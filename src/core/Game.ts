@@ -1,4 +1,4 @@
-import p2, { Broadphase, Narrowphase } from "p2";
+import p2, { Broadphase, Narrowphase, World } from "p2";
 import ContactList, {
   ContactInfo,
   ContactInfoWithEquations,
@@ -72,7 +72,7 @@ export default class Game {
 
     this.tickIterations = tickIterations;
     this.framerate = framerate;
-    this.world = new CustomWorld({ gravity: [0, 0] });
+    this.world = new World({ gravity: [0, 0] });
     this.world.on("beginContact", this.beginContact, null);
     this.world.on("endContact", this.endContact, null);
     this.world.on("impact", this.impact, null);
