@@ -19,7 +19,7 @@ export async function main() {
   await new Promise((resolve) => window.addEventListener("load", resolve));
 
   const game = new Game({
-    tickIterations: 1,
+    tickIterations: 4,
   });
 
   for (const contactMaterial of ContactMaterials) {
@@ -42,8 +42,8 @@ export async function main() {
   // TODO: Add actual stuff here
 
   game.camera.center(V(0, 0));
-  game.camera.z = 10;
+  game.camera.z = 20;
   const human = game.addEntity(new Human(V(0, 0)));
   game.addEntity(new PlayerHumanController(human));
-  game.addEntity(new Zombie(V(10, 30)));
+  game.addEntity(new Zombie(V(10, 10)));
 }

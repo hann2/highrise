@@ -6,7 +6,7 @@ import { V2d, V } from "../../core/Vector";
 
 const RADIUS = 0.5; // meters
 const SPEED = 10;
-const FRICTION = 0.8;
+const FRICTION = 0.4;
 
 export default class Human extends BaseEntity implements Entity {
   body: Body;

@@ -7,8 +7,8 @@ import Human from "./Human";
 import { radToDeg } from "../../core/util/MathUtil";
 
 const RADIUS = 0.5; // meters
-const SPEED = 8;
-const FRICTION = 0.8;
+const SPEED = 5;
+const FRICTION = 0.4;
 
 export default class Zombie extends BaseEntity implements Entity {
   body: Body;
