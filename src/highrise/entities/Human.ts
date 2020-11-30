@@ -25,7 +25,7 @@ export default class Human extends BaseEntity implements Entity {
     this.body.addShape(shape);
 
     this.sprite = new Graphics();
-    this.sprite.beginFill(0x00ff00);
+    this.sprite.beginFill(0x0000ff);
     this.sprite.drawCircle(0, 0, RADIUS);
     this.sprite.endFill();
   }
