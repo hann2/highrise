@@ -1,11 +1,13 @@
 import AutoPauser from "../core/AutoPauser";
 import Game from "../core/Game";
+import DebugRenderer from "../core/graphics/DebugRenderer";
+import FPSMeter from "../core/util/FPSMeter";
+import { V } from "../core/Vector";
+import Human from "./entities/Human";
+import PlayerHumanController from "./entities/PlayerHumanController";
+import Zombie from "./entities/Zombie";
 import { ContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
-import DebugRenderer from "../core/graphics/DebugRenderer";
-import { HelloWorld } from "./entities/HelloWorld";
-import { V } from "../core/Vector";
-import FPSMeter from "../core/util/FPSMeter";
 
 declare global {
   interface Window {
@@ -39,7 +41,9 @@ export async function main() {
 
   // TODO: Add actual stuff here
 
-  game.camera.center(V(100, 10));
-  game.camera.z = 2;
-  game.addEntity(new HelloWorld());
+  game.camera.center(V(0, 0));
+  game.camera.z = 10;
+  const human = game.addEntity(new Human(V(0, 0)));
+  game.addEntity(new PlayerHumanController(human));
+  game.addEntity(new Zombie(V(10, 30)));
 }
