@@ -6,6 +6,7 @@ import { V } from "../core/Vector";
 import Human from "./entities/Human";
 import PlayerHumanController from "./entities/PlayerHumanController";
 import Zombie from "./entities/Zombie";
+import Wall from "./entities/Wall";
 import { ContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
 
@@ -46,4 +47,5 @@ export async function main() {
   const human = game.addEntity(new Human(V(0, 0)));
   game.addEntity(new PlayerHumanController(human));
   game.addEntity(new Zombie(V(10, 30)));
+  game.addEntity(new Wall(5, 5));
 }
