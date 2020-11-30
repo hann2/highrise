@@ -1,4 +1,4 @@
-import { Body, Circle } from "p2";
+import { Body, Circle, Ray, RaycastResult } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -34,19 +34,34 @@ export default class Zombie extends BaseEntity implements Entity {
   onTick() {
     const humans = this.game!.entities.getTagged("human") as Human[];
 
-    let nearestHuman: Human | undefined;
+    let nearestVisibleHuman: Human | undefined;
     let nearestDistance: number = Infinity;
 
     for (const human of humans) {
+      const ray = new Ray({
+        mode: Ray.CLOSEST,
+        from: this.getPosition(),
+        to: human.getPosition(),
+        skipBackfaces: true,
+      });
+      const result = new RaycastResult();
+      this.game!.world.raycast(result, ray);
+      const firstVisibleBody = result.body;
+      console.log(result);
+
+      // what if zomb sees you through window???
+      // should you be able to sneak up on zombie???
+
+      const isVisible = firstVisibleBody === human.body;
       const distance = human.getPosition().sub(this.getPosition()).magnitude;
-      if (distance < nearestDistance) {
+      if (isVisible && distance < nearestDistance) {
         nearestDistance = distance;
-        nearestHuman = human;
+        nearestVisibleHuman = human;
       }
     }
 
-    if (nearestHuman) {
-      const direction = nearestHuman
+    if (nearestVisibleHuman) {
+      const direction = nearestVisibleHuman
         .getPosition()
         .sub(this.getPosition())
         .inormalize();
