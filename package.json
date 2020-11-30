@@ -1,0 +1,33 @@
+{
+  "name": "highrise",
+  "version": "0.0.1",
+  "description": "A zombie shooter",
+  "main": "index.ts",
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html",
+    "now": "now",
+    "now-prod": "now --prod",
+    "tsc": "tsc --noEmit",
+    "tsc-watch": "tsc --noEmit --watch",
+    "generate-asset-types": "./generate-asset-types.js -d ./resources; ./generate-asset-types.js -d ./src",
+    "analyze": ""
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/css-font-loading-module": "0.0.4",
+    "@types/p2": "^0.7.36",
+    "fontfaceobserver": "^2.1.0",
+    "p2": "^0.7.1",
+    "pixi.js": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.26",
+    "camelcase": "^6.0.0",
+    "eslint": "^7.4.0",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-bundle-visualiser": "^1.2.0",
+    "typescript": "^3.9.5"
+  }
+}

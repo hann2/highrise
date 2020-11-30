@@ -1,0 +1,12 @@
+{
+  "files.exclude": {
+    ".cache": true
+  },
+  "search.exclude": {
+    "**/*.code-search": true,
+    "**/bower_components": true,
+    "**/node_modules": true
+  },
+  "editor.formatOnSave": true,
+  "git.ignoreLimitWarning": true
+}

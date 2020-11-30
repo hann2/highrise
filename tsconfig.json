@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "lib": ["es2018", "dom"],
+    "noEmit": true,
+    "target": "ES5",
+    "downlevelIteration": true,
+    "strict": true
+  }
+}
