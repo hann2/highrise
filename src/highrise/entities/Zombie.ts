@@ -8,13 +8,14 @@ import { radToDeg } from "../../core/util/MathUtil";
 import Damageable from "./Damageable";
 
 const RADIUS = 0.5; // meters
-const SPEED = 5;
+const SPEED = 2;
 const FRICTION = 0.4;
 
 export default class Zombie extends BaseEntity implements Entity, Damageable {
   body: Body;
   sprite: Graphics;
   hp: number = 100;
+  positionOfLastTarget?: V2d;
 
   constructor(position: V2d) {
     super();
@@ -60,9 +61,10 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
       }
     }
 
-    if (nearestVisibleHuman) {
-      const direction = nearestVisibleHuman
-        .getPosition()
+    if (nearestVisibleHuman || this.positionOfLastTarget) {
+      const targetPosition = nearestVisibleHuman ? nearestVisibleHuman.getPosition() : this.positionOfLastTarget;
+      this.positionOfLastTarget = targetPosition;
+      const direction = targetPosition!
         .sub(this.getPosition())
         .inormalize();
       this.walk(direction);

@@ -28,6 +28,10 @@ export default class TestMap extends BaseEntity implements Entity {
     this.addChild(new Zombie(V(10, 15)));
     this.addChild(new Zombie(V(12, 17)));
     this.addChild(new Zombie(V(12, 15)));
+    this.addChild(new Zombie(V(13, 3)));
+    this.addChild(new Zombie(V(2, 12)));
+    this.addChild(new Zombie(V(2, 15)));
+    this.addChild(new Zombie(V(6, 15)));
     for (const wall of walls) {
         this.addChild(new Wall(wall[0], wall[1], wall[2], wall[3]));
     }
