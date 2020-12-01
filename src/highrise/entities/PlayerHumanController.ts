@@ -15,6 +15,8 @@ export default class PlayerHumanController
   }
 
   onTick() {
+    this.human.firing = !!this.game?.io.lmb;
+    
     const direction = V(0, 0);
     if (this.game?.io.keyIsDown("KeyW")) {
       direction[1] += -1;
@@ -27,9 +29,6 @@ export default class PlayerHumanController
     }
     if (this.game?.io.keyIsDown("KeyD")) {
       direction[0] += 1;
-    }
-    if (this.game?.io.lmb) {
-      direction[1] += -1;
     }
 
     this.human.walk(direction);
