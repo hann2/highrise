@@ -5,7 +5,7 @@ import Zombie from "./Zombie";
 import { V2d } from "../../core/Vector";
 import { testLineOfSight } from "../utils/visionUtils";
 
-const FOLLOW_DISTANCE = 2;
+const FOLLOW_DISTANCE = 2; // meters
 
 export default class AIHumanController extends BaseEntity implements Entity {
   human: Human;

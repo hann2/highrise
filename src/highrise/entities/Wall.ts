@@ -21,7 +21,7 @@ export default class Wall extends BaseEntity implements Entity {
 
     const graphics = new Graphics();
     graphics.position.set(0, 0);
-    graphics.beginFill(0xff0000);
+    graphics.beginFill(0x666666);
     graphics.drawPolygon(corners);
     graphics.endFill();
 
