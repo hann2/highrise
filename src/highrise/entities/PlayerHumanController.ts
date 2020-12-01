@@ -7,6 +7,14 @@ import { ControllerButton, ControllerAxis } from "../../core/io/Gamepad";
 import Interactable, { isInteractable } from "./Interactable";
 import { testLineOfSight } from "../utils/visionUtils";
 import { KeyCode } from "../../core/io/Keys";
+import { choose } from "../../core/util/Random";
+import AIHumanController from "./AIHumanController";
+import CameraController from "./CameraController";
+import Pistol from "./guns/Pistol";
+import Rifle from "./guns/Rifle";
+import Shotgun from "./guns/Shotgun";
+import Party from "./Party";
+import { goToLevel, newGame } from "../data/levels/switchLevel";
 
 const INTERACT_DISTANCE = 5;
 
@@ -113,5 +121,10 @@ export default class PlayerHumanController
     }
 
     this.human.walk(direction);
+
+    // Death
+    if (this.human.hp <= 0) {
+      newGame(this.game!);
+    }
   }
 }

@@ -14,6 +14,7 @@ import { ContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
 import CameraController from "./entities/CameraController";
 import { choose } from "../core/util/Random";
+import { newGame } from "./data/levels/switchLevel";
 
 declare global {
   interface Window {
@@ -43,29 +44,5 @@ export async function main() {
   game.addEntity(new AutoPauser());
   game.addEntity(new FPSMeter());
 
-  const player = new Human(V(5, 5));
-  player.gun = choose(new Rifle(), new Shotgun(), new Pistol());
-  const george = new Human(V(6.5, 5));
-  george.gun = choose(new Rifle(), new Shotgun(), new Pistol());
-  const georgia = new Human(V(5, 6.5));
-  georgia.gun = choose(new Rifle(), new Shotgun(), new Pistol());
-
-  game.camera.center(player.getPosition());
-
-  const entities = [
-    player,
-    george,
-    georgia,
-    new PlayerHumanController(player),
-    new AIHumanController(george, player),
-    new AIHumanController(georgia, player),
-    new CameraController(game.camera, player),
-  ];
-
-  const startingParty = new Party(entities);
-
-  const level = new Level1();
-  game.addEntity(startingParty);
-  game.addEntity(level);
-  level.placeEntities(startingParty);
+  newGame(game);
 }
