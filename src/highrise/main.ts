@@ -54,11 +54,8 @@ export async function main() {
 
   const entities = [
     player,
-    player.gun,
     george,
-    george.gun,
     georgia,
-    georgia.gun,
     new PlayerHumanController(player),
     new AIHumanController(george, player),
     new AIHumanController(georgia, player),

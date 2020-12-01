@@ -78,5 +78,11 @@ export default class AIHumanController
         this.human.walk(direction.normalize());
       }
     }
+
+    if (this.human.hp <= 0) {
+      this.human.destroy();
+      this.destroy();
+      // should gun drop???
+    }
   }
 }

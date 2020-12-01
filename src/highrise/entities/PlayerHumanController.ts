@@ -6,6 +6,7 @@ import { FireMode } from "./guns/Gun";
 import { ControllerButton, ControllerAxis } from "../../core/io/Gamepad";
 import Interactable, { isInteractable } from "./Interactable";
 import { testLineOfSight } from "../utils/visionUtils";
+import { KeyCode } from "../../core/io/Keys";
 
 const INTERACT_DISTANCE = 5;
 
@@ -28,6 +29,37 @@ export default class PlayerHumanController
     switch (button) {
       case ControllerButton.RT:
         this.human.pullTrigger();
+        break;
+    }
+  }
+
+  onKeyDown(key: KeyCode) {
+    switch (key) {
+      case "KeyE":
+        // Interacting
+        const interactables = Array.from(this.game!.entities.all)
+          .filter(isInteractable)
+          .filter((i) => testLineOfSight((i as any) as BaseEntity, this.human))
+          .filter(
+            (i) =>
+              ((i as any) as BaseEntity)
+                .getPosition()
+                .sub(this.human.getPosition()).magnitude < INTERACT_DISTANCE
+          )
+          .sort(
+            (i1, i2) =>
+              ((i1 as any) as BaseEntity)
+                .getPosition()
+                .sub(this.human.getPosition()).magnitude -
+              ((i2 as any) as BaseEntity)
+                .getPosition()
+                .sub(this.human.getPosition()).magnitude
+          ) as Interactable[];
+        for (const interactable of interactables) {
+          if (interactable.interact(this.human)) {
+            break;
+          }
+        }
         break;
     }
   }
@@ -81,23 +113,5 @@ export default class PlayerHumanController
     }
 
     this.human.walk(direction);
-
-    // Interacting
-    if (this.game?.io.keyIsDown("KeyE")) {
-      const interactables = Array.from(this.game!.entities.all)
-        .filter(isInteractable)
-        .filter((i) => testLineOfSight((i as any) as BaseEntity, this.human))
-        .filter(
-          (i) =>
-            ((i as any) as BaseEntity)
-              .getPosition()
-              .sub(this.human.getPosition()).magnitude < INTERACT_DISTANCE
-        ) as Interactable[];
-      for (const interactable of interactables) {
-        if (interactable.interact(this.human)) {
-          break;
-        }
-      }
-    }
   }
 }

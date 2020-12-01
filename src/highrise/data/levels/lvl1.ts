@@ -1,9 +1,12 @@
 import { V } from "../../../core/Vector";
 import AIHumanController from "../../entities/AIHumanController";
 import Exit from "../../entities/Exit";
+import Pistol from "../../entities/guns/Pistol";
+import Rifle from "../../entities/guns/Rifle";
 import Shotgun from "../../entities/guns/Shotgun";
 import Human from "../../entities/Human";
 import Party from "../../entities/Party";
+import Pickup from "../../entities/Pickup";
 import Wall from "../../entities/Wall";
 import Zombie from "../../entities/Zombie";
 import Level from "./Level";
@@ -39,8 +42,10 @@ export default class Level1 extends Level {
       new Wall(7, 3, 8, 10),
       new Exit(1, 17, 4, 19),
       ella,
-      ella.gun,
       new AIHumanController(ella),
+      new Pickup(V(17, 3), (human) => (human.gun = new Shotgun()), "S"),
+      new Pickup(V(17, 5), (human) => (human.gun = new Rifle()), "R"),
+      new Pickup(V(17, 7), (human) => (human.gun = new Pistol()), "P"),
     ];
 
     super.placeParty(spawnLocations, entities, party);

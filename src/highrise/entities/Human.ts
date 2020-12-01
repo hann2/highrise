@@ -21,7 +21,7 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   sprite: Sprite;
   tags = ["human"];
   hp: number = 100;
-  gun?: Gun;
+  _gun?: Gun;
 
   constructor(position: V2d) {
     super();
@@ -70,15 +70,19 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   }
 
   pullTrigger() {
-    this.gun?.pullTrigger(this);
+    this._gun?.pullTrigger(this);
+  }
+
+  set gun(gun: Gun) {
+    if (this._gun) {
+      this._gun.destroy();
+    }
+    this._gun = gun;
+    this.addChild(gun, true);
   }
 
   // Inflict damage on the human
   damage(amount: number) {
     this.hp -= amount;
-
-    if (this.hp <= 0) {
-      console.log("You dead");
-    }
   }
 }

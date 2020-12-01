@@ -1,12 +1,13 @@
 import { Body, Box } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { Graphics, Point } from "pixi.js";
+import { Graphics, ObservablePoint, Point, Text } from "pixi.js";
 import { CollisionGroups } from "../Collision";
 import Interactable from "./Interactable";
 import Level from "../data/levels/Level";
 import Party from "./Party";
 import { goToNextLevel } from "../data/levels/switchLevel";
+import { V } from "../../core/Vector";
 
 export default class Exit extends BaseEntity implements Entity, Interactable {
   sprite: GameSprite;
