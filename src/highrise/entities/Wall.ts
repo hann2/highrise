@@ -6,32 +6,22 @@ import { Graphics, Point } from "pixi.js";
 export default class Wall extends BaseEntity implements Entity {
   sprite: GameSprite;
 
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  path: any[];
-  corners: Point[];
-
-  constructor(x: number, y: number) {
+  constructor(x1: number, y1: number, x2: number, y2: number) {
     super();
 
-    this.x = x;
-    this.y = y;
-    this.w = 5;
-    this.h = 2;
-    this.path = [];
-    this.corners = [
-      new Point(0.5 * this.w, 0.5 * this.h),
-      new Point(0.5 * this.w, -0.5 * this.h),
-      new Point(-0.5 * this.w, -0.5 * this.h),
-      new Point(-0.5 * this.w, 0.5 * this.h),
+    const w = Math.abs(x2 - x1);
+    const h = Math.abs(y2 - y1);
+    const corners = [
+      new Point(x1, y1),
+      new Point(x1, y2),
+      new Point(x2, y2),
+      new Point(x2, y1),
     ];
 
     const graphics = new Graphics();
-    graphics.position.set(this.x, this.y);
+    graphics.position.set(0, 0);
     graphics.beginFill(0xff0000);
-    graphics.drawPolygon(this.corners);
+    graphics.drawPolygon(corners);
     graphics.endFill();
 
     this.sprite = graphics;
@@ -39,10 +29,10 @@ export default class Wall extends BaseEntity implements Entity {
     this.body = new Body({
       mass: 0,
       // material: new Material(2),
-      position: [x, y],
+      position: [Math.min(x1, x2) + w / 2, Math.min(y1, y2) + h / 2],
     });
 
-    const shape = new Box({ width: this.w, height: this.h });
+    const shape = new Box({ width: w, height: h });
     this.body.addShape(shape, [0, 0], 0);
   }
 }

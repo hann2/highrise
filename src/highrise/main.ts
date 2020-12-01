@@ -45,5 +45,5 @@ export async function main() {
   const human = game.addEntity(new Human(V(0, 0)));
   game.addEntity(new PlayerHumanController(human));
   game.addEntity(new Zombie(V(10, 10)));
-  game.addEntity(new Wall(5, 5));
+  game.addEntity(new Wall(5, 5, 8, 6));
 }
