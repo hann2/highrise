@@ -47,7 +47,6 @@ export default class Zombie extends BaseEntity implements Entity {
       const result = new RaycastResult();
       this.game!.world.raycast(result, ray);
       const firstVisibleBody = result.body;
-      console.log(result);
 
       // what if zomb sees you through window???
       // should you be able to sneak up on zombie???

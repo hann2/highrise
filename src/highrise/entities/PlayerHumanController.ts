@@ -28,6 +28,9 @@ export default class PlayerHumanController
     if (this.game?.io.keyIsDown("KeyD")) {
       direction[0] += 1;
     }
+    if (this.game?.io.lmb) {
+      direction[1] += -1;
+    }
 
     this.human.walk(direction);
   }
