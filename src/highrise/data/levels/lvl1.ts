@@ -8,10 +8,10 @@ import Level2 from "./lvl2";
 
 export default class Level1 extends Level {
   constructor() {
-    super();
+    super(1);
   }
 
-  beginLevel(party: Party) {
+  placeEntities(party: Party) {
     const spawnLocations = [V(5, 5), V(6.5, 5), V(5, 6.5), V(3, 3)];
 
     const entities = [
@@ -32,9 +32,9 @@ export default class Level1 extends Level {
       new Wall(3, 13, 8, 14),
       new Wall(0, 10, 17, 11),
       new Wall(7, 3, 8, 10),
-      new Exit(this, new Level2(), 1, 17, 4, 19),
+      new Exit(1, 17, 4, 19),
     ];
 
-    super.start(spawnLocations, entities, party);
+    super.placeParty(spawnLocations, entities, party);
   }
 }

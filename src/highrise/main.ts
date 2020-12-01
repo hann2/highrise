@@ -70,5 +70,5 @@ export async function main() {
   const level = new Level1();
   game.addEntity(startingParty);
   game.addEntity(level);
-  level.beginLevel(startingParty);
+  level.placeEntities(startingParty);
 }

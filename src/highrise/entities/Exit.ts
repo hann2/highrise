@@ -6,24 +6,13 @@ import { CollisionGroups } from "../Collision";
 import Interactable from "./Interactable";
 import Level from "../data/levels/Level";
 import Party from "./Party";
+import { goToNextLevel } from "../data/levels/switchLevel";
 
 export default class Exit extends BaseEntity implements Entity, Interactable {
   sprite: GameSprite;
-  level: Level;
-  nextLevel: Level;
 
-  constructor(
-    level: Level,
-    nextLevel: Level,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number
-  ) {
+  constructor(x1: number, y1: number, x2: number, y2: number) {
     super();
-
-    this.level = level;
-    this.nextLevel = nextLevel;
 
     const w = Math.abs(x2 - x1);
     const h = Math.abs(y2 - y1);
@@ -54,11 +43,6 @@ export default class Exit extends BaseEntity implements Entity, Interactable {
   }
 
   interact(): void {
-    const party = [...this.game?.entities.all].filter(
-      (e) => e instanceof Party
-    )[0] as Party;
-    this.game?.addEntity(this.nextLevel);
-    this.nextLevel.beginLevel(party);
-    this.level.destroy();
+    goToNextLevel(this.game!);
   }
 }

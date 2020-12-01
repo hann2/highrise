@@ -4,15 +4,19 @@ import { V2d } from "../../../core/Vector";
 import Party from "../../entities/Party";
 
 export default class Level extends BaseEntity implements Entity {
-  constructor() {
+  index: number;
+
+  constructor(index: number) {
     super();
+
+    this.index = index;
   }
 
-  beginLevel(party: Party) {
+  placeEntities(party: Party) {
     throw Error("Implement this");
   }
 
-  start(spawnLocations: V2d[], levelEntities: Entity[], party: Party) {
+  placeParty(spawnLocations: V2d[], levelEntities: Entity[], party: Party) {
     party.respawn(spawnLocations);
 
     this.addChildren(...levelEntities);
