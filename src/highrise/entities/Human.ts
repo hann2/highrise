@@ -10,7 +10,7 @@ const SPEED = 10;
 const FRICTION = 0.4;
 
 // should eventually come from a gun
-const FIRE_RATE = 1; // shots per second
+const FIRE_RATE = 10; // shots per second
 
 export default class Human extends BaseEntity implements Entity {
   body: Body;
@@ -39,7 +39,7 @@ export default class Human extends BaseEntity implements Entity {
     this.body.applyImpulse(friction);
 
     this.fireCooldown -= dt;
-    const mousePosition = this.game?.io.mousePosition;
+    const mousePosition = this.game?.camera.toWorld(this.game?.io.mousePosition);
     if (this.firing && this.fireCooldown < 0 && mousePosition) {
       console.log("BANG!");
       // direction

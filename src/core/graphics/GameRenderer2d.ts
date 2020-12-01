@@ -26,7 +26,7 @@ export class GameRenderer2d {
       resolution: Pixi.settings.RESOLUTION,
     });
     document.body.appendChild(this.pixiRenderer.view);
-    // this.hideCursor();
+    this.showCursor();
 
     this.stage = new Pixi.Container();
     this.camera = new Camera2d(this);
