@@ -1,23 +1,17 @@
 import { Body, Circle } from "p2";
-import { Graphics, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
+import manBlueGun from "../../../resources/images/Man Blue/manBlue_gun.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { normalizeAngle, radToDeg } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
+import { CollisionGroups } from "../Collision";
 import Damageable from "./Damageable";
 import Gun from "./guns/Gun";
-import { CollisionGroups } from "../Collision";
-import { getSprites } from "../../core/resources/images";
-import manBlueGun from "../../../resources/images/Man Blue/manBlue_gun.png";
 
 export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4;
 const FRICTION = 0.4;
-const NUM_BULLETS = 8;
-const CONE_ANGLE = Math.PI / 24;
-
-// should eventually come from a gun
-const FIRE_RATE = 1.5; // shots per second
 
 export default class Human extends BaseEntity implements Entity, Damageable {
   body: Body;
@@ -62,6 +56,10 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   // Have the human face a specific angle
   setDirection(angle: number) {
     this.body.angle = normalizeAngle(angle);
+  }
+
+  setPosition(position: V2d) {
+    this.body.position = position;
   }
 
   getDirection(): number {
