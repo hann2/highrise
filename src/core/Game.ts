@@ -94,7 +94,7 @@ export default class Game {
 
   /** The intended time between renders in real-world seconds */
   get trueRenderTimestep(): number {
-    return (1 / this.framerate) * this.slowMo;
+    return 1 / this.framerate;
   }
 
   /** The intended time between ticks in game seconds */
