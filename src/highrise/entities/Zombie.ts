@@ -1,5 +1,6 @@
 import { Body, Circle } from "p2";
 import { Sprite } from "pixi.js";
+import * as Pixi from "pixi.js";
 import zoimbie1Hold from "../../../resources/images/Zombie 1/zoimbie1_hold.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -31,8 +32,8 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     this.body.addShape(shape);
 
     this.sprite = Sprite.from(zoimbie1Hold);
-    this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.scale.set(1.0 / this.sprite.width);
+    this.sprite.anchor.set(0.5, 0.5); // make it rotate about the middle
+    this.sprite.scale.set((2 * RADIUS) / this.sprite.width);
   }
 
   onTick() {

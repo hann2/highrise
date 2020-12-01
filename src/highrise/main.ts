@@ -25,6 +25,7 @@ export async function main() {
   const game = new Game({
     tickIterations: 4,
   });
+  game.world.frictionGravity = 10;
 
   for (const contactMaterial of ContactMaterials) {
     game.world.addContactMaterial(contactMaterial);
@@ -35,12 +36,10 @@ export async function main() {
 
   const preloader = game.addEntity(new Preloader());
   await preloader.waitTillLoaded();
+  preloader.destroy();
 
-  game.world.frictionGravity = 10; // TODO: Tune this
   game.addEntity(new AutoPauser());
   game.addEntity(new FPSMeter());
-  // So we don't remove the html from the screen until we've actually hopefully rendered the table
-  preloader.destroy();
 
   const player = new Human(V(5, 5));
   player.gun = new Rifle();

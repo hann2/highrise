@@ -34,8 +34,8 @@ export default class Human extends BaseEntity implements Entity, Damageable {
     this.body.addShape(shape);
 
     this.sprite = Sprite.from(manBlueGun);
-    this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.scale.set(1.0 / this.sprite.width);
+    this.sprite.anchor.set(0.5, 0.5); // make it rotate about the middle
+    this.sprite.scale.set((2 * HUMAN_RADIUS) / this.sprite.width);
   }
 
   onTick(dt: number) {
