@@ -13,6 +13,7 @@ import PlayerHumanController from "./entities/PlayerHumanController";
 import { ContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
 import CameraController from "./entities/CameraController";
+import { choose } from "../core/util/Random";
 
 declare global {
   interface Window {
@@ -43,11 +44,11 @@ export async function main() {
   game.addEntity(new FPSMeter());
 
   const player = new Human(V(5, 5));
-  player.gun = new Rifle();
+  player.gun = choose(new Rifle(), new Shotgun(), new Pistol());
   const george = new Human(V(6.5, 5));
-  george.gun = new Shotgun();
+  george.gun = choose(new Rifle(), new Shotgun(), new Pistol());
   const georgia = new Human(V(5, 6.5));
-  georgia.gun = new Pistol();
+  georgia.gun = choose(new Rifle(), new Shotgun(), new Pistol());
 
   game.camera.center(player.getPosition());
 

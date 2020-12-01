@@ -32,7 +32,7 @@ export enum FireMode {
 const defaultGunStats: GunStats = {
   fireRate: 1.0,
   muzzleLength: 0.7,
-  muzzleVelocity: 50,
+  muzzleVelocity: 80,
   bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
 };
