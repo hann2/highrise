@@ -7,11 +7,11 @@ import Bullet from "./Bullet";
 import Damageable from "./Damageable"
 
 const RADIUS = 0.5; // meters
-const SPEED = 10;
+const SPEED = 4;
 const FRICTION = 0.4;
 
 // should eventually come from a gun
-const FIRE_RATE = 10; // shots per second
+const FIRE_RATE = 1.5; // shots per second
 
 export default class Human extends BaseEntity implements Entity, Damageable {
   body: Body;

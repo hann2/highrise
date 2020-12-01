@@ -50,11 +50,11 @@ export default class AIHumanController
         const direction = this.lastSeenPositionOfPlayer.sub(this.human.getPosition());
         const distance = direction.magnitude;
         if (distance > FOLLOW_DISTANCE) {
-          this.human.walk(direction);
+          this.human.walk(direction.normalize());
         }
       } else if (this.lastSeenPositionOfPlayer) {
         const direction = this.lastSeenPositionOfPlayer.sub(this.human.getPosition());
-        this.human.walk(direction);
+        this.human.walk(direction.normalize());
       }
     }
     
