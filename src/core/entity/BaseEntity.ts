@@ -106,19 +106,6 @@ export default abstract class BaseEntity implements Entity {
       }
     }
   }
-
-  // I regret putting this here.  In the future we may have cone of sight, and dont need base understanding that...
-  hasVisionOf(other: BaseEntity): boolean {
-    const ray = new Ray({
-      mode: Ray.CLOSEST,
-      from: this.getPosition(),
-      to: other.getPosition(),
-      skipBackfaces: true,
-    });
-    const result = new RaycastResult();
-    this.game!.world.raycast(result, ray);
-    return result.body === other.body;
-  }
 }
 
 class Timer extends BaseEntity implements Entity {

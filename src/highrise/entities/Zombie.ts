@@ -6,6 +6,7 @@ import { V2d, V } from "../../core/Vector";
 import Human from "./Human";
 import { radToDeg } from "../../core/util/MathUtil";
 import Damageable from "./Damageable";
+import { testLineOfSight } from "../utils/visionUtils";
 
 const RADIUS = 0.5; // meters
 const SPEED = 2;
@@ -43,7 +44,7 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
 
     for (const human of humans) {
       // should you be able to sneak up on zombie???
-      const isVisible = this.hasVisionOf(human);
+      const isVisible = testLineOfSight(this, human);
       const distance = human.getPosition().sub(this.getPosition()).magnitude;
       if (isVisible && distance < nearestDistance) {
         nearestDistance = distance;
