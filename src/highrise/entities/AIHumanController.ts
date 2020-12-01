@@ -2,7 +2,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Human from "./Human";
 import Zombie from "./Zombie";
-import { V } from "../../core/Vector";
+import { V2d } from "../../core/Vector";
 
 const FOLLOW_DISTANCE = 2;
 

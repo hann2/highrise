@@ -3,12 +3,15 @@ import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V2d, V } from "../../core/Vector";
-import Bullet from "./Bullet";
+import Bullet, { BULLET_RADIUS } from "./Bullet";
 import Damageable from "./Damageable"
+import Gun from "./Gun";
 
-const RADIUS = 0.5; // meters
+export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4;
 const FRICTION = 0.4;
+const NUM_BULLETS = 8;
+const CONE_ANGLE = Math.PI / 24;
 
 // should eventually come from a gun
 const FIRE_RATE = 1.5; // shots per second
@@ -18,36 +21,37 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   sprite: Graphics;
   tags = ["human"];
   hp: number = 100;
-  firing: boolean = false;
-  direction?: V2d;
-  fireCooldown: number = 0;
+  gun?: Gun;
 
   constructor(position: V2d) {
     super();
 
     this.body = new Body({ mass: 1, position: position.clone() });
 
-    const shape = new Circle({ radius: RADIUS });
+    const shape = new Circle({ radius: HUMAN_RADIUS });
     this.body.addShape(shape);
 
     this.sprite = new Graphics();
     this.sprite.beginFill(0x0000ff);
-    this.sprite.drawCircle(0, 0, RADIUS);
+    this.sprite.drawCircle(0, 0, HUMAN_RADIUS);
     this.sprite.endFill();
+  }
+
+  set direction(direction: V2d) {
+    if (this.gun) {
+      this.gun.direction = direction;
+    }
+  }
+
+  set firing(firing: boolean) {
+    if (this.gun) {
+      this.gun.firing = firing;
+    }
   }
 
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
-
-    this.fireCooldown -= dt;
-    if (this.firing && this.fireCooldown < 0 && this.direction) {
-      // direction
-      const start = V(this.getPosition());
-      this.addChild(new Bullet(start.add(this.direction.mul(RADIUS + 0.15)), this.direction));
-
-      this.fireCooldown = 1 / FIRE_RATE;
-    }
   }
 
   onRender() {

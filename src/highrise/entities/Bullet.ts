@@ -5,7 +5,7 @@ import Entity from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
 import { isDamageable } from "./Damageable";
 
-const RADIUS = 0.1; // meters
+export const BULLET_RADIUS = 0.05; // meters
 const BULLET_SPEED = 50;
 const BULLET_DAMAGE = 40;
 
@@ -18,12 +18,12 @@ export default class Bullet extends BaseEntity implements Entity {
 
     this.body = new Body({ mass: 1, position: position.clone(), velocity: direction.mul(BULLET_SPEED).clone() });
 
-    const shape = new Circle({ radius: RADIUS });
+    const shape = new Circle({ radius: BULLET_RADIUS });
     this.body.addShape(shape);
 
     this.sprite = new Graphics();
     this.sprite.beginFill(0xffff00);
-    this.sprite.drawCircle(0, 0, RADIUS);
+    this.sprite.drawCircle(0, 0, BULLET_RADIUS);
     this.sprite.endFill();
   }
 
@@ -31,7 +31,9 @@ export default class Bullet extends BaseEntity implements Entity {
     if (isDamageable(other)) {
       other.damage(BULLET_DAMAGE);
     }
-    this.destroy();
+    if (!(other instanceof Bullet)) {
+      this.destroy();
+    }
   }
 
   onRender() {
