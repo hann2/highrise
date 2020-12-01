@@ -16,6 +16,7 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
   sprite: Graphics;
   hp: number = 100;
   positionOfLastTarget?: V2d;
+  tags = ["zombie"];
 
   constructor(position: V2d) {
     super();

@@ -2,6 +2,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Human from "./Human";
 import PlayerHumanController from "./PlayerHumanController";
+import AIHumanController from "./AIHumanController";
 import Zombie from "./Zombie";
 import Wall from "./Wall";
 import { V } from "../../core/Vector";
@@ -22,8 +23,13 @@ export default class TestMap extends BaseEntity implements Entity {
   constructor() {
     super();
     
-    const human = this.addChild(new Human(V(5, 5)));
-    this.addChild(new PlayerHumanController(human));
+    const player = this.addChild(new Human(V(5, 5)));
+    this.addChild(new PlayerHumanController(player));
+    const george = this.addChild(new Human(V(6.5, 5)));
+    this.addChild(new AIHumanController(george, player));
+    const georgia = this.addChild(new Human(V(5, 6.5)));
+    this.addChild(new AIHumanController(georgia, player));
+
     this.addChild(new Zombie(V(10, 8)));
     this.addChild(new Zombie(V(10, 15)));
     this.addChild(new Zombie(V(12, 17)));
