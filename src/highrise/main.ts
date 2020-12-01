@@ -65,5 +65,8 @@ export async function main() {
 
   game.camera.center(V(0, 0));
   game.camera.z = 20;
-  game.addEntity(new Level1(startingParty));
+  const level = new Level1();
+  game.addEntity(startingParty);
+  game.addEntity(level);
+  level.beginLevel(startingParty);
 }

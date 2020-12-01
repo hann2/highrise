@@ -4,6 +4,10 @@ import { V } from "../../core/Vector";
 import Human from "./Human";
 import { FireMode } from "./guns/Gun";
 import { ControllerButton, ControllerAxis } from "../../core/io/Gamepad";
+import Interactable, { isInteractable } from "./Interactable";
+import { testLineOfSight } from "../utils/visionUtils";
+
+const INTERACT_DISTANCE = 5;
 
 // Maps keyboard/mouse/gamepad input to human actions
 export default class PlayerHumanController
@@ -74,5 +78,19 @@ export default class PlayerHumanController
     }
 
     this.human.walk(direction);
+
+    // Interacting
+    if (this.game?.io.keyIsDown("KeyE")) {
+      const interactable = (Array.from(this.game!.entities.all)
+        .filter(isInteractable)
+        .filter((i) => testLineOfSight((i as any) as BaseEntity, this.human))
+        .filter(
+          (i) =>
+            ((i as any) as BaseEntity)
+              .getPosition()
+              .sub(this.human.getPosition()).magnitude < INTERACT_DISTANCE
+        )[0] as any) as Interactable;
+      interactable?.interact();
+    }
   }
 }
