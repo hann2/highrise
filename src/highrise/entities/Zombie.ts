@@ -5,14 +5,16 @@ import Entity from "../../core/entity/Entity";
 import { V2d, V } from "../../core/Vector";
 import Human from "./Human";
 import { radToDeg } from "../../core/util/MathUtil";
+import Damageable from "./Damageable";
 
 const RADIUS = 0.5; // meters
 const SPEED = 5;
 const FRICTION = 0.4;
 
-export default class Zombie extends BaseEntity implements Entity {
+export default class Zombie extends BaseEntity implements Entity, Damageable {
   body: Body;
   sprite: Graphics;
+  hp: number = 100;
 
   constructor(position: V2d) {
     super();
@@ -82,5 +84,13 @@ export default class Zombie extends BaseEntity implements Entity {
 
   face(angle: number) {
     this.body.angle = angle;
+  }
+
+  damage(amount: number) {
+    this.hp -= amount;
+
+    if (this.hp <= 0) {
+      this.destroy();
+    }
   }
 }

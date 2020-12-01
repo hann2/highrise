@@ -4,6 +4,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V2d, V } from "../../core/Vector";
 import Bullet from "./Bullet";
+import Damageable from "./Damageable"
 
 const RADIUS = 0.5; // meters
 const SPEED = 10;
@@ -12,7 +13,7 @@ const FRICTION = 0.4;
 // should eventually come from a gun
 const FIRE_RATE = 10; // shots per second
 
-export default class Human extends BaseEntity implements Entity {
+export default class Human extends BaseEntity implements Entity, Damageable {
   body: Body;
   sprite: Graphics;
   tags = ["human"];
@@ -45,7 +46,7 @@ export default class Human extends BaseEntity implements Entity {
       // direction
       const start = V(this.getPosition());
       const direction = mousePosition.sub(start).normalize();
-      this.addChild(new Bullet(start.add(direction.mul(RADIUS + 0.001)), direction));
+      this.addChild(new Bullet(start.add(direction.mul(RADIUS + 0.1)), direction));
 
       this.fireCooldown = 1 / FIRE_RATE;
     }
