@@ -16,6 +16,8 @@ export default class PlayerHumanController
 
   onTick() {
     this.human.firing = !!this.game?.io.lmb;
+    const mousePosition = this.game?.camera.toWorld(this.game?.io.mousePosition);
+    this.human.direction = mousePosition?.sub(this.human.getPosition()).normalize();
     
     const direction = V(0, 0);
     if (this.game?.io.keyIsDown("KeyW")) {

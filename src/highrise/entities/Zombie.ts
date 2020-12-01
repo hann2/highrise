@@ -41,19 +41,8 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     let nearestDistance: number = Infinity;
 
     for (const human of humans) {
-      const ray = new Ray({
-        mode: Ray.CLOSEST,
-        from: this.getPosition(),
-        to: human.getPosition(),
-        skipBackfaces: true,
-      });
-      const result = new RaycastResult();
-      this.game!.world.raycast(result, ray);
-      const firstVisibleBody = result.body;
-
       // should you be able to sneak up on zombie???
-
-      const isVisible = firstVisibleBody === human.body;
+      const isVisible = this.hasVisionOf(human);
       const distance = human.getPosition().sub(this.getPosition()).magnitude;
       if (isVisible && distance < nearestDistance) {
         nearestDistance = distance;

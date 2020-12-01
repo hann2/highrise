@@ -1,4 +1,4 @@
-import p2, { Constraint, Spring } from "p2";
+import p2, { Constraint, Spring, Ray, RaycastResult } from "p2";
 import Game from "../Game";
 import { clamp } from "../util/MathUtil";
 import { V, V2d } from "../Vector";
@@ -105,6 +105,19 @@ export default abstract class BaseEntity implements Entity {
         if (!timerId || timerId === timer.timerId) timer.destroy();
       }
     }
+  }
+
+  // I regret putting this here.  In the future we may have cone of sight, and dont need base understanding that...
+  hasVisionOf(other: BaseEntity): boolean {
+    const ray = new Ray({
+      mode: Ray.CLOSEST,
+      from: this.getPosition(),
+      to: other.getPosition(),
+      skipBackfaces: true,
+    });
+    const result = new RaycastResult();
+    this.game!.world.raycast(result, ray);
+    return result.body === other.body;
   }
 }
 

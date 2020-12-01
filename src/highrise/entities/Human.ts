@@ -19,6 +19,7 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   tags = ["human"];
   hp: number = 100;
   firing: boolean = false;
+  direction?: V2d;
   fireCooldown: number = 0;
 
   constructor(position: V2d) {
@@ -40,13 +41,10 @@ export default class Human extends BaseEntity implements Entity, Damageable {
     this.body.applyImpulse(friction);
 
     this.fireCooldown -= dt;
-    const mousePosition = this.game?.camera.toWorld(this.game?.io.mousePosition);
-    if (this.firing && this.fireCooldown < 0 && mousePosition) {
-      console.log("BANG!");
+    if (this.firing && this.fireCooldown < 0 && this.direction) {
       // direction
       const start = V(this.getPosition());
-      const direction = mousePosition.sub(start).normalize();
-      this.addChild(new Bullet(start.add(direction.mul(RADIUS + 0.15)), direction));
+      this.addChild(new Bullet(start.add(this.direction.mul(RADIUS + 0.15)), this.direction));
 
       this.fireCooldown = 1 / FIRE_RATE;
     }
