@@ -6,8 +6,9 @@ import AIHumanController from "./AIHumanController";
 import Zombie from "./Zombie";
 import Wall from "./Wall";
 import { V } from "../../core/Vector";
-import Pistol from "./Pistol";
-import Shotgun from "./Shotgun";
+import Pistol from "./guns/Pistol";
+import Shotgun from "./guns/Shotgun";
+import Rifle from "./guns/Rifle";
 
 const walls = [
   [0, 0, 20, 1],
@@ -26,12 +27,13 @@ export default class TestMap extends BaseEntity implements Entity {
     super();
 
     const player = this.addChild(new Human(V(5, 5)));
-    player.gun = this.addChild(new Shotgun(player.body));
+    player.gun = this.addChild(new Rifle());
     this.addChild(new PlayerHumanController(player));
     const george = this.addChild(new Human(V(6.5, 5)));
-    george.gun = this.addChild(new Pistol(george.body));
+    george.gun = this.addChild(new Shotgun());
     this.addChild(new AIHumanController(george, player));
     const georgia = this.addChild(new Human(V(5, 6.5)));
+    georgia.gun = this.addChild(new Pistol());
     this.addChild(new AIHumanController(georgia, player));
 
     this.addChild(new Zombie(V(10, 8)));

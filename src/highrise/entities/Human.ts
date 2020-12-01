@@ -2,9 +2,11 @@ import { Body, Circle } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { normalizeAngle, radToDeg } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import Damageable from "./Damageable";
-import Gun from "./Gun";
+import Gun from "./guns/Gun";
+import { CollisionGroups } from "../Collision";
 
 export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4;
@@ -25,27 +27,24 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   constructor(position: V2d) {
     super();
 
-    this.body = new Body({ mass: 1, position: position.clone() });
+    this.body = new Body({
+      mass: 1,
+      position: position.clone(),
+      fixedRotation: true,
+    });
 
     const shape = new Circle({ radius: HUMAN_RADIUS });
+    shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 
     this.sprite = new Graphics();
     this.sprite.beginFill(0x0000ff);
     this.sprite.drawCircle(0, 0, HUMAN_RADIUS);
     this.sprite.endFill();
-  }
 
-  set direction(direction: V2d) {
-    if (this.gun) {
-      this.gun.direction = direction;
-    }
-  }
-
-  set firing(firing: boolean) {
-    if (this.gun) {
-      this.gun.firing = firing;
-    }
+    this.sprite.lineStyle(0.1, 0xffffff);
+    this.sprite.moveTo(0, 0);
+    this.sprite.lineTo(HUMAN_RADIUS, 0);
   }
 
   onTick(dt: number) {
@@ -55,7 +54,7 @@ export default class Human extends BaseEntity implements Entity, Damageable {
 
   onRender() {
     [this.sprite.x, this.sprite.y] = this.body.position;
-    this.sprite.angle = this.body.angle;
+    this.sprite.angle = radToDeg(this.body.angle);
   }
 
   // Move the human along a specified vector
@@ -64,8 +63,16 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   }
 
   // Have the human face a specific angle
-  face(angle: number) {
-    this.body.angle = angle;
+  setDirection(angle: number) {
+    this.body.angle = normalizeAngle(angle);
+  }
+
+  getDirection(): number {
+    return this.body.angle;
+  }
+
+  pullTrigger() {
+    this.gun?.pullTrigger(this);
   }
 
   // Inflict damage on the human

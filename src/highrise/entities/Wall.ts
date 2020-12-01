@@ -2,6 +2,7 @@ import { Body, Box } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { Graphics, Point } from "pixi.js";
+import { CollisionGroups } from "../Collision";
 
 export default class Wall extends BaseEntity implements Entity {
   sprite: GameSprite;
@@ -33,6 +34,7 @@ export default class Wall extends BaseEntity implements Entity {
     });
 
     const shape = new Box({ width: w, height: h });
+    shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0], 0);
   }
 }

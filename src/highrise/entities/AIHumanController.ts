@@ -37,14 +37,11 @@ export default class AIHumanController extends BaseEntity implements Entity {
     if (nearestVisibleZombie) {
       const direction = nearestVisibleZombie
         .getPosition()
-        .sub(this.human.getPosition())
-        .inormalize();
+        .sub(this.human.getPosition()).angle;
 
-      this.human.firing = true;
-      this.human.direction = direction;
+      this.human.setDirection(direction);
+      this.human.pullTrigger();
     } else {
-      this.human.firing = false;
-
       if (testLineOfSight(this.human, this.player)) {
         this.lastSeenPositionOfPlayer = this.player.getPosition();
         const direction = this.lastSeenPositionOfPlayer.sub(

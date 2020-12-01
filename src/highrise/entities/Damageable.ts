@@ -4,4 +4,5 @@ export default interface Damageable extends Entity {
   damage(damage: number): void;
 }
 
-export const isDamageable = (x: any): x is Damageable => !!x?.damage;
+export const isDamageable = (x: any): x is Damageable =>
+  typeof x?.damage === "function";

@@ -1,7 +1,9 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import Human from "./Human";
 import { V } from "../../core/Vector";
+import Human from "./Human";
+import { FireMode } from "./guns/Gun";
+import { ControllerButton, ControllerAxis } from "../../core/io/Gamepad";
 
 // Maps keyboard/mouse/gamepad input to human actions
 export default class PlayerHumanController
@@ -14,15 +16,42 @@ export default class PlayerHumanController
     this.human = human;
   }
 
-  onTick() {
-    this.human.firing = !!this.game?.io.lmb;
-    const mousePosition = this.game?.camera.toWorld(
-      this.game?.io.mousePosition
-    );
-    this.human.direction = mousePosition
-      ?.sub(this.human.getPosition())
-      .normalize();
+  onMouseDown() {
+    this.human.pullTrigger();
+  }
 
+  onButtonDown(button: ControllerButton) {
+    switch (button) {
+      case ControllerButton.RT:
+        this.human.pullTrigger();
+        break;
+    }
+  }
+
+  onTick() {
+    const io = this.game!.io;
+    // Shooting
+    if (
+      (io.lmb || this.game?.io.getButton(ControllerButton.RT)) &&
+      this.human.gun?.stats.fireMode === FireMode.FULL_AUTO
+    ) {
+      this.human.pullTrigger();
+    }
+
+    // Direction
+    if (io.usingGamepad) {
+      const direction = V(
+        io.getAxis(ControllerAxis.RIGHT_X),
+        io.getAxis(ControllerAxis.RIGHT_Y)
+      );
+      this.human.setDirection(direction.angle);
+    } else {
+      const mousePosition = this.game!.camera.toWorld(io.mousePosition);
+      const mouseDirection = mousePosition.sub(this.human.getPosition()).angle;
+      this.human.setDirection(mouseDirection);
+    }
+
+    // Moving
     const direction = V(0, 0);
     if (this.game?.io.keyIsDown("KeyW")) {
       direction[1] += -1;
@@ -35,6 +64,13 @@ export default class PlayerHumanController
     }
     if (this.game?.io.keyIsDown("KeyD")) {
       direction[0] += 1;
+    }
+
+    direction[0] += io.getAxis(ControllerAxis.LEFT_X);
+    direction[1] += io.getAxis(ControllerAxis.LEFT_Y);
+
+    if (direction.magnitude > 1) {
+      direction.magnitude = 1;
     }
 
     this.human.walk(direction);

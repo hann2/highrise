@@ -1,16 +1,17 @@
-import { Body, Circle, Ray, RaycastResult } from "p2";
+import { Body, Circle } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { V2d, V } from "../../core/Vector";
-import Human from "./Human";
 import { radToDeg } from "../../core/util/MathUtil";
-import Damageable from "./Damageable";
+import { V, V2d } from "../../core/Vector";
+import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
+import Damageable from "./Damageable";
+import Human from "./Human";
 
 const RADIUS = 0.5; // meters
-const SPEED = 2;
-const FRICTION = 0.4;
+const SPEED = 1.2;
+const FRICTION = 0.2;
 
 export default class Zombie extends BaseEntity implements Entity, Damageable {
   body: Body;
@@ -25,6 +26,7 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     this.body = new Body({ mass: 1, position: position.clone() });
 
     const shape = new Circle({ radius: RADIUS });
+    shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 
     this.sprite = new Graphics();
