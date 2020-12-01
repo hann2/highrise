@@ -1,10 +1,12 @@
 import { V } from "../../../core/Vector";
+import AIHumanController from "../../entities/AIHumanController";
 import Exit from "../../entities/Exit";
+import Shotgun from "../../entities/guns/Shotgun";
+import Human from "../../entities/Human";
 import Party from "../../entities/Party";
 import Wall from "../../entities/Wall";
 import Zombie from "../../entities/Zombie";
 import Level from "./Level";
-import Level2 from "./lvl2";
 
 export default class Level1 extends Level {
   constructor() {
@@ -13,6 +15,9 @@ export default class Level1 extends Level {
 
   placeEntities(party: Party) {
     const spawnLocations = [V(5, 5), V(6.5, 5), V(5, 6.5), V(3, 3)];
+
+    const ella = new Human(V(15, 6.5));
+    ella.gun = new Shotgun();
 
     const entities = [
       new Zombie(V(10, 8)),
@@ -33,6 +38,9 @@ export default class Level1 extends Level {
       new Wall(0, 10, 17, 11),
       new Wall(7, 3, 8, 10),
       new Exit(1, 17, 4, 19),
+      ella,
+      ella.gun,
+      new AIHumanController(ella),
     ];
 
     super.placeParty(spawnLocations, entities, party);

@@ -42,7 +42,8 @@ export default class Exit extends BaseEntity implements Entity, Interactable {
     this.body.addShape(shape, [0, 0], 0);
   }
 
-  interact(): void {
+  interact(): boolean {
     goToNextLevel(this.game!);
+    return true;
   }
 }

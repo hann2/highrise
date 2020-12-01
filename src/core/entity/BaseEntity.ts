@@ -59,9 +59,14 @@ export default abstract class BaseEntity implements Entity {
     }
   }
 
-  addChild<T extends Entity>(child: T): T {
+  addChild<T extends Entity>(child: T, changeParent: boolean = false): T {
     if (child.parent) {
-      throw new Error("Child already has a parent.");
+      if (changeParent) {
+        const oldParent = child.parent;
+        oldParent.children!.splice(oldParent.children!.indexOf(child), 1);
+      } else {
+        throw new Error("Child already has a parent.");
+      }
     }
     child.parent = this;
     this.children = this.children ?? [];

@@ -84,7 +84,7 @@ export default class PlayerHumanController
 
     // Interacting
     if (this.game?.io.keyIsDown("KeyE")) {
-      const interactable = (Array.from(this.game!.entities.all)
+      const interactables = Array.from(this.game!.entities.all)
         .filter(isInteractable)
         .filter((i) => testLineOfSight((i as any) as BaseEntity, this.human))
         .filter(
@@ -92,8 +92,12 @@ export default class PlayerHumanController
             ((i as any) as BaseEntity)
               .getPosition()
               .sub(this.human.getPosition()).magnitude < INTERACT_DISTANCE
-        )[0] as any) as Interactable;
-      interactable?.interact();
+        ) as Interactable[];
+      for (const interactable of interactables) {
+        if (interactable.interact(this.human)) {
+          break;
+        }
+      }
     }
   }
 }
