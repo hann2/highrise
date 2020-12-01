@@ -83,6 +83,8 @@ export default class Game {
     this.audio = audio ?? new AudioContext();
     this.masterGain = this.audio.createGain();
     this.masterGain.connect(this.audio.destination);
+
+    this.addEntity(this.renderer.camera);
   }
 
   /** The current intended time between renders in game seconds */

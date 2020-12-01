@@ -12,6 +12,7 @@ import Party from "./entities/Party";
 import PlayerHumanController from "./entities/PlayerHumanController";
 import { ContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
+import CameraController from "./entities/CameraController";
 
 declare global {
   interface Window {
@@ -58,11 +59,10 @@ export async function main() {
     new PlayerHumanController(player),
     new AIHumanController(george, player),
     new AIHumanController(georgia, player),
+    new CameraController(game.camera, player),
   ];
 
   const startingParty = new Party(entities);
 
-  game.camera.center(V(0, 0));
-  game.camera.z = 20;
   game.addEntity(new Level1(startingParty));
 }
