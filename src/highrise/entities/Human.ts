@@ -8,6 +8,9 @@ import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import Damageable from "./Damageable";
 import Gun from "./guns/Gun";
+import { choose } from "../../core/util/Random";
+import manBrownGun from "../../../resources/images/Man Brown/manBrown_gun.png";
+import manOldGun from "../../../resources/images/Man Old/manOld_gun.png";
 
 export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4;
@@ -33,7 +36,7 @@ export default class Human extends BaseEntity implements Entity, Damageable {
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 
-    this.sprite = Sprite.from(manBlueGun);
+    this.sprite = Sprite.from(choose(manBlueGun, manBrownGun, manOldGun));
     this.sprite.anchor.set(0.5, 0.5); // make it rotate about the middle
     this.sprite.scale.set((2 * HUMAN_RADIUS) / this.sprite.width);
   }

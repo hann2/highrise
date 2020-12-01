@@ -49,6 +49,8 @@ export async function main() {
   const georgia = new Human(V(5, 6.5));
   georgia.gun = new Pistol();
 
+  game.camera.center(player.getPosition());
+
   const entities = [
     player,
     player.gun,
