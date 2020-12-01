@@ -1,5 +1,7 @@
 import { Body, Circle } from "p2";
-import { Graphics } from "pixi.js";
+import { Sprite } from "pixi.js";
+import * as Pixi from "pixi.js";
+import zoimbie1Hold from "../../../resources/images/Zombie 1/zoimbie1_hold.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { radToDeg } from "../../core/util/MathUtil";
@@ -15,7 +17,7 @@ const FRICTION = 0.2;
 
 export default class Zombie extends BaseEntity implements Entity, Damageable {
   body: Body;
-  sprite: Graphics;
+  sprite: Sprite;
   hp: number = 100;
   positionOfLastTarget?: V2d;
   tags = ["zombie"];
@@ -29,13 +31,9 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 
-    this.sprite = new Graphics();
-    this.sprite.beginFill(0xff0000);
-    this.sprite.drawCircle(0, 0, RADIUS);
-    this.sprite.endFill();
-    this.sprite.lineStyle(0.1, 0xffffff);
-    this.sprite.moveTo(0, 0);
-    this.sprite.lineTo(RADIUS, 0);
+    this.sprite = Sprite.from(zoimbie1Hold);
+    this.sprite.anchor.set(0.5, 0.5); // make it rotate about the middle
+    this.sprite.scale.set((2 * RADIUS) / this.sprite.width);
   }
 
   onTick() {

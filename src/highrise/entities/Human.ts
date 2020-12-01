@@ -1,5 +1,6 @@
 import { Body, Circle } from "p2";
-import { Graphics } from "pixi.js";
+import { Sprite } from "pixi.js";
+import manBlueGun from "../../../resources/images/Man Blue/manBlue_gun.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { normalizeAngle, radToDeg } from "../../core/util/MathUtil";
@@ -7,6 +8,9 @@ import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import Damageable from "./Damageable";
 import Gun from "./guns/Gun";
+import { choose } from "../../core/util/Random";
+import manBrownGun from "../../../resources/images/Man Brown/manBrown_gun.png";
+import manOldGun from "../../../resources/images/Man Old/manOld_gun.png";
 
 export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4;
@@ -14,7 +18,7 @@ const FRICTION = 0.4;
 
 export default class Human extends BaseEntity implements Entity, Damageable {
   body: Body;
-  sprite: Graphics;
+  sprite: Sprite;
   tags = ["human"];
   hp: number = 100;
   gun?: Gun;
@@ -32,14 +36,9 @@ export default class Human extends BaseEntity implements Entity, Damageable {
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 
-    this.sprite = new Graphics();
-    this.sprite.beginFill(0x0000ff);
-    this.sprite.drawCircle(0, 0, HUMAN_RADIUS);
-    this.sprite.endFill();
-
-    this.sprite.lineStyle(0.1, 0xffffff);
-    this.sprite.moveTo(0, 0);
-    this.sprite.lineTo(HUMAN_RADIUS, 0);
+    this.sprite = Sprite.from(choose(manBlueGun, manBrownGun, manOldGun));
+    this.sprite.anchor.set(0.5, 0.5); // make it rotate about the middle
+    this.sprite.scale.set((2 * HUMAN_RADIUS) / this.sprite.width);
   }
 
   onTick(dt: number) {

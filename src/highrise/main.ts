@@ -12,6 +12,8 @@ import Party from "./entities/Party";
 import PlayerHumanController from "./entities/PlayerHumanController";
 import { ContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
+import CameraController from "./entities/CameraController";
+import { choose } from "../core/util/Random";
 
 declare global {
   interface Window {
@@ -25,6 +27,7 @@ export async function main() {
   const game = new Game({
     tickIterations: 4,
   });
+  game.world.frictionGravity = 10;
 
   for (const contactMaterial of ContactMaterials) {
     game.world.addContactMaterial(contactMaterial);
@@ -35,19 +38,19 @@ export async function main() {
 
   const preloader = game.addEntity(new Preloader());
   await preloader.waitTillLoaded();
-
-  game.world.frictionGravity = 10; // TODO: Tune this
-  game.addEntity(new AutoPauser());
-  game.addEntity(new FPSMeter());
-  // So we don't remove the html from the screen until we've actually hopefully rendered the table
   preloader.destroy();
 
+  game.addEntity(new AutoPauser());
+  game.addEntity(new FPSMeter());
+
   const player = new Human(V(5, 5));
-  player.gun = new Rifle();
+  player.gun = choose(new Rifle(), new Shotgun(), new Pistol());
   const george = new Human(V(6.5, 5));
-  george.gun = new Shotgun();
+  george.gun = choose(new Rifle(), new Shotgun(), new Pistol());
   const georgia = new Human(V(5, 6.5));
-  georgia.gun = new Pistol();
+  georgia.gun = choose(new Rifle(), new Shotgun(), new Pistol());
+
+  game.camera.center(player.getPosition());
 
   const entities = [
     player,
@@ -59,12 +62,11 @@ export async function main() {
     new PlayerHumanController(player),
     new AIHumanController(george, player),
     new AIHumanController(georgia, player),
+    new CameraController(game.camera, player),
   ];
 
   const startingParty = new Party(entities);
 
-  game.camera.center(V(0, 0));
-  game.camera.z = 20;
   const level = new Level1();
   game.addEntity(startingParty);
   game.addEntity(level);

@@ -3,12 +3,12 @@ import { V2d } from "../../../core/Vector";
 import Bullet from "../Bullet";
 import Gun from "./Gun";
 
-const NUM_BULLETS = 8;
+const NUM_BULLETS = 9;
 const CONE_ANGLE = Math.PI / 24;
 
 export default class Shotgun extends Gun {
   constructor() {
-    super({ fireRate: 4.0, bulletDamage: 30 });
+    super({ fireRate: 4.0, bulletDamage: 30, muzzleVelocity: 55 });
   }
 
   onShoot(position: V2d, direction: number) {

@@ -1,12 +1,7 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { V, V2d } from "../../core/Vector";
-import AIHumanController from "./AIHumanController";
-import Pistol from "./guns/Pistol";
-import Rifle from "./guns/Rifle";
-import Shotgun from "./guns/Shotgun";
+import { V2d } from "../../core/Vector";
 import Human from "./Human";
-import PlayerHumanController from "./PlayerHumanController";
 
 export default class Party extends BaseEntity implements Entity {
   constructor(entities: Entity[]) {

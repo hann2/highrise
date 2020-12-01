@@ -1,4 +1,3 @@
-import { exit } from "process";
 import { V } from "../../../core/Vector";
 import Exit from "../../entities/Exit";
 import Party from "../../entities/Party";
