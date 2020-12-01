@@ -24,9 +24,9 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   constructor(position: V2d) {
     super();
 
-    this.body = new Body({ mass: 1 });
+    this.body = new Body({ mass: 1, position: position.clone() });
 
-    const shape = new Circle({ radius: RADIUS, position: position.clone() });
+    const shape = new Circle({ radius: RADIUS });
     this.body.addShape(shape);
 
     this.sprite = new Graphics();
@@ -46,7 +46,7 @@ export default class Human extends BaseEntity implements Entity, Damageable {
       // direction
       const start = V(this.getPosition());
       const direction = mousePosition.sub(start).normalize();
-      this.addChild(new Bullet(start.add(direction.mul(RADIUS + 0.1)), direction));
+      this.addChild(new Bullet(start.add(direction.mul(RADIUS + 0.15)), direction));
 
       this.fireCooldown = 1 / FIRE_RATE;
     }
