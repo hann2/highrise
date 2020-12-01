@@ -5,7 +5,7 @@ import Entity from "../../core/entity/Entity";
 import { V2d, V } from "../../core/Vector";
 import Bullet, { BULLET_RADIUS } from "./Bullet";
 import { HUMAN_RADIUS } from "./Human";
-import Gun from './Gun';
+import Gun from "./Gun";
 
 const NUM_BULLETS = 8;
 const CONE_ANGLE = Math.PI / 24;
@@ -28,12 +28,13 @@ export default class Pistol extends BaseEntity implements Entity, Gun {
       for (let i = 0; i < NUM_BULLETS; i++) {
         const angleOffset = Math.random() * CONE_ANGLE - CONE_ANGLE / 2;
         const direction = this.direction.rotate(angleOffset);
-        const start = V(this.getPosition()).add(direction.mul(HUMAN_RADIUS + BULLET_RADIUS + 0.05));
+        const start = V(this.getPosition()).add(
+          direction.mul(HUMAN_RADIUS + BULLET_RADIUS + 0.05)
+        );
         this.addChild(new Bullet(start, direction));
       }
 
       this.fireCooldown = 1 / FIRE_RATE;
     }
   }
-
 }

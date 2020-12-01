@@ -2,9 +2,8 @@ import { Body, Circle } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { V2d, V } from "../../core/Vector";
-import Bullet, { BULLET_RADIUS } from "./Bullet";
-import Damageable from "./Damageable"
+import { V, V2d } from "../../core/Vector";
+import Damageable from "./Damageable";
 import Gun from "./Gun";
 
 export const HUMAN_RADIUS = 0.5; // meters
@@ -59,14 +58,17 @@ export default class Human extends BaseEntity implements Entity, Damageable {
     this.sprite.angle = this.body.angle;
   }
 
+  // Move the human along a specified vector
   walk(direction: V2d) {
     this.body.applyImpulse(direction.mul(SPEED));
   }
 
+  // Have the human face a specific angle
   face(angle: number) {
     this.body.angle = angle;
   }
 
+  // Inflict damage on the human
   damage(amount: number) {
     this.hp -= amount;
 

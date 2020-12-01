@@ -52,11 +52,11 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     }
 
     if (nearestVisibleHuman || this.positionOfLastTarget) {
-      const targetPosition = nearestVisibleHuman ? nearestVisibleHuman.getPosition() : this.positionOfLastTarget;
+      const targetPosition = nearestVisibleHuman
+        ? nearestVisibleHuman.getPosition()
+        : this.positionOfLastTarget;
       this.positionOfLastTarget = targetPosition;
-      const direction = targetPosition!
-        .sub(this.getPosition())
-        .inormalize();
+      const direction = targetPosition!.sub(this.getPosition()).inormalize();
       this.walk(direction);
       this.face(direction.angle);
     }

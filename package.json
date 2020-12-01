@@ -11,7 +11,8 @@
     "tsc": "tsc --noEmit",
     "tsc-watch": "tsc --noEmit --watch",
     "generate-asset-types": "./generate-asset-types.js -d ./resources; ./generate-asset-types.js -d ./src",
-    "analyze": ""
+    "analyze": "",
+    "prettier": "prettier --write src"
   },
   "author": "",
   "license": "MIT",
@@ -28,6 +29,7 @@
     "eslint": "^7.14.0",
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-bundle-visualiser": "^1.2.0",
+    "prettier": "^2.2.1",
     "typescript": "^4.1.2"
   }
 }

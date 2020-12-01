@@ -16,7 +16,11 @@ export default class Bullet extends BaseEntity implements Entity {
   constructor(position: V2d, direction: V2d) {
     super();
 
-    this.body = new Body({ mass: 1, position: position.clone(), velocity: direction.mul(BULLET_SPEED).clone() });
+    this.body = new Body({
+      mass: 1,
+      position: position.clone(),
+      velocity: direction.mul(BULLET_SPEED).clone(),
+    });
 
     const shape = new Circle({ radius: BULLET_RADIUS });
     this.body.addShape(shape);

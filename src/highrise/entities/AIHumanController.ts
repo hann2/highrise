@@ -6,9 +6,7 @@ import { V2d } from "../../core/Vector";
 
 const FOLLOW_DISTANCE = 2;
 
-export default class AIHumanController
-  extends BaseEntity
-  implements Entity {
+export default class AIHumanController extends BaseEntity implements Entity {
   human: Human;
   player: Human;
   lastSeenPositionOfPlayer?: V2d;
@@ -27,7 +25,8 @@ export default class AIHumanController
 
     for (const zombie of zombies) {
       const isVisible = this.human.hasVisionOf(zombie);
-      const distance = zombie.getPosition().sub(this.human.getPosition()).magnitude;
+      const distance = zombie.getPosition().sub(this.human.getPosition())
+        .magnitude;
       if (isVisible && distance < nearestDistance) {
         nearestDistance = distance;
         nearestVisibleZombie = zombie;
@@ -39,7 +38,7 @@ export default class AIHumanController
         .getPosition()
         .sub(this.human.getPosition())
         .inormalize();
-        
+
       this.human.firing = true;
       this.human.direction = direction;
     } else {
@@ -47,16 +46,19 @@ export default class AIHumanController
 
       if (this.human.hasVisionOf(this.player)) {
         this.lastSeenPositionOfPlayer = this.player.getPosition();
-        const direction = this.lastSeenPositionOfPlayer.sub(this.human.getPosition());
+        const direction = this.lastSeenPositionOfPlayer.sub(
+          this.human.getPosition()
+        );
         const distance = direction.magnitude;
         if (distance > FOLLOW_DISTANCE) {
           this.human.walk(direction.normalize());
         }
       } else if (this.lastSeenPositionOfPlayer) {
-        const direction = this.lastSeenPositionOfPlayer.sub(this.human.getPosition());
+        const direction = this.lastSeenPositionOfPlayer.sub(
+          this.human.getPosition()
+        );
         this.human.walk(direction.normalize());
       }
     }
-    
   }
 }
