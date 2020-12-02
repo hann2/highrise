@@ -4,7 +4,7 @@ import { V, V2d } from "../../../core/Vector";
 import Exit from "../../entities/Exit";
 import Wall from "../../entities/Wall";
 import Zombie from "../../entities/Zombie";
-import Level from "./Level";
+import { Level } from "./Level";
 
 const LEVEL_SIZE = 10;
 
@@ -45,15 +45,20 @@ export default class TestLevelGenerator {
   }
 
   addExits(isDestroyed: boolean[][][]): Entity[] {
-    const furthestPointSeen = V(0, 0);
-    const furthestDistance = 0;
+    let furthestPointSeen = V(0, 0);
+    let furthestDistance = 0;
+
+    const seen: boolean[][] = [];
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      seen[i] = [];
+    }
 
     const traverse = (p: V2d, distance: number) => {
       const [x, y] = p;
-      if (isDestroyed[x][y].seen) {
+      if (seen[x][y]) {
         return;
       }
-      isDestroyed[x][y].seen = true;
+      seen[x][y] = true;
       if (distance > furthestDistance) {
         furthestDistance = distance;
         furthestPointSeen = p;
