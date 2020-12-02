@@ -1,7 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
-import { buildLevel } from "../../data/levels/switchLevel";
 import Gun from "../guns/Gun";
 import Pistol from "../guns/Pistol";
 import Rifle from "../guns/Rifle";
@@ -10,6 +9,7 @@ import Human from "../Human";
 import AllyHumanController from "./AllyController";
 import PlayerHumanController from "./PlayerHumanController";
 import SurvivorHumanController from "./SurvivorHumanController";
+import TestLevelGenerator from "../../data/levels/TestLevelGenerator";
 
 interface PartyEvent {
   human: Human;
@@ -22,6 +22,7 @@ export default class LevelController extends BaseEntity implements Entity {
   currentLevel: number = 1;
   partyMembers: Human[] = [];
   playerHumanController?: PlayerHumanController;
+  levelGenerator = new TestLevelGenerator();
 
   constructor() {
     super();
@@ -35,8 +36,7 @@ export default class LevelController extends BaseEntity implements Entity {
       this.partyMembers = [];
 
       const player = this.game!.addEntity(new Human());
-      const gun = choose(new Pistol(), new Shotgun(), new Rifle());
-      player.giveGun(this.game!.addEntity(gun));
+      player.giveGun(choose(new Pistol(), new Shotgun(), new Rifle()));
       this.game!.dispatch({ type: "addToParty", human: player });
       this.setPlayerHuman(player);
 
@@ -53,9 +53,13 @@ export default class LevelController extends BaseEntity implements Entity {
 
     startLevel: () => {
       console.log("startLevel", this.currentLevel);
-      const level = buildLevel(this.currentLevel);
-      level.placeEntities(this.partyMembers);
-      this.game!.addEntity(level);
+      const { entities, spawnLocations } = this.levelGenerator.generateLevel();
+      this.game!.addEntities(entities);
+
+      this.partyMembers.forEach((partyMember, i) => {
+        partyMember.setPosition(spawnLocations[i]);
+      });
+
       // TODO: Play sound
     },
 
@@ -87,10 +91,14 @@ export default class LevelController extends BaseEntity implements Entity {
       }
     },
 
-    gameOver: () => {
+    gameOver: async () => {
       console.log("Game over, so sad");
       this.playerHumanController?.destroy();
       this.playerHumanController = undefined;
+
+      await this.wait(2);
+
+      this.game!.dispatch({ type: "newGame" });
     },
   };
 

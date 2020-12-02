@@ -213,7 +213,7 @@ export default class Game {
   };
 
   /** Shortcut for adding multiple entities. */
-  addEntities<T extends Entity[]>(entities: T): T {
+  addEntities<T extends readonly Entity[]>(entities: T): T {
     for (const entity of entities) {
       this.addEntity(entity);
     }

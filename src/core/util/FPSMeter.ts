@@ -1,5 +1,6 @@
+import { Text } from "pixi.js";
 import BaseEntity from "../entity/BaseEntity";
-import Entity from "../entity/Entity";
+import Entity, { GameSprite } from "../entity/Entity";
 import Game from "../Game";
 
 const SMOOTHING = 0.95;
@@ -8,10 +9,17 @@ export default class FPSMeter extends BaseEntity implements Entity {
   lastUpdate: number;
   averageDuration: number = 0;
   slowFrameCount: number = 0;
+  sprite: Text & GameSprite;
 
   constructor() {
     super();
     this.lastUpdate = performance.now();
+    this.sprite = new Text("", {
+      fontSize: 12,
+      fill: "white",
+      align: "left",
+    });
+    this.sprite.layerName = "hud"; // TODO: Don't hardcode this I guess
   }
 
   onAdd(game: Game) {
@@ -24,10 +32,11 @@ export default class FPSMeter extends BaseEntity implements Entity {
     this.averageDuration =
       SMOOTHING * this.averageDuration + (1.0 - SMOOTHING) * duration;
     this.lastUpdate = now;
+
+    this.sprite.text = this.getText();
   }
 
   getStats() {
-    const renderer = this.game?.renderer;
     return {
       fps: Math.ceil(1000 / this.averageDuration),
       bodyCount: this.game?.world.bodies.length ?? 0,

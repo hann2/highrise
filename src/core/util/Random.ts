@@ -76,7 +76,7 @@ export function shuffle<T>(a: T[]): T[] {
   return a;
 }
 
-/** Put an array into a deterministically random order and return the array. */
+/** Put an array into a deterministically random order and return the array. Seed should be an integer */
 export function seededShuffle<T>(a: T[], seed: number): T[] {
   let i, j, temp;
   i = a.length;
