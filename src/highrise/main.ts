@@ -1,10 +1,11 @@
 import AutoPauser from "../core/AutoPauser";
 import Game from "../core/Game";
 import FPSMeter from "../core/util/FPSMeter";
-import { newGame } from "./data/levels/switchLevel";
-import { ContactMaterials, initContactMaterials } from "./P2Materials";
-import Preloader from "./Preloader";
+import LevelController from "./entities/controllers/LevelController";
 import { initLayers } from "./layers";
+import { initContactMaterials } from "./P2Materials";
+import Preloader from "./Preloader";
+import CameraController from "./entities/controllers/CameraController";
 
 declare global {
   interface Window {
@@ -31,6 +32,8 @@ export async function main() {
 
   game.addEntity(new AutoPauser());
   game.addEntity(new FPSMeter());
+  game.addEntity(new LevelController());
+  game.addEntity(new CameraController(game.camera));
 
-  newGame(game);
+  game.dispatch({ type: "newGame" });
 }

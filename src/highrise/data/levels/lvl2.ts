@@ -1,5 +1,5 @@
 import { V } from "../../../core/Vector";
-import Party from "../../entities/Party";
+import Human from "../../entities/Human";
 import Wall from "../../entities/Wall";
 import Zombie from "../../entities/Zombie";
 import Level from "./Level";
@@ -9,7 +9,7 @@ export default class Level2 extends Level {
     super(2);
   }
 
-  placeEntities(party: Party) {
+  placeEntities(party: readonly Human[]) {
     const spawnLocations = [
       V(5, 20 - 5),
       V(6.5, 20 - 5),

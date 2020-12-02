@@ -28,7 +28,7 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   hp: number = 100;
   gun?: Gun;
 
-  constructor(position: V2d) {
+  constructor(position: V2d = V(0, 0)) {
     super();
 
     this.body = new Body({
@@ -122,5 +122,10 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   // Inflict damage on the human
   damage(amount: number) {
     this.hp -= amount;
+
+    if (this.hp < 0) {
+      this.game!.dispatch({ type: "humanDied", human: this });
+      this.destroy();
+    }
   }
 }

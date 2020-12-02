@@ -1,12 +1,11 @@
 import { V } from "../../../core/Vector";
-import AIHumanController from "../../entities/AIHumanController";
+import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Exit from "../../entities/Exit";
+import GunPickup from "../../entities/GunPickup";
 import Pistol from "../../entities/guns/Pistol";
 import Rifle from "../../entities/guns/Rifle";
 import Shotgun from "../../entities/guns/Shotgun";
 import Human from "../../entities/Human";
-import Party from "../../entities/Party";
-import GunPickup from "../../entities/GunPickup";
 import Wall from "../../entities/Wall";
 import Zombie from "../../entities/Zombie";
 import Level from "./Level";
@@ -16,7 +15,7 @@ export default class Level1 extends Level {
     super(1);
   }
 
-  placeEntities(party: Party) {
+  placeEntities(party: readonly Human[]) {
     const spawnLocations = [V(5, 5), V(6.5, 5), V(5, 6.5), V(3, 3)];
 
     const ella = new Human(V(15, 6.5));
@@ -42,7 +41,7 @@ export default class Level1 extends Level {
       new Wall(7, 3, 8, 10),
       new Exit(1, 17, 4, 19),
       ella,
-      new AIHumanController(ella),
+      new SurvivorHumanController(ella),
       new GunPickup(V(17, 3), new Shotgun()),
       new GunPickup(V(17, 5), new Rifle()),
       new GunPickup(V(17, 7), new Pistol()),
