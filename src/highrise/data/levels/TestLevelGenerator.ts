@@ -1,5 +1,5 @@
 import Entity from "../../../core/entity/Entity";
-import { seededShuffle } from "../../../core/util/Random";
+import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Exit from "../../entities/Exit";
 import Wall from "../../entities/Wall";
@@ -11,7 +11,7 @@ const LEVEL_SIZE = 10;
 export default class TestLevelGenerator {
   constructor() {}
 
-  generateLevel(seed: number): Level {
+  generateLevel(seed: number = rInteger(0, 2 ** 32)): Level {
     const spawnLocations = [V(0, 1), V(1, 1), V(2, 1), V(1, 2)].map(
       this.levelCoordToWorldCoord
     );
