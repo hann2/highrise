@@ -2,6 +2,9 @@ import Entity from "../../../core/entity/Entity";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Exit from "../../entities/Exit";
+import GunPickup from "../../entities/GunPickup";
+import Rifle from "../../entities/guns/Rifle";
+import Shotgun from "../../entities/guns/Shotgun";
 import Wall from "../../entities/Wall";
 import Zombie from "../../entities/Zombie";
 import { Level } from "./Level";
@@ -20,10 +23,16 @@ export default class TestLevelGenerator {
     const [innerWalls, isDestroyed] = this.addInnerWalls(seed);
     const exits = this.addExits(isDestroyed);
     const enemies = this.addEnemies();
-    // addPickups();
+    const pickups = this.addPickups(seed);
     // addSurvivors();
 
-    const entities = [...outerWalls, ...innerWalls, ...exits, ...enemies];
+    const entities = [
+      ...outerWalls,
+      ...innerWalls,
+      ...exits,
+      ...enemies,
+      ...pickups,
+    ];
 
     return {
       entities,
@@ -101,6 +110,30 @@ export default class TestLevelGenerator {
       }
     }
     return enemies;
+  }
+
+  addPickups(seed: number): Entity[] {
+    const locations = [];
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      for (let j = 0; j < LEVEL_SIZE; j++) {
+        if (i <= 2 && j <= 2) {
+          continue;
+        }
+        locations.push(V(i, j));
+      }
+    }
+    const shuffledLocations = seededShuffle(locations, seed);
+
+    return [
+      new GunPickup(
+        this.levelCoordToWorldCoord(shuffledLocations[0]),
+        new Shotgun()
+      ),
+      new GunPickup(
+        this.levelCoordToWorldCoord(shuffledLocations[1]),
+        new Rifle()
+      ),
+    ];
   }
 
   addInnerWalls(seed: number): [Entity[], boolean[][][]] {
