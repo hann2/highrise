@@ -1,22 +1,20 @@
 import { Body, Circle } from "p2";
 import { Sprite } from "pixi.js";
-import manBlueGun from "../../../resources/images/Man Blue/manBlue_gun.png";
-import manBrownGun from "../../../resources/images/Man Brown/manBrown_gun.png";
-import manOldGun from "../../../resources/images/Man Old/manOld_gun.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
 import { clamp, normalizeAngle, radToDeg } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import { Character, CharacterSoundClass } from "../characters/Character";
+import { randomCharacter } from "../characters/characters";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
-import Hittable from "./Hittable";
 import GunPickup from "./GunPickup";
 import Gun from "./guns/Gun";
+import Hittable from "./Hittable";
 import Interactable, { isInteractable } from "./Interactable";
 
 export const HUMAN_RADIUS = 0.5; // meters
@@ -32,7 +30,10 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   hp: number = MAX_HEALTH;
   gun?: Gun;
 
-  constructor(position: V2d = V(0, 0)) {
+  constructor(
+    position: V2d = V(0, 0),
+    public character: Character = randomCharacter()
+  ) {
     super();
 
     this.body = new Body({
@@ -45,7 +46,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 
-    this.sprite = Sprite.from(choose(manBlueGun, manBrownGun, manOldGun));
+    this.sprite = Sprite.from(character.image);
     this.sprite.anchor.set(0.5, 0.5); // make it rotate about the middle
     this.sprite.scale.set((2 * HUMAN_RADIUS) / this.sprite.width);
   }
@@ -91,6 +92,8 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     }
     this.gun = gun;
     this.addChild(gun, true);
+
+    this.speak("pickupItem");
   }
 
   dropGun() {
@@ -140,14 +143,10 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   inflictDamage(amount: number) {
     this.hp -= amount;
 
-    this.game?.addEntity(
-      new PositionalSound(
-        choose<SoundName>("humanHit1", "humanHit2"),
-        this.getPosition()
-      )
-    );
+    this.speak("hurt");
 
     if (this.hp <= 0) {
+      this.speak("death");
       this.game?.dispatch({ type: "humanDied", human: this });
       this.destroy();
     }
@@ -157,6 +156,15 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.hp += amount;
     if (this.hp > MAX_HEALTH) {
       this.hp = MAX_HEALTH;
+    }
+  }
+
+  speak(soundClass: CharacterSoundClass) {
+    // TODO: Only speak one sound at a time
+    const sounds = this.character.sounds[soundClass];
+    if (sounds.length > 0) {
+      const sound = choose(...sounds);
+      this.game?.addEntity(new PositionalSound(sound, this.getPosition()));
     }
   }
 }

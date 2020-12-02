@@ -1,0 +1,22 @@
+import { SoundName } from "../../core/resources/sounds";
+
+// Data about a character
+export interface Character {
+  image: string;
+
+  sounds: CharacterSounds;
+}
+
+interface CharacterSounds {
+  death: SoundName[];
+  hurt: SoundName[];
+  joinParty: SoundName[];
+  lookHere: SoundName[];
+  nearDeath: SoundName[];
+  pickupItem: SoundName[];
+  relief: SoundName[];
+  taunts: SoundName[];
+  worried: SoundName[];
+}
+
+export type CharacterSoundClass = keyof CharacterSounds;
