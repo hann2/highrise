@@ -3,7 +3,7 @@ import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { polarToVec } from "../../../core/util/MathUtil";
-import { rUniform } from "../../../core/util/Random";
+import { choose, rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import Bullet from "../Bullet";
 import Human from "../Human";
@@ -23,7 +23,13 @@ export interface GunStats {
   //
   fireMode: FireMode;
 
-  shootSound: SoundName;
+  sounds: {
+    shoot: SoundName[];
+    empty: SoundName[];
+    pickup: SoundName[];
+    reload: SoundName[];
+  };
+
   texture?: string;
 }
 
@@ -43,7 +49,13 @@ const defaultGunStats: GunStats = {
   muzzleVelocity: 80,
   bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
-  shootSound: "gunShot2",
+
+  sounds: {
+    shoot: ["pistol2Shot1"],
+    empty: ["dryFire1"],
+    pickup: ["pistolCock1"],
+    reload: ["reload1"],
+  },
 };
 
 export default class Gun extends BaseEntity implements Entity {
@@ -62,10 +74,21 @@ export default class Gun extends BaseEntity implements Entity {
         .getPosition()
         .add(polarToVec(direction, this.stats.muzzleLength));
       this.makeProjectile(muzzlePosition, direction);
-      this.game!.addEntity(
-        new PositionalSound(this.stats.shootSound, muzzlePosition.clone())
-      );
+
+      this.playSound("shoot", muzzlePosition);
+
       this.currentCooldown += 1.0 / this.stats.fireRate;
+    }
+  }
+
+  playSound(
+    soundClass: keyof GunStats["sounds"],
+    position: V2d
+  ): PositionalSound | undefined {
+    const sounds = this.stats.sounds[soundClass];
+    if (sounds.length > 0) {
+      const sound = choose(...sounds);
+      return this.game!.addEntity(new PositionalSound(sound, position));
     }
   }
 

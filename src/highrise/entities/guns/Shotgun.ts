@@ -13,6 +13,13 @@ export default class Shotgun extends Gun {
       fireRate: 4,
       bulletDamage: 30,
       muzzleVelocity: 55,
+
+      sounds: {
+        shoot: ["shotgunShot3"],
+        empty: ["dryFire3"],
+        pickup: ["shotgunPump1"],
+        reload: ["shotgunLoading1"],
+      },
     });
   }
 

@@ -109,7 +109,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     }
   }
 
-  giveWeapon(weapon: Gun | MeleeWeapon) {
+  async giveWeapon(weapon: Gun | MeleeWeapon) {
     if (this.weapon) {
       this.dropWeapon();
     }
@@ -137,7 +137,11 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.sprite.addChild(manSprite);
     this.sprite.anchor.set(0.5, 0.5);
 
-    this.speak("pickupItem");
+    if (weapon instanceof Gun) {
+      weapon.playSound("pickup", this.getPosition());
+      await this.wait(0.5);
+      this.speak("pickupItem");
+    }
   }
 
   dropWeapon() {
