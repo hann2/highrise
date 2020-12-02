@@ -6,6 +6,7 @@ import { initLayers } from "./layers";
 import { initContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
 import CameraController from "./entities/controllers/CameraController";
+import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 
 declare global {
   interface Window {
@@ -34,6 +35,7 @@ export async function main() {
   game.addEntity(new FPSMeter());
   game.addEntity(new LevelController());
   game.addEntity(new CameraController(game.camera));
+  game.addEntity(new PositionalSoundListener());
 
   game.dispatch({ type: "newGame" });
 }

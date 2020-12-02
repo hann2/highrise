@@ -16,7 +16,7 @@ export default class Shotgun extends Gun {
     });
   }
 
-  onShoot(position: V2d, direction: number) {
+  makeProjectile(position: V2d, direction: number) {
     for (let i = 0; i < NUM_BULLETS; i++) {
       const angleOffset = rUniform(-CONE_ANGLE / 2, CONE_ANGLE / 2);
       this.game?.addEntity(

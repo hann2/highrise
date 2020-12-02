@@ -10,6 +10,7 @@ import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
 import Damageable from "./Damageable";
 import Human, { HUMAN_RADIUS } from "./Human";
+import { rNormal } from "../../core/util/Random";
 
 const RADIUS = 0.5; // meters
 const SPEED = 1.2;
@@ -25,6 +26,7 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
   positionOfLastTarget?: V2d;
   tags = ["zombie"];
   attackCooldown = 0;
+  speed: number = rNormal(SPEED, SPEED / 5);
 
   constructor(position: V2d) {
     super();
@@ -89,11 +91,11 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     this.sprite.angle = radToDeg(this.body.angle);
 
     const attackPercent = clamp(this.attackCooldown / ZOMBIE_ATTACK_COOLDOWN);
-    this.sprite.tint = colorLerp(0xffffff, 0xff0000, attackPercent);
+    this.sprite.tint = colorLerp(0xffffff, 0x666666, attackPercent);
   }
 
   walk(direction: V2d) {
-    this.body.applyImpulse(direction.mul(SPEED));
+    this.body.applyImpulse(direction.mul(this.speed));
   }
 
   face(angle: number) {

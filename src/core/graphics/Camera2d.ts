@@ -64,6 +64,10 @@ export class Camera2d extends BaseEntity implements Entity {
     this.velocity[1] = value;
   }
 
+  getPosition() {
+    return this.position;
+  }
+
   onTick(dt: number) {
     this.x += this.vx * dt;
     this.y += this.vy * dt;

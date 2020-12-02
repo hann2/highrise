@@ -3,6 +3,7 @@ import Entity from "../../../core/entity/Entity";
 import { Camera2d } from "../../../core/graphics/Camera2d";
 import Human from "../Human";
 import LevelController from "./LevelController";
+import PositionalSoundListener from "../../../core/sound/PositionalSoundListener";
 
 export default class CameraController extends BaseEntity implements Entity {
   persistent = true;
@@ -17,6 +18,14 @@ export default class CameraController extends BaseEntity implements Entity {
     if (player) {
       this.camera.smoothCenter(player.getPosition());
     }
+
+    this.getListener().setPosition(this.camera.position);
+  }
+
+  getListener(): PositionalSoundListener {
+    return this.game!.entities.byId(
+      "positional_sound_listener"
+    ) as PositionalSoundListener;
   }
 
   getPlayer() {

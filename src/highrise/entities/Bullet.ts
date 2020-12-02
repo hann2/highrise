@@ -1,12 +1,14 @@
-import { Body, Circle, ContactEquation } from "p2";
+import { Body, Circle } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import CCDBody from "../../core/physics/CCDBody";
+import { PositionalSound } from "../../core/sound/PositionalSound";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { isDamageable } from "./Damageable";
+import { choose } from "../../core/util/Random";
 
 export const BULLET_RADIUS = 0.05; // meters
 
@@ -38,15 +40,13 @@ export default class Bullet extends BaseEntity implements Entity {
     this.sprite = new Graphics();
   }
 
-  onBeginContact(
-    other: Entity,
-    _: unknown,
-    __: unknown,
-    contactEquations: ContactEquation[]
-  ) {
+  onBeginContact(other: Entity, _: unknown, __: unknown) {
     if (isDamageable(other)) {
       other.damage(this.damage);
     }
+    this.game?.addEntity(
+      new PositionalSound(choose("wallHit1", "wallHit2"), this.getPosition())
+    );
     this.destroy();
   }
 

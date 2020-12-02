@@ -5,6 +5,8 @@ import Bullet from "../Bullet";
 import Human from "../Human";
 import { polarToVec } from "../../../core/util/MathUtil";
 import { rUniform } from "../../../core/util/Random";
+import { SoundName } from "../../../core/resources/sounds";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
 
 // Stats that make a gun unique
 export interface GunStats {
@@ -20,6 +22,8 @@ export interface GunStats {
   muzzleLength: number;
   //
   fireMode: FireMode;
+
+  shootSound: SoundName;
 }
 
 export enum FireMode {
@@ -38,6 +42,7 @@ const defaultGunStats: GunStats = {
   muzzleVelocity: 80,
   bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
+  shootSound: "pop1",
 };
 
 export default class Gun extends BaseEntity implements Entity {
@@ -55,13 +60,15 @@ export default class Gun extends BaseEntity implements Entity {
       const muzzlePosition = shooter
         .getPosition()
         .add(polarToVec(direction, this.stats.muzzleLength));
-
-      this.onShoot(muzzlePosition, direction);
+      this.makeProjectile(muzzlePosition, direction);
+      this.game!.addEntity(
+        new PositionalSound(this.stats.shootSound, muzzlePosition.clone())
+      );
       this.currentCooldown += 1.0 / this.stats.fireRate;
     }
   }
 
-  onShoot(position: V2d, direction: number) {
+  makeProjectile(position: V2d, direction: number) {
     this.game!.addEntity(
       new Bullet(
         position,

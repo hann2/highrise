@@ -1,8 +1,12 @@
 import pop1 from "../../../resources/audio/pop1.flac";
+import wallHit1 from "../../../resources/audio/wall-hit-1.flac";
+import wallHit2 from "../../../resources/audio/wall-hit-2.flac";
 
 // TODO: These shouln't be listed in core/
 export const SOUND_URLS = {
   pop1,
+  wallHit1,
+  wallHit2,
 };
 
 export type SoundName = keyof typeof SOUND_URLS;
