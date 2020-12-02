@@ -1,5 +1,5 @@
 import Game from "../../../core/Game";
-import { choose } from "../../../core/util/Random";
+import { choose, rInteger } from "../../../core/util/Random";
 import { V } from "../../../core/Vector";
 import AIHumanController from "../../entities/AIHumanController";
 import CameraController from "../../entities/CameraController";
@@ -12,9 +12,11 @@ import PlayerHumanController from "../../entities/PlayerHumanController";
 import Level from "./Level";
 import Level1 from "./lvl1";
 import Level2 from "./lvl2";
+import TestLevelGenerator from "./TestLevelGenerator";
 
 export const newGame = (game: Game) => {
   const oldParty = [...game.entities.all].filter((e) => e instanceof Party)[0];
+  oldParty?.destroy();
 
   const player = new Human(V(5, 5));
   player.giveGun(choose(new Rifle(), new Shotgun(), new Pistol()));
@@ -39,8 +41,6 @@ export const newGame = (game: Game) => {
   game!.addEntity(startingParty);
 
   goToLevel(game!, 1, startingParty);
-
-  oldParty?.destroy();
 };
 
 export const goToNextLevel = (game: Game) => {
@@ -58,8 +58,11 @@ export const goToLevel = (game: Game, index: number, party: Party) => {
   const oldLevel = [...game.entities.all].filter(
     (e) => e instanceof Level
   )[0] as Level;
-  const newLevel = buildLevel(index);
-  newLevel.placeEntities(party);
+  const newLevel = new TestLevelGenerator().generateLevel(
+    party,
+    rInteger(1, 2000000)
+  );
+  // newLevel.placeParty(party);
   game.addEntity(newLevel);
   oldLevel?.destroy();
 };

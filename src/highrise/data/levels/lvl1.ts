@@ -20,7 +20,7 @@ export default class Level1 extends Level {
     const spawnLocations = [V(5, 5), V(6.5, 5), V(5, 6.5), V(3, 3)];
 
     const ella = new Human(V(15, 6.5));
-    ella.giveGun(new Shotgun());
+    ella.giveGun(new Pistol());
 
     const entities = [
       new Zombie(V(10, 8)),

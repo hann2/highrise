@@ -10,7 +10,7 @@ export default class Shotgun extends Gun {
   constructor() {
     super({
       name: "Shotgun",
-      fireRate: 4.0,
+      fireRate: 1,
       bulletDamage: 30,
       muzzleVelocity: 55,
     });

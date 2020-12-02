@@ -15,7 +15,7 @@ const RADIUS = 0.5; // meters
 const SPEED = 1.2;
 const FRICTION = 0.2;
 const ZOMBIE_ATTACK_RANGE = 2;
-const ZOMBIE_ATTACK_DAMAGE = 30;
+const ZOMBIE_ATTACK_DAMAGE = 40;
 const ZOMBIE_ATTACK_COOLDOWN = 2;
 
 export default class Zombie extends BaseEntity implements Entity, Damageable {
