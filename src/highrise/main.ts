@@ -2,8 +2,9 @@ import AutoPauser from "../core/AutoPauser";
 import Game from "../core/Game";
 import FPSMeter from "../core/util/FPSMeter";
 import { newGame } from "./data/levels/switchLevel";
-import { ContactMaterials } from "./P2Materials";
+import { ContactMaterials, initContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
+import { initLayers } from "./layers";
 
 declare global {
   interface Window {
@@ -18,10 +19,8 @@ export async function main() {
     tickIterations: 4,
   });
   game.world.frictionGravity = 10;
-
-  for (const contactMaterial of ContactMaterials) {
-    game.world.addContactMaterial(contactMaterial);
-  }
+  initLayers(game);
+  initContactMaterials(game);
 
   window.DEBUG = { game };
   game.start();

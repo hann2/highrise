@@ -4,7 +4,7 @@ import manBlueGun from "../../../resources/images/Man Blue/manBlue_gun.png";
 import manBrownGun from "../../../resources/images/Man Brown/manBrown_gun.png";
 import manOldGun from "../../../resources/images/Man Old/manOld_gun.png";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity from "../../core/entity/Entity";
+import Entity, { GameSprite } from "../../core/entity/Entity";
 import { normalizeAngle, radToDeg } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
@@ -14,6 +14,7 @@ import Damageable from "./Damageable";
 import Gun from "./guns/Gun";
 import Interactable, { isInteractable } from "./Interactable";
 import GunPickup from "./GunPickup";
+import { Layers } from "../layers";
 
 export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4; // arbitrary units

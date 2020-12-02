@@ -8,9 +8,10 @@ import Level from "../data/levels/Level";
 import Party from "./Party";
 import { goToNextLevel } from "../data/levels/switchLevel";
 import { V } from "../../core/Vector";
+import { Layers } from "../layers";
 
 export default class Exit extends BaseEntity implements Entity {
-  sprite: GameSprite;
+  sprite: Graphics & GameSprite;
 
   constructor(x1: number, y1: number, x2: number, y2: number) {
     super();
@@ -24,13 +25,12 @@ export default class Exit extends BaseEntity implements Entity {
       new Point(x2, y1),
     ];
 
-    const graphics = new Graphics();
-    graphics.position.set(0, 0);
-    graphics.beginFill(0x00ffff);
-    graphics.drawPolygon(corners);
-    graphics.endFill();
-
-    this.sprite = graphics;
+    this.sprite = new Graphics();
+    this.sprite.layerName = Layers.WORLD_BACK;
+    this.sprite.position.set(0, 0);
+    this.sprite.beginFill(0x00ffff);
+    this.sprite.drawPolygon(corners);
+    this.sprite.endFill();
 
     const position = V(Math.min(x1, x2) + w / 2, Math.min(y1, y2) + h / 2);
     this.body = new Body({
