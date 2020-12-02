@@ -23,12 +23,13 @@ export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
 const INTERACT_DISTANCE = 3; // meters
+const MAX_HEALTH = 100;
 
 export default class Human extends BaseEntity implements Entity, Hittable {
   body: Body;
   sprite: Sprite;
   tags = ["human"];
-  hp: number = 100;
+  hp: number = MAX_HEALTH;
   gun?: Gun;
 
   constructor(position: V2d = V(0, 0)) {
@@ -149,6 +150,13 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     if (this.hp <= 0) {
       this.game?.dispatch({ type: "humanDied", human: this });
       this.destroy();
+    }
+  }
+
+  heal(amount: number) {
+    this.hp += amount;
+    if (this.hp > MAX_HEALTH) {
+      this.hp = MAX_HEALTH;
     }
   }
 }
