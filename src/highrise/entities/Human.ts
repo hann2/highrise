@@ -14,7 +14,7 @@ import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
-import Hittable from "./Damageable";
+import Hittable from "./Hittable";
 import GunPickup from "./GunPickup";
 import Gun from "./guns/Gun";
 import Interactable, { isInteractable } from "./Interactable";

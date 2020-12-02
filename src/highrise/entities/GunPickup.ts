@@ -25,11 +25,6 @@ export default class GunPickup extends BaseEntity {
     this.sprite.position.set(...position);
     this.sprite.text = this.gun.stats.name.substr(0, 1);
     this.sprite.scale.set(0.03);
-
-    this.body = new Body({
-      mass: 0,
-      position: position,
-    });
   }
 
   onInteract(human: Human) {

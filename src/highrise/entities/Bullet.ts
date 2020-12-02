@@ -7,7 +7,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
-import { isHittable } from "./Damageable";
+import { isHittable } from "./Hittable";
 import { choose } from "../../core/util/Random";
 import { SoundName } from "../../core/resources/sounds";
 

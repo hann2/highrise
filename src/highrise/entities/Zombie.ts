@@ -8,7 +8,7 @@ import { clamp, radToDeg } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
-import Hittable from "./Damageable";
+import Hittable from "./Hittable";
 import Human, { HUMAN_RADIUS } from "./Human";
 import { rNormal, choose } from "../../core/util/Random";
 import Bullet from "./Bullet";
