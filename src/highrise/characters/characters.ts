@@ -1,9 +1,11 @@
 import manBlueGun from "../../../resources/images/Man Blue/manBlue_gun.png";
-import { Character } from "./Character";
+import manBlueStand from "../../../resources/images/Man Blue/manBlue_stand.png";
 import { choose } from "../../core/util/Random";
+import { Character } from "./Character";
 
 export const simon: Character = {
-  image: manBlueGun,
+  imageGun: manBlueGun,
+  imageStand: manBlueStand,
 
   sounds: {
     death: ["simonDeath1"],

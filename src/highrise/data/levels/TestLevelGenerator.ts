@@ -2,15 +2,16 @@ import Entity from "../../../core/entity/Entity";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Exit from "../../entities/Exit";
-import GunPickup from "../../entities/GunPickup";
 import Rifle from "../../entities/guns/Rifle";
 import Shotgun from "../../entities/guns/Shotgun";
 import HealthPickup from "../../entities/HealthPickup";
+import Axe from "../../entities/meleeWeapons/Axe";
 import Wall from "../../entities/Wall";
+import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import { Level } from "./Level";
 
-const LEVEL_SIZE = 10;
+const LEVEL_SIZE = 5;
 
 export default class TestLevelGenerator {
   constructor() {}
@@ -126,15 +127,19 @@ export default class TestLevelGenerator {
     const shuffledLocations = seededShuffle(locations, seed);
 
     return [
-      new GunPickup(
+      new WeaponPickup(
         this.levelCoordToWorldCoord(shuffledLocations[0]),
         new Shotgun()
       ),
-      new GunPickup(
+      new WeaponPickup(
         this.levelCoordToWorldCoord(shuffledLocations[1]),
         new Rifle()
       ),
-      new HealthPickup(this.levelCoordToWorldCoord(shuffledLocations[2])),
+      new WeaponPickup(
+        this.levelCoordToWorldCoord(shuffledLocations[2]),
+        new Axe()
+      ),
+      new HealthPickup(this.levelCoordToWorldCoord(shuffledLocations[3])),
     ];
   }
 

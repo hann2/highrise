@@ -3,11 +3,10 @@ import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { polarToVec } from "../../../core/util/MathUtil";
-import { rUniform, choose } from "../../../core/util/Random";
+import { choose, rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import Bullet from "../Bullet";
 import Human from "../Human";
-import { SoundInstance } from "../../../core/sound/SoundInstance";
 
 // Stats that make a gun unique
 export interface GunStats {
@@ -30,6 +29,8 @@ export interface GunStats {
     pickup: SoundName[];
     reload: SoundName[];
   };
+
+  texture?: string;
 }
 
 export enum FireMode {

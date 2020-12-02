@@ -12,12 +12,13 @@ import { randomCharacter } from "../characters/characters";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
-import GunPickup from "./GunPickup";
 import Gun from "./guns/Gun";
 import Hittable from "./Hittable";
 import Interactable, { isInteractable } from "./Interactable";
+import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
+import WeaponPickup from "./WeaponPickup";
 
-export const HUMAN_RADIUS = 0.5; // meters
+export const HUMAN_RADIUS = 0.4; // meters
 const SPEED = 4; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
 const INTERACT_DISTANCE = 3; // meters
@@ -28,7 +29,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   sprite: Sprite;
   tags = ["human"];
   hp: number = MAX_HEALTH;
-  gun?: Gun;
+  weapon?: Gun | MeleeWeapon;
 
   constructor(
     position: V2d = V(0, 0),
@@ -46,10 +47,15 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 
-    this.sprite = Sprite.from(character.image);
-    this.sprite.anchor.set(0.5, 0.5); // make it rotate about the middle
-    this.sprite.scale.set((2 * HUMAN_RADIUS) / this.sprite.width);
+    this.sprite = new Sprite();
+    const manSprite = Sprite.from(character.imageStand);
+    manSprite.anchor.set(0.5, 0.5);
+    manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
+    this.sprite.addChild(manSprite);
+    this.sprite.anchor.set(0.5, 0.5);
   }
+
+  onMeleeHit(meleeWeapon: MeleeWeapon, position: V2d): void {}
 
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
@@ -62,6 +68,14 @@ export default class Human extends BaseEntity implements Entity, Hittable {
 
     const healthPercent = clamp(this.hp / 100);
     this.sprite.tint = colorLerp(0xff0000, 0xffffff, healthPercent);
+
+    const weaponSprite = this.sprite.getChildByName("weapon");
+    if (weaponSprite) {
+      weaponSprite.visible =
+        !this.weapon?.currentCooldown ||
+        this.weapon?.currentCooldown <= 0 ||
+        this.weapon instanceof Gun;
+    }
   }
 
   // Move the human along a specified vector
@@ -82,27 +96,58 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     return this.body.angle;
   }
 
-  pullTrigger() {
-    this.gun?.pullTrigger(this);
+  useWeapon() {
+    if (this.weapon instanceof Gun) {
+      this.weapon?.pullTrigger(this);
+    } else {
+      this.weapon?.attack(this);
+    }
   }
 
-  async giveGun(gun: Gun) {
-    if (this.gun) {
-      this.dropGun();
+  async giveWeapon(weapon: Gun | MeleeWeapon) {
+    if (this.weapon) {
+      this.dropWeapon();
     }
-    this.gun = gun;
-    this.addChild(gun, true);
+    this.weapon = weapon;
+    this.addChild(weapon, true);
+    this.sprite.removeChildren();
 
-    gun.playSound("pickup", this.getPosition());
-    await this.wait(0.5);
-    this.speak("pickupItem");
+    const manSprite =
+      weapon instanceof Gun
+        ? Sprite.from(this.character.imageGun)
+        : Sprite.from(this.character.imageStand);
+
+    if (weapon instanceof MeleeWeapon && weapon.stats.texture) {
+      const weaponSprite = Sprite.from(weapon.stats.texture);
+      weaponSprite.scale.set(weapon.stats.weaponLength / weaponSprite.height);
+      weaponSprite.anchor.set(0.5, 0.5);
+      weaponSprite.rotation = Math.PI / 2;
+      weaponSprite.position.set(0, 0.3);
+      weaponSprite.name = "weapon";
+      this.sprite.addChild(weaponSprite);
+    }
+    manSprite.anchor.set(0.5, 0.5);
+    manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
+    this.sprite.addChild(manSprite);
+    this.sprite.anchor.set(0.5, 0.5);
+
+    if (weapon instanceof Gun) {
+      weapon.playSound("pickup", this.getPosition());
+      await this.wait(0.5);
+      this.speak("pickupItem");
+    }
   }
 
-  dropGun() {
-    if (this.gun) {
-      this.game?.addEntity(new GunPickup(this.getPosition(), this.gun));
-      this.gun = undefined;
+  dropWeapon() {
+    if (this.weapon) {
+      this.game?.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
+      this.weapon = undefined;
     }
+    this.sprite.removeChildren();
+    const manSprite = Sprite.from(this.character.imageStand);
+    manSprite.anchor.set(0.5, 0.5);
+    manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
+    this.sprite.addChild(manSprite);
   }
 
   // Return a list of all interactables within range

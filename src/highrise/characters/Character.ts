@@ -2,7 +2,8 @@ import { SoundName } from "../../core/resources/sounds";
 
 // Data about a character
 export interface Character {
-  image: string;
+  imageStand: string;
+  imageGun: string;
 
   sounds: CharacterSounds;
 }

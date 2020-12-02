@@ -48,7 +48,7 @@ export default class SurvivorHumanController
         .isub(this.human.getPosition()).angle;
 
       this.human.setDirection(direction);
-      this.human.pullTrigger();
+      this.human.useWeapon();
     }
 
     this.interactable.position = this.human.getPosition();

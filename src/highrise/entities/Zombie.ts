@@ -13,8 +13,9 @@ import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
 import Human, { HUMAN_RADIUS } from "./Human";
+import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
 
-const RADIUS = 0.5; // meters
+const RADIUS = 0.3; // meters
 const SPEED = 1.2;
 const FRICTION = 0.2;
 const ZOMBIE_ATTACK_RANGE = RADIUS + HUMAN_RADIUS + 0.1;
@@ -54,7 +55,11 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
       this.attackCooldown -= dt;
     }
     if (this.attackProgress !== null) {
-      this.attackProgress += dt;
+      if (this.attackProgress >= ZOMBIE_ATTACK_ANIMATION_LENGTH) {
+        this.attackProgress = null;
+      } else {
+        this.attackProgress += dt;
+      }
     }
 
     const [
@@ -119,9 +124,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.sprite.angle = radToDeg(this.body.angle);
 
     if (this.attackProgress != null) {
-      if (this.attackProgress >= ZOMBIE_ATTACK_ANIMATION_LENGTH) {
-        this.attackProgress = null;
-      } else if (this.attackProgress < ZOMBIE_ATTACK_WINDUP) {
+      if (this.attackProgress < ZOMBIE_ATTACK_WINDUP) {
         const attackPercent = clamp(this.attackProgress / ZOMBIE_ATTACK_WINDUP);
         this.sprite.tint = colorLerp(0xffffff, 0x666666, attackPercent);
       } else {
@@ -143,6 +146,23 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.hp -= bullet.damage;
+
+    this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
+
+    this.game?.addEntity(
+      new PositionalSound(
+        choose("zombieHit1", "zombieHit2"),
+        this.getPosition()
+      )
+    );
+
+    if (this.hp <= 0) {
+      this.destroy();
+    }
+  }
+
+  onMeleeHit(meleeWeapon: MeleeWeapon, position: V2d) {
+    this.hp -= meleeWeapon.stats.damage;
 
     this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
 

@@ -3,7 +3,7 @@ import Entity from "../../../core/entity/Entity";
 import { ControllerAxis, ControllerButton } from "../../../core/io/Gamepad";
 import { KeyCode } from "../../../core/io/Keys";
 import { V } from "../../../core/Vector";
-import { FireMode } from "../guns/Gun";
+import Gun, { FireMode } from "../guns/Gun";
 import Human from "../Human";
 
 // Maps keyboard/mouse/gamepad input to human actions
@@ -19,13 +19,13 @@ export default class PlayerHumanController
   }
 
   onMouseDown() {
-    this.human.pullTrigger();
+    this.human.useWeapon();
   }
 
   onButtonDown(button: ControllerButton) {
     switch (button) {
       case ControllerButton.RT:
-        this.human.pullTrigger();
+        this.human.useWeapon();
         break;
       case ControllerButton.X:
         this.human.interactWithNearest();
@@ -50,9 +50,10 @@ export default class PlayerHumanController
     // Shooting
     if (
       (io.lmb || this.game?.io.getButton(ControllerButton.RT)) &&
-      this.human.gun?.stats.fireMode === FireMode.FULL_AUTO
+      this.human.weapon instanceof Gun &&
+      this.human.weapon?.stats.fireMode === FireMode.FULL_AUTO
     ) {
-      this.human.pullTrigger();
+      this.human.useWeapon();
     }
 
     // Direction
