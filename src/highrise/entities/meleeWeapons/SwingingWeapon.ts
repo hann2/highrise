@@ -6,7 +6,7 @@ import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { polarToVec, radToDeg } from "../../../core/util/MathUtil";
 import { V2d } from "../../../core/Vector";
-import { isHittable } from "../Damageable";
+import { isHittable } from "../Hittable";
 import Human from "../Human";
 import MeleeWeapon from "./MeleeWeapon";
 

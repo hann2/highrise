@@ -7,7 +7,7 @@ import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import Bullet from "./Bullet";
-import Hittable from "./Damageable";
+import Hittable from "./Hittable";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {

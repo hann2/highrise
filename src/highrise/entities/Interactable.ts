@@ -5,13 +5,13 @@ import { V2d } from "../../core/Vector";
 
 /** A thing on the ground that humans can interact with */
 export default class Interactable extends BaseEntity implements Entity {
+  tags = ["interactable"];
+
   constructor(
     public position: V2d,
     private onInteract?: (human: Human, self: Interactable) => void
   ) {
     super();
-
-    // TODO: Sprite?
   }
 
   getPosition() {
@@ -20,7 +20,6 @@ export default class Interactable extends BaseEntity implements Entity {
 
   interact(human: Human) {
     this.onInteract?.(human, this);
-    this.destroy();
   }
 }
 

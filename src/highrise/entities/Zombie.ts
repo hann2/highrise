@@ -11,7 +11,7 @@ import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
-import Hittable from "./Damageable";
+import Hittable from "./Hittable";
 import Human, { HUMAN_RADIUS } from "./Human";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
 

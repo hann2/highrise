@@ -1,20 +1,19 @@
 import { Body, Circle } from "p2";
 import { Sprite } from "pixi.js";
-import manBlueGun from "../../../resources/images/Man Blue/manBlue_gun.png";
-import manBlueStand from "../../../resources/images/Man Blue/manBlue_stand.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
 import { clamp, normalizeAngle, radToDeg } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import { Character, CharacterSoundClass } from "../characters/Character";
+import { randomCharacter } from "../characters/characters";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
-import Hittable from "./Damageable";
 import Gun from "./guns/Gun";
+import Hittable from "./Hittable";
 import Interactable, { isInteractable } from "./Interactable";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
 import WeaponPickup from "./WeaponPickup";
@@ -32,7 +31,10 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
 
-  constructor(position: V2d = V(0, 0)) {
+  constructor(
+    position: V2d = V(0, 0),
+    public character: Character = randomCharacter()
+  ) {
     super();
 
     this.body = new Body({
@@ -46,7 +48,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape);
 
     this.sprite = new Sprite();
-    const manSprite = Sprite.from(manBlueStand);
+    const manSprite = Sprite.from(character.imageStand);
     manSprite.anchor.set(0.5, 0.5);
     manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
     this.sprite.addChild(manSprite);
@@ -112,8 +114,8 @@ export default class Human extends BaseEntity implements Entity, Hittable {
 
     const manSprite =
       weapon instanceof Gun
-        ? Sprite.from(manBlueGun)
-        : Sprite.from(manBlueStand);
+        ? Sprite.from(this.character.imageGun)
+        : Sprite.from(this.character.imageStand);
 
     if (weapon instanceof MeleeWeapon && weapon.stats.texture) {
       const weaponSprite = Sprite.from(weapon.stats.texture);
@@ -128,6 +130,8 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
     this.sprite.addChild(manSprite);
     this.sprite.anchor.set(0.5, 0.5);
+
+    this.speak("pickupItem");
   }
 
   dropWeapon() {
@@ -136,7 +140,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
       this.weapon = undefined;
     }
     this.sprite.removeChildren();
-    const manSprite = Sprite.from(manBlueStand);
+    const manSprite = Sprite.from(this.character.imageStand);
     manSprite.anchor.set(0.5, 0.5);
     manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
     this.sprite.addChild(manSprite);
@@ -182,14 +186,10 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   inflictDamage(amount: number) {
     this.hp -= amount;
 
-    this.game?.addEntity(
-      new PositionalSound(
-        choose<SoundName>("humanHit1", "humanHit2"),
-        this.getPosition()
-      )
-    );
+    this.speak("hurt");
 
     if (this.hp <= 0) {
+      this.speak("death");
       this.game?.dispatch({ type: "humanDied", human: this });
       this.destroy();
     }
@@ -199,6 +199,15 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.hp += amount;
     if (this.hp > MAX_HEALTH) {
       this.hp = MAX_HEALTH;
+    }
+  }
+
+  speak(soundClass: CharacterSoundClass) {
+    // TODO: Only speak one sound at a time
+    const sounds = this.character.sounds[soundClass];
+    if (sounds.length > 0) {
+      const sound = choose(...sounds);
+      this.game?.addEntity(new PositionalSound(sound, this.getPosition()));
     }
   }
 }
