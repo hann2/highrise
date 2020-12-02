@@ -5,7 +5,7 @@ import manBrownGun from "../../../resources/images/Man Brown/manBrown_gun.png";
 import manOldGun from "../../../resources/images/Man Old/manOld_gun.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { normalizeAngle, radToDeg } from "../../core/util/MathUtil";
+import { normalizeAngle, radToDeg, clamp } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
@@ -15,6 +15,7 @@ import Gun from "./guns/Gun";
 import Interactable, { isInteractable } from "./Interactable";
 import GunPickup from "./GunPickup";
 import { Layers } from "../layers";
+import { colorLerp } from "../../core/util/ColorUtils";
 
 export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4; // arbitrary units
@@ -54,6 +55,9 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   onRender() {
     [this.sprite.x, this.sprite.y] = this.body.position;
     this.sprite.angle = radToDeg(this.body.angle);
+
+    const healthPercent = clamp(this.hp / 100);
+    this.sprite.tint = colorLerp(0xff0000, 0xffffff, healthPercent);
   }
 
   // Move the human along a specified vector
@@ -122,8 +126,9 @@ export default class Human extends BaseEntity implements Entity, Damageable {
   // Inflict damage on the human
   damage(amount: number) {
     this.hp -= amount;
+    console.log("damaging human", this.hp);
 
-    if (this.hp < 0) {
+    if (this.hp <= 0) {
       this.game!.dispatch({ type: "humanDied", human: this });
       this.destroy();
     }

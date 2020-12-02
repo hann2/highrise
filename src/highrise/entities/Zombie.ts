@@ -1,22 +1,22 @@
 import { Body, Circle } from "p2";
 import { Sprite } from "pixi.js";
-import * as Pixi from "pixi.js";
 import zoimbie1Hold from "../../../resources/images/Zombie 1/zoimbie1_hold.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { radToDeg } from "../../core/util/MathUtil";
+import { colorLerp } from "../../core/util/ColorUtils";
+import { clamp, radToDeg } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
 import Damageable from "./Damageable";
-import Human from "./Human";
+import Human, { HUMAN_RADIUS } from "./Human";
 
 const RADIUS = 0.5; // meters
 const SPEED = 1.2;
 const FRICTION = 0.2;
-const ZOMBIE_ATTACK_RANGE = 2;
-const ZOMBIE_ATTACK_DAMAGE = 40;
-const ZOMBIE_ATTACK_COOLDOWN = 2;
+const ZOMBIE_ATTACK_RANGE = RADIUS + HUMAN_RADIUS + 0.1;
+const ZOMBIE_ATTACK_DAMAGE = 20;
+const ZOMBIE_ATTACK_COOLDOWN = 1.2;
 
 export default class Zombie extends BaseEntity implements Entity, Damageable {
   body: Body;
@@ -41,7 +41,9 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
   }
 
   onTick(dt: number) {
-    this.attackCooldown -= dt;
+    if (this.attackCooldown > 0) {
+      this.attackCooldown -= dt;
+    }
 
     const humans = this.game!.entities.getTagged("human") as Human[];
 
@@ -71,7 +73,7 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     if (
       nearestVisibleHuman &&
       nearestDistance < ZOMBIE_ATTACK_RANGE &&
-      this.attackCooldown < 0
+      this.attackCooldown <= 0
     ) {
       nearestVisibleHuman.damage(ZOMBIE_ATTACK_DAMAGE);
 
@@ -85,6 +87,9 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
   onRender() {
     [this.sprite.x, this.sprite.y] = this.body.position;
     this.sprite.angle = radToDeg(this.body.angle);
+
+    const attackPercent = clamp(this.attackCooldown / ZOMBIE_ATTACK_COOLDOWN);
+    this.sprite.tint = colorLerp(0xffffff, 0xff0000, attackPercent);
   }
 
   walk(direction: V2d) {
