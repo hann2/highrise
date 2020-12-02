@@ -1,8 +1,10 @@
 import Entity from "../../core/entity/Entity";
+import Bullet from "./Bullet";
+import { V2d } from "../../core/Vector";
 
-export default interface Damageable extends Entity {
-  damage(damage: number): void;
+export default interface Hittable extends Entity {
+  onBulletHit(bullet: Bullet, position: V2d): void;
 }
 
-export const isDamageable = (x: any): x is Damageable =>
-  typeof x?.damage === "function";
+export const isHittable = (x: any): x is Hittable =>
+  typeof x?.onBulletHit === "function";

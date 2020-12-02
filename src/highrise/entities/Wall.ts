@@ -3,8 +3,13 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { Graphics, Point } from "pixi.js";
 import { CollisionGroups } from "../Collision";
+import Bullet from "./Bullet";
+import Hittable from "./Damageable";
+import { PositionalSound } from "../../core/sound/PositionalSound";
+import { choose } from "../../core/util/Random";
+import { V2d } from "../../core/Vector";
 
-export default class Wall extends BaseEntity implements Entity {
+export default class Wall extends BaseEntity implements Entity, Hittable {
   sprite: GameSprite;
 
   constructor(x1: number, y1: number, x2: number, y2: number) {
@@ -36,5 +41,11 @@ export default class Wall extends BaseEntity implements Entity {
     const shape = new Box({ width: w, height: h });
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0], 0);
+  }
+
+  onBulletHit(bullet: Bullet, position: V2d) {
+    this.game!.addEntity(
+      new PositionalSound(choose("wallHit1", "wallHit2"), position)
+    );
   }
 }

@@ -8,9 +8,12 @@ import { clamp, radToDeg } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
-import Damageable from "./Damageable";
+import Hittable from "./Damageable";
 import Human, { HUMAN_RADIUS } from "./Human";
-import { rNormal } from "../../core/util/Random";
+import { rNormal, choose } from "../../core/util/Random";
+import Bullet from "./Bullet";
+import { SoundName } from "../../core/resources/sounds";
+import { PositionalSound } from "../../core/sound/PositionalSound";
 
 const RADIUS = 0.5; // meters
 const SPEED = 1.2;
@@ -19,7 +22,7 @@ const ZOMBIE_ATTACK_RANGE = RADIUS + HUMAN_RADIUS + 0.1;
 const ZOMBIE_ATTACK_DAMAGE = 20;
 const ZOMBIE_ATTACK_COOLDOWN = 1.2;
 
-export default class Zombie extends BaseEntity implements Entity, Damageable {
+export default class Zombie extends BaseEntity implements Entity, Hittable {
   body: Body;
   sprite: Sprite;
   hp: number = 100;
@@ -77,7 +80,7 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
       nearestDistance < ZOMBIE_ATTACK_RANGE &&
       this.attackCooldown <= 0
     ) {
-      nearestVisibleHuman.damage(ZOMBIE_ATTACK_DAMAGE);
+      nearestVisibleHuman.inflictDamage(ZOMBIE_ATTACK_DAMAGE);
 
       this.attackCooldown = ZOMBIE_ATTACK_COOLDOWN;
     }
@@ -102,8 +105,17 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     this.body.angle = angle;
   }
 
-  damage(amount: number) {
-    this.hp -= amount;
+  onBulletHit(bullet: Bullet, position: V2d) {
+    this.hp -= bullet.damage;
+
+    this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
+
+    this.game?.addEntity(
+      new PositionalSound(
+        choose("zombieHit1", "zombieHit2"),
+        this.getPosition()
+      )
+    );
 
     if (this.hp <= 0) {
       this.destroy();

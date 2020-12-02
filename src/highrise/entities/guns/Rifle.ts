@@ -5,7 +5,7 @@ export default class Rifle extends Gun {
     super({
       name: "Rifle",
       fireRate: 10,
-      bulletDamage: 70,
+      bulletDamage: 40,
       muzzleVelocity: 120,
       fireMode: FireMode.FULL_AUTO,
     });

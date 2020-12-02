@@ -42,7 +42,7 @@ const defaultGunStats: GunStats = {
   muzzleVelocity: 80,
   bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
-  shootSound: "pop1",
+  shootSound: "gunShot2",
 };
 
 export default class Gun extends BaseEntity implements Entity {

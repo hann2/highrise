@@ -4,25 +4,27 @@ import manBlueGun from "../../../resources/images/Man Blue/manBlue_gun.png";
 import manBrownGun from "../../../resources/images/Man Brown/manBrown_gun.png";
 import manOldGun from "../../../resources/images/Man Old/manOld_gun.png";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
-import { normalizeAngle, radToDeg, clamp } from "../../core/util/MathUtil";
+import Entity from "../../core/entity/Entity";
+import { SoundName } from "../../core/resources/sounds";
+import { PositionalSound } from "../../core/sound/PositionalSound";
+import { colorLerp } from "../../core/util/ColorUtils";
+import { clamp, normalizeAngle, radToDeg } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
-import Damageable from "./Damageable";
+import Bullet from "./Bullet";
+import Hittable from "./Damageable";
+import GunPickup from "./GunPickup";
 import Gun from "./guns/Gun";
 import Interactable, { isInteractable } from "./Interactable";
-import GunPickup from "./GunPickup";
-import { Layers } from "../layers";
-import { colorLerp } from "../../core/util/ColorUtils";
 
 export const HUMAN_RADIUS = 0.5; // meters
 const SPEED = 4; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
 const INTERACT_DISTANCE = 3; // meters
 
-export default class Human extends BaseEntity implements Entity, Damageable {
+export default class Human extends BaseEntity implements Entity, Hittable {
   body: Body;
   sprite: Sprite;
   tags = ["human"];
@@ -123,13 +125,29 @@ export default class Human extends BaseEntity implements Entity, Damageable {
     }
   }
 
-  // Inflict damage on the human
-  damage(amount: number) {
-    this.hp -= amount;
-    console.log("damaging human", this.hp);
+  onBulletHit(bullet: Bullet, position: V2d) {
+    this.hp -= bullet.damage;
+
+    this.game!.addEntity(new PositionalSound(choose("fleshHit1"), position));
 
     if (this.hp <= 0) {
-      this.game!.dispatch({ type: "humanDied", human: this });
+      this.destroy();
+    }
+  }
+
+  // Inflict damage on the human
+  inflictDamage(amount: number) {
+    this.hp -= amount;
+
+    this.game?.addEntity(
+      new PositionalSound(
+        choose<SoundName>("humanHit1", "humanHit2"),
+        this.getPosition()
+      )
+    );
+
+    if (this.hp <= 0) {
+      this.game?.dispatch({ type: "humanDied", human: this });
       this.destroy();
     }
   }

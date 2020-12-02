@@ -7,8 +7,9 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
-import { isDamageable } from "./Damageable";
+import { isHittable } from "./Damageable";
 import { choose } from "../../core/util/Random";
+import { SoundName } from "../../core/resources/sounds";
 
 export const BULLET_RADIUS = 0.05; // meters
 
@@ -20,7 +21,7 @@ export default class Bullet extends BaseEntity implements Entity {
     position: V2d,
     direction: number,
     speed: number = 50,
-    private damage: number = 40
+    public damage: number = 40
   ) {
     super();
 
@@ -41,12 +42,10 @@ export default class Bullet extends BaseEntity implements Entity {
   }
 
   onBeginContact(other: Entity, _: unknown, __: unknown) {
-    if (isDamageable(other)) {
-      other.damage(this.damage);
+    if (isHittable(other)) {
+      // TODO: Get actual collision position
+      other.onBulletHit(this, this.getPosition());
     }
-    this.game?.addEntity(
-      new PositionalSound(choose("wallHit1", "wallHit2"), this.getPosition())
-    );
     this.destroy();
   }
 
