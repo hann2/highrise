@@ -5,6 +5,7 @@ import Exit from "../../entities/Exit";
 import GunPickup from "../../entities/GunPickup";
 import Rifle from "../../entities/guns/Rifle";
 import Shotgun from "../../entities/guns/Shotgun";
+import HealthPickup from "../../entities/HealthPickup";
 import Wall from "../../entities/Wall";
 import Zombie from "../../entities/Zombie";
 import { Level } from "./Level";
@@ -133,6 +134,7 @@ export default class TestLevelGenerator {
         this.levelCoordToWorldCoord(shuffledLocations[1]),
         new Rifle()
       ),
+      new HealthPickup(this.levelCoordToWorldCoord(shuffledLocations[2])),
     ];
   }
 
