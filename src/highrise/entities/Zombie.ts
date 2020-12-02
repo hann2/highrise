@@ -51,7 +51,7 @@ export default class Zombie extends BaseEntity implements Entity, Damageable {
     for (const human of humans) {
       // should you be able to sneak up on zombie???
       const isVisible = testLineOfSight(this, human);
-      const distance = human.getPosition().sub(this.getPosition()).magnitude;
+      const distance = human.getPosition().isub(this.getPosition()).magnitude;
       if (isVisible && distance < nearestDistance) {
         nearestDistance = distance;
         nearestVisibleHuman = human;
