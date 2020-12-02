@@ -1,6 +1,9 @@
-import BaseEntity from "../../core/entity/BaseEntity";
 import { Ray, RaycastResult } from "p2";
+import BaseEntity from "../../core/entity/BaseEntity";
+import Game from "../../core/Game";
 import { CollisionGroups } from "../Collision";
+import Human from "../entities/Human";
+import Zombie from "../entities/Zombie";
 
 // Returns true if there is an unobstructed line-of-sight from the looker to the target
 export function testLineOfSight(
@@ -17,4 +20,26 @@ export function testLineOfSight(
   const result = new RaycastResult();
   looker.game!.world.raycast(result, ray);
   return result.body === target.body || result.body == null;
+}
+
+// Returns the zombie that is nearest to and visible by a given human
+export function getNearestVisibleZombie(
+  game: Game,
+  human: Human
+): Zombie | undefined {
+  const zombies = game.entities.getTagged("zombie") as Zombie[];
+
+  let nearestVisibleZombie: Zombie | undefined;
+  let nearestDistance: number = Infinity;
+
+  for (const zombie of zombies) {
+    const isVisible = testLineOfSight(human, zombie);
+    const distance = zombie.getPosition().sub(human.getPosition()).magnitude;
+    if (isVisible && distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestVisibleZombie = zombie;
+    }
+  }
+
+  return nearestVisibleZombie;
 }

@@ -6,6 +6,7 @@ export enum Layers {
   WORLD_BACK = "world_back",
   WORLD = "world",
   WORLD_FRONT = "world_front",
+  HUD = "hud",
 }
 
 // Set up the game to use our layers
@@ -13,6 +14,7 @@ export function initLayers(game: Game) {
   game.renderer.createLayer(Layers.WORLD_BACK, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_FRONT, new LayerInfo());
+  game.renderer.createLayer(Layers.HUD, new LayerInfo({ paralax: 0 }));
 
   game.renderer.defaultLayer = Layers.WORLD;
 }

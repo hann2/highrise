@@ -2,7 +2,6 @@ import Entity from "../../../core/entity/Entity";
 import { seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Exit from "../../entities/Exit";
-import Party from "../../entities/Party";
 import Wall from "../../entities/Wall";
 import Zombie from "../../entities/Zombie";
 import Level from "./Level";
@@ -12,7 +11,7 @@ const LEVEL_SIZE = 10;
 export default class TestLevelGenerator {
   constructor() {}
 
-  generateLevel(party: Party, seed: number): Level {
+  generateLevel(seed: number): Level {
     const spawnLocations = [V(0, 1), V(1, 1), V(2, 1), V(1, 2)].map(
       this.levelCoordToWorldCoord
     );
@@ -26,9 +25,10 @@ export default class TestLevelGenerator {
 
     const entities = [...outerWalls, ...innerWalls, ...exits, ...enemies];
 
-    const level = new Level(1);
-    level.placeParty(spawnLocations, entities, party);
-    return level;
+    return {
+      entities,
+      spawnLocations,
+    };
   }
 
   levelCoordToWorldCoord(coord: V2d): V2d {
@@ -45,9 +45,34 @@ export default class TestLevelGenerator {
   }
 
   addExits(isDestroyed: boolean[][][]): Entity[] {
-    const stack = [V(0, 0)];
     const furthestPointSeen = V(0, 0);
     const furthestDistance = 0;
+
+    const traverse = (p: V2d, distance: number) => {
+      const [x, y] = p;
+      if (isDestroyed[x][y].seen) {
+        return;
+      }
+      isDestroyed[x][y].seen = true;
+      if (distance > furthestDistance) {
+        furthestDistance = distance;
+        furthestPointSeen = p;
+      }
+      if (x < LEVEL_SIZE - 1 && isDestroyed[x][y][0]) {
+        traverse(V(x + 1, y), distance + 1);
+      }
+      if (y < LEVEL_SIZE - 1 && isDestroyed[x][y][1]) {
+        traverse(V(x, y + 1), distance + 1);
+      }
+      if (x > 0 && isDestroyed[x - 1][y][0]) {
+        traverse(V(x - 1, y), distance + 1);
+      }
+      if (y > 0 && isDestroyed[x][y - 1][1]) {
+        traverse(V(x, y - 1), distance + 1);
+      }
+    };
+
+    traverse(furthestPointSeen, 0);
 
     const exitWorldCoords = this.levelCoordToWorldCoord(furthestPointSeen);
     return [
@@ -73,7 +98,7 @@ export default class TestLevelGenerator {
     return enemies;
   }
 
-  addInnerWalls(seed: number): Entity[] {
+  addInnerWalls(seed: number): [Entity[], boolean[][][]] {
     type UpTree = (number[] | null)[][];
     type WallI = { i: number; j: number; right: boolean };
 
