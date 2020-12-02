@@ -8,12 +8,11 @@ import Interactable, { isInteractable } from "./Interactable";
 import { testLineOfSight } from "../utils/visionUtils";
 import { KeyCode } from "../../core/io/Keys";
 
-const INTERACT_DISTANCE = 5;
-
 // Maps keyboard/mouse/gamepad input to human actions
 export default class PlayerHumanController
   extends BaseEntity
   implements Entity {
+  /** The human being controlled by the player */
   human: Human;
 
   constructor(human: Human) {
@@ -30,6 +29,9 @@ export default class PlayerHumanController
       case ControllerButton.RT:
         this.human.pullTrigger();
         break;
+      case ControllerButton.X:
+        this.human.interactWithNearest();
+        break;
     }
   }
 
@@ -37,29 +39,7 @@ export default class PlayerHumanController
     switch (key) {
       case "KeyE":
         // Interacting
-        const interactables = Array.from(this.game!.entities.all)
-          .filter(isInteractable)
-          .filter((i) => testLineOfSight((i as any) as BaseEntity, this.human))
-          .filter(
-            (i) =>
-              ((i as any) as BaseEntity)
-                .getPosition()
-                .sub(this.human.getPosition()).magnitude < INTERACT_DISTANCE
-          )
-          .sort(
-            (i1, i2) =>
-              ((i1 as any) as BaseEntity)
-                .getPosition()
-                .sub(this.human.getPosition()).magnitude -
-              ((i2 as any) as BaseEntity)
-                .getPosition()
-                .sub(this.human.getPosition()).magnitude
-          ) as Interactable[];
-        for (const interactable of interactables) {
-          if (interactable.interact(this.human)) {
-            break;
-          }
-        }
+        this.human.interactWithNearest();
         break;
     }
   }

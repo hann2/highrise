@@ -44,11 +44,11 @@ export async function main() {
   game.addEntity(new FPSMeter());
 
   const player = new Human(V(5, 5));
-  player.gun = choose(new Rifle(), new Shotgun(), new Pistol());
+  player.giveGun(choose(new Rifle(), new Shotgun(), new Pistol()));
   const george = new Human(V(6.5, 5));
-  george.gun = choose(new Rifle(), new Shotgun(), new Pistol());
+  george.giveGun(choose(new Rifle(), new Shotgun(), new Pistol()));
   const georgia = new Human(V(5, 6.5));
-  georgia.gun = choose(new Rifle(), new Shotgun(), new Pistol());
+  georgia.giveGun(choose(new Rifle(), new Shotgun(), new Pistol()));
 
   game.camera.center(player.getPosition());
 

@@ -8,6 +8,8 @@ import { rUniform } from "../../../core/util/Random";
 
 // Stats that make a gun unique
 export interface GunStats {
+  // Friendly name for the gun
+  name: string;
   // Maximum rounds per second
   fireRate: number;
   // meters/second of bullet when fired
@@ -30,6 +32,7 @@ export enum FireMode {
 }
 
 const defaultGunStats: GunStats = {
+  name: "Gun",
   fireRate: 1.0,
   muzzleLength: 0.7,
   muzzleVelocity: 80,

@@ -8,12 +8,14 @@ import Interactable from "./Interactable";
 
 const FOLLOW_DISTANCE = 2; // meters
 
-export default class AIHumanController
-  extends BaseEntity
-  implements Entity, Interactable {
+export default class AIHumanController extends BaseEntity implements Entity {
+  // The human this AI is controlling
   human: Human;
+  // The human this AI is following
   following?: Human;
   lastSeenPositionOfFollowing?: V2d;
+  // The interaction target to make this human follow the player
+  followInteractable?: Interactable;
 
   constructor(human: Human, following?: Human) {
     super();
@@ -21,24 +23,84 @@ export default class AIHumanController
     this.following = following;
   }
 
-  getPosition() {
-    return this.human.getPosition();
+  onAdd() {
+    if (this.following) {
+      this.startFollowing(this.following);
+    } else {
+      this.stopFollowing();
+    }
   }
 
-  interact(player: Human): boolean {
-    if (this.following) {
-      return false;
-    }
-
+  startFollowing(player: Human) {
     this.following = player;
-    const party = player.parent as BaseEntity;
-    party.addChild(this, true);
-    party.addChild(this.human, true);
+    this.followInteractable?.destroy();
 
-    return true;
+    this.game?.dispatch({
+      type: "startFollowing",
+      human: this.human,
+      aiController: this,
+    });
+
+    // TODO: This feels a little sketchy
+    // const party = player.parent as BaseEntity;
+    // party.addChild(this, true);
+    // party.addChild(this.human, true);
+  }
+
+  stopFollowing() {
+    this.following = undefined;
+    this.lastSeenPositionOfFollowing = undefined;
+    this.followInteractable = this.addChild(
+      new Interactable(this.human.getPosition(), (interacter) => {
+        this.startFollowing(interacter);
+      })
+    );
   }
 
   onTick() {
+    // If our human dies/gets removed, we shouldn't be here anymore
+    if (!this.human.game) {
+      this.destroy();
+      return;
+    }
+
+    const nearestVisibleZombie = this.getNearestVisibleZombie();
+    if (nearestVisibleZombie) {
+      const direction = nearestVisibleZombie
+        .getPosition()
+        .isub(this.human.getPosition()).angle;
+
+      this.human.setDirection(direction);
+      this.human.pullTrigger();
+    } else if (this.following) {
+      if (testLineOfSight(this.human, this.following)) {
+        this.lastSeenPositionOfFollowing = this.following.getPosition();
+        const direction = this.lastSeenPositionOfFollowing.sub(
+          this.human.getPosition()
+        );
+        const distance = direction.magnitude;
+        if (distance > FOLLOW_DISTANCE) {
+          this.human.walk(direction.inormalize());
+        }
+      } else if (this.lastSeenPositionOfFollowing) {
+        const direction = this.lastSeenPositionOfFollowing.sub(
+          this.human.getPosition()
+        );
+        this.human.walk(direction.inormalize());
+      }
+    }
+
+    if (this.followInteractable) {
+      this.followInteractable.position = this.human.getPosition();
+    }
+
+    if (this.human.hp <= 0) {
+      this.human.destroy();
+      this.destroy();
+    }
+  }
+
+  getNearestVisibleZombie(): Zombie | undefined {
     const zombies = this.game!.entities.getTagged("zombie") as Zombie[];
 
     let nearestVisibleZombie: Zombie | undefined;
@@ -54,35 +116,6 @@ export default class AIHumanController
       }
     }
 
-    if (nearestVisibleZombie) {
-      const direction = nearestVisibleZombie
-        .getPosition()
-        .sub(this.human.getPosition()).angle;
-
-      this.human.setDirection(direction);
-      this.human.pullTrigger();
-    } else if (this.following) {
-      if (testLineOfSight(this.human, this.following)) {
-        this.lastSeenPositionOfFollowing = this.following.getPosition();
-        const direction = this.lastSeenPositionOfFollowing.sub(
-          this.human.getPosition()
-        );
-        const distance = direction.magnitude;
-        if (distance > FOLLOW_DISTANCE) {
-          this.human.walk(direction.normalize());
-        }
-      } else if (this.lastSeenPositionOfFollowing) {
-        const direction = this.lastSeenPositionOfFollowing.sub(
-          this.human.getPosition()
-        );
-        this.human.walk(direction.normalize());
-      }
-    }
-
-    if (this.human.hp <= 0) {
-      this.human.destroy();
-      this.destroy();
-      // should gun drop???
-    }
+    return nearestVisibleZombie;
   }
 }

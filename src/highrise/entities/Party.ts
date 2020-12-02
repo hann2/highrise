@@ -4,6 +4,8 @@ import { V2d } from "../../core/Vector";
 import Human from "./Human";
 
 export default class Party extends BaseEntity implements Entity {
+  id = "party"; // So there's always at most one, and we can always find it easily
+
   constructor(entities: Entity[]) {
     super();
 

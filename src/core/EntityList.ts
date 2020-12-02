@@ -13,6 +13,7 @@ export default class EntityList implements Iterable<Entity> {
 
   all = new Set<Entity>();
 
+  // TODO: Replace these with getByFilter after improving getByFilter
   filtered = {
     afterPhysics: new FilterList<Entity>((e) => Boolean(e.afterPhysics)),
     beforeTick: new FilterList<Entity>((e) => Boolean(e.beforeTick)),
@@ -23,6 +24,9 @@ export default class EntityList implements Iterable<Entity> {
     hasBody: new FilterList<Entity>((e) => Boolean(e.body)),
   };
 
+  /**
+   * Adds an entity to this list and all sublists and does all the bookkeeping
+   */
   add(entity: Entity) {
     this.all.add(entity);
     for (const list of Object.values(this.filtered)) {
@@ -49,6 +53,9 @@ export default class EntityList implements Iterable<Entity> {
     }
   }
 
+  /**
+   * Removes an entity from this list and all the sublists and does some bookkeeping
+   */
   remove(entity: Entity) {
     this.all.delete(entity);
     for (const list of Object.values(this.filtered)) {
@@ -72,6 +79,9 @@ export default class EntityList implements Iterable<Entity> {
     }
   }
 
+  /**
+   * Get the entity with the given id.
+   */
   byId(id: string) {
     return this.idToEntity.get(id);
   }
@@ -99,13 +109,28 @@ export default class EntityList implements Iterable<Entity> {
         result.add(e);
       }
     }
-    return Array.from(result);
+    return [...result];
   }
 
+  /**
+   * Return all the entities that pass a type guard
+   * TODO: Add a way to create filter lists for this for performance optimization
+   * Then we could replace the hardCoded filters with something nicer
+   */
+  getByFilter<T extends Entity>(filter: (e: Entity) => e is T): T[] {
+    return [...this.all].filter(filter);
+  }
+
+  /**
+   * Get all entities that handle a specific event type
+   */
   getHandlers(eventType: string): ReadonlyArray<Entity> {
     return this.handlers.get(eventType);
   }
 
+  /**
+   * Iterate through all the entities.
+   */
   [Symbol.iterator]() {
     return this.all[Symbol.iterator]();
   }

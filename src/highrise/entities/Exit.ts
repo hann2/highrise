@@ -9,7 +9,7 @@ import Party from "./Party";
 import { goToNextLevel } from "../data/levels/switchLevel";
 import { V } from "../../core/Vector";
 
-export default class Exit extends BaseEntity implements Entity, Interactable {
+export default class Exit extends BaseEntity implements Entity {
   sprite: GameSprite;
 
   constructor(x1: number, y1: number, x2: number, y2: number) {
@@ -32,19 +32,22 @@ export default class Exit extends BaseEntity implements Entity, Interactable {
 
     this.sprite = graphics;
 
+    const position = V(Math.min(x1, x2) + w / 2, Math.min(y1, y2) + h / 2);
     this.body = new Body({
       mass: 0,
-      // material: new Material(2),
-      position: [Math.min(x1, x2) + w / 2, Math.min(y1, y2) + h / 2],
+      position,
+      collisionResponse: false,
     });
 
     const shape = new Box({ width: w, height: h });
+    shape.collisionGroup = CollisionGroups.Sensors;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0], 0);
-  }
 
-  interact(): boolean {
-    goToNextLevel(this.game!);
-    return true;
+    this.addChild(
+      new Interactable(position, () => {
+        goToNextLevel(this.game!);
+      })
+    );
   }
 }

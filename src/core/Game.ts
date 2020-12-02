@@ -198,7 +198,11 @@ export default class Game {
     }
 
     if (entity.children) {
-      this.addEntities(entity.children);
+      for (const child of entity.children) {
+        if (!child.game) {
+          this.addEntity(child);
+        }
+      }
     }
 
     if (entity.afterAdded) {

@@ -62,6 +62,7 @@ export default abstract class BaseEntity implements Entity {
   addChild<T extends Entity>(child: T, changeParent: boolean = false): T {
     if (child.parent) {
       if (changeParent) {
+        // TODO: This can lead to weird state where a child is added but its parent isn't
         const oldParent = child.parent;
         oldParent.children!.splice(oldParent.children!.indexOf(child), 1);
       } else {
@@ -71,8 +72,8 @@ export default abstract class BaseEntity implements Entity {
     child.parent = this;
     this.children = this.children ?? [];
     this.children.push(child);
-    // if we're already added, add the child too
-    if (this.game) {
+
+    if (this.game && !child.game) {
       this.game.addEntity(child);
     }
     return child;

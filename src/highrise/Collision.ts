@@ -4,5 +4,6 @@ export const CollisionGroups = {
   Humans: 0b10,
   Zombies: 0b100,
   Bullets: 0b1000,
+  Sensors: 0b10000,
   All: 0b11111111111111111111111111111111,
 };
