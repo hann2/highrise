@@ -10,7 +10,7 @@ export default class Rifle extends Gun {
       fireMode: FireMode.FULL_AUTO,
 
       sounds: {
-        shoot: ["rifleShot1", "rifleShot2", "rifleShot3", "rifleShot4"],
+        shoot: ["rifleShot1", "rifleShot2", "rifleShot3"],
         empty: ["dryFire1", "dryFire2"],
         pickup: ["magazineLoad1"],
         reload: ["reload1"],
