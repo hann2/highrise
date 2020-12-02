@@ -6,7 +6,6 @@ import {
   testLineOfSight,
 } from "../../utils/visionUtils";
 import Human from "../Human";
-import Interactable from "../Interactable";
 
 const FOLLOW_DISTANCE = 2; // meters
 
@@ -45,7 +44,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
         .isub(this.human.getPosition()).angle;
 
       this.human.setDirection(direction);
-      this.human.pullTrigger();
+      this.human.useWeapon();
     } else if (this.leader) {
       if (testLineOfSight(this.human, this.leader)) {
         this.lastSeenPositionOfLeader = this.leader.getPosition();
