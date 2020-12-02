@@ -49,6 +49,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
 
     this.sprite = new Sprite();
     const manSprite = Sprite.from(character.imageStand);
+    manSprite.name = "man";
     manSprite.anchor.set(0.5, 0.5);
     manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
     this.sprite.addChild(manSprite);
@@ -67,7 +68,11 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.sprite.angle = radToDeg(this.body.angle);
 
     const healthPercent = clamp(this.hp / 100);
-    this.sprite.tint = colorLerp(0xff0000, 0xffffff, healthPercent);
+    this.sprite.getChildByName("man")!.tint! = colorLerp(
+      0xff0000,
+      0xffffff,
+      healthPercent
+    );
 
     const weaponSprite = this.sprite.getChildByName("weapon");
     if (weaponSprite) {
@@ -116,6 +121,9 @@ export default class Human extends BaseEntity implements Entity, Hittable {
       weapon instanceof Gun
         ? Sprite.from(this.character.imageGun)
         : Sprite.from(this.character.imageStand);
+    manSprite.name = "man";
+    manSprite.anchor.set(0.5, 0.5);
+    manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
 
     if (weapon instanceof MeleeWeapon && weapon.stats.texture) {
       const weaponSprite = Sprite.from(weapon.stats.texture);
@@ -126,8 +134,6 @@ export default class Human extends BaseEntity implements Entity, Hittable {
       weaponSprite.name = "weapon";
       this.sprite.addChild(weaponSprite);
     }
-    manSprite.anchor.set(0.5, 0.5);
-    manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
     this.sprite.addChild(manSprite);
     this.sprite.anchor.set(0.5, 0.5);
 

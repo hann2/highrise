@@ -5,7 +5,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
-import { clamp, radToDeg } from "../../core/util/MathUtil";
+import { clamp, polarToVec, radToDeg } from "../../core/util/MathUtil";
 import { choose, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
@@ -82,7 +82,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
       nearestDistance < ZOMBIE_ATTACK_RANGE &&
       this.attackCooldown <= 0
     ) {
-      this.wait(ZOMBIE_ATTACK_WINDUP).then(() => {
+      this.wait(ZOMBIE_ATTACK_WINDUP, undefined, "zombieDamage").then(() => {
         const [
           nearestVisibleHuman,
           nearestDistance,
@@ -161,7 +161,21 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     }
   }
 
+  interruptAttack() {
+    if (this.attackProgress != null) {
+      this.attackProgress = null;
+      this.clearTimers("zombieDamage");
+    }
+  }
+
+  knockback(direction: number) {
+    this.body.applyImpulse(polarToVec(direction, 100));
+  }
+
   onMeleeHit(meleeWeapon: MeleeWeapon, position: V2d) {
+    this.interruptAttack();
+    this.knockback(this.getPosition().sub(position).angle);
+
     this.hp -= meleeWeapon.stats.damage;
 
     this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
