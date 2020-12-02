@@ -86,13 +86,15 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.gun?.pullTrigger(this);
   }
 
-  giveGun(gun: Gun) {
+  async giveGun(gun: Gun) {
     if (this.gun) {
       this.dropGun();
     }
     this.gun = gun;
     this.addChild(gun, true);
 
+    gun.playSound("pickup", this.getPosition());
+    await this.wait(0.5);
     this.speak("pickupItem");
   }
 
