@@ -18,8 +18,8 @@ export default class TestLevelGenerator {
     );
 
     const outerWalls = this.addOuterWalls();
-    const innerWalls = this.addInnerWalls(seed);
-    const exits = this.addExits();
+    const [innerWalls, isDestroyed] = this.addInnerWalls(seed);
+    const exits = this.addExits(isDestroyed);
     const enemies = this.addEnemies();
     // addPickups();
     // addSurvivors();
@@ -44,8 +44,20 @@ export default class TestLevelGenerator {
     ];
   }
 
-  addExits(): Entity[] {
-    return [new Exit(1, 1, 3, 3)];
+  addExits(isDestroyed: boolean[][][]): Entity[] {
+    const stack = [V(0, 0)];
+    const furthestPointSeen = V(0, 0);
+    const furthestDistance = 0;
+
+    const exitWorldCoords = this.levelCoordToWorldCoord(furthestPointSeen);
+    return [
+      new Exit(
+        exitWorldCoords[0] - 1.5,
+        exitWorldCoords[1] - 1.5,
+        exitWorldCoords[0] + 1.5,
+        exitWorldCoords[1] + 1.5
+      ),
+    ];
   }
 
   addEnemies(): Entity[] {
@@ -167,6 +179,6 @@ export default class TestLevelGenerator {
       }
     }
 
-    return wallEntities;
+    return [wallEntities, isDestroyed];
   }
 }

@@ -1,10 +1,10 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import Human from "./Human";
-import Zombie from "./Zombie";
 import { V2d } from "../../core/Vector";
 import { testLineOfSight } from "../utils/visionUtils";
+import Human from "./Human";
 import Interactable from "./Interactable";
+import Zombie from "./Zombie";
 
 const FOLLOW_DISTANCE = 2; // meters
 
