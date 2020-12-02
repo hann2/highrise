@@ -68,12 +68,13 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.sprite.angle = radToDeg(this.body.angle);
 
     const healthPercent = clamp(this.hp / 100);
-    this.sprite.getChildByName("man")!.tint! = colorLerp(
+    (this.sprite.getChildByName("man") as Sprite).tint = colorLerp(
       0xff0000,
       0xffffff,
       healthPercent
     );
 
+    // Sorry Simon
     const weaponSprite = this.sprite.getChildByName("weapon");
     if (weaponSprite) {
       weaponSprite.visible =
