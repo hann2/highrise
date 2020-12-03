@@ -3,9 +3,7 @@ import { Sprite } from "pixi.js";
 import axe from "../../../../resources/images/axe.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { polarToVec, radToDeg } from "../../../core/util/MathUtil";
-import { choose } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { isHittable } from "../Hittable";
 import Human from "../Human";
@@ -16,6 +14,7 @@ export default class SwingingWeapon extends BaseEntity {
   weapon: MeleeWeapon;
   holder: Human;
   sprite: Sprite;
+  body: Body;
 
   constructor(weapon: MeleeWeapon, holder: Human) {
     super();
@@ -46,10 +45,10 @@ export default class SwingingWeapon extends BaseEntity {
   }
 
   onTick(dt: number) {
-    const [position, angle] = this.getWeaponPositionAndAngle();
-    const shape = this.body!.shapes[0]!;
-    shape.position = position;
-    shape.angle = angle;
+    const [[x, y], angle] = this.getWeaponPositionAndAngle();
+    this.body.position[0] = x;
+    this.body.position[1] = y;
+    this.body.angle = angle;
 
     if (this.attackProgress >= this.weapon.stats.attackDuration) {
       this.destroy();

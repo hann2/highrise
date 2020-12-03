@@ -1,7 +1,7 @@
 import { rUniform, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import Bullet from "../Bullet";
-import Gun from "./Gun";
+import Gun, { ReloadingStyle } from "./Gun";
 
 const NUM_BULLETS = 9;
 const CONE_ANGLE = Math.PI / 24;
@@ -13,6 +13,7 @@ export default class Shotgun extends Gun {
       fireRate: 4,
       bulletDamage: 30,
       muzzleVelocity: 55,
+      reloadingStyle: ReloadingStyle.INDIVIDUAL,
 
       sounds: {
         shoot: ["shotgunShot3"],

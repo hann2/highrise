@@ -27,8 +27,11 @@ export default class PlayerHumanController
       case ControllerButton.RT:
         this.human.useWeapon();
         break;
-      case ControllerButton.X:
+      case ControllerButton.Y:
         this.human.interactWithNearest();
+        break;
+      case ControllerButton.X:
+        this.human.reload();
         break;
     }
   }
@@ -38,6 +41,10 @@ export default class PlayerHumanController
       case "KeyE":
         // Interacting
         this.human.interactWithNearest();
+        break;
+      case "KeyR":
+        // Interacting
+        this.human.reload();
         break;
     }
   }

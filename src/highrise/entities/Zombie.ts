@@ -16,8 +16,8 @@ import Human, { HUMAN_RADIUS } from "./Human";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
 
 const RADIUS = 0.3; // meters
-const SPEED = 1.2;
-const FRICTION = 0.2;
+const SPEED = 0.4;
+const FRICTION = 0.1;
 const ZOMBIE_ATTACK_RANGE = RADIUS + HUMAN_RADIUS + 0.1;
 const ZOMBIE_ATTACK_DAMAGE = 20;
 const ZOMBIE_ATTACK_COOLDOWN = 1.2;
@@ -35,6 +35,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   attackCooldown = 0;
   attackProgress: number | null = null;
   speed: number = rNormal(SPEED, SPEED / 5);
+  stunnedTimer = 0;
 
   constructor(position: V2d) {
     super();
@@ -51,49 +52,53 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   }
 
   onTick(dt: number) {
-    if (this.attackCooldown > 0) {
-      this.attackCooldown -= dt;
-    }
-    if (this.attackProgress !== null) {
-      if (this.attackProgress >= ZOMBIE_ATTACK_ANIMATION_LENGTH) {
-        this.attackProgress = null;
-      } else {
-        this.attackProgress += dt;
+    if (this.stunnedTimer > 0) {
+      this.stunnedTimer -= dt;
+    } else {
+      if (this.attackCooldown > 0) {
+        this.attackCooldown -= dt;
       }
-    }
-
-    const [
-      nearestVisibleHuman,
-      nearestDistance,
-    ] = this.getNearestVisibleHuman();
-
-    if (nearestVisibleHuman || this.positionOfLastTarget) {
-      const targetPosition = nearestVisibleHuman
-        ? nearestVisibleHuman.getPosition()
-        : this.positionOfLastTarget;
-      this.positionOfLastTarget = targetPosition;
-      const direction = targetPosition!.sub(this.getPosition()).inormalize();
-      this.walk(direction);
-      this.face(direction.angle);
-    }
-
-    if (
-      nearestVisibleHuman &&
-      nearestDistance < ZOMBIE_ATTACK_RANGE &&
-      this.attackCooldown <= 0
-    ) {
-      this.wait(ZOMBIE_ATTACK_WINDUP, undefined, "zombieDamage").then(() => {
-        const [
-          nearestVisibleHuman,
-          nearestDistance,
-        ] = this.getNearestVisibleHuman();
-        if (nearestVisibleHuman && nearestDistance < ZOMBIE_ATTACK_RANGE) {
-          nearestVisibleHuman.inflictDamage(ZOMBIE_ATTACK_DAMAGE);
+      if (this.attackProgress !== null) {
+        if (this.attackProgress >= ZOMBIE_ATTACK_ANIMATION_LENGTH) {
+          this.attackProgress = null;
+        } else {
+          this.attackProgress += dt;
         }
-      });
+      }
 
-      this.attackProgress = 0;
-      this.attackCooldown = ZOMBIE_ATTACK_COOLDOWN;
+      const [
+        nearestVisibleHuman,
+        nearestDistance,
+      ] = this.getNearestVisibleHuman();
+
+      if (nearestVisibleHuman || this.positionOfLastTarget) {
+        const targetPosition = nearestVisibleHuman
+          ? nearestVisibleHuman.getPosition()
+          : this.positionOfLastTarget;
+        this.positionOfLastTarget = targetPosition;
+        const direction = targetPosition!.sub(this.getPosition()).inormalize();
+        this.walk(direction);
+        this.face(direction.angle);
+      }
+
+      if (
+        nearestVisibleHuman &&
+        nearestDistance < ZOMBIE_ATTACK_RANGE &&
+        this.attackCooldown <= 0
+      ) {
+        this.wait(ZOMBIE_ATTACK_WINDUP, undefined, "zombieDamage").then(() => {
+          const [
+            nearestVisibleHuman,
+            nearestDistance,
+          ] = this.getNearestVisibleHuman();
+          if (nearestVisibleHuman && nearestDistance < ZOMBIE_ATTACK_RANGE) {
+            nearestVisibleHuman.inflictDamage(ZOMBIE_ATTACK_DAMAGE);
+          }
+        });
+
+        this.attackProgress = 0;
+        this.attackCooldown = ZOMBIE_ATTACK_COOLDOWN;
+      }
     }
 
     const friction = V(this.body.velocity).mul(-FRICTION);
@@ -149,6 +154,8 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
     this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
 
+    this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.3, 0.05));
+
     this.game?.addEntity(
       new PositionalSound(
         choose("zombieHit1", "zombieHit2"),
@@ -169,7 +176,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   }
 
   knockback(direction: number) {
-    this.body.applyImpulse(polarToVec(direction, 100));
+    this.body.applyImpulse(polarToVec(direction, 50));
   }
 
   onMeleeHit(meleeWeapon: MeleeWeapon, position: V2d) {
@@ -177,6 +184,8 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.knockback(this.getPosition().sub(position).angle);
 
     this.hp -= meleeWeapon.stats.damage;
+
+    this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.6, 0.1));
 
     this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
 

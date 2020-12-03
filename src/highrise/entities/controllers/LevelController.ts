@@ -7,6 +7,7 @@ import Axe from "../meleeWeapons/Axe";
 import AllyHumanController from "./AllyController";
 import PlayerHumanController from "./PlayerHumanController";
 import SurvivorHumanController from "./SurvivorHumanController";
+import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 
 interface PartyEvent {
   human: Human;
@@ -158,6 +159,8 @@ export default class LevelController extends BaseEntity implements Entity {
       }
     } else if (entity instanceof Gun) {
       return false; // If we delete the parent it will delete the gun
+    } else if (entity instanceof MeleeWeapon) {
+      return false; // If we delete the parent it will delete the weapon
     } else if (entity instanceof AllyHumanController) {
       return false;
     } else if (entity instanceof PlayerHumanController) {
