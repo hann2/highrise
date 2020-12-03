@@ -10,9 +10,7 @@ import { V, V2d } from "../../core/Vector";
 import { Character, CharacterSoundClass } from "../characters/Character";
 import { randomCharacter } from "../characters/characters";
 import { CollisionGroups } from "../Collision";
-import Light from "../lighting/Light";
 import { PointLight } from "../lighting/PointLight";
-import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
 import Gun from "./guns/Gun";
 import Hittable from "./Hittable";
@@ -180,17 +178,20 @@ export default class Human extends BaseEntity implements Entity, Hittable {
 
   // Return a list of all interactables within range
   getNearbyInteractables(): Interactable[] {
-    return this.game!.entities.getByFilter(isInteractable)
-      .filter((i) => testLineOfSight(i, this))
-      .filter(
-        (i) =>
-          i.getPosition().sub(this.getPosition()).magnitude < INTERACT_DISTANCE
-      )
-      .sort(
-        (i1, i2) =>
-          i1.getPosition().sub(this.getPosition()).magnitude -
-          i2.getPosition().sub(this.getPosition()).magnitude
-      );
+    return (
+      this.game!.entities.getByFilter(isInteractable)
+        // .filter((i) => testLineOfSight(i, this))
+        .filter(
+          (i) =>
+            i.getPosition().sub(this.getPosition()).magnitude <
+            INTERACT_DISTANCE
+        )
+        .sort(
+          (i1, i2) =>
+            i1.getPosition().sub(this.getPosition()).magnitude -
+            i2.getPosition().sub(this.getPosition()).magnitude
+        )
+    );
   }
 
   // Interacts with the nearest interactable within range if there is one

@@ -1,6 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
 import Rifle from "../../entities/guns/Rifle";
 import Shotgun from "../../entities/guns/Shotgun";
@@ -80,6 +81,7 @@ class LevelBuilder {
       ...roomEntities,
       ...innerWalls,
       ...exits,
+      ...closetEntities,
       ...enemies,
       ...pickups,
       new Floor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
@@ -122,7 +124,15 @@ class LevelBuilder {
     this.destroyWall([V(2, 0), true]);
     this.cells[3][0].content = "empty";
 
-    return [];
+    const [x, y] = this.levelCoordToWorldCoord(V(2, 0));
+
+    return [
+      new Door(
+        V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
+        OPEN_WIDTH,
+        0
+      ),
+    ];
   }
 
   addOuterWalls(): Entity[] {
@@ -181,7 +191,6 @@ class LevelBuilder {
         this.closets.push(closet);
       }
     }
-    console.log(this.closets);
 
     return [];
   }
@@ -254,7 +263,10 @@ class LevelBuilder {
     }
     const shuffledLocations = seededShuffle(locations, seed);
     const consumeLocation = () => {
-      const location = shuffledLocations.pop()!;
+      const location = shuffledLocations.pop();
+      if (!location) {
+        throw new Error("Not enough closets in map for all pickups!");
+      }
       this.cells[location[0]][location[1]].content = "pickup";
       return this.levelCoordToWorldCoord(location);
     };
