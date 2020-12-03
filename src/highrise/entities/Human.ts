@@ -78,9 +78,9 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     const weaponSprite = this.sprite.getChildByName("weapon");
     if (weaponSprite) {
       weaponSprite.visible =
+        this.weapon instanceof Gun ||
         !this.weapon?.currentCooldown ||
-        this.weapon?.currentCooldown <= 0 ||
-        this.weapon instanceof Gun;
+        this.weapon?.currentCooldown <= 0;
     }
   }
 
@@ -104,9 +104,15 @@ export default class Human extends BaseEntity implements Entity, Hittable {
 
   useWeapon() {
     if (this.weapon instanceof Gun) {
-      this.weapon?.pullTrigger(this);
-    } else {
-      this.weapon?.attack(this);
+      this.weapon.pullTrigger(this);
+    } else if (this.weapon instanceof MeleeWeapon) {
+      this.weapon.attack(this);
+    }
+  }
+
+  reload() {
+    if (this.weapon instanceof Gun) {
+      this.weapon.startReload(this);
     }
   }
 

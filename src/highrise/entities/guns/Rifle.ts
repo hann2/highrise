@@ -1,4 +1,4 @@
-import Gun, { FireMode } from "./Gun";
+import Gun, { FireMode, ReloadingStyle } from "./Gun";
 
 export default class Rifle extends Gun {
   constructor() {
@@ -8,6 +8,7 @@ export default class Rifle extends Gun {
       bulletDamage: 40,
       muzzleVelocity: 120,
       fireMode: FireMode.FULL_AUTO,
+      reloadingStyle: ReloadingStyle.MAGAZINE,
 
       sounds: {
         shoot: ["rifleShot1", "rifleShot2", "rifleShot3"],

@@ -5,7 +5,7 @@ export default class Axe extends MeleeWeapon {
   constructor() {
     super({
       name: "Axe",
-      damage: 40,
+      damage: 50,
       attackCooldown: 0.4,
       swingArc: Math.PI / 2,
       attackDuration: 0.2,
