@@ -1,17 +1,16 @@
-import { Body, Box } from "p2";
+import { Body, Box, RevoluteConstraint } from "p2";
 import { Graphics, Point, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { clamp, normalizeAngle } from "../../core/util/MathUtil";
+import { clamp } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { Layers } from "../layers";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
-import Human from "./Human";
-import Interactable from "./Interactable";
 import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
 
 const DOOR_THICKNESS = 0.25;
@@ -20,13 +19,15 @@ const MIN_ANGLE = -Math.PI / 2;
 const MAX_ANGLE = Math.PI / 2;
 
 export default class Door extends BaseEntity implements Entity, Hittable {
-  sprite: Sprite;
   hingePoint: V2d;
   length: number;
   restingAngle: number;
+
+  sprite: Sprite;
+  body: Body;
+
   currentOffset: number;
   angularVelocity: number = 0;
-  body: Body;
   closing = false;
 
   constructor(hingePoint: V2d, length: number, restingAngle: number) {
@@ -52,8 +53,6 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     graphics.drawPolygon(corners);
     graphics.endFill();
 
-    this.addChild(new Interactable(hingePoint, this.onInteract.bind(this)));
-
     this.sprite = new Sprite();
     this.sprite.position.set(...hingePoint);
     this.sprite.addChild(graphics);
@@ -61,18 +60,30 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     (this.sprite as GameSprite).layerName = Layers.WORLD_FRONT;
 
     this.body = new Body({
-      mass: 0,
+      mass: 20,
       position: hingePoint,
     });
 
     const shape = new Box({ width: w, height: h });
-    shape.collisionMask = CollisionGroups.All;
+    shape.collisionGroup = CollisionGroups.World;
+    shape.collisionMask = CollisionGroups.All ^ CollisionGroups.World;
     this.body.addShape(shape, [length / 2, 0], 0);
+    this.body.angle = restingAngle;
+    this.body.angularDamping = 0.9;
+  }
+
+  onAdd(game: Game) {
+    const constraint = new RevoluteConstraint(game.ground, this.body, {
+      worldPivot: this.hingePoint,
+    });
+    constraint.setLimits(
+      this.restingAngle + MIN_ANGLE,
+      this.restingAngle + MAX_ANGLE
+    );
+    this.constraints = [constraint];
   }
 
   onTick(dt: number) {
-    this.body.angle = this.currentOffset + this.restingAngle;
-
     if (this.angularVelocity) {
       this.currentOffset = this.currentOffset + dt * this.angularVelocity;
       if (this.currentOffset >= MAX_ANGLE || this.currentOffset <= MIN_ANGLE) {
@@ -90,22 +101,8 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.currentOffset = clamp(this.currentOffset, MIN_ANGLE, MAX_ANGLE);
   }
 
-  onInteract(human: Human) {
-    if (this.currentOffset === MIN_ANGLE) {
-      this.angularVelocity = DOOR_SPEED;
-      this.closing = true;
-    } else if (this.currentOffset === MAX_ANGLE) {
-      this.angularVelocity = -DOOR_SPEED;
-      this.closing = true;
-    } else if (this.currentOffset === 0) {
-      const humanAngle = human.getPosition().sub(this.hingePoint).angle;
-      const humanOffset = normalizeAngle(this.restingAngle - humanAngle);
-      this.angularVelocity = Math.sign(humanOffset) * DOOR_SPEED;
-    }
-  }
-
   onRender() {
-    this.sprite.rotation = this.currentOffset + this.restingAngle;
+    this.sprite.rotation = this.body.angle;
   }
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}

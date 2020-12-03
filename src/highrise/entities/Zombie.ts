@@ -13,7 +13,6 @@ import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
 import Human, { HUMAN_RADIUS } from "./Human";
-import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
 import SwingingWeapon, { SwingPhase } from "./meleeWeapons/SwingingWeapon";
 
 const RADIUS = 0.3; // meters
@@ -44,6 +43,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.body = new Body({ mass: 1, position: position.clone() });
 
     const shape = new Circle({ radius: RADIUS });
+    shape.collisionGroup = CollisionGroups.Zombies;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 

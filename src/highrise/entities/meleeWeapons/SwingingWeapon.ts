@@ -10,6 +10,7 @@ import {
   smootherStep,
 } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
+import { CollisionGroups } from "../../Collision";
 import { isHittable } from "../Hittable";
 import Human from "../Human";
 import MeleeWeapon from "./MeleeWeapon";
@@ -40,6 +41,8 @@ export default class SwingingWeapon extends BaseEntity {
     });
     this.body.addShape(shape);
     this.body.collisionResponse = false;
+    shape.collisionGroup = CollisionGroups.Bullets;
+    shape.collisionMask = CollisionGroups.Zombies;
   }
 
   onRender() {
