@@ -329,32 +329,21 @@ class LevelBuilder {
       for (let j = 0; j < LEVEL_SIZE; j++) {
         const [x, y] = this.levelCoordToWorldCoord(V(i, j));
         if (this.cells[i][j].rightWall.exists) {
-          const startEarly =
-            j > 0 &&
-            i < LEVEL_SIZE - 1 &&
-            this.cells[i + 1][j - 1].bottomWall.exists;
-          const longWall =
-            (j < LEVEL_SIZE - 1 && this.cells[i][j + 1].rightWall.exists) ||
-            (i < LEVEL_SIZE - 1 && this.cells[i + 1][j].bottomWall.exists) ||
-            this.cells[i][j].bottomWall.exists;
           wallEntities.push(
             new Wall(
               x + OPEN_WIDTH / 2,
-              y - (startEarly ? WALL_WIDTH + OPEN_WIDTH / 2 : OPEN_WIDTH / 2),
+              y - (WALL_WIDTH + OPEN_WIDTH / 2),
               x + WALL_WIDTH + OPEN_WIDTH / 2,
-              y + (longWall ? WALL_WIDTH + OPEN_WIDTH / 2 : OPEN_WIDTH / 2)
+              y + WALL_WIDTH + OPEN_WIDTH / 2
             )
           );
         }
         if (this.cells[i][j].bottomWall.exists) {
-          const longWall =
-            (j < LEVEL_SIZE - 1 && this.cells[i][j + 1].rightWall.exists) ||
-            (i < LEVEL_SIZE - 1 && this.cells[i + 1][j].bottomWall.exists);
           wallEntities.push(
             new Wall(
-              x - OPEN_WIDTH / 2,
+              x - (WALL_WIDTH + OPEN_WIDTH / 2),
               y + OPEN_WIDTH / 2,
-              x + (longWall ? WALL_WIDTH + OPEN_WIDTH / 2 : OPEN_WIDTH / 2),
+              x + WALL_WIDTH + OPEN_WIDTH / 2,
               y + WALL_WIDTH + OPEN_WIDTH / 2
             )
           );
