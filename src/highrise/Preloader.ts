@@ -1,6 +1,7 @@
 import * as Pixi from "pixi.js";
 import dsDigitalUrl from "../../resources/fonts/ds-digi.ttf";
 import axe from "../../resources/images/axe.png";
+import healthPack from "../../resources/images/health_pack.png";
 import manBlueGun from "../../resources/images/Man Blue/manBlue_gun.png";
 import manBlueStand from "../../resources/images/Man Blue/manBlue_stand.png";
 import manBrownGun from "../../resources/images/Man Brown/manBrown_gun.png";
@@ -78,6 +79,7 @@ export default class Preloader extends BaseEntity implements Entity {
 
   async loadImages() {
     const imageUrls = [
+      healthPack,
       axe,
       manBlueStand,
       manBrownStand,
