@@ -3,8 +3,6 @@ import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
 import { generateLevel } from "../../data/levels/levelGeneration";
 import Gun from "../guns/Gun";
-import Pistol from "../guns/Pistol";
-import Rifle from "../guns/Rifle";
 import Shotgun from "../guns/Shotgun";
 import Human from "../Human";
 import Axe from "../meleeWeapons/Axe";
@@ -41,10 +39,10 @@ export default class LevelController extends BaseEntity implements Entity {
       player.giveWeapon(
         choose<Gun | MeleeWeapon>(
           new Axe(),
-          new Katana()
+          new Katana(),
           // new Pistol(),
           // new Rifle(),
-          // new Shotgun()
+          new Shotgun()
         )
       );
       this.game!.dispatch({ type: "addToParty", human: player });
