@@ -118,6 +118,24 @@ class LevelBuilder {
     }
   }
 
+  wallIdToDoorEntity(id: WallID): Entity {
+    const [[i, j], right] = id;
+    const [x, y] = this.levelCoordToWorldCoord(V(i, j));
+    if (right) {
+      return new Door(
+        V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
+        OPEN_WIDTH,
+        Math.PI / 2
+      );
+    } else {
+      return new Door(
+        V(x - OPEN_WIDTH / 2, y + OPEN_WIDTH / 2 + WALL_WIDTH / 2),
+        OPEN_WIDTH,
+        0
+      );
+    }
+  }
+
   addRooms(): Entity[] {
     // Spawn room
     this.addIndestructibleBox(V(0, 0), V(3, 3));
@@ -126,13 +144,7 @@ class LevelBuilder {
 
     const [x, y] = this.levelCoordToWorldCoord(V(2, 0));
 
-    return [
-      new Door(
-        V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
-        OPEN_WIDTH,
-        Math.PI / 2
-      ),
-    ];
+    return [this.wallIdToDoorEntity([V(2, 0), true])];
   }
 
   addOuterWalls(): Entity[] {
@@ -155,6 +167,7 @@ class LevelBuilder {
   }
 
   addClosets(): Entity[] {
+    const entities: Entity[] = [];
     for (let i = 0; i < LEVEL_SIZE; i++) {
       for (let j = 0; j < LEVEL_SIZE; j++) {
         if (this.cells[i][j].content) {
@@ -162,25 +175,43 @@ class LevelBuilder {
         }
 
         let [x, y] = [i, j];
-        let right = x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists;
-        let down = y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists;
-        let left = x > 0 && !this.cells[x - 1][y].rightWall.exists;
-        let up = y > 0 && !this.cells[x][y - 1].bottomWall.exists;
-        if (+right + +down + +left + +up !== 1) {
+        const backRight =
+          x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists;
+        const backDown =
+          y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists;
+        const backLeft = x > 0 && !this.cells[x - 1][y].rightWall.exists;
+        const backUp = y > 0 && !this.cells[x][y - 1].bottomWall.exists;
+        if (+backRight + +backDown + +backLeft + +backUp !== 1) {
           continue;
         }
-        x += +right + -left;
-        y += +down + -up;
+        x += +backRight + -backLeft;
+        y += +backDown + -backUp;
         if (this.cells[x][y].content) {
           continue;
         }
-        right = x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists;
-        down = y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists;
-        left = x > 0 && !this.cells[x - 1][y].rightWall.exists;
-        up = y > 0 && !this.cells[x][y - 1].bottomWall.exists;
-        if (+right + +down + +left + +up !== 2) {
+        const frontRight =
+          x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists;
+        const frontDown =
+          y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists;
+        const frontLeft = x > 0 && !this.cells[x - 1][y].rightWall.exists;
+        const frontUp = y > 0 && !this.cells[x][y - 1].bottomWall.exists;
+        if (+frontRight + +frontDown + +frontLeft + +frontUp !== 2) {
           continue;
         }
+
+        let doorWall: WallID;
+        if (frontRight && !backLeft) {
+          doorWall = [V(x, y), true];
+        } else if (frontDown && !backUp) {
+          doorWall = [V(x, y), false];
+        } else if (frontLeft && !backRight) {
+          doorWall = [V(x - 1, y), true];
+        } else if (frontUp && !backDown) {
+          doorWall = [V(x, y - 1), false];
+        } else {
+          throw new Error("This should never happen");
+        }
+        entities.push(this.wallIdToDoorEntity(doorWall));
 
         this.cells[x][y].content = "empty";
         const closet = {
@@ -192,7 +223,7 @@ class LevelBuilder {
       }
     }
 
-    return [];
+    return entities;
   }
 
   addExits(): Entity[] {

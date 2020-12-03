@@ -15,7 +15,7 @@ import Interactable from "./Interactable";
 import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
 
 const DOOR_THICKNESS = 0.25;
-const DOOR_SPEED = Math.PI; // Radians per second
+const DOOR_SPEED = 3 * Math.PI; // Radians per second
 const MIN_ANGLE = -Math.PI / 2;
 const MAX_ANGLE = Math.PI / 2;
 
