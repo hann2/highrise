@@ -8,6 +8,7 @@ import manBrownGun from "../../resources/images/Man Brown/manBrown_gun.png";
 import manBrownStand from "../../resources/images/Man Brown/manBrown_stand.png";
 import manOldGun from "../../resources/images/Man Old/manOld_gun.png";
 import manOldStand from "../../resources/images/Man Old/manOld_stand.png";
+import katana from "../../resources/images/weapons/katana.png";
 import zoimbie1Hold from "../../resources/images/Zombie 1/zoimbie1_hold.png";
 import zoimbie1Stand from "../../resources/images/Zombie 1/zoimbie1_stand.png";
 import BaseEntity from "../core/entity/BaseEntity";
@@ -81,6 +82,7 @@ export default class Preloader extends BaseEntity implements Entity {
     const imageUrls = [
       healthPack,
       axe,
+      katana,
       manBlueStand,
       manBrownStand,
       manOldStand,

@@ -10,6 +10,7 @@ import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import { Level } from "./Level";
+import Katana from "../../entities/meleeWeapons/Katana";
 
 const LEVEL_SIZE = 5;
 
@@ -139,7 +140,11 @@ export default class TestLevelGenerator {
         this.levelCoordToWorldCoord(shuffledLocations[2]),
         new Axe()
       ),
-      new HealthPickup(this.levelCoordToWorldCoord(shuffledLocations[3])),
+      new WeaponPickup(
+        this.levelCoordToWorldCoord(shuffledLocations[3]),
+        new Katana()
+      ),
+      new HealthPickup(this.levelCoordToWorldCoord(shuffledLocations[4])),
     ];
   }
 

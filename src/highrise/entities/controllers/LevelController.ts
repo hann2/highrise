@@ -12,6 +12,7 @@ import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 import AllyHumanController from "./AllyController";
 import PlayerHumanController from "./PlayerHumanController";
 import SurvivorHumanController from "./SurvivorHumanController";
+import Katana from "../meleeWeapons/Katana";
 
 interface PartyEvent {
   human: Human;
@@ -41,6 +42,7 @@ export default class LevelController extends BaseEntity implements Entity {
       player.giveWeapon(
         choose<Gun | MeleeWeapon>(
           new Axe(),
+          new Katana(),
           new Pistol(),
           new Rifle(),
           new Shotgun()

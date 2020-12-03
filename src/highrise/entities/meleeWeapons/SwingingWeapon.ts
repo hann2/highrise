@@ -22,7 +22,7 @@ export default class SwingingWeapon extends BaseEntity {
     this.weapon = weapon;
     this.holder = holder;
 
-    this.sprite = Sprite.from(axe);
+    this.sprite = Sprite.from(weapon.stats.attackTexture);
     this.sprite.scale.set(weapon.stats.weaponLength / this.sprite.height);
     this.sprite.anchor.set(0.5, 0.5);
 
