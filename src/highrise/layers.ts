@@ -8,6 +8,8 @@ export enum Layers {
   // Stuff on the floor
   WORLD_BACK = "world_back",
   // Stuff at the human's level
+  WEAPONS = "world_weapons",
+  // Stuff at the human's level
   WORLD = "world",
   // Stuff above the humans
   WORLD_FRONT = "world_front",
@@ -21,6 +23,7 @@ export enum Layers {
 export function initLayers(game: Game) {
   game.renderer.createLayer(Layers.FLOOR, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_BACK, new LayerInfo());
+  game.renderer.createLayer(Layers.WEAPONS, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_FRONT, new LayerInfo());
   game.renderer.createLayer(Layers.LIGHTING, new LayerInfo({ paralax: 0 }));

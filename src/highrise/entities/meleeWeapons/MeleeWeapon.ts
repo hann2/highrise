@@ -3,42 +3,47 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
-import { degToRad } from "../../../core/util/MathUtil";
 import { choose } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import Human from "../Human";
+import {
+  SwingAngles,
+  SwingDescriptor,
+  SwingDurations,
+} from "./SwingDescriptor";
 import SwingingWeapon from "./SwingingWeapon";
 
 // Stats that make a melee weapon unique
 export interface MeleeStats {
+  // Friendly name of this weapon
   name: string;
+
+  // HP of damage done on hit during swing
   damage: number;
-  // Time between attacks in seconds.  Should be >= attackLength
-  attackCooldown: number;
-  // Angle of the start of the swing
-  swingArcStart: number;
-  // Angle of the end of the swing
-  swingArcEnd: number;
-  // Length of attack in seconds
-  attackDuration: number;
-  // Percent of duration winding up
-  windupTime: number;
-  // Percent of duration winding down
-  winddownTime: number;
-  // How far from user will enemies take damage
-  attackRange: number;
-  // Physical length of weapon
-  weaponLength: number;
-  // Physical width of weapon's hitbox
-  weaponWidth: number;
+  // HP of damage done on hit during windup
+  windUpDamage: number;
+  // HP of damage done on hit during winddown
+  windDownDamage: number;
+
+  // Amount of knockback applied when hit during swing
+  knockbackAmount: number;
+  // Amount of knockback applied when hit during windUp
+  windUpKnockbackAmount: number;
+  // Amount of knockback applied when hit during windDown
+  windDownKnockbackAmount: number;
+
+  // Physical size of the weapon
+  size: [number, number];
   // Anchor point of the texture when holding/swinging
   handlePosition: [number, number];
-  // Position the player holds the weapon while at rest
-  restPosition: [number, number];
-  // Center of rotation of the swing
-  swingPosition: [number, number];
-  // Angle in radians to hold the weapon while not swinging
-  restAngle: number;
+
+  swing: {
+    durations?: SwingDurations;
+    angles?: SwingAngles;
+    maxExtension?: number;
+    restPosition?: [number, number];
+    swingCenter?: [number, number];
+  };
 
   // Texture rendered by the pickup
   pickupTexture: string;
@@ -54,21 +59,20 @@ export interface MeleeStats {
 }
 
 const defaultMeleeStats: MeleeStats = {
-  name: "Melee",
+  name: "Melee Weapon",
+
   damage: 40,
-  attackCooldown: 2,
-  windupTime: 0.2,
-  winddownTime: 0.2,
-  swingArcStart: degToRad(90),
-  swingArcEnd: degToRad(-90),
-  attackDuration: 2,
-  attackRange: 1,
-  weaponLength: 1,
-  weaponWidth: 0.2,
+  windUpDamage: 0,
+  windDownDamage: 0,
+
+  knockbackAmount: 50,
+  windUpKnockbackAmount: 0,
+  windDownKnockbackAmount: 0,
+
+  swing: {},
+
+  size: [0.2, 1],
   handlePosition: [0.5, 0.9],
-  swingPosition: [0.0, 0.0],
-  restPosition: [0.0, 0.0],
-  restAngle: 0,
 
   pickupTexture: axe,
   holdTexture: axe,
@@ -83,15 +87,25 @@ const defaultMeleeStats: MeleeStats = {
 export default class MeleeWeapon extends BaseEntity implements Entity {
   stats: MeleeStats;
   currentCooldown: number = 0;
+  swing: SwingDescriptor;
 
   constructor(stats: Partial<MeleeStats>) {
     super();
     this.stats = { ...defaultMeleeStats, ...stats };
+
+    const swing = this.stats.swing;
+    this.swing = new SwingDescriptor(
+      swing.durations,
+      swing.angles,
+      swing.maxExtension,
+      swing.restPosition,
+      swing.swingCenter
+    );
   }
 
   attack(holder: Human) {
     if (this.currentCooldown <= 0) {
-      this.currentCooldown += this.stats.attackCooldown;
+      this.currentCooldown += this.swing.duration;
       this.addChild(new SwingingWeapon(this, holder));
       this.playSound("attack", holder.getPosition());
     }

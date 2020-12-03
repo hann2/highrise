@@ -1,27 +1,29 @@
 import axe from "../../../../resources/images/axe.png";
 import MeleeWeapon from "./MeleeWeapon";
+import { SwingDescriptor } from "./SwingDescriptor";
 import { degToRad } from "../../../core/util/MathUtil";
 
 export default class Axe extends MeleeWeapon {
   constructor() {
     super({
       name: "Axe",
-      damage: 100,
-      attackCooldown: 0.65,
-      attackDuration: 0.65,
 
-      windupTime: 0.4,
-      winddownTime: 0.2,
-      swingArcStart: degToRad(90),
-      swingArcEnd: degToRad(-90),
-      attackRange: 1.3,
+      damage: 80,
+      windUpDamage: 20,
 
-      weaponLength: 1,
-      weaponWidth: 0.2,
+      knockbackAmount: 80,
+      windUpKnockbackAmount: 40,
+
+      size: [0.2, 1],
       handlePosition: [0.5, 0.85],
-      restPosition: [0.15, 0.4],
-      swingPosition: [0.0, 0.1],
-      restAngle: degToRad(-75),
+
+      swing: {
+        durations: [0.4, 0.2, 0.2],
+        angles: [degToRad(-75), degToRad(90), degToRad(-90)],
+        maxExtension: 0.3,
+        restPosition: [0.15, 0.4],
+        swingCenter: [0.0, 0.1],
+      },
 
       pickupTexture: axe,
       attackTexture: axe,

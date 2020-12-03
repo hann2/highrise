@@ -1,26 +1,28 @@
 import katana from "../../../../resources/images/weapons/katana.png";
-import MeleeWeapon from "./MeleeWeapon";
 import { degToRad } from "../../../core/util/MathUtil";
+import { V } from "../../../core/Vector";
+import MeleeWeapon from "./MeleeWeapon";
+import { SwingDescriptor } from "./SwingDescriptor";
 
 export default class Katana extends MeleeWeapon {
   constructor() {
     super({
       name: "Katana",
-      damage: 50,
-      attackCooldown: 0.4,
-      attackDuration: 0.4,
-      windupTime: 0.2,
-      winddownTime: 0.4,
 
-      swingArcStart: degToRad(140),
-      swingArcEnd: degToRad(-75),
-      weaponLength: 1,
-      attackRange: 1.5,
-      weaponWidth: 0.2,
+      damage: 50,
+      knockbackAmount: 20,
+      windDownDamage: 30,
+
+      size: [0.2, 1],
       handlePosition: [0.5, 0.9],
-      restPosition: [0.0, 0.25],
-      swingPosition: [0.0, 0.0],
-      restAngle: degToRad(120),
+
+      swing: {
+        durations: [0.2, 0.2, 0.2],
+        angles: [degToRad(110), degToRad(140), degToRad(-75)],
+        maxExtension: 0.6,
+        restPosition: [0.1, 0.2],
+        swingCenter: [0.0, 0.0],
+      },
 
       pickupTexture: katana,
       attackTexture: katana,

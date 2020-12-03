@@ -18,9 +18,9 @@ export default class WeaponPickup extends BaseEntity {
     this.addChild(weapon, true); // Take ownership of the gun. This is a little weird
     this.addChild(new Interactable(position, this.onInteract.bind(this)));
 
-    if (weapon.stats.pickupTexture && weapon.stats.weaponLength) {
+    if (weapon.stats.pickupTexture && weapon.stats.size) {
       this.sprite = Sprite.from(weapon.stats.pickupTexture);
-      this.sprite.scale.set(weapon.stats.weaponLength / this.sprite.height);
+      this.sprite.scale.set(weapon.stats.size[1] / this.sprite.height);
       this.sprite.anchor.set(0.5, 0.5);
       this.sprite.position.set(...position);
       this.sprite.rotation = rUniform(0, Math.PI * 2);

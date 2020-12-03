@@ -1,20 +1,19 @@
 import { Body, Circle } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity from "../../core/entity/Entity";
+import Entity, { GameSprite } from "../../core/entity/Entity";
 import CCDBody from "../../core/physics/CCDBody";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
+import { Layers } from "../layers";
 import { isHittable } from "./Hittable";
 
 export const BULLET_RADIUS = 0.05; // meters
 
-const COLOR = 0xeedd55;
-
 export default class Bullet extends BaseEntity implements Entity {
   body: Body;
-  sprite: Graphics;
+  sprite: Graphics & GameSprite;
 
   constructor(
     position: V2d,
@@ -38,6 +37,7 @@ export default class Bullet extends BaseEntity implements Entity {
     this.body.addShape(shape);
 
     this.sprite = new Graphics();
+    this.sprite.layerName = Layers.WEAPONS;
   }
 
   onBeginContact(other: Entity, _: unknown, __: unknown) {

@@ -3,6 +3,7 @@ import { Sprite } from "pixi.js";
 import zoimbie1Hold from "../../../resources/images/Zombie 1/zoimbie1_hold.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
 import { clamp, polarToVec, radToDeg } from "../../core/util/MathUtil";
@@ -13,7 +14,7 @@ import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
 import Human, { HUMAN_RADIUS } from "./Human";
-import SwingingWeapon, { SwingPhase } from "./meleeWeapons/SwingingWeapon";
+import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
 
 const RADIUS = 0.3; // meters
 const SPEED = 0.4;
@@ -176,31 +177,33 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     }
   }
 
-  knockback(direction: number) {
-    this.body.applyImpulse(polarToVec(direction, 50));
+  knockback(direction: number, amount: number = 50) {
+    this.body.applyImpulse(polarToVec(direction, amount));
   }
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d) {
-    if (swingingWeapon.swingPhase === SwingPhase.Swing) {
+    const damageAmount = swingingWeapon.getDamage();
+    const knockbackAmount = swingingWeapon.getKnockback();
+
+    // Knockback on the windup or the swing
+    if (knockbackAmount) {
       this.interruptAttack();
-      this.knockback(this.getPosition().sub(position).angle);
+      this.knockback(this.getPosition().sub(position).angle, knockbackAmount);
+    }
 
+    if (damageAmount) {
       this.hp -= swingingWeapon.weapon.stats.damage;
-
       this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.6, 0.1));
-
       this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
-
-      this.game?.addEntity(
-        new PositionalSound(
-          choose("zombieHit1", "zombieHit2"),
-          this.getPosition()
-        )
-      );
+      this.speak(choose("zombieHit1", "zombieHit2"));
     }
 
     if (this.hp <= 0) {
       this.destroy();
     }
+  }
+
+  speak(soundName: SoundName) {
+    this.game?.addEntity(new PositionalSound(soundName, this.getPosition()));
   }
 }
