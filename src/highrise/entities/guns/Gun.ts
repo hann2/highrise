@@ -112,6 +112,7 @@ export default class Gun extends BaseEntity implements Entity {
         this.makeProjectile(muzzlePosition, direction);
         this.playSound("shoot", muzzlePosition);
         this.shootCooldown += 1.0 / this.stats.fireRate;
+        this.ammo -= 1;
       } else {
         this.playSound("empty", muzzlePosition);
       }
@@ -141,7 +142,7 @@ export default class Gun extends BaseEntity implements Entity {
   }
 
   async startReload(shooter: Human) {
-    if (!this.isReloading()) {
+    if (!this.isReloading() && this.ammo < this.stats.ammoCapacity) {
       this.reloadCooldown = this.stats.reloadTime;
       this.ammo = 0;
       this.playSound("reload", shooter.getPosition());

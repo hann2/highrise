@@ -9,10 +9,11 @@ export default class Rifle extends Gun {
       muzzleVelocity: 120,
       fireMode: FireMode.FULL_AUTO,
       reloadingStyle: ReloadingStyle.MAGAZINE,
+      ammoCapacity: 30,
 
       sounds: {
         shoot: ["rifleShot1", "rifleShot2", "rifleShot3"],
-        empty: ["dryFire1", "dryFire2"],
+        empty: ["dryFire3"],
         pickup: ["magazineLoad1"],
         reload: ["reload1"],
       },

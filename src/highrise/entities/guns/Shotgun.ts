@@ -14,10 +14,11 @@ export default class Shotgun extends Gun {
       bulletDamage: 30,
       muzzleVelocity: 55,
       reloadingStyle: ReloadingStyle.INDIVIDUAL,
+      ammoCapacity: 7,
 
       sounds: {
         shoot: ["shotgunShot3"],
-        empty: ["dryFire3"],
+        empty: ["dryFire1"],
         pickup: ["shotgunPump1"],
         reload: ["shotgunLoading1"],
       },

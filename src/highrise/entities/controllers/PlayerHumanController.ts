@@ -58,7 +58,8 @@ export default class PlayerHumanController
     if (
       (io.lmb || this.game?.io.getButton(ControllerButton.RT)) &&
       this.human.weapon instanceof Gun &&
-      this.human.weapon?.stats.fireMode === FireMode.FULL_AUTO
+      this.human.weapon.stats.fireMode === FireMode.FULL_AUTO &&
+      this.human.weapon.ammo > 0
     ) {
       this.human.useWeapon();
     }
