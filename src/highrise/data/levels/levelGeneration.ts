@@ -19,13 +19,32 @@ const WALL_WIDTH = 0.3;
 const OPEN_WIDTH = 1.8;
 const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
 
-type Closet = { backCell: V2d; frontCell: V2d };
+interface RoomTemplate {
+  dimensions: V2d;
+  doors: WallID[];
+}
+interface Closet {
+  backCell: V2d;
+  frontCell: V2d;
+}
 type WallID = [V2d, boolean];
-type WallBuilder = { exists: boolean; destructible: boolean; id: WallID };
-type Cell = {
+interface WallBuilder {
+  exists: boolean;
+  destructible: boolean;
+  id: WallID;
+}
+interface Cell {
   content?: string;
   rightWall: WallBuilder;
   bottomWall: WallBuilder;
+}
+
+const testRoomTemplate: RoomTemplate = {
+  dimensions: V(3, 2),
+  doors: [
+    [V(-1, 1), true],
+    [V(2, -1), false],
+  ],
 };
 
 class LevelBuilder {
@@ -68,7 +87,7 @@ class LevelBuilder {
     );
 
     const outerWalls = this.addOuterWalls();
-    const roomEntities = this.addRooms();
+    const roomEntities = this.addRooms(seed);
     const innerWalls = this.addInnerWalls(seed);
     const exits = this.addExits();
     const closetEntities = this.addClosets();
@@ -99,11 +118,21 @@ class LevelBuilder {
   }
 
   addIndestructibleBox(upperRightCorner: V2d, dimensions: V2d) {
+    if (upperRightCorner.y > 0) {
+      for (let i = 0; i < dimensions.x; i++) {
+        this.markIndestructible([upperRightCorner.add([i, -1]), false]);
+      }
+    }
+    if (upperRightCorner.x > 0) {
+      for (let j = 0; j < dimensions.y; j++) {
+        this.markIndestructible([upperRightCorner.add([-1, j]), true]);
+      }
+    }
     for (let i = 0; i < dimensions[0]; i++) {
       for (let j = 0; j < dimensions[1]; j++) {
-        const cell = this.cells[i][j];
-        cell.content = "empty";
         const [x, y] = upperRightCorner.add([i, j]);
+        const cell = this.cells[x][y];
+        cell.content = "empty";
         if (i === dimensions[0] - 1) {
           this.markIndestructible([V(x, y), true]);
         } else {
@@ -136,15 +165,84 @@ class LevelBuilder {
     }
   }
 
-  addRooms(): Entity[] {
+  getCellOnOtherSideOfWall(cell: V2d, wall: WallID): V2d {
+    if (cell.equals(wall[0])) {
+      return cell.add(wall[1] ? V(1, 0) : V(0, 1));
+    } else {
+      return cell.sub(cell[1] === wall[0][1] ? V(1, 0) : V(0, 1));
+    }
+  }
+
+  addRooms(seed: number): Entity[] {
+    const entities = [];
+
+    const allLocations = [];
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      for (let j = 0; j < LEVEL_SIZE; j++) {
+        allLocations.push(V(i, j));
+      }
+    }
+    const shuffledLocations = seededShuffle(allLocations, seed);
+
+    const isElligibleCell = ([x, y]: V2d): boolean => {
+      return (
+        x < LEVEL_SIZE &&
+        y < LEVEL_SIZE &&
+        x >= 0 &&
+        y >= 0 &&
+        !this.cells[x][y].content
+      );
+    };
+
+    const isElligibleRoom = (
+      upperRightCorner: V2d,
+      template: RoomTemplate
+    ): boolean => {
+      const dimensions = template.dimensions;
+      for (let i = 0; i < dimensions[0]; i++) {
+        for (let j = 0; j < dimensions[1]; j++) {
+          if (!isElligibleCell(V(i, j).add(upperRightCorner))) {
+            return false;
+          }
+        }
+      }
+      for (const [relativeCell, right] of template.doors) {
+        const cell = relativeCell.add(upperRightCorner);
+        const wall: WallID = [cell, right];
+        const farCell = this.getCellOnOtherSideOfWall(cell, wall);
+        if (!isElligibleCell(farCell) || !isElligibleCell(cell)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    const addRoom = (template: RoomTemplate) => {
+      const dimensions = template.dimensions;
+      let corner;
+      while (!isElligibleRoom((corner = shuffledLocations.pop()!), template));
+      this.addIndestructibleBox(corner, dimensions);
+
+      for (const [relativeCell, right] of template.doors) {
+        const cell = relativeCell.add(corner);
+        const wall: WallID = [cell, right];
+        const farCell = this.getCellOnOtherSideOfWall(cell, wall);
+
+        this.cells[farCell.x][farCell.y].content = "empty";
+        this.destroyWall(wall);
+        entities.push(this.wallIdToDoorEntity(wall));
+      }
+    };
+
     // Spawn room
     this.addIndestructibleBox(V(0, 0), V(3, 3));
     this.destroyWall([V(2, 0), true]);
     this.cells[3][0].content = "empty";
+    entities.push(this.wallIdToDoorEntity([V(2, 0), true]));
 
-    const [x, y] = this.levelCoordToWorldCoord(V(2, 0));
+    addRoom(testRoomTemplate);
 
-    return [this.wallIdToDoorEntity([V(2, 0), true])];
+    return entities;
   }
 
   addOuterWalls(): Entity[] {
@@ -227,7 +325,10 @@ class LevelBuilder {
   }
 
   addExits(): Entity[] {
-    let furthestPointSeen = V(0, 0);
+    // Should be near spawn
+    const startingPont = V(0, 0);
+
+    let furthestPointSeen: V2d = startingPont;
     let furthestDistance = 0;
 
     const seen: boolean[][] = [];
@@ -235,10 +336,14 @@ class LevelBuilder {
       seen[i] = [];
     }
 
-    const traverse = (p: V2d, distance: number) => {
+    // BFS
+    type QueueElement = [V2d, number];
+    const queue: QueueElement[] = [[startingPont, 0]];
+    while (queue.length) {
+      const [p, distance] = queue.shift()!;
       const [x, y] = p;
       if (seen[x][y]) {
-        return;
+        continue;
       }
       seen[x][y] = true;
       if (distance > furthestDistance) {
@@ -246,20 +351,18 @@ class LevelBuilder {
         furthestPointSeen = p;
       }
       if (x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists) {
-        traverse(V(x + 1, y), distance + 1);
+        queue.push([V(x + 1, y), distance + 1]);
       }
       if (y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists) {
-        traverse(V(x, y + 1), distance + 1);
+        queue.push([V(x, y + 1), distance + 1]);
       }
       if (x > 0 && !this.cells[x - 1][y].rightWall.exists) {
-        traverse(V(x - 1, y), distance + 1);
+        queue.push([V(x - 1, y), distance + 1]);
       }
       if (y > 0 && !this.cells[x][y - 1].bottomWall.exists) {
-        traverse(V(x, y - 1), distance + 1);
+        queue.push([V(x, y - 1), distance + 1]);
       }
-    };
-
-    traverse(furthestPointSeen, 0);
+    }
 
     this.cells[furthestPointSeen[0]][furthestPointSeen[1]].content = "exit";
 
