@@ -130,7 +130,7 @@ class LevelBuilder {
       new Door(
         V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
         OPEN_WIDTH,
-        0
+        Math.PI / 2
       ),
     ];
   }
