@@ -6,10 +6,10 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
+import { Layers } from "../layers";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
-import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
-import { Layers } from "../layers";
+import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {
   sprite: GameSprite;
@@ -46,7 +46,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape, [0, 0], 0);
   }
 
-  onMeleeHit(meleeWeapon: MeleeWeapon, position: V2d): void {}
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(

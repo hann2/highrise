@@ -11,9 +11,14 @@ export function clamp(value: number, min = 0, max = 1): number {
 }
 
 // The smoothstep function between 0 and 1
-export function smoothStep(value: number): number {
-  value = clamp(value);
-  return value * value * (3 - 2 * value);
+export function smoothStep(t: number): number {
+  t = clamp(t);
+  return 3 * t ** 2 - 2 * t ** 3;
+}
+
+export function smootherStep(t: number): number {
+  t = clamp(t);
+  return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3;
 }
 
 export function lerp(a: number, b: number, t: number = 0.5): number {
@@ -30,16 +35,6 @@ export function lerpOrSnap(
     return b;
   }
   return lerp(a, b, t);
-}
-
-export function smoothstep(t: number): number {
-  t = clamp(t);
-  return 3 * t ** 2 - 2 * t ** 3;
-}
-
-export function smootherstep(t: number): number {
-  t = clamp(t);
-  return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3;
 }
 
 /** Normalizes an angle in radians to be in the range [-pi, pi] */

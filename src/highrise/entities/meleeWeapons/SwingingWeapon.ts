@@ -3,13 +3,13 @@ import { Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import {
+  clamp,
   lerp,
   polarToVec,
   radToDeg,
-  smoothStep,
-  clamp,
+  smootherStep,
 } from "../../../core/util/MathUtil";
-import { V2d, V } from "../../../core/Vector";
+import { V, V2d } from "../../../core/Vector";
 import { isHittable } from "../Hittable";
 import Human from "../Human";
 import MeleeWeapon from "./MeleeWeapon";
@@ -61,36 +61,57 @@ export default class SwingingWeapon extends BaseEntity {
     }
   }
 
+  get attackPercent() {
+    return this.attackProgress / this.weapon.stats.attackDuration;
+  }
+
+  get swingPhase(): SwingPhase {
+    if (this.attackPercent < this.weapon.stats.windupTime) {
+      return SwingPhase.WindUp;
+    } else if (this.attackPercent < 1.0 - this.weapon.stats.winddownTime) {
+      return SwingPhase.Swing;
+    } else {
+      return SwingPhase.WindDown;
+    }
+  }
+
   getWeaponPositionAndAngle(): [V2d, number] {
     const {
-      weaponLength,
       attackRange,
-      swingArc,
-      attackDuration,
       handlePosition,
-      restPosition,
-      swingPosition,
       restAngle,
+      restPosition,
+      swingArcEnd,
+      swingArcStart,
+      swingPosition,
+      weaponLength,
+      winddownTime,
+      windupTime,
     } = this.weapon.stats;
 
     // 0 is start of attack, 1 is end
-    const attackPercent = this.attackProgress / attackDuration;
 
     // local angles of the swing arc in radians CCW
-    const arcBegin = swingArc / 2;
-    const arcEnd = -swingArc / 2;
-    const swingPercent = weaponSwingTween(attackPercent);
-    const armsAngle = lerp(arcBegin, arcEnd, swingPercent);
+    const armsAngle = weaponSwingAngle(
+      restAngle,
+      swingArcStart,
+      swingArcEnd,
+      windupTime,
+      winddownTime,
+      this.attackPercent
+    );
 
     // Distance between the human center and the handle at full extension
     const maxExtension = attackRange - weaponLength * handlePosition[1];
     // Current distance between the human center and the handle
-    const armExtension = extensionTween(attackPercent) * maxExtension;
+    const armExtension =
+      extensionTween(windupTime, winddownTime, this.attackPercent) *
+      maxExtension;
 
     // Location the rotation is happening around
     const basePosition = V(restPosition).lerp(
       swingPosition,
-      basePositionTween(attackPercent)
+      basePositionTween(this.attackPercent)
     );
 
     // The location of the handle relative to the body of the human
@@ -106,23 +127,51 @@ export default class SwingingWeapon extends BaseEntity {
 
   onBeginContact(other: Entity, _: unknown, __: unknown) {
     if (other != this.holder && isHittable(other)) {
-      other.onMeleeHit(this.weapon, this.getPosition());
+      other.onMeleeHit(this, this.getPosition());
     }
   }
 }
 
-function weaponSwingTween(percent: number): number {
-  if (percent < 0.2) {
-    return lerp(0.4, 0, smoothStep(percent / 0.2));
-  } else if (percent < 0.8) {
-    return smoothStep((percent - 0.2) / 0.6);
+export enum SwingPhase {
+  WindUp,
+  Swing,
+  WindDown,
+}
+
+function weaponSwingAngle(
+  restAngle: number,
+  backAngle: number,
+  forwardAngle: number,
+  windupTime: number,
+  winddownTime: number,
+  attackPercent: number
+): number {
+  if (attackPercent < windupTime) {
+    const t = attackPercent / windupTime;
+    return lerp(restAngle, backAngle, smootherStep(t));
+  } else if (attackPercent < 1.0 - winddownTime) {
+    const t =
+      (attackPercent - windupTime) / (1.0 - (windupTime + winddownTime));
+    return lerp(backAngle, forwardAngle, smootherStep(t));
   } else {
-    return lerp(1, 0.4, smoothStep((percent - 0.8) / 0.2));
+    const t = (attackPercent - (1.0 - winddownTime)) / winddownTime;
+    return lerp(forwardAngle, restAngle, smootherStep(t));
   }
 }
 
-function extensionTween(percent: number): number {
-  return Math.abs(Math.sin(clamp(percent) * Math.PI)) ** 0.5;
+function extensionTween(
+  windupTime: number,
+  winddownTime: number,
+  t: number
+): number {
+  if (t < windupTime) {
+    return lerp(0, 0.5, (t / windupTime) ** 2);
+  } else if (t < 1.0 - winddownTime) {
+    const t2 = (t - windupTime) / (1.0 - windupTime - winddownTime);
+    return 0.5 + 0.5 * Math.abs(Math.sin(clamp(t2) * Math.PI)) ** 0.5;
+  } else {
+    return lerp(0.5, 0, (t - (1.0 - winddownTime)) / winddownTime);
+  }
 }
 
 function basePositionTween(percent: number): number {

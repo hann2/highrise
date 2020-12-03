@@ -16,6 +16,7 @@ import Gun from "./guns/Gun";
 import Hittable from "./Hittable";
 import Interactable, { isInteractable } from "./Interactable";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
+import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
 import WeaponPickup from "./WeaponPickup";
 
 export const HUMAN_RADIUS = 0.4; // meters
@@ -56,7 +57,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.sprite.anchor.set(0.5, 0.5);
   }
 
-  onMeleeHit(meleeWeapon: MeleeWeapon, position: V2d): void {}
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
 
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
@@ -144,7 +145,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
       const weaponSprite = Sprite.from(pickupTexture);
       weaponSprite.scale.set(weaponLength / weaponSprite.height);
       weaponSprite.anchor.set(...handlePosition);
-      weaponSprite.rotation = Math.PI / 2 - restAngle;
+      weaponSprite.rotation = Math.PI / 2 + restAngle;
       weaponSprite.position.set(...restPosition);
       weaponSprite.name = "weapon";
       this.sprite.addChild(weaponSprite);

@@ -2,11 +2,12 @@ import axe from "../../../../resources/images/axe.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
+import { degToRad } from "../../../core/util/MathUtil";
+import { choose } from "../../../core/util/Random";
+import { V2d } from "../../../core/Vector";
 import Human from "../Human";
 import SwingingWeapon from "./SwingingWeapon";
-import { V2d } from "../../../core/Vector";
-import { choose } from "../../../core/util/Random";
-import { PositionalSound } from "../../../core/sound/PositionalSound";
 
 // Stats that make a melee weapon unique
 export interface MeleeStats {
@@ -14,10 +15,16 @@ export interface MeleeStats {
   damage: number;
   // Time between attacks in seconds.  Should be >= attackLength
   attackCooldown: number;
-  // Width of swing arc in radians
-  swingArc: number;
+  // Angle of the start of the swing
+  swingArcStart: number;
+  // Angle of the end of the swing
+  swingArcEnd: number;
   // Length of attack in seconds
   attackDuration: number;
+  // Percent of duration winding up
+  windupTime: number;
+  // Percent of duration winding down
+  winddownTime: number;
   // How far from user will enemies take damage
   attackRange: number;
   // Physical length of weapon
@@ -50,7 +57,10 @@ const defaultMeleeStats: MeleeStats = {
   name: "Melee",
   damage: 40,
   attackCooldown: 2,
-  swingArc: Math.PI / 2,
+  windupTime: 0.2,
+  winddownTime: 0.2,
+  swingArcStart: degToRad(90),
+  swingArcEnd: degToRad(-90),
   attackDuration: 2,
   attackRange: 1,
   weaponLength: 1,

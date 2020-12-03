@@ -14,6 +14,7 @@ import Bullet from "./Bullet";
 import Hittable from "./Hittable";
 import Human, { HUMAN_RADIUS } from "./Human";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
+import SwingingWeapon, { SwingPhase } from "./meleeWeapons/SwingingWeapon";
 
 const RADIUS = 0.3; // meters
 const SPEED = 0.4;
@@ -179,22 +180,24 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.body.applyImpulse(polarToVec(direction, 50));
   }
 
-  onMeleeHit(meleeWeapon: MeleeWeapon, position: V2d) {
-    this.interruptAttack();
-    this.knockback(this.getPosition().sub(position).angle);
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d) {
+    if (swingingWeapon.swingPhase === SwingPhase.Swing) {
+      this.interruptAttack();
+      this.knockback(this.getPosition().sub(position).angle);
 
-    this.hp -= meleeWeapon.stats.damage;
+      this.hp -= swingingWeapon.weapon.stats.damage;
 
-    this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.6, 0.1));
+      this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.6, 0.1));
 
-    this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
+      this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
 
-    this.game?.addEntity(
-      new PositionalSound(
-        choose("zombieHit1", "zombieHit2"),
-        this.getPosition()
-      )
-    );
+      this.game?.addEntity(
+        new PositionalSound(
+          choose("zombieHit1", "zombieHit2"),
+          this.getPosition()
+        )
+      );
+    }
 
     if (this.hp <= 0) {
       this.destroy();
