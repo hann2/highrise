@@ -80,6 +80,7 @@ import swordShing2 from "../../../resources/audio/weapons/sword-shing-2.flac";
 import swordShing3 from "../../../resources/audio/weapons/sword-shing-3.flac";
 import zombieHit1 from "../../../resources/audio/zombie-hit-1.flac";
 import zombieHit2 from "../../../resources/audio/zombie-hit-2.flac";
+import shotgunLoadShell1 from "../../../resources/audio/guns/shotgun/shotgun-load-shell-1.mp3";
 
 // TODO: These shouln't be listed in core/
 export const SOUND_URLS = {
@@ -136,6 +137,7 @@ export const SOUND_URLS = {
   rifleSuppressedShot5,
   rifleSuppressedShot6,
   shotgunLoading1,
+  shotgunLoadShell1,
   shotgunPump1,
   shotgunShot1,
   shotgunShot2,

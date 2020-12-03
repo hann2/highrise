@@ -38,4 +38,6 @@ export async function main() {
   game.addEntity(new PositionalSoundListener());
 
   game.dispatch({ type: "newGame" });
+
+  game.masterGain.gain.value = 0.3;
 }

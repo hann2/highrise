@@ -9,6 +9,7 @@ export default class Rifle extends Gun {
       muzzleVelocity: 120,
       fireMode: FireMode.FULL_AUTO,
       reloadingStyle: ReloadingStyle.MAGAZINE,
+      reloadTime: 1.5,
       ammoCapacity: 30,
 
       sounds: {

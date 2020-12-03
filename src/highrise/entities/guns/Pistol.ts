@@ -8,13 +8,14 @@ export default class Pistol extends Gun {
       bulletDamage: 34,
       muzzleVelocity: 60,
       reloadingStyle: ReloadingStyle.MAGAZINE,
-      ammoCapacity: 15,
+      reloadTime: 0.9,
+      ammoCapacity: 7,
 
       sounds: {
-        shoot: ["pistol2Shot1", "pistol2Shot2"],
+        shoot: ["pistolShot2"],
         empty: ["dryFire2"],
         pickup: ["pistolCock1"],
-        reload: ["reload1"],
+        reload: ["magazineLoad1"],
       },
     });
   }

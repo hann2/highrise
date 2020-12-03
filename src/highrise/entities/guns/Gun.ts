@@ -81,8 +81,8 @@ const defaultGunStats: GunStats = {
 export default class Gun extends BaseEntity implements Entity {
   stats: GunStats;
   shootCooldown: number = 0;
-  reloadCooldown: number = 0;
   ammo: number;
+  isReloading: boolean = false;
 
   constructor(stats: Partial<GunStats> = {}) {
     super();
@@ -94,12 +94,8 @@ export default class Gun extends BaseEntity implements Entity {
     this.ammo = this.stats.ammoCapacity;
   }
 
-  isReloading() {
-    return this.reloadCooldown > 0;
-  }
-
   pullTrigger(shooter: Human) {
-    if (this.isReloading()) {
+    if (this.isReloading) {
       // TODO: Cancel reload? Nothing?
     } else if (this.shootCooldown <= 0) {
       const direction = shooter.getDirection();
@@ -141,27 +137,43 @@ export default class Gun extends BaseEntity implements Entity {
     );
   }
 
-  async startReload(shooter: Human) {
-    if (!this.isReloading() && this.ammo < this.stats.ammoCapacity) {
-      this.reloadCooldown = this.stats.reloadTime;
-      this.ammo = 0;
-      this.playSound("reload", shooter.getPosition());
+  async reload(shooter: Human) {
+    if (!this.isReloading && this.ammo < this.stats.ammoCapacity) {
+      if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
+        console.log("start magazine reloading", this.stats.ammoCapacity);
+        this.isReloading = true;
+        this.playSound("reload", shooter.getPosition());
+        this.ammo = 0;
+        await this.wait(this.stats.reloadTime, undefined, "reload");
+        this.ammo = this.stats.ammoCapacity;
+        this.isReloading = false;
+        console.log(
+          "end magazine reloading",
+          this.stats.ammoCapacity,
+          this.ammo
+        );
+      } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
+        console.log("start individual reloading");
+        this.isReloading = true;
+        while (this.ammo < this.stats.ammoCapacity) {
+          this.playSound("reload", shooter.getPosition());
+          await this.wait(this.stats.reloadTime, undefined, "reload");
+          this.ammo += 1;
+        }
+        this.isReloading = false;
+        console.log("end individual reloading");
+      }
     }
   }
 
-  finishReload() {
-    this.ammo = this.stats.ammoCapacity;
+  cancelReload() {
+    this.clearTimers("reload");
+    this.isReloading = false;
   }
 
   onTick(dt: number) {
     if (this.shootCooldown > 0) {
       this.shootCooldown -= dt;
-    }
-    if (this.reloadCooldown > 0) {
-      this.reloadCooldown -= dt;
-      if (this.reloadCooldown <= 0) {
-        this.finishReload();
-      }
     }
   }
 }

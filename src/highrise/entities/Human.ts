@@ -112,7 +112,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
 
   reload() {
     if (this.weapon instanceof Gun) {
-      this.weapon.startReload(this);
+      this.weapon.reload(this);
     }
   }
 

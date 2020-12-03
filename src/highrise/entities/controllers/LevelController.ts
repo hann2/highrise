@@ -1,13 +1,17 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { choose } from "../../../core/util/Random";
 import TestLevelGenerator from "../../data/levels/TestLevelGenerator";
 import Gun from "../guns/Gun";
+import Pistol from "../guns/Pistol";
+import Rifle from "../guns/Rifle";
+import Shotgun from "../guns/Shotgun";
 import Human from "../Human";
 import Axe from "../meleeWeapons/Axe";
+import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 import AllyHumanController from "./AllyController";
 import PlayerHumanController from "./PlayerHumanController";
 import SurvivorHumanController from "./SurvivorHumanController";
-import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 
 interface PartyEvent {
   human: Human;
@@ -34,7 +38,14 @@ export default class LevelController extends BaseEntity implements Entity {
       this.partyMembers = [];
 
       const player = this.game!.addEntity(new Human());
-      player.giveWeapon(new Axe());
+      player.giveWeapon(
+        choose<Gun | MeleeWeapon>(
+          new Axe(),
+          new Pistol(),
+          new Rifle(),
+          new Shotgun()
+        )
+      );
       this.game!.dispatch({ type: "addToParty", human: player });
       this.setPlayerHuman(player);
 
