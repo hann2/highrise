@@ -18,15 +18,18 @@ const WALL_WIDTH = 0.3;
 const OPEN_WIDTH = 1.8;
 const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
 
+type Closet = { backCell: V2d; frontCell: V2d };
 type WallID = [V2d, boolean];
 type WallBuilder = { exists: boolean; destructible: boolean; id: WallID };
+type Cell = {
+  content?: string;
+  rightWall: WallBuilder;
+  bottomWall: WallBuilder;
+};
 
 class LevelBuilder {
-  cells: {
-    content?: string;
-    rightWall: WallBuilder;
-    bottomWall: WallBuilder;
-  }[][] = [];
+  closets: Closet[] = [];
+  cells: Cell[][] = [];
 
   constructor() {
     for (let i = 0; i < LEVEL_SIZE; i++) {
@@ -67,6 +70,7 @@ class LevelBuilder {
     const roomEntities = this.addRooms();
     const innerWalls = this.addInnerWalls(seed);
     const exits = this.addExits();
+    const closetEntities = this.addClosets();
     const pickups = this.addPickups(seed);
     const enemies = this.addEnemies();
     // addSurvivors();
@@ -92,7 +96,7 @@ class LevelBuilder {
     return coord.mul(CELL_WIDTH).add(V(firstCellCenter, firstCellCenter));
   }
 
-  addRoom(upperRightCorner: V2d, dimensions: V2d, doors: WallID[]) {
+  addIndestructibleBox(upperRightCorner: V2d, dimensions: V2d) {
     for (let i = 0; i < dimensions[0]; i++) {
       for (let j = 0; j < dimensions[1]; j++) {
         const cell = this.cells[i][j];
@@ -110,14 +114,12 @@ class LevelBuilder {
         }
       }
     }
-    for (const door of doors) {
-      this.destroyWall(door);
-    }
   }
 
   addRooms(): Entity[] {
     // Spawn room
-    this.addRoom(V(0, 0), V(3, 3), [[V(2, 0), true]]);
+    this.addIndestructibleBox(V(0, 0), V(3, 3));
+    this.destroyWall([V(2, 0), true]);
     this.cells[3][0].content = "empty";
 
     return [];
@@ -140,6 +142,48 @@ class LevelBuilder {
         CELL_WIDTH * LEVEL_SIZE + WALL_WIDTH
       ),
     ];
+  }
+
+  addClosets(): Entity[] {
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      for (let j = 0; j < LEVEL_SIZE; j++) {
+        if (this.cells[i][j].content) {
+          continue;
+        }
+
+        let [x, y] = [i, j];
+        let right = x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists;
+        let down = y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists;
+        let left = x > 0 && !this.cells[x - 1][y].rightWall.exists;
+        let up = y > 0 && !this.cells[x][y - 1].bottomWall.exists;
+        if (+right + +down + +left + +up !== 1) {
+          continue;
+        }
+        x += +right + -left;
+        y += +down + -up;
+        if (this.cells[x][y].content) {
+          continue;
+        }
+        right = x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists;
+        down = y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists;
+        left = x > 0 && !this.cells[x - 1][y].rightWall.exists;
+        up = y > 0 && !this.cells[x][y - 1].bottomWall.exists;
+        if (+right + +down + +left + +up !== 2) {
+          continue;
+        }
+
+        this.cells[x][y].content = "empty";
+        const closet = {
+          backCell: V(i, j),
+          frontCell: V(x, y),
+        };
+
+        this.closets.push(closet);
+      }
+    }
+    console.log(this.closets);
+
+    return [];
   }
 
   addExits(): Entity[] {
@@ -205,12 +249,8 @@ class LevelBuilder {
 
   addPickups(seed: number): Entity[] {
     const locations = [];
-    for (let i = 0; i < LEVEL_SIZE; i++) {
-      for (let j = 0; j < LEVEL_SIZE; j++) {
-        if (!this.cells[i][j].content) {
-          locations.push(V(i, j));
-        }
-      }
+    for (const closet of this.closets) {
+      locations.push(closet.backCell);
     }
     const shuffledLocations = seededShuffle(locations, seed);
     const consumeLocation = () => {
