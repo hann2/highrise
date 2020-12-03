@@ -4,6 +4,9 @@ import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
 import Human from "../Human";
 import SwingingWeapon from "./SwingingWeapon";
+import { V2d } from "../../../core/Vector";
+import { choose } from "../../../core/util/Random";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
 
 // Stats that make a melee weapon unique
 export interface MeleeStats {
@@ -22,8 +25,17 @@ export interface MeleeStats {
   // Physical width of weapon's hitbox
   weaponWidth: number;
 
-  attackSound: SoundName;
-  texture: string;
+  // Texture rendered by the pickup
+  pickupTexture: string;
+  // Texture rendered when holding
+  holdTexture: string;
+  // Texture rendered when attacking
+  attackTexture: string;
+
+  sounds: {
+    attack: SoundName[];
+    pickup: SoundName[];
+  };
 }
 
 const defaultMeleeStats: MeleeStats = {
@@ -35,8 +47,15 @@ const defaultMeleeStats: MeleeStats = {
   attackRange: 1,
   weaponLength: 1,
   weaponWidth: 0.2,
-  attackSound: "fleshHit1",
-  texture: axe,
+
+  pickupTexture: axe,
+  holdTexture: axe,
+  attackTexture: axe,
+
+  sounds: {
+    attack: ["pop1"],
+    pickup: ["swordShing1"],
+  },
 };
 
 export default class MeleeWeapon extends BaseEntity implements Entity {
@@ -52,12 +71,21 @@ export default class MeleeWeapon extends BaseEntity implements Entity {
     if (this.currentCooldown <= 0) {
       this.currentCooldown += this.stats.attackCooldown;
       this.addChild(new SwingingWeapon(this, holder));
+      this.playSound("attack", holder.getPosition());
     }
   }
 
   onTick(dt: number) {
     if (this.currentCooldown > 0) {
       (this.currentCooldown -= dt), 0;
+    }
+  }
+
+  playSound(soundClass: keyof MeleeStats["sounds"], position: V2d) {
+    const sounds = this.stats.sounds[soundClass];
+    if (sounds.length > 0) {
+      const soundName = choose(...sounds);
+      this.game?.addEntity(new PositionalSound(soundName, position));
     }
   }
 }

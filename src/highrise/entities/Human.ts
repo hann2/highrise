@@ -117,8 +117,8 @@ export default class Human extends BaseEntity implements Entity, Hittable {
         ? Sprite.from(this.character.imageGun)
         : Sprite.from(this.character.imageStand);
 
-    if (weapon instanceof MeleeWeapon && weapon.stats.texture) {
-      const weaponSprite = Sprite.from(weapon.stats.texture);
+    if (weapon instanceof MeleeWeapon && weapon.stats.pickupTexture) {
+      const weaponSprite = Sprite.from(weapon.stats.pickupTexture);
       weaponSprite.scale.set(weapon.stats.weaponLength / weaponSprite.height);
       weaponSprite.anchor.set(0.5, 0.5);
       weaponSprite.rotation = Math.PI / 2;
@@ -131,11 +131,9 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.sprite.addChild(manSprite);
     this.sprite.anchor.set(0.5, 0.5);
 
-    if (weapon instanceof Gun) {
-      weapon.playSound("pickup", this.getPosition());
-      await this.wait(0.5);
-      this.speak("pickupItem");
-    }
+    weapon.playSound("pickup", this.getPosition());
+    await this.wait(0.5);
+    this.speak("pickupItem");
   }
 
   dropWeapon() {

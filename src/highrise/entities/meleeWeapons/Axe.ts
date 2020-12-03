@@ -12,8 +12,11 @@ export default class Axe extends MeleeWeapon {
       attackRange: 1,
       weaponLength: 1,
       weaponWidth: 0.2,
-      attackSound: "fleshHit1",
-      texture: axe,
+      pickupTexture: axe,
+      sounds: {
+        attack: ["pop1"],
+        pickup: ["swordShing3"],
+      },
     });
   }
 }

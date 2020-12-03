@@ -72,8 +72,12 @@ import sniperShot2 from "../../../resources/audio/guns/sniper-rifle/sniper-shot-
 import sniperShot3 from "../../../resources/audio/guns/sniper-rifle/sniper-shot-3.mp3";
 import humanHit1 from "../../../resources/audio/human-hit-1.flac";
 import humanHit2 from "../../../resources/audio/human-hit-2.flac";
+import pop1 from "../../../resources/audio/pop1.flac";
 import wallHit1 from "../../../resources/audio/wall-hit-1.flac";
 import wallHit2 from "../../../resources/audio/wall-hit-2.flac";
+import swordShing1 from "../../../resources/audio/weapons/sword-shing-1.flac";
+import swordShing2 from "../../../resources/audio/weapons/sword-shing-2.flac";
+import swordShing3 from "../../../resources/audio/weapons/sword-shing-3.flac";
 import zombieHit1 from "../../../resources/audio/zombie-hit-1.flac";
 import zombieHit2 from "../../../resources/audio/zombie-hit-2.flac";
 
@@ -83,6 +87,7 @@ export const SOUND_URLS = {
   fleshHit1,
   humanHit1,
   humanHit2,
+  pop1,
   wallHit1,
   wallHit2,
   zombieHit1,
@@ -139,6 +144,11 @@ export const SOUND_URLS = {
   sniperShot1,
   sniperShot2,
   sniperShot3,
+
+  // Other Weapons
+  swordShing1,
+  swordShing2,
+  swordShing3,
 
   // Characters
   simonDeath1,

@@ -23,6 +23,7 @@ export interface GunStats {
   //
   fireMode: FireMode;
 
+  // Sounds that play for various things
   sounds: {
     shoot: SoundName[];
     empty: SoundName[];
@@ -30,6 +31,7 @@ export interface GunStats {
     reload: SoundName[];
   };
 
+  // Texture to use when the item's on the ground
   texture?: string;
 }
 

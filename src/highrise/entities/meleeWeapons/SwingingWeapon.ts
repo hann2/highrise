@@ -5,6 +5,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { polarToVec, radToDeg } from "../../../core/util/MathUtil";
+import { choose } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { isHittable } from "../Hittable";
 import Human from "../Human";
@@ -21,13 +22,6 @@ export default class SwingingWeapon extends BaseEntity {
 
     this.weapon = weapon;
     this.holder = holder;
-
-    this.addChild(
-      new PositionalSound(
-        this.weapon.stats.attackSound,
-        holder.getPosition().clone()
-      )
-    );
 
     this.sprite = Sprite.from(axe);
     this.sprite.scale.set(weapon.stats.weaponLength / this.sprite.height);
