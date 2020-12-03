@@ -10,6 +10,8 @@ import { V, V2d } from "../../core/Vector";
 import { Character, CharacterSoundClass } from "../characters/Character";
 import { randomCharacter } from "../characters/characters";
 import { CollisionGroups } from "../Collision";
+import Light from "../lighting/Light";
+import { PointLight } from "../lighting/PointLight";
 import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
 import Gun from "./guns/Gun";
@@ -31,6 +33,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   tags = ["human"];
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
+  light: PointLight;
 
   constructor(
     position: V2d = V(0, 0),
@@ -55,6 +58,8 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
     this.sprite.addChild(manSprite);
     this.sprite.anchor.set(0.5, 0.5);
+
+    this.light = this.addChild(new PointLight(5));
   }
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
@@ -64,8 +69,10 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.body.applyImpulse(friction);
   }
 
+  // TODO: Guarantee that this happens after everyone else's render calls
   onRender() {
     [this.sprite.x, this.sprite.y] = this.body.position;
+    this.light.setPosition(this.body.position);
     this.sprite.angle = radToDeg(this.body.angle);
 
     const healthPercent = clamp(this.hp / 100);

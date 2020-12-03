@@ -11,15 +11,19 @@ export enum Layers {
   WORLD = "world",
   // Stuff above the humans
   WORLD_FRONT = "world_front",
+  // Special layer for lighting
+  LIGHTING = "lighting",
   // Stuff not in the world
   HUD = "hud",
 }
 
 // Set up the game to use our layers
 export function initLayers(game: Game) {
+  game.renderer.createLayer(Layers.FLOOR, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_BACK, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_FRONT, new LayerInfo());
+  game.renderer.createLayer(Layers.LIGHTING, new LayerInfo({ paralax: 0 }));
   game.renderer.createLayer(Layers.HUD, new LayerInfo({ paralax: 0 }));
 
   game.renderer.defaultLayer = Layers.WORLD;

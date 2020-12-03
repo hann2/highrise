@@ -10,6 +10,7 @@ import Katana from "../../entities/meleeWeapons/Katana";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
+import Floor from "../../Floor";
 import { Level } from "./Level";
 
 const LEVEL_SIZE = 10;
@@ -77,6 +78,7 @@ class LevelBuilder {
       ...exits,
       ...enemies,
       ...pickups,
+      new Floor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
     ];
 
     return {

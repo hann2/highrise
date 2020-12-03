@@ -12,7 +12,7 @@ export default class CameraController extends BaseEntity implements Entity {
   }
 
   onRender() {
-    this.camera.z = 80;
+    this.camera.z = 40;
     const player = this.getPlayer();
     if (player) {
       this.camera.smoothCenter(player.getPosition());
@@ -22,13 +22,13 @@ export default class CameraController extends BaseEntity implements Entity {
   }
 
   getListener(): PositionalSoundListener {
-    return this.game!.entities.byId(
+    return this.game!.entities.getById(
       "positional_sound_listener"
     ) as PositionalSoundListener;
   }
 
   getPlayer() {
-    const levelController = this.game!.entities.byId(
+    const levelController = this.game!.entities.getById(
       "level_controller"
     ) as LevelController;
     return levelController.playerHuman;

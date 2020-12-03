@@ -8,6 +8,7 @@ import manBrownGun from "../../resources/images/Man Brown/manBrown_gun.png";
 import manBrownStand from "../../resources/images/Man Brown/manBrown_stand.png";
 import manOldGun from "../../resources/images/Man Old/manOld_gun.png";
 import manOldStand from "../../resources/images/Man Old/manOld_stand.png";
+import pointLight from "../../resources/images/point-light.png";
 import katana from "../../resources/images/weapons/katana.png";
 import zoimbie1Hold from "../../resources/images/Zombie 1/zoimbie1_hold.png";
 import zoimbie1Stand from "../../resources/images/Zombie 1/zoimbie1_stand.png";
@@ -91,6 +92,7 @@ export default class Preloader extends BaseEntity implements Entity {
       manOldGun,
       zoimbie1Hold,
       zoimbie1Stand,
+      pointLight,
       "asdfasdfasdf",
     ];
     let loaded = 0;

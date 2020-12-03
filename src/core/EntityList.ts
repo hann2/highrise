@@ -82,7 +82,7 @@ export default class EntityList implements Iterable<Entity> {
   /**
    * Get the entity with the given id.
    */
-  byId(id: string) {
+  getById(id: string) {
     return this.idToEntity.get(id);
   }
 

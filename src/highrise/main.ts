@@ -7,6 +7,7 @@ import { initContactMaterials } from "./P2Materials";
 import Preloader from "./Preloader";
 import CameraController from "./entities/controllers/CameraController";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
+import LightingManager from "./lighting/LightingManager";
 
 declare global {
   interface Window {
@@ -36,6 +37,7 @@ export async function main() {
   game.addEntity(new LevelController());
   game.addEntity(new CameraController(game.camera));
   game.addEntity(new PositionalSoundListener());
+  game.addEntity(new LightingManager());
 
   game.dispatch({ type: "newGame" });
 
