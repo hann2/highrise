@@ -24,6 +24,14 @@ export interface MeleeStats {
   weaponLength: number;
   // Physical width of weapon's hitbox
   weaponWidth: number;
+  // Anchor point of the texture when holding/swinging
+  handlePosition: [number, number];
+  // Position the player holds the weapon while at rest
+  restPosition: [number, number];
+  // Center of rotation of the swing
+  swingPosition: [number, number];
+  // Angle in radians to hold the weapon while not swinging
+  restAngle: number;
 
   // Texture rendered by the pickup
   pickupTexture: string;
@@ -47,6 +55,10 @@ const defaultMeleeStats: MeleeStats = {
   attackRange: 1,
   weaponLength: 1,
   weaponWidth: 0.2,
+  handlePosition: [0.5, 0.9],
+  swingPosition: [0.0, 0.0],
+  restPosition: [0.0, 0.0],
+  restAngle: 0,
 
   pickupTexture: axe,
   holdTexture: axe,

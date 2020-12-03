@@ -9,6 +9,7 @@ import { CollisionGroups } from "../Collision";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
+import { Layers } from "../layers";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {
   sprite: GameSprite;
@@ -32,6 +33,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     graphics.endFill();
 
     this.sprite = graphics;
+    this.sprite.layerName = Layers.WORLD_FRONT;
 
     this.body = new Body({
       mass: 0,

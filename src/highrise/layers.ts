@@ -3,9 +3,15 @@ import { LayerInfo } from "../core/graphics/LayerInfo";
 
 // Layers for rendering stuff in front of other stuff
 export enum Layers {
+  // The floor
+  FLOOR = "floor",
+  // Stuff on the floor
   WORLD_BACK = "world_back",
+  // Stuff at the human's level
   WORLD = "world",
+  // Stuff above the humans
   WORLD_FRONT = "world_front",
+  // Stuff not in the world
   HUD = "hud",
 }
 

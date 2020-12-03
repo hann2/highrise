@@ -5,9 +5,11 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import { V2d } from "../../core/Vector";
 import Human from "./Human";
 import Interactable from "./Interactable";
+import { GameSprite } from "../../core/entity/Entity";
+import { Layers } from "../layers";
 
 export default class HealthPickup extends BaseEntity {
-  sprite: Sprite;
+  sprite: Sprite & GameSprite;
 
   constructor(position: V2d) {
     super();
@@ -18,6 +20,7 @@ export default class HealthPickup extends BaseEntity {
     this.sprite.scale.set(0.7 / this.sprite.width);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(...position);
+    this.sprite.layerName = Layers.WORLD_BACK;
 
     this.body = new Body({
       mass: 0,

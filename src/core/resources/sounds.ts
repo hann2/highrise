@@ -61,6 +61,7 @@ import rifle2Shot1 from "../../../resources/audio/guns/rifle/rifle2-shot-1.mp3";
 import rifle2Shot2 from "../../../resources/audio/guns/rifle/rifle2-shot-2.mp3";
 import rifle2Shot3 from "../../../resources/audio/guns/rifle/rifle2-shot-3.mp3";
 import rifle2Shot4 from "../../../resources/audio/guns/rifle/rifle2-shot-4.mp3";
+import shotgunLoadShell1 from "../../../resources/audio/guns/shotgun/shotgun-load-shell-1.mp3";
 import shotgunLoading1 from "../../../resources/audio/guns/shotgun/shotgun-loading-1.mp3";
 import shotgunPump1 from "../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import shotgunShot1 from "../../../resources/audio/guns/shotgun/shotgun-shot-1.mp3";
@@ -78,9 +79,9 @@ import wallHit2 from "../../../resources/audio/wall-hit-2.flac";
 import swordShing1 from "../../../resources/audio/weapons/sword-shing-1.flac";
 import swordShing2 from "../../../resources/audio/weapons/sword-shing-2.flac";
 import swordShing3 from "../../../resources/audio/weapons/sword-shing-3.flac";
+import swordShing4 from "../../../resources/audio/weapons/sword-shing-4.flac";
 import zombieHit1 from "../../../resources/audio/zombie-hit-1.flac";
 import zombieHit2 from "../../../resources/audio/zombie-hit-2.flac";
-import shotgunLoadShell1 from "../../../resources/audio/guns/shotgun/shotgun-load-shell-1.mp3";
 
 // TODO: These shouln't be listed in core/
 export const SOUND_URLS = {
@@ -151,6 +152,7 @@ export const SOUND_URLS = {
   swordShing1,
   swordShing2,
   swordShing3,
+  swordShing4,
 
   // Characters
   simonDeath1,

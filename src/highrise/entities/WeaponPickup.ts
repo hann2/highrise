@@ -6,9 +6,11 @@ import Gun from "./guns/Gun";
 import Human from "./Human";
 import Interactable from "./Interactable";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
+import { GameSprite } from "../../core/entity/Entity";
+import { Layers } from "../layers";
 
 export default class WeaponPickup extends BaseEntity {
-  sprite?: Sprite;
+  sprite?: Sprite & GameSprite;
 
   constructor(position: V2d, private weapon: Gun | MeleeWeapon) {
     super();
@@ -21,7 +23,7 @@ export default class WeaponPickup extends BaseEntity {
       this.sprite.scale.set(weapon.stats.weaponLength / this.sprite.height);
       this.sprite.anchor.set(0.5, 0.5);
       this.sprite.position.set(...position);
-      this.sprite.angle = rUniform(0, Math.PI * 2);
+      this.sprite.rotation = rUniform(0, Math.PI * 2);
     } else {
       const textSprite = new Text("", {
         font: "5px Snippet",
@@ -34,6 +36,8 @@ export default class WeaponPickup extends BaseEntity {
       textSprite.scale.set(0.03);
       this.sprite = textSprite;
     }
+
+    this.sprite.layerName = Layers.WORLD_BACK;
   }
 
   onInteract(human: Human) {

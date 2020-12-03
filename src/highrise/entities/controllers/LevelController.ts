@@ -41,11 +41,11 @@ export default class LevelController extends BaseEntity implements Entity {
       const player = this.game!.addEntity(new Human());
       player.giveWeapon(
         choose<Gun | MeleeWeapon>(
-          new Axe(),
-          new Katana(),
-          new Pistol(),
-          new Rifle(),
-          new Shotgun()
+          // new Axe(),
+          new Katana()
+          // new Pistol(),
+          // new Rifle(),
+          // new Shotgun()
         )
       );
       this.game!.dispatch({ type: "addToParty", human: player });

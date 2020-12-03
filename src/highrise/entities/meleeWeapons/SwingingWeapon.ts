@@ -1,10 +1,15 @@
 import { Body, Box } from "p2";
 import { Sprite } from "pixi.js";
-import axe from "../../../../resources/images/axe.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { polarToVec, radToDeg } from "../../../core/util/MathUtil";
-import { V2d } from "../../../core/Vector";
+import {
+  lerp,
+  polarToVec,
+  radToDeg,
+  smoothStep,
+  clamp,
+} from "../../../core/util/MathUtil";
+import { V2d, V } from "../../../core/Vector";
 import { isHittable } from "../Hittable";
 import Human from "../Human";
 import MeleeWeapon from "./MeleeWeapon";
@@ -24,17 +29,16 @@ export default class SwingingWeapon extends BaseEntity {
 
     this.sprite = Sprite.from(weapon.stats.attackTexture);
     this.sprite.scale.set(weapon.stats.weaponLength / this.sprite.height);
-    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.anchor.set(...weapon.stats.handlePosition);
 
     const width = this.weapon.stats.weaponWidth;
     const length = this.weapon.stats.weaponLength;
     this.body = new Body();
-    this.body.addShape(
-      new Box({
-        width,
-        height: length,
-      })
-    );
+    const shape = new Box({
+      width,
+      height: length,
+    });
+    this.body.addShape(shape);
     this.body.collisionResponse = false;
   }
 
@@ -58,20 +62,46 @@ export default class SwingingWeapon extends BaseEntity {
   }
 
   getWeaponPositionAndAngle(): [V2d, number] {
-    const length = this.weapon.stats.weaponLength;
-    const range = this.weapon.stats.attackRange;
-    const arc = this.weapon.stats.swingArc;
-    const duration = this.weapon.stats.attackDuration;
+    const {
+      weaponLength,
+      attackRange,
+      swingArc,
+      attackDuration,
+      handlePosition,
+      restPosition,
+      swingPosition,
+      restAngle,
+    } = this.weapon.stats;
 
-    const startingAngle = this.holder.getDirection() + arc / 2;
-    const angle1 = startingAngle - (arc * this.attackProgress) / duration;
-    const angle2 =
-      startingAngle + Math.PI / 2 - (arc * this.attackProgress) / duration;
-    const position = this.holder
-      .getPosition()
-      .add(polarToVec(angle1, range - length / 2));
+    // 0 is start of attack, 1 is end
+    const attackPercent = this.attackProgress / attackDuration;
 
-    return [position, angle2];
+    // local angles of the swing arc in radians CCW
+    const arcBegin = swingArc / 2;
+    const arcEnd = -swingArc / 2;
+    const swingPercent = weaponSwingTween(attackPercent);
+    const armsAngle = lerp(arcBegin, arcEnd, swingPercent);
+
+    // Distance between the human center and the handle at full extension
+    const maxExtension = attackRange - weaponLength * handlePosition[1];
+    // Current distance between the human center and the handle
+    const armExtension = extensionTween(attackPercent) * maxExtension;
+
+    // Location the rotation is happening around
+    const basePosition = V(restPosition).lerp(
+      swingPosition,
+      basePositionTween(attackPercent)
+    );
+
+    // The location of the handle relative to the body of the human
+    const localPosition = basePosition.add(polarToVec(armsAngle, armExtension));
+
+    // The location of the handle relative to the world
+    const worldPosition = this.holder.localToWorld(localPosition);
+
+    // The angle to draw the weapon sprite at
+    const imageAngle = Math.PI / 2 + armsAngle + this.holder.getDirection(); // Duno why
+    return [worldPosition, imageAngle];
   }
 
   onBeginContact(other: Entity, _: unknown, __: unknown) {
@@ -79,4 +109,22 @@ export default class SwingingWeapon extends BaseEntity {
       other.onMeleeHit(this.weapon, this.getPosition());
     }
   }
+}
+
+function weaponSwingTween(percent: number): number {
+  if (percent < 0.2) {
+    return lerp(0.4, 0, smoothStep(percent / 0.2));
+  } else if (percent < 0.8) {
+    return smoothStep((percent - 0.2) / 0.6);
+  } else {
+    return lerp(1, 0.4, smoothStep((percent - 0.8) / 0.2));
+  }
+}
+
+function extensionTween(percent: number): number {
+  return Math.abs(Math.sin(clamp(percent) * Math.PI)) ** 0.5;
+}
+
+function basePositionTween(percent: number): number {
+  return Math.abs(Math.sin(clamp(percent) * Math.PI)) ** 0.5;
 }

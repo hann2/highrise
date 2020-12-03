@@ -95,7 +95,8 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   }
 
   setPosition(position: V2d) {
-    this.body.position = position;
+    this.body.position[0] = position[0];
+    this.body.position[1] = position[1];
   }
 
   getDirection(): number {
@@ -133,14 +134,22 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
 
     if (weapon instanceof MeleeWeapon && weapon.stats.pickupTexture) {
-      const weaponSprite = Sprite.from(weapon.stats.pickupTexture);
-      weaponSprite.scale.set(weapon.stats.weaponLength / weaponSprite.height);
-      weaponSprite.anchor.set(0.5, 0.5);
-      weaponSprite.rotation = Math.PI / 2;
-      weaponSprite.position.set(0, 0.3);
+      const {
+        weaponLength,
+        handlePosition,
+        restAngle,
+        restPosition,
+        pickupTexture,
+      } = weapon.stats;
+      const weaponSprite = Sprite.from(pickupTexture);
+      weaponSprite.scale.set(weaponLength / weaponSprite.height);
+      weaponSprite.anchor.set(...handlePosition);
+      weaponSprite.rotation = Math.PI / 2 - restAngle;
+      weaponSprite.position.set(...restPosition);
       weaponSprite.name = "weapon";
       this.sprite.addChild(weaponSprite);
     }
+
     this.sprite.addChild(manSprite);
     this.sprite.anchor.set(0.5, 0.5);
 

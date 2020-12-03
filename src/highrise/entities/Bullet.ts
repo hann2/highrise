@@ -3,15 +3,14 @@ import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import CCDBody from "../../core/physics/CCDBody";
-import { PositionalSound } from "../../core/sound/PositionalSound";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { isHittable } from "./Hittable";
-import { choose } from "../../core/util/Random";
-import { SoundName } from "../../core/resources/sounds";
 
 export const BULLET_RADIUS = 0.05; // meters
+
+const COLOR = 0xeedd55;
 
 export default class Bullet extends BaseEntity implements Entity {
   body: Body;
@@ -52,8 +51,9 @@ export default class Bullet extends BaseEntity implements Entity {
   onRender() {
     const velocity = this.body.velocity;
     const dt = this.game!.renderTimestep;
+
     this.sprite.clear();
-    this.sprite.lineStyle(0.02, 0xffff00, 0.5);
+    this.sprite.lineStyle(0.02, 0xffeedd, 0.25);
     this.sprite.moveTo(0, 0);
     this.sprite.lineTo(-velocity[0] * dt, -velocity[1] * dt);
 
