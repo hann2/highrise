@@ -50,6 +50,7 @@ const testRoomTemplate: RoomTemplate = {
 class LevelBuilder {
   closets: Closet[] = [];
   cells: Cell[][] = [];
+  doors: WallID[] = [];
 
   constructor() {
     for (let i = 0; i < LEVEL_SIZE; i++) {
@@ -93,6 +94,7 @@ class LevelBuilder {
     const closetEntities = this.addClosets();
     const pickups = this.addPickups(seed);
     const enemies = this.addEnemies();
+    const doors = this.doors.map(this.wallIdToDoorEntity.bind(this));
     // addSurvivors();
 
     const entities = [
@@ -103,6 +105,7 @@ class LevelBuilder {
       ...closetEntities,
       ...enemies,
       ...pickups,
+      ...doors,
       new Floor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
     ];
 
@@ -154,13 +157,25 @@ class LevelBuilder {
       return new Door(
         V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
         OPEN_WIDTH,
-        Math.PI / 2
+        Math.PI / 2,
+        j === 0 || this.cells[i + 1][j - 1].bottomWall.exists
+          ? -Math.PI / 2
+          : -Math.PI,
+        j === 0 || this.cells[i][j - 1].bottomWall.exists
+          ? Math.PI / 2
+          : Math.PI
       );
     } else {
       return new Door(
         V(x - OPEN_WIDTH / 2, y + OPEN_WIDTH / 2 + WALL_WIDTH / 2),
         OPEN_WIDTH,
-        0
+        0,
+        i === 0 || this.cells[i - 1][j].rightWall.exists
+          ? -Math.PI / 2
+          : -Math.PI,
+        i === 0 || this.cells[i - 1][j + 1].rightWall.exists
+          ? Math.PI / 2
+          : Math.PI
       );
     }
   }
@@ -174,7 +189,7 @@ class LevelBuilder {
   }
 
   addRooms(seed: number): Entity[] {
-    const entities = [];
+    const entities: Entity[] = [];
 
     const allLocations = [];
     for (let i = 0; i < LEVEL_SIZE; i++) {
@@ -230,7 +245,7 @@ class LevelBuilder {
 
         this.cells[farCell.x][farCell.y].content = "empty";
         this.destroyWall(wall);
-        entities.push(this.wallIdToDoorEntity(wall));
+        this.doors.push(wall);
       }
     };
 
@@ -238,8 +253,9 @@ class LevelBuilder {
     this.addIndestructibleBox(V(0, 0), V(3, 3));
     this.destroyWall([V(2, 0), true]);
     this.cells[3][0].content = "empty";
-    entities.push(this.wallIdToDoorEntity([V(2, 0), true]));
+    this.doors.push([V(2, 0), true]);
 
+    addRoom(testRoomTemplate);
     addRoom(testRoomTemplate);
 
     return entities;
@@ -309,7 +325,7 @@ class LevelBuilder {
         } else {
           throw new Error("This should never happen");
         }
-        entities.push(this.wallIdToDoorEntity(doorWall));
+        this.doors.push(doorWall);
 
         this.cells[x][y].content = "empty";
         const closet = {
@@ -396,22 +412,24 @@ class LevelBuilder {
       locations.push(closet.backCell);
     }
     const shuffledLocations = seededShuffle(locations, seed);
-    const consumeLocation = () => {
+
+    const entities: Entity[] = [];
+    const consumeLocation = (f: (l: V2d) => Entity) => {
       const location = shuffledLocations.pop();
       if (!location) {
-        throw new Error("Not enough closets in map for all pickups!");
+        console.warn("Not enough closets in map for all pickups!");
+        return;
       }
       this.cells[location[0]][location[1]].content = "pickup";
-      return this.levelCoordToWorldCoord(location);
+      entities.push(f(this.levelCoordToWorldCoord(location)));
     };
 
-    return [
-      new WeaponPickup(consumeLocation(), new Shotgun()),
-      new WeaponPickup(consumeLocation(), new Rifle()),
-      new WeaponPickup(consumeLocation(), new Axe()),
-      new WeaponPickup(consumeLocation(), new Katana()),
-      new HealthPickup(consumeLocation()),
-    ];
+    consumeLocation((l: V2d) => new WeaponPickup(l, new Shotgun()));
+    consumeLocation((l: V2d) => new WeaponPickup(l, new Rifle()));
+    consumeLocation((l: V2d) => new WeaponPickup(l, new Axe()));
+    consumeLocation((l: V2d) => new WeaponPickup(l, new Katana()));
+    consumeLocation((l: V2d) => new HealthPickup(l));
+    return entities;
   }
 
   addInnerWalls(seed: number): Entity[] {
