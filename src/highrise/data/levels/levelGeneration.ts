@@ -1,4 +1,4 @@
-import { Matrix, Point } from "pixi.js";
+import { Matrix } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
@@ -14,6 +14,8 @@ import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import Floor from "../../Floor";
 import { Level } from "./Level";
+import RoomTemplate from "./RoomTemplate";
+import { zombieRoomTemplate } from "./roomTemplates";
 
 const LEVEL_SIZE = 10;
 const WALL_WIDTH = 0.3;
@@ -32,15 +34,11 @@ const POSSIBLE_ORIENTATIONS: Matrix[] = [
   new Matrix(0, -1, -1, 0),
 ];
 
-interface RoomTemplate {
-  dimensions: V2d;
-  doors: WallID[];
-}
 interface Closet {
   backCell: V2d;
   frontCell: V2d;
 }
-type WallID = [V2d, boolean];
+export type WallID = [V2d, boolean];
 interface WallBuilder {
   exists: boolean;
   destructible: boolean;
@@ -51,14 +49,6 @@ interface Cell {
   rightWall: WallBuilder;
   bottomWall: WallBuilder;
 }
-
-const testRoomTemplate: RoomTemplate = {
-  dimensions: V(3, 2),
-  doors: [
-    [V(-1, 1), true],
-    [V(2, -1), false],
-  ],
-};
 
 class LevelBuilder {
   closets: Closet[] = [];
@@ -263,6 +253,10 @@ class LevelBuilder {
         this.destroyWall(wall);
         this.doors.push(wall);
       }
+
+      for (const z of template.zombiePositions) {
+        entities.push(new Zombie(this.levelCoordToWorldCoord(z.add(corner))));
+      }
     };
 
     // Spawn room
@@ -272,59 +266,10 @@ class LevelBuilder {
     this.doors.push([V(2, 0), true]);
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
-    addRoom(this.orientRoom(testRoomTemplate, shuffledOrientations[0]));
-    addRoom(this.orientRoom(testRoomTemplate, shuffledOrientations[1]));
+    addRoom(zombieRoomTemplate.transform(shuffledOrientations[0]));
+    addRoom(zombieRoomTemplate.transform(shuffledOrientations[1]));
 
     return entities;
-  }
-
-  pointToV2d(p: Point): V2d {
-    return V(p.x, p.y);
-  }
-
-  orientRoom(
-    originalTemplate: RoomTemplate,
-    orientation: Matrix
-  ): RoomTemplate {
-    const transformedDimensions = this.pointToV2d(
-      orientation.apply(originalTemplate.dimensions)
-    );
-    const offset = V(
-      transformedDimensions.x >= 0 ? 0 : -(transformedDimensions.x + 1),
-      transformedDimensions.y >= 0 ? 0 : -(transformedDimensions.y + 1)
-    );
-    const newDimensions: V2d = V(
-      Math.abs(transformedDimensions.x),
-      Math.abs(transformedDimensions.y)
-    );
-
-    const newTemplate = {
-      dimensions: newDimensions,
-      doors: originalTemplate.doors.map(
-        (originalDoor: WallID): WallID => {
-          const [originalCell, originalRight] = originalDoor;
-          const temp = this.pointToV2d(orientation.apply(originalCell));
-          const transformedCell = this.pointToV2d(
-            orientation.apply(originalCell)
-          ).add(offset);
-          const originalWallDirection = originalRight ? V(1, 0) : V(0, 1);
-          const newWallDirection = this.pointToV2d(
-            orientation.apply(originalWallDirection)
-          );
-
-          if (newWallDirection.x === -1 || newWallDirection.y === -1) {
-            return [
-              transformedCell.add(newWallDirection),
-              newWallDirection.x === -1,
-            ];
-          } else {
-            return [transformedCell, newWallDirection.x === 1];
-          }
-        }
-      ),
-    };
-
-    return newTemplate;
   }
 
   addOuterWalls(): Entity[] {
