@@ -1,5 +1,6 @@
 import { Matrix } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
+import { identity } from "../../../core/util/FunctionalUtils";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Door from "../../entities/Door";
@@ -15,7 +16,7 @@ import Zombie from "../../entities/Zombie";
 import Floor from "../../Floor";
 import { Level } from "./Level";
 import RoomTemplate from "./RoomTemplate";
-import { zombieRoomTemplate } from "./roomTemplates";
+import { bathroomTemplate } from "./roomTemplates";
 
 const LEVEL_SIZE = 10;
 const WALL_WIDTH = 0.3;
@@ -240,7 +241,7 @@ class LevelBuilder {
 
     const addRoom = (template: RoomTemplate) => {
       const dimensions = template.dimensions;
-      let corner;
+      let corner: V2d;
       while (!isElligibleRoom((corner = shuffledLocations.pop()!), template));
       this.addIndestructibleBox(corner, dimensions);
 
@@ -254,8 +255,14 @@ class LevelBuilder {
         this.doors.push(wall);
       }
 
-      for (const z of template.zombiePositions) {
-        entities.push(new Zombie(this.levelCoordToWorldCoord(z.add(corner))));
+      for (const entityGenerator of template.entityGenerators) {
+        const entity: Entity | undefined = entityGenerator(
+          (p) => this.levelCoordToWorldCoord(p.add(corner)),
+          identity
+        );
+        if (entity) {
+          entities.push(entity);
+        }
       }
     };
 
@@ -266,8 +273,8 @@ class LevelBuilder {
     this.doors.push([V(2, 0), true]);
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
-    addRoom(zombieRoomTemplate.transform(shuffledOrientations[0]));
-    addRoom(zombieRoomTemplate.transform(shuffledOrientations[1]));
+    addRoom(bathroomTemplate.transform(shuffledOrientations[0]));
+    addRoom(bathroomTemplate.transform(shuffledOrientations[1]));
 
     return entities;
   }
