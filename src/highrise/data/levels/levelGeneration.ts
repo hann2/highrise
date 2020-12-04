@@ -1,4 +1,6 @@
+import { Matrix } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
+import { identity } from "../../../core/util/FunctionalUtils";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Door from "../../entities/Door";
@@ -13,21 +15,31 @@ import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import Floor from "../../Floor";
 import { Level } from "./Level";
+import RoomTemplate from "./RoomTemplate";
+import { bathroomTemplate } from "./roomTemplates";
 
 const LEVEL_SIZE = 10;
 const WALL_WIDTH = 0.3;
 const OPEN_WIDTH = 1.8;
 const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
 
-interface RoomTemplate {
-  dimensions: V2d;
-  doors: WallID[];
-}
+// List of all possible reflections/rotations
+const POSSIBLE_ORIENTATIONS: Matrix[] = [
+  new Matrix(1, 0, 0, 1),
+  new Matrix(1, 0, 0, -1),
+  new Matrix(-1, 0, 0, 1),
+  new Matrix(-1, 0, 0, -1),
+  new Matrix(0, 1, 1, 0),
+  new Matrix(0, 1, -1, 0),
+  new Matrix(0, -1, 1, 0),
+  new Matrix(0, -1, -1, 0),
+];
+
 interface Closet {
   backCell: V2d;
   frontCell: V2d;
 }
-type WallID = [V2d, boolean];
+export type WallID = [V2d, boolean];
 interface WallBuilder {
   exists: boolean;
   destructible: boolean;
@@ -38,14 +50,6 @@ interface Cell {
   rightWall: WallBuilder;
   bottomWall: WallBuilder;
 }
-
-const testRoomTemplate: RoomTemplate = {
-  dimensions: V(3, 2),
-  doors: [
-    [V(-1, 1), true],
-    [V(2, -1), false],
-  ],
-};
 
 class LevelBuilder {
   closets: Closet[] = [];
@@ -153,6 +157,7 @@ class LevelBuilder {
   wallIdToDoorEntity(id: WallID): Entity {
     const [[i, j], right] = id;
     const [x, y] = this.levelCoordToWorldCoord(V(i, j));
+    // TODO: should be able to go 270 deg, but only goes up to 180.
     if (right) {
       return new Door(
         V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
@@ -209,6 +214,8 @@ class LevelBuilder {
       );
     };
 
+    // TODO: It's possible we will block off part of the level with indestructible walls.
+    // That *should* make the room inelligible
     const isElligibleRoom = (
       upperRightCorner: V2d,
       template: RoomTemplate
@@ -234,7 +241,7 @@ class LevelBuilder {
 
     const addRoom = (template: RoomTemplate) => {
       const dimensions = template.dimensions;
-      let corner;
+      let corner: V2d;
       while (!isElligibleRoom((corner = shuffledLocations.pop()!), template));
       this.addIndestructibleBox(corner, dimensions);
 
@@ -247,6 +254,16 @@ class LevelBuilder {
         this.destroyWall(wall);
         this.doors.push(wall);
       }
+
+      for (const entityGenerator of template.entityGenerators) {
+        const entity: Entity | undefined = entityGenerator(
+          (p) => this.levelCoordToWorldCoord(p.add(corner)),
+          identity
+        );
+        if (entity) {
+          entities.push(entity);
+        }
+      }
     };
 
     // Spawn room
@@ -255,8 +272,9 @@ class LevelBuilder {
     this.cells[3][0].content = "empty";
     this.doors.push([V(2, 0), true]);
 
-    addRoom(testRoomTemplate);
-    addRoom(testRoomTemplate);
+    const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
+    addRoom(bathroomTemplate.transform(shuffledOrientations[0]));
+    addRoom(bathroomTemplate.transform(shuffledOrientations[1]));
 
     return entities;
   }
