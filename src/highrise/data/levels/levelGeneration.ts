@@ -120,6 +120,10 @@ class LevelBuilder {
     return this.cells[i][j][right ? "rightWall" : "bottomWall"].destructible;
   }
 
+  wallIdsEqual(a: WallID, b: WallID): boolean {
+    return a[0].x === b[0].x && a[0].y === b[0].y && a[1] === b[1];
+  }
+
   getWallInDirection(cell: V2d, direction: V2d): WallID {
     let newCell = cell;
     if (direction.x === -1 || direction.y === -1) {
@@ -262,8 +266,13 @@ class LevelBuilder {
     ): boolean => {
       const [[wx, wy], wr] = wall;
       const matchDoor = template.doors
-        .map(([doorP, doorR]) => [doorP.add(upperRightCorner), doorR])
-        .some(([[x, y], r]) => x === wx && y === wy && r === wr);
+        .map(
+          ([doorP, doorR]: WallID): WallID => [
+            doorP.add(upperRightCorner),
+            doorR,
+          ]
+        )
+        .some((doorWall: WallID) => this.wallIdsEqual(doorWall, wall));
       if (matchDoor) {
         return false;
       } else if (wr) {
