@@ -25,7 +25,7 @@ import RoomTemplate from "./RoomTemplate";
 import TransformedRoomTemplate from "./TransformedRoomTemplate";
 import ZombieRoomTemplate from "./ZombieRoomTemplate";
 
-const LEVEL_SIZE = 10;
+const LEVEL_SIZE = 12;
 const WALL_WIDTH = 0.3;
 const OPEN_WIDTH = 1.8;
 const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
@@ -41,6 +41,8 @@ const POSSIBLE_ORIENTATIONS: Matrix[] = [
   new Matrix(0, -1, 1, 0),
   new Matrix(0, -1, -1, 0),
 ];
+
+const DIRECTIONS = [V(1, 0), V(0, 1), V(-1, 0), V(0, -1)];
 
 interface Closet {
   backCell: V2d;
@@ -89,6 +91,7 @@ class LevelBuilder {
   destroyWall(id: WallID) {
     const [[i, j], right] = id;
     this.cells[i][j][right ? "rightWall" : "bottomWall"].exists = false;
+    this.cells[i][j][right ? "rightWall" : "bottomWall"].destructible = true;
   }
 
   undestroyWall(id: WallID) {
@@ -99,6 +102,30 @@ class LevelBuilder {
   markIndestructible(id: WallID) {
     const [[i, j], right] = id;
     this.cells[i][j][right ? "rightWall" : "bottomWall"].destructible = false;
+  }
+
+  isExisting(id: WallID) {
+    const [[i, j], right] = id;
+    if (i === -1 || j === -1) {
+      return true;
+    }
+    return this.cells[i][j][right ? "rightWall" : "bottomWall"].exists;
+  }
+
+  isDestructible(id: WallID) {
+    const [[i, j], right] = id;
+    if (i === -1 || j === -1) {
+      return false;
+    }
+    return this.cells[i][j][right ? "rightWall" : "bottomWall"].destructible;
+  }
+
+  getWallInDirection(cell: V2d, direction: V2d): WallID {
+    let newCell = cell;
+    if (direction.x === -1 || direction.y === -1) {
+      newCell = newCell.add(direction);
+    }
+    return [newCell, direction.y === 0];
   }
 
   generateLevel(seed: number = rInteger(0, 2 ** 32)): Level {
@@ -228,8 +255,69 @@ class LevelBuilder {
       );
     };
 
-    // TODO: It's possible we will block off part of the level with indestructible walls.
-    // That *should* make the room inelligible
+    const isWallInRoomIndestructible = (
+      upperRightCorner: V2d,
+      template: RoomTemplate,
+      wall: WallID
+    ): boolean => {
+      const [[wx, wy], wr] = wall;
+      const matchDoor = template.doors
+        .map(([doorP, doorR]) => [doorP.add(upperRightCorner), doorR])
+        .some(([[x, y], r]) => x === wx && y === wy && r === wr);
+      if (matchDoor) {
+        return false;
+      } else if (wr) {
+        return (
+          (wx === upperRightCorner.x - 1 ||
+            wx === upperRightCorner.x + template.dimensions.x - 1) &&
+          wy >= upperRightCorner.y &&
+          wy <= upperRightCorner.y + template.dimensions.y - 1
+        );
+      }
+      return (
+        (wy === upperRightCorner.y - 1 ||
+          wy === upperRightCorner.y + template.dimensions.y - 1) &&
+        wx >= upperRightCorner.x &&
+        wx <= upperRightCorner.x + template.dimensions.x - 1
+      );
+    };
+
+    const doesRoomCutoffPartOfMap = (
+      upperRightCorner: V2d,
+      template: RoomTemplate
+    ): boolean => {
+      const startingPont = V(5, 5);
+
+      let seenCount = 0;
+      const seen: boolean[][] = [];
+      for (let i = 0; i < LEVEL_SIZE; i++) {
+        seen[i] = [];
+      }
+
+      // BFS
+      const queue: V2d[] = [startingPont];
+      while (queue.length) {
+        const p = queue.shift()!;
+        const [x, y] = p;
+        if (seen[x][y]) {
+          continue;
+        }
+        seen[x][y] = true;
+        seenCount += 1;
+        for (const direction of DIRECTIONS) {
+          const wall = this.getWallInDirection(p, direction);
+          if (
+            this.isDestructible(wall) &&
+            !isWallInRoomIndestructible(upperRightCorner, template, wall)
+          ) {
+            queue.push(p.add(direction));
+          }
+        }
+      }
+
+      return seenCount === LEVEL_SIZE * LEVEL_SIZE;
+    };
+
     const isElligibleRoom = (
       upperRightCorner: V2d,
       template: RoomTemplate
@@ -250,7 +338,7 @@ class LevelBuilder {
           return false;
         }
       }
-      return true;
+      return doesRoomCutoffPartOfMap(upperRightCorner, template);
     };
 
     const addRoom = (template: RoomTemplate) => {
@@ -436,17 +524,11 @@ class LevelBuilder {
         furthestDistance = distance;
         furthestPointSeen = p;
       }
-      if (x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists) {
-        queue.push([V(x + 1, y), distance + 1]);
-      }
-      if (y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists) {
-        queue.push([V(x, y + 1), distance + 1]);
-      }
-      if (x > 0 && !this.cells[x - 1][y].rightWall.exists) {
-        queue.push([V(x - 1, y), distance + 1]);
-      }
-      if (y > 0 && !this.cells[x][y - 1].bottomWall.exists) {
-        queue.push([V(x, y - 1), distance + 1]);
+      for (const direction of DIRECTIONS) {
+        const wall = this.getWallInDirection(p, direction);
+        if (!this.isExisting(wall)) {
+          queue.push([p.add(direction), distance + 1]);
+        }
       }
     }
 
@@ -600,5 +682,6 @@ class LevelBuilder {
 }
 
 export const generateLevel = (seed: number = rInteger(0, 2 ** 32)): Level => {
+  console.log("Generating level with seed " + seed);
   return new LevelBuilder().generateLevel(seed);
 };
