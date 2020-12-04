@@ -1,16 +1,29 @@
 import { Matrix, Point } from "pixi.js";
+import Entity from "../../../core/entity/Entity";
+import { polarToVec } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
 import { WallID } from "./levelGeneration";
+
+type CellTransformer = (cell: V2d) => V2d;
+type AngleTransformer = (cell: number) => number;
+export type EntityGenerator = (
+  transformCell: CellTransformer,
+  transformAngle: AngleTransformer
+) => Entity | undefined;
 
 export default class RoomTemplate {
   dimensions: V2d;
   doors: WallID[];
-  zombiePositions: V2d[];
+  entityGenerators: EntityGenerator[];
 
-  constructor(dimensions: V2d, doors: WallID[], zombiePositions: V2d[]) {
+  constructor(
+    dimensions: V2d,
+    doors: WallID[],
+    entityGenerators: EntityGenerator[]
+  ) {
     this.dimensions = dimensions;
     this.doors = doors;
-    this.zombiePositions = zombiePositions;
+    this.entityGenerators = entityGenerators;
   }
 
   transform(orientation: Matrix): RoomTemplate {
@@ -44,11 +57,28 @@ export default class RoomTemplate {
         return [transformedCell, newWallDirection.x === 1];
       }
     };
+    const transformAngle = (originalAngle: number): number => {
+      const originalVector = polarToVec(originalAngle, 1);
+      const transformedVector = this.pointToV2d(
+        orientation.apply(originalVector)
+      );
+      return transformedVector.angle;
+    };
 
+    const transformedGenerators: EntityGenerator[] = this.entityGenerators.map(
+      (oldGenerator: EntityGenerator) => (
+        transformCell2: CellTransformer,
+        transformAngle2: AngleTransformer
+      ) =>
+        oldGenerator(
+          (p: V2d) => transformCell2(transformCell(p)),
+          (a: number) => transformAngle2(transformAngle(a))
+        )
+    );
     const newTemplate: RoomTemplate = new RoomTemplate(
       newDimensions,
       this.doors.map(transformWall),
-      this.zombiePositions.map(transformCell)
+      transformedGenerators
     );
 
     return newTemplate;
