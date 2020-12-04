@@ -1,6 +1,6 @@
 import Entity from "../../../core/entity/Entity";
 import { V } from "../../../core/Vector";
-import Decoration from "../../entities/Decoration";
+import Furniture from "../../entities/Furniture";
 import { lobbyDesk } from "../../view/DecorationSprite";
 import {
   AngleTransformer,
@@ -43,7 +43,7 @@ export default class LobbyRoomTemplate extends RoomTemplate {
     transformAngle: AngleTransformer
   ): Entity[] {
     const entities: Entity[] = [];
-    entities.push(new Decoration(transformCell(V(2.5, 3.5)), lobbyDesk));
+    entities.push(new Furniture(transformCell(V(2.5, 3.5)), lobbyDesk));
     return entities;
   }
 }
