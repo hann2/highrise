@@ -27,9 +27,7 @@ export class SwingDescriptor {
     public restPosition: [number, number] = [0, 0],
     // Handle position while swinging
     public swingPosition: [number, number] = [0, 0]
-  ) {
-    console.log("new swing descriptor", swingDurations);
-  }
+  ) {}
 
   // Total duration of the swing in seconds
   get duration() {

@@ -85,7 +85,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   // TODO: Guarantee that this happens after everyone else's render calls
   onRender() {
     [this.sprite.x, this.sprite.y] = this.body.position;
-    this.sprite.angle = radToDeg(this.body.angle);
+    this.sprite.rotation = this.body.angle;
 
     const healthPercent = clamp(this.hp / 100);
     (this.sprite.getChildByName("man") as Sprite).tint = colorLerp(

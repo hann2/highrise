@@ -56,7 +56,7 @@ export default class SwingingWeapon extends BaseEntity {
   onRender() {
     const [position, angle] = this.getWeaponPositionAndAngle();
     this.sprite.position.set(...position);
-    this.sprite.angle = radToDeg(angle);
+    this.sprite.rotation = angle;
   }
 
   getKnockback() {

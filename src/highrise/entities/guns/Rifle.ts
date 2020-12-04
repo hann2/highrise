@@ -4,7 +4,7 @@ export default class Rifle extends Gun {
   constructor() {
     super({
       name: "Rifle",
-      fireRate: 10,
+      fireRate: 8,
       bulletDamage: 40,
       muzzleVelocity: 120,
       fireMode: FireMode.FULL_AUTO,

@@ -9,6 +9,22 @@ import manBrownGun from "../../resources/images/Man Brown/manBrown_gun.png";
 import manBrownStand from "../../resources/images/Man Brown/manBrown_stand.png";
 import manOldGun from "../../resources/images/Man Old/manOld_gun.png";
 import manOldStand from "../../resources/images/Man Old/manOld_stand.png";
+import muzzleFlash1 from "../../resources/images/muzzle_flashs/muzzle-flash-1.png";
+import muzzleFlash10 from "../../resources/images/muzzle_flashs/muzzle-flash-10.png";
+import muzzleFlash11 from "../../resources/images/muzzle_flashs/muzzle-flash-11.png";
+import muzzleFlash12 from "../../resources/images/muzzle_flashs/muzzle-flash-12.png";
+import muzzleFlash13 from "../../resources/images/muzzle_flashs/muzzle-flash-13.png";
+import muzzleFlash14 from "../../resources/images/muzzle_flashs/muzzle-flash-14.png";
+import muzzleFlash15 from "../../resources/images/muzzle_flashs/muzzle-flash-15.png";
+import muzzleFlash16 from "../../resources/images/muzzle_flashs/muzzle-flash-16.png";
+import muzzleFlash2 from "../../resources/images/muzzle_flashs/muzzle-flash-2.png";
+import muzzleFlash3 from "../../resources/images/muzzle_flashs/muzzle-flash-3.png";
+import muzzleFlash4 from "../../resources/images/muzzle_flashs/muzzle-flash-4.png";
+import muzzleFlash5 from "../../resources/images/muzzle_flashs/muzzle-flash-5.png";
+import muzzleFlash6 from "../../resources/images/muzzle_flashs/muzzle-flash-6.png";
+import muzzleFlash7 from "../../resources/images/muzzle_flashs/muzzle-flash-7.png";
+import muzzleFlash8 from "../../resources/images/muzzle_flashs/muzzle-flash-8.png";
+import muzzleFlash9 from "../../resources/images/muzzle_flashs/muzzle-flash-9.png";
 import pointLight from "../../resources/images/point-light.png";
 import katana from "../../resources/images/weapons/katana.png";
 import zoimbie1Hold from "../../resources/images/Zombie 1/zoimbie1_hold.png";
@@ -96,6 +112,23 @@ export default class Preloader extends BaseEntity implements Entity {
       zoimbie1Stand,
       pointLight,
       "asdfasdfasdf",
+
+      muzzleFlash1,
+      muzzleFlash2,
+      muzzleFlash3,
+      muzzleFlash4,
+      muzzleFlash5,
+      muzzleFlash6,
+      muzzleFlash7,
+      muzzleFlash8,
+      muzzleFlash9,
+      muzzleFlash10,
+      muzzleFlash11,
+      muzzleFlash12,
+      muzzleFlash13,
+      muzzleFlash14,
+      muzzleFlash15,
+      muzzleFlash16,
     ];
     let loaded = 0;
     const total = imageUrls.length;

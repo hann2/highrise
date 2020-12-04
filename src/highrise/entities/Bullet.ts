@@ -74,6 +74,6 @@ export default class Bullet extends BaseEntity implements Entity {
 
     [this.sprite.x, this.sprite.y] = this.body.position;
     [this.light.lightSprite.x, this.light.lightSprite.y] = this.body.position;
-    this.sprite.angle = this.body.angle;
+    this.sprite.rotation = this.body.angle;
   }
 }

@@ -128,7 +128,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
   onRender() {
     [this.sprite.x, this.sprite.y] = this.body.position;
-    this.sprite.angle = radToDeg(this.body.angle);
+    this.sprite.rotation = this.body.angle;
 
     if (this.attackProgress != null) {
       if (this.attackProgress < ZOMBIE_ATTACK_WINDUP) {

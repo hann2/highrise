@@ -19,7 +19,6 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   onDestroy() {
-    console.log("light onDestroy()");
     this.lightManager!.removeLight(this);
     this.lightManager = undefined;
   }

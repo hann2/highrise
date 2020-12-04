@@ -5,6 +5,7 @@ import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { polarToVec } from "../../../core/util/MathUtil";
 import { choose, rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
+import MuzzleFlash from "../../effects/MuzzleFlash";
 import Bullet from "../Bullet";
 import Human from "../Human";
 
@@ -114,6 +115,7 @@ export default class Gun extends BaseEntity implements Entity {
         // Actually shoot
         this.makeProjectile(muzzlePosition, direction);
         this.playSound("shoot", muzzlePosition);
+        this.game?.addEntity(new MuzzleFlash(muzzlePosition, direction));
         this.shootCooldown += 1.0 / this.stats.fireRate;
         this.ammo -= 1;
 
