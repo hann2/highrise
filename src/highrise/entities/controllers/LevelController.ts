@@ -5,6 +5,8 @@ import { generateLevel } from "../../data/levels/levelGeneration";
 import Gun from "../guns/Gun";
 import Shotgun from "../guns/Shotgun";
 import Human from "../Human";
+import Axe from "../meleeWeapons/Axe";
+import Katana from "../meleeWeapons/Katana";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 import AllyHumanController from "./AllyController";
 import PlayerHumanController from "./PlayerHumanController";
@@ -36,8 +38,8 @@ export default class LevelController extends BaseEntity implements Entity {
       const player = this.game!.addEntity(new Human());
       player.giveWeapon(
         choose<Gun | MeleeWeapon>(
-          // new Axe(),
-          // new Katana(),
+          new Axe(),
+          new Katana(),
           // new Pistol(),
           // new Rifle(),
           new Shotgun()

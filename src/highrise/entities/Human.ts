@@ -141,15 +141,11 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
 
     if (weapon instanceof MeleeWeapon && weapon.stats.pickupTexture) {
-      const {
-        weaponLength,
-        handlePosition,
-        restAngle,
-        restPosition,
-        pickupTexture,
-      } = weapon.stats;
+      const { size, handlePosition, pickupTexture } = weapon.stats;
+      const { restAngle, restPosition } = weapon.swing;
+
       const weaponSprite = Sprite.from(pickupTexture);
-      weaponSprite.scale.set(weaponLength / weaponSprite.height);
+      weaponSprite.scale.set(size[1] / weaponSprite.height);
       weaponSprite.anchor.set(...handlePosition);
       weaponSprite.rotation = Math.PI / 2 + restAngle;
       weaponSprite.position.set(...restPosition);
