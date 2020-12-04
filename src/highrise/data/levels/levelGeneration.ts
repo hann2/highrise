@@ -4,11 +4,14 @@ import { identity } from "../../../core/util/FunctionalUtils";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import BaseFloor from "../../BaseFloor";
+import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
+import Pistol from "../../entities/guns/Pistol";
 import Rifle from "../../entities/guns/Rifle";
 import PumpShotgun from "../../entities/guns/Shotgun";
 import HealthPickup from "../../entities/HealthPickup";
+import Human from "../../entities/Human";
 import Axe from "../../entities/meleeWeapons/Axe";
 import Katana from "../../entities/meleeWeapons/Katana";
 import Wall from "../../entities/Wall";
@@ -102,10 +105,9 @@ class LevelBuilder {
     const innerWalls = this.addInnerWalls(seed);
     const exits = this.addExits();
     const closetEntities = this.addClosets();
-    const pickups = this.addPickups(seed);
+    const pickups = this.fillClosets(seed);
     const enemies = this.addEnemies();
     const doors = this.doors.map(this.wallIdToDoorEntity.bind(this));
-    // addSurvivors();
 
     const entities = [
       ...outerWalls,
@@ -409,7 +411,7 @@ class LevelBuilder {
         continue;
       }
       seen[x][y] = true;
-      if (distance > furthestDistance) {
+      if (distance > furthestDistance && !this.cells[x][y].content) {
         furthestDistance = distance;
         furthestPointSeen = p;
       }
@@ -453,7 +455,7 @@ class LevelBuilder {
     return enemies;
   }
 
-  addPickups(seed: number): Entity[] {
+  fillClosets(seed: number): Entity[] {
     const locations = [];
     for (const closet of this.closets) {
       locations.push(closet.backCell);
@@ -461,14 +463,19 @@ class LevelBuilder {
     const shuffledLocations = seededShuffle(locations, seed);
 
     const entities: Entity[] = [];
-    const consumeLocation = (f: (l: V2d) => Entity) => {
+    const consumeLocation = (f: (l: V2d) => Entity | Entity[]) => {
       const location = shuffledLocations.pop();
       if (!location) {
         console.warn("Not enough closets in map for all pickups!");
         return;
       }
       this.cells[location[0]][location[1]].content = "pickup";
-      entities.push(f(this.levelCoordToWorldCoord(location)));
+      const entity = f(this.levelCoordToWorldCoord(location));
+      if (entity instanceof Array) {
+        entities.push(...entity);
+      } else {
+        entities.push(entity);
+      }
     };
 
     consumeLocation((l: V2d) => new WeaponPickup(l, new PumpShotgun()));
@@ -476,6 +483,11 @@ class LevelBuilder {
     consumeLocation((l: V2d) => new WeaponPickup(l, new Axe()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Katana()));
     consumeLocation((l: V2d) => new HealthPickup(l));
+    consumeLocation((l: V2d) => {
+      const surv = new Human(l);
+      surv.giveWeapon(new Pistol());
+      return [surv, new SurvivorHumanController(surv)];
+    });
     return entities;
   }
 
