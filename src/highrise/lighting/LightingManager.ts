@@ -16,6 +16,14 @@ export default class LightingManager extends BaseEntity implements Entity {
     return this.game!.renderer.pixiRenderer;
   }
 
+  handlers = {
+    resize: () => {
+      const { width, height, resolution } = this.renderer;
+      this.texture.resize(width / resolution, height / resolution);
+      console.log("resizing light map");
+    },
+  };
+
   onAdd() {
     const { width, height, resolution } = this.renderer;
     this.texture = RenderTexture.create({

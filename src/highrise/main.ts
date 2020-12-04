@@ -8,6 +8,7 @@ import Preloader from "./Preloader";
 import CameraController from "./entities/controllers/CameraController";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import LightingManager from "./lighting/LightingManager";
+import ResizeListener from "../core/util/ResizeListener";
 
 declare global {
   interface Window {
@@ -19,7 +20,7 @@ export async function main() {
   await new Promise((resolve) => window.addEventListener("load", resolve));
 
   const game = new Game({
-    tickIterations: 4,
+    tickIterations: 1,
   });
   game.world.frictionGravity = 10;
   initLayers(game);
@@ -34,6 +35,7 @@ export async function main() {
 
   game.addEntity(new AutoPauser());
   game.addEntity(new FPSMeter());
+  game.addEntity(new ResizeListener());
   game.addEntity(new LevelController());
   game.addEntity(new CameraController(game.camera));
   game.addEntity(new PositionalSoundListener());
