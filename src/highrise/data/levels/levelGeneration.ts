@@ -3,6 +3,7 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import BaseFloor from "../../BaseFloor";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
 import Rifle from "../../entities/guns/Rifle";
@@ -110,7 +111,7 @@ class LevelBuilder {
       ...enemies,
       ...pickups,
       ...doors,
-      new Floor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
+      new BaseFloor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
     ];
 
     return {
@@ -255,15 +256,22 @@ class LevelBuilder {
         this.doors.push(wall);
       }
 
-      for (const entityGenerator of template.entityGenerators) {
-        const entity: Entity | undefined = entityGenerator(
+      if (template.floor) {
+        entities.push(
+          new Floor(
+            template.floor,
+            this.levelCoordToWorldCoord(corner.sub(V(0.5, 0.5))),
+            dimensions.mul(CELL_WIDTH)
+          )
+        );
+      }
+
+      entities.push(
+        ...template.entityGenerator(
           (p) => this.levelCoordToWorldCoord(p.add(corner)),
           identity
-        );
-        if (entity) {
-          entities.push(entity);
-        }
-      }
+        )
+      );
     };
 
     // Spawn room

@@ -2,6 +2,7 @@ import { Matrix, Point } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { polarToVec } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
+import { DecorationSprite } from "../../view/DecorationSprite";
 import { WallID } from "./levelGeneration";
 
 type CellTransformer = (cell: V2d) => V2d;
@@ -9,37 +10,46 @@ type AngleTransformer = (cell: number) => number;
 export type EntityGenerator = (
   transformCell: CellTransformer,
   transformAngle: AngleTransformer
-) => Entity | undefined;
+) => Entity[];
 
 export default class RoomTemplate {
   dimensions: V2d;
   doors: WallID[];
-  entityGenerators: EntityGenerator[];
+  entityGenerator: EntityGenerator;
+  floor?: DecorationSprite;
 
   constructor(
     dimensions: V2d,
     doors: WallID[],
-    entityGenerators: EntityGenerator[]
+    entityGenerator: EntityGenerator,
+    floor?: DecorationSprite
   ) {
     this.dimensions = dimensions;
     this.doors = doors;
-    this.entityGenerators = entityGenerators;
+    this.entityGenerator = entityGenerator;
+    this.floor = floor;
   }
 
   transform(orientation: Matrix): RoomTemplate {
-    const transformedDimensions = this.pointToV2d(
-      orientation.apply(this.dimensions)
-    );
-    const offset = V(
-      transformedDimensions.x >= 0 ? 0 : -(transformedDimensions.x + 1),
-      transformedDimensions.y >= 0 ? 0 : -(transformedDimensions.y + 1)
-    );
-    const newDimensions: V2d = V(
-      Math.abs(transformedDimensions.x),
-      Math.abs(transformedDimensions.y)
-    );
-    const transformCell = (originalCell: V2d) =>
-      this.pointToV2d(orientation.apply(originalCell)).add(offset);
+    const transformDimension = (dimensions: V2d) => {
+      const transformedDimensions = this.pointToV2d(
+        orientation.apply(dimensions)
+      );
+      return V(
+        Math.abs(transformedDimensions.x),
+        Math.abs(transformedDimensions.y)
+      );
+    };
+    const transformCell = (originalCell: V2d) => {
+      const transformedDimensions = this.pointToV2d(
+        orientation.apply(this.dimensions)
+      );
+      const offset = V(
+        transformedDimensions.x >= 0 ? 0 : -(transformedDimensions.x + 1),
+        transformedDimensions.y >= 0 ? 0 : -(transformedDimensions.y + 1)
+      );
+      return this.pointToV2d(orientation.apply(originalCell)).add(offset);
+    };
     const transformWall = (originalWall: WallID): WallID => {
       const [originalCell, originalRight] = originalWall;
       const transformedCell = transformCell(originalCell);
@@ -65,20 +75,19 @@ export default class RoomTemplate {
       return transformedVector.angle;
     };
 
-    const transformedGenerators: EntityGenerator[] = this.entityGenerators.map(
-      (oldGenerator: EntityGenerator) => (
-        transformCell2: CellTransformer,
-        transformAngle2: AngleTransformer
-      ) =>
-        oldGenerator(
-          (p: V2d) => transformCell2(transformCell(p)),
-          (a: number) => transformAngle2(transformAngle(a))
-        )
-    );
+    const transformedGenerator: EntityGenerator = (
+      transformCell2: CellTransformer,
+      transformAngle2: AngleTransformer
+    ) =>
+      this.entityGenerator(
+        (p: V2d) => transformCell2(transformCell(p)),
+        (a: number) => transformAngle2(transformAngle(a))
+      );
     const newTemplate: RoomTemplate = new RoomTemplate(
-      newDimensions,
+      transformDimension(this.dimensions),
       this.doors.map(transformWall),
-      transformedGenerators
+      transformedGenerator,
+      this.floor
     );
 
     return newTemplate;

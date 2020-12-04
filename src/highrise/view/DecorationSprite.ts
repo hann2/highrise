@@ -77,3 +77,10 @@ export const leftSink1: DecorationSprite = {
   dimensions: V(48, 68),
   heightMeters: 0.8,
 };
+
+export const bathroomTiles: DecorationSprite = {
+  imageName: bathroom,
+  offset: V(36, 180),
+  dimensions: V(24, 24),
+  heightMeters: 1,
+};
