@@ -10,7 +10,7 @@ import { GameSprite } from "../../core/entity/Entity";
 import { Layers } from "../layers";
 
 export default class WeaponPickup extends BaseEntity {
-  sprite?: Sprite & GameSprite;
+  sprite: Sprite & GameSprite;
 
   constructor(position: V2d, private weapon: Gun | MeleeWeapon) {
     super();

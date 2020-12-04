@@ -5,27 +5,45 @@ import Light from "./Light";
 import { Shadows } from "./Shadows";
 
 export class PointLight extends Light {
-  shadow: Shadows;
+  shadow?: Shadows;
 
   constructor(
-    radius: number = 1,
+    private radius: number = 1,
     intensity: number = 1.0,
     color: number = 0xffffff,
+    private shadowsEnabled: boolean = false
   ) {
     super(Sprite.from(pointLight));
     this.lightSprite.anchor.set(0.5, 0.5);
 
-    this.shadow = this.addChild(new Shadows());
-    this.lightSprite.mask = this.shadow.shadowGraphics;
-
     this.setRadius(radius);
     this.setIntensity(intensity);
     this.setColor(color);
+
+    if (shadowsEnabled) {
+      this.enableShadows();
+    }
+  }
+
+  enableShadows() {
+    this.shadowsEnabled = true;
+    if (!this.shadow) {
+      const { x, y } = this.lightSprite.position;
+      this.shadow = this.addChild(new Shadows(V(x, y), this.radius));
+      this.lightSprite.mask = this.shadow.shadowGraphics;
+    }
+  }
+
+  disableShadows() {
+    this.shadowsEnabled = false;
+    this.shadow?.destroy();
+    this.shadow = undefined;
+    this.lightSprite.mask = null;
   }
 
   setPosition([x, y]: [number, number]) {
     this.lightSprite.position.set(x, y);
-    this.shadow.setPosition(V(x, y));
+    this.shadow?.setPosition(V(x, y));
   }
 
   setIntensity(value: number) {
@@ -33,6 +51,7 @@ export class PointLight extends Light {
   }
 
   setRadius(radius: number) {
+    this.radius = radius;
     this.lightSprite.width = radius * 2;
     this.lightSprite.height = radius * 2;
   }
