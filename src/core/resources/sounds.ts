@@ -61,6 +61,7 @@ import rifle2Shot2 from "../../../resources/audio/guns/rifle/rifle2-shot-2.mp3";
 import rifle2Shot3 from "../../../resources/audio/guns/rifle/rifle2-shot-3.mp3";
 import rifle2Shot4 from "../../../resources/audio/guns/rifle/rifle2-shot-4.mp3";
 import shotgunLoadShell1 from "../../../resources/audio/guns/shotgun/shotgun-load-shell-1.mp3";
+import shotgunLoadShell2 from "../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
 import shotgunLoading1 from "../../../resources/audio/guns/shotgun/shotgun-loading-1.mp3";
 import shotgunPump1 from "../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import shotgunShot1 from "../../../resources/audio/guns/shotgun/shotgun-shot-1.mp3";
@@ -139,6 +140,7 @@ export const SOUND_URLS = {
   rifleSuppressedShot6,
   shotgunLoading1,
   shotgunLoadShell1,
+  shotgunLoadShell2,
   shotgunPump1,
   shotgunShot1,
   shotgunShot2,

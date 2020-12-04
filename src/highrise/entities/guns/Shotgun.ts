@@ -22,7 +22,7 @@ export default class PumpShotgun extends Gun {
         shoot: ["shotgunShot3"],
         empty: ["dryFire1"],
         pickup: ["shotgunPump1"],
-        reload: ["shotgunLoadShell1"],
+        reload: ["shotgunLoadShell2"],
         pump: ["shotgunPump1"],
       },
     });
