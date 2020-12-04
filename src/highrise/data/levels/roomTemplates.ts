@@ -10,8 +10,10 @@ import {
   downToilet2,
   leftSink1,
   leftToilet1,
+  leftToilet2,
   rightSink1,
   rightToilet1,
+  rightToilet2,
 } from "../../view/DecorationSprite";
 import RoomTemplate, { EntityGenerator } from "./RoomTemplate";
 
@@ -49,25 +51,37 @@ const addSinkAt = (p: V2d): EntityGenerator => (
 ) => {
   const vec = polarToVec(transformAngle(0), 1);
   if (vec.x === 1) {
-    return new Decoration(transformCell(p), rightSink1);
+    return new Decoration(transformCell(p).add(V(-0.5, 0)), rightSink1);
   } else if (vec.x === -1) {
-    return new Decoration(transformCell(p), leftSink1);
+    return new Decoration(transformCell(p).add(V(0.5, 0)), leftSink1);
   } else if (vec.y === 1) {
-    return new Decoration(transformCell(p), choose(downSink1, downSink2));
+    return new Decoration(
+      transformCell(p).add(V(0, -0.6)),
+      choose(downSink1, downSink2)
+    );
   }
 };
 
-const atToiletAt = (p: V2d): EntityGenerator => (
+const addToiletAt = (p: V2d): EntityGenerator => (
   transformCell,
   transformAngle
 ) => {
   const vec = polarToVec(transformAngle(0), 1);
   if (vec.x === 1) {
-    return new Decoration(transformCell(p), leftToilet1);
+    return new Decoration(
+      transformCell(p).add(V(0.4, 0)),
+      choose(leftToilet1, leftToilet2)
+    );
   } else if (vec.x === -1) {
-    return new Decoration(transformCell(p), rightToilet1);
+    return new Decoration(
+      transformCell(p).add(V(-0.4, 0)),
+      choose(rightToilet1, rightToilet2)
+    );
   } else if (vec.y === -1) {
-    return new Decoration(transformCell(p), choose(downToilet1, downToilet2));
+    return new Decoration(
+      transformCell(p).add(V(0, -0.4)),
+      choose(downToilet1, downToilet2)
+    );
   }
 };
 
@@ -77,8 +91,8 @@ export const bathroomTemplate: RoomTemplate = new RoomTemplate(
   [
     addSinkAt(V(0, 1)),
     addSinkAt(V(0, 2)),
-    atToiletAt(V(1, 0)),
-    atToiletAt(V(1, 1)),
-    atToiletAt(V(1, 2)),
+    addToiletAt(V(1, 0)),
+    addToiletAt(V(1, 1)),
+    addToiletAt(V(1, 2)),
   ]
 );

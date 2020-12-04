@@ -10,70 +10,70 @@ export interface DecorationSprite {
 
 export const rightToilet1: DecorationSprite = {
   imageName: bathroom,
-  offset: V(48, 304),
-  dimensions: V(48, 64),
+  offset: V(48, 300),
+  dimensions: V(48, 68),
   heightMeters: 1,
 };
 
 export const leftToilet1: DecorationSprite = {
   imageName: bathroom,
-  offset: V(96, 304),
-  dimensions: V(48, 64),
+  offset: V(96, 300),
+  dimensions: V(48, 68),
   heightMeters: 1,
 };
 
 export const downToilet1: DecorationSprite = {
   imageName: bathroom,
-  offset: V(144, 304),
-  dimensions: V(48, 64),
-  heightMeters: 1,
+  offset: V(146, 300),
+  dimensions: V(46, 68),
+  heightMeters: 0.9,
 };
 
 export const downToilet2: DecorationSprite = {
   imageName: bathroom,
-  offset: V(192, 304),
-  dimensions: V(48, 64),
-  heightMeters: 1,
+  offset: V(192, 300),
+  dimensions: V(46, 68),
+  heightMeters: 0.9,
 };
 
 export const rightToilet2: DecorationSprite = {
   imageName: bathroom,
-  offset: V(240, 304),
-  dimensions: V(48, 64),
+  offset: V(240, 300),
+  dimensions: V(48, 68),
   heightMeters: 1,
 };
 
 export const leftToilet2: DecorationSprite = {
   imageName: bathroom,
-  offset: V(288, 304),
-  dimensions: V(48, 64),
+  offset: V(288, 300),
+  dimensions: V(48, 68),
   heightMeters: 1,
 };
 
 export const downSink1: DecorationSprite = {
   imageName: bathroom,
-  offset: V(0, 370),
-  dimensions: V(48, 64),
-  heightMeters: 1,
+  offset: V(0, 376),
+  dimensions: V(47, 68),
+  heightMeters: 0.6,
 };
 
 export const downSink2: DecorationSprite = {
   imageName: bathroom,
-  offset: V(48, 370),
-  dimensions: V(48, 64),
-  heightMeters: 1,
+  offset: V(48, 376),
+  dimensions: V(47, 68),
+  heightMeters: 0.6,
 };
 
 export const rightSink1: DecorationSprite = {
   imageName: bathroom,
-  offset: V(96, 370),
-  dimensions: V(48, 64),
-  heightMeters: 1,
+  offset: V(96, 372),
+  dimensions: V(48, 68),
+  heightMeters: 0.8,
 };
 
 export const leftSink1: DecorationSprite = {
   imageName: bathroom,
-  offset: V(144, 370),
-  dimensions: V(48, 64),
-  heightMeters: 1,
+  offset: V(144, 372),
+  dimensions: V(48, 68),
+  heightMeters: 0.8,
 };
