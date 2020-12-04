@@ -42,7 +42,14 @@ const POSSIBLE_ORIENTATIONS: Matrix[] = [
   new Matrix(0, -1, -1, 0),
 ];
 
-const DIRECTIONS = [V(1, 0), V(0, 1), V(-1, 0), V(0, -1)];
+const Direction = {
+  RIGHT: V(1, 0),
+  DOWN: V(0, 1),
+  LEFT: V(-1, 0),
+  UP: V(0, -1),
+};
+
+const DIRECTIONS = Object.values(Direction);
 
 interface Closet {
   backCell: V2d;
@@ -202,30 +209,47 @@ class LevelBuilder {
   wallIdToDoorEntity(id: WallID): Entity {
     const [[i, j], right] = id;
     const [x, y] = this.levelCoordToWorldCoord(V(i, j));
-    // TODO: should be able to go 270 deg, but only goes up to 180.
+
+    const countWallsThatExist = (walls: WallID[]) => {
+      let count = 0;
+      for (const wall of walls) {
+        count += 1;
+        if (this.isExisting(wall)) {
+          break;
+        }
+      }
+      return count;
+    };
+
     if (right) {
+      const wallsClockwise: WallID[] = [
+        this.getWallInDirection(V(i, j), Direction.UP),
+        this.getWallInDirection(V(i, j - 1), Direction.RIGHT),
+        this.getWallInDirection(V(i + 1, j), Direction.UP),
+      ];
+      const wallsCounterClockwise = [...wallsClockwise].reverse();
+
       return new Door(
         V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
         OPEN_WIDTH,
         Math.PI / 2,
-        j === 0 || this.cells[i + 1][j - 1].bottomWall.exists
-          ? -Math.PI / 2
-          : -Math.PI,
-        j === 0 || this.cells[i][j - 1].bottomWall.exists
-          ? Math.PI / 2
-          : Math.PI
+        (countWallsThatExist(wallsCounterClockwise) * -Math.PI) / 2,
+        (countWallsThatExist(wallsClockwise) * Math.PI) / 2
       );
     } else {
+      const wallsClockwise: WallID[] = [
+        this.getWallInDirection(V(i, j + 1), Direction.LEFT),
+        this.getWallInDirection(V(i - 1, j), Direction.DOWN),
+        this.getWallInDirection(V(i, j), Direction.LEFT),
+      ];
+      const wallsCounterClockwise = [...wallsClockwise].reverse();
+
       return new Door(
         V(x - OPEN_WIDTH / 2, y + OPEN_WIDTH / 2 + WALL_WIDTH / 2),
         OPEN_WIDTH,
         0,
-        i === 0 || this.cells[i - 1][j].rightWall.exists
-          ? -Math.PI / 2
-          : -Math.PI,
-        i === 0 || this.cells[i - 1][j + 1].rightWall.exists
-          ? Math.PI / 2
-          : Math.PI
+        (countWallsThatExist(wallsCounterClockwise) * -Math.PI) / 2,
+        (countWallsThatExist(wallsClockwise) * Math.PI) / 2
       );
     }
   }
@@ -555,7 +579,7 @@ class LevelBuilder {
   }
 
   addEnemies(): Entity[] {
-    const enemies = [];
+    const enemies: Entity[] = [];
     for (let i = 0; i < LEVEL_SIZE; i++) {
       for (let j = 0; j < LEVEL_SIZE; j++) {
         if (!this.cells[i][j].content) {
