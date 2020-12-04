@@ -1,3 +1,4 @@
+import { Matrix, Point } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
@@ -18,6 +19,18 @@ const LEVEL_SIZE = 10;
 const WALL_WIDTH = 0.3;
 const OPEN_WIDTH = 1.8;
 const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
+
+// List of all possible reflections/rotations
+const POSSIBLE_ORIENTATIONS: Matrix[] = [
+  new Matrix(1, 0, 0, 1),
+  new Matrix(1, 0, 0, -1),
+  new Matrix(-1, 0, 0, 1),
+  new Matrix(-1, 0, 0, -1),
+  new Matrix(0, 1, 1, 0),
+  new Matrix(0, 1, -1, 0),
+  new Matrix(0, -1, 1, 0),
+  new Matrix(0, -1, -1, 0),
+];
 
 interface RoomTemplate {
   dimensions: V2d;
@@ -153,6 +166,7 @@ class LevelBuilder {
   wallIdToDoorEntity(id: WallID): Entity {
     const [[i, j], right] = id;
     const [x, y] = this.levelCoordToWorldCoord(V(i, j));
+    // TODO: should be able to go 270 deg, but only goes up to 180.
     if (right) {
       return new Door(
         V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
@@ -209,6 +223,8 @@ class LevelBuilder {
       );
     };
 
+    // TODO: It's possible we will block off part of the level with indestructible walls.
+    // That *should* make the room inelligible
     const isElligibleRoom = (
       upperRightCorner: V2d,
       template: RoomTemplate
@@ -255,10 +271,60 @@ class LevelBuilder {
     this.cells[3][0].content = "empty";
     this.doors.push([V(2, 0), true]);
 
-    addRoom(testRoomTemplate);
-    addRoom(testRoomTemplate);
+    const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
+    addRoom(this.orientRoom(testRoomTemplate, shuffledOrientations[0]));
+    addRoom(this.orientRoom(testRoomTemplate, shuffledOrientations[1]));
 
     return entities;
+  }
+
+  pointToV2d(p: Point): V2d {
+    return V(p.x, p.y);
+  }
+
+  orientRoom(
+    originalTemplate: RoomTemplate,
+    orientation: Matrix
+  ): RoomTemplate {
+    const transformedDimensions = this.pointToV2d(
+      orientation.apply(originalTemplate.dimensions)
+    );
+    const offset = V(
+      transformedDimensions.x >= 0 ? 0 : -(transformedDimensions.x + 1),
+      transformedDimensions.y >= 0 ? 0 : -(transformedDimensions.y + 1)
+    );
+    const newDimensions: V2d = V(
+      Math.abs(transformedDimensions.x),
+      Math.abs(transformedDimensions.y)
+    );
+
+    const newTemplate = {
+      dimensions: newDimensions,
+      doors: originalTemplate.doors.map(
+        (originalDoor: WallID): WallID => {
+          const [originalCell, originalRight] = originalDoor;
+          const temp = this.pointToV2d(orientation.apply(originalCell));
+          const transformedCell = this.pointToV2d(
+            orientation.apply(originalCell)
+          ).add(offset);
+          const originalWallDirection = originalRight ? V(1, 0) : V(0, 1);
+          const newWallDirection = this.pointToV2d(
+            orientation.apply(originalWallDirection)
+          );
+
+          if (newWallDirection.x === -1 || newWallDirection.y === -1) {
+            return [
+              transformedCell.add(newWallDirection),
+              newWallDirection.x === -1,
+            ];
+          } else {
+            return [transformedCell, newWallDirection.x === 1];
+          }
+        }
+      ),
+    };
+
+    return newTemplate;
   }
 
   addOuterWalls(): Entity[] {
