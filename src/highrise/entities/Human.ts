@@ -38,7 +38,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
   light: PointLight;
-  flashLight: DirectionalLight;
+  // flashLight: DirectionalLight;
 
   constructor(
     position: V2d = V(0, 0),
@@ -66,20 +66,20 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.sprite.anchor.set(0.5, 0.5);
 
     this.light = this.addChild(new PointLight(5, 0.4));
-    this.flashLight = this.addChild(
-      new DirectionalLight(15, degToRad(30), 0.6)
-    );
+    // this.flashLight = this.addChild(
+    //   new DirectionalLight(15, degToRad(30), 0.6)
+    // );
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void { }
 
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
 
     this.light.setPosition(this.body.position);
-    this.flashLight.setPosition(this.body.position);
-    this.flashLight.setDirection(this.body.angle);
+    // this.flashLight.setPosition(this.body.position);
+    // this.flashLight.setDirection(this.body.angle);
   }
 
   // TODO: Guarantee that this happens after everyone else's render calls

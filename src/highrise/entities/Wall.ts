@@ -13,6 +13,7 @@ import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {
   sprite: GameSprite;
+  tags = ["cast_shadow"];
 
   constructor(x1: number, y1: number, x2: number, y2: number) {
     super();
@@ -46,7 +47,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape, [0, 0], 0);
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void { }
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
