@@ -1,7 +1,11 @@
 import Entity from "../../../core/entity/Entity";
 import { V2d } from "../../../core/Vector";
 import { DecorationSprite } from "../../view/DecorationSprite";
-import { AngleTransformer, CellTransformer } from "./ElementTransformer";
+import {
+  AngleTransformer,
+  CellTransformer,
+  WallTransformer,
+} from "./ElementTransformer";
 import { WallID } from "./levelGeneration";
 
 export default class RoomTemplate {
@@ -13,6 +17,10 @@ export default class RoomTemplate {
     this.dimensions = dimensions;
     this.doors = doors;
     this.floor = floor;
+  }
+
+  generateWalls(transformWall: WallTransformer): WallID[] {
+    return [];
   }
 
   generateEntities(

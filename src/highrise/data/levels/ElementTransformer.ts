@@ -5,6 +5,7 @@ import { pointToV2d, WallID } from "./levelGeneration";
 
 export type CellTransformer = (cell: V2d) => V2d;
 export type AngleTransformer = (cell: number) => number;
+export type WallTransformer = (cell: WallID) => WallID;
 
 export default class ElementTransformer {
   transformation: Matrix;

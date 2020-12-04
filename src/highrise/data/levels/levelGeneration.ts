@@ -20,6 +20,7 @@ import Zombie from "../../entities/Zombie";
 import Floor from "../../Floor";
 import BathroomTemplate from "./BathroomTemplate";
 import { Level } from "./Level";
+import LobbyRoomTemplate from "./LobbyRoomTemplate";
 import RoomTemplate from "./RoomTemplate";
 import TransformedRoomTemplate from "./TransformedRoomTemplate";
 import ZombieRoomTemplate from "./ZombieRoomTemplate";
@@ -88,6 +89,11 @@ class LevelBuilder {
   destroyWall(id: WallID) {
     const [[i, j], right] = id;
     this.cells[i][j][right ? "rightWall" : "bottomWall"].exists = false;
+  }
+
+  undestroyWall(id: WallID) {
+    const [[i, j], right] = id;
+    this.cells[i][j][right ? "rightWall" : "bottomWall"].exists = true;
   }
 
   markIndestructible(id: WallID) {
@@ -249,9 +255,16 @@ class LevelBuilder {
 
     const addRoom = (template: RoomTemplate) => {
       const dimensions = template.dimensions;
-      let corner: V2d;
-      while (!isElligibleRoom((corner = shuffledLocations.pop()!), template));
-      this.addIndestructibleBox(corner, dimensions);
+      let maybeCorner: V2d | undefined;
+      do {
+        maybeCorner = shuffledLocations.pop();
+      } while (maybeCorner && !isElligibleRoom(maybeCorner, template));
+      if (!maybeCorner) {
+        console.warn("Couldn't make room!");
+        return;
+      }
+      const corner = maybeCorner!;
+      this.addIndestructibleBox(maybeCorner, dimensions);
 
       for (const [relativeCell, right] of template.doors) {
         const cell = relativeCell.add(corner);
@@ -279,6 +292,13 @@ class LevelBuilder {
           identity
         )
       );
+
+      template
+        .generateWalls(([p, r]) => [p.add(corner), r])
+        .forEach((w) => {
+          this.undestroyWall(w);
+          this.markIndestructible(w);
+        });
     };
 
     // Spawn room
@@ -288,6 +308,7 @@ class LevelBuilder {
     this.doors.push([V(2, 0), true]);
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
+    addRoom(new LobbyRoomTemplate());
     addRoom(
       new TransformedRoomTemplate(
         new BathroomTemplate(),

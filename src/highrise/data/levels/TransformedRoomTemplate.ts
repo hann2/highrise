@@ -4,7 +4,9 @@ import { V2d } from "../../../core/Vector";
 import ElementTransformer, {
   AngleTransformer,
   CellTransformer,
+  WallTransformer,
 } from "./ElementTransformer";
+import { WallID } from "./levelGeneration";
 import RoomTemplate from "./RoomTemplate";
 
 export default class TransformedRoomTemplate extends RoomTemplate {
@@ -22,12 +24,18 @@ export default class TransformedRoomTemplate extends RoomTemplate {
     this.transformer = transformer;
   }
 
+  generateWalls(transformWall: WallTransformer): WallID[] {
+    const transformer = this.transformer;
+    return this.base.generateWalls((w: WallID) =>
+      transformWall(transformer.transformWall(w))
+    );
+  }
+
   generateEntities(
     transformCell: CellTransformer,
     transformAngle: AngleTransformer
   ): Entity[] {
     const transformer = this.transformer;
-    console.log(transformer);
     return this.base.generateEntities(
       (p: V2d) => transformCell(transformer.transformCell(p)),
       (a: number) => transformAngle(transformer.transformAngle(a))

@@ -1,4 +1,5 @@
 import bathroom from "../../../resources/images/bathroom.png";
+import market from "../../../resources/images/market.png";
 import { V, V2d } from "../../core/Vector";
 
 export interface DecorationSprite {
@@ -83,4 +84,11 @@ export const bathroomTiles: DecorationSprite = {
   offset: V(36, 180),
   dimensions: V(24, 24),
   heightMeters: 1,
+};
+
+export const lobbyDesk: DecorationSprite = {
+  imageName: market,
+  offset: V(97, 84),
+  dimensions: V(143, 49),
+  heightMeters: 4,
 };
