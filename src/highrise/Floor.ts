@@ -1,18 +1,27 @@
-import { Graphics } from "pixi.js";
 import BaseEntity from "../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../core/entity/Entity";
-import { Layers } from "./layers";
+import Entity from "../core/entity/Entity";
+import { V, V2d } from "../core/Vector";
+import Decoration from "./entities/Decoration";
+import { DecorationSprite } from "./view/DecorationSprite";
 
 export default class Floor extends BaseEntity implements Entity {
-  sprite: Graphics & GameSprite;
-
-  constructor([width, height]: [number, number]) {
+  constructor(
+    decorationSprite: DecorationSprite,
+    [x, y]: V2d,
+    [width, height]: V2d
+  ) {
     super();
 
-    this.sprite = new Graphics();
-    this.sprite.layerName = Layers.FLOOR;
-    this.sprite.beginFill(0xeeeeee);
-    this.sprite.drawRect(0, 0, width, height);
-    this.sprite.endFill();
+    const off = decorationSprite.heightMeters / 2;
+
+    for (let i = x + off; i <= width + x; i += decorationSprite.heightMeters) {
+      for (
+        let j = y + off;
+        j <= height + y;
+        j += decorationSprite.heightMeters
+      ) {
+        this.addChild(new Decoration(V(i, j), decorationSprite));
+      }
+    }
   }
 }

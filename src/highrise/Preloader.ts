@@ -9,6 +9,7 @@ import manBrownGun from "../../resources/images/Man Brown/manBrown_gun.png";
 import manBrownStand from "../../resources/images/Man Brown/manBrown_stand.png";
 import manOldGun from "../../resources/images/Man Old/manOld_gun.png";
 import manOldStand from "../../resources/images/Man Old/manOld_stand.png";
+import market from "../../resources/images/market.png";
 import muzzleFlash1 from "../../resources/images/muzzle_flashs/muzzle-flash-1.png";
 import muzzleFlash10 from "../../resources/images/muzzle_flashs/muzzle-flash-10.png";
 import muzzleFlash11 from "../../resources/images/muzzle_flashs/muzzle-flash-11.png";
@@ -99,6 +100,7 @@ export default class Preloader extends BaseEntity implements Entity {
   async loadImages() {
     const imageUrls = [
       bathroom,
+      market,
       healthPack,
       axe,
       katana,

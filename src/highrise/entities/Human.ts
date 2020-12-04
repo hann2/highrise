@@ -4,12 +4,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
-import {
-  clamp,
-  degToRad,
-  normalizeAngle,
-  radToDeg,
-} from "../../core/util/MathUtil";
+import { clamp, degToRad, normalizeAngle } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Character, CharacterSoundClass } from "../characters/Character";
