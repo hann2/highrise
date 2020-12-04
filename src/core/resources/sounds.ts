@@ -19,7 +19,6 @@ import simonTaunt2 from "../../../resources/audio/characters/simon/simon-taunt-2
 import simonWorried1 from "../../../resources/audio/characters/simon/simon-worried-1.flac";
 import simonWorried2 from "../../../resources/audio/characters/simon/simon-worried-2.flac";
 import simonWorried3 from "../../../resources/audio/characters/simon/simon-worried-3.flac";
-import fleshHit1 from "../../../resources/audio/flesh-hit-1.flac";
 import dryFire1 from "../../../resources/audio/guns/misc/dry-fire-1.mp3";
 import dryFire2 from "../../../resources/audio/guns/misc/dry-fire-2.mp3";
 import dryFire3 from "../../../resources/audio/guns/misc/dry-fire-3.mp3";
@@ -71,17 +70,18 @@ import shotgunShot4 from "../../../resources/audio/guns/shotgun/shotgun-shot-4.m
 import sniperShot1 from "../../../resources/audio/guns/sniper-rifle/sniper-shot-1.mp3";
 import sniperShot2 from "../../../resources/audio/guns/sniper-rifle/sniper-shot-2.mp3";
 import sniperShot3 from "../../../resources/audio/guns/sniper-rifle/sniper-shot-3.mp3";
-import humanHit1 from "../../../resources/audio/human-hit-1.flac";
-import humanHit2 from "../../../resources/audio/human-hit-2.flac";
-import pop1 from "../../../resources/audio/pop1.flac";
-import wallHit1 from "../../../resources/audio/wall-hit-1.flac";
-import wallHit2 from "../../../resources/audio/wall-hit-2.flac";
+import fleshHit1 from "../../../resources/audio/impacts/flesh-hit-1.flac";
+import humanHit1 from "../../../resources/audio/impacts/human-hit-1.flac";
+import humanHit2 from "../../../resources/audio/impacts/human-hit-2.flac";
+import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
+import pop1 from "../../../resources/audio/misc/pop1.flac";
 import swordShing1 from "../../../resources/audio/weapons/sword-shing-1.flac";
 import swordShing2 from "../../../resources/audio/weapons/sword-shing-2.flac";
 import swordShing3 from "../../../resources/audio/weapons/sword-shing-3.flac";
 import swordShing4 from "../../../resources/audio/weapons/sword-shing-4.flac";
-import zombieHit1 from "../../../resources/audio/zombie-hit-1.flac";
-import zombieHit2 from "../../../resources/audio/zombie-hit-2.flac";
+import zombieHit1 from "../../../resources/audio/zombie/zombie-hit-1.flac";
+import zombieHit2 from "../../../resources/audio/zombie/zombie-hit-2.flac";
 
 // TODO: These shouln't be listed in core/
 export const SOUND_URLS = {
