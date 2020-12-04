@@ -7,8 +7,10 @@ import {
   Ray,
   RaycastResult,
   Shape,
+  vec2,
   World,
 } from "p2";
+import * as Pixi from "pixi.js";
 import { Graphics, PI_2 } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";
@@ -29,6 +31,7 @@ export class Shadows extends BaseEntity implements Entity {
     super();
 
     this.shadowGraphics = new Graphics();
+    // this.shadowGraphics.filters = [new Pixi.filters.BlurFilter(20)];
 
     // I guess this makes sure that the shadow is in the world?
     this.sprite = this.shadowGraphics;
@@ -43,7 +46,16 @@ export class Shadows extends BaseEntity implements Entity {
     if (this.game) {
       this.update();
     } else {
-      console.trace("asdf");
+      console.trace("updating shadow before added");
+    }
+  }
+
+  setRadius(radius: number) {
+    this.radius = radius;
+    if (this.game) {
+      this.update();
+    } else {
+      console.trace("updating shadow before added");
     }
   }
 
@@ -97,7 +109,11 @@ export class Shadows extends BaseEntity implements Entity {
 }
 
 // Casts a ray towards a corner and returns the hit point
-function shadowRaycast(center: V2d, corner: V2d, world: World): V2d {
+function shadowRaycast(
+  center: [number, number],
+  corner: [number, number],
+  world: World
+): [number, number] {
   const ray = new Ray({
     mode: Ray.CLOSEST,
     from: center,
@@ -110,7 +126,7 @@ function shadowRaycast(center: V2d, corner: V2d, world: World): V2d {
   world.raycast(result, ray);
 
   if (result.hasHit()) {
-    const hitPoint = V(0, 0);
+    const hitPoint: [number, number] = [0, 0];
     result.getHitPoint(hitPoint, ray);
     return hitPoint;
   } else {

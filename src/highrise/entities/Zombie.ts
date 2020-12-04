@@ -1,4 +1,4 @@
-import { Body, Circle } from "p2";
+import { Body, Circle, vec2 } from "p2";
 import { Sprite } from "pixi.js";
 import zoimbie1Hold from "../../../resources/images/Zombie 1/zoimbie1_hold.png";
 import BaseEntity from "../../core/entity/BaseEntity";
@@ -107,19 +107,23 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.body.applyImpulse(friction);
   }
 
-  getNearestVisibleHuman(): [Human | undefined, number] {
+  getNearestVisibleHuman(
+    maxDistance: number = 15
+  ): [Human | undefined, number] {
     const humans = this.game!.entities.getTagged("human") as Human[];
 
     let nearestVisibleHuman: Human | undefined;
-    let nearestDistance: number = Infinity;
+    let nearestDistance: number = maxDistance;
 
     for (const human of humans) {
       // should you be able to sneak up on zombie???
-      const isVisible = testLineOfSight(this, human);
-      const distance = human.getPosition().isub(this.getPosition()).magnitude;
-      if (isVisible && distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestVisibleHuman = human;
+      const distance = vec2.dist(human.body.position, this.body.position);
+      if (distance < nearestDistance) {
+        const isVisible = testLineOfSight(this, human);
+        if (isVisible) {
+          nearestDistance = distance;
+          nearestVisibleHuman = human;
+        }
       }
     }
 

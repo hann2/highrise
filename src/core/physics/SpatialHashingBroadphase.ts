@@ -159,6 +159,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     return result;
   }
 
+  // TODO: This only queries the bodies currently in the world (which is usually only static ones)
   rayQuery(ray: Ray): Body[] {
     const result: Body[] = [];
 

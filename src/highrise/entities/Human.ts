@@ -71,7 +71,9 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
+  }
 
+  afterPhysics() {
     this.light.setPosition(this.body.position);
     // this.flashLight.setPosition(this.body.position);
     // this.flashLight.setDirection(this.body.angle);
