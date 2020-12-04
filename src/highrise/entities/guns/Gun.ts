@@ -136,7 +136,7 @@ export default class Gun extends BaseEntity implements Entity {
     const sounds = this.stats.sounds[soundClass];
     if (sounds?.length) {
       const sound = choose(...sounds);
-      return this.game!.addEntity(new PositionalSound(sound, position));
+      return this.game?.addEntity(new PositionalSound(sound, position));
     }
   }
 

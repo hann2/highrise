@@ -19,6 +19,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
+import { Layers } from "../layers";
 import { PointLight } from "../lighting/PointLight";
 
 const SPRITE_URLS = [
@@ -43,28 +44,30 @@ const SPRITE_URLS = [
 const SCALE = 1 / 200;
 const DURATION = 0.1;
 export default class MuzzleFlash extends BaseEntity implements Entity {
-  light: PointLight;
+  light?: PointLight;
   timeLeft: number = DURATION;
   sprite: Sprite & GameSprite;
 
   constructor(position: V2d, angle: number) {
     super();
 
-    this.light = this.addChild(new PointLight(20, 0.8, 0xffeeaa));
-    this.light.setPosition(position);
-
     this.sprite = Sprite.from(choose(...SPRITE_URLS));
     this.sprite.anchor.set(0.3, 0.5);
     this.sprite.scale.set(1 / 150);
     this.sprite.position.set(...position);
     this.sprite.rotation = angle;
-
     this.sprite.blendMode = BLEND_MODES.ADD;
+    this.sprite.layerName = Layers.WORLD_OVERLAY;
+  }
+
+  onAdd() {
+    this.light = this.addChild(new PointLight(20, 0.8, 0xffeeaa, true));
+    this.light.setPosition([this.sprite.position.x, this.sprite.position.y]);
   }
 
   onTick(dt: number) {
     const t = this.timeLeft / DURATION;
-    this.light.setIntensity(0.9 * t);
+    this.light?.setIntensity(0.9 * t);
 
     this.sprite.alpha = t;
     this.sprite.scale.set(SCALE * (1.8 - t ** 2));

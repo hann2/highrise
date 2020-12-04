@@ -60,13 +60,13 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.sprite.addChild(manSprite);
     this.sprite.anchor.set(0.5, 0.5);
 
-    this.light = this.addChild(new PointLight(5, 0.4));
+    this.light = this.addChild(new PointLight(5, 0.4, 0xffffee, true));
     // this.flashLight = this.addChild(
     //   new DirectionalLight(15, degToRad(30), 0.6)
     // );
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void { }
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
 
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
