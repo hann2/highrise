@@ -3,7 +3,6 @@ import { polarToVec } from "../../../core/util/MathUtil";
 import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Decoration from "../../entities/Decoration";
-import Zombie from "../../entities/Zombie";
 import {
   bathroomTiles,
   downSink1,
@@ -17,33 +16,18 @@ import {
   rightToilet1,
   rightToilet2,
 } from "../../view/DecorationSprite";
+import { AngleTransformer, CellTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 
-const zombieRoomDimensions = V(3, 2);
-export const zombieRoomTemplate: RoomTemplate = new RoomTemplate(
-  zombieRoomDimensions,
-  [
-    [V(-1, 1), true],
-    [V(2, -1), false],
-  ],
-  (transformCell) => {
-    const zombies: Entity[] = [];
-    for (let i = 0; i < zombieRoomDimensions.x; i++) {
-      for (let j = 0; j < zombieRoomDimensions.y; j++) {
-        zombies.push(new Zombie(transformCell(V(i, j).add(V(0.25, 0.25)))));
-        zombies.push(new Zombie(transformCell(V(i, j).add(V(-0.25, 0.25)))));
-        zombies.push(new Zombie(transformCell(V(i, j).add(V(0.25, -0.25)))));
-        zombies.push(new Zombie(transformCell(V(i, j).add(V(-0.25, -0.25)))));
-      }
-    }
-    return zombies;
+export default class BathroomTemplate extends RoomTemplate {
+  constructor() {
+    super(V(2, 3), [[V(-1, 0), true]], bathroomTiles);
   }
-);
 
-export const bathroomTemplate: RoomTemplate = new RoomTemplate(
-  V(2, 3),
-  [[V(-1, 0), true]],
-  (transformCell, transformAngle) => {
+  generateEntities(
+    transformCell: CellTransformer,
+    transformAngle: AngleTransformer
+  ): Entity[] {
     const entities: Entity[] = [];
 
     const addToiletAt = (p: V2d) => {
@@ -99,6 +83,5 @@ export const bathroomTemplate: RoomTemplate = new RoomTemplate(
     addToiletAt(V(1, 2));
 
     return entities;
-  },
-  bathroomTiles
-);
+  }
+}
