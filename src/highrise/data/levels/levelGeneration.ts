@@ -4,7 +4,7 @@ import { V, V2d } from "../../../core/Vector";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
 import Rifle from "../../entities/guns/Rifle";
-import Shotgun from "../../entities/guns/Shotgun";
+import PumpShotgun from "../../entities/guns/Shotgun";
 import HealthPickup from "../../entities/HealthPickup";
 import Axe from "../../entities/meleeWeapons/Axe";
 import Katana from "../../entities/meleeWeapons/Katana";
@@ -424,7 +424,7 @@ class LevelBuilder {
       entities.push(f(this.levelCoordToWorldCoord(location)));
     };
 
-    consumeLocation((l: V2d) => new WeaponPickup(l, new Shotgun()));
+    consumeLocation((l: V2d) => new WeaponPickup(l, new PumpShotgun()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Rifle()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Axe()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Katana()));

@@ -3,7 +3,7 @@ import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
 import { generateLevel } from "../../data/levels/levelGeneration";
 import Gun from "../guns/Gun";
-import Shotgun from "../guns/Shotgun";
+import PumpShotgun from "../guns/Shotgun";
 import Human from "../Human";
 import Axe from "../meleeWeapons/Axe";
 import Katana from "../meleeWeapons/Katana";
@@ -38,11 +38,11 @@ export default class LevelController extends BaseEntity implements Entity {
       const player = this.game!.addEntity(new Human());
       player.giveWeapon(
         choose<Gun | MeleeWeapon>(
-          new Axe(),
-          new Katana(),
+          // new Axe(),
+          // new Katana(),
           // new Pistol(),
           // new Rifle(),
-          new Shotgun()
+          new PumpShotgun()
         )
       );
       this.game!.dispatch({ type: "addToParty", human: player });
@@ -167,13 +167,12 @@ export default class LevelController extends BaseEntity implements Entity {
       } else {
         return true;
       }
-    } else if (entity instanceof Gun) {
-      return false; // If we delete the parent it will delete the gun
-    } else if (entity instanceof MeleeWeapon) {
-      return false; // If we delete the parent it will delete the weapon
     } else if (entity instanceof AllyHumanController) {
       return false;
     } else if (entity instanceof PlayerHumanController) {
+      return false;
+    } else if (entity.parent) {
+      // Let parents do the clearing for things like guns and lights and whatever, so we don't have to keep track of stuff like whether guns in a player's inventory should be deleted
       return false;
     }
     return true;

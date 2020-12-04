@@ -1,16 +1,15 @@
-import { BLEND_MODES, DisplayObject, Sprite } from "pixi.js";
+import { BLEND_MODES, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import LightingManager from "./LightingManager";
 
-export default abstract class Light extends BaseEntity implements Entity {
-  lightSprite!: Sprite;
+export default class Light extends BaseEntity implements Entity {
+  constructor(public lightSprite: Sprite = new Sprite()) {
+    super();
+    this.lightSprite.blendMode = BLEND_MODES.ADD;
+  }
 
   private lightManager?: LightingManager;
-
-  private getLightingManager() {
-    return;
-  }
 
   onAdd() {
     this.lightManager = this.game!.entities.getById(

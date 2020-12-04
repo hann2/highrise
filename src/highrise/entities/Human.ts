@@ -4,12 +4,18 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
-import { clamp, normalizeAngle, radToDeg } from "../../core/util/MathUtil";
+import {
+  clamp,
+  degToRad,
+  normalizeAngle,
+  radToDeg,
+} from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Character, CharacterSoundClass } from "../characters/Character";
 import { randomCharacter } from "../characters/characters";
 import { CollisionGroups } from "../Collision";
+import { DirectionalLight } from "../lighting/DirectionalLight";
 import { PointLight } from "../lighting/PointLight";
 import Bullet from "./Bullet";
 import Gun from "./guns/Gun";
@@ -32,6 +38,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
   light: PointLight;
+  flashLight: DirectionalLight;
 
   constructor(
     position: V2d = V(0, 0),
@@ -58,7 +65,10 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.sprite.addChild(manSprite);
     this.sprite.anchor.set(0.5, 0.5);
 
-    this.light = this.addChild(new PointLight(5));
+    this.light = this.addChild(new PointLight(5, 0.4));
+    this.flashLight = this.addChild(
+      new DirectionalLight(15, degToRad(30), 0.6)
+    );
   }
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
@@ -66,12 +76,15 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
+
+    this.light.setPosition(this.body.position);
+    this.flashLight.setPosition(this.body.position);
+    this.flashLight.setDirection(this.body.angle);
   }
 
   // TODO: Guarantee that this happens after everyone else's render calls
   onRender() {
     [this.sprite.x, this.sprite.y] = this.body.position;
-    this.light.setPosition(this.body.position);
     this.sprite.angle = radToDeg(this.body.angle);
 
     const healthPercent = clamp(this.hp / 100);

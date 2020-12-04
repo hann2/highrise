@@ -31,7 +31,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     // this.sprite.scale.set(1 / resolution);
 
     const darkness = new Graphics();
-    darkness.beginFill(0x222233);
+    darkness.beginFill(0x000000);
     darkness.drawRect(-100, -100, 1000, 1000);
     darkness.endFill();
 

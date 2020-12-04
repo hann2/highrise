@@ -35,6 +35,7 @@ export interface GunStats {
     empty: SoundName[];
     pickup: SoundName[];
     reload: SoundName[];
+    pump?: SoundName[];
   };
 
   // Texture to use when the item's on the ground
@@ -50,6 +51,8 @@ export enum FireMode {
   FULL_AUTO,
   // 3 bullets per trigger pull
   BURST,
+  // Pumps after every shot
+  PUMP,
 }
 
 export enum ReloadingStyle {
@@ -75,6 +78,7 @@ const defaultGunStats: GunStats = {
     empty: ["dryFire1"],
     pickup: ["pistolCock1"],
     reload: ["reload1"],
+    pump: ["shotgunPump1"],
   },
 };
 
@@ -94,9 +98,12 @@ export default class Gun extends BaseEntity implements Entity {
     this.ammo = this.stats.ammoCapacity;
   }
 
-  pullTrigger(shooter: Human) {
+  async pullTrigger(shooter: Human) {
     if (this.isReloading) {
-      // TODO: Cancel reload? Nothing?
+      if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
+        this.cancelReload();
+        this.playSound("pump", shooter.getPosition());
+      }
     } else if (this.shootCooldown <= 0) {
       const direction = shooter.getDirection();
       const muzzlePosition = shooter
@@ -109,6 +116,11 @@ export default class Gun extends BaseEntity implements Entity {
         this.playSound("shoot", muzzlePosition);
         this.shootCooldown += 1.0 / this.stats.fireRate;
         this.ammo -= 1;
+
+        if (this.stats.fireMode === FireMode.PUMP) {
+          await this.wait(0.1);
+          this.playSound("pump", shooter.getPosition());
+        }
       } else {
         this.playSound("empty", muzzlePosition);
       }
@@ -120,7 +132,7 @@ export default class Gun extends BaseEntity implements Entity {
     position: V2d
   ): PositionalSound | undefined {
     const sounds = this.stats.sounds[soundClass];
-    if (sounds.length > 0) {
+    if (sounds?.length) {
       const sound = choose(...sounds);
       return this.game!.addEntity(new PositionalSound(sound, position));
     }
@@ -160,6 +172,7 @@ export default class Gun extends BaseEntity implements Entity {
           await this.wait(this.stats.reloadTime, undefined, "reload");
           this.ammo += 1;
         }
+        this.playSound("pump", shooter.getPosition());
         this.isReloading = false;
         console.log("end individual reloading");
       }

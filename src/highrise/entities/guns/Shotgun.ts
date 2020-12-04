@@ -1,19 +1,20 @@
-import { rUniform, rNormal } from "../../../core/util/Random";
+import { rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import Bullet from "../Bullet";
-import Gun, { ReloadingStyle } from "./Gun";
+import Gun, { FireMode, ReloadingStyle } from "./Gun";
 
 const NUM_BULLETS = 9;
 const CONE_ANGLE = Math.PI / 24;
 
-export default class Shotgun extends Gun {
+export default class PumpShotgun extends Gun {
   constructor() {
     super({
       name: "Shotgun",
-      fireRate: 4,
+      fireRate: 2,
       bulletDamage: 30,
       muzzleVelocity: 55,
       reloadingStyle: ReloadingStyle.INDIVIDUAL,
+      fireMode: FireMode.PUMP,
       reloadTime: 0.5,
       ammoCapacity: 7,
 
@@ -22,6 +23,7 @@ export default class Shotgun extends Gun {
         empty: ["dryFire1"],
         pickup: ["shotgunPump1"],
         reload: ["shotgunLoadShell1"],
+        pump: ["shotgunPump1"],
       },
     });
   }
