@@ -102,7 +102,6 @@ export default class Preloader extends BaseEntity implements Entity {
       healthPack,
       katana,
       market,
-      market,
       muzzleFlash1,
       muzzleFlash10,
       muzzleFlash11,
