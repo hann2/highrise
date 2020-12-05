@@ -50,7 +50,7 @@ export default class BathroomTemplate extends RoomTemplate {
       } else if (vec.y === -1) {
         entities.push(
           new Furniture(
-            transformCell(p).add(V(0, -0.4)),
+            transformCell(p).add(V(0, -0.0)),
             choose(downToilet1, downToilet2)
           )
         );
@@ -70,7 +70,7 @@ export default class BathroomTemplate extends RoomTemplate {
       } else if (vec.y === 1) {
         entities.push(
           new Decoration(
-            transformCell(p).add(V(0, -0.6)),
+            transformCell(p).add(V(0, -0.5)),
             choose(downSink1, downSink2)
           )
         );

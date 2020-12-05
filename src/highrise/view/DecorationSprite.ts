@@ -1,5 +1,6 @@
 import bathroom from "../../../resources/images/bathroom.png";
 import fancyFurniture from "../../../resources/images/fancy-furniture.png";
+import fencesLights from "../../../resources/images/fences-lights.png";
 import furniture from "../../../resources/images/furniture.png";
 import market from "../../../resources/images/market.png";
 import { V, V2d } from "../../core/Vector";
@@ -191,4 +192,25 @@ export const jewelryStall: DecorationSprite = {
   offset: V(0, 624),
   dimensions: V(96, 96),
   heightMeters: 3,
+};
+
+export const garbageCan: DecorationSprite = {
+  imageName: fencesLights,
+  offset: V(486, 322),
+  dimensions: V(21, 29),
+  heightMeters: 1,
+};
+
+export const boxes: DecorationSprite = {
+  imageName: fencesLights,
+  offset: V(196, 287),
+  dimensions: V(25, 32),
+  heightMeters: 1,
+};
+
+export const sack: DecorationSprite = {
+  imageName: market,
+  offset: V(337, 724),
+  dimensions: V(47, 41),
+  heightMeters: 0.8,
 };
