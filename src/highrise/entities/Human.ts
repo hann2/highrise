@@ -49,7 +49,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
 
     const shape = new Circle({ radius: HUMAN_RADIUS });
     shape.collisionGroup = CollisionGroups.Humans;
-    shape.collisionMask = CollisionGroups.All;
+    shape.collisionMask = CollisionGroups.All ^ CollisionGroups.Bullets;
     this.body.addShape(shape);
 
     this.sprite = new Sprite();
