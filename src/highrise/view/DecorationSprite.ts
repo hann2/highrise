@@ -1,8 +1,8 @@
-import bathroom from "../../../resources/images/bathroom.png";
-import fancyFurniture from "../../../resources/images/fancy-furniture.png";
-import fencesLights from "../../../resources/images/fences-lights.png";
-import furniture from "../../../resources/images/furniture.png";
-import market from "../../../resources/images/market.png";
+import bathroom from "../../../resources/images/environment/bathroom.png";
+import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
+import fencesLights from "../../../resources/images/environment/fences-lights.png";
+import furniture from "../../../resources/images/environment/furniture.png";
+import market from "../../../resources/images/environment/market.png";
 import { V, V2d } from "../../core/Vector";
 
 export interface DecorationSprite {
