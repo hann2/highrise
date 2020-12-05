@@ -13,6 +13,8 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
   hugeBodies: Set<Body> = new Set();
   partitions: Set<Body>[] = [];
 
+  bodiesAdded: boolean = false;
+
   constructor(
     private cellSize: number = DEFAULT_CELL_SIZE,
     private width: number = 24,
@@ -76,6 +78,24 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     }
   }
 
+  addExtraBodies() {
+    for (const kBody of this.kinematicBodies) {
+      this.addBodyToHash(kBody);
+    }
+    for (const dBody of this.dynamicBodies) {
+      this.addBodyToHash(dBody);
+    }
+  }
+
+  removeExtraBodies() {
+    for (const kBody of this.kinematicBodies) {
+      this.removeBodyFromHash(kBody);
+    }
+    for (const dBody of this.dynamicBodies) {
+      this.removeBodyFromHash(dBody);
+    }
+  }
+
   /** Returns an array where every 2 entries represents a collision pair */
   getCollisionPairs(world: World): Body[] {
     const result: Body[] = [];
@@ -91,7 +111,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     for (const dBody of this.dynamicBodies) {
       this.removeBodyFromHash(dBody); // This will make sure we don't overlap ourselves, and that we don't double count anything
 
-      for (const other of this.aabbQuery(world, dBody.getAABB())) {
+      for (const other of this.aabbQuery(world, dBody.getAABB(), undefined, false)) {
         if (Broadphase.canCollide(dBody, other)) {
           result.push(dBody, other);
         }
@@ -139,8 +159,12 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     return result;
   }
 
-  aabbQuery(_: World, aabb: AABB, result?: Body[]): Body[] {
+  aabbQuery(_: World, aabb: AABB, result?: Body[], shouldAddBodies: boolean = true): Body[] {
     result = result ?? [];
+
+    if (shouldAddBodies) {
+      this.addExtraBodies();
+    }
 
     for (const cell of this.aabbToCells(aabb, false)) {
       for (const body of this.partitions[cell]) {
@@ -156,11 +180,19 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
       }
     }
 
+    if (shouldAddBodies) {
+      this.removeExtraBodies();
+    }
+
     return result;
   }
 
-  // TODO: This only queries the bodies currently in the world (which is usually only static ones)
-  rayQuery(ray: Ray): Body[] {
+  // TODO: This is broken for some reason
+  rayQuery(ray: Ray, shouldAddBodies = true): Body[] {
+    if (shouldAddBodies) {
+      this.addExtraBodies();
+    }
+
     const result: Body[] = [];
 
     // See https://www.redblobgames.com/grids/line-drawing.html
@@ -178,7 +210,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
 
     let cellX = Math.floor(x1);
     let cellY = Math.floor(y1);
-    for (let ix = 0, iy = 0; ix < xSteps || iy < ySteps; ) {
+    for (let ix = 0, iy = 0; ix < xSteps || iy < ySteps;) {
       if ((0.5 + ix) / xSteps < (0.5 + iy) / ySteps) {
         // next step is horizontal
         cellX += signX;
@@ -196,6 +228,10 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
           result.push(body);
         }
       }
+    }
+
+    if (shouldAddBodies) {
+      this.removeExtraBodies();
     }
 
     return result;
