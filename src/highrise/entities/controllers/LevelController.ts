@@ -4,7 +4,9 @@ import { choose } from "../../../core/util/Random";
 import { generateLevel } from "../../data/levels/levelGeneration";
 import LobbyLevel from "../../data/levels/LobbyLevel";
 import ShopLevel from "../../data/levels/ShopLevel";
+import DoubleBarrelShotgun from "../guns/DoubleBarrelShotgun";
 import Gun from "../guns/Gun";
+import PumpShotgun from "../guns/PumpShotgun";
 import Rifle from "../guns/Rifle";
 import Human from "../Human";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
@@ -41,8 +43,9 @@ export default class LevelController extends BaseEntity implements Entity {
           // new Axe(),
           // new Katana(),
           // new Pistol()
-          new Rifle()
-          // new PumpShotgun()
+          // new Rifle()
+          new PumpShotgun(),
+          new DoubleBarrelShotgun()
         )
       );
       this.game!.dispatch({ type: "addToParty", human: player });

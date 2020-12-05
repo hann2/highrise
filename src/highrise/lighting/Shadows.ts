@@ -23,17 +23,17 @@ import { CollisionGroups } from "../Collision";
 //     - Only find necessary shapes
 //     - Keep track of walls to reduce number of triangles
 //     - Don't use V2d
-export class Shadows extends BaseEntity implements Entity {
-  shadowGraphics: Graphics;
+export class ShadowMask extends BaseEntity implements Entity {
+  graphic: Graphics;
 
   constructor(private position: V2d, private radius: number = 10) {
     super();
 
-    this.shadowGraphics = new Graphics();
+    this.graphic = new Graphics();
     // this.shadowGraphics.filters = [new Pixi.filters.BlurFilter(20)];
 
     // I guess this makes sure that the shadow is in the world?
-    this.sprite = this.shadowGraphics;
+    this.sprite = this.graphic;
   }
 
   onAdd() {
@@ -59,18 +59,18 @@ export class Shadows extends BaseEntity implements Entity {
   }
 
   update() {
-    this.shadowGraphics.clear();
+    this.graphic.clear();
 
     const corners = this.getShadowCorners(this.position);
 
     if (corners.length) {
-      this.shadowGraphics.beginFill(0xffffff);
+      this.graphic.beginFill(0xffffff);
       const lastCorner = corners[corners.length - 1];
-      this.shadowGraphics.moveTo(lastCorner[0], lastCorner[1]);
+      this.graphic.moveTo(lastCorner[0], lastCorner[1]);
       for (const corner of corners) {
-        this.shadowGraphics.lineTo(corner[0], corner[1]);
+        this.graphic.lineTo(corner[0], corner[1]);
       }
-      this.shadowGraphics.endFill();
+      this.graphic.endFill();
     }
   }
 

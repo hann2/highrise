@@ -17,7 +17,7 @@ export default class Katana extends MeleeWeapon {
       handlePosition: [0.5, 0.9],
 
       swing: {
-        durations: [0.2, 0.2, 0.2],
+        durations: [0.08, 0.17, 0.2],
         angles: [degToRad(110), degToRad(140), degToRad(-75)],
         maxExtension: 0.6,
         restPosition: [0.1, 0.2],

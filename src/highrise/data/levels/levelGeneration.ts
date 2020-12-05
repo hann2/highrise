@@ -10,7 +10,7 @@ import Exit from "../../entities/Exit";
 import Furniture from "../../entities/Furniture";
 import Pistol from "../../entities/guns/Pistol";
 import Rifle from "../../entities/guns/Rifle";
-import PumpShotgun from "../../entities/guns/Shotgun";
+import Pump from "../../entities/guns/PumpShotgun";
 import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/Human";
 import Axe from "../../entities/meleeWeapons/Axe";
@@ -667,7 +667,7 @@ class LevelBuilder {
       }
     };
 
-    consumeLocation((l: V2d) => new WeaponPickup(l, new PumpShotgun()));
+    consumeLocation((l: V2d) => new WeaponPickup(l, new Pump()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Rifle()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Axe()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Katana()));
