@@ -80,7 +80,7 @@ export default class Gun extends BaseEntity implements Entity {
   }
 
   makeProjectile(position: V2d, direction: number) {
-    this.game!.addEntity(
+    this.game?.addEntity(
       new Bullet(
         position,
         direction,
@@ -104,7 +104,7 @@ export default class Gun extends BaseEntity implements Entity {
       } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
         this.playSound("reload", shooter.getPosition());
         this.isReloading = true;
-        await this.wait(this.stats.reloadTime / 2, undefined, "reload");
+        await this.wait(this.stats.reloadTime, undefined, "reload");
         while (this.ammo < this.stats.ammoCapacity) {
           this.playSound("reloadInsert", shooter.getPosition(), 1);
           await this.wait(this.stats.reloadTime, undefined, "reload");

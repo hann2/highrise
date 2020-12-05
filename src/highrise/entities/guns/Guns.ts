@@ -8,6 +8,7 @@ import Gun from "./Gun";
 import M1911 from "./M1911";
 import Magnum from "./Magnum";
 import PumpShotgun from "./PumpShotgun";
+import SPAS12 from "./SPAS12";
 
 // A list of all the guns
 export const GUNS: Array<new () => Gun> = [
@@ -20,4 +21,5 @@ export const GUNS: Array<new () => Gun> = [
   M1911,
   Magnum,
   PumpShotgun,
+  SPAS12,
 ];
