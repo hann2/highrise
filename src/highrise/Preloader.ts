@@ -30,6 +30,7 @@ import BaseEntity from "../core/entity/BaseEntity";
 import Entity from "../core/entity/Entity";
 import Game from "../core/Game";
 import { loadSound, SoundName, SOUND_URLS } from "../core/resources/sounds";
+import { CHARACTERS } from "./characters/characters";
 
 export default class Preloader extends BaseEntity implements Entity {
   private _resolve!: () => void;
@@ -122,6 +123,11 @@ export default class Preloader extends BaseEntity implements Entity {
       zoimbie1Hold,
       zoimbie1Stand,
     ];
+
+    for (const character of CHARACTERS) {
+      imageUrls.push(character.imageGun, character.imageStand);
+    }
+
     let loaded = 0;
     const total = imageUrls.length;
     const element = document.getElementById("image-count")!;
