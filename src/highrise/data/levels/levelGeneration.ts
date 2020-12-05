@@ -1,7 +1,7 @@
 import { Matrix, Point } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
-import { rInteger, seededShuffle } from "../../../core/util/Random";
+import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import BaseFloor from "../../BaseFloor";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
@@ -18,6 +18,7 @@ import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import Floor from "../../Floor";
+import BakeryTemplate from "./BakeryTemplate";
 import BathroomTemplate from "./BathroomTemplate";
 import { Level } from "./Level";
 import LobbyRoomTemplate from "./LobbyRoomTemplate";
@@ -433,6 +434,12 @@ class LevelBuilder {
     addRoom(new LobbyRoomTemplate());
     addRoom(
       new TransformedRoomTemplate(
+        new BakeryTemplate(),
+        choose(new Matrix(1, 0, 0, 1), new Matrix(-1, 0, 0, 1))
+      )
+    );
+    addRoom(
+      new TransformedRoomTemplate(
         new BathroomTemplate(),
         shuffledOrientations[0]
       )
@@ -716,6 +723,7 @@ class LevelBuilder {
 }
 
 export const generateLevel = (seed: number = rInteger(0, 2 ** 32)): Level => {
+  seed = 3577873334;
   console.log("Generating level with seed " + seed);
   return new LevelBuilder().generateLevel(seed);
 };

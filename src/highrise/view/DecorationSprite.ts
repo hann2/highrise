@@ -157,3 +157,38 @@ export const piano: DecorationSprite = {
   dimensions: V(116, 96),
   heightMeters: 2.5,
 };
+
+export const shelfEmpty: DecorationSprite = {
+  imageName: furniture,
+  offset: V(384, 385),
+  dimensions: V(32, 31),
+  heightMeters: 1.3,
+};
+
+export const shelfJars: DecorationSprite = {
+  imageName: furniture,
+  offset: V(416, 385),
+  dimensions: V(32, 31),
+  heightMeters: 1.3,
+};
+
+export const shelfBooks: DecorationSprite = {
+  imageName: furniture,
+  offset: V(448, 385),
+  dimensions: V(32, 31),
+  heightMeters: 1.3,
+};
+
+export const bakeryStall: DecorationSprite = {
+  imageName: market,
+  offset: V(0, 528),
+  dimensions: V(96, 96),
+  heightMeters: 3,
+};
+
+export const jewelryStall: DecorationSprite = {
+  imageName: market,
+  offset: V(0, 624),
+  dimensions: V(96, 96),
+  heightMeters: 3,
+};
