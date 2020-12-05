@@ -7,6 +7,7 @@ import BaseFloor from "../../BaseFloor";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
+import Furniture from "../../entities/Furniture";
 import Glock from "../../entities/guns/Glock";
 import M1911 from "../../entities/guns/M1911";
 import PumpShotgun from "../../entities/guns/PumpShotgun";
@@ -18,6 +19,12 @@ import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import Floor from "../../Floor";
+import {
+  boxes,
+  garbageCan,
+  sack,
+  shelfEmpty,
+} from "../../view/DecorationSprite";
 import { Level } from "./Level";
 import LevelTemplate from "./LevelTemplate";
 import RoomTemplate from "./RoomTemplate";
@@ -51,6 +58,9 @@ const DIRECTIONS = Object.values(Direction);
 interface Closet {
   backCell: V2d;
   frontCell: V2d;
+  backWall: WallID;
+  doorWall: WallID;
+  backWallDirection: V2d;
 }
 export type WallID = [V2d, boolean];
 interface WallBuilder {
@@ -461,50 +471,64 @@ class LevelBuilder {
           continue;
         }
 
-        let [x, y] = [i, j];
-        const backRight =
-          x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists;
-        const backDown =
-          y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists;
-        const backLeft = x > 0 && !this.cells[x - 1][y].rightWall.exists;
-        const backUp = y > 0 && !this.cells[x][y - 1].bottomWall.exists;
-        if (+backRight + +backDown + +backLeft + +backUp !== 1) {
-          continue;
+        const backCell = V(i, j);
+
+        let openDirection;
+        let backFound = 0;
+        for (const direction of DIRECTIONS) {
+          let wall = this.getWallInDirection(backCell, direction);
+          if (!this.isExisting(wall)) {
+            backFound += 1;
+            openDirection = direction;
+          }
         }
-        x += +backRight + -backLeft;
-        y += +backDown + -backUp;
-        if (this.cells[x][y].content) {
-          continue;
-        }
-        const frontRight =
-          x < LEVEL_SIZE - 1 && !this.cells[x][y].rightWall.exists;
-        const frontDown =
-          y < LEVEL_SIZE - 1 && !this.cells[x][y].bottomWall.exists;
-        const frontLeft = x > 0 && !this.cells[x - 1][y].rightWall.exists;
-        const frontUp = y > 0 && !this.cells[x][y - 1].bottomWall.exists;
-        if (+frontRight + +frontDown + +frontLeft + +frontUp !== 2) {
+        if (backFound !== 1 || !openDirection) {
           continue;
         }
 
-        let doorWall: WallID;
-        if (frontRight && !backLeft) {
-          doorWall = [V(x, y), true];
-        } else if (frontDown && !backUp) {
-          doorWall = [V(x, y), false];
-        } else if (frontLeft && !backRight) {
-          doorWall = [V(x - 1, y), true];
-        } else if (frontUp && !backDown) {
-          doorWall = [V(x, y - 1), false];
-        } else {
-          throw new Error("This should never happen");
+        const frontCell = backCell.add(openDirection);
+        if (this.cells[frontCell.x][frontCell.y].content) {
+          continue;
         }
+
+        let doorDirection;
+        let frontFound = 0;
+        for (const direction of DIRECTIONS) {
+          let wall = this.getWallInDirection(frontCell, direction);
+          if (
+            !this.isExisting(wall) &&
+            (direction.x !== -openDirection.x ||
+              direction.y != -openDirection.y)
+          ) {
+            frontFound += 1;
+            doorDirection = direction;
+          }
+        }
+        if (frontFound !== 1 || !doorDirection) {
+          continue;
+        }
+
+        const doorWall = this.getWallInDirection(frontCell, doorDirection);
         this.doors.push(doorWall);
 
-        this.cells[x][y].content = "empty";
+        this.cells[frontCell.x][frontCell.y].content = "empty";
+        const backWall = this.getWallInDirection(
+          backCell,
+          openDirection.mul(-1)
+        );
         const closet = {
-          backCell: V(i, j),
-          frontCell: V(x, y),
+          backCell,
+          frontCell,
+          doorWall,
+          backWall,
+          backWallDirection: openDirection,
         };
+
+        if (frontCell.x === 3 && frontCell.y === 1) {
+          console.log(backFound);
+          console.log(frontFound);
+          console.log(closet);
+        }
 
         this.closets.push(closet);
       }
@@ -574,25 +598,72 @@ class LevelBuilder {
   }
 
   fillClosets(seed: number): Entity[] {
-    const locations = [];
-    for (const closet of this.closets) {
-      locations.push(closet.backCell);
-    }
-    const shuffledLocations = seededShuffle(locations, seed);
+    const shuffledClosets: Closet[] = seededShuffle(this.closets, seed);
 
+    let counter = 0;
     const entities: Entity[] = [];
     const consumeLocation = (f: (l: V2d) => Entity | Entity[]) => {
-      const location = shuffledLocations.pop();
-      if (!location) {
+      const closet = shuffledClosets[counter];
+      counter += 1;
+      if (!closet) {
         console.warn("Not enough closets in map for all pickups!");
         return;
       }
-      this.cells[location[0]][location[1]].content = "pickup";
+      this.cells[closet.backCell[0]][closet.backCell[1]].content = "pickup";
+      const location = closet.backCell.add(closet.backWallDirection.mul(0.5));
       const entity = f(this.levelCoordToWorldCoord(location));
       if (entity instanceof Array) {
         entities.push(...entity);
       } else {
         entities.push(entity);
+      }
+
+      if (counter % 4 === 0) {
+        entities.push(
+          new Furniture(
+            this.levelCoordToWorldCoord(
+              closet.backCell
+                .add(closet.backWallDirection.mul(-0.2))
+                .add(closet.backWallDirection.rotate90cw().mul(-0.15))
+            ),
+            sack
+          )
+        );
+      } else if (counter % 4 === 1) {
+        entities.push(
+          new Furniture(
+            this.levelCoordToWorldCoord(
+              closet.backCell.add(
+                closet.backWallDirection
+                  .mul(-0.25)
+                  .add(closet.backWallDirection.rotate90cw().mul(0.1))
+              )
+            ),
+            boxes
+          )
+        );
+      } else if (counter % 4 === 2) {
+        entities.push(
+          new Furniture(
+            this.levelCoordToWorldCoord(
+              closet.backCell.add(
+                closet.backWallDirection
+                  .mul(-0.2)
+                  .add(closet.backWallDirection.rotate90cw().mul(0.2))
+              )
+            ),
+            garbageCan
+          )
+        );
+      } else {
+        entities.push(
+          new Furniture(
+            this.levelCoordToWorldCoord(
+              closet.backCell.add(closet.backWallDirection.mul(-0.15))
+            ),
+            shelfEmpty
+          )
+        );
       }
     };
 
@@ -605,6 +676,11 @@ class LevelBuilder {
       surv.giveWeapon(choose(new Glock(), new M1911()));
       return [surv, new SurvivorHumanController(surv)];
     });
+
+    for (let i = counter; i < shuffledClosets.length; i++) {
+      consumeLocation((l: V2d) => new Zombie(l));
+    }
+
     return entities;
   }
 
@@ -699,7 +775,6 @@ export const generateLevel = (
   levelTemplate: LevelTemplate,
   seed: number = rInteger(0, 2 ** 32)
 ): Level => {
-  seed = 3577873334;
   console.log("Generating level with seed " + seed);
   return new LevelBuilder().generateLevel(levelTemplate, seed);
 };
