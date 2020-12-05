@@ -15,7 +15,6 @@ import cindyTaunt2 from "../../../resources/audio/characters/cindy/cindy-taunt-2
 import cindyWorried1 from "../../../resources/audio/characters/cindy/cindy-worried-1.flac";
 import clariceDeath1 from "../../../resources/audio/characters/clarice/clarice-death-1.flac";
 import clariceDeath2 from "../../../resources/audio/characters/clarice/clarice-death-2.flac";
-import clariceDeath3 from "../../../resources/audio/characters/clarice/clarice-death-3.flac";
 import clariceHurt1 from "../../../resources/audio/characters/clarice/clarice-hurt-1.flac";
 import clariceHurt2 from "../../../resources/audio/characters/clarice/clarice-hurt-2.flac";
 import clariceHurt3 from "../../../resources/audio/characters/clarice/clarice-hurt-3.flac";
@@ -287,7 +286,6 @@ export const SOUND_URLS = {
   cindyWorried1,
   clariceDeath1,
   clariceDeath2,
-  clariceDeath3,
   clariceHurt1,
   clariceHurt2,
   clariceHurt3,

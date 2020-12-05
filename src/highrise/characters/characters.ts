@@ -37,7 +37,7 @@ export const Clarice: Character = {
   imageStand: clariceStand,
 
   sounds: {
-    death: ["clariceDeath1", "clariceDeath2", "clariceDeath3"],
+    death: ["clariceDeath1", "clariceDeath2"],
     hurt: ["clariceHurt1", "clariceHurt2", "clariceHurt3"],
     joinParty: ["clariceJoinParty1"],
     lookHere: ["clariceLookHere1"],
