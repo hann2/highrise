@@ -9,8 +9,8 @@ import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
 import Furniture from "../../entities/Furniture";
 import Pistol from "../../entities/guns/Pistol";
-import Rifle from "../../entities/guns/Rifle";
 import Pump from "../../entities/guns/PumpShotgun";
+import Rifle from "../../entities/guns/Rifle";
 import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/Human";
 import Axe from "../../entities/meleeWeapons/Axe";
@@ -19,6 +19,7 @@ import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import Floor from "../../Floor";
+import { PointLight } from "../../lighting/PointLight";
 import {
   boxes,
   garbageCan,
@@ -160,6 +161,7 @@ class LevelBuilder {
     const exits = this.addExits();
     const closetEntities = this.addClosets();
     const pickups = this.fillClosets(seed);
+    const nubbyEntities = this.fillNubbies();
     const enemies = this.addEnemies();
     const doors = this.doors.map(this.wallIdToDoorEntity.bind(this));
 
@@ -171,6 +173,7 @@ class LevelBuilder {
       ...closetEntities,
       ...enemies,
       ...pickups,
+      ...nubbyEntities,
       ...doors,
       new BaseFloor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
     ];
@@ -537,6 +540,17 @@ class LevelBuilder {
     return entities;
   }
 
+  isANubby(cell: V2d): boolean {
+    let found = 0;
+    for (const direction of DIRECTIONS) {
+      let wall = this.getWallInDirection(cell, direction);
+      if (!this.isExisting(wall)) {
+        found += 1;
+      }
+    }
+    return found === 1;
+  }
+
   addExits(): Entity[] {
     // Should be near spawn
     const startingPont = V(0, 0);
@@ -559,7 +573,11 @@ class LevelBuilder {
         continue;
       }
       seen[x][y] = true;
-      if (distance > furthestDistance && !this.cells[x][y].content) {
+      if (
+        distance > furthestDistance &&
+        !this.cells[x][y].content &&
+        this.isANubby(V(x, y))
+      ) {
         furthestDistance = distance;
         furthestPointSeen = p;
       }
@@ -597,6 +615,54 @@ class LevelBuilder {
     return enemies;
   }
 
+  fillNubbies(): Entity[] {
+    const entities: Entity[] = [];
+
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      for (let j = 0; j < LEVEL_SIZE; j++) {
+        if (this.cells[i][j].content) {
+          continue;
+        }
+        const cell = V(i, j);
+
+        let openDirection: V2d;
+        let found = 0;
+        for (const direction of DIRECTIONS) {
+          let wall = this.getWallInDirection(cell, direction);
+          if (!this.isExisting(wall)) {
+            found += 1;
+            openDirection = direction;
+          }
+        }
+        const isANubby = found === 1;
+        if (!isANubby) {
+          continue;
+        }
+
+        if (isANubby) {
+          const wallDirection = openDirection!;
+          const machinePosition = cell.sub(wallDirection.mul(0.2));
+          const machineDimensions = wallDirection.x ? V(0.3, 0.5) : V(0.5, 0.3);
+
+          const light = new PointLight();
+          light.setIntensity(0.3);
+          light.setColor(0xadff2f);
+          light.setPosition(this.levelCoordToWorldCoord(machinePosition));
+          entities.push(light);
+
+          const corner1 = this.levelCoordToWorldCoord(
+            machinePosition.sub(machineDimensions.mul(0.5))
+          );
+          const corner2 = this.levelCoordToWorldCoord(
+            machinePosition.add(machineDimensions.mul(0.5))
+          );
+          entities.push(new Wall(corner1.x, corner1.y, corner2.x, corner2.y));
+        }
+      }
+    }
+    return entities;
+  }
+
   fillClosets(seed: number): Entity[] {
     const shuffledClosets: Closet[] = seededShuffle(this.closets, seed);
 
@@ -611,6 +677,9 @@ class LevelBuilder {
       }
       this.cells[closet.backCell[0]][closet.backCell[1]].content = "pickup";
       const location = closet.backCell.add(closet.backWallDirection.mul(0.5));
+      const light = new PointLight(CELL_WIDTH * 3, 0.5);
+      light.setPosition(this.levelCoordToWorldCoord(location));
+      entities.push(light);
       const entity = f(this.levelCoordToWorldCoord(location));
       if (entity instanceof Array) {
         entities.push(...entity);
