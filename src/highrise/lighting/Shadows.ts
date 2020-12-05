@@ -26,6 +26,8 @@ import { CollisionGroups } from "../Collision";
 export class Shadows extends BaseEntity implements Entity {
   shadowGraphics: Graphics;
 
+  dirty: boolean = true;
+
   constructor(private position: V2d, private radius: number = 10) {
     super();
 
@@ -42,19 +44,18 @@ export class Shadows extends BaseEntity implements Entity {
 
   setPosition(position: V2d) {
     this.position = position;
-    if (this.game) {
-      this.update();
-    } else {
-      console.trace("updating shadow before added");
-    }
+    this.dirty = true;
   }
 
   setRadius(radius: number) {
     this.radius = radius;
-    if (this.game) {
+    this.dirty = true;
+  }
+
+  // TODO: Make LightManager render after everything else so I don't keep having to use afterPhysics
+  afterPhysics() {
+    if (this.dirty) {
       this.update();
-    } else {
-      console.trace("updating shadow before added");
     }
   }
 
@@ -72,6 +73,8 @@ export class Shadows extends BaseEntity implements Entity {
       }
       this.shadowGraphics.endFill();
     }
+
+    this.dirty = false;
   }
 
   // TODO: This is really slow

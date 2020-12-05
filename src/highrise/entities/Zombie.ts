@@ -31,7 +31,6 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   body: Body;
   sprite: Sprite;
   hp: number = 100;
-  positionOfLastTarget?: V2d;
   tags = ["zombie"];
   attackCooldown = 0;
   attackProgress: number | null = null;
@@ -67,67 +66,10 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
           this.attackProgress += dt;
         }
       }
-
-      const [
-        nearestVisibleHuman,
-        nearestDistance,
-      ] = this.getNearestVisibleHuman();
-
-      if (nearestVisibleHuman || this.positionOfLastTarget) {
-        const targetPosition = nearestVisibleHuman
-          ? nearestVisibleHuman.getPosition()
-          : this.positionOfLastTarget;
-        this.positionOfLastTarget = targetPosition;
-        const direction = targetPosition!.sub(this.getPosition()).inormalize();
-        this.walk(direction);
-        this.face(direction.angle);
-      }
-
-      if (
-        nearestVisibleHuman &&
-        nearestDistance < ZOMBIE_ATTACK_RANGE &&
-        this.attackCooldown <= 0
-      ) {
-        this.wait(ZOMBIE_ATTACK_WINDUP, undefined, "zombieDamage").then(() => {
-          const [
-            nearestVisibleHuman,
-            nearestDistance,
-          ] = this.getNearestVisibleHuman();
-          if (nearestVisibleHuman && nearestDistance < ZOMBIE_ATTACK_RANGE) {
-            nearestVisibleHuman.inflictDamage(ZOMBIE_ATTACK_DAMAGE);
-          }
-        });
-
-        this.attackProgress = 0;
-        this.attackCooldown = ZOMBIE_ATTACK_COOLDOWN;
-      }
     }
 
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
-  }
-
-  getNearestVisibleHuman(
-    maxDistance: number = 15
-  ): [Human | undefined, number] {
-    const humans = this.game!.entities.getTagged("human") as Human[];
-
-    let nearestVisibleHuman: Human | undefined;
-    let nearestDistance: number = maxDistance;
-
-    for (const human of humans) {
-      // should you be able to sneak up on zombie???
-      const distance = vec2.dist(human.body.position, this.body.position);
-      if (distance < nearestDistance) {
-        const isVisible = testLineOfSight(this, human);
-        if (isVisible) {
-          nearestDistance = distance;
-          nearestVisibleHuman = human;
-        }
-      }
-    }
-
-    return [nearestVisibleHuman, nearestDistance];
   }
 
   onRender() {
@@ -172,6 +114,12 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     if (this.hp <= 0) {
       this.destroy();
     }
+  }
+
+  async attack() {
+
+    await this.wait(ZOMBIE_ATTACK_WINDUP);
+    // TODO: Damage nearby people
   }
 
   interruptAttack() {
