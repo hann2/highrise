@@ -26,7 +26,7 @@ export default class Decoration extends BaseEntity implements Entity {
     this.sprite.position.set(...position);
     this.sprite.layerName = Layers.WORLD_BACK;
     this.sprite.scale.set(
-      decorationSprite.heightMeters / decorationSprite.dimensions[0]
+      decorationSprite.heightMeters / decorationSprite.dimensions[1]
     );
   }
 }

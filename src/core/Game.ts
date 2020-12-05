@@ -7,7 +7,6 @@ import Entity, { WithOwner } from "./entity/Entity";
 import EntityList from "./EntityList";
 import { GameRenderer2d } from "./graphics/GameRenderer2d";
 import { IOManager } from "./io/IO";
-import CustomWorld from "./physics/CustomWorld";
 
 interface GameOptions {
   audio?: AudioContext;

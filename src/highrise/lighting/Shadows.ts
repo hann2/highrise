@@ -12,6 +12,7 @@ import {
 import { Graphics, PI_2 } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";
+import CustomWorld from "../../core/physics/CustomWorld";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 
@@ -117,11 +118,11 @@ function shadowRaycast(
     from: center,
     to: corner,
     skipBackfaces: true,
-    collisionMask: CollisionGroups.World,
+    collisionMask: CollisionGroups.ShadowCaster,
     // TODO: Check that owner is a shadowcaster. Maybe just do that with collision groups?
   });
   const result = new RaycastResult();
-  world.raycast(result, ray);
+  (world as CustomWorld).raycast(result, ray, false);
 
   if (result.hasHit()) {
     const hitPoint: [number, number] = [0, 0];

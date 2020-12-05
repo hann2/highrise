@@ -1,8 +1,10 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { getNearestVisibleZombie } from "../../utils/visionUtils";
+import Gun from "../guns/Gun";
 import Human from "../Human";
 import Interactable from "../Interactable";
+import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 
 // Controller for a human that is waiting to be found
 export default class SurvivorHumanController
@@ -42,13 +44,26 @@ export default class SurvivorHumanController
       this.human
     );
 
-    if (nearestVisibleZombie) {
-      const direction = nearestVisibleZombie
-        .getPosition()
-        .isub(this.human.getPosition()).angle;
+    const weapon = this.human.weapon;
+    if (weapon instanceof Gun && weapon.ammo === 0 && !weapon.isReloading) {
+      this.human.reload();
+    }
 
-      this.human.setDirection(direction);
-      this.human.useWeapon();
+    if (nearestVisibleZombie) {
+      const displacement = nearestVisibleZombie
+        .getPosition()
+        .isub(this.human.getPosition());
+
+      this.human.setDirection(displacement.angle);
+
+      if (weapon instanceof Gun && !weapon.isReloading) {
+        this.human.useWeapon();
+      } else if (weapon instanceof MeleeWeapon) {
+        const maxReach = weapon.stats.size[1] + weapon.swing.maxExtension;
+        if (displacement.magnitude < maxReach) {
+          this.human.useWeapon();
+        }
+      }
     }
 
     this.interactable.position = this.human.getPosition();

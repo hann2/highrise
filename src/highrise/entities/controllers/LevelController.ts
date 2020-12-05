@@ -2,6 +2,8 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
 import { generateLevel } from "../../data/levels/levelGeneration";
+import LobbyLevel from "../../data/levels/LobbyLevel";
+import ShopLevel from "../../data/levels/ShopLevel";
 import Gun from "../guns/Gun";
 import Rifle from "../guns/Rifle";
 import Human from "../Human";
@@ -59,7 +61,9 @@ export default class LevelController extends BaseEntity implements Entity {
 
     startLevel: () => {
       console.log("startLevel", this.currentLevel);
-      const { entities, spawnLocations } = generateLevel();
+      const { entities, spawnLocations } = generateLevel(
+        this.currentLevel === 1 ? new LobbyLevel() : new ShopLevel()
+      );
       this.game!.addEntities(entities);
 
       this.partyMembers.forEach((partyMember, i) => {

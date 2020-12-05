@@ -18,12 +18,9 @@ import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import Floor from "../../Floor";
-import BathroomTemplate from "./BathroomTemplate";
 import { Level } from "./Level";
-import LobbyRoomTemplate from "./LobbyRoomTemplate";
+import LevelTemplate from "./LevelTemplate";
 import RoomTemplate from "./RoomTemplate";
-import TransformedRoomTemplate from "./TransformedRoomTemplate";
-import ZombieRoomTemplate from "./ZombieRoomTemplate";
 
 const LEVEL_SIZE = 12;
 const WALL_WIDTH = 0.3;
@@ -31,7 +28,7 @@ const OPEN_WIDTH = 1.8;
 const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
 
 // List of all possible reflections/rotations
-const POSSIBLE_ORIENTATIONS: Matrix[] = [
+export const POSSIBLE_ORIENTATIONS: Matrix[] = [
   new Matrix(1, 0, 0, 1),
   new Matrix(1, 0, 0, -1),
   new Matrix(-1, 0, 0, 1),
@@ -139,13 +136,16 @@ class LevelBuilder {
     return [newCell, direction.y === 0];
   }
 
-  generateLevel(seed: number = rInteger(0, 2 ** 32)): Level {
+  generateLevel(
+    levelTemplate: LevelTemplate,
+    seed: number = rInteger(0, 2 ** 32)
+  ): Level {
     const spawnLocations = [V(1, 2), V(0, 1), V(1, 1), V(2, 1)].map(
       this.levelCoordToWorldCoord
     );
 
     const outerWalls = this.addOuterWalls();
-    const roomEntities = this.addRooms(seed);
+    const roomEntities = this.addRooms(levelTemplate, seed);
     const innerWalls = this.addInnerWalls(seed);
     const exits = this.addExits();
     const closetEntities = this.addClosets();
@@ -262,7 +262,7 @@ class LevelBuilder {
     }
   }
 
-  addRooms(seed: number): Entity[] {
+  addRooms(levelTemplate: LevelTemplate, seed: number): Entity[] {
     const entities: Entity[] = [];
 
     const allLocations = [];
@@ -392,6 +392,7 @@ class LevelBuilder {
         const wall: WallID = [cell, right];
         const farCell = this.getCellOnOtherSideOfWall(cell, wall);
 
+        this.cells[cell.x][cell.y].content = "empty";
         this.cells[farCell.x][farCell.y].content = "empty";
         this.destroyWall(wall);
         this.doors.push(wall);
@@ -428,26 +429,7 @@ class LevelBuilder {
     this.cells[3][0].content = "empty";
     this.doors.push([V(2, 0), true]);
 
-    const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
-    addRoom(new LobbyRoomTemplate());
-    addRoom(
-      new TransformedRoomTemplate(
-        new BathroomTemplate(),
-        shuffledOrientations[0]
-      )
-    );
-    addRoom(
-      new TransformedRoomTemplate(
-        new BathroomTemplate(),
-        shuffledOrientations[1]
-      )
-    );
-    addRoom(
-      new TransformedRoomTemplate(
-        new ZombieRoomTemplate(),
-        shuffledOrientations[2]
-      )
-    );
+    levelTemplate.chooseRoomTemplates(seed).forEach(addRoom.bind(this));
 
     return entities;
   }
@@ -714,7 +696,11 @@ class LevelBuilder {
   }
 }
 
-export const generateLevel = (seed: number = rInteger(0, 2 ** 32)): Level => {
+export const generateLevel = (
+  levelTemplate: LevelTemplate,
+  seed: number = rInteger(0, 2 ** 32)
+): Level => {
+  seed = 3577873334;
   console.log("Generating level with seed " + seed);
-  return new LevelBuilder().generateLevel(seed);
+  return new LevelBuilder().generateLevel(levelTemplate, seed);
 };

@@ -10,6 +10,7 @@ import {
   RaycastResult,
   Ray,
   WorldOptions,
+  AABB,
 } from "p2";
 import { ContactInfo } from "../ContactList";
 import SpatialHashingBroadphase from "./SpatialHashingBroadphase";
@@ -84,10 +85,23 @@ export default class CustomWorld extends World {
     this.kinematicBodies.delete(body);
   }
 
-  raycast(result: RaycastResult, ray: Ray) {
+
+  raycast(result: RaycastResult, ray: Ray, shouldAddBodies: boolean = true) {
     // Get all bodies within the ray AABB
-    const bodies = this.broadphase.rayQuery(ray);
+    // const bodies = this.broadphase.rayQuery(ray, shouldAddBodies);
+    // ray.intersectBodies(result, bodies);
+    // return result.hasHit();
+
+    const aabb = new AABB()
+    // @ts-ignore
+    const bodies: Body = [];
+    // @ts-ignore
+    ray.getAABB(aabb);
+    // @ts-ignore
+    this.broadphase.aabbQuery(this, aabb, bodies, shouldAddBodies);
+    // @ts-ignore
     ray.intersectBodies(result, bodies);
+
     return result.hasHit();
   }
 
@@ -308,7 +322,7 @@ export default class CustomWorld extends World {
         for (const constraint of this.constraints) {
           Utils.appendArray(islandManager.equations, constraint.equations);
         }
-        for (let i = 0; i < this.constraints.length; i++) {}
+        for (let i = 0; i < this.constraints.length; i++) { }
         islandManager.split(this);
 
         for (const island of islandManager.islands) {

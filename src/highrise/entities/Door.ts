@@ -66,8 +66,8 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     });
 
     const shape = new Box({ width: w, height: h });
-    shape.collisionGroup = CollisionGroups.World;
-    shape.collisionMask = CollisionGroups.All ^ CollisionGroups.World;
+    shape.collisionGroup = CollisionGroups.World | CollisionGroups.ShadowCaster;
+    shape.collisionMask = CollisionGroups.All ^ (CollisionGroups.World | CollisionGroups.ShadowCaster);
     this.body.addShape(shape, [length / 2, 0], 0);
     this.body.angle = restingAngle;
     this.body.angularDamping = 0.9;
@@ -88,7 +88,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.sprite.rotation = this.body.angle;
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void { }
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
