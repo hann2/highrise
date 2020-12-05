@@ -392,6 +392,7 @@ class LevelBuilder {
         const wall: WallID = [cell, right];
         const farCell = this.getCellOnOtherSideOfWall(cell, wall);
 
+        this.cells[cell.x][cell.y].content = "empty";
         this.cells[farCell.x][farCell.y].content = "empty";
         this.destroyWall(wall);
         this.doors.push(wall);

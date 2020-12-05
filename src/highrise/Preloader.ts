@@ -2,6 +2,8 @@ import * as Pixi from "pixi.js";
 import dsDigitalUrl from "../../resources/fonts/ds-digi.ttf";
 import axe from "../../resources/images/axe.png";
 import bathroom from "../../resources/images/bathroom.png";
+import fancyFurniture from "../../resources/images/fancy-furniture.png";
+import furniture from "../../resources/images/furniture.png";
 import healthPack from "../../resources/images/health_pack.png";
 import manBlueGun from "../../resources/images/Man Blue/manBlue_gun.png";
 import manBlueStand from "../../resources/images/Man Blue/manBlue_stand.png";
@@ -101,6 +103,8 @@ export default class Preloader extends BaseEntity implements Entity {
     const imageUrls = [
       bathroom,
       market,
+      furniture,
+      fancyFurniture,
       healthPack,
       axe,
       katana,

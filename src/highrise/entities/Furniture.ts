@@ -23,11 +23,11 @@ export default class Furniture extends BaseEntity implements Entity, Hittable {
     });
 
     const aspectRatio =
-      decorationSprite.dimensions.y / decorationSprite.dimensions.x;
+      decorationSprite.dimensions.x / decorationSprite.dimensions.y;
 
     const shape = new Box({
-      width: decorationSprite.heightMeters,
-      height: decorationSprite.heightMeters * aspectRatio,
+      width: decorationSprite.heightMeters * aspectRatio,
+      height: decorationSprite.heightMeters,
     });
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0], 0);
