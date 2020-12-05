@@ -84,6 +84,7 @@ class LevelBuilder {
   closets: Closet[] = [];
   cells: Cell[][] = [];
   doors: WallID[] = [];
+  spawnLocation?: V2d;
 
   constructor() {
     for (let i = 0; i < LEVEL_SIZE; i++) {
@@ -437,9 +438,8 @@ class LevelBuilder {
         });
     };
 
-    // Note: the exit generator assumes spawn is near 0,0.  If we move this, we need to
-    //    give exit generator any point in the spawn room.
-    addRoom(new SpawnRoom(), V(0, 0));
+    this.spawnLocation = V(0, 0);
+    addRoom(new SpawnRoom(), this.spawnLocation);
     levelTemplate.chooseRoomTemplates(seed).forEach((t) => addRoom(t));
 
     return entities;
@@ -550,8 +550,7 @@ class LevelBuilder {
   }
 
   addExits(): Entity[] {
-    // Should be near spawn
-    const startingPont = V(0, 0);
+    const startingPont = this.spawnLocation!;
 
     let furthestPointSeen: V2d = startingPont;
     let furthestDistance = 0;
