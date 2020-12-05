@@ -13,7 +13,7 @@ import { V, V2d } from "../../../core/Vector";
 import { CollisionGroups } from "../../Collision";
 import { Layers } from "../../layers";
 import { isHittable } from "../Hittable";
-import Human from "../Human";
+import Human from "../human/Human";
 import MeleeWeapon from "./MeleeWeapon";
 import { SwingPhase } from "./SwingDescriptor";
 

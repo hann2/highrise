@@ -12,7 +12,7 @@ import Glock from "../../entities/guns/Glock";
 import M1911 from "../../entities/guns/M1911";
 import PumpShotgun from "../../entities/guns/PumpShotgun";
 import HealthPickup from "../../entities/HealthPickup";
-import Human from "../../entities/Human";
+import Human from "../../entities/human/Human";
 import Axe from "../../entities/meleeWeapons/Axe";
 import Katana from "../../entities/meleeWeapons/Katana";
 import Wall from "../../entities/Wall";

@@ -1,14 +1,26 @@
 import cindyGun from "../../../resources/images/characters/cindy/cindy_gun.png";
+import cindyHold from "../../../resources/images/characters/cindy/cindy_hold.png";
+import cindyReload from "../../../resources/images/characters/cindy/cindy_reload.png";
 import cindyStand from "../../../resources/images/characters/cindy/cindy_stand.png";
 import clariceGun from "../../../resources/images/characters/clarice/clarice_gun.png";
+import clariceHold from "../../../resources/images/characters/clarice/clarice_hold.png";
+import clariceReload from "../../../resources/images/characters/clarice/clarice_reload.png";
 import clariceStand from "../../../resources/images/characters/clarice/clarice_stand.png";
 import clydeGun from "../../../resources/images/characters/clyde/clyde_gun.png";
+import clydeHold from "../../../resources/images/characters/clyde/clyde_hold.png";
+import clydeReload from "../../../resources/images/characters/clyde/clyde_reload.png";
 import clydeStand from "../../../resources/images/characters/clyde/clyde_stand.png";
 import kyleGun from "../../../resources/images/characters/kyle/kyle_gun.png";
+import kyleHold from "../../../resources/images/characters/kyle/kyle_hold.png";
+import kyleReload from "../../../resources/images/characters/kyle/kyle_reload.png";
 import kyleStand from "../../../resources/images/characters/kyle/kyle_stand.png";
 import nancyGun from "../../../resources/images/characters/nancy/nancy_gun.png";
+import nancyHold from "../../../resources/images/characters/nancy/nancy_hold.png";
+import nancyReload from "../../../resources/images/characters/nancy/nancy_reload.png";
 import nancyStand from "../../../resources/images/characters/nancy/nancy_stand.png";
 import simonGun from "../../../resources/images/characters/simon/simon_gun.png";
+import simonHold from "../../../resources/images/characters/simon/simon_hold.png";
+import simonReload from "../../../resources/images/characters/simon/simon_reload.png";
 import simonStand from "../../../resources/images/characters/simon/simon_stand.png";
 import { choose, shuffle } from "../../core/util/Random";
 import { Character } from "./Character";
@@ -16,6 +28,8 @@ import { Character } from "./Character";
 export const Cindy: Character = {
   imageGun: cindyGun,
   imageStand: cindyStand,
+  imageReload: cindyReload,
+  imageHold: cindyHold,
 
   sounds: {
     death: ["cindyDeath1"],
@@ -35,6 +49,8 @@ export const Cindy: Character = {
 export const Clarice: Character = {
   imageGun: clariceGun,
   imageStand: clariceStand,
+  imageReload: clariceReload,
+  imageHold: clariceHold,
 
   sounds: {
     death: ["clariceDeath1", "clariceDeath2"],
@@ -54,6 +70,8 @@ export const Clarice: Character = {
 export const Clyde: Character = {
   imageGun: clydeGun,
   imageStand: clydeStand,
+  imageReload: clydeReload,
+  imageHold: clydeHold,
 
   sounds: {
     death: ["clydeDeath1"],
@@ -83,6 +101,8 @@ export const Clyde: Character = {
 export const Kyle: Character = {
   imageGun: kyleGun,
   imageStand: kyleStand,
+  imageReload: kyleReload,
+  imageHold: kyleHold,
 
   sounds: {
     death: ["kyleDeath1", "kyleDeath2", "kyleDeath3"],
@@ -112,6 +132,8 @@ export const Kyle: Character = {
 export const Nancy: Character = {
   imageGun: nancyGun,
   imageStand: nancyStand,
+  imageReload: nancyReload,
+  imageHold: nancyHold,
 
   sounds: {
     death: ["nancyDeath3"],
@@ -143,6 +165,8 @@ export const Nancy: Character = {
 export const Simon: Character = {
   imageGun: simonGun,
   imageStand: simonStand,
+  imageReload: simonReload,
+  imageHold: simonHold,
 
   sounds: {
     death: ["simonDeath1"],

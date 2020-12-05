@@ -3,7 +3,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Game from "../../core/Game";
 import CustomWorld from "../../core/physics/CustomWorld";
 import { CollisionGroups } from "../Collision";
-import Human from "../entities/Human";
+import Human from "../entities/human/Human";
 import Zombie from "../entities/Zombie";
 
 // Returns true if there is an unobstructed line-of-sight from the looker to the target

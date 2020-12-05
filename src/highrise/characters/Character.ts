@@ -4,6 +4,8 @@ import { SoundName } from "../../core/resources/sounds";
 export interface Character {
   imageStand: string;
   imageGun: string;
+  imageReload: string;
+  imageHold: string;
 
   sounds: CharacterSounds;
 }

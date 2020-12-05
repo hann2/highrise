@@ -6,7 +6,7 @@ import { choose, rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import MuzzleFlash from "../../effects/MuzzleFlash";
 import Bullet from "../Bullet";
-import Human from "../Human";
+import Human from "../human/Human";
 import { FireMode, GunStats, ReloadingStyle } from "./GunStats";
 
 const defaultGunStats: GunStats = {
@@ -19,6 +19,8 @@ const defaultGunStats: GunStats = {
   ammoCapacity: 10,
   reloadTime: 1,
   reloadingStyle: ReloadingStyle.MAGAZINE,
+
+  size: [1, 1],
 
   sounds: {
     shoot: ["pistol2Shot1"],

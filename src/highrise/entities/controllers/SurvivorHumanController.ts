@@ -2,7 +2,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { getNearestVisibleZombie } from "../../utils/visionUtils";
 import Gun from "../guns/Gun";
-import Human from "../Human";
+import Human from "../human/Human";
 import Interactable from "../Interactable";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 

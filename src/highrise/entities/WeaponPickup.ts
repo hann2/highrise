@@ -1,9 +1,9 @@
-import { Sprite, Text } from "pixi.js";
+import { Sprite, Text, Texture } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import { rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import Gun from "./guns/Gun";
-import Human from "./Human";
+import Human from "./human/Human";
 import Interactable from "./Interactable";
 import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
 import { GameSprite } from "../../core/entity/Entity";
@@ -18,24 +18,13 @@ export default class WeaponPickup extends BaseEntity {
     this.addChild(weapon, true); // Take ownership of the gun. This is a little weird
     this.addChild(new Interactable(position, this.onInteract.bind(this)));
 
-    if (weapon.stats.pickupTexture && weapon.stats.size) {
-      this.sprite = Sprite.from(weapon.stats.pickupTexture);
-      this.sprite.scale.set(weapon.stats.size[1] / this.sprite.height);
-      this.sprite.anchor.set(0.5, 0.5);
-      this.sprite.position.set(...position);
-      this.sprite.rotation = rUniform(0, Math.PI * 2);
-    } else {
-      const textSprite = new Text("", {
-        font: "5px Snippet",
-        fill: "yellow",
-        align: "left",
-      });
-      textSprite.anchor.set(0.5, 0.5);
-      textSprite.position.set(...position);
-      textSprite.text = this.weapon.stats.name.substr(0, 1);
-      textSprite.scale.set(0.03);
-      this.sprite = textSprite;
-    }
+    const length = weapon.stats.size[1];
+    const texture = weapon.stats.pickupTexture ?? Texture.WHITE;
+    this.sprite = Sprite.from(texture);
+    this.sprite.scale.set(length / this.sprite.height);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.position.set(...position);
+    this.sprite.rotation = rUniform(0, Math.PI * 2);
 
     this.sprite.layerName = Layers.WORLD_BACK;
   }

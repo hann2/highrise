@@ -1,24 +1,22 @@
 import { Body, Circle } from "p2";
-import { Sprite } from "pixi.js";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity from "../../core/entity/Entity";
-import { PositionalSound } from "../../core/sound/PositionalSound";
-import { colorLerp } from "../../core/util/ColorUtils";
-import { clamp, degToRad, normalizeAngle } from "../../core/util/MathUtil";
-import { choose } from "../../core/util/Random";
-import { V, V2d } from "../../core/Vector";
-import { Character, CharacterSoundClass } from "../characters/Character";
-import { randomCharacter } from "../characters/characters";
-import { CollisionGroups } from "../Collision";
-import { DirectionalLight } from "../lighting/DirectionalLight";
-import { PointLight } from "../lighting/PointLight";
-import Bullet from "./Bullet";
-import Gun from "./guns/Gun";
-import Hittable from "./Hittable";
-import Interactable, { isInteractable } from "./Interactable";
-import MeleeWeapon from "./meleeWeapons/MeleeWeapon";
-import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
-import WeaponPickup from "./WeaponPickup";
+import BaseEntity from "../../../core/entity/BaseEntity";
+import Entity from "../../../core/entity/Entity";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
+import { normalizeAngle } from "../../../core/util/MathUtil";
+import { choose } from "../../../core/util/Random";
+import { V, V2d } from "../../../core/Vector";
+import { Character, CharacterSoundClass } from "../../characters/Character";
+import { randomCharacter } from "../../characters/characters";
+import { CollisionGroups } from "../../Collision";
+import { PointLight } from "../../lighting/PointLight";
+import Bullet from "../Bullet";
+import Gun from "../guns/Gun";
+import Hittable from "../Hittable";
+import Interactable, { isInteractable } from "../Interactable";
+import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
+import SwingingWeapon from "../meleeWeapons/SwingingWeapon";
+import WeaponPickup from "../WeaponPickup";
+import HumanSprite from "./HumanSprite";
 
 export const HUMAN_RADIUS = 0.4; // meters
 const SPEED = 4; // arbitrary units
@@ -28,7 +26,6 @@ const MAX_HEALTH = 100;
 
 export default class Human extends BaseEntity implements Entity, Hittable {
   body: Body;
-  sprite: Sprite;
   tags = ["human"];
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
@@ -41,6 +38,8 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   ) {
     super();
 
+    this.addChild(new HumanSprite(this));
+
     this.body = new Body({
       mass: 1,
       position: position.clone(),
@@ -51,14 +50,6 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     shape.collisionGroup = CollisionGroups.Humans;
     shape.collisionMask = CollisionGroups.All ^ CollisionGroups.Bullets;
     this.body.addShape(shape);
-
-    this.sprite = new Sprite();
-    const manSprite = Sprite.from(character.imageStand);
-    manSprite.name = "man";
-    manSprite.anchor.set(0.5, 0.5);
-    manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
-    this.sprite.addChild(manSprite);
-    this.sprite.anchor.set(0.5, 0.5);
 
     this.light = this.addChild(new PointLight(5, 0.4, 0xffffee, true));
     // this.flashLight = this.addChild(
@@ -77,28 +68,6 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     this.light.setPosition(this.body.position);
     // this.flashLight.setPosition(this.body.position);
     // this.flashLight.setDirection(this.body.angle);
-  }
-
-  // TODO: Guarantee that this happens after everyone else's render calls
-  onRender() {
-    [this.sprite.x, this.sprite.y] = this.body.position;
-    this.sprite.rotation = this.body.angle;
-
-    const healthPercent = clamp(this.hp / 100);
-    (this.sprite.getChildByName("man") as Sprite).tint = colorLerp(
-      0xff0000,
-      0xffffff,
-      healthPercent
-    );
-
-    // Sorry Simon
-    const weaponSprite = this.sprite.getChildByName("weapon");
-    if (weaponSprite) {
-      weaponSprite.visible =
-        this.weapon instanceof Gun ||
-        !this.weapon?.currentCooldown ||
-        this.weapon?.currentCooldown <= 0;
-    }
   }
 
   // Move the human along a specified vector
@@ -140,31 +109,6 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     }
     this.weapon = weapon;
     this.addChild(weapon, true);
-    this.sprite.removeChildren();
-
-    const manSprite =
-      weapon instanceof Gun
-        ? Sprite.from(this.character.imageGun)
-        : Sprite.from(this.character.imageStand);
-    manSprite.name = "man";
-    manSprite.anchor.set(0.5, 0.5);
-    manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
-
-    if (weapon instanceof MeleeWeapon && weapon.stats.pickupTexture) {
-      const { size, handlePosition, pickupTexture } = weapon.stats;
-      const { restAngle, restPosition } = weapon.swing;
-
-      const weaponSprite = Sprite.from(pickupTexture);
-      weaponSprite.scale.set(size[1] / weaponSprite.height);
-      weaponSprite.anchor.set(...handlePosition);
-      weaponSprite.rotation = Math.PI / 2 + restAngle;
-      weaponSprite.position.set(...restPosition);
-      weaponSprite.name = "weapon";
-      this.sprite.addChild(weaponSprite);
-    }
-
-    this.sprite.addChild(manSprite);
-    this.sprite.anchor.set(0.5, 0.5);
 
     weapon.playSound("pickup", this.getPosition());
     await this.wait(0.5);
@@ -176,11 +120,6 @@ export default class Human extends BaseEntity implements Entity, Hittable {
       this.game?.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
       this.weapon = undefined;
     }
-    this.sprite.removeChildren();
-    const manSprite = Sprite.from(this.character.imageStand);
-    manSprite.anchor.set(0.5, 0.5);
-    manSprite.scale.set((2 * HUMAN_RADIUS) / manSprite.height);
-    this.sprite.addChild(manSprite);
   }
 
   // Return a list of all interactables within range

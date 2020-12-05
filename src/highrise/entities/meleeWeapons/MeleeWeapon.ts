@@ -5,7 +5,7 @@ import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { choose } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
-import Human from "../Human";
+import Human from "../human/Human";
 import {
   SwingAngles,
   SwingDescriptor,

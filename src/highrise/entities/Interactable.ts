@@ -1,5 +1,5 @@
 import Entity from "../../core/entity/Entity";
-import Human from "./Human";
+import Human from "./human/Human";
 import BaseEntity from "../../core/entity/BaseEntity";
 import { V2d } from "../../core/Vector";
 

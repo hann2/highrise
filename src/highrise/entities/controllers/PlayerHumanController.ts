@@ -5,7 +5,7 @@ import { KeyCode } from "../../../core/io/Keys";
 import { V } from "../../../core/Vector";
 import Gun from "../guns/Gun";
 import { FireMode } from "../guns/GunStats";
-import Human from "../Human";
+import Human from "../human/Human";
 
 // Maps keyboard/mouse/gamepad input to human actions
 export default class PlayerHumanController
@@ -71,7 +71,10 @@ export default class PlayerHumanController
         io.getAxis(ControllerAxis.RIGHT_X),
         io.getAxis(ControllerAxis.RIGHT_Y)
       );
-      this.human.setDirection(direction.angle);
+      if (direction.magnitude > 0.1) {
+        // account for dead zone
+        this.human.setDirection(direction.angle);
+      }
     } else {
       const mousePosition = this.game!.camera.toWorld(io.mousePosition);
       const mouseDirection = mousePosition.sub(this.human.getPosition()).angle;

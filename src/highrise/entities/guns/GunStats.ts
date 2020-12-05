@@ -35,7 +35,7 @@ export interface GunStats {
   // Texture to use when the item's on the ground
   pickupTexture?: string;
   // Physical size of the weapon
-  size?: V2d;
+  size: [number, number];
 }
 
 export enum FireMode {

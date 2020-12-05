@@ -7,8 +7,9 @@ import ShopLevel from "../../data/levels/ShopLevel";
 import DoubleBarrelShotgun from "../guns/DoubleBarrelShotgun";
 import Gun from "../guns/Gun";
 import PumpShotgun from "../guns/PumpShotgun";
-import Human from "../Human";
+import Human from "../human/Human";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
+import PartyManager from "../PartyManager";
 import AllyHumanController from "./AllyController";
 import PlayerHumanController from "./PlayerHumanController";
 import SurvivorHumanController from "./SurvivorHumanController";
@@ -24,10 +25,7 @@ export default class LevelController extends BaseEntity implements Entity {
   currentLevel: number = 1;
   partyMembers: Human[] = [];
   playerHumanController?: PlayerHumanController;
-
-  constructor() {
-    super();
-  }
+  partyManager = new PartyManager();
 
   handlers = {
     newGame: () => {

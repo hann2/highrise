@@ -3,7 +3,7 @@ import { Sprite } from "pixi.js";
 import healthPack from "../../../resources/images/health_pack.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import { V2d } from "../../core/Vector";
-import Human from "./Human";
+import Human from "./human/Human";
 import Interactable from "./Interactable";
 import { GameSprite } from "../../core/entity/Entity";
 import { Layers } from "../layers";

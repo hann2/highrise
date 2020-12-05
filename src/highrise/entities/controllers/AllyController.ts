@@ -5,7 +5,7 @@ import {
   getNearestVisibleZombie,
   testLineOfSight,
 } from "../../utils/visionUtils";
-import Human from "../Human";
+import Human from "../human/Human";
 
 const FOLLOW_DISTANCE = 2; // meters
 
@@ -51,6 +51,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
         const direction = this.lastSeenPositionOfLeader.sub(
           this.human.getPosition()
         );
+        this.human.setDirection(direction.angle);
         const distance = direction.magnitude;
         if (distance > FOLLOW_DISTANCE) {
           this.human.walk(direction.inormalize());

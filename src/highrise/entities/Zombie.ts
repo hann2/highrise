@@ -13,7 +13,7 @@ import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
-import Human, { HUMAN_RADIUS } from "./Human";
+import Human, { HUMAN_RADIUS } from "./human/Human";
 import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
 
 const RADIUS = 0.3; // meters
