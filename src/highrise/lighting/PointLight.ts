@@ -2,10 +2,10 @@ import { Sprite } from "pixi.js";
 import pointLight from "../../../resources/images/lights/point-light.png";
 import { V, V2d } from "../../core/Vector";
 import Light from "./Light";
-import { Shadows } from "./Shadows";
+import { ShadowMask } from "./Shadows";
 
 export class PointLight extends Light {
-  shadow?: Shadows;
+  shadow?: ShadowMask;
 
   constructor(
     private radius: number = 1,
@@ -29,8 +29,8 @@ export class PointLight extends Light {
     this.shadowsEnabled = true;
     if (!this.shadow) {
       const { x, y } = this.lightSprite.position;
-      this.shadow = this.addChild(new Shadows(V(x, y), this.radius));
-      this.lightSprite.mask = this.shadow.shadowGraphics;
+      this.shadow = this.addChild(new ShadowMask(V(x, y), this.radius));
+      this.lightSprite.mask = this.shadow.graphic;
     }
   }
 
