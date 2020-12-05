@@ -15,12 +15,13 @@ export default class AR15 extends Gun {
       ammoCapacity: 30,
 
       pickupTexture: ar15,
+      size: [0.8, 0.4],
 
       sounds: {
         shoot: ["rifleShot1", "rifleShot2", "rifleShot3"],
         empty: ["dryFire3"],
         pickup: ["magazineLoad1"],
-        reload: ["reload1"],
+        reload: ["ar15Reload1", "ar15ReloadEmpty"],
       },
     });
   }

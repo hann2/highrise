@@ -29,6 +29,8 @@ export interface GunStats {
     empty: SoundName[];
     pickup: SoundName[];
     reload: SoundName[];
+    reloadInsert?: SoundName[];
+    reloadFinish?: SoundName[];
     pump?: SoundName[];
   };
 

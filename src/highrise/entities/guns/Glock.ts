@@ -14,12 +14,13 @@ export default class Glock extends Gun {
       ammoCapacity: 15,
 
       pickupTexture: glock,
+      size: [0.45, 0.45],
 
       sounds: {
         shoot: ["pistolShot2"],
         empty: ["dryFire2"],
         pickup: ["pistolCock1"],
-        reload: ["magazineLoad1"],
+        reload: ["m1911Reload1"],
       },
     });
   }

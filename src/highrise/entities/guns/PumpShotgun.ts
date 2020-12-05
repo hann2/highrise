@@ -11,7 +11,7 @@ const CONE_ANGLE = Math.PI / 24;
 export default class PumpShotgun extends Gun {
   constructor() {
     super({
-      name: "Shotgun",
+      name: "Remington Shotgun",
       fireRate: 2,
       bulletDamage: 30,
       muzzleVelocity: 55,
@@ -21,12 +21,15 @@ export default class PumpShotgun extends Gun {
       ammoCapacity: 7,
 
       pickupTexture: remington,
+      size: [1.1, 1.1],
 
       sounds: {
         shoot: ["shotgunShot3"],
         empty: ["dryFire1"],
         pickup: ["shotgunPump1"],
-        reload: ["shotgunLoadShell2"],
+        reload: [],
+        reloadInsert: ["shotgunLoadShell2"],
+        reloadFinish: ["shotgunPump1"],
         pump: ["shotgunPump1"],
       },
     });

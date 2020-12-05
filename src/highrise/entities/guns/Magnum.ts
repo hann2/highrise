@@ -14,12 +14,19 @@ export default class Magnum extends Gun {
       ammoCapacity: 6,
 
       pickupTexture: magnum,
+      size: [0.55, 0.55],
 
       sounds: {
-        shoot: ["deagleShot1", "deagleShot2"],
-        empty: ["dryFire2"],
-        pickup: ["pistolCock1"],
-        reload: ["magazineLoad1"],
+        shoot: ["revolverShot3"],
+        empty: ["revolverDryFire"],
+        pickup: ["revolverPickup"],
+        reload: ["revolverReloadStart"],
+        reloadInsert: [
+          "revolverInsertShell1",
+          "revolverInsertShell2",
+          "revolverInsertShell3",
+        ],
+        reloadFinish: ["revolverReloadFinish"],
       },
     });
   }

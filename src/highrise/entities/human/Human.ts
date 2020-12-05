@@ -104,6 +104,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   }
 
   async giveWeapon(weapon: Gun | MeleeWeapon) {
+    console.log(weapon.stats.name);
     if (this.weapon) {
       this.dropWeapon();
     }

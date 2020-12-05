@@ -10,16 +10,17 @@ export default class FiveSeven extends Gun {
       bulletDamage: 25,
       muzzleVelocity: 60,
       reloadingStyle: ReloadingStyle.MAGAZINE,
-      reloadTime: 0.85,
+      reloadTime: 0.8,
       ammoCapacity: 20,
 
       pickupTexture: fiveseven,
+      size: [0.45, 0.45],
 
       sounds: {
         shoot: ["pistolShot1"],
         empty: ["dryFire2"],
         pickup: ["pistolCock1"],
-        reload: ["magazineLoad1"],
+        reload: ["m1911Reload1"],
       },
     });
   }

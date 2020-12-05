@@ -41,8 +41,9 @@ export const MUZZLE_FLASH_URLS = [
   muzzleFlash16,
 ];
 
-const SCALE = 1 / 200;
-const DURATION = 0.1;
+const SCALE = 1 / 200; // scale of the image
+const DURATION = 0.1; // seconds
+const RADIUS = 12; // meters for light
 export default class MuzzleFlash extends BaseEntity implements Entity {
   light?: PointLight;
   timeLeft: number = DURATION;
@@ -61,7 +62,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
   }
 
   onAdd() {
-    this.light = this.addChild(new PointLight(20, 0.8, 0xffeeaa, true));
+    this.light = this.addChild(new PointLight(RADIUS, 0.8, 0xffeeaa, true));
     this.light.setPosition([this.sprite.position.x, this.sprite.position.y]);
   }
 

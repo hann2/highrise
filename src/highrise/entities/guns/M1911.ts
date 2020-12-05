@@ -10,16 +10,17 @@ export default class M1911 extends Gun {
       bulletDamage: 34,
       muzzleVelocity: 60,
       reloadingStyle: ReloadingStyle.MAGAZINE,
-      reloadTime: 0.9,
+      reloadTime: 0.8,
       ammoCapacity: 7,
 
       pickupTexture: glock,
+      size: [0.45, 0.45],
 
       sounds: {
         shoot: ["pistol2Shot1"],
-        empty: ["dryFire2"],
-        pickup: ["pistolCock1"],
-        reload: ["magazineLoad1"],
+        empty: ["m1911DryFire"],
+        pickup: ["m1911Pickup"],
+        reload: ["m1911Reload1"],
       },
     });
   }

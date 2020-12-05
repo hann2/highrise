@@ -1,3 +1,4 @@
+import doubleBarrelShotgun from "../../../../resources/images/weapons/double-barrel-shotgun.png";
 import remington from "../../../../resources/images/weapons/remington.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import { rUniform } from "../../../core/util/Random";
@@ -21,7 +22,8 @@ export default class DoubleBarrelShotgun extends Gun {
       reloadTime: 1.2,
       ammoCapacity: 2,
 
-      pickupTexture: remington,
+      pickupTexture: doubleBarrelShotgun,
+      size: [1.1, 1.1],
 
       sounds: {
         shoot: ["shotgunShot1"],

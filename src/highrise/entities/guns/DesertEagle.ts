@@ -14,12 +14,13 @@ export default class DesertEagle extends Gun {
       ammoCapacity: 7,
 
       pickupTexture: desertEagle,
+      size: [0.55, 0.55],
 
       sounds: {
         shoot: ["deagleShot1", "deagleShot2"],
         empty: ["dryFire2"],
         pickup: ["pistolCock1"],
-        reload: ["magazineLoad1"],
+        reload: ["m1911Reload1"],
       },
     });
   }

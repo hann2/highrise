@@ -143,6 +143,9 @@ import deagleShot2 from "../../../resources/audio/guns/pistol/deagle-shot-2.mp3"
 import deagleShot3 from "../../../resources/audio/guns/pistol/deagle-shot-3.mp3";
 import deagleShot4 from "../../../resources/audio/guns/pistol/deagle-shot-4.mp3";
 import deagleShot5 from "../../../resources/audio/guns/pistol/deagle-shot-5.mp3";
+import m1911DryFire from "../../../resources/audio/guns/pistol/m1911-dry-fire.flac";
+import m1911Pickup from "../../../resources/audio/guns/pistol/m1911-pickup.wav";
+import m1911Reload1 from "../../../resources/audio/guns/pistol/m1911-reload-1.flac";
 import pistolCock1 from "../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
 import pistolCock2 from "../../../resources/audio/guns/pistol/pistol-cock-2.mp3";
 import pistolShot1 from "../../../resources/audio/guns/pistol/pistol-shot-1.mp3";
@@ -151,9 +154,18 @@ import pistolShot3 from "../../../resources/audio/guns/pistol/pistol-shot-3.mp3"
 import pistol2Shot1 from "../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
 import pistol2Shot2 from "../../../resources/audio/guns/pistol/pistol2-shot-2.mp3";
 import pistol2Shot3 from "../../../resources/audio/guns/pistol/pistol2-shot-3.mp3";
-import revolverShot1 from "../../../resources/audio/guns/pistol/revolver-shot-1.mp3";
-import revolverShot2 from "../../../resources/audio/guns/pistol/revolver-shot-2.mp3";
-import revolverShot3 from "../../../resources/audio/guns/pistol/revolver-shot-3.mp3";
+import revolverDryFire from "../../../resources/audio/guns/revolver/revolver-dry-fire.flac";
+import revolverInsertShell1 from "../../../resources/audio/guns/revolver/revolver-insert-shell-1.flac";
+import revolverInsertShell2 from "../../../resources/audio/guns/revolver/revolver-insert-shell-2.flac";
+import revolverInsertShell3 from "../../../resources/audio/guns/revolver/revolver-insert-shell-3.flac";
+import revolverPickup from "../../../resources/audio/guns/revolver/revolver-pickup.flac";
+import revolverReloadFinish from "../../../resources/audio/guns/revolver/revolver-reload-finish.flac";
+import revolverReloadStart from "../../../resources/audio/guns/revolver/revolver-reload-start.flac";
+import revolverShot1 from "../../../resources/audio/guns/revolver/revolver-shot-1.mp3";
+import revolverShot2 from "../../../resources/audio/guns/revolver/revolver-shot-2.mp3";
+import revolverShot3 from "../../../resources/audio/guns/revolver/revolver-shot-3.mp3";
+import ar15Reload1 from "../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
+import ar15ReloadEmpty from "../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
 import rifleShot1 from "../../../resources/audio/guns/rifle/rifle-shot-1.mp3";
 import rifleShot2 from "../../../resources/audio/guns/rifle/rifle-shot-2.mp3";
 import rifleShot3 from "../../../resources/audio/guns/rifle/rifle-shot-3.mp3";
@@ -209,6 +221,8 @@ export const SOUND_URLS = {
   zombieHit2,
 
   // Guns
+  ar15Reload1,
+  ar15ReloadEmpty,
   deagleShot1,
   deagleShot2,
   deagleShot3,
@@ -218,6 +232,9 @@ export const SOUND_URLS = {
   dryFire2,
   dryFire3,
   magazineLoad1,
+  m1911DryFire,
+  m1911Pickup,
+  m1911Reload1,
   pistol2Shot1,
   pistol2Shot2,
   pistol2Shot3,
@@ -227,14 +244,21 @@ export const SOUND_URLS = {
   pistolShot2,
   pistolShot3,
   reload1,
+  revolverDryFire,
+  revolverInsertShell1,
+  revolverInsertShell2,
+  revolverInsertShell3,
+  revolverPickup,
+  revolverReloadFinish,
+  revolverReloadStart,
   revolverShot1,
   revolverShot2,
   revolverShot3,
+  rifle2Shot1,
+  rifle2Shot2,
   rifleShot1,
   shellDrop1,
   shellDrop2,
-  rifle2Shot1,
-  rifle2Shot2,
   rifle2Shot3,
   rifle2Shot4,
   rifleShot2,

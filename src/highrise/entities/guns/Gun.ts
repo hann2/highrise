@@ -26,7 +26,9 @@ const defaultGunStats: GunStats = {
     shoot: ["pistol2Shot1"],
     empty: ["dryFire1"],
     pickup: ["pistolCock1"],
-    reload: ["reload1"],
+    reload: ["ar15Reload1"],
+    reloadInsert: [],
+    reloadFinish: [],
     pump: ["shotgunPump1"],
   },
 };
@@ -51,7 +53,7 @@ export default class Gun extends BaseEntity implements Entity {
     if (this.isReloading) {
       if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
         this.cancelReload();
-        this.playSound("pump", shooter.getPosition());
+        this.playSound("reload", shooter.getPosition(), 2);
       }
     } else if (this.shootCooldown <= 0) {
       const direction = shooter.getDirection();
@@ -77,17 +79,6 @@ export default class Gun extends BaseEntity implements Entity {
     }
   }
 
-  playSound(
-    soundClass: keyof GunStats["sounds"],
-    position: V2d
-  ): PositionalSound | undefined {
-    const sounds = this.stats.sounds[soundClass];
-    if (sounds?.length) {
-      const sound = choose(...sounds);
-      return this.game?.addEntity(new PositionalSound(sound, position));
-    }
-  }
-
   makeProjectile(position: V2d, direction: number) {
     this.game!.addEntity(
       new Bullet(
@@ -103,19 +94,23 @@ export default class Gun extends BaseEntity implements Entity {
     if (!this.isReloading && this.ammo < this.stats.ammoCapacity) {
       if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
         this.isReloading = true;
-        this.playSound("reload", shooter.getPosition());
+        const soundIndex = this.ammo > 0 ? 0 : 1; // play a special sound for reloading while empty
+        this.playSound("reload", shooter.getPosition(), soundIndex);
         this.ammo = 0;
         await this.wait(this.stats.reloadTime, undefined, "reload");
+        this.playSound("reloadFinish", shooter.getPosition());
         this.ammo = this.stats.ammoCapacity;
         this.isReloading = false;
       } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
+        this.playSound("reload", shooter.getPosition());
         this.isReloading = true;
+        await this.wait(this.stats.reloadTime / 2, undefined, "reload");
         while (this.ammo < this.stats.ammoCapacity) {
-          this.playSound("reload", shooter.getPosition());
+          this.playSound("reloadInsert", shooter.getPosition(), 1);
           await this.wait(this.stats.reloadTime, undefined, "reload");
           this.ammo += 1;
         }
-        this.playSound("pump", shooter.getPosition());
+        this.playSound("reloadFinish", shooter.getPosition());
         this.isReloading = false;
       }
     }
@@ -129,6 +124,18 @@ export default class Gun extends BaseEntity implements Entity {
   onTick(dt: number) {
     if (this.shootCooldown > 0) {
       this.shootCooldown -= dt;
+    }
+  }
+
+  playSound(
+    soundClass: keyof GunStats["sounds"],
+    position: V2d,
+    index: number = -1
+  ): PositionalSound | undefined {
+    const sounds = this.stats.sounds[soundClass];
+    if (sounds?.length) {
+      const sound = sounds[index] ?? choose(...sounds);
+      return this.game?.addEntity(new PositionalSound(sound, position));
     }
   }
 }

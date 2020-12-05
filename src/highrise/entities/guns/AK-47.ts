@@ -6,7 +6,7 @@ export default class AK47 extends Gun {
   constructor() {
     super({
       name: "AK-47",
-      fireRate: 7,
+      fireRate: 9,
       bulletDamage: 45,
       muzzleVelocity: 120,
       fireMode: FireMode.FULL_AUTO,
@@ -15,12 +15,13 @@ export default class AK47 extends Gun {
       ammoCapacity: 30,
 
       pickupTexture: ak47,
+      size: [1.4, 1.4],
 
       sounds: {
-        shoot: ["rifle2Shot1", "rifle2Shot2", "rifle2Shot3"],
+        shoot: ["rifle2Shot1"],
         empty: ["dryFire3"],
         pickup: ["magazineLoad1"],
-        reload: ["reload1"],
+        reload: ["ar15Reload1", "ar15ReloadEmpty"],
       },
     });
   }

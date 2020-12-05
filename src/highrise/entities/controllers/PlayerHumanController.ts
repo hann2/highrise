@@ -2,8 +2,10 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { ControllerAxis, ControllerButton } from "../../../core/io/Gamepad";
 import { KeyCode } from "../../../core/io/Keys";
+import { choose } from "../../../core/util/Random";
 import { V } from "../../../core/Vector";
 import Gun from "../guns/Gun";
+import { GUNS } from "../guns/Guns";
 import { FireMode } from "../guns/GunStats";
 import Human from "../human/Human";
 
@@ -35,6 +37,9 @@ export default class PlayerHumanController
         break;
       case ControllerButton.X:
         this.human.reload();
+        break;
+      case ControllerButton.BACK:
+        this.human.giveWeapon(new (choose(...GUNS))());
         break;
     }
   }
