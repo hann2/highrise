@@ -42,7 +42,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
       position: [Math.min(x1, x2) + w / 2, Math.min(y1, y2) + h / 2],
     });
 
-    const shape = new Box({ width: w * 0.85, height: h * 0.85 });
+    const shape = new Box({ width: w, height: h });
     shape.collisionGroup = CollisionGroups.World | CollisionGroups.ShadowCaster;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0], 0);
