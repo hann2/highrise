@@ -52,7 +52,7 @@ export default class PlayerHumanController
   onTick() {
     const io = this.game!.io;
 
-    this.game!.slowMo = io.keyIsDown("ShiftLeft") ? 0.4 : 1.0;
+    this.game!.slowMo = io.keyIsDown("ShiftLeft") ? 0.2 : 1.0;
 
     // Shooting
     if (
