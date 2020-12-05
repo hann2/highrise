@@ -1,7 +1,18 @@
 import Entity from "../../../core/entity/Entity";
+import { choose } from "../../../core/util/Random";
 import { V } from "../../../core/Vector";
+import Decoration from "../../entities/Decoration";
 import Furniture from "../../entities/Furniture";
-import { lobbyDesk } from "../../view/DecorationSprite";
+import {
+  chairRight,
+  chairUp,
+  coffeeTable,
+  endTable1,
+  endTable2,
+  lobbyDesk,
+  piano,
+  rug,
+} from "../../view/DecorationSprite";
 import {
   AngleTransformer,
   CellTransformer,
@@ -43,7 +54,19 @@ export default class LobbyRoomTemplate extends RoomTemplate {
     transformAngle: AngleTransformer
   ): Entity[] {
     const entities: Entity[] = [];
+
+    entities.push(new Decoration(transformCell(V(2.5, 5)), rug));
     entities.push(new Furniture(transformCell(V(2.5, 3.5)), lobbyDesk));
+    entities.push(new Furniture(transformCell(V(-0.15, 5)), chairRight));
+    entities.push(new Furniture(transformCell(V(-0.15, 5.47)), chairRight));
+    entities.push(new Furniture(transformCell(V(0.35, 6)), chairUp));
+    entities.push(new Furniture(transformCell(V(0.85, 6)), chairUp));
+    entities.push(
+      new Furniture(transformCell(V(-0.15, 6.15)), choose(endTable1, endTable2))
+    );
+    entities.push(new Furniture(transformCell(V(0.6, 5)), coffeeTable));
+
+    entities.push(new Furniture(transformCell(V(4.5, 5.5)), piano));
     return entities;
   }
 }

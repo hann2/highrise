@@ -392,6 +392,7 @@ class LevelBuilder {
         const wall: WallID = [cell, right];
         const farCell = this.getCellOnOtherSideOfWall(cell, wall);
 
+        this.cells[cell.x][cell.y].content = "empty";
         this.cells[farCell.x][farCell.y].content = "empty";
         this.destroyWall(wall);
         this.doors.push(wall);
@@ -715,6 +716,7 @@ class LevelBuilder {
 }
 
 export const generateLevel = (seed: number = rInteger(0, 2 ** 32)): Level => {
+  seed = 3973714408;
   console.log("Generating level with seed " + seed);
   return new LevelBuilder().generateLevel(seed);
 };

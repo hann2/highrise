@@ -7,10 +7,8 @@ import {
   Ray,
   RaycastResult,
   Shape,
-  vec2,
   World,
 } from "p2";
-import * as Pixi from "pixi.js";
 import { Graphics, PI_2 } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";

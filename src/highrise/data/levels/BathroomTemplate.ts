@@ -3,6 +3,7 @@ import { polarToVec } from "../../../core/util/MathUtil";
 import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Decoration from "../../entities/Decoration";
+import Furniture from "../../entities/Furniture";
 import {
   bathroomTiles,
   downSink1,
@@ -34,21 +35,21 @@ export default class BathroomTemplate extends RoomTemplate {
       const vec = polarToVec(transformAngle(0), 1);
       if (vec.x === 1) {
         entities.push(
-          new Decoration(
+          new Furniture(
             transformCell(p).add(V(0.4, 0)),
             choose(leftToilet1, leftToilet2)
           )
         );
       } else if (vec.x === -1) {
         entities.push(
-          new Decoration(
+          new Furniture(
             transformCell(p).add(V(-0.4, 0)),
             choose(rightToilet1, rightToilet2)
           )
         );
       } else if (vec.y === -1) {
         entities.push(
-          new Decoration(
+          new Furniture(
             transformCell(p).add(V(0, -0.4)),
             choose(downToilet1, downToilet2)
           )
