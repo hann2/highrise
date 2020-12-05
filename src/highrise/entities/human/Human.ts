@@ -176,6 +176,8 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   }
 
   heal(amount: number) {
+    this.speak("pickupItem");
+
     this.hp += amount;
     if (this.hp > MAX_HEALTH) {
       this.hp = MAX_HEALTH;

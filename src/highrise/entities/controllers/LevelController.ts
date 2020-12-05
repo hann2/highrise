@@ -1,5 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { Level } from "../../data/levels/Level";
 import {
   chooseTemplate,
@@ -34,6 +35,7 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     levelComplete: async () => {
+      this.getPartyLeader()?.speak("relief");
       this.currentLevel += 1;
       this.clearLevel();
 
@@ -78,6 +80,9 @@ export default class LevelController extends BaseEntity implements Entity {
   shouldClear(entity: Entity) {
     if (entity.persistent) {
       // Whatever is persistent we probably don't wanna delete it (like the pause controller)
+      return false;
+    }
+    if (entity instanceof PositionalSound && !entity.continuous) {
       return false;
     }
     if (entity instanceof Human) {
