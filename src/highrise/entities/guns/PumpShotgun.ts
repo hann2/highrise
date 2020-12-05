@@ -1,7 +1,9 @@
+import remington from "../../../../resources/images/weapons/remington.png";
 import { rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import Bullet from "../Bullet";
-import Gun, { FireMode, ReloadingStyle } from "./Gun";
+import Gun from "./Gun";
+import { ReloadingStyle, FireMode } from "./GunStats";
 
 const NUM_BULLETS = 9;
 const CONE_ANGLE = Math.PI / 24;
@@ -17,6 +19,8 @@ export default class PumpShotgun extends Gun {
       fireMode: FireMode.PUMP,
       reloadTime: 0.5,
       ammoCapacity: 7,
+
+      pickupTexture: remington,
 
       sounds: {
         shoot: ["shotgunShot3"],

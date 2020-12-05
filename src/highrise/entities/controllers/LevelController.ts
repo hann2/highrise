@@ -7,7 +7,6 @@ import ShopLevel from "../../data/levels/ShopLevel";
 import DoubleBarrelShotgun from "../guns/DoubleBarrelShotgun";
 import Gun from "../guns/Gun";
 import PumpShotgun from "../guns/PumpShotgun";
-import Rifle from "../guns/Rifle";
 import Human from "../Human";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 import AllyHumanController from "./AllyController";

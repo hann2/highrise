@@ -1,16 +1,20 @@
-import Gun, { FireMode, ReloadingStyle } from "./Gun";
+import ar15 from "../../../../resources/images/weapons/ar-15.png";
+import Gun from "./Gun";
+import { FireMode, ReloadingStyle } from "./GunStats";
 
-export default class Rifle extends Gun {
+export default class AR15 extends Gun {
   constructor() {
     super({
-      name: "Rifle",
-      fireRate: 8,
-      bulletDamage: 40,
+      name: "AR-15",
+      fireRate: 9,
+      bulletDamage: 45,
       muzzleVelocity: 120,
-      fireMode: FireMode.FULL_AUTO,
+      fireMode: FireMode.SEMI_AUTO,
       reloadingStyle: ReloadingStyle.MAGAZINE,
       reloadTime: 1.5,
       ammoCapacity: 30,
+
+      pickupTexture: ar15,
 
       sounds: {
         shoot: ["rifleShot1", "rifleShot2", "rifleShot3"],

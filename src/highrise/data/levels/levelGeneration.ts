@@ -1,15 +1,15 @@
 import { Matrix, Point } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
-import { rInteger, seededShuffle } from "../../../core/util/Random";
+import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import BaseFloor from "../../BaseFloor";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
-import Pistol from "../../entities/guns/Pistol";
-import Rifle from "../../entities/guns/Rifle";
-import Pump from "../../entities/guns/PumpShotgun";
+import Glock from "../../entities/guns/Glock";
+import M1911 from "../../entities/guns/M1911";
+import PumpShotgun from "../../entities/guns/PumpShotgun";
 import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/Human";
 import Axe from "../../entities/meleeWeapons/Axe";
@@ -596,14 +596,13 @@ class LevelBuilder {
       }
     };
 
-    consumeLocation((l: V2d) => new WeaponPickup(l, new Pump()));
-    consumeLocation((l: V2d) => new WeaponPickup(l, new Rifle()));
+    consumeLocation((l: V2d) => new WeaponPickup(l, new PumpShotgun()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Axe()));
     consumeLocation((l: V2d) => new WeaponPickup(l, new Katana()));
     consumeLocation((l: V2d) => new HealthPickup(l));
     consumeLocation((l: V2d) => {
       const surv = new Human(l);
-      surv.giveWeapon(new Pistol());
+      surv.giveWeapon(choose(new Glock(), new M1911()));
       return [surv, new SurvivorHumanController(surv)];
     });
     return entities;
