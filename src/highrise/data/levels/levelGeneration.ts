@@ -716,7 +716,6 @@ class LevelBuilder {
 }
 
 export const generateLevel = (seed: number = rInteger(0, 2 ** 32)): Level => {
-  seed = 3973714408;
   console.log("Generating level with seed " + seed);
   return new LevelBuilder().generateLevel(seed);
 };
