@@ -1,20 +1,19 @@
 import { Matrix, Point } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
-import { rInteger, seededShuffle } from "../../../core/util/Random";
+import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import BaseFloor from "../../BaseFloor";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
 import Furniture from "../../entities/Furniture";
-import Pistol from "../../entities/guns/Pistol";
-import Pump from "../../entities/guns/PumpShotgun";
-import Rifle from "../../entities/guns/Rifle";
+import Glock from "../../entities/guns/Glock";
+import { GUNS } from "../../entities/guns/Guns";
+import M1911 from "../../entities/guns/M1911";
 import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/Human";
-import Axe from "../../entities/meleeWeapons/Axe";
-import Katana from "../../entities/meleeWeapons/Katana";
+import { MELEE_WEAPONS } from "../../entities/meleeWeapons/MeleeWeapons";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
@@ -736,14 +735,14 @@ class LevelBuilder {
       }
     };
 
-    consumeLocation((l: V2d) => new WeaponPickup(l, new Pump()));
-    consumeLocation((l: V2d) => new WeaponPickup(l, new Rifle()));
-    consumeLocation((l: V2d) => new WeaponPickup(l, new Axe()));
-    consumeLocation((l: V2d) => new WeaponPickup(l, new Katana()));
+    consumeLocation((l: V2d) => new WeaponPickup(l, new (choose(...GUNS))()));
+    consumeLocation(
+      (l: V2d) => new WeaponPickup(l, new (choose(...MELEE_WEAPONS))())
+    );
     consumeLocation((l: V2d) => new HealthPickup(l));
     consumeLocation((l: V2d) => {
       const surv = new Human(l);
-      surv.giveWeapon(new Pistol());
+      surv.giveWeapon(choose(new Glock(), new M1911()));
       return [surv, new SurvivorHumanController(surv)];
     });
 

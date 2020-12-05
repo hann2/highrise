@@ -1,8 +1,10 @@
+import remington from "../../../../resources/images/weapons/remington.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import { rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import Bullet from "../Bullet";
-import Gun, { FireMode, ReloadingStyle } from "./Gun";
+import Gun from "./Gun";
+import { ReloadingStyle, FireMode } from "./GunStats";
 
 const NUM_BULLETS = 9;
 const CONE_ANGLE = degToRad(20);
@@ -18,6 +20,8 @@ export default class DoubleBarrelShotgun extends Gun {
       fireMode: FireMode.SEMI_AUTO,
       reloadTime: 1.2,
       ammoCapacity: 2,
+
+      pickupTexture: remington,
 
       sounds: {
         shoot: ["shotgunShot1"],

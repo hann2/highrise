@@ -1,9 +1,11 @@
-import Gun, { ReloadingStyle } from "./Gun";
+import glock from "../../../../resources/images/weapons/glock.png";
+import Gun from "./Gun";
+import { ReloadingStyle } from "./GunStats";
 
-export default class Pistol extends Gun {
+export default class M1911 extends Gun {
   constructor() {
     super({
-      name: "Pistol",
+      name: "M1911",
       fireRate: 9,
       bulletDamage: 34,
       muzzleVelocity: 60,
@@ -11,8 +13,10 @@ export default class Pistol extends Gun {
       reloadTime: 0.9,
       ammoCapacity: 7,
 
+      pickupTexture: glock,
+
       sounds: {
-        shoot: ["pistolShot2"],
+        shoot: ["pistol2Shot1"],
         empty: ["dryFire2"],
         pickup: ["pistolCock1"],
         reload: ["magazineLoad1"],

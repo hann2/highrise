@@ -9,3 +9,26 @@ export default class Credits extends BaseEntity implements Entity {
     this.sprite = new Sprite();
   }
 }
+
+const TEXT = `
+  DESIGN
+Philip Hann
+Simon Baumgardt-Wellander
+
+  SOUND EFFECTS
+Simon Baumgardt-Wellander
+Fesliyan Studios
+
+  VOICE ACTORS
+Philip Hann
+Simon Baumgardt-Wellander
+Marisa DeNicolo-Hann
+Lawlfrats
+
+  ART
+Philip Hann
+Simon Baumgardt-Wellander
+Kenny NL
+Project Cordon Sprites
+Panda Maru
+`;

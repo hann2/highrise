@@ -31,6 +31,8 @@ import Entity from "../core/entity/Entity";
 import Game from "../core/Game";
 import { loadSound, SoundName, SOUND_URLS } from "../core/resources/sounds";
 import { CHARACTERS } from "./characters/characters";
+import { GUNS } from "./entities/guns/Guns";
+import { MELEE_WEAPONS } from "./entities/meleeWeapons/MeleeWeapons";
 
 export default class Preloader extends BaseEntity implements Entity {
   private _resolve!: () => void;
@@ -95,13 +97,11 @@ export default class Preloader extends BaseEntity implements Entity {
   }
 
   async loadImages() {
-    const imageUrls = [
-      axe,
+    const imageUrls = new Set([
       bathroom,
       fancyFurniture,
       furniture,
       healthPack,
-      katana,
       market,
       muzzleFlash1,
       muzzleFlash10,
@@ -122,14 +122,28 @@ export default class Preloader extends BaseEntity implements Entity {
       pointLight,
       zoimbie1Hold,
       zoimbie1Stand,
-    ];
+    ]);
 
     for (const character of CHARACTERS) {
-      imageUrls.push(character.imageGun, character.imageStand);
+      imageUrls.add(character.imageGun);
+      imageUrls.add(character.imageStand);
+    }
+
+    for (const GunConstructor of GUNS) {
+      const stats = new GunConstructor().stats;
+      stats.pickupTexture && imageUrls.add(stats.pickupTexture);
+    }
+
+    for (const MeleeWeaponConstructor of MELEE_WEAPONS) {
+      const weapon = new MeleeWeaponConstructor();
+      const { pickupTexture, attackTexture, holdTexture } = weapon.stats;
+      attackTexture && imageUrls.add(attackTexture);
+      holdTexture && imageUrls.add(holdTexture);
+      pickupTexture && imageUrls.add(pickupTexture);
     }
 
     let loaded = 0;
-    const total = imageUrls.length;
+    const total = imageUrls.size;
     const element = document.getElementById("image-count")!;
     element.innerText = `${loaded} / ${total}`;
 
