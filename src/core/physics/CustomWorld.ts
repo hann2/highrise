@@ -85,6 +85,7 @@ export default class CustomWorld extends World {
     this.kinematicBodies.delete(body);
   }
 
+
   raycast(result: RaycastResult, ray: Ray, shouldAddBodies: boolean = true) {
     // Get all bodies within the ray AABB
     // const bodies = this.broadphase.rayQuery(ray, shouldAddBodies);
@@ -92,9 +93,13 @@ export default class CustomWorld extends World {
     // return result.hasHit();
 
     const aabb = new AABB()
+    // @ts-ignore
     const bodies: Body = [];
+    // @ts-ignore
     ray.getAABB(aabb);
+    // @ts-ignore
     this.broadphase.aabbQuery(this, aabb, bodies, shouldAddBodies);
+    // @ts-ignore
     ray.intersectBodies(result, bodies);
 
     return result.hasHit();
