@@ -6,7 +6,7 @@ import Entity from "../../core/entity/Entity";
 import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
-import { clamp, polarToVec, radToDeg } from "../../core/util/MathUtil";
+import { clamp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
@@ -47,6 +47,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     shape.collisionGroup = CollisionGroups.Zombies;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
+    this.body.angularDamping = 0.9;
 
     this.sprite = Sprite.from(zoimbie1Hold);
     this.sprite.anchor.set(0.5, 0.5); // make it rotate about the middle
