@@ -1,9 +1,10 @@
-import Entity from "../../../core/entity/Entity";
-import { polarToVec } from "../../../core/util/MathUtil";
-import { choose } from "../../../core/util/Random";
-import { V, V2d } from "../../../core/Vector";
-import Decoration from "../../entities/Decoration";
-import Furniture from "../../entities/Furniture";
+import Entity from "../../../../core/entity/Entity";
+import { polarToVec } from "../../../../core/util/MathUtil";
+import { choose } from "../../../../core/util/Random";
+import { V, V2d } from "../../../../core/Vector";
+import Decoration from "../../../entities/Decoration";
+import Furniture from "../../../entities/Furniture";
+import { PointLight } from "../../../lighting/PointLight";
 import {
   bathroomTiles,
   downSink1,
@@ -16,7 +17,7 @@ import {
   rightSink1,
   rightToilet1,
   rightToilet2,
-} from "../../view/DecorationSprite";
+} from "../../../view/DecorationSprite";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 
@@ -82,6 +83,10 @@ export default class BathroomTemplate extends RoomTemplate {
     addToiletAt(V(1, 0));
     addToiletAt(V(1, 1));
     addToiletAt(V(1, 2));
+
+    const light = new PointLight(7, 0.8, 0xfaf0e6);
+    light.setPosition(transformCell(V(0.5, 1)));
+    entities.push(light);
 
     return entities;
   }

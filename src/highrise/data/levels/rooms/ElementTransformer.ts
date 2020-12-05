@@ -1,7 +1,7 @@
 import { Matrix } from "pixi.js";
-import { polarToVec } from "../../../core/util/MathUtil";
-import { V, V2d } from "../../../core/Vector";
-import { pointToV2d, WallID } from "./levelGeneration";
+import { polarToVec } from "../../../../core/util/MathUtil";
+import { V, V2d } from "../../../../core/Vector";
+import { pointToV2d, WallID } from "../levelGeneration";
 
 export type CellTransformer = (cell: V2d) => V2d;
 export type AngleTransformer = (cell: number) => number;

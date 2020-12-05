@@ -30,14 +30,14 @@ export const downToilet1: DecorationSprite = {
   imageName: bathroom,
   offset: V(146, 300),
   dimensions: V(46, 68),
-  heightMeters: 1.5,
+  heightMeters: 1.2,
 };
 
 export const downToilet2: DecorationSprite = {
   imageName: bathroom,
   offset: V(192, 300),
   dimensions: V(46, 68),
-  heightMeters: 1.5,
+  heightMeters: 1.2,
 };
 
 export const rightToilet2: DecorationSprite = {
@@ -183,14 +183,14 @@ export const shelfBooks: DecorationSprite = {
 export const bakeryStall: DecorationSprite = {
   imageName: market,
   offset: V(0, 528),
-  dimensions: V(96, 96),
+  dimensions: V(96, 95),
   heightMeters: 3,
 };
 
 export const jewelryStall: DecorationSprite = {
   imageName: market,
   offset: V(0, 624),
-  dimensions: V(96, 96),
+  dimensions: V(96, 95),
   heightMeters: 3,
 };
 

@@ -1,12 +1,12 @@
-import Entity from "../../../core/entity/Entity";
-import { V2d } from "../../../core/Vector";
-import { DecorationSprite } from "../../view/DecorationSprite";
+import Entity from "../../../../core/entity/Entity";
+import { V2d } from "../../../../core/Vector";
+import { DecorationSprite } from "../../../view/DecorationSprite";
+import { WallID } from "../levelGeneration";
 import {
   AngleTransformer,
   CellTransformer,
   WallTransformer,
 } from "./ElementTransformer";
-import { WallID } from "./levelGeneration";
 
 export default class RoomTemplate {
   dimensions: V2d;

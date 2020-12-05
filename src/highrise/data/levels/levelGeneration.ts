@@ -28,10 +28,10 @@ import {
 import { Level } from "./Level";
 import LevelTemplate from "./LevelTemplate";
 import LobbyLevel from "./LobbyLevel";
-import RoomTemplate from "./RoomTemplate";
+import RoomTemplate from "./rooms/RoomTemplate";
 import ShopLevel from "./ShopLevel";
 
-const LEVEL_SIZE = 12;
+const LEVEL_SIZE = 16;
 const WALL_WIDTH = 0.3;
 const OPEN_WIDTH = 1.8;
 const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
@@ -333,7 +333,7 @@ class LevelBuilder {
       upperRightCorner: V2d,
       template: RoomTemplate
     ): boolean => {
-      const startingPont = V(5, 5);
+      const startingPont = V(0, 0);
 
       let seenCount = 0;
       const seen: boolean[][] = [];
@@ -442,6 +442,9 @@ class LevelBuilder {
     this.destroyWall([V(2, 0), true]);
     this.cells[3][0].content = "empty";
     this.doors.push([V(2, 0), true]);
+    const light = new PointLight(6, 0.8);
+    light.setPosition(this.levelCoordToWorldCoord(V(1, 1)));
+    entities.push(light);
 
     levelTemplate.chooseRoomTemplates(seed).forEach(addRoom.bind(this));
 
@@ -609,7 +612,7 @@ class LevelBuilder {
       for (let j = 0; j < LEVEL_SIZE; j++) {
         if (!this.cells[i][j].content) {
           this.cells[i][j].content = "zombie";
-          enemies.push(new Zombie(this.levelCoordToWorldCoord(V(i, j))));
+          // enemies.push(new Zombie(this.levelCoordToWorldCoord(V(i, j))));
         }
       }
     }
@@ -851,5 +854,5 @@ export const generateLevel = (
   seed: number = rInteger(0, 2 ** 32)
 ): Level => {
   console.log("Generating level with seed " + seed);
-  return new LevelBuilder().generateLevel(levelTemplate, seed);
+  return new LevelBuilder().generateLevel(new ShopLevel(), seed);
 };

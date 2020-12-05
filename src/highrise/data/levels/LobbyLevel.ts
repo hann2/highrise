@@ -1,11 +1,11 @@
 import { seededShuffle } from "../../../core/util/Random";
-import BathroomTemplate from "./BathroomTemplate";
 import { POSSIBLE_ORIENTATIONS } from "./levelGeneration";
 import LevelTemplate from "./LevelTemplate";
-import LobbyRoomTemplate from "./LobbyRoomTemplate";
-import RoomTemplate from "./RoomTemplate";
-import TransformedRoomTemplate from "./TransformedRoomTemplate";
-import ZombieRoomTemplate from "./ZombieRoomTemplate";
+import BathroomTemplate from "./rooms/BathroomTemplate";
+import LobbyRoomTemplate from "./rooms/LobbyRoomTemplate";
+import RoomTemplate from "./rooms/RoomTemplate";
+import TransformedRoomTemplate from "./rooms/TransformedRoomTemplate";
+import ZombieRoomTemplate from "./rooms/ZombieRoomTemplate";
 
 export default class LobbyLevel extends LevelTemplate {
   chooseRoomTemplates(seed: number): RoomTemplate[] {

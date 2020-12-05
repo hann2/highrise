@@ -1,8 +1,8 @@
-import Entity from "../../../core/entity/Entity";
-import { choose } from "../../../core/util/Random";
-import { V } from "../../../core/Vector";
-import Decoration from "../../entities/Decoration";
-import Furniture from "../../entities/Furniture";
+import Entity from "../../../../core/entity/Entity";
+import { choose } from "../../../../core/util/Random";
+import { V } from "../../../../core/Vector";
+import Decoration from "../../../entities/Decoration";
+import Furniture from "../../../entities/Furniture";
 import {
   chairRight,
   chairUp,
@@ -12,13 +12,13 @@ import {
   lobbyDesk,
   piano,
   rug,
-} from "../../view/DecorationSprite";
+} from "../../../view/DecorationSprite";
+import { WallID } from "../levelGeneration";
 import {
   AngleTransformer,
   CellTransformer,
   WallTransformer,
 } from "./ElementTransformer";
-import { WallID } from "./levelGeneration";
 import RoomTemplate from "./RoomTemplate";
 
 export default class LobbyRoomTemplate extends RoomTemplate {

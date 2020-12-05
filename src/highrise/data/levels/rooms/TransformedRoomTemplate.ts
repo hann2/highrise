@@ -1,12 +1,12 @@
 import { Matrix } from "pixi.js";
-import Entity from "../../../core/entity/Entity";
-import { V2d } from "../../../core/Vector";
+import Entity from "../../../../core/entity/Entity";
+import { V2d } from "../../../../core/Vector";
+import { WallID } from "../levelGeneration";
 import ElementTransformer, {
   AngleTransformer,
   CellTransformer,
   WallTransformer,
 } from "./ElementTransformer";
-import { WallID } from "./levelGeneration";
 import RoomTemplate from "./RoomTemplate";
 
 export default class TransformedRoomTemplate extends RoomTemplate {
