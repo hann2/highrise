@@ -1,9 +1,10 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { choose } from "../../core/util/Random";
-import { V2d } from "../../core/Vector";
-import AK47 from "./guns/AK-47";
-import Gun from "./guns/Gun";
+import { Level } from "../data/levels/Level";
+import AllyHumanController from "./controllers/AllyController";
+import PlayerHumanController from "./controllers/PlayerHumanController";
+import SurvivorHumanController from "./controllers/SurvivorHumanController";
 import { GUNS } from "./guns/Guns";
 import Human from "./human/Human";
 
@@ -12,24 +13,75 @@ interface PartyEvent {
 }
 
 export default class PartyManager extends BaseEntity implements Entity {
+  persistent = true;
   id = "party_manager";
 
   partyMembers: Human[] = [];
   leader!: Human;
 
   handlers = {
-    newGame: () => {},
+    newGame: () => {
+      console.log("newGame");
+      this.partyMembers = [];
+      this.leader = this.game!.addEntity(new Human());
+      this.leader.giveWeapon(new (choose(...GUNS))());
+      this.game!.addEntity(new PlayerHumanController(() => this.leader));
+      this.game?.dispatch({ type: "addToParty", human: this.leader });
+    },
+
+    addToParty: ({
+      human,
+      survivorController,
+    }: PartyEvent & { survivorController?: SurvivorHumanController }) => {
+      console.log("added to party");
+      this.partyMembers.push(human);
+      survivorController?.destroy();
+      this.game!.addEntity(
+        new AllyHumanController(human, () => this.leader, human !== this.leader)
+      );
+    },
+
+    startLevel: ({ level }: { level: Level }) => {
+      console.log("start level", this.partyMembers);
+      this.partyMembers.forEach((partyMember, i) => {
+        partyMember.setPosition(level.spawnLocations[i]);
+      });
+    },
+
+    humanDied: ({ human }: PartyEvent) => {
+      const indexInParty = this.partyMembers.indexOf(human);
+      if (indexInParty >= 0) {
+        this.partyMembers.splice(indexInParty, 1);
+      }
+      if (human === this.leader) {
+        if (this.partyMembers.length > 0) {
+          this.setLeader(this.partyMembers[0]);
+        } else {
+          this.game!.dispatch({ type: "gameOver" });
+        }
+      }
+    },
   };
 
-  reset() {
-    this.partyMembers = [];
-    this.leader = this.game!.addEntity(new Human());
-    this.leader.giveWeapon(new (choose(...GUNS))());
+  hasMember(human: Human) {
+    return this.partyMembers.includes(human);
   }
 
-  respawn(spawnLocations: V2d[]) {
-    this.partyMembers.forEach((partyMember, i) => {
-      partyMember.setPosition(spawnLocations[i]);
-    });
+  getAllyControllers() {
+    return this.game?.entities.getTagged(
+      "ally_controller"
+    ) as AllyHumanController[];
+  }
+
+  setLeader(leader: Human) {
+    if (!this.hasMember(leader)) {
+      throw new Error("Leader must be in the party");
+    }
+    const oldLeader = this.leader;
+    this.leader = leader;
+
+    for (const allyController of this.getAllyControllers()) {
+      allyController.enabled = allyController.human != leader;
+    }
   }
 }

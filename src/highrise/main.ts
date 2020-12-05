@@ -10,6 +10,7 @@ import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import LightingManager from "./lighting/LightingManager";
 import ResizeListener from "../core/util/ResizeListener";
 import PauseMenuController from "./menu/PauseMenuController";
+import PartyManager from "./entities/PartyManager";
 
 declare global {
   interface Window {
@@ -39,6 +40,7 @@ export async function main() {
   game.addEntity(new FPSMeter());
   game.addEntity(new ResizeListener());
   game.addEntity(new LevelController());
+  game.addEntity(new PartyManager());
   game.addEntity(new CameraController(game.camera));
   game.addEntity(new PositionalSoundListener());
   game.addEntity(new LightingManager());

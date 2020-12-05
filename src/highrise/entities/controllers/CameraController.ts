@@ -3,6 +3,7 @@ import Entity from "../../../core/entity/Entity";
 import { Camera2d } from "../../../core/graphics/Camera2d";
 import PositionalSoundListener from "../../../core/sound/PositionalSoundListener";
 import { V } from "../../../core/Vector";
+import PartyManager from "../PartyManager";
 import LevelController from "./LevelController";
 
 export default class CameraController extends BaseEntity implements Entity {
@@ -31,9 +32,7 @@ export default class CameraController extends BaseEntity implements Entity {
   }
 
   getPlayer() {
-    const levelController = this.game!.entities.getById(
-      "level_controller"
-    ) as LevelController;
-    return levelController.playerHuman;
+    return (this.game!.entities.getById("party_manager") as PartyManager)
+      ?.leader;
   }
 }

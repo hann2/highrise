@@ -12,11 +12,13 @@ export default class PlayerHumanController
   extends BaseEntity
   implements Entity {
   /** The human being controlled by the player */
-  human: Human;
 
-  constructor(human: Human) {
+  constructor(private getHuman: () => Human) {
     super();
-    this.human = human;
+  }
+
+  get human() {
+    return this.getHuman();
   }
 
   onMouseDown() {

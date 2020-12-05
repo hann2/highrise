@@ -27,7 +27,9 @@ import {
 } from "../../view/DecorationSprite";
 import { Level } from "./Level";
 import LevelTemplate from "./LevelTemplate";
+import LobbyLevel from "./LobbyLevel";
 import RoomTemplate from "./RoomTemplate";
+import ShopLevel from "./ShopLevel";
 
 const LEVEL_SIZE = 12;
 const WALL_WIDTH = 0.3;
@@ -769,6 +771,10 @@ class LevelBuilder {
 
     return wallEntities;
   }
+}
+
+export function chooseTemplate(level: number): LevelTemplate {
+  return level === 1 ? new LobbyLevel() : new ShopLevel();
 }
 
 export const generateLevel = (

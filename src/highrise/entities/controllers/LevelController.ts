@@ -1,18 +1,14 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { choose } from "../../../core/util/Random";
-import { generateLevel } from "../../data/levels/levelGeneration";
-import LobbyLevel from "../../data/levels/LobbyLevel";
-import ShopLevel from "../../data/levels/ShopLevel";
-import DoubleBarrelShotgun from "../guns/DoubleBarrelShotgun";
-import Gun from "../guns/Gun";
-import PumpShotgun from "../guns/PumpShotgun";
+import { Level } from "../../data/levels/Level";
+import {
+  chooseTemplate,
+  generateLevel,
+} from "../../data/levels/levelGeneration";
 import Human from "../human/Human";
-import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 import PartyManager from "../PartyManager";
 import AllyHumanController from "./AllyController";
 import PlayerHumanController from "./PlayerHumanController";
-import SurvivorHumanController from "./SurvivorHumanController";
 
 interface PartyEvent {
   human: Human;
@@ -23,130 +19,35 @@ export default class LevelController extends BaseEntity implements Entity {
   id = "level_controller";
   persistent = true;
   currentLevel: number = 1;
-  partyMembers: Human[] = [];
-  playerHumanController?: PlayerHumanController;
-  partyManager = new PartyManager();
 
   handlers = {
-    newGame: () => {
-      console.log("newGame");
+    newGame: async () => {
       this.game!.clearScene();
       this.currentLevel = 1;
-      this.partyMembers = [];
+      const level = generateLevel(chooseTemplate(this.currentLevel));
 
-      const player = this.game!.addEntity(new Human());
-      player.giveWeapon(
-        choose<Gun | MeleeWeapon>(
-          // new Axe(),
-          // new Katana(),
-          // new Pistol()
-          // new Rifle()
-          new PumpShotgun(),
-          new DoubleBarrelShotgun()
-        )
-      );
-      this.game!.dispatch({ type: "addToParty", human: player });
-      this.setPlayerHuman(player);
-
-      this.game!.dispatch({ type: "startLevel" });
+      await this.wait(0.0); // so that this happens async
+      this.game!.dispatch({ type: "startLevel", level });
     },
 
-    levelComplete: () => {
-      console.log("levelComplete");
+    levelComplete: async () => {
       this.currentLevel += 1;
       this.clearLevel();
 
-      this.game?.dispatch({ type: "startLevel" });
+      await this.wait(2);
+      const level = generateLevel(chooseTemplate(this.currentLevel));
+      this.game?.dispatch({ type: "startLevel", level });
     },
 
-    startLevel: () => {
-      console.log("startLevel", this.currentLevel);
-      const { entities, spawnLocations } = generateLevel(
-        this.currentLevel === 1 ? new LobbyLevel() : new ShopLevel()
-      );
-      this.game!.addEntities(entities);
-
-      this.partyMembers.forEach((partyMember, i) => {
-        partyMember.setPosition(spawnLocations[i]);
-      });
-
-      // TODO: Play sound
-    },
-
-    addToParty: ({
-      human,
-      survivorController,
-    }: PartyEvent & { survivorController?: SurvivorHumanController }) => {
-      console.log("addToParty");
-      this.partyMembers.push(human);
-      survivorController?.destroy();
-      this.game!.addEntity(new AllyHumanController(human, this.playerHuman));
-    },
-
-    removeFromParty: ({ human }: PartyEvent) => {
-      console.log("removeFromParty");
-    },
-
-    humanDied: ({ human }: PartyEvent) => {
-      const indexInParty = this.partyMembers.indexOf(human);
-      if (indexInParty >= 0) {
-        this.partyMembers.splice(indexInParty, 1);
-      }
-      if (human === this.playerHuman) {
-        if (this.partyMembers.length > 0) {
-          this.setPlayerHuman(this.partyMembers[0]);
-        } else {
-          this.game!.dispatch({ type: "gameOver" });
-        }
-      }
+    startLevel: ({ level }: { level: Level }) => {
+      this.game!.addEntities(level.entities);
     },
 
     gameOver: async () => {
-      console.log("Game over, so sad");
-      this.playerHumanController?.destroy();
-      this.playerHumanController = undefined;
-
-      await this.wait(2);
-
+      await this.wait(3);
       this.game!.dispatch({ type: "newGame" });
     },
   };
-
-  setPlayerHuman(playerHuman: Human) {
-    if (!this.partyMembers.includes(playerHuman)) {
-      throw new Error("Player must control a party member");
-    }
-
-    const oldPlayerHuman = this.playerHuman;
-
-    if (!this.playerHumanController) {
-      this.playerHumanController = this.addChild(
-        new PlayerHumanController(playerHuman)
-      );
-    } else {
-      this.playerHumanController.human = playerHuman;
-    }
-
-    if (oldPlayerHuman) {
-      this.game!.addEntity(
-        new AllyHumanController(oldPlayerHuman, playerHuman)
-      );
-    }
-
-    for (const allyController of this.game!.entities.getTagged(
-      "ally_controller"
-    ) as AllyHumanController[]) {
-      if (allyController.human === playerHuman) {
-        allyController.destroy();
-      } else {
-        allyController.leader = playerHuman;
-      }
-    }
-  }
-
-  get playerHuman(): Human | undefined {
-    return this.playerHumanController?.human;
-  }
 
   /** Remove all the old stuff from the old level */
   clearLevel() {
@@ -157,6 +58,16 @@ export default class LevelController extends BaseEntity implements Entity {
     }
   }
 
+  getPartyMembers() {
+    return (this.game!.entities.getById("party_manager") as PartyManager)
+      .partyMembers;
+  }
+
+  getPartyLeader() {
+    return (this.game!.entities.getById("party_manager") as PartyManager)
+      .leader;
+  }
+
   /** Determines whether or not we should clear an entity */
   shouldClear(entity: Entity) {
     if (entity.persistent) {
@@ -164,7 +75,7 @@ export default class LevelController extends BaseEntity implements Entity {
       return false;
     }
     if (entity instanceof Human) {
-      if (this.partyMembers.includes(entity)) {
+      if (this.getPartyMembers().includes(entity)) {
         return false;
       } else {
         return true;

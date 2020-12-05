@@ -13,23 +13,24 @@ const FOLLOW_DISTANCE = 2; // meters
 export default class AllyHumanController extends BaseEntity implements Entity {
   tags = ["ally_controller"];
 
-  // The human this AI is controlling
-  human: Human;
-  // The human this AI is following
-  leader?: Human;
-
   lastSeenPositionOfLeader?: V2d;
 
-  constructor(human: Human, leader?: Human) {
+  constructor(
+    public human: Human,
+    public getLeader: () => Human,
+    public enabled: boolean = true
+  ) {
     super();
-    this.human = human;
-    this.leader = leader;
   }
 
   onTick() {
     // If our human dies/gets removed, we shouldn't be here anymore
     if (!this.human.game) {
       this.destroy();
+      return;
+    }
+
+    if (!this.enabled) {
       return;
     }
 
@@ -63,5 +64,9 @@ export default class AllyHumanController extends BaseEntity implements Entity {
         this.human.walk(direction.inormalize());
       }
     }
+  }
+
+  get leader() {
+    return this.getLeader();
   }
 }

@@ -22,7 +22,7 @@ import { V2d } from "../../core/Vector";
 import { Layers } from "../layers";
 import { PointLight } from "../lighting/PointLight";
 
-const SPRITE_URLS = [
+export const MUZZLE_FLASH_URLS = [
   muzzleFlash1,
   muzzleFlash2,
   muzzleFlash3,
@@ -51,7 +51,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
   constructor(position: V2d, angle: number) {
     super();
 
-    this.sprite = Sprite.from(choose(...SPRITE_URLS));
+    this.sprite = Sprite.from(choose(...MUZZLE_FLASH_URLS));
     this.sprite.anchor.set(0.3, 0.5);
     this.sprite.scale.set(1 / 150);
     this.sprite.position.set(...position);

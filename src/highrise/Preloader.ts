@@ -31,6 +31,7 @@ import Entity from "../core/entity/Entity";
 import Game from "../core/Game";
 import { loadSound, SoundName, SOUND_URLS } from "../core/resources/sounds";
 import { CHARACTERS } from "./characters/characters";
+import { MUZZLE_FLASH_URLS } from "./effects/MuzzleFlash";
 import { GUNS } from "./entities/guns/Guns";
 import { MELEE_WEAPONS } from "./entities/meleeWeapons/MeleeWeapons";
 
@@ -103,25 +104,10 @@ export default class Preloader extends BaseEntity implements Entity {
       furniture,
       healthPack,
       market,
-      muzzleFlash1,
-      muzzleFlash10,
-      muzzleFlash11,
-      muzzleFlash12,
-      muzzleFlash13,
-      muzzleFlash14,
-      muzzleFlash15,
-      muzzleFlash16,
-      muzzleFlash2,
-      muzzleFlash3,
-      muzzleFlash4,
-      muzzleFlash5,
-      muzzleFlash6,
-      muzzleFlash7,
-      muzzleFlash8,
-      muzzleFlash9,
       pointLight,
       zoimbie1Hold,
       zoimbie1Stand,
+      ...MUZZLE_FLASH_URLS,
     ]);
 
     for (const character of CHARACTERS) {
