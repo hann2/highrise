@@ -1,6 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { choose } from "../../core/util/Random";
+import { choose, rBool } from "../../core/util/Random";
 import { Level } from "../data/levels/Level";
 import AllyHumanController from "./controllers/AllyController";
 import PlayerHumanController from "./controllers/PlayerHumanController";
@@ -37,12 +37,25 @@ export default class PartyManager extends BaseEntity implements Entity {
       this.game!.addEntity(
         new AllyHumanController(human, () => this.leader, human !== this.leader)
       );
+
+      if (this.partyMembers.length > 1) {
+        human.speak("joinParty");
+      }
     },
 
-    startLevel: ({ level }: { level: Level }) => {
+    levelComplete: () => {
+      const speaker = choose(...this.partyMembers);
+      speaker.speak("relief");
+    },
+
+    startLevel: async ({ level }: { level: Level }) => {
       this.partyMembers.forEach((partyMember, i) => {
         partyMember.setPosition(level.spawnLocations[i]);
       });
+
+      await this.wait(2);
+      const speaker = choose(...this.partyMembers);
+      speaker.speak(choose("newLevel", "misc"));
     },
 
     humanDied: ({ human }: PartyEvent) => {
@@ -56,6 +69,14 @@ export default class PartyManager extends BaseEntity implements Entity {
         } else {
           this.game!.dispatch({ type: "gameOver" });
         }
+      }
+    },
+
+    zombieDied: async () => {
+      if (rBool(1 / 10)) {
+        await this.wait(0.5);
+        const speaker = choose(...this.partyMembers);
+        speaker.speak("taunts");
       }
     },
   };
@@ -74,7 +95,6 @@ export default class PartyManager extends BaseEntity implements Entity {
     if (!this.hasMember(leader)) {
       throw new Error("Leader must be in the party");
     }
-    const oldLeader = this.leader;
     this.leader = leader;
 
     for (const allyController of this.getAllyControllers()) {

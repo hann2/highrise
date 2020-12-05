@@ -19,26 +19,29 @@ export function testLineOfSight(
     collisionMask: CollisionGroups.World,
   });
   const result = new RaycastResult();
-  (looker.game!.world as CustomWorld).raycast(result, ray, false);
+  (looker.game!.world as CustomWorld).raycast(result, ray, true);
   return result.body === target.body || result.body == null;
 }
 
 // Returns the zombie that is nearest to and visible by a given human
 export function getNearestVisibleZombie(
   game: Game,
-  human: Human
+  human: Human,
+  maxDistance: number = Infinity
 ): Zombie | undefined {
   const zombies = game.entities.getTagged("zombie") as Zombie[];
 
   let nearestVisibleZombie: Zombie | undefined;
-  let nearestDistance: number = Infinity;
+  let nearestDistance: number = maxDistance;
 
   for (const zombie of zombies) {
-    const isVisible = testLineOfSight(human, zombie);
     const distance = zombie.getPosition().sub(human.getPosition()).magnitude;
-    if (isVisible && distance < nearestDistance) {
-      nearestDistance = distance;
-      nearestVisibleZombie = zombie;
+    if (distance < maxDistance) {
+      const isVisible = testLineOfSight(human, zombie);
+      if (isVisible) {
+        nearestDistance = distance;
+        nearestVisibleZombie = zombie;
+      }
     }
   }
 

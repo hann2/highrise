@@ -3,7 +3,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { normalizeAngle } from "../../../core/util/MathUtil";
-import { choose } from "../../../core/util/Random";
+import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { Character, CharacterSoundClass } from "../../characters/Character";
 import { randomCharacter } from "../../characters/characters";
@@ -11,6 +11,7 @@ import { CollisionGroups } from "../../Collision";
 import { PointLight } from "../../lighting/PointLight";
 import Bullet from "../Bullet";
 import Gun from "../guns/Gun";
+import { FireMode } from "../guns/GunStats";
 import Hittable from "../Hittable";
 import Interactable, { isInteractable } from "../Interactable";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
@@ -30,6 +31,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
   light: PointLight;
+  humanSprite: HumanSprite; // TODO: Communicate through events instead
   // flashLight: DirectionalLight;
 
   constructor(
@@ -38,7 +40,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   ) {
     super();
 
-    this.addChild(new HumanSprite(this));
+    this.humanSprite = this.addChild(new HumanSprite(this));
 
     this.body = new Body({
       mass: 1,
@@ -92,8 +94,25 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   useWeapon() {
     if (this.weapon instanceof Gun) {
       this.weapon.pullTrigger(this);
+
+      if (this.weapon.stats.fireMode === FireMode.FULL_AUTO) {
+        if (rBool(1 / 1000)) {
+          // TODO: Also this could be way better
+          this.speak("taunts");
+        }
+      } else {
+        if (rBool(1 / 200)) {
+          // TODO: Also this could be way better
+          this.speak("taunts");
+        }
+      }
     } else if (this.weapon instanceof MeleeWeapon) {
       this.weapon.attack(this);
+
+      if (rBool(1 / 100)) {
+        // TODO: Also this could be way better
+        this.speak("taunts");
+      }
     }
   }
 
@@ -103,21 +122,26 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     }
   }
 
-  async giveWeapon(weapon: Gun | MeleeWeapon) {
+  async giveWeapon(weapon: Gun | MeleeWeapon, shouldSpeak: boolean = true) {
     console.log(weapon.stats.name);
+    this.humanSprite.onGiveWeapon(weapon);
     if (this.weapon) {
       this.dropWeapon();
     }
     this.weapon = weapon;
     this.addChild(weapon, true);
-
+    this.game?.dispatch({ type: "giveWeapon", human: this, weapon });
     weapon.playSound("pickup", this.getPosition());
-    await this.wait(0.5);
-    this.speak("pickupItem");
+
+    if (shouldSpeak) {
+      await this.wait(0.5);
+      this.speak("pickupItem");
+    }
   }
 
   dropWeapon() {
     if (this.weapon) {
+      this.humanSprite.onDropWeapon();
       this.game?.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
       this.weapon = undefined;
     }
@@ -166,12 +190,14 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   inflictDamage(amount: number) {
     this.hp -= amount;
 
-    this.speak("hurt");
-
     if (this.hp <= 0) {
       this.speak("death");
       this.game?.dispatch({ type: "humanDied", human: this });
       this.destroy();
+    } else if (this.hp < 30) {
+      this.speak("nearDeath"); // TODO: We actually probably want this delayed a bit
+    } else {
+      this.speak("hurt");
     }
   }
 

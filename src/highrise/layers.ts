@@ -4,6 +4,7 @@ import { LayerInfo } from "../core/graphics/LayerInfo";
 // Layers for rendering stuff in front of other stuff
 export enum Layers {
   // The floor
+  SUBFLOOR = "subfloor",
   FLOOR = "floor",
   // Stuff on the floor
   WORLD_BACK = "world_back",
@@ -23,6 +24,7 @@ export enum Layers {
 
 // Set up the game to use our layers
 export function initLayers(game: Game) {
+  game.renderer.createLayer(Layers.SUBFLOOR, new LayerInfo());
   game.renderer.createLayer(Layers.FLOOR, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_BACK, new LayerInfo());
   game.renderer.createLayer(Layers.WEAPONS, new LayerInfo());

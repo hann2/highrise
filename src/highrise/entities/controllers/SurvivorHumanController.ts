@@ -6,6 +6,7 @@ import Human from "../human/Human";
 import Interactable from "../Interactable";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
 
+const MAX_ATTACK_DISTANCE = 10; // meters
 // Controller for a human that is waiting to be found
 export default class SurvivorHumanController
   extends BaseEntity
@@ -41,7 +42,8 @@ export default class SurvivorHumanController
 
     const nearestVisibleZombie = getNearestVisibleZombie(
       this.game!,
-      this.human
+      this.human,
+      MAX_ATTACK_DISTANCE
     );
 
     const weapon = this.human.weapon;

@@ -1,4 +1,4 @@
-import p2, { Broadphase, Narrowphase, World } from "p2";
+import p2, { World } from "p2";
 import ContactList, {
   ContactInfo,
   ContactInfoWithEquations,
@@ -7,13 +7,13 @@ import Entity, { WithOwner } from "./entity/Entity";
 import EntityList from "./EntityList";
 import { GameRenderer2d } from "./graphics/GameRenderer2d";
 import { IOManager } from "./io/IO";
+import CustomWorld from "./physics/CustomWorld";
 
 interface GameOptions {
   audio?: AudioContext;
   tickIterations?: number;
   framerate?: number;
-  broadphase?: Broadphase;
-  narrowphase?: Narrowphase;
+  world?: World | CustomWorld;
 }
 
 /**
@@ -61,7 +61,12 @@ export default class Game {
   /**
    * Create a new Game.
    */
-  constructor({ audio, tickIterations = 5, framerate = 60 }: GameOptions) {
+  constructor({
+    audio,
+    tickIterations = 5,
+    framerate = 60,
+    world,
+  }: GameOptions) {
     this.entities = new EntityList();
     this.entitiesToRemove = new Set();
 
@@ -71,8 +76,8 @@ export default class Game {
 
     this.tickIterations = tickIterations;
     this.framerate = framerate;
-    this.world = new World({ gravity: [0, 0] });
-    // this.world = new CustomWorld({ gravity: [0, 0] });
+    // this.world = new World({ gravity: [0, 0] });
+    this.world = world ?? new CustomWorld({ gravity: [0, 0] });
     this.world.on("beginContact", this.beginContact, null);
     this.world.on("endContact", this.endContact, null);
     this.world.on("impact", this.impact, null);

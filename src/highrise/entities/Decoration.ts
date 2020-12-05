@@ -11,12 +11,10 @@ export default class Decoration extends BaseEntity implements Entity {
   constructor(position: V2d, decorationSprite: DecorationSprite) {
     super();
 
-    const renderTexture = (Texture.from(
-      decorationSprite.imageName,
-      {}
-    ) as any) as BaseTexture;
+    // TODO: This might be really inefficient
+    const sheetTexture = Texture.from(decorationSprite.imageName, {});
     const subTexture = new Texture(
-      renderTexture,
+      (sheetTexture as any) as BaseTexture,
       new Rectangle(...decorationSprite.offset, ...decorationSprite.dimensions)
     );
 

@@ -36,6 +36,32 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     );
   }
 
+  autoResize(totalCells: number) {
+    // TODO: Implement me
+    // go through all bodies, find min x, min y, max x, max y
+    // do some math to split those cells up nicely?
+    throw new Error("Not yet implemented");
+  }
+
+  resize(cellSize: number, width: number, height: number) {
+    this.cellSize = cellSize;
+    const oldBodies = new Set<Body>();
+    for (const partition of this.partitions) {
+      for (const body of partition) {
+        oldBodies.add(body);
+      }
+    }
+
+    this.partitions = [];
+    for (let i = 0; i < width * height; i++) {
+      this.partitions.push(new Set());
+    }
+
+    for (const body of oldBodies) {
+      this.addBodyToHash(body);
+    }
+  }
+
   onAddBody(body: Body) {
     if (body.type === Body.DYNAMIC) {
       this.dynamicBodies.add(body);
@@ -111,7 +137,12 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     for (const dBody of this.dynamicBodies) {
       this.removeBodyFromHash(dBody); // This will make sure we don't overlap ourselves, and that we don't double count anything
 
-      for (const other of this.aabbQuery(world, dBody.getAABB(), undefined, false)) {
+      for (const other of this.aabbQuery(
+        world,
+        dBody.getAABB(),
+        undefined,
+        false
+      )) {
         if (Broadphase.canCollide(dBody, other)) {
           result.push(dBody, other);
         }
@@ -159,7 +190,12 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     return result;
   }
 
-  aabbQuery(_: World, aabb: AABB, result?: Body[], shouldAddBodies: boolean = true): Body[] {
+  aabbQuery(
+    _: World,
+    aabb: AABB,
+    result?: Body[],
+    shouldAddBodies: boolean = true
+  ): Body[] {
     result = result ?? [];
 
     if (shouldAddBodies) {
@@ -210,7 +246,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
 
     let cellX = Math.floor(x1);
     let cellY = Math.floor(y1);
-    for (let ix = 0, iy = 0; ix < xSteps || iy < ySteps;) {
+    for (let ix = 0, iy = 0; ix < xSteps || iy < ySteps; ) {
       if ((0.5 + ix) / xSteps < (0.5 + iy) / ySteps) {
         // next step is horizontal
         cellX += signX;

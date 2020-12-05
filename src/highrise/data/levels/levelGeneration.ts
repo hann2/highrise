@@ -3,7 +3,7 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import BaseFloor from "../../BaseFloor";
+import SubFloor from "../../SubFloor";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
@@ -17,7 +17,7 @@ import { MELEE_WEAPONS } from "../../entities/meleeWeapons/MeleeWeapons";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
-import Floor from "../../Floor";
+import TilingFloor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
 import {
   boxes,
@@ -31,10 +31,10 @@ import LobbyLevel from "./LobbyLevel";
 import RoomTemplate from "./rooms/RoomTemplate";
 import ShopLevel from "./ShopLevel";
 
-const LEVEL_SIZE = 16;
-const WALL_WIDTH = 0.3;
-const OPEN_WIDTH = 1.8;
-const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
+export const LEVEL_SIZE = 16;
+export const WALL_WIDTH = 0.3;
+export const OPEN_WIDTH = 1.8;
+export const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
 
 // List of all possible reflections/rotations
 export const POSSIBLE_ORIENTATIONS: Matrix[] = [
@@ -176,7 +176,7 @@ class LevelBuilder {
       ...pickups,
       ...nubbyEntities,
       ...doors,
-      new BaseFloor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
+      new SubFloor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
     ];
 
     return {
@@ -414,7 +414,7 @@ class LevelBuilder {
 
       if (template.floor) {
         entities.push(
-          new Floor(
+          new TilingFloor(
             template.floor,
             this.levelCoordToWorldCoord(corner.sub(V(0.5, 0.5))),
             dimensions.mul(CELL_WIDTH)
@@ -747,7 +747,7 @@ class LevelBuilder {
     consumeLocation((l: V2d) => new HealthPickup(l));
     consumeLocation((l: V2d) => {
       const surv = new Human(l);
-      surv.giveWeapon(choose(new Glock(), new M1911()));
+      surv.giveWeapon(choose(new Glock(), new M1911()), false);
       return [surv, new SurvivorHumanController(surv)];
     });
 

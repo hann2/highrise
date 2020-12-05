@@ -96,6 +96,7 @@ export default class Preloader extends BaseEntity implements Entity {
       imageUrls.add(character.imageGun);
       imageUrls.add(character.imageStand);
       imageUrls.add(character.imageReload);
+      imageUrls.add(character.imageHold);
     }
 
     for (const GunConstructor of GUNS) {

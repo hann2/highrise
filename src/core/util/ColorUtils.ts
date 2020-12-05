@@ -1,5 +1,6 @@
 import { clamp } from "./MathUtil";
 
+// Converts int values 0-255 to single hex value
 export function rgbToHex(red: number, green: number, blue: number): number {
   return (
     clamp(blue, 0, 255) +

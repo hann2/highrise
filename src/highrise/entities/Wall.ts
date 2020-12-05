@@ -43,12 +43,12 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     });
 
     const shape = new Box({ width: w, height: h });
-    shape.collisionGroup = CollisionGroups.World | CollisionGroups.ShadowCaster;
+    shape.collisionGroup = CollisionGroups.World | CollisionGroups.CastsShadow;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0], 0);
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void { }
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(

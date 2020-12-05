@@ -4,18 +4,21 @@ import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { colorLerp } from "../../../core/util/ColorUtils";
 import { clamp } from "../../../core/util/MathUtil";
 import Gun from "../guns/Gun";
-import Hittable from "../Hittable";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
-import WeaponPickup from "../WeaponPickup";
 import Human, { HUMAN_RADIUS } from "./Human";
+
+interface BodySprites {
+  holding: Sprite;
+  standing: Sprite;
+  gun: Sprite;
+  reloading: Sprite;
+}
 
 // Renders a human
 export default class HumanSprite extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
-  holdSprite: Sprite;
-  standSprite: Sprite;
-  gunSprite: Sprite;
-  reloadSprite: Sprite;
+
+  bodySprites: BodySprites;
   weaponSprite?: Sprite;
 
   constructor(private human: Human) {
@@ -24,12 +27,14 @@ export default class HumanSprite extends BaseEntity implements Entity {
     this.sprite = new Sprite();
     this.sprite.anchor.set(0.5, 0.5);
 
-    this.reloadSprite = Sprite.from(human.character.imageReload);
-    this.gunSprite = Sprite.from(human.character.imageGun);
-    this.standSprite = Sprite.from(human.character.imageStand);
-    this.holdSprite = Sprite.from(human.character.imageHold);
+    this.bodySprites = {
+      reloading: Sprite.from(human.character.imageReload),
+      gun: Sprite.from(human.character.imageGun),
+      standing: Sprite.from(human.character.imageStand),
+      holding: Sprite.from(human.character.imageHold),
+    };
 
-    for (const bodySprite of this.getBodySprites()) {
+    for (const bodySprite of Object.values(this.bodySprites)) {
       bodySprite.anchor.set(0.5, 0.5);
       bodySprite.scale.set((2 * HUMAN_RADIUS) / bodySprite.height);
       this.sprite.addChild(bodySprite);
@@ -44,7 +49,7 @@ export default class HumanSprite extends BaseEntity implements Entity {
 
     const currentBodySprite = this.getCurrentBodySprite();
 
-    for (const s of this.getBodySprites()) {
+    for (const s of Object.values(this.bodySprites)) {
       s.visible = s === currentBodySprite;
     }
 
@@ -60,27 +65,18 @@ export default class HumanSprite extends BaseEntity implements Entity {
     const { weapon } = this.human;
     if (weapon instanceof Gun) {
       if (weapon.isReloading) {
-        return this.reloadSprite;
+        return this.bodySprites.reloading;
       } else {
-        return this.gunSprite;
+        return this.bodySprites.gun;
       }
     } else if (weapon instanceof MeleeWeapon) {
-      return this.holdSprite;
+      return this.bodySprites.holding;
     } else {
-      return this.standSprite;
+      return this.bodySprites.standing;
     }
   }
 
-  getBodySprites() {
-    return [
-      this.holdSprite,
-      this.gunSprite,
-      this.reloadSprite,
-      this.standSprite,
-    ];
-  }
-
-  async giveWeapon(weapon: Gun | MeleeWeapon) {
+  async onGiveWeapon(weapon: Gun | MeleeWeapon) {
     if (weapon instanceof MeleeWeapon) {
       const { handlePosition, pickupTexture, size, swing } = weapon.stats;
       const { restAngle, restPosition } = weapon.swing;
@@ -94,7 +90,7 @@ export default class HumanSprite extends BaseEntity implements Entity {
     }
   }
 
-  dropWeapon() {
+  onDropWeapon() {
     if (this.weaponSprite) {
       this.sprite.removeChild(this.weaponSprite);
       this.weaponSprite = undefined;

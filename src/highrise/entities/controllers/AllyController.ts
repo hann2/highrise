@@ -5,10 +5,11 @@ import {
   getNearestVisibleZombie,
   testLineOfSight,
 } from "../../utils/visionUtils";
+import Gun from "../guns/Gun";
 import Human from "../human/Human";
 
 const FOLLOW_DISTANCE = 2; // meters
-
+const MAX_SHOOT_DISTANCE = 10; // meters
 // Controller for a human that is in the party
 export default class AllyHumanController extends BaseEntity implements Entity {
   tags = ["ally_controller"];
@@ -36,8 +37,14 @@ export default class AllyHumanController extends BaseEntity implements Entity {
 
     const nearestVisibleZombie = getNearestVisibleZombie(
       this.game!,
-      this.human
+      this.human,
+      MAX_SHOOT_DISTANCE
     );
+
+    const weapon = this.human.weapon;
+    if (weapon instanceof Gun && weapon.ammo === 0 && !weapon.isReloading) {
+      this.human.reload();
+    }
 
     if (nearestVisibleZombie) {
       const direction = nearestVisibleZombie

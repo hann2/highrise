@@ -7,7 +7,7 @@ import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
 import { clamp, polarToVec } from "../../core/util/MathUtil";
-import { choose, rNormal } from "../../core/util/Random";
+import { choose, rBool, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../Collision";
 import { testLineOfSight } from "../utils/visionUtils";
@@ -204,6 +204,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     }
 
     if (this.hp <= 0) {
+      this.game?.dispatch({ type: "zombieDied", zombie: this });
       this.destroy();
     }
   }

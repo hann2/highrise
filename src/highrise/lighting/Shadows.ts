@@ -114,7 +114,8 @@ function shadowRaycast(
     from: center,
     to: corner,
     skipBackfaces: true,
-    collisionMask: CollisionGroups.ShadowCaster,
+    collisionMask: CollisionGroups.CastsShadow,
+    collisionGroup: CollisionGroups.Shadow,
     // TODO: Check that owner is a shadowcaster. Maybe just do that with collision groups?
   });
   const result = new RaycastResult();

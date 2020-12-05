@@ -1,27 +1,30 @@
+import { BaseTexture, Rectangle, Texture, TilingSprite } from "pixi.js";
 import BaseEntity from "../core/entity/BaseEntity";
-import Entity from "../core/entity/Entity";
-import { V, V2d } from "../core/Vector";
-import Decoration from "./entities/Decoration";
+import Entity, { GameSprite } from "../core/entity/Entity";
+import { V2d } from "../core/Vector";
+import { Layers } from "./layers";
 import { DecorationSprite } from "./view/DecorationSprite";
 
-export default class Floor extends BaseEntity implements Entity {
+export default class TilingFloor extends BaseEntity implements Entity {
+  sprite: TilingSprite & GameSprite;
   constructor(
-    decorationSprite: DecorationSprite,
-    [x, y]: V2d,
+    { imageName, offset, dimensions, heightMeters }: DecorationSprite,
+    [x, y]: [number, number],
     [width, height]: V2d
   ) {
     super();
 
-    const off = decorationSprite.heightMeters / 2;
+    const sheetTexture = Texture.from(imageName);
+    const texture = new Texture(
+      (sheetTexture as any) as BaseTexture,
+      new Rectangle(...offset, ...dimensions)
+    );
 
-    for (let i = x + off; i <= width + x; i += decorationSprite.heightMeters) {
-      for (
-        let j = y + off;
-        j <= height + y;
-        j += decorationSprite.heightMeters
-      ) {
-        this.addChild(new Decoration(V(i, j), decorationSprite));
-      }
-    }
+    this.sprite = new TilingSprite(texture, width, height);
+
+    const scale = heightMeters / dimensions[1];
+    this.sprite.tileScale.set(scale);
+    this.sprite.position.set(x, y);
+    this.sprite.layerName = Layers.FLOOR;
   }
 }
