@@ -13,7 +13,6 @@ export default class ResizeListener extends BaseEntity implements Entity {
   }
 
   onResize = () => {
-    console.log("window resized");
     this.game?.dispatch({ type: "resize" });
   };
 }

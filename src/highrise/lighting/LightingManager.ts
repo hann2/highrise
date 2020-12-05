@@ -20,7 +20,6 @@ export default class LightingManager extends BaseEntity implements Entity {
     resize: () => {
       const { width, height, resolution } = this.renderer;
       this.texture.resize(width / resolution, height / resolution);
-      console.log("resizing light map");
     },
   };
 

@@ -102,20 +102,13 @@ export default class Gun extends BaseEntity implements Entity {
   async reload(shooter: Human) {
     if (!this.isReloading && this.ammo < this.stats.ammoCapacity) {
       if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
-        console.log("start magazine reloading", this.stats.ammoCapacity);
         this.isReloading = true;
         this.playSound("reload", shooter.getPosition());
         this.ammo = 0;
         await this.wait(this.stats.reloadTime, undefined, "reload");
         this.ammo = this.stats.ammoCapacity;
         this.isReloading = false;
-        console.log(
-          "end magazine reloading",
-          this.stats.ammoCapacity,
-          this.ammo
-        );
       } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
-        console.log("start individual reloading");
         this.isReloading = true;
         while (this.ammo < this.stats.ammoCapacity) {
           this.playSound("reload", shooter.getPosition());
@@ -124,7 +117,6 @@ export default class Gun extends BaseEntity implements Entity {
         }
         this.playSound("pump", shooter.getPosition());
         this.isReloading = false;
-        console.log("end individual reloading");
       }
     }
   }

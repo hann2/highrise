@@ -11,7 +11,8 @@ export class PointLight extends Light {
     private radius: number = 1,
     intensity: number = 1.0,
     color: number = 0xffffff,
-    private shadowsEnabled: boolean = false
+    private shadowsEnabled: boolean = false,
+    position?: [number, number]
   ) {
     super(Sprite.from(pointLight));
     this.lightSprite.anchor.set(0.5, 0.5);
@@ -23,6 +24,8 @@ export class PointLight extends Light {
     if (shadowsEnabled) {
       this.enableShadows();
     }
+
+    position && this.setPosition(position);
   }
 
   enableShadows() {

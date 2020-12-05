@@ -21,7 +21,6 @@ export default class PartyManager extends BaseEntity implements Entity {
 
   handlers = {
     newGame: () => {
-      console.log("newGame");
       this.partyMembers = [];
       this.leader = this.game!.addEntity(new Human());
       this.leader.giveWeapon(new (choose(...GUNS))());
@@ -33,7 +32,6 @@ export default class PartyManager extends BaseEntity implements Entity {
       human,
       survivorController,
     }: PartyEvent & { survivorController?: SurvivorHumanController }) => {
-      console.log("added to party");
       this.partyMembers.push(human);
       survivorController?.destroy();
       this.game!.addEntity(
@@ -42,7 +40,6 @@ export default class PartyManager extends BaseEntity implements Entity {
     },
 
     startLevel: ({ level }: { level: Level }) => {
-      console.log("start level", this.partyMembers);
       this.partyMembers.forEach((partyMember, i) => {
         partyMember.setPosition(level.spawnLocations[i]);
       });

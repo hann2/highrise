@@ -44,8 +44,6 @@ export class ShadowMask extends BaseEntity implements Entity {
     this.position = position;
     if (this.game) {
       this.update();
-    } else {
-      console.trace("updating shadow before added");
     }
   }
 
@@ -53,8 +51,6 @@ export class ShadowMask extends BaseEntity implements Entity {
     this.radius = radius;
     if (this.game) {
       this.update();
-    } else {
-      console.trace("updating shadow before added");
     }
   }
 
