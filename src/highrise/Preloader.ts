@@ -2,6 +2,7 @@ import * as Pixi from "pixi.js";
 import dsDigitalUrl from "../../resources/fonts/ds-digi.ttf";
 import bathroom from "../../resources/images/environment/bathroom.png";
 import fancyFurniture from "../../resources/images/environment/fancy-furniture.png";
+import fencesLights from "../../resources/images/environment/fences-lights.png";
 import furniture from "../../resources/images/environment/furniture.png";
 import market from "../../resources/images/environment/market.png";
 import healthPack from "../../resources/images/health_pack.png";
@@ -81,6 +82,7 @@ export default class Preloader extends BaseEntity implements Entity {
 
   async loadImages() {
     const imageUrls = new Set([
+      fencesLights,
       bathroom,
       fancyFurniture,
       furniture,
