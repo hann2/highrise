@@ -1,6 +1,7 @@
 import { Ray, RaycastResult } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Game from "../../core/Game";
+import CustomWorld from "../../core/physics/CustomWorld";
 import { CollisionGroups } from "../Collision";
 import Human from "../entities/Human";
 import Zombie from "../entities/Zombie";
@@ -18,7 +19,7 @@ export function testLineOfSight(
     collisionMask: CollisionGroups.World,
   });
   const result = new RaycastResult();
-  looker.game!.world.raycast(result, ray);
+  (looker.game!.world as CustomWorld).raycast(result, ray, false);
   return result.body === target.body || result.body == null;
 }
 
