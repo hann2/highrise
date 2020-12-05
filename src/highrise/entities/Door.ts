@@ -66,7 +66,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     });
 
     const shape = new Box({ width: w * 0.85, height: h * 0.85 });
-    shape.collisionGroup = CollisionGroups.World & CollisionGroups.ShadowCaster;
+    shape.collisionGroup = CollisionGroups.World | CollisionGroups.ShadowCaster;
     shape.collisionMask = CollisionGroups.All ^ CollisionGroups.World;
     this.body.addShape(shape, [length / 2, 0], 0);
     this.body.angle = restingAngle;
