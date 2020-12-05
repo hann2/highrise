@@ -1,4 +1,4 @@
-import axe from "../../../../resources/images/axe.png";
+import axe from "../../../../resources/images/weapons/axe.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";

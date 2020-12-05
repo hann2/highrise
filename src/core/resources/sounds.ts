@@ -1,3 +1,116 @@
+import cindyDeath1 from "../../../resources/audio/characters/cindy/cindy-death-1.flac";
+import cindyHurt1 from "../../../resources/audio/characters/cindy/cindy-hurt-1.flac";
+import cindyHurt2 from "../../../resources/audio/characters/cindy/cindy-hurt-2.flac";
+import cindyHurt3 from "../../../resources/audio/characters/cindy/cindy-hurt-3.flac";
+import cindyJoinParty1 from "../../../resources/audio/characters/cindy/cindy-join-party-1.flac";
+import cindyLookHere1 from "../../../resources/audio/characters/cindy/cindy-look-here-1.flac";
+import cindyLookHere2 from "../../../resources/audio/characters/cindy/cindy-look-here-2.flac";
+import cindyMisc1 from "../../../resources/audio/characters/cindy/cindy-misc-1.flac";
+import cindyNearDeath1 from "../../../resources/audio/characters/cindy/cindy-near-death-1.flac";
+import cindyNewLevel1 from "../../../resources/audio/characters/cindy/cindy-new-level-1.flac";
+import cindyPickup1 from "../../../resources/audio/characters/cindy/cindy-pickup-1.flac";
+import cindyRelief1 from "../../../resources/audio/characters/cindy/cindy-relief-1.flac";
+import cindyTaunt1 from "../../../resources/audio/characters/cindy/cindy-taunt-1.flac";
+import cindyTaunt2 from "../../../resources/audio/characters/cindy/cindy-taunt-2.flac";
+import cindyWorried1 from "../../../resources/audio/characters/cindy/cindy-worried-1.flac";
+import clariceDeath1 from "../../../resources/audio/characters/clarice/clarice-death-1.flac";
+import clariceDeath2 from "../../../resources/audio/characters/clarice/clarice-death-2.flac";
+import clariceDeath3 from "../../../resources/audio/characters/clarice/clarice-death-3.flac";
+import clariceHurt1 from "../../../resources/audio/characters/clarice/clarice-hurt-1.flac";
+import clariceHurt2 from "../../../resources/audio/characters/clarice/clarice-hurt-2.flac";
+import clariceHurt3 from "../../../resources/audio/characters/clarice/clarice-hurt-3.flac";
+import clariceJoinParty1 from "../../../resources/audio/characters/clarice/clarice-join-party-1.flac";
+import clariceLookHere1 from "../../../resources/audio/characters/clarice/clarice-look-here-1.flac";
+import clariceMisc1 from "../../../resources/audio/characters/clarice/clarice-misc-1.flac";
+import clariceMisc2 from "../../../resources/audio/characters/clarice/clarice-misc-2.flac";
+import clariceNearDeath from "../../../resources/audio/characters/clarice/clarice-near-death.flac";
+import clariceNewLevel1 from "../../../resources/audio/characters/clarice/clarice-new-level-1.flac";
+import claricePickup1 from "../../../resources/audio/characters/clarice/clarice-pickup-1.flac";
+import clariceRelief1 from "../../../resources/audio/characters/clarice/clarice-relief-1.flac";
+import clariceRelief2 from "../../../resources/audio/characters/clarice/clarice-relief-2.flac";
+import clariceTaunt1 from "../../../resources/audio/characters/clarice/clarice-taunt-1.flac";
+import clariceWorried1 from "../../../resources/audio/characters/clarice/clarice-worried-1.flac";
+import clydeDeath1 from "../../../resources/audio/characters/clyde/clyde-death-1.flac";
+import clydeHurt1 from "../../../resources/audio/characters/clyde/clyde-hurt-1.flac";
+import clydeHurt2 from "../../../resources/audio/characters/clyde/clyde-hurt-2.flac";
+import clydeJoinParty1 from "../../../resources/audio/characters/clyde/clyde-join-party-1.flac";
+import clydeLetsgo1 from "../../../resources/audio/characters/clyde/clyde-letsgo-1.flac";
+import clydeLookHere1 from "../../../resources/audio/characters/clyde/clyde-look-here-1.flac";
+import clydeLookHere2 from "../../../resources/audio/characters/clyde/clyde-look-here-2.flac";
+import clydeMisc1 from "../../../resources/audio/characters/clyde/clyde-misc-1.flac";
+import clydeNearDeath from "../../../resources/audio/characters/clyde/clyde-near-death.flac";
+import clydeNewLevel1 from "../../../resources/audio/characters/clyde/clyde-new-level-1.flac";
+import clydeNewLevel2 from "../../../resources/audio/characters/clyde/clyde-new-level-2.flac";
+import clydeNewLevel3 from "../../../resources/audio/characters/clyde/clyde-new-level-3.flac";
+import clydeNewLevel4 from "../../../resources/audio/characters/clyde/clyde-new-level-4.flac";
+import clydePickup1 from "../../../resources/audio/characters/clyde/clyde-pickup-1.flac";
+import clydeRelief1 from "../../../resources/audio/characters/clyde/clyde-relief-1.flac";
+import clydeRelief2 from "../../../resources/audio/characters/clyde/clyde-relief-2.flac";
+import clydeRelief3 from "../../../resources/audio/characters/clyde/clyde-relief-3.flac";
+import clydeTaunt1 from "../../../resources/audio/characters/clyde/clyde-taunt-1.flac";
+import clydeTaunt2 from "../../../resources/audio/characters/clyde/clyde-taunt-2.flac";
+import clydeWorried1 from "../../../resources/audio/characters/clyde/clyde-worried-1.flac";
+import clydeWorried2 from "../../../resources/audio/characters/clyde/clyde-worried-2.flac";
+import clydeWorried3 from "../../../resources/audio/characters/clyde/clyde-worried-3.flac";
+import clydeWorried4 from "../../../resources/audio/characters/clyde/clyde-worried-4.flac";
+import kyleDeath1 from "../../../resources/audio/characters/kyle/kyle-death-1.flac";
+import kyleDeath2 from "../../../resources/audio/characters/kyle/kyle-death-2.flac";
+import kyleDeath3 from "../../../resources/audio/characters/kyle/kyle-death-3.flac";
+import kyleHurt1 from "../../../resources/audio/characters/kyle/kyle-hurt-1.flac";
+import kyleHurt2 from "../../../resources/audio/characters/kyle/kyle-hurt-2.flac";
+import kyleHurt3 from "../../../resources/audio/characters/kyle/kyle-hurt-3.flac";
+import kyleHurt4 from "../../../resources/audio/characters/kyle/kyle-hurt-4.flac";
+import kyleHurt5 from "../../../resources/audio/characters/kyle/kyle-hurt-5.flac";
+import kyleHurt6 from "../../../resources/audio/characters/kyle/kyle-hurt-6.flac";
+import kyleHurt7 from "../../../resources/audio/characters/kyle/kyle-hurt-7.flac";
+import kyleHurt8 from "../../../resources/audio/characters/kyle/kyle-hurt-8.flac";
+import kyleHurt9 from "../../../resources/audio/characters/kyle/kyle-hurt-9.flac";
+import kyleJoinParty1 from "../../../resources/audio/characters/kyle/kyle-join-party-1.flac";
+import kyleLookHere1 from "../../../resources/audio/characters/kyle/kyle-look-here-1.flac";
+import kyleLookHere2 from "../../../resources/audio/characters/kyle/kyle-look-here-2.flac";
+import kyleMisc1 from "../../../resources/audio/characters/kyle/kyle-misc-1.flac";
+import kyleNearDeath1 from "../../../resources/audio/characters/kyle/kyle-near-death-1.flac";
+import kyleNearDeath2 from "../../../resources/audio/characters/kyle/kyle-near-death-2.flac";
+import kyleNewLevel1 from "../../../resources/audio/characters/kyle/kyle-new-level-1.flac";
+import kylePickup1 from "../../../resources/audio/characters/kyle/kyle-pickup-1.flac";
+import kylePickup2 from "../../../resources/audio/characters/kyle/kyle-pickup-2.flac";
+import kyleRelief1 from "../../../resources/audio/characters/kyle/kyle-relief-1.flac";
+import kyleTaunt1 from "../../../resources/audio/characters/kyle/kyle-taunt-1.flac";
+import kyleWorried1 from "../../../resources/audio/characters/kyle/kyle-worried-1.flac";
+import kyleWorried2 from "../../../resources/audio/characters/kyle/kyle-worried-2.flac";
+import kyleWorried3 from "../../../resources/audio/characters/kyle/kyle-worried-3.flac";
+import nancyDeath3 from "../../../resources/audio/characters/nancy/nancy-death-3.flac";
+import nancyHurt1 from "../../../resources/audio/characters/nancy/nancy-hurt-1.flac";
+import nancyHurt2 from "../../../resources/audio/characters/nancy/nancy-hurt-2.flac";
+import nancyHurt3 from "../../../resources/audio/characters/nancy/nancy-hurt-3.flac";
+import nancyHurt4 from "../../../resources/audio/characters/nancy/nancy-hurt-4.flac";
+import nancyHurt5 from "../../../resources/audio/characters/nancy/nancy-hurt-5.flac";
+import nancyHurt6 from "../../../resources/audio/characters/nancy/nancy-hurt-6.flac";
+import nancyJoinParty1 from "../../../resources/audio/characters/nancy/nancy-join-party-1.flac";
+import nancyJoinParty2 from "../../../resources/audio/characters/nancy/nancy-join-party-2.flac";
+import nancyJoinParty3 from "../../../resources/audio/characters/nancy/nancy-join-party-3.flac";
+import nancyJoinParty4 from "../../../resources/audio/characters/nancy/nancy-join-party-4.flac";
+import nancyLaugh1 from "../../../resources/audio/characters/nancy/nancy-laugh-1.flac";
+import nancyLevelComplete1 from "../../../resources/audio/characters/nancy/nancy-level-complete-1.flac";
+import nancyLevelComplete2 from "../../../resources/audio/characters/nancy/nancy-level-complete-2.flac";
+import nancyLookHere1 from "../../../resources/audio/characters/nancy/nancy-look-here-1.flac";
+import nancyLookHere2 from "../../../resources/audio/characters/nancy/nancy-look-here-2.flac";
+import nancyLookHere3 from "../../../resources/audio/characters/nancy/nancy-look-here-3.flac";
+import nancyMisc1 from "../../../resources/audio/characters/nancy/nancy-misc-1.flac";
+import nancyMisc2 from "../../../resources/audio/characters/nancy/nancy-misc-2.flac";
+import nancyNearDeath1 from "../../../resources/audio/characters/nancy/nancy-near-death-1.flac";
+import nancyNearDeath2 from "../../../resources/audio/characters/nancy/nancy-near-death-2.flac";
+import nancyNearDeath3 from "../../../resources/audio/characters/nancy/nancy-near-death-3.flac";
+import nancyNewLevel3 from "../../../resources/audio/characters/nancy/nancy-new-level-3.flac";
+import nancyPickup1 from "../../../resources/audio/characters/nancy/nancy-pickup-1.flac";
+import nancyPickup2 from "../../../resources/audio/characters/nancy/nancy-pickup-2.flac";
+import nancyPickup3 from "../../../resources/audio/characters/nancy/nancy-pickup-3.flac";
+import nancyRelief1 from "../../../resources/audio/characters/nancy/nancy-relief-1.flac";
+import nancyRelief2 from "../../../resources/audio/characters/nancy/nancy-relief-2.flac";
+import nancyRelief3 from "../../../resources/audio/characters/nancy/nancy-relief-3.flac";
+import nancyWorried1 from "../../../resources/audio/characters/nancy/nancy-worried-1.flac";
+import nancyWorried2 from "../../../resources/audio/characters/nancy/nancy-worried-2.flac";
+import nancyWorried3 from "../../../resources/audio/characters/nancy/nancy-worried-3.flac";
 import simonDeath1 from "../../../resources/audio/characters/simon/simon-death-1.flac";
 import simonHurt1 from "../../../resources/audio/characters/simon/simon-hurt-1.flac";
 import simonHurt2 from "../../../resources/audio/characters/simon/simon-hurt-2.flac";
@@ -157,6 +270,119 @@ export const SOUND_URLS = {
   swordShing4,
 
   // Characters
+  cindyDeath1,
+  cindyHurt1,
+  cindyHurt2,
+  cindyHurt3,
+  cindyJoinParty1,
+  cindyLookHere1,
+  cindyLookHere2,
+  cindyMisc1,
+  cindyNearDeath1,
+  cindyNewLevel1,
+  cindyPickup1,
+  cindyRelief1,
+  cindyTaunt1,
+  cindyTaunt2,
+  cindyWorried1,
+  clariceDeath1,
+  clariceDeath2,
+  clariceDeath3,
+  clariceHurt1,
+  clariceHurt2,
+  clariceHurt3,
+  clariceJoinParty1,
+  clariceLookHere1,
+  clariceMisc1,
+  clariceMisc2,
+  clariceNearDeath,
+  clariceNewLevel1,
+  claricePickup1,
+  clariceRelief1,
+  clariceRelief2,
+  clariceTaunt1,
+  clariceWorried1,
+  clydeDeath1,
+  clydeHurt1,
+  clydeHurt2,
+  clydeJoinParty1,
+  clydeLetsgo1,
+  clydeLookHere1,
+  clydeLookHere2,
+  clydeMisc1,
+  clydeNearDeath,
+  clydeNewLevel1,
+  clydeNewLevel2,
+  clydeNewLevel3,
+  clydeNewLevel4,
+  clydePickup1,
+  clydeRelief1,
+  clydeRelief2,
+  clydeRelief3,
+  clydeTaunt1,
+  clydeTaunt2,
+  clydeWorried1,
+  clydeWorried2,
+  clydeWorried3,
+  clydeWorried4,
+  kyleDeath1,
+  kyleDeath2,
+  kyleDeath3,
+  kyleHurt1,
+  kyleHurt2,
+  kyleHurt3,
+  kyleHurt4,
+  kyleHurt5,
+  kyleHurt6,
+  kyleHurt7,
+  kyleHurt8,
+  kyleHurt9,
+  kyleJoinParty1,
+  kyleLookHere1,
+  kyleLookHere2,
+  kyleMisc1,
+  kyleNearDeath1,
+  kyleNearDeath2,
+  kyleNewLevel1,
+  kylePickup1,
+  kylePickup2,
+  kyleRelief1,
+  kyleTaunt1,
+  kyleWorried1,
+  kyleWorried2,
+  kyleWorried3,
+  nancyDeath3,
+  nancyHurt1,
+  nancyHurt2,
+  nancyHurt3,
+  nancyHurt4,
+  nancyHurt5,
+  nancyHurt6,
+  nancyJoinParty1,
+  nancyJoinParty2,
+  nancyJoinParty3,
+  nancyJoinParty4,
+  nancyLaugh1,
+  nancyLevelComplete1,
+  nancyLevelComplete2,
+  nancyLookHere1,
+  nancyLookHere2,
+  nancyLookHere3,
+  nancyMisc1,
+  nancyMisc2,
+  nancyNearDeath1,
+  nancyNearDeath2,
+  nancyNearDeath3,
+  nancyNewLevel3,
+  nancyPickup1,
+  nancyPickup2,
+  nancyPickup3,
+  nancyRelief1,
+  nancyRelief2,
+  nancyRelief3,
+  nancyWorried1,
+  nancyWorried2,
+  nancyWorried3,
   simonDeath1,
   simonHurt1,
   simonHurt2,

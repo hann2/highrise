@@ -13,7 +13,9 @@ interface CharacterSounds {
   hurt: SoundName[];
   joinParty: SoundName[];
   lookHere: SoundName[];
+  misc: SoundName[];
   nearDeath: SoundName[];
+  newLevel: SoundName[];
   pickupItem: SoundName[];
   relief: SoundName[];
   taunts: SoundName[];

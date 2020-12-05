@@ -1,14 +1,8 @@
 import * as Pixi from "pixi.js";
 import dsDigitalUrl from "../../resources/fonts/ds-digi.ttf";
-import axe from "../../resources/images/axe.png";
 import bathroom from "../../resources/images/bathroom.png";
 import healthPack from "../../resources/images/health_pack.png";
-import manBlueGun from "../../resources/images/Man Blue/manBlue_gun.png";
-import manBlueStand from "../../resources/images/Man Blue/manBlue_stand.png";
-import manBrownGun from "../../resources/images/Man Brown/manBrown_gun.png";
-import manBrownStand from "../../resources/images/Man Brown/manBrown_stand.png";
-import manOldGun from "../../resources/images/Man Old/manOld_gun.png";
-import manOldStand from "../../resources/images/Man Old/manOld_stand.png";
+import pointLight from "../../resources/images/lights/point-light.png";
 import market from "../../resources/images/market.png";
 import muzzleFlash1 from "../../resources/images/muzzle_flashs/muzzle-flash-1.png";
 import muzzleFlash10 from "../../resources/images/muzzle_flashs/muzzle-flash-10.png";
@@ -26,7 +20,7 @@ import muzzleFlash6 from "../../resources/images/muzzle_flashs/muzzle-flash-6.pn
 import muzzleFlash7 from "../../resources/images/muzzle_flashs/muzzle-flash-7.png";
 import muzzleFlash8 from "../../resources/images/muzzle_flashs/muzzle-flash-8.png";
 import muzzleFlash9 from "../../resources/images/muzzle_flashs/muzzle-flash-9.png";
-import pointLight from "../../resources/images/point-light.png";
+import axe from "../../resources/images/weapons/axe.png";
 import katana from "../../resources/images/weapons/katana.png";
 import zoimbie1Hold from "../../resources/images/Zombie 1/zoimbie1_hold.png";
 import zoimbie1Stand from "../../resources/images/Zombie 1/zoimbie1_stand.png";
@@ -99,23 +93,19 @@ export default class Preloader extends BaseEntity implements Entity {
 
   async loadImages() {
     const imageUrls = [
-      bathroom,
-      market,
-      healthPack,
       axe,
+      bathroom,
+      healthPack,
       katana,
-      manBlueStand,
-      manBrownStand,
-      manOldStand,
-      manBlueGun,
-      manBrownGun,
-      manOldGun,
-      zoimbie1Hold,
-      zoimbie1Stand,
-      pointLight,
-      "asdfasdfasdf",
-
+      market,
       muzzleFlash1,
+      muzzleFlash10,
+      muzzleFlash11,
+      muzzleFlash12,
+      muzzleFlash13,
+      muzzleFlash14,
+      muzzleFlash15,
+      muzzleFlash16,
       muzzleFlash2,
       muzzleFlash3,
       muzzleFlash4,
@@ -124,13 +114,9 @@ export default class Preloader extends BaseEntity implements Entity {
       muzzleFlash7,
       muzzleFlash8,
       muzzleFlash9,
-      muzzleFlash10,
-      muzzleFlash11,
-      muzzleFlash12,
-      muzzleFlash13,
-      muzzleFlash14,
-      muzzleFlash15,
-      muzzleFlash16,
+      pointLight,
+      zoimbie1Hold,
+      zoimbie1Stand,
     ];
     let loaded = 0;
     const total = imageUrls.length;

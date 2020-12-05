@@ -1,7 +1,6 @@
-import axe from "../../../../resources/images/axe.png";
-import MeleeWeapon from "./MeleeWeapon";
-import { SwingDescriptor } from "./SwingDescriptor";
+import axe from "../../../../resources/images/weapons/axe.png";
 import { degToRad } from "../../../core/util/MathUtil";
+import MeleeWeapon from "./MeleeWeapon";
 
 export default class Axe extends MeleeWeapon {
   constructor() {

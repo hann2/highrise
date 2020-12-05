@@ -1,5 +1,5 @@
 import { Sprite } from "pixi.js";
-import pointLight from "../../../resources/images/point-light.png";
+import pointLight from "../../../resources/images/lights/point-light.png";
 import { V, V2d } from "../../core/Vector";
 import Light from "./Light";
 import { Shadows } from "./Shadows";
