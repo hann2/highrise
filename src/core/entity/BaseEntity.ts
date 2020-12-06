@@ -41,6 +41,10 @@ export default abstract class BaseEntity implements Entity {
     throw new Error("Position is not implemented for this entity");
   }
 
+  get isDestroyed() {
+    return this.game == null;
+  }
+
   // Removes this from the game. You probably shouldn't override this method.
   destroy() {
     if (this.game) {
@@ -62,7 +66,7 @@ export default abstract class BaseEntity implements Entity {
   addChild<T extends Entity>(child: T, changeParent: boolean = false): T {
     if (child.parent) {
       if (changeParent) {
-        // TODO: This can lead to weird state where a child is added but its parent isn't
+        // This can lead to weird state where a child is added but its parent isn't, dunno if that's bad
         const oldParent = child.parent;
         oldParent.children!.splice(oldParent.children!.indexOf(child), 1);
       } else {

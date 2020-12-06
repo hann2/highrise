@@ -1,3 +1,4 @@
+import ar15 from "../../../../resources/images/weapons/ar-15.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
@@ -21,6 +22,7 @@ const defaultGunStats: GunStats = {
   reloadingStyle: ReloadingStyle.MAGAZINE,
 
   size: [1, 1],
+  pickupTexture: ar15,
 
   sounds: {
     shoot: ["pistol2Shot1"],

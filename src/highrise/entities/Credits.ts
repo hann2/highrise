@@ -15,20 +15,31 @@ const TEXT = `
 Philip Hann
 Simon Baumgardt-Wellander
 
+  MUSIC
+Michael Wiktorek
+Simon Baumgardt-Wellander
+
   SOUND EFFECTS
 Simon Baumgardt-Wellander
-Fesliyan Studios
+ With thanks to
+  Fesliyan Studios - Guns
+
 
   VOICE ACTORS
 Philip Hann
 Simon Baumgardt-Wellander
+Philip Hann
 Marisa DeNicolo-Hann
+Michael Wiktorek
 Lawlfrats
+Andy Moreland
+Wendy Vang
 
   ART
 Philip Hann
 Simon Baumgardt-Wellander
-Kenny NL
-Project Cordon Sprites
-Panda Maru
+ With thanks to
+  Kenny NL - Humans and Zombies
+  Project Cordon Sprites - Guns
+  Panda Maru - Environment
 `;

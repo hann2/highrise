@@ -117,6 +117,7 @@ export class SoundInstance extends BaseEntity implements Entity {
     if (this.continuous) {
       throw new Error("Can't wait for end of continuous sound");
     }
+    // TODO: This looks like it needs an implementation
   }
 
   onTick() {
@@ -136,6 +137,7 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   handlers = {
     slowMoChanged: () => {
+      // TODO: This is never fired
       this.updatePlaybackRate();
     },
   };

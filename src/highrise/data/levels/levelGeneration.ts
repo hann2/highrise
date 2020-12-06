@@ -15,7 +15,7 @@ import Human from "../../entities/human/Human";
 import { MELEE_WEAPONS } from "../../entities/meleeWeapons/MeleeWeapons";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
-import Zombie from "../../entities/Zombie";
+import Zombie from "../../entities/zombie/Zombie";
 import TilingFloor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
 import SubFloor from "../../SubFloor";

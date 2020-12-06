@@ -19,6 +19,9 @@ export default class IOHandlerList implements Iterable<IOEventHandler> {
     ),
     onRightDown: new FilterList<IOEventHandler>((e) => Boolean(e.onRightDown)),
     onRightUp: new FilterList<IOEventHandler>((e) => Boolean(e.onRightUp)),
+    onInputDeviceChange: new FilterList<IOEventHandler>((e) =>
+      Boolean(e.onInputDeviceChange)
+    ),
   };
 
   add(handler: IOEventHandler) {

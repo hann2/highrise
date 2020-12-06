@@ -3,8 +3,9 @@ import { LayerInfo } from "../core/graphics/LayerInfo";
 
 // Layers for rendering stuff in front of other stuff
 export enum Layers {
-  // The floor
+  // The floor under the floor
   SUBFLOOR = "subfloor",
+  // The floor
   FLOOR = "floor",
   // Stuff on the floor
   WORLD_BACK = "world_back",

@@ -4,7 +4,7 @@ import stairs from "../../../resources/images/environment/stairs.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V } from "../../core/Vector";
-import { CollisionGroups } from "../Collision";
+import { CollisionGroups } from "../physics/CollisionGroups";
 import { Layers } from "../layers";
 import Interactable from "./Interactable";
 

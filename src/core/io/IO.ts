@@ -11,7 +11,6 @@ const GAMEPAD_MAXIMUM = 0.95;
 // Manages IO
 export class IOManager {
   handlers = new IOHandlerList();
-  // TODO: Key down times
   private keys: Map<KeyCode, boolean> = new Map();
   // buttons pressed last frame. Used for checking differences in state.
   private lastButtons: boolean[] = [];
@@ -83,7 +82,7 @@ export class IOManager {
 
       for (const [buttonIndex, button] of buttons.entries()) {
         if (button && !this.lastButtons[buttonIndex]) {
-          this.usingGamepad = true;
+          this.setUsingGamepad(true);
           for (const handler of this.handlers.filtered.onButtonDown) {
             handler.onButtonDown!(buttonIndex);
           }
@@ -99,6 +98,15 @@ export class IOManager {
     }
   }
 
+  private setUsingGamepad(value: boolean) {
+    if (this.usingGamepad != value) {
+      this.usingGamepad = value;
+      for (const handler of this.handlers.filtered.onInputDeviceChange) {
+        handler.onInputDeviceChange!(this.usingGamepad);
+      }
+    }
+  }
+
   addHandler(handler: IOEventHandler): void {
     this.handlers.add(handler);
   }
@@ -109,13 +117,13 @@ export class IOManager {
 
   // Update the position of the mouse.
   onMouseMove(event: MouseEvent) {
-    this.usingGamepad = false;
+    this.setUsingGamepad(false);
     this.mousePosition = V(event.clientX, event.clientY);
   }
 
   // Fire all click handlers.
   onClick(event: MouseEvent) {
-    this.usingGamepad = false;
+    this.setUsingGamepad(false);
     this.mousePosition = V(event.clientX, event.clientY);
     switch (event.button) {
       case MouseButtons.LEFT:
@@ -133,7 +141,7 @@ export class IOManager {
 
   // Fire all mouse down handlers.
   onMouseDown(event: MouseEvent) {
-    this.usingGamepad = false;
+    this.setUsingGamepad(false);
     this.mousePosition = V(event.clientX, event.clientY);
     this.mouseButtons[event.button] = true;
     switch (event.button) {
@@ -152,7 +160,7 @@ export class IOManager {
 
   // Fire all mouse up handlers
   onMouseUp(event: MouseEvent) {
-    this.usingGamepad = false;
+    this.setUsingGamepad(false);
     this.mousePosition = V(event.clientX, event.clientY);
     this.mouseButtons[event.button] = false;
     switch (event.button) {

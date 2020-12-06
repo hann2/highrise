@@ -54,8 +54,6 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.lightwrapper.removeChild(light.lightSprite);
   }
 
-  // TODO: On resize
-
   onRender() {
     this.lightwrapper.transform.setFromMatrix(this.game!.camera.getMatrix());
     this.renderer.render(this.lightwrapper, this.texture);

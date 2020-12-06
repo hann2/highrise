@@ -1,37 +1,36 @@
 import { Body, Circle } from "p2";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { normalizeAngle } from "../../../core/util/MathUtil";
-import { choose, rBool } from "../../../core/util/Random";
+import { rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { Character, CharacterSoundClass } from "../../characters/Character";
 import { randomCharacter } from "../../characters/characters";
-import { CollisionGroups } from "../../Collision";
+import BloodSplat from "../../effects/BloodSplat";
 import { PointLight } from "../../lighting/PointLight";
-import Bullet from "../Bullet";
+import { CollisionGroups } from "../../physics/CollisionGroups";
 import Gun from "../guns/Gun";
 import { FireMode } from "../guns/GunStats";
-import Hittable from "../Hittable";
 import Interactable, { isInteractable } from "../Interactable";
 import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
-import SwingingWeapon from "../meleeWeapons/SwingingWeapon";
 import WeaponPickup from "../WeaponPickup";
 import HumanSprite from "./HumanSprite";
+import HumanVoice from "./HumanVoice";
 
-export const HUMAN_RADIUS = 0.4; // meters
+export const HUMAN_RADIUS = 0.35; // meters
 const SPEED = 4; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
 const INTERACT_DISTANCE = 3; // meters
 const MAX_HEALTH = 100;
 
-export default class Human extends BaseEntity implements Entity, Hittable {
+export default class Human extends BaseEntity implements Entity {
   body: Body;
   tags = ["human"];
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
   light: PointLight;
   humanSprite: HumanSprite; // TODO: Communicate through events instead
+  voice: HumanVoice;
   // flashLight: DirectionalLight;
 
   constructor(
@@ -41,6 +40,7 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     super();
 
     this.humanSprite = this.addChild(new HumanSprite(this));
+    this.voice = this.addChild(new HumanVoice(this));
 
     this.body = new Body({
       mass: 1,
@@ -58,8 +58,6 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     //   new DirectionalLight(15, degToRad(30), 0.6)
     // );
   }
-
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
 
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
@@ -123,7 +121,6 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   }
 
   async giveWeapon(weapon: Gun | MeleeWeapon, shouldSpeak: boolean = true) {
-    console.log(weapon.stats.name);
     if (this.weapon) {
       this.dropWeapon();
     }
@@ -176,29 +173,24 @@ export default class Human extends BaseEntity implements Entity, Hittable {
     }
   }
 
-  onBulletHit(bullet: Bullet, position: V2d) {
-    this.hp -= bullet.damage;
-
-    this.game!.addEntity(new PositionalSound(choose("fleshHit1"), position));
-
-    if (this.hp <= 0) {
-      this.destroy();
-    }
-  }
-
   // Inflict damage on the human
   inflictDamage(amount: number) {
     this.hp -= amount;
 
     if (this.hp <= 0) {
-      this.speak("death");
-      this.game?.dispatch({ type: "humanDied", human: this });
-      this.destroy();
+      this.die();
     } else if (this.hp < 30) {
       this.speak("nearDeath"); // TODO: We actually probably want this delayed a bit
     } else {
       this.speak("hurt");
     }
+  }
+
+  die() {
+    this.speak("death");
+    this.game?.dispatch({ type: "humanDied", human: this });
+    this.game?.addEntity(new BloodSplat(this.getPosition()));
+    this.destroy();
   }
 
   heal(amount: number) {
@@ -211,11 +203,6 @@ export default class Human extends BaseEntity implements Entity, Hittable {
   }
 
   speak(soundClass: CharacterSoundClass) {
-    // TODO: Only speak one sound at a time
-    const sounds = this.character.sounds[soundClass];
-    if (sounds.length > 0) {
-      const sound = choose(...sounds);
-      this.game?.addEntity(new PositionalSound(sound, this.getPosition()));
-    }
+    this.voice.speak(soundClass);
   }
 }

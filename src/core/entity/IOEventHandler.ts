@@ -22,4 +22,6 @@ export default interface IOEventHandler {
   onButtonDown?(button: ControllerButton): void;
   // Called when a gamepad button is released
   onButtonUp?(button: ControllerButton): void;
+  // Called when a gamepad is started or stopped being used
+  onInputDeviceChange?(usingGamepad: boolean): void;
 }

@@ -14,15 +14,9 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";
 import CustomWorld from "../../core/physics/CustomWorld";
 import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../Collision";
+import { CollisionGroups } from "../physics/CollisionGroups";
 
 // See https://www.redblobgames.com/articles/visibility/
-//
-// TODO: Performance improvements
-//     - Bound the graphics class
-//     - Only find necessary shapes
-//     - Keep track of walls to reduce number of triangles
-//     - Don't use V2d
 export class ShadowMask extends BaseEntity implements Entity {
   graphic: Graphics;
 
@@ -116,7 +110,6 @@ function shadowRaycast(
     skipBackfaces: true,
     collisionMask: CollisionGroups.CastsShadow,
     collisionGroup: CollisionGroups.Shadow,
-    // TODO: Check that owner is a shadowcaster. Maybe just do that with collision groups?
   });
   const result = new RaycastResult();
   (world as CustomWorld).raycast(result, ray, false);

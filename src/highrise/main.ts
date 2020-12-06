@@ -12,8 +12,8 @@ import PartyManager from "./entities/PartyManager";
 import { initLayers } from "./layers";
 import LightingManager from "./lighting/LightingManager";
 import PauseMenuController from "./menu/PauseMenuController";
-import { initContactMaterials } from "./P2Materials";
-import Preloader from "./Preloader";
+import { initContactMaterials } from "./physics/PhysicsMaterials";
+import Preloader from "./preloader/Preloader";
 
 declare global {
   interface Window {

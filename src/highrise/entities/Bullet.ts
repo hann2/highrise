@@ -4,7 +4,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../Collision";
+import { CollisionGroups } from "../physics/CollisionGroups";
 import { Layers } from "../layers";
 import Light from "../lighting/Light";
 import Hittable, { isHittable } from "./Hittable";

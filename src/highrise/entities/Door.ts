@@ -6,7 +6,7 @@ import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../Collision";
+import { CollisionGroups } from "../physics/CollisionGroups";
 import { Layers } from "../layers";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
