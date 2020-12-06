@@ -11,7 +11,13 @@ import Interactable from "./Interactable";
 export default class Exit extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
 
-  constructor(x1: number, y1: number, x2: number, y2: number) {
+  constructor(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    direction: number
+  ) {
     super();
 
     const w = Math.abs(x2 - x1);
@@ -19,9 +25,11 @@ export default class Exit extends BaseEntity implements Entity {
 
     this.sprite = Sprite.from(stairs);
     this.sprite.layerName = Layers.WORLD_BACK;
-    this.sprite.position.set(x1, y1);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.position.set(x1 + w / 2, y1 + h / 2);
     this.sprite.width = w;
     this.sprite.height = h;
+    this.sprite.rotation = direction;
 
     const position = V(Math.min(x1, x2) + w / 2, Math.min(y1, y2) + h / 2);
     this.body = new Body({

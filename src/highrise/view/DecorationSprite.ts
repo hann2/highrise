@@ -451,77 +451,77 @@ export const grassPot: DecorationSprite = relativeTo(
 
 export const woodenChairLeft1: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(261, 384),
+  dimensions: V(22, 32),
+  heightMeters: 1,
 };
 
 export const woodenChairLeft2: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(262, 416),
+  dimensions: V(22, 32),
+  heightMeters: 1,
 };
 
 export const woodenChairUp1: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(293, 385),
+  dimensions: V(22, 32),
+  heightMeters: 1,
 };
 
 export const woodenChairUp2: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(294, 416),
+  dimensions: V(22, 32),
+  heightMeters: 1,
 };
 
 export const woodenChairDown1: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(325, 384),
+  dimensions: V(22, 32),
+  heightMeters: 1,
 };
 
 export const woodenChairDown2: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(326, 416),
+  dimensions: V(22, 32),
+  heightMeters: 1,
 };
 
 export const woodenChairRight1: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(357, 384),
+  dimensions: V(22, 32),
+  heightMeters: 1,
 };
 
 export const woodenChairRight2: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(358, 416),
+  dimensions: V(22, 32),
+  heightMeters: 1,
 };
 
 export const breadPlate: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(484, 296),
+  dimensions: V(24, 17),
+  heightMeters: 0.3,
 };
 
 export const meatPlate: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(385, 420),
+  dimensions: V(31, 24),
+  heightMeters: 0.3,
 };
 
 export const sausagePlate: DecorationSprite = {
   imageName: furniture,
-  offset: V(0, 624),
-  dimensions: V(96, 95),
-  heightMeters: 3,
+  offset: V(449, 421),
+  dimensions: V(31, 24),
+  heightMeters: 0.3,
 };
