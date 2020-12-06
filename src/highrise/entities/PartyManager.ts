@@ -7,6 +7,7 @@ import PlayerHumanController from "./controllers/PlayerHumanController";
 import SurvivorHumanController from "./controllers/SurvivorHumanController";
 import { GUNS } from "./guns/Guns";
 import Human from "./human/Human";
+import SpawnLocation from "./SpawnLocation";
 
 interface PartyEvent {
   human: Human;
@@ -49,8 +50,12 @@ export default class PartyManager extends BaseEntity implements Entity {
     },
 
     startLevel: async ({ level }: { level: Level }) => {
+      const spawnLocations = level.entities.filter(
+        (entity): entity is SpawnLocation => entity instanceof SpawnLocation
+      );
+
       this.partyMembers.forEach((partyMember, i) => {
-        partyMember.setPosition(level.spawnLocations[i]);
+        partyMember.setPosition(spawnLocations[i].position);
       });
 
       await this.wait(2);

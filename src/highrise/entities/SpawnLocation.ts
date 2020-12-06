@@ -3,11 +3,9 @@ import Entity from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
 
 export default class SpawnLocation extends BaseEntity implements Entity {
-  position: V2d;
+  tags = ["spawn_location"];
 
-  constructor(position: V2d) {
+  constructor(public position: V2d) {
     super();
-
-    this.position = position;
   }
 }
