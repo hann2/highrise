@@ -29,6 +29,7 @@ import { Level } from "./Level";
 import LevelTemplate from "./LevelTemplate";
 import LobbyLevel from "./LobbyLevel";
 import RoomTemplate from "./rooms/RoomTemplate";
+import SpawnRoom from "./rooms/SpawnRoom";
 import ShopLevel from "./ShopLevel";
 
 export const LEVEL_SIZE = 16;
@@ -83,6 +84,7 @@ class LevelBuilder {
   closets: Closet[] = [];
   cells: Cell[][] = [];
   doors: WallID[] = [];
+  spawnLocation?: V2d;
 
   constructor() {
     for (let i = 0; i < LEVEL_SIZE; i++) {
@@ -152,10 +154,6 @@ class LevelBuilder {
     levelTemplate: LevelTemplate,
     seed: number = rInteger(0, 2 ** 32)
   ): Level {
-    const spawnLocations = [V(1, 2), V(0, 1), V(1, 1), V(2, 1)].map(
-      this.levelCoordToWorldCoord
-    );
-
     const outerWalls = this.addOuterWalls();
     const roomEntities = this.addRooms(levelTemplate, seed);
     const innerWalls = this.addInnerWalls(seed);
@@ -181,7 +179,6 @@ class LevelBuilder {
 
     return {
       entities,
-      spawnLocations,
     };
   }
 
@@ -388,15 +385,19 @@ class LevelBuilder {
       return doesRoomCutoffPartOfMap(upperRightCorner, template);
     };
 
-    const addRoom = (template: RoomTemplate) => {
+    const addRoom = (template: RoomTemplate, locationOverride?: V2d) => {
       const dimensions = template.dimensions;
       let maybeCorner: V2d | undefined;
-      do {
-        maybeCorner = shuffledLocations.pop();
-      } while (maybeCorner && !isElligibleRoom(maybeCorner, template));
-      if (!maybeCorner) {
-        console.warn("Couldn't make room!");
-        return;
+      if (locationOverride) {
+        maybeCorner = locationOverride;
+      } else {
+        do {
+          maybeCorner = shuffledLocations.pop();
+        } while (maybeCorner && !isElligibleRoom(maybeCorner, template));
+        if (!maybeCorner) {
+          console.warn("Couldn't make room!");
+          return;
+        }
       }
       const corner = maybeCorner!;
       this.addIndestructibleBox(maybeCorner, dimensions);
@@ -437,16 +438,9 @@ class LevelBuilder {
         });
     };
 
-    // Spawn room
-    this.addIndestructibleBox(V(0, 0), V(3, 3));
-    this.destroyWall([V(2, 0), true]);
-    this.cells[3][0].content = "empty";
-    this.doors.push([V(2, 0), true]);
-    const light = new PointLight(6, 0.8);
-    light.setPosition(this.levelCoordToWorldCoord(V(1, 1)));
-    entities.push(light);
-
-    levelTemplate.chooseRoomTemplates(seed).forEach(addRoom.bind(this));
+    this.spawnLocation = V(0, 0);
+    addRoom(new SpawnRoom(), this.spawnLocation);
+    levelTemplate.chooseRoomTemplates(seed).forEach((t) => addRoom(t));
 
     return entities;
   }
@@ -556,8 +550,7 @@ class LevelBuilder {
   }
 
   addExits(): Entity[] {
-    // Should be near spawn
-    const startingPont = V(0, 0);
+    const startingPont = this.spawnLocation!;
 
     let furthestPointSeen: V2d = startingPont;
     let furthestDistance = 0;

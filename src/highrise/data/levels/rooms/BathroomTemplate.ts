@@ -51,7 +51,7 @@ export default class BathroomTemplate extends RoomTemplate {
       } else if (vec.y === -1) {
         entities.push(
           new Furniture(
-            transformCell(p).add(V(0, -0.0)),
+            transformCell(p).add(V(0, -0.3)),
             choose(downToilet1, downToilet2)
           )
         );
