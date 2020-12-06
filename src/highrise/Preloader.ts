@@ -1,5 +1,6 @@
 import * as Pixi from "pixi.js";
 import dsDigitalUrl from "../../resources/fonts/ds-digi.ttf";
+import captureItUrl from "../../resources/fonts/capture_it/capture_it.ttf";
 import bathroom from "../../resources/images/environment/bathroom.png";
 import fancyFurniture from "../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../resources/images/environment/fences-lights.png";
@@ -44,7 +45,10 @@ export default class Preloader extends BaseEntity implements Entity {
   }
 
   async loadFonts() {
-    const fonts = [new FontFace("DS Digital", `url(${dsDigitalUrl})`)];
+    const fonts = [
+      new FontFace("DS Digital", `url(${dsDigitalUrl})`),
+      new FontFace("Capture It", `url(${captureItUrl})`),
+    ];
     let loaded = 0;
     const total = fonts.length;
     const element = document.getElementById("font-count")!;

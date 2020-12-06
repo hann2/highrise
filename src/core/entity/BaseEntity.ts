@@ -97,6 +97,7 @@ export default abstract class BaseEntity implements Entity {
   ): Promise<void> {
     return new Promise((resolve) => {
       const timer = new Timer(delay, () => resolve(), onTick, timerId);
+      timer.persistent = this.persistent;
       this.addChild(timer);
     });
   }

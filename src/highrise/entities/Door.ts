@@ -61,7 +61,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     (this.sprite as GameSprite).layerName = Layers.WORLD_FRONT;
 
     this.body = new Body({
-      mass: 20,
+      mass: 1.5,
       position: hingePoint,
     });
 
@@ -72,7 +72,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
       (CollisionGroups.World | CollisionGroups.CastsShadow);
     this.body.addShape(shape, [length / 2, 0], 0);
     this.body.angle = restingAngle;
-    this.body.angularDamping = 0.9;
+    this.body.angularDamping = 1.0;
   }
 
   onAdd(game: Game) {

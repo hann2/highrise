@@ -7,6 +7,7 @@ import PlayerHumanController from "./controllers/PlayerHumanController";
 import SurvivorHumanController from "./controllers/SurvivorHumanController";
 import { GUNS } from "./guns/Guns";
 import Human from "./human/Human";
+import Axe from "./meleeWeapons/Axe";
 import SpawnLocation from "./SpawnLocation";
 
 interface PartyEvent {
@@ -24,7 +25,8 @@ export default class PartyManager extends BaseEntity implements Entity {
     newGame: () => {
       this.partyMembers = [];
       this.leader = this.game!.addEntity(new Human());
-      this.leader.giveWeapon(new (choose(...GUNS))());
+      // this.leader.giveWeapon(new (choose(...GUNS))());
+      this.leader.giveWeapon(new Axe());
       this.game!.addEntity(new PlayerHumanController(() => this.leader));
       this.game?.dispatch({ type: "addToParty", human: this.leader });
     },

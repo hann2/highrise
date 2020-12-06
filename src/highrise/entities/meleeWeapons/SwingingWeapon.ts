@@ -50,7 +50,7 @@ export default class SwingingWeapon extends BaseEntity {
     });
     shape.collisionGroup = CollisionGroups.Bullets;
     shape.collisionMask = CollisionGroups.Zombies;
-    this.body.addShape(shape);
+    this.body.addShape(shape, [...handlePosition]);
   }
 
   onRender() {

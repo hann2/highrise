@@ -3,16 +3,19 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { Layers } from "../layers";
 
+let i = 0;
 export default class FadeEffect extends BaseEntity implements Entity {
   persistent = true;
 
   sprite: Graphics & GameSprite;
 
+  fadeId = i++;
+
   constructor(
     private outDuration = 1,
     private holdDuration = 0.5,
     private inDuration = 1,
-    color = 0x000000
+    color = 0x003333
   ) {
     super();
 
@@ -26,11 +29,19 @@ export default class FadeEffect extends BaseEntity implements Entity {
   }
 
   async onAdd() {
-    await this.wait(this.outDuration, (_, t) => (this.sprite.alpha = t));
+    await this.wait(this.outDuration, (_, t) => {
+      this.sprite.alpha = t;
+    });
     this.sprite.alpha = 1;
-    await this.wait(this.holdDuration);
-    await this.wait(this.inDuration, (_, t) => (this.sprite.alpha = 1 - t));
+    await this.wait(this.holdDuration, undefined);
+    await this.wait(this.inDuration, (_, t) => {
+      this.sprite.alpha = 1 - t;
+    });
     this.sprite.alpha = 0;
     this.destroy();
+  }
+
+  onDestroy() {
+    console.log("fade destroyed", this.fadeId);
   }
 }

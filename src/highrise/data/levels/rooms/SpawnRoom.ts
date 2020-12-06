@@ -1,6 +1,11 @@
-import Entity from "../../../../core/entity/Entity";
+import { BLEND_MODES, Text } from "pixi.js";
+import BaseEntity from "../../../../core/entity/BaseEntity";
+import Entity, { GameSprite } from "../../../../core/entity/Entity";
+import Game from "../../../../core/Game";
 import { V } from "../../../../core/Vector";
+import LevelController from "../../../entities/controllers/LevelController";
 import SpawnLocation from "../../../entities/SpawnLocation";
+import { Layers } from "../../../layers";
 import { PointLight } from "../../../lighting/PointLight";
 import { bathroomTiles } from "../../../view/DecorationSprite";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
@@ -26,6 +31,35 @@ export default class SpawnRoom extends RoomTemplate {
     entities.push(new SpawnLocation(transformCell(V(1, 1))));
     entities.push(new SpawnLocation(transformCell(V(2, 1))));
 
+    entities.push(new SpawnRoomFloor(transformCell(V(1, 1))));
+
     return entities;
+  }
+}
+
+class SpawnRoomFloor extends BaseEntity implements Entity {
+  sprite: Text & GameSprite;
+
+  constructor([x, y]: [number, number]) {
+    super();
+
+    this.sprite = new Text(``, {
+      fontSize: 64,
+      fontFamily: "Capture It",
+      fill: "red",
+      align: "center",
+    });
+    this.sprite.blendMode = BLEND_MODES.MULTIPLY;
+    this.sprite.position.set(x, y);
+    this.sprite.scale.set(1 / 64);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.layerName = Layers.WORLD_BACK;
+  }
+
+  onAdd(game: Game) {
+    // TODO: This is kinda hacky, but it works for now
+    const level = (game.entities.getById("level_controller") as LevelController)
+      .currentLevel;
+    this.sprite.text = `Level ${level}`;
   }
 }

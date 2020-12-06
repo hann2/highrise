@@ -56,8 +56,8 @@ export default class HumanSprite extends BaseEntity implements Entity {
     const healthPercent = clamp(hp / 100);
     currentBodySprite.tint = colorLerp(0xff0000, 0xffffff, healthPercent);
 
-    if (weapon instanceof MeleeWeapon) {
-      this.weaponSprite!.visible = weapon.currentCooldown <= 0;
+    if (weapon instanceof MeleeWeapon && this.weaponSprite) {
+      this.weaponSprite.visible = weapon.currentCooldown <= 0;
     }
   }
 

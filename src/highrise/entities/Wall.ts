@@ -15,7 +15,13 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
   sprite: GameSprite;
   tags = ["cast_shadow"];
 
-  constructor(x1: number, y1: number, x2: number, y2: number) {
+  constructor(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    color: number = 0x666666
+  ) {
     super();
 
     const w = Math.abs(x2 - x1);
@@ -29,7 +35,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
     const graphics = new Graphics();
     graphics.position.set(0, 0);
-    graphics.beginFill(0x666666);
+    graphics.beginFill(color);
     graphics.drawPolygon(corners);
     graphics.endFill();
 

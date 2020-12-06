@@ -30,7 +30,6 @@ export default class LevelController extends BaseEntity implements Entity {
 
       await this.wait(0.0); // so that this happens async
       this.game!.dispatch({ type: "startLevel", level });
-
       this.game?.addEntity(new FadeEffect(0, 0, 1.5));
     },
 
@@ -51,7 +50,7 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     gameOver: async () => {
-      this.game!.addEntity(new FadeEffect(2.5, 1, 0.5));
+      this.game!.addEntity(new FadeEffect(2.0, 1.001, 0, 0x0000ff));
       await this.wait(3);
       this.game!.dispatch({ type: "newGame" });
     },
