@@ -3,10 +3,16 @@ import { V } from "../../../../../core/Vector";
 import Furniture from "../../../../entities/Furniture";
 import { PointLight } from "../../../../lighting/PointLight";
 import {
-  bakeryStall,
   bathroomTiles,
-  shelfEmpty,
-  shelfJars,
+  housePlantShort1,
+  housePlantShort2,
+  housePlantTall1,
+  housePlantTall2,
+  housePlantTall3,
+  vaseEmpty,
+  vaseRose,
+  vaseRoses,
+  vaseTulips,
 } from "../../../../view/DecorationSprite";
 import { AngleTransformer, CellTransformer } from "../ElementTransformer";
 import RoomTemplate from "../RoomTemplate";
@@ -30,9 +36,19 @@ export default class Florist extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
-    entities.push(new Furniture(transformCell(V(0.28, 0.28)), bakeryStall));
-    entities.push(new Furniture(transformCell(V(1.4, -0.15)), shelfEmpty));
-    entities.push(new Furniture(transformCell(V(2.1, -0.15)), shelfJars));
+    entities.push(new Furniture(transformCell(V(0.28, 0.28)), vaseEmpty));
+    entities.push(new Furniture(transformCell(V(1.4, -0.15)), vaseRose));
+    entities.push(new Furniture(transformCell(V(2.1, -0.15)), vaseRoses));
+    entities.push(new Furniture(transformCell(V(2.1, -0.15)), vaseTulips));
+    entities.push(
+      new Furniture(transformCell(V(2.1, -0.15)), housePlantShort1)
+    );
+    entities.push(
+      new Furniture(transformCell(V(2.1, -0.15)), housePlantShort2)
+    );
+    entities.push(new Furniture(transformCell(V(2.1, -0.15)), housePlantTall1));
+    entities.push(new Furniture(transformCell(V(2.1, -0.15)), housePlantTall2));
+    entities.push(new Furniture(transformCell(V(2.1, -0.15)), housePlantTall3));
     const light = new PointLight(6, 0.6);
     light.setPosition(transformCell(V(1, 1)));
     entities.push(light);

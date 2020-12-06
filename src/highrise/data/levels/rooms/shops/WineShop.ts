@@ -3,10 +3,13 @@ import { V } from "../../../../../core/Vector";
 import Furniture from "../../../../entities/Furniture";
 import { PointLight } from "../../../../lighting/PointLight";
 import {
-  bakeryStall,
   bathroomTiles,
+  redWineCrate,
   shelfEmpty,
   shelfJars,
+  whiteWineCrate,
+  wineCabinet,
+  wineRack,
 } from "../../../../view/DecorationSprite";
 import { AngleTransformer, CellTransformer } from "../ElementTransformer";
 import RoomTemplate from "../RoomTemplate";
@@ -30,7 +33,10 @@ export default class WineShop extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
-    entities.push(new Furniture(transformCell(V(0.28, 0.28)), bakeryStall));
+    entities.push(new Furniture(transformCell(V(0.28, 0.28)), redWineCrate));
+    entities.push(new Furniture(transformCell(V(0.28, 0.28)), whiteWineCrate));
+    entities.push(new Furniture(transformCell(V(0.28, 0.28)), wineRack));
+    entities.push(new Furniture(transformCell(V(0.28, 0.28)), wineCabinet));
     entities.push(new Furniture(transformCell(V(1.4, -0.15)), shelfEmpty));
     entities.push(new Furniture(transformCell(V(2.1, -0.15)), shelfJars));
     const light = new PointLight(6, 0.6);

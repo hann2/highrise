@@ -3,8 +3,8 @@ import { V } from "../../../../../core/Vector";
 import Furniture from "../../../../entities/Furniture";
 import { PointLight } from "../../../../lighting/PointLight";
 import {
-  bakeryStall,
   bathroomTiles,
+  jewelryStall,
   shelfEmpty,
   shelfJars,
 } from "../../../../view/DecorationSprite";
@@ -30,7 +30,7 @@ export default class Jeweler extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
-    entities.push(new Furniture(transformCell(V(0.28, 0.28)), bakeryStall));
+    entities.push(new Furniture(transformCell(V(0.28, 0.28)), jewelryStall));
     entities.push(new Furniture(transformCell(V(1.4, -0.15)), shelfEmpty));
     entities.push(new Furniture(transformCell(V(2.1, -0.15)), shelfJars));
     const light = new PointLight(6, 0.6);
