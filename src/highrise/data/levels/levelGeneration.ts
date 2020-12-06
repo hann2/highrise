@@ -3,11 +3,10 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import SubFloor from "../../SubFloor";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
+import Decoration from "../../entities/Decoration";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
-import Furniture from "../../entities/Furniture";
 import Glock from "../../entities/guns/Glock";
 import { GUNS } from "../../entities/guns/Guns";
 import M1911 from "../../entities/guns/M1911";
@@ -19,6 +18,7 @@ import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/Zombie";
 import TilingFloor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
+import SubFloor from "../../SubFloor";
 import {
   boxes,
   garbageCan,
@@ -588,13 +588,22 @@ class LevelBuilder {
 
     this.cells[furthestPointSeen[0]][furthestPointSeen[1]].content = "exit";
 
+    let openDirection: V2d;
+    for (const direction of DIRECTIONS) {
+      let wall = this.getWallInDirection(furthestPointSeen, direction);
+      if (!this.isExisting(wall)) {
+        openDirection = direction;
+      }
+    }
+
     const exitWorldCoords = this.levelCoordToWorldCoord(furthestPointSeen);
     return [
       new Exit(
         exitWorldCoords[0] - OPEN_WIDTH / 2,
         exitWorldCoords[1] - OPEN_WIDTH / 2,
         exitWorldCoords[0] + OPEN_WIDTH / 2,
-        exitWorldCoords[1] + OPEN_WIDTH / 2
+        exitWorldCoords[1] + OPEN_WIDTH / 2,
+        openDirection!.angle + Math.PI
       ),
     ];
   }
@@ -686,7 +695,7 @@ class LevelBuilder {
 
       if (counter % 4 === 0) {
         entities.push(
-          new Furniture(
+          new Decoration(
             this.levelCoordToWorldCoord(
               closet.backCell
                 .add(closet.backWallDirection.mul(-0.2))
@@ -697,7 +706,7 @@ class LevelBuilder {
         );
       } else if (counter % 4 === 1) {
         entities.push(
-          new Furniture(
+          new Decoration(
             this.levelCoordToWorldCoord(
               closet.backCell.add(
                 closet.backWallDirection
@@ -710,7 +719,7 @@ class LevelBuilder {
         );
       } else if (counter % 4 === 2) {
         entities.push(
-          new Furniture(
+          new Decoration(
             this.levelCoordToWorldCoord(
               closet.backCell.add(
                 closet.backWallDirection
@@ -723,7 +732,7 @@ class LevelBuilder {
         );
       } else {
         entities.push(
-          new Furniture(
+          new Decoration(
             this.levelCoordToWorldCoord(
               closet.backCell.add(closet.backWallDirection.mul(-0.15))
             ),
