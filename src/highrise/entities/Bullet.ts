@@ -4,10 +4,11 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../physics/CollisionGroups";
 import { Layers } from "../layers";
 import Light from "../lighting/Light";
+import { CollisionGroups } from "../physics/CollisionGroups";
 import Hittable, { isHittable } from "./Hittable";
+import Human from "./human/Human";
 
 export const BULLET_RADIUS = 0.05; // meters
 const MAX_LIFESPAN = 3.0; // seconds
@@ -28,7 +29,8 @@ export default class Bullet extends BaseEntity implements Entity {
     public position: V2d,
     direction: number,
     speed: number = 50,
-    public damage: number = 40
+    public damage: number = 40,
+    public shooter?: Human
   ) {
     super();
 
@@ -92,13 +94,20 @@ export default class Bullet extends BaseEntity implements Entity {
     this.destroy();
   }
 
+  getLocalEndPoint(dt: number) {
+    if (this.hitPosition) {
+      return this.hitPosition.sub(this.position);
+    } else {
+      return this.velocity.mul(dt);
+    }
+  }
+
   afterPhysics() {
     const velocity = this.velocity;
     const dt = this.game!.renderTimestep;
 
-    const endPoint = this.hitPosition || velocity.mul(dt);
+    const endPoint = this.getLocalEndPoint(dt);
 
-    // TODO: Render based on endpoint
     this.sprite.clear();
     this.sprite.lineStyle(0.03, 0xffaa00, 0.9);
     this.sprite.moveTo(0, 0);

@@ -5,6 +5,7 @@ import Game from "../../core/Game";
 import { loadSound, SoundName, SOUND_URLS } from "../../core/resources/sounds";
 import { getFontsToPreload } from "./preloadFonts";
 import { getImagesToPreload } from "./preloadImages";
+import { getSoundsToPreload } from "./preloadSounds";
 
 export default class Preloader extends BaseEntity implements Entity {
   private _resolve!: () => void;
@@ -48,7 +49,7 @@ export default class Preloader extends BaseEntity implements Entity {
   }
 
   async loadSounds(audioContext: AudioContext) {
-    const soundNames = Object.keys(SOUND_URLS) as SoundName[];
+    const soundNames = getSoundsToPreload();
     let loaded = 0;
     const total = soundNames.length;
     const element = document.getElementById("sound-count")!;

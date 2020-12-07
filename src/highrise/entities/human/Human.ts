@@ -18,7 +18,7 @@ import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
 
 export const HUMAN_RADIUS = 0.35; // meters
-const SPEED = 4; // arbitrary units
+const SPEED = 3.5; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
 const INTERACT_DISTANCE = 3; // meters
 const MAX_HEALTH = 100;

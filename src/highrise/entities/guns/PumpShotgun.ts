@@ -15,6 +15,8 @@ export default class PumpShotgun extends Gun {
       name: "Remington Shotgun",
       fireRate: 2,
       bulletDamage: 30,
+      bulletsPerShot: 9,
+      bulletSpread: degToRad(10),
       muzzleVelocity: 55,
       reloadingStyle: ReloadingStyle.INDIVIDUAL,
       fireMode: FireMode.PUMP,

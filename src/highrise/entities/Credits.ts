@@ -15,9 +15,11 @@ const TEXT = `
 Philip Hann
 Simon Baumgardt-Wellander
 
+
   MUSIC
 Michael Wiktorek
 Simon Baumgardt-Wellander
+
 
   SOUND EFFECTS
 Simon Baumgardt-Wellander
@@ -26,14 +28,15 @@ Simon Baumgardt-Wellander
 
 
   VOICE ACTORS
-Philip Hann
-Simon Baumgardt-Wellander
-Philip Hann
-Marisa DeNicolo-Hann
-Michael Wiktorek
-Lawlfrats
-Andy Moreland
-Wendy Vang
+Philip Hann — Clyde
+Simon Baumgardt-Wellander — Simon
+Marisa DeNicolo-Hann — Clarice, Kyle
+Michael Wiktorek — Chad, Demitri, Shadowlord66
+Lawlfrats — Cindy
+Andy Moreland — Andy
+Wendy Vang — Wendy
+Cole Graham — Lucky Jack
+
 
   ART
 Philip Hann
