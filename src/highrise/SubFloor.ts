@@ -1,3 +1,4 @@
+import { hsv2rgb } from "color-functions";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../core/entity/Entity";
@@ -11,15 +12,12 @@ export default class SubFloor extends BaseEntity implements Entity {
   constructor([width, height]: [number, number]) {
     super();
 
-    const color = rgbToHex(
-      rInteger(0, 256),
-      rInteger(0, 256),
-      rInteger(0, 256)
-    );
+    const hue = rInteger(0, 256);
+    const { r, g, b } = hsv2rgb(hue, 60, 200);
 
     this.sprite = new Graphics();
     this.sprite.layerName = Layers.SUBFLOOR;
-    this.sprite.beginFill(color);
+    this.sprite.beginFill(rgbToHex(r, g, b));
     this.sprite.drawRect(0, 0, width, height);
     this.sprite.endFill();
   }

@@ -32,7 +32,7 @@ import RoomTemplate from "./rooms/RoomTemplate";
 import SpawnRoom from "./rooms/SpawnRoom";
 import ShopLevel from "./ShopLevel";
 
-export const LEVEL_SIZE = 16;
+export const LEVEL_SIZE = 14;
 export const WALL_WIDTH = 0.3;
 export const OPEN_WIDTH = 1.8;
 export const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
@@ -856,5 +856,5 @@ export const generateLevel = (
   seed: number = rInteger(0, 2 ** 32)
 ): Level => {
   console.log("Generating level with seed " + seed);
-  return new LevelBuilder().generateLevel(new ShopLevel(), seed);
+  return new LevelBuilder().generateLevel(levelTemplate, seed);
 };
