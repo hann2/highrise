@@ -45,4 +45,6 @@ Simon Baumgardt-Wellander
   Kenny NL - Humans and Zombies
   Project Cordon Sprites - Guns
   Panda Maru - Environment
+  Nicnubill - Environment
+  Ayene Chan - Environment
 `;
