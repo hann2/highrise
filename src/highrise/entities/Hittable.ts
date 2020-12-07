@@ -1,7 +1,7 @@
 import Entity from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
 import Bullet from "./Bullet";
-import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 
 export default interface Hittable extends Entity {
   onBulletHit(bullet: Bullet, position: V2d): void;

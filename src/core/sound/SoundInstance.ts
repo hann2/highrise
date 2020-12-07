@@ -77,6 +77,10 @@ export class SoundInstance extends BaseEntity implements Entity {
     super();
     this.speed = options.speed ?? 1.0;
     this.continuous = options.continuous ?? false;
+
+    if (!SoundBuffers.has(soundName)) {
+      throw new Error(`Unloaded Sound ${soundName}`);
+    }
   }
 
   onAdd(game: Game) {

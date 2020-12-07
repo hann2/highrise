@@ -1,4 +1,6 @@
 import { Body, Box } from "p2";
+import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
@@ -9,7 +11,7 @@ import { DecorationSprite } from "../view/DecorationSprite";
 import Bullet from "./Bullet";
 import Decoration from "./Decoration";
 import Hittable from "./Hittable";
-import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 
 export default class Furniture extends BaseEntity implements Entity, Hittable {
   constructor(position: V2d, decorationSprite: DecorationSprite) {
@@ -37,7 +39,7 @@ export default class Furniture extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
-      new PositionalSound(choose("wallHit1", "wallHit2"), position)
+      new PositionalSound(choose(wallHit1, wallHit2), position)
     );
   }
 }

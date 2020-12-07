@@ -12,7 +12,7 @@ export default class HumanVoice extends BaseEntity implements Entity {
     super();
   }
 
-  // TODO: Handle the events that make us speak
+  // TODO: Handle the events that make us speak -- Do we actually want to do that here?
 
   onTick() {
     this.currentSound?.setPosition(this.human.getPosition());

@@ -40,7 +40,6 @@ export default class ZombieSprite extends BaseEntity implements Entity {
     }
   }
 
-  // TODO: Guarantee that this happens after everyone else's render calls. Why?
   onRender() {
     const { body } = this.zombie;
     [this.sprite.x, this.sprite.y] = body.position;

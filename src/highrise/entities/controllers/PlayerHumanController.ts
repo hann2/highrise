@@ -4,9 +4,9 @@ import { ControllerAxis, ControllerButton } from "../../../core/io/Gamepad";
 import { KeyCode } from "../../../core/io/Keys";
 import { choose } from "../../../core/util/Random";
 import { V } from "../../../core/Vector";
-import Gun from "../guns/Gun";
-import { GUNS } from "../guns/Guns";
-import { FireMode } from "../guns/GunStats";
+import Gun from "../../weapons/Gun";
+import { GUNS } from "../../weapons/guns";
+import { FireMode } from "../../weapons/GunStats";
 import Human from "../human/Human";
 
 // Maps keyboard/mouse/gamepad input to human actions
@@ -39,7 +39,7 @@ export default class PlayerHumanController
         this.human.reload();
         break;
       case ControllerButton.BACK:
-        this.human.giveWeapon(new (choose(...GUNS))());
+        this.human.giveWeapon(new Gun(choose(...GUNS)));
         break;
     }
   }

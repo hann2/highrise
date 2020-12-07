@@ -2,7 +2,7 @@ import * as Pixi from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
-import { loadSound, SoundName, SOUND_URLS } from "../../core/resources/sounds";
+import { loadSound } from "../../core/resources/sounds";
 import { getFontsToPreload } from "./preloadFonts";
 import { getImagesToPreload } from "./preloadImages";
 import { getSoundsToPreload } from "./preloadSounds";
@@ -49,19 +49,18 @@ export default class Preloader extends BaseEntity implements Entity {
   }
 
   async loadSounds(audioContext: AudioContext) {
-    const soundNames = getSoundsToPreload();
+    const urls = getSoundsToPreload();
     let loaded = 0;
-    const total = soundNames.length;
+    const total = urls.length;
     const element = document.getElementById("sound-count")!;
     element.innerText = `${loaded} / ${total}`;
 
     await Promise.all(
-      soundNames.map(async (name) => {
-        const url = SOUND_URLS[name];
+      urls.map(async (url) => {
         try {
-          await loadSound(name, url, audioContext);
+          await loadSound(url, audioContext);
         } catch (e) {
-          console.warn(`Sound failed to load: ${name}, ${url}`, e);
+          console.warn(`Sound failed to load: ${url}, ${url}`, e);
         }
         loaded += 1;
         element.innerText = `${loaded} / ${total}`;

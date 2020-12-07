@@ -3,8 +3,8 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { colorLerp } from "../../../core/util/ColorUtils";
 import { clamp } from "../../../core/util/MathUtil";
-import Gun from "../guns/Gun";
-import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
+import Gun from "../../weapons/Gun";
+import MeleeWeapon from "../../weapons/MeleeWeapon";
 import Human, { HUMAN_RADIUS } from "./Human";
 
 interface BodySprites {
@@ -28,10 +28,10 @@ export default class HumanSprite extends BaseEntity implements Entity {
     this.sprite.anchor.set(0.5, 0.5);
 
     this.bodySprites = {
-      reloading: Sprite.from(human.character.imageReload),
-      gun: Sprite.from(human.character.imageGun),
-      standing: Sprite.from(human.character.imageStand),
-      holding: Sprite.from(human.character.imageHold),
+      reloading: Sprite.from(human.character.textures.reload),
+      gun: Sprite.from(human.character.textures.gun),
+      standing: Sprite.from(human.character.textures.stand),
+      holding: Sprite.from(human.character.textures.hold),
     };
 
     for (const bodySprite of Object.values(this.bodySprites)) {
@@ -41,7 +41,6 @@ export default class HumanSprite extends BaseEntity implements Entity {
     }
   }
 
-  // TODO: Guarantee that this happens after everyone else's render calls. Why?
   onRender() {
     const { body, hp, weapon } = this.human;
     [this.sprite.x, this.sprite.y] = body.position;
@@ -78,10 +77,10 @@ export default class HumanSprite extends BaseEntity implements Entity {
 
   async onGiveWeapon(weapon: Gun | MeleeWeapon) {
     if (weapon instanceof MeleeWeapon) {
-      const { handlePosition, pickupTexture, size, swing } = weapon.stats;
+      const { handlePosition, textures, size, swing } = weapon.stats;
       const { restAngle, restPosition } = weapon.swing;
 
-      this.weaponSprite = Sprite.from(pickupTexture);
+      this.weaponSprite = Sprite.from(textures.pickup);
       this.weaponSprite.scale.set(size[1] / this.weaponSprite.height);
       this.weaponSprite.anchor.set(...handlePosition);
       this.weaponSprite.rotation = Math.PI / 2 + restAngle;

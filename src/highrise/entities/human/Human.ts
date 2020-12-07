@@ -4,15 +4,18 @@ import Entity from "../../../core/entity/Entity";
 import { normalizeAngle } from "../../../core/util/MathUtil";
 import { rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { Character, CharacterSoundClass } from "../../characters/Character";
-import { randomCharacter } from "../../characters/characters";
+import {
+  Character,
+  CharacterSoundClass,
+  randomCharacter,
+} from "../../characters/Character";
 import BloodSplat from "../../effects/BloodSplat";
 import { PointLight } from "../../lighting/PointLight";
 import { CollisionGroups } from "../../physics/CollisionGroups";
-import Gun from "../guns/Gun";
-import { FireMode } from "../guns/GunStats";
+import Gun from "../../weapons/Gun";
+import { FireMode } from "../../weapons/GunStats";
 import Interactable, { isInteractable } from "../Interactable";
-import MeleeWeapon from "../meleeWeapons/MeleeWeapon";
+import MeleeWeapon from "../../weapons/MeleeWeapon";
 import WeaponPickup from "../WeaponPickup";
 import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
@@ -28,7 +31,7 @@ export default class Human extends BaseEntity implements Entity {
   tags = ["human"];
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
-  light: PointLight;
+  light?: PointLight;
   humanSprite: HumanSprite; // TODO: Communicate through events instead
   voice: HumanVoice;
   // flashLight: DirectionalLight;
@@ -53,7 +56,7 @@ export default class Human extends BaseEntity implements Entity {
     shape.collisionMask = CollisionGroups.All ^ CollisionGroups.Bullets;
     this.body.addShape(shape);
 
-    this.light = this.addChild(new PointLight(5, 0.4, 0xffffee, true));
+    // this.light = this.addChild(new PointLight(5, 0.4, 0xffffee, true));
     // this.flashLight = this.addChild(
     //   new DirectionalLight(15, degToRad(30), 0.6)
     // );
@@ -65,7 +68,7 @@ export default class Human extends BaseEntity implements Entity {
   }
 
   afterPhysics() {
-    this.light.setPosition(this.body.position);
+    // this.light.setPosition(this.body.position);
     // this.flashLight.setPosition(this.body.position);
     // this.flashLight.setDirection(this.body.angle);
   }

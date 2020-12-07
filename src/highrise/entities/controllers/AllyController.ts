@@ -5,7 +5,7 @@ import {
   getNearestVisibleZombie,
   testLineOfSight,
 } from "../../utils/visionUtils";
-import Gun from "../guns/Gun";
+import Gun from "../../weapons/Gun";
 import Human from "../human/Human";
 
 const FOLLOW_DISTANCE = 2; // meters

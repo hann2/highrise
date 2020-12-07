@@ -10,7 +10,9 @@ import { CollisionGroups } from "../physics/CollisionGroups";
 import { Layers } from "../layers";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
-import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/SwingingWeapon";
+import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 
 const DOOR_THICKNESS = 0.25;
 
@@ -94,7 +96,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
-      new PositionalSound(choose("wallHit1", "wallHit2"), position)
+      new PositionalSound(choose(wallHit1, wallHit2), position)
     );
   }
 }

@@ -1,19 +1,22 @@
 import { Body, Circle } from "p2";
+import fleshHit1 from "../../../../resources/audio/weapons/flesh-hit-1.flac";
+import fleshHit2 from "../../../../resources/audio/weapons/flesh-hit-2.flac";
+import fleshHit3 from "../../../../resources/audio/weapons/flesh-hit-3.flac";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
 import { choose, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import BloodSplat from "../../effects/BloodSplat";
 import { CollisionGroups } from "../../physics/CollisionGroups";
+import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
 import Hittable from "../Hittable";
 import Human, { HUMAN_RADIUS } from "../human/Human";
-import SwingingWeapon from "../meleeWeapons/SwingingWeapon";
 import ZombieController from "./ZombieController";
 import ZombieSprite from "./ZombieSprite";
+import ZombieVoice from "./ZombieVoice";
 
 export const ZOMBIE_RADIUS = 0.35; // meters
 const SPEED = 0.4;
@@ -30,7 +33,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   hp: number = 100;
   speed: number = rNormal(SPEED, SPEED / 5);
   stunnedTimer = 0;
-
+  voice: ZombieVoice;
   attackPhase: "ready" | "windup" | "attack" | "winddown" = "ready";
 
   constructor(position: V2d) {
@@ -46,6 +49,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
     this.addChild(new ZombieController(this));
     this.addChild(new ZombieSprite(this));
+    this.voice = this.addChild(new ZombieVoice(this));
   }
 
   get isStunned() {
@@ -102,14 +106,11 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   onBulletHit(bullet: Bullet, position: V2d) {
     this.hp -= bullet.damage;
 
-    this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
-
     this.game?.addEntity(
-      new PositionalSound(
-        choose("zombieHit1", "zombieHit2"),
-        this.getPosition()
-      )
+      new PositionalSound(choose(fleshHit1, fleshHit2, fleshHit3), position)
     );
+
+    this.voice.speak("hit");
 
     if (this.hp <= 0) {
       this.die();
@@ -133,8 +134,12 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     if (damageAmount) {
       this.hp -= swingingWeapon.weapon.stats.damage;
       this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.6, 0.1));
-      this.game?.addEntity(new PositionalSound(choose("fleshHit1"), position));
-      this.speak(choose("zombieHit1", "zombieHit2"));
+
+      // TODO: Get sound from weapon
+      const soundName = choose(fleshHit1, fleshHit2, fleshHit3);
+      this.game?.addEntity(new PositionalSound(soundName, position));
+
+      this.voice.speak("hit");
     }
 
     if (this.hp <= 0) {
@@ -146,9 +151,5 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.game?.dispatch({ type: "zombieDied", zombie: this });
     this.game?.addEntity(new BloodSplat(this.getPosition()));
     this.destroy();
-  }
-
-  speak(soundName: SoundName) {
-    this.game?.addEntity(new PositionalSound(soundName, this.getPosition()));
   }
 }

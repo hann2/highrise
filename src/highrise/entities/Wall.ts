@@ -1,15 +1,17 @@
 import { Body, Box } from "p2";
 import { Graphics, Point } from "pixi.js";
+import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../physics/CollisionGroups";
 import { Layers } from "../layers";
+import { CollisionGroups } from "../physics/CollisionGroups";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
-import SwingingWeapon from "./meleeWeapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {
   sprite: GameSprite;
@@ -58,7 +60,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
-      new PositionalSound(choose("wallHit1", "wallHit2"), position)
+      new PositionalSound(choose(wallHit1, wallHit2), position)
     );
   }
 }

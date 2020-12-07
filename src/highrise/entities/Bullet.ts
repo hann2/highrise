@@ -86,9 +86,9 @@ export default class Bullet extends BaseEntity implements Entity {
     }
   }
 
-  onBeginContact(other: Entity, _: unknown, __: unknown) {
+  onBeginContact(other: Entity) {
     if (isHittable(other)) {
-      // TODO: Get actual collision position
+      // TODO: Get actual collision position. I believe it can be found on the third parameter
       other.onBulletHit(this, this.getPosition());
     }
     this.destroy();

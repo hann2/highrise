@@ -7,12 +7,8 @@ import SurvivorHumanController from "../../entities/controllers/SurvivorHumanCon
 import Decoration from "../../entities/Decoration";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
-import Glock from "../../entities/guns/Glock";
-import { GUNS } from "../../entities/guns/Guns";
-import M1911 from "../../entities/guns/M1911";
 import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/human/Human";
-import { MELEE_WEAPONS } from "../../entities/meleeWeapons/MeleeWeapons";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/zombie/Zombie";
@@ -25,6 +21,13 @@ import {
   sack,
   shelfEmpty,
 } from "../../view/DecorationSprite";
+import Gun from "../../weapons/Gun";
+import { GUNS } from "../../weapons/guns";
+import { FiveSeven } from "../../weapons/guns/FiveSeven";
+import { Glock } from "../../weapons/guns/Glock";
+import { M1911 } from "../../weapons/guns/M1911";
+import { MELEE_WEAPONS } from "../../weapons/melee-weapons";
+import MeleeWeapon from "../../weapons/MeleeWeapon";
 import { Level } from "./Level";
 import LevelTemplate from "./LevelTemplate";
 import LobbyLevel from "./LobbyLevel";
@@ -742,14 +745,14 @@ class LevelBuilder {
       }
     };
 
-    consumeLocation((l: V2d) => new WeaponPickup(l, new (choose(...GUNS))()));
+    consumeLocation((l: V2d) => new WeaponPickup(l, new Gun(choose(...GUNS))));
     consumeLocation(
-      (l: V2d) => new WeaponPickup(l, new (choose(...MELEE_WEAPONS))())
+      (l: V2d) => new WeaponPickup(l, new MeleeWeapon(choose(...MELEE_WEAPONS)))
     );
     consumeLocation((l: V2d) => new HealthPickup(l));
     consumeLocation((l: V2d) => {
       const surv = new Human(l);
-      surv.giveWeapon(choose(new Glock(), new M1911()), false);
+      surv.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
       return [surv, new SurvivorHumanController(surv)];
     });
 
