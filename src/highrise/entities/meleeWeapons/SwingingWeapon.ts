@@ -1,5 +1,5 @@
 import { Body, Box } from "p2";
-import { Sprite } from "pixi.js";
+import { Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import {
@@ -10,7 +10,7 @@ import {
   smootherStep,
 } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
-import { CollisionGroups } from "../../Collision";
+import { CollisionGroups } from "../../physics/CollisionGroups";
 import { Layers } from "../../layers";
 import { isHittable } from "../Hittable";
 import Human from "../human/Human";
@@ -43,14 +43,26 @@ export default class SwingingWeapon extends BaseEntity {
     this.sprite.anchor.set(...handlePosition);
     this.sprite.layerName = Layers.WEAPONS;
 
+    const hitbox = new Graphics();
+    this.sprite.addChild(hitbox);
+    hitbox.beginFill(0x00ff00);
+    hitbox.drawRect(
+      0,
+      0,
+      size[0] * this.sprite.height,
+      size[1] * this.sprite.height
+    );
+    hitbox.endFill();
+
     this.body = new Body({ collisionResponse: false });
+    this.body.type = Body.DYNAMIC; // Cuz it moves
     const shape = new Box({
       width: size[0],
       height: size[1],
     });
     shape.collisionGroup = CollisionGroups.Bullets;
     shape.collisionMask = CollisionGroups.Zombies;
-    this.body.addShape(shape, [...handlePosition]);
+    this.body.addShape(shape);
   }
 
   onRender() {
@@ -99,22 +111,24 @@ export default class SwingingWeapon extends BaseEntity {
   }
 
   getWeaponPositionAndAngle(): [V2d, number] {
-    // The location of the handle relative to the body of the human
+    // The location of the handle relative to the holder
     const localPosition = this.weapon.swing.getHandlePosition(
       this.attackProgress
     );
 
+    // The angle of the weapon relative to the holder
     const localAngle = this.weapon.swing.getAngle(this.attackProgress);
 
     // The location of the handle relative to the world
     const worldPosition = this.holder.localToWorld(localPosition);
 
     // The angle to draw the weapon sprite at
-    const worldAngle = Math.PI / 2 + localAngle + this.holder.getDirection(); // Duno why
+    const worldAngle = Math.PI / 2 + localAngle + this.holder.getDirection();
     return [worldPosition, worldAngle];
   }
 
   onBeginContact(other: Entity, _: unknown, __: unknown) {
+    console.log("SwingingWeapon contact");
     if (other != this.holder && isHittable(other)) {
       other.onMeleeHit(this, this.getPosition());
     }

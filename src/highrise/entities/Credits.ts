@@ -15,20 +15,34 @@ const TEXT = `
 Philip Hann
 Simon Baumgardt-Wellander
 
+
+  MUSIC
+Michael Wiktorek
+Simon Baumgardt-Wellander
+
+
   SOUND EFFECTS
 Simon Baumgardt-Wellander
-Fesliyan Studios
+ With thanks to
+  Fesliyan Studios - Guns
+
 
   VOICE ACTORS
-Philip Hann
-Simon Baumgardt-Wellander
-Marisa DeNicolo-Hann
-Lawlfrats
+Philip Hann — Clyde
+Simon Baumgardt-Wellander — Simon
+Marisa DeNicolo-Hann — Clarice, Kyle
+Michael Wiktorek — Chad, Demitri, Shadowlord66
+Lawlfrats — Cindy
+Andy Moreland — Andy
+Wendy Vang — Wendy
+Cole Graham — Lucky Jack
+
 
   ART
 Philip Hann
 Simon Baumgardt-Wellander
-Kenny NL
-Project Cordon Sprites
-Panda Maru
+ With thanks to
+  Kenny NL - Humans and Zombies
+  Project Cordon Sprites - Guns
+  Panda Maru - Environment
 `;

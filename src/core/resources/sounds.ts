@@ -430,7 +430,7 @@ export const SOUND_URLS = {
 
 export type SoundName = keyof typeof SOUND_URLS;
 
-export const SOUNDS: Map<SoundName, AudioBuffer> = new Map();
+export const SoundBuffers: Map<string, AudioBuffer> = new Map();
 
 export async function loadSound(
   name: SoundName,
@@ -441,23 +441,15 @@ export async function loadSound(
     .then((response) => response.arrayBuffer())
     .then((data) => audioContext.decodeAudioData(data))
     .then((buffer) => {
-      SOUNDS.set(name, buffer);
+      SoundBuffers.set(name, buffer);
       return buffer;
     });
 }
 
 export function getSoundDuration(soundName: SoundName): number {
-  return SOUNDS.get(soundName)?.duration ?? -1;
+  return SoundBuffers.get(soundName)?.duration ?? -1;
 }
 
 export function soundIsLoaded(name: SoundName) {
-  return SOUNDS.get(name) != undefined;
-}
-
-export function loadAllSounds(audioContext: AudioContext) {
-  return Promise.all(
-    Object.entries(SOUND_URLS).map(([name, url]) =>
-      loadSound(name as SoundName, url, audioContext)
-    )
-  );
+  return SoundBuffers.get(name) != undefined;
 }

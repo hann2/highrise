@@ -17,8 +17,8 @@ export default class Axe extends MeleeWeapon {
       handlePosition: [0.5, 0.85],
 
       swing: {
-        durations: [0.4, 0.2, 0.2],
-        angles: [degToRad(-75), degToRad(90), degToRad(-90)],
+        durations: [0.25, 0.2, 0.2],
+        angles: [degToRad(-75), degToRad(60), degToRad(-90)],
         maxExtension: 0.3,
         restPosition: [0.15, 0.4],
         swingCenter: [0.0, 0.1],

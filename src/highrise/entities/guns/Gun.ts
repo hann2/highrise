@@ -1,7 +1,8 @@
+import ar15 from "../../../../resources/images/weapons/ar-15.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
-import { polarToVec } from "../../../core/util/MathUtil";
+import { degToRad, polarToVec } from "../../../core/util/MathUtil";
 import { choose, rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import MuzzleFlash from "../../effects/MuzzleFlash";
@@ -19,8 +20,11 @@ const defaultGunStats: GunStats = {
   ammoCapacity: 10,
   reloadTime: 1,
   reloadingStyle: ReloadingStyle.MAGAZINE,
+  bulletsPerShot: 1,
+  bulletSpread: degToRad(0.5),
 
   size: [1, 1],
+  pickupTexture: ar15,
 
   sounds: {
     shoot: ["pistol2Shot1"],
@@ -63,7 +67,7 @@ export default class Gun extends BaseEntity implements Entity {
 
       if (this.ammo > 0) {
         // Actually shoot
-        this.makeProjectile(muzzlePosition, direction);
+        this.makeProjectile(muzzlePosition, direction, shooter);
         this.playSound("shoot", muzzlePosition);
         this.game?.addEntity(new MuzzleFlash(muzzlePosition, direction));
         this.shootCooldown += 1.0 / this.stats.fireRate;
@@ -79,15 +83,22 @@ export default class Gun extends BaseEntity implements Entity {
     }
   }
 
-  makeProjectile(position: V2d, direction: number) {
-    this.game?.addEntity(
-      new Bullet(
-        position,
-        direction,
-        this.stats.muzzleVelocity * rUniform(0.9, 1.1),
-        this.stats.bulletDamage
-      )
-    );
+  makeProjectile(position: V2d, direction: number, shooter: Human) {
+    for (let i = 0; i < this.stats.bulletsPerShot; i++) {
+      const spread = rUniform(
+        -this.stats.bulletSpread / 2,
+        this.stats.bulletSpread / 2
+      );
+      this.game?.addEntity(
+        new Bullet(
+          position,
+          direction + spread,
+          this.stats.muzzleVelocity * rUniform(0.9, 1.1),
+          this.stats.bulletDamage,
+          shooter
+        )
+      );
+    }
   }
 
   async reload(shooter: Human) {

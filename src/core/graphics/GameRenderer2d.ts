@@ -7,7 +7,7 @@ import { LayerInfo } from "./LayerInfo";
 // The thing that renders stuff to the screen. Mostly for handling layers.
 export class GameRenderer2d {
   private layerInfos: Map<string, LayerInfo> = new Map();
-  private cursor: string = "none";
+  private cursor: CSSStyleDeclaration["cursor"] = "none";
   defaultLayer: string = "_default";
   spriteCount: number = 0;
 
@@ -71,6 +71,10 @@ export class GameRenderer2d {
 
   showCursor() {
     this.cursor = "auto";
+  }
+
+  setCursor(value: CSSStyleDeclaration["cursor"]) {
+    this.cursor = value;
   }
 
   // Render the current frame.

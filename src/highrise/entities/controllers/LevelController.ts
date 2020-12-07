@@ -50,7 +50,7 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     gameOver: async () => {
-      this.game!.addEntity(new FadeEffect(2.0, 1.001, 0, 0x0000ff));
+      this.game!.addEntity(new FadeEffect(2.0, 1.001, 0, 0x000000));
       await this.wait(3);
       this.game!.dispatch({ type: "newGame" });
     },

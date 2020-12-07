@@ -1,7 +1,7 @@
 import BaseEntity from "../entity/BaseEntity";
 import Entity from "../entity/Entity";
 import Game from "../Game";
-import { SoundName, SOUNDS } from "../resources/sounds";
+import { SoundName, SoundBuffers } from "../resources/sounds";
 import { rUniform } from "../util/Random";
 
 export interface SoundOptions {
@@ -98,7 +98,7 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   makeChain({ audio, slowMo, masterGain }: Game): AudioNode {
     this.sourceNode = audio.createBufferSource();
-    this.sourceNode.buffer = SOUNDS.get(this.soundName)!;
+    this.sourceNode.buffer = SoundBuffers.get(this.soundName)!;
     this.sourceNode.playbackRate.value = this._speed * slowMo;
     this.sourceNode.loop = this.continuous;
 
@@ -117,6 +117,7 @@ export class SoundInstance extends BaseEntity implements Entity {
     if (this.continuous) {
       throw new Error("Can't wait for end of continuous sound");
     }
+    // TODO: This looks like it needs an implementation
   }
 
   onTick() {
@@ -136,6 +137,7 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   handlers = {
     slowMoChanged: () => {
+      // TODO: This is never fired
       this.updatePlaybackRate();
     },
   };
