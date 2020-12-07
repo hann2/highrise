@@ -1,11 +1,14 @@
 import { SoundName } from "../../core/resources/sounds";
-import { choose, shuffle } from "../../core/util/Random";
+import { shuffle } from "../../core/util/Random";
+import { Andy } from "./Andy";
+import { Chad } from "./Chad";
 import { Cindy } from "./Cindy";
 import { Clarice } from "./Clarice";
 import { Clyde } from "./Clyde";
 import { Kyle } from "./Kyle";
 import { Nancy } from "./Nancy";
 import { Simon } from "./Simon";
+import { Wendy } from "./Wendy";
 
 // Data about a character
 export interface Character {
@@ -36,7 +39,17 @@ export interface CharacterSounds {
 
 export type CharacterSoundClass = keyof CharacterSounds;
 
-export const CHARACTERS = [Cindy, Clarice, Clyde, Kyle, Nancy, Simon];
+export const CHARACTERS = [
+  Andy,
+  Chad,
+  Cindy,
+  Clarice,
+  Clyde,
+  Kyle,
+  Nancy,
+  Simon,
+  Wendy,
+];
 
 const CHARACTERS_SHUFFLED = shuffle([...CHARACTERS]);
 let characterId = 0;

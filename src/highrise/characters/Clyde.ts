@@ -39,7 +39,7 @@ export const Clyde: Character = {
     hurt: [clydeHurt1, clydeHurt2],
     joinParty: [clydeJoinParty1],
     lookHere: [clydeLookHere1, clydeLookHere2],
-    misc: [clydeMisc1, clydeMisc1],
+    misc: [clydeMisc1],
     nearDeath: [clydeNearDeath],
     newLevel: [clydeNewLevel1, clydeNewLevel2, clydeNewLevel3, clydeNewLevel4],
     pickupItem: [clydePickup1],
