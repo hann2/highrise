@@ -4,20 +4,21 @@ import { V, V2d } from "../../core/Vector";
 import Light from "./Light";
 import * as Pixi from "pixi.js";
 
-// TODO: Shadows. More sharing of code between this and Point Light
 export class DirectionalLight extends Light {
   graphics: Graphics;
   constructor(
     private _length: number = 1,
     private _width: number = degToRad(30),
     intensity: number = 1.0,
-    color: number = 0xffffff
+    color: number = 0xffffff,
+    shadowsEnabled: boolean = true
   ) {
-    super();
+    super(undefined, shadowsEnabled);
 
     this.setIntensity(intensity);
     this.setColor(color);
 
+    // TODO: Use a shader I think, instead of graphics and filter
     this.graphics = new Graphics();
     this.lightSprite.addChild(this.graphics);
 
@@ -34,17 +35,17 @@ export class DirectionalLight extends Light {
     return this._length;
   }
 
-  set width(value: number) {
+  set spread(value: number) {
     this._width = value;
     this.redraw();
   }
 
-  get width() {
+  get spread() {
     return this._width;
   }
 
   redraw() {
-    const theta = this.width / 2;
+    const theta = this.spread / 2;
     const length = this.length;
 
     this.graphics.clear();
@@ -56,23 +57,11 @@ export class DirectionalLight extends Light {
     this.graphics.endFill();
   }
 
-  setPosition([x, y]: [number, number]) {
-    this.lightSprite.position.set(x, y);
-  }
-
   setDirection(angle: number) {
     this.lightSprite.rotation = angle;
   }
 
-  setIntensity(value: number) {
-    this.lightSprite.alpha = value;
-  }
-
-  setColor(value: number) {
-    this.lightSprite.tint = value;
-  }
-
-  getPosition(): V2d {
-    return V(this.lightSprite.x, this.lightSprite.y);
+  getShadowRadius() {
+    return this.length;
   }
 }

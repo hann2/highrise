@@ -64,7 +64,12 @@ export class ShadowMask extends BaseEntity implements Entity {
     }
   }
 
-  // TODO: This is really slow
+  // TODO: This is really slow. Ideas for fixing
+  //   - Make my rayQuery function on SpatialHashingBroadphase work
+  //   - Raycast on the list of bodies we've got already
+  //   - Don't raycast? Just draw shadows away from point. This might actually be a lot faster, who knows.
+  //     ^^ This one seems promising
+  //   - USe an AABB Instead of a radius
   private getShadowCorners(center: V2d): [number, number][] {
     // const bodies = this.game!.entities.getTagged("cast_shadow");
 
@@ -82,6 +87,13 @@ export class ShadowMask extends BaseEntity implements Entity {
       );
 
     const corners: V2d[] = [];
+
+    // TODO: Don't raycast, just draw the shadows per shape
+
+    // for each shape
+    //   get back-facing corners
+    //   project a point for each back-facing corner out to the shadow radius
+    //   return combined array of all these points
 
     for (const body of bodies) {
       for (const shape of body.shapes) {
