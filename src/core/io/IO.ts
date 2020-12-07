@@ -5,6 +5,8 @@ import * as MouseButtons from "./MouseButtons";
 import { KeyCode } from "./Keys";
 import { V2d, V } from "../Vector";
 
+const GAMEPAD_POLLING_FREQUENCY = 250; // Hz
+
 const GAMEPAD_MINIMUM = 0.2;
 const GAMEPAD_MAXIMUM = 0.95;
 
@@ -47,7 +49,10 @@ export class IOManager {
     };
 
     // Because this is a polling not pushing interface
-    window.setInterval(() => this.handleGamepads(), 1);
+    window.setInterval(
+      () => this.handleGamepads(),
+      1000 / GAMEPAD_POLLING_FREQUENCY
+    );
   }
 
   // True if the left mouse button is down.

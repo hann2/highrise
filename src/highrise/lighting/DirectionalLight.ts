@@ -4,6 +4,7 @@ import { V, V2d } from "../../core/Vector";
 import Light from "./Light";
 import * as Pixi from "pixi.js";
 
+// TODO: Shadows. More sharing of code between this and Point Light
 export class DirectionalLight extends Light {
   graphics: Graphics;
   constructor(

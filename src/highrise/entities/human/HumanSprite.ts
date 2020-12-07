@@ -2,7 +2,7 @@ import { Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { colorLerp } from "../../../core/util/ColorUtils";
-import { clamp } from "../../../core/util/MathUtil";
+import { clamp, degToRad } from "../../../core/util/MathUtil";
 import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import Human, { HUMAN_RADIUS } from "./Human";
@@ -57,6 +57,10 @@ export default class HumanSprite extends BaseEntity implements Entity {
 
     if (weapon instanceof MeleeWeapon && this.weaponSprite) {
       this.weaponSprite.visible = weapon.currentCooldown <= 0;
+      const swaySpeed = 2 * Math.PI * 1.5;
+      const swayAmount = degToRad(3);
+      const sway = Math.sin(this.game!.elapsedTime * swaySpeed) * swayAmount;
+      this.weaponSprite.rotation = weapon.swing.restAngle + sway + Math.PI / 2;
     }
   }
 
@@ -80,7 +84,7 @@ export default class HumanSprite extends BaseEntity implements Entity {
       const { handlePosition, textures, size, swing } = weapon.stats;
       const { restAngle, restPosition } = weapon.swing;
 
-      this.weaponSprite = Sprite.from(textures.pickup);
+      this.weaponSprite = Sprite.from(textures.hold);
       this.weaponSprite.scale.set(size[1] / this.weaponSprite.height);
       this.weaponSprite.anchor.set(...handlePosition);
       this.weaponSprite.rotation = Math.PI / 2 + restAngle;

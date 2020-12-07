@@ -3,6 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { choose, rBool } from "../../core/util/Random";
 import { Level } from "../data/levels/Level";
 import { Axe } from "../weapons/melee-weapons/Axe";
+import { BaseballBat } from "../weapons/melee-weapons/BaseballBat";
 import MeleeWeapon from "../weapons/MeleeWeapon";
 import AllyHumanController from "./controllers/AllyController";
 import PlayerHumanController from "./controllers/PlayerHumanController";
@@ -26,7 +27,7 @@ export default class PartyManager extends BaseEntity implements Entity {
       this.partyMembers = [];
       this.leader = this.game!.addEntity(new Human());
       // this.leader.giveWeapon(new (choose(...GUNS))(), false);
-      this.leader.giveWeapon(new MeleeWeapon(Axe), false);
+      this.leader.giveWeapon(new MeleeWeapon(BaseballBat), false);
       this.game!.addEntity(new PlayerHumanController(() => this.leader));
       this.game?.dispatch({ type: "addToParty", human: this.leader });
     },

@@ -25,8 +25,8 @@ export default class PauseMenuController extends BaseEntity implements Entity {
 
     const text = new Text("PAUSED", {
       fontSize: 64,
-      fontFamily: "DS Digital",
-      fill: "red",
+      fontFamily: "Capture It",
+      fill: "white",
       align: "center",
     });
     text.anchor.set(0.5, 0.5);

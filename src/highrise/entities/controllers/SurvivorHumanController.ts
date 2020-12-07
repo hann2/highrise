@@ -5,6 +5,8 @@ import Gun from "../../weapons/Gun";
 import Human from "../human/Human";
 import Interactable from "../Interactable";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
+import { rBool } from "../../../core/util/Random";
+import Zombie from "../zombie/Zombie";
 
 const MAX_ATTACK_DISTANCE = 10; // meters
 // Controller for a human that is waiting to be found
@@ -15,6 +17,8 @@ export default class SurvivorHumanController
 
   // The human this AI is controlling
   human: Human;
+  // The zombie this AI is currently shooting at
+  target?: Zombie;
 
   // The interaction target to make this human follow the player
   interactable: Interactable;
@@ -33,33 +37,46 @@ export default class SurvivorHumanController
     );
   }
 
-  onTick() {
+  scanForTargets() {
+    this.target = getNearestVisibleZombie(
+      this.game!,
+      this.human,
+      MAX_ATTACK_DISTANCE
+    );
+  }
+
+  onTick(dt: number) {
     // If our human dies/gets removed, we shouldn't be here anymore
     if (!this.human.game) {
       this.destroy();
       return;
     }
 
-    const nearestVisibleZombie = getNearestVisibleZombie(
-      this.game!,
-      this.human,
-      MAX_ATTACK_DISTANCE
-    );
-
     const weapon = this.human.weapon;
     if (weapon instanceof Gun && weapon.ammo === 0 && !weapon.isReloading) {
       this.human.reload();
     }
 
-    if (nearestVisibleZombie) {
-      const displacement = nearestVisibleZombie
+    if (this.target?.isDestroyed) {
+      this.target = undefined;
+    }
+
+    if (rBool(dt * 2.0)) {
+      // about twice per second
+      this.scanForTargets();
+    }
+
+    if (this.target) {
+      const displacement = this.target
         .getPosition()
         .isub(this.human.getPosition());
 
       this.human.setDirection(displacement.angle);
 
-      if (weapon instanceof Gun && !weapon.isReloading) {
-        this.human.useWeapon();
+      if (weapon instanceof Gun && weapon.canShoot()) {
+        if (rBool(0.4)) {
+          this.human.useWeapon();
+        }
       } else if (weapon instanceof MeleeWeapon) {
         const maxReach = weapon.stats.size[1] + weapon.swing.maxExtension;
         if (displacement.magnitude < maxReach) {

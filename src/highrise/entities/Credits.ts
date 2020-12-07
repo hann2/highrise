@@ -16,15 +16,9 @@ Philip Hann
 Simon Baumgardt-Wellander
 
 
-  MUSIC
-Michael Wiktorek
+  PROGRAMMING
+Philip Hann
 Simon Baumgardt-Wellander
-
-
-  SOUND EFFECTS
-Simon Baumgardt-Wellander
- With thanks to
-  Fesliyan Studios - Guns
 
 
   VOICE ACTORS
@@ -38,13 +32,31 @@ Wendy Vang — Wendy
 Cole Graham — Lucky Jack
 
 
+  MUSIC
+Michael Wiktorek
+Simon Baumgardt-Wellander
+
+
+  SOUND EFFECTS
+Simon Baumgardt-Wellander
+Morgan Thurlow
+ With thanks to
+Fesliyan Studios - Guns
+The Free Firearm Sound Library — Guns
+
+
   ART
 Philip Hann
 Simon Baumgardt-Wellander
- With thanks to
-  Kenny NL - Humans and Zombies
-  Project Cordon Sprites - Guns
-  Panda Maru - Environment
-  Nicnubill - Environment
-  Ayene Chan - Environment
+  With thanks to:
+Kenny NL - Humans and Zombies
+PWL - Blood Splatters
+Project Cordon Sprites - Guns
+Panda Maru - Environment
+Nicnubill - Environment
+Ayene Chan - Environment
+
+
+No zombies were harmed in the making of this game.
+Some celery, walnuts, and a lemon were though.
 `;

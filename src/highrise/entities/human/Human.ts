@@ -1,7 +1,7 @@
 import { Body, Circle } from "p2";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { normalizeAngle } from "../../../core/util/MathUtil";
+import { angleDelta, clamp, normalizeAngle } from "../../../core/util/MathUtil";
 import { rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import {
@@ -19,8 +19,10 @@ import MeleeWeapon from "../../weapons/MeleeWeapon";
 import WeaponPickup from "../WeaponPickup";
 import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
+import Flashlight from "./Flashlight";
 
 export const HUMAN_RADIUS = 0.35; // meters
+const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
 const SPEED = 3.5; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
 const INTERACT_DISTANCE = 3; // meters
@@ -56,21 +58,12 @@ export default class Human extends BaseEntity implements Entity {
     shape.collisionMask = CollisionGroups.All ^ CollisionGroups.Bullets;
     this.body.addShape(shape);
 
-    // this.light = this.addChild(new PointLight(5, 0.4, 0xffffee, true));
-    // this.flashLight = this.addChild(
-    //   new DirectionalLight(15, degToRad(30), 0.6)
-    // );
+    this.addChild(new Flashlight(this));
   }
 
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
-  }
-
-  afterPhysics() {
-    // this.light.setPosition(this.body.position);
-    // this.flashLight.setPosition(this.body.position);
-    // this.flashLight.setDirection(this.body.angle);
   }
 
   // Move the human along a specified vector
@@ -79,8 +72,10 @@ export default class Human extends BaseEntity implements Entity {
   }
 
   // Have the human face a specific angle
-  setDirection(angle: number) {
-    this.body.angle = normalizeAngle(angle);
+  setDirection(angle: number, dt: number = this.game!.tickTimestep) {
+    const angleDiff = angleDelta(this.body.angle, angle);
+    const turnAmount = clamp(angleDiff, -MAX_ROTATION * dt, MAX_ROTATION * dt);
+    this.body.angle += turnAmount;
   }
 
   setPosition(position: V2d) {

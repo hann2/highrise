@@ -21,6 +21,10 @@ export default class Gun extends BaseEntity implements Entity {
     this.ammo = this.stats.ammoCapacity;
   }
 
+  canShoot(): boolean {
+    return !this.isReloading && this.shootCooldown <= 0 && this.ammo > 0;
+  }
+
   async pullTrigger(shooter: Human) {
     if (this.isReloading) {
       if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
@@ -114,7 +118,9 @@ export default class Gun extends BaseEntity implements Entity {
     const sounds = this.stats.sounds[soundClass];
     if (sounds?.length) {
       const sound = sounds[index] ?? choose(...sounds);
-      return this.game?.addEntity(new PositionalSound(sound, position));
+      return this.game?.addEntity(
+        new PositionalSound(sound, position, { gain: 0.5 })
+      );
     }
   }
 }

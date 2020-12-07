@@ -13,7 +13,7 @@ import Human from "./human/Human";
 export const BULLET_RADIUS = 0.05; // meters
 const MAX_LIFESPAN = 3.0; // seconds
 
-// TODO: Use raycast not bodies
+// TODO: Don't draw line past collision point. I thought the code does that, but the results differ
 export default class Bullet extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
   light: Light;

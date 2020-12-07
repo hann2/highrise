@@ -23,9 +23,9 @@ export const Axe: MeleeWeaponStats = {
   swing: {
     durations: [0.25, 0.2, 0.2],
     angles: [degToRad(-75), degToRad(60), degToRad(-90)],
-    maxExtension: 0.3,
+    maxExtension: 0.2,
     restPosition: [0.15, 0.4],
-    swingCenter: [0.0, 0.1],
+    swingCenter: [0.0, 0.0],
   },
 
   textures: {
