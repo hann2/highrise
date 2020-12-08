@@ -2,7 +2,9 @@ import dryFire2 from "../../../../resources/audio/guns/misc/dry-fire-2.mp3";
 import m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
 import pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
 import pistolShot1 from "../../../../resources/audio/guns/pistol/pistol-shot-1.mp3";
+import pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
 import fiveseven from "../../../../resources/images/weapons/fiveseven.png";
+import pistol from "../../../../resources/images/weapons/pistol.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const FiveSeven: GunStats = {
@@ -16,7 +18,12 @@ export const FiveSeven: GunStats = {
   reloadTime: 0.8,
   ammoCapacity: 20,
 
-  textures: { pickup: fiveseven },
+  textures: {
+    ...defaultGunStats.textures,
+    pickup: fiveseven,
+    holding: pistol,
+    shellCasing: pistolCasing,
+  },
   size: [0.45, 0.45],
 
   sounds: {

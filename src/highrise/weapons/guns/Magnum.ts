@@ -6,7 +6,9 @@ import revolverPickup from "../../../../resources/audio/guns/revolver/revolver-p
 import revolverReloadFinish from "../../../../resources/audio/guns/revolver/revolver-reload-finish.flac";
 import revolverReloadStart from "../../../../resources/audio/guns/revolver/revolver-reload-start.flac";
 import revolverShot3 from "../../../../resources/audio/guns/revolver/revolver-shot-3.mp3";
+import pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
 import magnum from "../../../../resources/images/weapons/magnum.png";
+import pistol from "../../../../resources/images/weapons/pistol.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const Magnum: GunStats = {
@@ -20,7 +22,12 @@ export const Magnum: GunStats = {
   reloadTime: 0.3,
   ammoCapacity: 6,
 
-  textures: { pickup: magnum },
+  textures: {
+    ...defaultGunStats.textures,
+    pickup: magnum,
+    holding: pistol,
+    shellCasing: pistolCasing,
+  },
   size: [0.55, 0.55],
 
   sounds: {

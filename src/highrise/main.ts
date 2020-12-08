@@ -7,6 +7,7 @@ import FPSMeter from "../core/util/FPSMeter";
 import ResizeListener from "../core/util/ResizeListener";
 import { CELL_WIDTH, LEVEL_SIZE } from "./data/levels/levelGeneration";
 import CameraController from "./entities/controllers/CameraController";
+import CheatController from "./entities/controllers/CheatController";
 import LevelController from "./entities/controllers/LevelController";
 import PartyManager from "./entities/PartyManager";
 import { initLayers } from "./layers";
@@ -60,5 +61,10 @@ export async function main() {
   game.addEntity(new MusicController());
   game.addEntity(new MainMenu());
 
+  if (process.env.NODE_ENV === "development") {
+    game.addEntity(new CheatController());
+  }
+
+  // It seems like we were kinda loud on average
   game.masterGain.gain.value = 0.3;
 }

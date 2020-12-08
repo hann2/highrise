@@ -2,12 +2,16 @@ import { BLEND_MODES, Text } from "pixi.js";
 import BaseEntity from "../../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../../core/entity/Entity";
 import Game from "../../../../core/Game";
+import { choose } from "../../../../core/util/Random";
 import { V } from "../../../../core/Vector";
 import LevelController from "../../../entities/controllers/LevelController";
 import SpawnLocation from "../../../entities/SpawnLocation";
+import WeaponPickup from "../../../entities/WeaponPickup";
 import { Layers } from "../../../layers";
 import { PointLight } from "../../../lighting/PointLight";
 import { bathroomTiles } from "../../../view/DecorationSprite";
+import Gun from "../../../weapons/Gun";
+import { GUNS } from "../../../weapons/guns";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 
@@ -30,6 +34,9 @@ export default class SpawnRoom extends RoomTemplate {
     entities.push(new SpawnLocation(transformCell(V(0, 1))));
     entities.push(new SpawnLocation(transformCell(V(1, 1))));
     entities.push(new SpawnLocation(transformCell(V(2, 1))));
+
+    const gun = new Gun(choose(...GUNS));
+    entities.push(new WeaponPickup(transformCell(V(0, 0)), gun));
 
     entities.push(new SpawnRoomFloor(transformCell(V(1, 1))));
 

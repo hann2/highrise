@@ -3,7 +3,9 @@ import magazineLoad1 from "../../../../resources/audio/guns/misc/magazine-load-1
 import ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
 import ar15ReloadEmpty from "../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
 import rifle2Shot1 from "../../../../resources/audio/guns/rifle/rifle2-shot-1.mp3";
+import rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
 import ak47 from "../../../../resources/images/weapons/ak47.png";
+import rifle from "../../../../resources/images/weapons/rifle.png";
 import {
   defaultGunStats,
   FireMode,
@@ -23,7 +25,12 @@ export const AK47: GunStats = {
   reloadTime: 1.8,
   ammoCapacity: 30,
 
-  textures: { pickup: ak47 },
+  textures: {
+    ...defaultGunStats.textures,
+    pickup: ak47,
+    holding: rifle,
+    shellCasing: rifleCasing,
+  },
   size: [1.4, 1.4],
 
   sounds: {

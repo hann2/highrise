@@ -1,10 +1,11 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { polarToVec } from "../../core/util/MathUtil";
+import { degToRad, polarToVec } from "../../core/util/MathUtil";
 import { choose, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import MuzzleFlash from "../effects/MuzzleFlash";
+import ShellCasing from "../effects/ShellCasing";
 import Bullet from "../entities/Bullet";
 import Human from "../entities/human/Human";
 import { FireMode, GunStats, ReloadingStyle } from "./GunStats";
@@ -25,7 +26,7 @@ export default class Gun extends BaseEntity implements Entity {
     return !this.isReloading && this.shootCooldown <= 0 && this.ammo > 0;
   }
 
-  async pullTrigger(shooter: Human) {
+  pullTrigger(shooter: Human) {
     if (this.isReloading) {
       if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
         this.cancelReload();
@@ -39,20 +40,46 @@ export default class Gun extends BaseEntity implements Entity {
 
       if (this.ammo > 0) {
         // Actually shoot
-        this.makeProjectile(muzzlePosition, direction, shooter);
-        this.playSound("shoot", muzzlePosition);
-        this.game?.addEntity(new MuzzleFlash(muzzlePosition, direction));
-        this.shootCooldown += 1.0 / this.stats.fireRate;
-        this.ammo -= 1;
-
-        if (this.stats.fireMode === FireMode.PUMP) {
-          await this.wait(0.1);
-          this.playSound("pump", shooter.getPosition());
-        }
+        this.onShoot(muzzlePosition, direction, shooter);
       } else {
         this.playSound("empty", muzzlePosition);
       }
     }
+  }
+
+  async onShoot(position: V2d, direction: number, shooter: Human) {
+    // Actual shot
+    this.makeProjectile(position, direction, shooter);
+
+    this.shootCooldown += 1.0 / this.stats.fireRate;
+    this.ammo -= 1;
+
+    // Various effects
+    this.playSound("shoot", position);
+    this.game?.addEntity(new MuzzleFlash(position, direction));
+
+    //
+    if (this.stats.fireMode === FireMode.PUMP) {
+      await this.wait(0.1);
+      this.playSound("pump", shooter.getPosition());
+      this.makeShellCasing(direction, shooter);
+    } else {
+      this.makeShellCasing(direction, shooter);
+    }
+  }
+
+  makeShellCasing(direction: number, shooter: Human) {
+    const position = shooter
+      .getPosition()
+      .add(polarToVec(direction, this.stats.muzzleLength * 0.5)); // Halfway seems to be a good estimate
+    this.game?.addEntity(
+      new ShellCasing(
+        position,
+        direction + Math.PI / 2,
+        direction,
+        this.stats.textures.shellCasing
+      )
+    );
   }
 
   makeProjectile(position: V2d, direction: number, shooter: Human) {

@@ -2,7 +2,9 @@ import dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
 import shotgunLoadShell2 from "../../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
 import shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import shotgunShot1 from "../../../../resources/audio/guns/shotgun/shotgun-shot-1.mp3";
+import shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
 import doubleBarrelShotgun from "../../../../resources/images/weapons/double-barrel-shotgun.png";
+import rifle from "../../../../resources/images/weapons/rifle.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
@@ -25,7 +27,12 @@ export const DoubleBarrelShotgun: GunStats = {
   reloadTime: 1.2,
   ammoCapacity: 2,
 
-  textures: { pickup: doubleBarrelShotgun },
+  textures: {
+    ...defaultGunStats.textures,
+    pickup: doubleBarrelShotgun,
+    holding: rifle,
+    shellCasing: shotgunCasing,
+  },
   size: [1.1, 1.1],
 
   sounds: {

@@ -31,7 +31,7 @@ export default class Preloader extends BaseEntity implements Entity {
     ]);
     const bytes = getTotalSoundBytes();
 
-    console.group(`Audio Loaded: ${(bytes / 2 ** 20).toFixed(1)}MB`);
+    console.group(`Audio Loaded: ${(bytes / 2 ** 20).toFixed(1)}MB total`);
 
     getBiggestSounds()
       .slice(0, 10)

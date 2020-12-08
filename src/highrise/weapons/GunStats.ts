@@ -3,7 +3,9 @@ import pistolCock1 from "../../../resources/audio/guns/pistol/pistol-cock-1.mp3"
 import pistol2Shot1 from "../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
 import ar15Reload1 from "../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
 import shotgunPump1 from "../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
+import pistolCasing from "../../../resources/images/shell-casings/pistol-casing.png";
 import ar15 from "../../../resources/images/weapons/ar-15.png";
+import pistol from "../../../resources/images/weapons/pistol.png";
 import { SoundName } from "../../core/resources/sounds";
 import { degToRad } from "../../core/util/MathUtil";
 import { BaseWeaponStats } from "./WeaponStats";
@@ -47,7 +49,10 @@ export interface GunStats extends BaseWeaponStats {
   textures: {
     // Texture to use when the item's on the ground
     pickup: string;
-    // TODO: Held texture
+    // Texture while in person's hands
+    holding: string;
+    // Texture of the ejected shell casing
+    shellCasing: string;
   };
 }
 
@@ -72,7 +77,7 @@ export enum ReloadingStyle {
 export const defaultGunStats: GunStats = {
   name: "Gun",
   fireRate: 1.0,
-  muzzleLength: 0.7,
+  muzzleLength: 0.2,
   muzzleVelocity: 80,
   bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
@@ -83,7 +88,7 @@ export const defaultGunStats: GunStats = {
   bulletSpread: degToRad(0.5),
 
   size: [1, 1],
-  textures: { pickup: ar15 },
+  textures: { pickup: ar15, holding: pistol, shellCasing: pistolCasing },
 
   sounds: {
     shoot: [pistol2Shot1],

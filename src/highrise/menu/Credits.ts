@@ -58,5 +58,5 @@ Ayene Chan - Environment
 
 
 No zombies were harmed in the making of this game.
-Some celery, walnuts, and a lemon were though.
+Some celery, walnuts, potatoes, and a lemon were though.
 `;
