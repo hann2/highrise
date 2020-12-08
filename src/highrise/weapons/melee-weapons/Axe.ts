@@ -1,4 +1,4 @@
-import fleshHit4 from "../../../../resources/audio/weapons/flesh-hit-4.flac";
+import fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
 import swordShing3 from "../../../../resources/audio/weapons/sword-shing-3.flac";
 import swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
 import swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";

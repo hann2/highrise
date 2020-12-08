@@ -26,8 +26,6 @@ export default class PartyManager extends BaseEntity implements Entity {
     newGame: () => {
       this.partyMembers = [];
       this.leader = this.game!.addEntity(new Human());
-      // this.leader.giveWeapon(new (choose(...GUNS))(), false);
-      this.leader.giveWeapon(new MeleeWeapon(BaseballBat), false);
       this.game!.addEntity(new PlayerHumanController(() => this.leader));
       this.game?.dispatch({ type: "addToParty", human: this.leader });
     },

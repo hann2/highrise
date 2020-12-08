@@ -1,6 +1,8 @@
 import bathroom from "../../../resources/images/environment/bathroom.png";
 import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../../resources/images/environment/fences-lights.png";
+import industrialCarpet001 from "../../../resources/images/environment/floor/IndustrialCarpet-001.jpg";
+import industrialCarpet002 from "../../../resources/images/environment/floor/IndustrialCarpet-002.jpg";
 import furniture from "../../../resources/images/environment/furniture.png";
 import market from "../../../resources/images/environment/market.png";
 import healthPack from "../../../resources/images/health_pack.png";
@@ -25,6 +27,9 @@ export function getImagesToPreload(): Set<string> {
     pointLight,
     zombie1Hold,
     zombie1Stand,
+
+    industrialCarpet001,
+    industrialCarpet002,
 
     ...MUZZLE_FLASH_URLS,
     ...BLOOD_SPLAT_URLS,

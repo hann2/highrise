@@ -1,7 +1,7 @@
+import fleshHit1 from "../../../resources/audio/impacts/flesh-hit-1.flac";
+import fleshHit2 from "../../../resources/audio/impacts/flesh-hit-2.flac";
+import fleshHit3 from "../../../resources/audio/impacts/flesh-hit-3.flac";
 import pop1 from "../../../resources/audio/misc/pop1.flac";
-import fleshHit1 from "../../../resources/audio/weapons/flesh-hit-1.flac";
-import fleshHit2 from "../../../resources/audio/weapons/flesh-hit-2.flac";
-import fleshHit3 from "../../../resources/audio/weapons/flesh-hit-3.flac";
 import swordShing1 from "../../../resources/audio/weapons/sword-shing-1.flac";
 import axe from "../../../resources/images/weapons/axe.png";
 import { SoundName } from "../../core/resources/sounds";

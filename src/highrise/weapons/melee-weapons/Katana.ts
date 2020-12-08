@@ -1,3 +1,7 @@
+import fleshHit1 from "../../../../resources/audio/impacts/flesh-hit-1.flac";
+import fleshHit2 from "../../../../resources/audio/impacts/flesh-hit-2.flac";
+import fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
+import fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
 import swordShing2 from "../../../../resources/audio/weapons/sword-shing-2.flac";
 import swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
 import swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
@@ -35,6 +39,7 @@ export const Katana: MeleeWeaponStats = {
   sounds: {
     ...defaultMeleeWeapon.sounds,
     swing: [swordSwoosh1, swordSwoosh2, swordSwoosh3],
+    hitFlesh: [fleshHit1, fleshHit2, fleshHit3, fleshHit4],
     pickup: [swordShing2],
   },
 };

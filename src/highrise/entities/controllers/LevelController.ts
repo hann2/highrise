@@ -25,6 +25,7 @@ export default class LevelController extends BaseEntity implements Entity {
 
   handlers = {
     newGame: async () => {
+      console.log("newGame");
       this.game!.clearScene();
       this.currentLevel = 1;
       const level = generateLevel(chooseTemplate(this.currentLevel));

@@ -1,5 +1,5 @@
 import m1911DryFire from "../../../../resources/audio/guns/pistol/m1911-dry-fire.flac";
-import m1911Pickup from "../../../../resources/audio/guns/pistol/m1911-pickup.wav";
+import m1911Pickup from "../../../../resources/audio/guns/pistol/M1911-pickup.flac";
 import m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
 import pistol2Shot1 from "../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
 import glock from "../../../../resources/images/weapons/glock.png";

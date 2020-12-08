@@ -21,6 +21,8 @@ export enum Layers {
   WORLD_OVERLAY = "world_overlay",
   // Stuff not in the world
   HUD = "hud",
+  // Stuff above even the HUD
+  MENU = "menu",
 }
 
 // Set up the game to use our layers
@@ -34,6 +36,7 @@ export function initLayers(game: Game) {
   game.renderer.createLayer(Layers.LIGHTING, new LayerInfo({ paralax: 0 }));
   game.renderer.createLayer(Layers.WORLD_OVERLAY, new LayerInfo());
   game.renderer.createLayer(Layers.HUD, new LayerInfo({ paralax: 0 }));
+  game.renderer.createLayer(Layers.MENU, new LayerInfo({ paralax: 0 }));
 
   game.renderer.defaultLayer = Layers.WORLD;
 }

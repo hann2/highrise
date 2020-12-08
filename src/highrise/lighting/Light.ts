@@ -1,4 +1,4 @@
-import { BLEND_MODES, Sprite } from "pixi.js";
+import { BLEND_MODES, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V, V2d } from "../../core/Vector";
@@ -18,6 +18,10 @@ export default class Light extends BaseEntity implements Entity {
     // TODO: Light shadows are drawing over each other. They need to be contained.
     // Do I need to render each shadow to a texture? That seems expensive
     // Is there something I can do with alpha, or shaders?
+
+    // this.texture = new RenderTexture();
+    // this.game?.renderer.pixiRenderer.render(this.lightSprite, this.renderTexture)
+    // this.game?.renderer.pixiRenderer.render(this.shadows, this.renderTexture)
 
     if (shadowsEnabled) {
       this.enableShadows();

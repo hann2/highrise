@@ -1,28 +1,23 @@
 import { Graphics, Sprite, Text } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { Layers } from "../layers";
 
-export default class PauseMenuController extends BaseEntity implements Entity {
+export default class MainMenu extends BaseEntity implements Entity {
   persistent = true;
   pausable = false;
   sprite: Sprite & GameSprite;
+
   constructor() {
     super();
 
     this.sprite = new Sprite();
     this.sprite.layerName = Layers.MENU;
-    this.sprite.visible = false;
 
-    const background = new Graphics();
-    background.beginFill(0x331111, 0.3);
-    background.drawRect(-5000, -5000, 10000, 10000);
-    background.endFill();
-    this.sprite.addChild(background);
-
-    const text = new Text("PAUSED", {
+    const text = new Text("Press Enter To Start", {
       fontSize: 64,
       fontFamily: "Capture It",
       fill: "white",
@@ -34,9 +29,13 @@ export default class PauseMenuController extends BaseEntity implements Entity {
 
   handlers = {
     resize: () => this.centerText(),
+    newGame: () => {
+      console.log("should destroy mainmenu");
+      this.destroy();
+    },
   };
 
-  onAdd() {
+  onAdd(game: Game) {
     this.centerText();
   }
 
@@ -45,23 +44,16 @@ export default class PauseMenuController extends BaseEntity implements Entity {
     this.sprite.y = this.game!.renderer.getHeight() / 3;
   }
 
-  onPause() {
-    this.sprite.visible = true;
-  }
-
-  onUnpause() {
-    this.sprite.visible = false;
-  }
-
   onKeyDown(key: KeyCode) {
-    if (key === "Escape") {
-      this.game?.togglePause();
+    if (key === "Enter") {
+      this.game?.dispatch({ type: "newGame" });
+      console.log("should start new game", this.game != null);
     }
   }
 
   onButtonDown(button: ControllerButton) {
     if (button === ControllerButton.START) {
-      this.game?.togglePause();
+      this.game?.dispatch({ type: "newGame" });
     }
   }
 }

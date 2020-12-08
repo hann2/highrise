@@ -8,22 +8,24 @@ import swordShing4 from "../../../resources/audio/weapons/sword-shing-4.flac";
 import zombieHit1 from "../../../resources/audio/zombie/zombie-hit-1.flac";
 import zombieHit2 from "../../../resources/audio/zombie/zombie-hit-2.flac";
 import { CHARACTERS } from "../characters/Character";
+import { MUSIC_URLS } from "../MusicController";
 import { WEAPONS } from "../weapons";
-import { GUNS } from "../weapons/guns";
 
 export function getSoundsToPreload(): string[] {
-  const urls = new Set<string>([]);
+  const urls = new Set<string>([
+    // Misc sounds. Probably will/should get lumped in with other stuff later
+    pop1,
+    wallHit1,
+    wallHit2,
+    zombieHit1,
+    zombieHit2,
+    swordShing1,
+    swordShing2,
+    swordShing3,
+    swordShing4,
 
-  // Misc sounds. Probably will/should get lumped in with other stuff later
-  urls.add(pop1);
-  urls.add(wallHit1);
-  urls.add(wallHit2);
-  urls.add(zombieHit1);
-  urls.add(zombieHit2);
-  urls.add(swordShing1);
-  urls.add(swordShing2);
-  urls.add(swordShing3);
-  urls.add(swordShing4);
+    ...MUSIC_URLS,
+  ]);
 
   // Characters
   for (const character of CHARACTERS) {

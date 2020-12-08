@@ -1,7 +1,7 @@
 import { Body, Circle } from "p2";
-import fleshHit1 from "../../../../resources/audio/weapons/flesh-hit-1.flac";
-import fleshHit2 from "../../../../resources/audio/weapons/flesh-hit-2.flac";
-import fleshHit3 from "../../../../resources/audio/weapons/flesh-hit-3.flac";
+import fleshHit1 from "../../../../resources/audio/impacts/flesh-hit-1.flac";
+import fleshHit2 from "../../../../resources/audio/impacts/flesh-hit-2.flac";
+import fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";

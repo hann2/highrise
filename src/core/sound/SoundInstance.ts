@@ -1,7 +1,7 @@
 import BaseEntity from "../entity/BaseEntity";
 import Entity from "../entity/Entity";
 import Game from "../Game";
-import { SoundName, SoundBuffers } from "../resources/sounds";
+import { getSoundBuffer, hasSoundBuffer, SoundName } from "../resources/sounds";
 import { rUniform } from "../util/Random";
 
 export interface SoundOptions {
@@ -78,7 +78,7 @@ export class SoundInstance extends BaseEntity implements Entity {
     this.speed = options.speed ?? 1.0;
     this.continuous = options.continuous ?? false;
 
-    if (!SoundBuffers.has(soundName)) {
+    if (!hasSoundBuffer(soundName)) {
       throw new Error(`Unloaded Sound ${soundName}`);
     }
   }
@@ -102,7 +102,7 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   makeChain({ audio, slowMo, masterGain }: Game): AudioNode {
     this.sourceNode = audio.createBufferSource();
-    this.sourceNode.buffer = SoundBuffers.get(this.soundName)!;
+    this.sourceNode.buffer = getSoundBuffer(this.soundName)!;
     this.sourceNode.playbackRate.value = this._speed * slowMo;
     this.sourceNode.loop = this.continuous;
 
@@ -147,18 +147,22 @@ export class SoundInstance extends BaseEntity implements Entity {
   };
 
   pause() {
-    this.paused = true;
-    this.sourceNode.onended = null;
-    this.sourceNode.stop();
+    if (this.pausable) {
+      this.paused = true;
+      this.sourceNode.onended = null;
+      this.sourceNode.stop();
+    }
   }
 
   unpause() {
-    this.paused = false;
-    const bufferDuration = this.sourceNode.buffer!.duration;
-    if (!this.continuous && this.elapsed >= bufferDuration) {
-      this.destroy();
-    } else {
-      this.restartSound(this.elapsed % bufferDuration);
+    if (this.paused) {
+      this.paused = false;
+      const bufferDuration = this.sourceNode.buffer!.duration;
+      if (!this.continuous && this.elapsed >= bufferDuration) {
+        this.destroy();
+      } else {
+        this.restartSound(this.elapsed % bufferDuration);
+      }
     }
   }
 

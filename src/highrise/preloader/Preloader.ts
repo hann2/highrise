@@ -2,7 +2,11 @@ import * as Pixi from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
-import { loadSound } from "../../core/resources/sounds";
+import {
+  getBiggestSounds,
+  getTotalSoundBytes,
+  loadSound,
+} from "../../core/resources/sounds";
 import { getFontsToPreload } from "./preloadFonts";
 import { getImagesToPreload } from "./preloadImages";
 import { getSoundsToPreload } from "./preloadSounds";
@@ -25,6 +29,17 @@ export default class Preloader extends BaseEntity implements Entity {
       this.loadSounds(game.audio),
       this.loadImages(),
     ]);
+    const bytes = getTotalSoundBytes();
+
+    console.group(`Audio Loaded: ${(bytes / 2 ** 20).toFixed(1)}MB`);
+
+    getBiggestSounds()
+      .slice(0, 10)
+      .forEach(([url, size]) =>
+        console.log(url, "\n", `${(size / 1024).toFixed(1)}kB`)
+      );
+
+    console.groupEnd();
     this._resolve();
   }
 

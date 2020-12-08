@@ -11,7 +11,9 @@ import LevelController from "./entities/controllers/LevelController";
 import PartyManager from "./entities/PartyManager";
 import { initLayers } from "./layers";
 import LightingManager from "./lighting/LightingManager";
+import MainMenu from "./menu/MainMenu";
 import PauseMenuController from "./menu/PauseMenuController";
+import MusicController from "./MusicController";
 import { initContactMaterials } from "./physics/PhysicsMaterials";
 import Preloader from "./preloader/Preloader";
 
@@ -55,8 +57,8 @@ export async function main() {
   game.addEntity(new CameraController(game.camera));
   game.addEntity(new PositionalSoundListener());
   game.addEntity(new LightingManager());
-
-  game.dispatch({ type: "newGame" });
+  game.addEntity(new MusicController());
+  game.addEntity(new MainMenu());
 
   game.masterGain.gain.value = 0.3;
 }
