@@ -1,3 +1,4 @@
+import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import revolverDryFire from "../../../../resources/audio/guns/revolver/revolver-dry-fire.flac";
 import revolverInsertShell1 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-1.flac";
 import revolverInsertShell2 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-2.flac";
@@ -31,6 +32,7 @@ export const Magnum: GunStats = {
   size: [0.55, 0.55],
 
   sounds: {
+    ...defaultGunStats.sounds,
     shoot: [revolverShot3],
     empty: [revolverDryFire],
     pickup: [revolverPickup],
@@ -41,5 +43,6 @@ export const Magnum: GunStats = {
       revolverInsertShell3,
     ],
     reloadFinish: [revolverReloadFinish],
+    shellDrop: [shellDrop1],
   },
 };

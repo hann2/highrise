@@ -1,5 +1,6 @@
 import dryFire3 from "../../../../resources/audio/guns/misc/dry-fire-3.mp3";
 import magazineLoad1 from "../../../../resources/audio/guns/misc/magazine-load-1.mp3";
+import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
 import ar15ReloadEmpty from "../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
 import rifle2Shot1 from "../../../../resources/audio/guns/rifle/rifle2-shot-1.mp3";
@@ -34,9 +35,11 @@ export const AK47: GunStats = {
   size: [1.4, 1.4],
 
   sounds: {
+    ...defaultGunStats.sounds,
     shoot: [rifle2Shot1],
     empty: [dryFire3],
     pickup: [magazineLoad1],
     reload: [ar15Reload1, ar15ReloadEmpty],
+    shellDrop: [shellDrop1],
   },
 };

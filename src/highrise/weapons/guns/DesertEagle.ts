@@ -1,4 +1,5 @@
 import dryFire2 from "../../../../resources/audio/guns/misc/dry-fire-2.mp3";
+import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import deagleShot1 from "../../../../resources/audio/guns/pistol/deagle-shot-1.mp3";
 import deagleShot2 from "../../../../resources/audio/guns/pistol/deagle-shot-2.mp3";
 import m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
@@ -26,9 +27,11 @@ export const DesertEagle: GunStats = {
   size: [0.55, 0.55],
 
   sounds: {
+    ...defaultGunStats.sounds,
     shoot: [deagleShot1, deagleShot2],
     empty: [dryFire2],
     pickup: [pistolCock1],
     reload: [m1911Reload1],
+    shellDrop: [shellDrop1],
   },
 };

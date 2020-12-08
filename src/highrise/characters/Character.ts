@@ -1,5 +1,6 @@
 import { SoundName } from "../../core/resources/sounds";
 import { shuffle } from "../../core/util/Random";
+import { ShuffleRing } from "../utils/ShuffleRing";
 import { Andy } from "./Andy";
 import { Chad } from "./Chad";
 import { Cindy } from "./Cindy";
@@ -51,9 +52,7 @@ export const CHARACTERS = [
   Wendy,
 ];
 
-const CHARACTERS_SHUFFLED = shuffle([...CHARACTERS]);
-let characterId = 0;
+const CHARACTERS_SHUFFLED = new ShuffleRing(CHARACTERS);
 export function randomCharacter(): Character {
-  characterId++;
-  return CHARACTERS_SHUFFLED[characterId % CHARACTERS_SHUFFLED.length];
+  return CHARACTERS_SHUFFLED.getNext();
 }

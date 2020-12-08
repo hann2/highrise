@@ -1,4 +1,5 @@
 import dryFire1 from "../../../resources/audio/guns/misc/dry-fire-1.mp3";
+import shellDrop1 from "../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import pistolCock1 from "../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
 import pistol2Shot1 from "../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
 import ar15Reload1 from "../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
@@ -41,9 +42,10 @@ export interface GunStats extends BaseWeaponStats {
     empty: SoundName[];
     pickup: SoundName[];
     reload: SoundName[];
-    reloadInsert?: SoundName[];
-    reloadFinish?: SoundName[];
-    pump?: SoundName[];
+    reloadInsert: SoundName[];
+    reloadFinish: SoundName[];
+    pump: SoundName[];
+    shellDrop: SoundName[];
   };
 
   textures: {
@@ -55,6 +57,9 @@ export interface GunStats extends BaseWeaponStats {
     shellCasing: string;
   };
 }
+
+export type GunSounds = GunStats["sounds"];
+export type GunSoundName = keyof GunSounds;
 
 export enum FireMode {
   // One bullet per trigger pull
@@ -77,7 +82,7 @@ export enum ReloadingStyle {
 export const defaultGunStats: GunStats = {
   name: "Gun",
   fireRate: 1.0,
-  muzzleLength: 0.2,
+  muzzleLength: 0.5,
   muzzleVelocity: 80,
   bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
@@ -98,5 +103,6 @@ export const defaultGunStats: GunStats = {
     reloadInsert: [],
     reloadFinish: [],
     pump: [shotgunPump1],
+    shellDrop: [shellDrop1],
   },
 };

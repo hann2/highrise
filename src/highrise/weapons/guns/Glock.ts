@@ -1,4 +1,5 @@
 import dryFire2 from "../../../../resources/audio/guns/misc/dry-fire-2.mp3";
+import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
 import pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
 import pistolShot2 from "../../../../resources/audio/guns/pistol/pistol-shot-2.mp3";
@@ -27,9 +28,11 @@ export const Glock: GunStats = {
   size: [0.45, 0.45],
 
   sounds: {
+    ...defaultGunStats.sounds,
     shoot: [pistolShot2],
     empty: [dryFire2],
     pickup: [pistolCock1],
     reload: [m1911Reload1],
+    shellDrop: [shellDrop1],
   },
 };

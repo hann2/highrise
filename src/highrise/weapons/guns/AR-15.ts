@@ -1,5 +1,6 @@
 import dryFire3 from "../../../../resources/audio/guns/misc/dry-fire-3.mp3";
 import magazineLoad1 from "../../../../resources/audio/guns/misc/magazine-load-1.mp3";
+import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
 import ar15ReloadEmpty from "../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
 import rifleShot1 from "../../../../resources/audio/guns/rifle/rifle-shot-1.mp3";
@@ -36,9 +37,11 @@ export const AR15: GunStats = {
   size: [0.8, 0.4],
 
   sounds: {
+    ...defaultGunStats.sounds,
     shoot: [rifleShot1, rifleShot2, rifleShot3],
     empty: [dryFire3],
     pickup: [magazineLoad1],
     reload: [ar15Reload1, ar15ReloadEmpty],
+    shellDrop: [shellDrop1],
   },
 };

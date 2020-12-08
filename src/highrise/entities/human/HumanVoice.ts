@@ -1,15 +1,23 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
-import { SoundInstance } from "../../../core/sound/SoundInstance";
 import { choose } from "../../../core/util/Random";
-import { CharacterSoundClass } from "../../characters/Character";
+import {
+  CharacterSoundClass,
+  CharacterSounds,
+} from "../../characters/Character";
+import { ShuffleRing } from "../../utils/ShuffleRing";
 import Human from "./Human";
 
 export default class HumanVoice extends BaseEntity implements Entity {
   currentSound?: PositionalSound;
+  sounds: CharacterSoundRings;
+
   constructor(public human: Human) {
     super();
+
+    this.sounds = makeSoundRings(human.character.sounds);
   }
 
   // TODO: Handle the events that make us speak -- Do we actually want to do that here?
@@ -25,9 +33,8 @@ export default class HumanVoice extends BaseEntity implements Entity {
   speak(soundClass: CharacterSoundClass) {
     // TODO: Interrupt sound
     if (!this.currentSound) {
-      const sounds = this.human.character.sounds[soundClass];
-      if (sounds.length > 0) {
-        const sound = choose(...sounds);
+      const sound = this.sounds[soundClass].getNext();
+      if (sound) {
         this.currentSound = this.game?.addEntity(
           new PositionalSound(sound, this.human.getPosition())
         );
@@ -35,3 +42,15 @@ export default class HumanVoice extends BaseEntity implements Entity {
     }
   }
 }
+
+function makeSoundRings(character: CharacterSounds): CharacterSoundRings {
+  const result = {} as CharacterSoundRings;
+  for (const [soundName, sounds] of Object.entries(character)) {
+    result[soundName as CharacterSoundClass] = new ShuffleRing(sounds);
+  }
+  return result;
+}
+
+type CharacterSoundRings = {
+  [k in keyof CharacterSounds]: ShuffleRing<SoundName>;
+};

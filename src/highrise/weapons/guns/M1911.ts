@@ -1,3 +1,4 @@
+import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import m1911DryFire from "../../../../resources/audio/guns/pistol/m1911-dry-fire.flac";
 import m1911Pickup from "../../../../resources/audio/guns/pistol/M1911-pickup.flac";
 import m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
@@ -27,9 +28,11 @@ export const M1911: GunStats = {
   size: [0.45, 0.45],
 
   sounds: {
+    ...defaultGunStats.sounds,
     shoot: [pistol2Shot1],
     empty: [m1911DryFire],
     pickup: [m1911Pickup],
     reload: [m1911Reload1],
+    shellDrop: [shellDrop1],
   },
 };

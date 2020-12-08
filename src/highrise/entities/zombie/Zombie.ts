@@ -67,6 +67,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
   async attack() {
     if (this.attackPhase === "ready") {
+      this.voice.speak("attack");
       this.attackPhase = "windup";
       await this.wait(WINDUP_TIME, undefined, "windup");
       this.attackPhase = "attack";
@@ -153,6 +154,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   die() {
     this.game?.dispatch({ type: "zombieDied", zombie: this });
     this.game?.addEntity(new BloodSplat(this.getPosition()));
+    this.voice.speak("death");
     this.destroy();
   }
 }

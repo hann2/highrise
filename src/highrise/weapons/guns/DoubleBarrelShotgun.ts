@@ -1,4 +1,5 @@
 import dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
+import shellDrop2 from "../../../../resources/audio/guns/misc/shell-drop-2.mp3";
 import shotgunLoadShell2 from "../../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
 import shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import shotgunShot1 from "../../../../resources/audio/guns/shotgun/shotgun-shot-1.mp3";
@@ -36,9 +37,11 @@ export const DoubleBarrelShotgun: GunStats = {
   size: [1.1, 1.1],
 
   sounds: {
+    ...defaultGunStats.sounds,
     shoot: [shotgunShot1],
     empty: [dryFire1],
     pickup: [shotgunPump1],
     reload: [shotgunLoadShell2],
+    shellDrop: [shellDrop2],
   },
 };

@@ -1,25 +1,36 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { degToRad, polarToVec } from "../../core/util/MathUtil";
-import { choose, rUniform } from "../../core/util/Random";
+import { polarToVec } from "../../core/util/MathUtil";
+import { rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import MuzzleFlash from "../effects/MuzzleFlash";
 import ShellCasing from "../effects/ShellCasing";
 import Bullet from "../entities/Bullet";
 import Human from "../entities/human/Human";
-import { FireMode, GunStats, ReloadingStyle } from "./GunStats";
+import { ShuffleRing } from "../utils/ShuffleRing";
+import {
+  FireMode,
+  GunSoundName,
+  GunSounds,
+  GunStats,
+  ReloadingStyle,
+} from "./GunStats";
 
 export default class Gun extends BaseEntity implements Entity {
   stats: GunStats;
   shootCooldown: number = 0;
   ammo: number;
   isReloading: boolean = false;
+  sounds: GunSoundRings;
 
   constructor(stats: GunStats) {
     super();
     this.stats = stats;
     this.ammo = this.stats.ammoCapacity;
+
+    this.sounds = makeSoundRings(stats.sounds);
   }
 
   canShoot(): boolean {
@@ -30,7 +41,7 @@ export default class Gun extends BaseEntity implements Entity {
     if (this.isReloading) {
       if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
         this.cancelReload();
-        this.playSound("reload", shooter.getPosition(), 2);
+        this.playSound("reloadFinish", shooter.getPosition());
       }
     } else if (this.shootCooldown <= 0) {
       const direction = shooter.getDirection();
@@ -77,7 +88,8 @@ export default class Gun extends BaseEntity implements Entity {
         position,
         direction + Math.PI / 2,
         direction,
-        this.stats.textures.shellCasing
+        this.stats.textures.shellCasing,
+        this.stats.sounds.shellDrop
       )
     );
   }
@@ -104,8 +116,7 @@ export default class Gun extends BaseEntity implements Entity {
     if (!this.isReloading && this.ammo < this.stats.ammoCapacity) {
       if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
         this.isReloading = true;
-        const soundIndex = this.ammo > 0 ? 0 : 1; // play a special sound for reloading while empty
-        this.playSound("reload", shooter.getPosition(), soundIndex);
+        this.playSound("reload", shooter.getPosition());
         this.ammo = 0;
         await this.wait(this.stats.reloadTime, undefined, "reload");
         this.playSound("reloadFinish", shooter.getPosition());
@@ -116,7 +127,7 @@ export default class Gun extends BaseEntity implements Entity {
         this.isReloading = true;
         await this.wait(this.stats.reloadTime, undefined, "reload");
         while (this.ammo < this.stats.ammoCapacity) {
-          this.playSound("reloadInsert", shooter.getPosition(), 1);
+          this.playSound("reloadInsert", shooter.getPosition());
           await this.wait(this.stats.reloadTime, undefined, "reload");
           this.ammo += 1;
         }
@@ -138,16 +149,25 @@ export default class Gun extends BaseEntity implements Entity {
   }
 
   playSound(
-    soundClass: keyof GunStats["sounds"],
-    position: V2d,
-    index: number = -1
+    soundClass: GunSoundName,
+    position: V2d
   ): PositionalSound | undefined {
-    const sounds = this.stats.sounds[soundClass];
-    if (sounds?.length) {
-      const sound = sounds[index] ?? choose(...sounds);
+    const sound = this.sounds[soundClass].getNext();
+    if (sound) {
       return this.game?.addEntity(
         new PositionalSound(sound, position, { gain: 0.5 })
       );
     }
   }
+}
+
+type GunSoundRings = { [gunSoundName in GunSoundName]: ShuffleRing<SoundName> };
+function makeSoundRings(sounds: GunSounds): GunSoundRings {
+  const result = {} as any;
+  for (const [gunSound, soundNames] of Object.entries(sounds)) {
+    result[gunSound as GunSoundName] = new ShuffleRing(
+      (soundNames as SoundName[]) ?? []
+    );
+  }
+  return result;
 }

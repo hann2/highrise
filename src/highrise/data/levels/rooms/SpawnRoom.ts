@@ -12,6 +12,8 @@ import { PointLight } from "../../../lighting/PointLight";
 import { bathroomTiles } from "../../../view/DecorationSprite";
 import Gun from "../../../weapons/Gun";
 import { GUNS } from "../../../weapons/guns";
+import { MELEE_WEAPONS } from "../../../weapons/melee-weapons";
+import MeleeWeapon from "../../../weapons/MeleeWeapon";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 
@@ -37,6 +39,9 @@ export default class SpawnRoom extends RoomTemplate {
 
     const gun = new Gun(choose(...GUNS));
     entities.push(new WeaponPickup(transformCell(V(0, 0)), gun));
+
+    const meleeWeapon = new MeleeWeapon(choose(...MELEE_WEAPONS));
+    entities.push(new WeaponPickup(transformCell(V(1.0, 0)), meleeWeapon));
 
     entities.push(new SpawnRoomFloor(transformCell(V(1, 1))));
 

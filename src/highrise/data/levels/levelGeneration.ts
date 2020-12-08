@@ -750,11 +750,11 @@ class LevelBuilder {
       (l: V2d) => new WeaponPickup(l, new MeleeWeapon(choose(...MELEE_WEAPONS)))
     );
     consumeLocation((l: V2d) => new HealthPickup(l));
-    consumeLocation((l: V2d) => {
-      const surv = new Human(l);
-      surv.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
-      return [surv, new SurvivorHumanController(surv)];
-    });
+    // consumeLocation((l: V2d) => {
+    //   const surv = new Human(l);
+    //   surv.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
+    //   return [surv, new SurvivorHumanController(surv)];
+    // });
 
     for (let i = counter; i < shuffledClosets.length; i++) {
       consumeLocation((l: V2d) => new Zombie(l));
