@@ -4,7 +4,7 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import { Layers } from "../layers";
 import Light from "./Light";
 
-const AMBIENT_LIGHT = 0x222222;
+const AMBIENT_LIGHT = 0x0a0a0a;
 export default class LightingManager extends BaseEntity implements Entity {
   id = "lighting_manager";
   persistent = true;

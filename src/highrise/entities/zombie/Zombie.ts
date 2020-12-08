@@ -136,8 +136,11 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
       this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.6, 0.1));
 
       // TODO: Get sound from weapon
-      const soundName = choose(fleshHit1, fleshHit2, fleshHit3);
-      this.game?.addEntity(new PositionalSound(soundName, position));
+      const sounds = swingingWeapon.weapon.stats.sounds.hitFlesh;
+      if (sounds) {
+        const soundName = choose(...sounds);
+        this.game?.addEntity(new PositionalSound(soundName, position));
+      }
 
       this.voice.speak("hit");
     }

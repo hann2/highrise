@@ -1,8 +1,9 @@
-import { AABB, Body, Box, Convex, Line, Shape } from "p2";
-import { Container, Graphics, PI_2, RenderTexture, Sprite } from "pixi.js";
+import { AABB, Body } from "p2";
+import { BLEND_MODES, Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";
-import { V, V2d } from "../../core/Vector";
+import { V2d } from "../../core/Vector";
+import { getShapeCorners } from "./shapeUtils";
 /**
  * Draws shadows from a given point
  *
@@ -12,30 +13,17 @@ import { V, V2d } from "../../core/Vector";
  * https://archive.gamedev.net/archive/reference/programming/features/2dsoftshadow/page3.html
  */
 export class ShadowMask extends BaseEntity implements Entity {
-  mask: Container;
-  texture: RenderTexture;
   dirty: boolean = true;
-  private graphics: Graphics;
+  graphics: Graphics;
 
-  constructor(private position: V2d, private radius: number = 10) {
+  constructor(private lightPos: V2d, private radius: number = 10) {
     super();
-
-    this.texture = this.texture = RenderTexture.create({
-      width: radius * 100,
-      height: radius * 100,
-      resolution: 10,
-    });
-    const mask = (this.mask = new Sprite(this.texture));
-    // mask.anchor.set(0.5, 0.5);
-    mask.scale.set(100);
     this.graphics = new Graphics();
-
-    // I guess this makes sure that the shadow is in the world?
-    // this.sprite = this.graphics;
+    this.graphics.blendMode = BLEND_MODES.MULTIPLY;
   }
 
   setPosition(position: V2d) {
-    this.position = position;
+    this.lightPos = position;
     this.dirty = true;
   }
 
@@ -53,26 +41,21 @@ export class ShadowMask extends BaseEntity implements Entity {
   update() {
     this.graphics.clear();
 
-    // Start with everything black for visible
-    const r = this.radius;
-    const [cx, cy] = this.position;
-    this.graphics
-      .beginFill(0xfffff)
-      .drawCircle(cx, cy, r * 10.5)
-      // .drawRect(cx - r, cy - r, 2 * r, 2 * r)
-      .endFill();
-
     const shadows = this.getShadowCorners();
 
     for (const corners of shadows) {
       if (corners.length) {
-        this.graphics.beginFill(0xffffff);
-        // this.graphics.drawPolygon(corners.flat());
-        this.graphics.endFill();
+        this.graphics
+          .beginFill(0x000000)
+          .drawPolygon(
+            corners
+              // TODO: Do we really want this translation here?
+              .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
+              .flat()
+          )
+          .endFill();
       }
     }
-
-    this.game!.renderer.pixiRenderer.render(this.graphics, this.texture);
 
     this.dirty = false;
   }
@@ -80,7 +63,7 @@ export class ShadowMask extends BaseEntity implements Entity {
   // TODO: This is really slow. Ideas for fixing
   //   - Don't use V2ds anywhere, and try to keep allocation down in general
   private getShadowCorners(): [number, number][][] {
-    const center = this.position;
+    const lightPos = this.lightPos;
     // const bodies = this.game!.entities.getTagged("cast_shadow");
 
     const bodies = this.getAffectedBodies();
@@ -89,32 +72,48 @@ export class ShadowMask extends BaseEntity implements Entity {
 
     for (const body of bodies) {
       for (const shape of body.shapes) {
-        const corners = getShapeCorners(shape, body, center);
+        // TODO: Don't use V2d anywhere here, and try to eliminate as much allocation as possible
+        const corners = getShapeCorners(shape, body, lightPos);
         const shadowPoints: [number, number][] = [];
+        const edgesVisible: boolean[] = [];
 
-        // TODO: Don't use V2d
+        // Figure out which faces are visible
         for (let i = 0; i < corners.length; i++) {
           const a = corners[i % corners.length];
           const b = corners[(i + 1) % corners.length];
           const edgeNormal = b.sub(a);
-          edgeNormal.rotate90cw();
-          const centerNormal = a.sub(center);
+          edgeNormal.irotate90cw();
+          const centerNormal = a.sub(lightPos);
 
           const dot = edgeNormal.dot(centerNormal);
+          edgesVisible.push(dot <= 0);
+        }
 
-          // Is backfacing
-          if (dot <= 0) {
-            const displacement = centerNormal.normalize();
-            const endThing = a.add(displacement);
-            shadowPoints.push(endThing);
+        for (let i = 1; i < corners.length + 1; i++) {
+          const point = corners[i % corners.length];
+          const previousEdge = edgesVisible[i - 1];
+          const nextEdge = edgesVisible[i % edgesVisible.length];
+
+          const shadowDistance = this.radius;
+          if (previousEdge && !nextEdge) {
+            // left breaking point
+            shadowPoints.push(point);
+            shadowPoints.push(displacePoint(point, lightPos, shadowDistance));
+          } else if (!previousEdge && nextEdge) {
+            // right breaking point
+            shadowPoints.push(displacePoint(point, lightPos, shadowDistance));
+            shadowPoints.push(point);
+          } else if (previousEdge && nextEdge) {
+            // front side
+            shadowPoints.push(point);
           } else {
-            shadowPoints.push(a);
+            // back side
+            shadowPoints.push(displacePoint(point, lightPos, shadowDistance));
           }
         }
-        // TODO:
-        //   get back-facing corners
-        //   project a point for each back-facing corner out to the shadow radius
-        //   return combined array of all these points
+
+        // TODO: This won't always reach the end of the thingy
+
         shadows.push(shadowPoints);
       }
     }
@@ -124,7 +123,7 @@ export class ShadowMask extends BaseEntity implements Entity {
 
   // Returns the nearby bodies that cast a shadow
   getAffectedBodies() {
-    const center = this.position;
+    const center = this.lightPos;
     const world = this.game!.world;
     return world.broadphase
       .aabbQuery(
@@ -140,38 +139,7 @@ export class ShadowMask extends BaseEntity implements Entity {
   }
 }
 
-// Returns the "corners" of a shape in world coordinates
-function getShapeCorners(shape: Shape, body: Body, center: V2d): V2d[] {
-  switch (shape.type) {
-    case Shape.BOX:
-    case Shape.CONVEX: {
-      const convex = shape as Box | Convex;
-      const points = [];
-      for (const vertex of convex.vertices) {
-        const point = V(0, 0);
-        body.toWorldFrame(point, vertex);
-        points.push(point);
-      }
-      return points;
-    }
-    case Shape.CAPSULE:
-      return []; // TODO this one seems a bit tricky, could probably approximate
-    case Shape.CIRCLE:
-      return []; // TODO: Just a few points on the edge? Really I suppose we want to draw the curve in the shadow, but that's a whole nother level of complexity
-    case Shape.LINE:
-      const line = shape as Line;
-      const start = V(-line.length / PI_2, 0);
-      const end = V(line.length / 2, 0);
-      body.toWorldFrame(start, start);
-      body.toWorldFrame(end, end);
-      return [start, end];
-    case Shape.HEIGHTFIELD:
-      return []; // I don't think we really need these
-    case Shape.PARTICLE:
-      return []; // Particles don't cast shadows
-    case Shape.PLANE:
-      return []; // Let's just not use planes
-    default:
-      return []; // In case I missed one
-  }
+function displacePoint(point: V2d, lightPos: V2d, distance: number): V2d {
+  const displacement = point.sub(lightPos).inormalize().imul(distance);
+  return displacement.iadd(point);
 }

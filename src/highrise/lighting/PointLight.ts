@@ -1,8 +1,9 @@
-import { Sprite } from "pixi.js";
+import { BLEND_MODES, Sprite } from "pixi.js";
 import pointLight from "../../../resources/images/lights/point-light.png";
 import Light from "./Light";
 
 export class PointLight extends Light {
+  pointLightSprite: Sprite;
   constructor(
     private radius: number = 1,
     intensity: number = 1.0,
@@ -10,8 +11,11 @@ export class PointLight extends Light {
     shadowsEnabled: boolean = false,
     position?: [number, number]
   ) {
-    super(Sprite.from(pointLight), shadowsEnabled, position);
-    this.lightSprite.anchor.set(0.5, 0.5);
+    super(undefined, shadowsEnabled, position);
+    this.pointLightSprite = Sprite.from(pointLight);
+    this.pointLightSprite.blendMode = BLEND_MODES.ADD;
+    this.pointLightSprite.anchor.set(0.5, 0.5);
+    this.lightSprite.addChildAt(this.pointLightSprite, 0);
 
     this.setRadius(radius);
     this.setIntensity(intensity);
@@ -23,8 +27,8 @@ export class PointLight extends Light {
   setRadius(radius: number) {
     this.radius = radius;
     this.shadows?.setRadius(radius);
-    this.lightSprite.width = radius * 2;
-    this.lightSprite.height = radius * 2;
+    this.pointLightSprite.width = radius * 2;
+    this.pointLightSprite.height = radius * 2;
   }
 
   getShadowRadius() {

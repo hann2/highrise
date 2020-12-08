@@ -15,6 +15,9 @@ export default class Light extends BaseEntity implements Entity {
   ) {
     super();
     this.lightSprite.blendMode = BLEND_MODES.ADD;
+    // TODO: Light shadows are drawing over each other. They need to be contained.
+    // Do I need to render each shadow to a texture? That seems expensive
+    // Is there something I can do with alpha, or shaders?
 
     if (shadowsEnabled) {
       this.enableShadows();
@@ -32,8 +35,7 @@ export default class Light extends BaseEntity implements Entity {
       this.shadows = this.addChild(
         new ShadowMask(V(x, y), this.getShadowRadius())
       );
-      this.lightSprite.mask = this.shadows.mask;
-      // this.lightSprite.addChild(this.shadows.mask);
+      this.lightSprite.addChild(this.shadows.graphics);
     }
   }
 
