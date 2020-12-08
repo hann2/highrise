@@ -73,8 +73,8 @@ export default class SurvivorHumanController
 
       this.human.setDirection(displacement.angle);
 
-      if (weapon instanceof Gun && weapon.canShoot()) {
-        if (rBool(0.4)) {
+      if (weapon instanceof Gun) {
+        if (weapon.canShoot() && rBool(0.4)) {
           this.human.useWeapon();
         }
       } else if (weapon instanceof MeleeWeapon) {

@@ -7,6 +7,7 @@ import {
   generateLevel,
 } from "../../data/levels/levelGeneration";
 import FadeEffect from "../../effects/FadeEffect";
+import Light from "../../lighting/Light";
 import Human from "../human/Human";
 import PartyManager from "../PartyManager";
 import AllyHumanController from "./AllyController";
@@ -46,7 +47,8 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     startLevel: ({ level }: { level: Level }) => {
-      this.game!.addEntities(level.entities);
+      const entities = level.entities.filter((e) => !(e instanceof Light));
+      this.game!.addEntities(entities);
     },
 
     gameOver: async () => {

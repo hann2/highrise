@@ -1,5 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { rBool } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import {
   getNearestVisibleZombie,
@@ -52,7 +53,14 @@ export default class AllyHumanController extends BaseEntity implements Entity {
         .isub(this.human.getPosition()).angle;
 
       this.human.setDirection(direction);
-      this.human.useWeapon();
+
+      if (weapon instanceof Gun) {
+        if (weapon.canShoot() && rBool(0.1)) {
+          this.human.useWeapon();
+        }
+      } else {
+        this.human.useWeapon();
+      }
     } else if (this.leader) {
       if (testLineOfSight(this.human, this.leader)) {
         this.lastSeenPositionOfLeader = this.leader.getPosition();

@@ -22,7 +22,7 @@ export class DirectionalLight extends Light {
     this.graphics = new Graphics();
     this.lightSprite.addChild(this.graphics);
 
-    this.graphics.filters = [new Pixi.filters.BlurFilter(20)];
+    this.graphics.filters = [new Pixi.filters.BlurFilter(2)];
     this.redraw();
   }
 

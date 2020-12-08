@@ -1,3 +1,4 @@
+import fleshHit4 from "../../../../resources/audio/weapons/flesh-hit-4.flac";
 import swordShing3 from "../../../../resources/audio/weapons/sword-shing-3.flac";
 import swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
 import swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
@@ -14,8 +15,8 @@ export const Axe: MeleeWeaponStats = {
   damage: 80,
   windUpDamage: 20,
 
-  knockbackAmount: 80,
-  windUpKnockbackAmount: 40,
+  knockbackAmount: 50,
+  windUpKnockbackAmount: 50,
 
   size: [0.2, 1],
   handlePosition: [0.5, 0.85],
@@ -38,6 +39,7 @@ export const Axe: MeleeWeaponStats = {
     ...defaultMeleeWeapon.sounds,
     swing: [swordSwoosh2, swordSwoosh3],
     windup: [swordSwoosh1],
+    hitFlesh: [fleshHit4],
     pickup: [swordShing3],
   },
 };

@@ -1,80 +1,132 @@
-import {
-  AABB,
-  Body,
-  Box,
-  Convex,
-  Line,
-  Ray,
-  RaycastResult,
-  Shape,
-  World,
-} from "p2";
-import { Graphics, PI_2 } from "pixi.js";
+import { AABB, Body, Box, Convex, Line, Shape } from "p2";
+import { Container, Graphics, PI_2, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";
-import CustomWorld from "../../core/physics/CustomWorld";
 import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../physics/CollisionGroups";
-
-// See https://www.redblobgames.com/articles/visibility/
+/**
+ * Draws shadows from a given point
+ *
+ * Resources:
+ * https://www.redblobgames.com/articles/visibility/
+ * https://stackoverflow.com/questions/55855767/algorithm-to-determine-back-sides-of-a-polygon
+ * https://archive.gamedev.net/archive/reference/programming/features/2dsoftshadow/page3.html
+ */
 export class ShadowMask extends BaseEntity implements Entity {
-  graphic: Graphics;
+  mask: Container;
+  texture: RenderTexture;
+  dirty: boolean = true;
+  private graphics: Graphics;
 
   constructor(private position: V2d, private radius: number = 10) {
     super();
 
-    this.graphic = new Graphics();
-    // this.shadowGraphics.filters = [new Pixi.filters.BlurFilter(20)];
+    this.texture = this.texture = RenderTexture.create({
+      width: radius * 100,
+      height: radius * 100,
+      resolution: 10,
+    });
+    const mask = (this.mask = new Sprite(this.texture));
+    // mask.anchor.set(0.5, 0.5);
+    mask.scale.set(100);
+    this.graphics = new Graphics();
 
     // I guess this makes sure that the shadow is in the world?
-    this.sprite = this.graphic;
-  }
-
-  onAdd() {
-    this.update();
+    // this.sprite = this.graphics;
   }
 
   setPosition(position: V2d) {
     this.position = position;
-    if (this.game) {
-      this.update();
-    }
+    this.dirty = true;
   }
 
   setRadius(radius: number) {
     this.radius = radius;
-    if (this.game) {
+    this.dirty = true;
+  }
+
+  afterPhysics() {
+    if (this.game && this.dirty) {
       this.update();
     }
   }
 
   update() {
-    this.graphic.clear();
+    this.graphics.clear();
 
-    const corners = this.getShadowCorners(this.position);
+    // Start with everything black for visible
+    const r = this.radius;
+    const [cx, cy] = this.position;
+    this.graphics
+      .beginFill(0xfffff)
+      .drawCircle(cx, cy, r * 10.5)
+      // .drawRect(cx - r, cy - r, 2 * r, 2 * r)
+      .endFill();
 
-    if (corners.length) {
-      this.graphic.beginFill(0xffffff);
-      const lastCorner = corners[corners.length - 1];
-      this.graphic.moveTo(lastCorner[0], lastCorner[1]);
-      for (const corner of corners) {
-        this.graphic.lineTo(corner[0], corner[1]);
+    const shadows = this.getShadowCorners();
+
+    for (const corners of shadows) {
+      if (corners.length) {
+        this.graphics.beginFill(0xffffff);
+        // this.graphics.drawPolygon(corners.flat());
+        this.graphics.endFill();
       }
-      this.graphic.endFill();
     }
+
+    this.game!.renderer.pixiRenderer.render(this.graphics, this.texture);
+
+    this.dirty = false;
   }
 
   // TODO: This is really slow. Ideas for fixing
-  //   - Make my rayQuery function on SpatialHashingBroadphase work
-  //   - Raycast on the list of bodies we've got already
-  //   - Don't raycast? Just draw shadows away from point. This might actually be a lot faster, who knows.
-  //     ^^ This one seems promising
-  //   - USe an AABB Instead of a radius
-  private getShadowCorners(center: V2d): [number, number][] {
+  //   - Don't use V2ds anywhere, and try to keep allocation down in general
+  private getShadowCorners(): [number, number][][] {
+    const center = this.position;
     // const bodies = this.game!.entities.getTagged("cast_shadow");
 
+    const bodies = this.getAffectedBodies();
+
+    const shadows: [number, number][][] = [];
+
+    for (const body of bodies) {
+      for (const shape of body.shapes) {
+        const corners = getShapeCorners(shape, body, center);
+        const shadowPoints: [number, number][] = [];
+
+        // TODO: Don't use V2d
+        for (let i = 0; i < corners.length; i++) {
+          const a = corners[i % corners.length];
+          const b = corners[(i + 1) % corners.length];
+          const edgeNormal = b.sub(a);
+          edgeNormal.rotate90cw();
+          const centerNormal = a.sub(center);
+
+          const dot = edgeNormal.dot(centerNormal);
+
+          // Is backfacing
+          if (dot <= 0) {
+            const displacement = centerNormal.normalize();
+            const endThing = a.add(displacement);
+            shadowPoints.push(endThing);
+          } else {
+            shadowPoints.push(a);
+          }
+        }
+        // TODO:
+        //   get back-facing corners
+        //   project a point for each back-facing corner out to the shadow radius
+        //   return combined array of all these points
+        shadows.push(shadowPoints);
+      }
+    }
+
+    return shadows;
+  }
+
+  // Returns the nearby bodies that cast a shadow
+  getAffectedBodies() {
+    const center = this.position;
     const world = this.game!.world;
-    const bodies = world.broadphase
+    return world.broadphase
       .aabbQuery(
         world,
         new AABB({
@@ -85,57 +137,10 @@ export class ShadowMask extends BaseEntity implements Entity {
       .filter((body: Body & WithOwner) =>
         body.owner?.tags?.includes?.("cast_shadow")
       );
-
-    const corners: V2d[] = [];
-
-    // TODO: Don't raycast, just draw the shadows per shape
-
-    // for each shape
-    //   get back-facing corners
-    //   project a point for each back-facing corner out to the shadow radius
-    //   return combined array of all these points
-
-    for (const body of bodies) {
-      for (const shape of body.shapes) {
-        corners.push(...getShapeCorners(shape, body, center));
-      }
-    }
-
-    corners.sort((a, b) => a.sub(center).angle - b.sub(center).angle);
-
-    return corners.map((corner) =>
-      shadowRaycast(center, corner, this.game!.world)
-    );
   }
 }
 
-// Casts a ray towards a corner and returns the hit point
-function shadowRaycast(
-  center: [number, number],
-  corner: [number, number],
-  world: World
-): [number, number] {
-  const ray = new Ray({
-    mode: Ray.CLOSEST,
-    from: center,
-    to: corner,
-    skipBackfaces: true,
-    collisionMask: CollisionGroups.CastsShadow,
-    collisionGroup: CollisionGroups.Shadow,
-  });
-  const result = new RaycastResult();
-  (world as CustomWorld).raycast(result, ray, false);
-
-  if (result.hasHit()) {
-    const hitPoint: [number, number] = [0, 0];
-    result.getHitPoint(hitPoint, ray);
-    return hitPoint;
-  } else {
-    return corner;
-  }
-}
-
-// Returns the "corners" of a shape
+// Returns the "corners" of a shape in world coordinates
 function getShapeCorners(shape: Shape, body: Body, center: V2d): V2d[] {
   switch (shape.type) {
     case Shape.BOX:

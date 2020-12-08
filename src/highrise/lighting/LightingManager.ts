@@ -4,6 +4,7 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import { Layers } from "../layers";
 import Light from "./Light";
 
+const AMBIENT_LIGHT = 0x222222;
 export default class LightingManager extends BaseEntity implements Entity {
   id = "lighting_manager";
   persistent = true;
@@ -38,7 +39,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     // this.sprite.scale.set(1 / resolution);
 
     const darkness = new Graphics();
-    darkness.beginFill(0x080808);
+    darkness.beginFill(AMBIENT_LIGHT);
     darkness.drawRect(-100, -100, 1000, 1000);
     darkness.endFill();
 
@@ -58,16 +59,4 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.lightwrapper.transform.setFromMatrix(this.game!.camera.getMatrix());
     this.renderer.render(this.lightwrapper, this.texture);
   }
-}
-
-const res = 8;
-function makeLight([x, y]: [number, number]) {
-  const graphics = new Graphics();
-  graphics.beginFill(0x444444);
-  graphics.drawCircle(res * x, res * y, res * 4);
-  graphics.endFill();
-  graphics.blendMode = BLEND_MODES.ADD;
-
-  graphics.scale.set(1.0 / res);
-  return graphics;
 }

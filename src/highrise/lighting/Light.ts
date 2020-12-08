@@ -6,11 +6,11 @@ import LightingManager from "./LightingManager";
 import { ShadowMask } from "./Shadows";
 
 export default class Light extends BaseEntity implements Entity {
-  shadowMask?: ShadowMask;
+  shadows?: ShadowMask;
 
   constructor(
     public lightSprite: Sprite = new Sprite(),
-    private shadowsEnabled: boolean = false,
+    public shadowsEnabled: boolean = false,
     position?: [number, number]
   ) {
     super();
@@ -27,19 +27,20 @@ export default class Light extends BaseEntity implements Entity {
 
   enableShadows() {
     this.shadowsEnabled = true;
-    if (!this.shadowMask) {
+    if (!this.shadows) {
       const { x, y } = this.lightSprite.position;
-      this.shadowMask = this.addChild(
+      this.shadows = this.addChild(
         new ShadowMask(V(x, y), this.getShadowRadius())
       );
-      this.lightSprite.mask = this.shadowMask.graphic;
+      this.lightSprite.mask = this.shadows.mask;
+      // this.lightSprite.addChild(this.shadows.mask);
     }
   }
 
   disableShadows() {
     this.shadowsEnabled = false;
-    this.shadowMask?.destroy();
-    this.shadowMask = undefined;
+    this.shadows?.destroy();
+    this.shadows = undefined;
     this.lightSprite.mask = null;
   }
 
@@ -49,7 +50,7 @@ export default class Light extends BaseEntity implements Entity {
 
   setPosition([x, y]: [number, number]) {
     this.lightSprite.position.set(x, y);
-    this.shadowMask?.setPosition(V(x, y));
+    this.shadows?.setPosition(V(x, y));
   }
 
   getPosition(): V2d {

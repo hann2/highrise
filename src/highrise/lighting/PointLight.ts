@@ -22,7 +22,7 @@ export class PointLight extends Light {
 
   setRadius(radius: number) {
     this.radius = radius;
-    this.shadowMask?.setRadius(radius);
+    this.shadows?.setRadius(radius);
     this.lightSprite.width = radius * 2;
     this.lightSprite.height = radius * 2;
   }
