@@ -77,10 +77,10 @@ interface ZombieSounds {
 }
 
 const rachelZombieSounds: ZombieSounds = {
-  hit: [rachelZombie3, rachelZombie5, rachelZombie6],
+  hit: [rachelZombie5, rachelZombie6, rachelZombie13],
   targetAquired: [rachelZombie1, rachelZombie8],
   attack: [rachelZombie4, rachelZombie7, rachelZombie10],
-  death: [rachelZombie9, rachelZombie12, rachelZombie13],
+  death: [rachelZombie3, rachelZombie9, rachelZombie12],
   idle: [rachelZombie2, rachelZombie11],
 };
 

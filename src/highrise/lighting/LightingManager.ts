@@ -58,5 +58,8 @@ export default class LightingManager extends BaseEntity implements Entity {
   onRender() {
     this.lightwrapper.transform.setFromMatrix(this.game!.camera.getMatrix());
     this.renderer.render(this.lightwrapper, this.texture);
+
+    // TODO: For Each Light:
+    //   render the light's shadows
   }
 }
