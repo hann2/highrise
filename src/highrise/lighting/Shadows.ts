@@ -94,7 +94,7 @@ export class ShadowMask extends BaseEntity implements Entity {
           const previousEdge = edgesVisible[i - 1];
           const nextEdge = edgesVisible[i % edgesVisible.length];
 
-          const shadowDistance = this.radius;
+          const shadowDistance = 2 * this.radius;
           if (previousEdge && !nextEdge) {
             // left breaking point
             shadowPoints.push(point);
@@ -112,7 +112,7 @@ export class ShadowMask extends BaseEntity implements Entity {
           }
         }
 
-        // TODO: This won't always reach the end of the thingy
+        // TODO: This won't always reach the end of the light, it needs either to be suuuper long, or to add more points
 
         shadows.push(shadowPoints);
       }
