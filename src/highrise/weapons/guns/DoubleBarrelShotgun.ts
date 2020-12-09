@@ -18,7 +18,7 @@ export const DoubleBarrelShotgun: GunStats = {
   ...defaultGunStats,
 
   name: "Sawn Off Shotgun",
-  fireRate: 8,
+  fireRate: 10,
   bulletDamage: 20,
   bulletsPerShot: 15,
   bulletSpread: degToRad(20),

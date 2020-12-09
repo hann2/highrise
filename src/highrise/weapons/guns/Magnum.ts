@@ -16,7 +16,7 @@ export const Magnum: GunStats = {
   ...defaultGunStats,
 
   name: ".357 Magnum",
-  fireRate: 9,
+  fireRate: 10,
   bulletDamage: 40,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,

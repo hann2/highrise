@@ -18,7 +18,7 @@ export const SPAS12: GunStats = {
   ...defaultGunStats,
 
   name: "SPAS12",
-  fireRate: 6,
+  fireRate: 8,
   bulletDamage: 30,
   bulletsPerShot: 9,
   bulletSpread: degToRad(7),

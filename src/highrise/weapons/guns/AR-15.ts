@@ -20,7 +20,7 @@ export const AR15: GunStats = {
   ...defaultGunStats,
 
   name: "AR-15",
-  fireRate: 9,
+  fireRate: 12,
   bulletDamage: 45,
   muzzleVelocity: 120,
   fireMode: FireMode.SEMI_AUTO,

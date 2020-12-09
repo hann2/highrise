@@ -12,7 +12,7 @@ export const M1911: GunStats = {
   ...defaultGunStats,
 
   name: "M1911",
-  fireRate: 9,
+  fireRate: 20,
   bulletDamage: 34,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.MAGAZINE,
