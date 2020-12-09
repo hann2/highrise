@@ -51,7 +51,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
     this.spin = rUniform(0, MAX_SPIN);
 
-    this.zVelocity = rUniform(0, 4);
+    this.zVelocity = rUniform(0, 2);
 
     this.bounceSounds = new ShuffleRing(sounds);
   }
@@ -98,7 +98,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.sprite.position.set(...this.position);
     this.sprite.rotation = this.rotation;
 
-    const scale = 1 + this.z;
+    const scale = 1 + this.z * 0.8;
     this.sprite.scale.set((SIZE / this.sprite.texture.width) * scale);
   }
 }
