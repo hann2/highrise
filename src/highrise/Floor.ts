@@ -5,7 +5,7 @@ import { V2d } from "../core/Vector";
 import { Layers } from "./layers";
 import { DecorationSprite } from "./view/DecorationSprite";
 
-export default class TilingFloor extends BaseEntity implements Entity {
+export default class Floor extends BaseEntity implements Entity {
   sprite: TilingSprite & GameSprite;
   constructor(
     { imageName, offset, dimensions, heightMeters }: DecorationSprite,

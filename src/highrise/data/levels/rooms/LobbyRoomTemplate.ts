@@ -2,7 +2,9 @@ import Entity from "../../../../core/entity/Entity";
 import { choose } from "../../../../core/util/Random";
 import { V } from "../../../../core/Vector";
 import Decoration from "../../../entities/Decoration";
+import TiledFloor, { Tiles } from "../../../entities/environment/TiledFloor";
 import Furniture from "../../../entities/Furniture";
+import { PointLight } from "../../../lighting/PointLight";
 import {
   chairRight,
   chairUp,
@@ -11,15 +13,55 @@ import {
   endTable2,
   lobbyDesk,
   piano,
+  redCarpetBottom,
+  redCarpetCenter,
+  redCarpetInnerBottomLeft,
+  redCarpetInnerBottomRight,
+  redCarpetInnerTopLeft,
+  redCarpetInnerTopRight,
+  redCarpetLeft,
+  redCarpetLowerLeft,
+  redCarpetLowerRight,
+  redCarpetRight,
+  redCarpetTop,
+  redCarpetUpperLeft,
+  redCarpetUpperRight,
   rug,
 } from "../../../view/DecorationSprite";
-import { WallID } from "../levelGeneration";
+import { DirectionalSprite } from "../../../view/DirectionalSprite";
+import { CELL_WIDTH, WallID } from "../levelGeneration";
 import {
   AngleTransformer,
   CellTransformer,
   WallTransformer,
 } from "./ElementTransformer";
+import {
+  doubleResolution,
+  fillFloorWithBorders,
+  FloorMask,
+  insetBorders,
+} from "./floorUtils";
 import RoomTemplate from "./RoomTemplate";
+
+const directionalRug: DirectionalSprite = {
+  baseSprites: {
+    RIGHT: redCarpetRight,
+    DOWN: redCarpetBottom,
+    LEFT: redCarpetLeft,
+    UP: redCarpetTop,
+    RIGHTUP: redCarpetUpperRight,
+    RIGHTDOWN: redCarpetLowerRight,
+    LEFTUP: redCarpetUpperLeft,
+    LEFTDOWN: redCarpetLowerLeft,
+    CENTER: redCarpetCenter,
+  },
+  insideCorners: {
+    RIGHTUP: redCarpetInnerTopRight,
+    RIGHTDOWN: redCarpetInnerBottomRight,
+    LEFTUP: redCarpetInnerTopLeft,
+    LEFTDOWN: redCarpetInnerBottomLeft,
+  },
+};
 
 export default class LobbyRoomTemplate extends RoomTemplate {
   constructor() {
@@ -55,6 +97,61 @@ export default class LobbyRoomTemplate extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
+    const carpetScale = redCarpetUpperLeft.heightMeters / CELL_WIDTH;
+
+    const elevatorLocations = [];
+    for (let j = 0; j < 3; j++) {
+      elevatorLocations.push(V(0, j));
+      elevatorLocations.push(V(2, j));
+      elevatorLocations.push(V(3, j));
+      elevatorLocations.push(V(5, j));
+    }
+
+    const lowResolutionFloorMask: FloorMask = [];
+    for (let i = 0; i < this.dimensions.x; i++) {
+      lowResolutionFloorMask[i] = [];
+      for (let j = 0; j < this.dimensions.y; j++) {
+        lowResolutionFloorMask[i][j] = true;
+      }
+    }
+
+    elevatorLocations.forEach(
+      (p) => (lowResolutionFloorMask[p.x][p.y] = false)
+    );
+
+    const floorMask = doubleResolution(
+      doubleResolution(lowResolutionFloorMask)
+    );
+
+    const mainTiles: Tiles = insetBorders(
+      fillFloorWithBorders(floorMask, directionalRug),
+      directionalRug
+    );
+
+    const elevatorTiles = insetBorders(
+      fillFloorWithBorders(
+        doubleResolution(doubleResolution([[true]])),
+        directionalRug
+      ),
+      directionalRug
+    );
+
+    const tileScale = V(carpetScale * CELL_WIDTH, carpetScale * CELL_WIDTH);
+
+    entities.push(
+      new TiledFloor(transformCell(V(-0.5, -0.5)), tileScale, mainTiles)
+    );
+
+    elevatorLocations.forEach((p) =>
+      entities.push(
+        new TiledFloor(
+          transformCell(p.add(V(-0.5, -0.5))),
+          tileScale,
+          elevatorTiles
+        )
+      )
+    );
+
     entities.push(new Decoration(transformCell(V(2.5, 5)), rug));
     entities.push(new Furniture(transformCell(V(2.5, 3.5)), lobbyDesk));
     entities.push(new Furniture(transformCell(V(-0.15, 5)), chairRight));
@@ -67,6 +164,11 @@ export default class LobbyRoomTemplate extends RoomTemplate {
     entities.push(new Furniture(transformCell(V(0.6, 5)), coffeeTable));
 
     entities.push(new Furniture(transformCell(V(4.5, 5.5)), piano));
+
+    const l1 = new PointLight(10);
+    l1.setPosition(transformCell(V(0, 0)));
+    entities.push(l1);
+
     return entities;
   }
 }

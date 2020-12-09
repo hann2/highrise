@@ -1,4 +1,5 @@
 import bathroom from "../../../resources/images/environment/bathroom.png";
+import carpet from "../../../resources/images/environment/carpet.png";
 import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../../resources/images/environment/fences-lights.png";
 import furniture from "../../../resources/images/environment/furniture.png";
@@ -524,4 +525,95 @@ export const sausagePlate: DecorationSprite = {
   offset: V(449, 421),
   dimensions: V(31, 24),
   heightMeters: 0.3,
+};
+
+export const redCarpetUpperLeft: DecorationSprite = {
+  imageName: carpet,
+  offset: V(192, 320),
+  dimensions: V(16, 16),
+  heightMeters: 0.2625,
+};
+
+export const redCarpetUpperRight: DecorationSprite = {
+  imageName: carpet,
+  offset: V(240, 320),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetLowerLeft: DecorationSprite = {
+  imageName: carpet,
+  offset: V(192, 320 + 48),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetLowerRight: DecorationSprite = {
+  imageName: carpet,
+  offset: V(192 + 48, 320 + 48),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetLeft: DecorationSprite = {
+  imageName: carpet,
+  offset: V(192, 336),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetTop: DecorationSprite = {
+  imageName: carpet,
+  offset: V(208, 320),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetRight: DecorationSprite = {
+  imageName: carpet,
+  offset: V(192 + 48, 336),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetBottom: DecorationSprite = {
+  imageName: carpet,
+  offset: V(208 + 16, 320 + 48),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetCenter: DecorationSprite = {
+  imageName: carpet,
+  offset: V(216, 340),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetInnerBottomRight: DecorationSprite = {
+  imageName: carpet,
+  offset: V(224 + 16, 304),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetInnerBottomLeft: DecorationSprite = {
+  imageName: carpet,
+  offset: V(224, 304),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetInnerTopRight: DecorationSprite = {
+  imageName: carpet,
+  offset: V(224 + 16, 304 - 16),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const redCarpetInnerTopLeft: DecorationSprite = {
+  imageName: carpet,
+  offset: V(224, 304 - 16),
+  dimensions: V(16, 16),
+  heightMeters: redCarpetUpperLeft.heightMeters,
 };

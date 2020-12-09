@@ -3,18 +3,17 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Decoration from "../../entities/Decoration";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
 import HealthPickup from "../../entities/HealthPickup";
-import Human from "../../entities/human/Human";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/zombie/Zombie";
-import TilingFloor from "../../Floor";
+import Floor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
 import SubFloor from "../../SubFloor";
+import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
 import {
   boxes,
   garbageCan,
@@ -23,9 +22,6 @@ import {
 } from "../../view/DecorationSprite";
 import Gun from "../../weapons/Gun";
 import { GUNS } from "../../weapons/guns";
-import { FiveSeven } from "../../weapons/guns/FiveSeven";
-import { Glock } from "../../weapons/guns/Glock";
-import { M1911 } from "../../weapons/guns/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee-weapons";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import { Level } from "./Level";
@@ -51,15 +47,6 @@ export const POSSIBLE_ORIENTATIONS: Matrix[] = [
   new Matrix(0, -1, 1, 0),
   new Matrix(0, -1, -1, 0),
 ];
-
-const Direction = {
-  RIGHT: V(1, 0),
-  DOWN: V(0, 1),
-  LEFT: V(-1, 0),
-  UP: V(0, -1),
-};
-
-const DIRECTIONS = Object.values(Direction);
 
 interface Closet {
   backCell: V2d;
@@ -351,7 +338,7 @@ class LevelBuilder {
         }
         seen[x][y] = true;
         seenCount += 1;
-        for (const direction of DIRECTIONS) {
+        for (const direction of CARDINAL_DIRECTIONS_VALUES) {
           const wall = this.getWallInDirection(p, direction);
           if (
             this.isDestructible(wall) &&
@@ -418,7 +405,7 @@ class LevelBuilder {
 
       if (template.floor) {
         entities.push(
-          new TilingFloor(
+          new Floor(
             template.floor,
             this.levelCoordToWorldCoord(corner.sub(V(0.5, 0.5))),
             dimensions.mul(CELL_WIDTH)
@@ -479,7 +466,7 @@ class LevelBuilder {
 
         let openDirection;
         let backFound = 0;
-        for (const direction of DIRECTIONS) {
+        for (const direction of CARDINAL_DIRECTIONS_VALUES) {
           let wall = this.getWallInDirection(backCell, direction);
           if (!this.isExisting(wall)) {
             backFound += 1;
@@ -497,7 +484,7 @@ class LevelBuilder {
 
         let doorDirection;
         let frontFound = 0;
-        for (const direction of DIRECTIONS) {
+        for (const direction of CARDINAL_DIRECTIONS_VALUES) {
           let wall = this.getWallInDirection(frontCell, direction);
           if (
             !this.isExisting(wall) &&
@@ -528,12 +515,6 @@ class LevelBuilder {
           backWallDirection: openDirection,
         };
 
-        if (frontCell.x === 3 && frontCell.y === 1) {
-          console.log(backFound);
-          console.log(frontFound);
-          console.log(closet);
-        }
-
         this.closets.push(closet);
       }
     }
@@ -543,7 +524,7 @@ class LevelBuilder {
 
   isANubby(cell: V2d): boolean {
     let found = 0;
-    for (const direction of DIRECTIONS) {
+    for (const direction of CARDINAL_DIRECTIONS_VALUES) {
       let wall = this.getWallInDirection(cell, direction);
       if (!this.isExisting(wall)) {
         found += 1;
@@ -581,7 +562,7 @@ class LevelBuilder {
         furthestDistance = distance;
         furthestPointSeen = p;
       }
-      for (const direction of DIRECTIONS) {
+      for (const direction of CARDINAL_DIRECTIONS_VALUES) {
         const wall = this.getWallInDirection(p, direction);
         if (!this.isExisting(wall)) {
           queue.push([p.add(direction), distance + 1]);
@@ -592,7 +573,7 @@ class LevelBuilder {
     this.cells[furthestPointSeen[0]][furthestPointSeen[1]].content = "exit";
 
     let openDirection: V2d;
-    for (const direction of DIRECTIONS) {
+    for (const direction of CARDINAL_DIRECTIONS_VALUES) {
       let wall = this.getWallInDirection(furthestPointSeen, direction);
       if (!this.isExisting(wall)) {
         openDirection = direction;
@@ -636,7 +617,7 @@ class LevelBuilder {
 
         let openDirection: V2d;
         let found = 0;
-        for (const direction of DIRECTIONS) {
+        for (const direction of CARDINAL_DIRECTIONS_VALUES) {
           let wall = this.getWallInDirection(cell, direction);
           if (!this.isExisting(wall)) {
             found += 1;
