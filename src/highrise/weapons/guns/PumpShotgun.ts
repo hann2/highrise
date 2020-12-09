@@ -21,7 +21,7 @@ export const PumpShotgun: GunStats = {
   fireRate: 2,
   bulletDamage: 30,
   bulletsPerShot: 9,
-  bulletSpread: degToRad(10),
+  bulletSpread: degToRad(9),
   muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   fireMode: FireMode.PUMP,

@@ -13,6 +13,8 @@ export default class LightingManager extends BaseEntity implements Entity {
   sprite!: Sprite & GameSprite;
   lightwrapper = new Graphics();
 
+  lights: Light[] = [];
+
   private get renderer() {
     return this.game!.renderer.pixiRenderer;
   }
@@ -36,7 +38,6 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.sprite.layerName = Layers.LIGHTING;
     this.sprite.blendMode = BLEND_MODES.MULTIPLY;
     this.sprite.anchor.set(0, 0);
-    // this.sprite.scale.set(1 / resolution);
 
     const darkness = new Graphics();
     darkness.beginFill(AMBIENT_LIGHT);
@@ -60,6 +61,8 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.renderer.render(this.lightwrapper, this.texture);
 
     // TODO: For Each Light:
-    //   render the light's shadows
+    //   render shadows to alpha channel
+    //   render light to color channels, but multiply color by alpha
+    //   clear alpha channel
   }
 }

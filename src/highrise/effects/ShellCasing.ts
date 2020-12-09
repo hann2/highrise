@@ -12,7 +12,7 @@ import { ShuffleRing } from "../utils/ShuffleRing";
 
 const LINEAR_FRICTION = 0.85;
 const ANGULAR_FRICTION = 0.75;
-const SIZE = 0.05; // meters
+const SIZE = 0.025; // meters wide
 
 const SPEED = 7; // meters
 const MAX_SPIN = Math.PI * 20;
