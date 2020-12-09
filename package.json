@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A zombie shooter",
   "main": "index.ts",
+  "repository": "github:hann2/highrise",
   "scripts": {
     "start": "parcel src/index.html",
     "build": "parcel build src/index.html",
@@ -15,7 +16,7 @@
     "postinstall": "patch-package",
     "prettier": "prettier --write src"
   },
-  "author": "",
+  "author": "Philip Hann, Simon Baumgardt-Wellander",
   "license": "MIT",
   "dependencies": {
     "@types/css-font-loading-module": "0.0.4",
