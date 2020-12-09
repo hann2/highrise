@@ -38,6 +38,7 @@ import {
 import {
   doubleResolution,
   fillFloorWithBorders,
+  FloorMask,
   insetBorders,
 } from "./floorUtils";
 import RoomTemplate from "./RoomTemplate";
@@ -98,31 +99,59 @@ export default class LobbyRoomTemplate extends RoomTemplate {
 
     const carpetScale = redCarpetUpperLeft.heightMeters / CELL_WIDTH;
 
-    const floorMask = doubleResolution(
-      doubleResolution([
-        [false, false, false, true, true, true, true],
-        [true, true, true, true, true, true, true],
-        [false, false, false, true, true, true, true],
-        [false, false, false, true, true, true, true],
-        [true, true, true, true, true, true, true],
-        [false, false, false, true, true, true, true],
-      ])
+    const elevatorLocations = [];
+    for (let j = 0; j < 3; j++) {
+      elevatorLocations.push(V(0, j));
+      elevatorLocations.push(V(2, j));
+      elevatorLocations.push(V(3, j));
+      elevatorLocations.push(V(5, j));
+    }
+
+    const lowResolutionFloorMask: FloorMask = [];
+    for (let i = 0; i < this.dimensions.x; i++) {
+      lowResolutionFloorMask[i] = [];
+      for (let j = 0; j < this.dimensions.y; j++) {
+        lowResolutionFloorMask[i][j] = true;
+      }
+    }
+
+    elevatorLocations.forEach(
+      (p) => (lowResolutionFloorMask[p.x][p.y] = false)
     );
 
-    const tiles: Tiles = insetBorders(
+    const floorMask = doubleResolution(
+      doubleResolution(lowResolutionFloorMask)
+    );
+
+    const mainTiles: Tiles = insetBorders(
       fillFloorWithBorders(floorMask, directionalRug),
       directionalRug
     );
 
-    // const tiles: Tiles = fillFloorWithBorders(floorMask, directionalRug);
+    const elevatorTiles = insetBorders(
+      fillFloorWithBorders(
+        doubleResolution(doubleResolution([[true]])),
+        directionalRug
+      ),
+      directionalRug
+    );
+
+    const tileScale = V(carpetScale * CELL_WIDTH, carpetScale * CELL_WIDTH);
 
     entities.push(
-      new TiledFloor(
-        transformCell(V(-0.5, -0.5)),
-        V(carpetScale * CELL_WIDTH, carpetScale * CELL_WIDTH),
-        tiles
+      new TiledFloor(transformCell(V(-0.5, -0.5)), tileScale, mainTiles)
+    );
+
+    elevatorLocations.forEach((p) =>
+      entities.push(
+        new TiledFloor(
+          transformCell(p.add(V(-0.5, -0.5))),
+          tileScale,
+          elevatorTiles
+        )
       )
     );
+
     entities.push(new Decoration(transformCell(V(2.5, 5)), rug));
     entities.push(new Furniture(transformCell(V(2.5, 3.5)), lobbyDesk));
     entities.push(new Furniture(transformCell(V(-0.15, 5)), chairRight));

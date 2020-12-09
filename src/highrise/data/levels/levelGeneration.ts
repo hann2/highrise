@@ -3,16 +3,14 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Decoration from "../../entities/Decoration";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
 import HealthPickup from "../../entities/HealthPickup";
-import Human from "../../entities/human/Human";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/zombie/Zombie";
-import TilingFloor from "../../Floor";
+import Floor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
 import SubFloor from "../../SubFloor";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
@@ -24,9 +22,6 @@ import {
 } from "../../view/DecorationSprite";
 import Gun from "../../weapons/Gun";
 import { GUNS } from "../../weapons/guns";
-import { FiveSeven } from "../../weapons/guns/FiveSeven";
-import { Glock } from "../../weapons/guns/Glock";
-import { M1911 } from "../../weapons/guns/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee-weapons";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import { Level } from "./Level";
@@ -410,7 +405,7 @@ class LevelBuilder {
 
       if (template.floor) {
         entities.push(
-          new TilingFloor(
+          new Floor(
             template.floor,
             this.levelCoordToWorldCoord(corner.sub(V(0.5, 0.5))),
             dimensions.mul(CELL_WIDTH)
