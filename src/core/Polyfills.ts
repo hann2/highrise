@@ -3,6 +3,7 @@
  * Attach all sorts of hacky stuff to the global state.
  */
 
+import * as PIXI from "pixi.js";
 import "regenerator-runtime/runtime";
 
 export async function polyfill() {
@@ -10,4 +11,6 @@ export async function polyfill() {
   if (!window.AudioContext && window.webkitAudioContext) {
     window.AudioContext = window.webkitAudioContext;
   }
+
+  window.PIXI = PIXI;
 }

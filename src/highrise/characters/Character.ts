@@ -5,7 +5,6 @@ import { Andy } from "./Andy";
 import { Chad } from "./Chad";
 import { Cindy } from "./Cindy";
 import { Clarice } from "./Clarice";
-import { Clyde } from "./Clyde";
 import { Kyle } from "./Kyle";
 import { Nancy } from "./Nancy";
 import { Simon } from "./Simon";
@@ -45,7 +44,7 @@ export const CHARACTERS = [
   Chad,
   Cindy,
   Clarice,
-  Clyde,
+  // Clyde,
   Kyle,
   Nancy,
   Simon,
