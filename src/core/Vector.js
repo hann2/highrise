@@ -35,6 +35,18 @@ export class V2d extends Array {
     return this;
   }
 
+  /** Return the result of multiplying a scalar by another vector and adding it to this. */
+  addScaled(other, scale) {
+    return this.clone().iaddScaled(other, scale);
+  }
+
+  /** (In Place) Return the result of multiplying a scalar by another vector and adding it to this. */
+  iaddScaled(other, scale = 1) {
+    this[0] += other[0] * scale;
+    this[1] += other[1] * scale;
+    return this;
+  }
+
   /** Return the result of subtracting a vector from this one. */
   sub(other) {
     return this.clone().isub(other);

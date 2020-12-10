@@ -9,9 +9,9 @@ import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { Layers } from "../layers";
 import { CollisionGroups } from "../physics/CollisionGroups";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
-import SwingingWeapon from "../weapons/SwingingWeapon";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {
   sprite: GameSprite;

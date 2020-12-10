@@ -29,6 +29,12 @@ export interface V2d extends ArrayLen2 {
   /** (In Place) Return the result of adding this vector to another. */
   iadd(other: ArrayLen2): this;
 
+  /** Return the result of multiplying a scalar by another vector and adding it to this. */
+  addScaled(other: ArrayLen2, scale: number): this;
+
+  /** (In Place) Return the result of multiplying a scalar by another vector and adding it to this. */
+  iaddScaled(other: ArrayLen2, scale: number): this;
+
   /** Return the result of subtracting a vector from this one. */
   sub(other: ArrayLen2): V2d;
 

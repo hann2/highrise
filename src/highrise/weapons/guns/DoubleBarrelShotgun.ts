@@ -18,10 +18,10 @@ export const DoubleBarrelShotgun: GunStats = {
   ...defaultGunStats,
 
   name: "Sawn Off Shotgun",
-  fireRate: 8,
+  fireRate: 10,
   bulletDamage: 20,
   bulletsPerShot: 15,
-  bulletSpread: degToRad(22),
+  bulletSpread: degToRad(20),
   muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   fireMode: FireMode.SEMI_AUTO,

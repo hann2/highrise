@@ -12,7 +12,7 @@ export const FiveSeven: GunStats = {
   ...defaultGunStats,
 
   name: "Five Seven",
-  fireRate: 10,
+  fireRate: 20,
   bulletDamage: 25,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.MAGAZINE,

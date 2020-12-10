@@ -4,6 +4,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
+import WallImpact from "../effects/WallImpact";
 import { Layers } from "../layers";
 import Light from "../lighting/Light";
 import { CollisionGroups } from "../physics/CollisionGroups";
@@ -23,6 +24,7 @@ export default class Bullet extends BaseEntity implements Entity {
   private ray: Ray;
   private raycastResult = new RaycastResult();
 
+  renderPosition: V2d;
   hitPosition?: V2d;
 
   constructor(
@@ -30,14 +32,14 @@ export default class Bullet extends BaseEntity implements Entity {
     direction: number,
     speed: number = 50,
     public damage: number = 40,
-    public shooter?: Human
+    private shooter?: Human
   ) {
     super();
 
     this.velocity = polarToVec(direction, speed);
     this.ray = new Ray({
-      from: position,
-      to: position.add(this.velocity),
+      from: position.clone(), // to be set later
+      to: V(0, 0),
       mode: Ray.ALL,
       collisionGroup: CollisionGroups.Bullets,
       collisionMask: CollisionGroups.All,
@@ -50,6 +52,8 @@ export default class Bullet extends BaseEntity implements Entity {
     this.lightGraphics = new Graphics();
     this.light = this.addChild(new Light());
     this.light.lightSprite.addChild(this.lightGraphics);
+
+    this.renderPosition = position.clone();
   }
 
   async onAdd() {
@@ -58,69 +62,85 @@ export default class Bullet extends BaseEntity implements Entity {
     this.destroy();
   }
 
-  onTick(dt: number) {
+  checkForCollision(
+    dt: number
+  ): { hit: Hittable; hitNormal: V2d; hitPosition: V2d } | undefined {
     this.raycastResult.reset();
-    this.ray.from = this.position;
-    this.ray.to = this.position.add(this.velocity.mul(dt));
+    this.ray.to = this.position.addScaled(this.velocity, dt);
     this.ray.update();
 
     let hitFraction = Infinity;
     let hit: Hittable | undefined;
-    this.ray.callback = ({ fraction, body, getHitPoint }) => {
+    let hitNormal: V2d;
+    this.ray.callback = ({ fraction, body, normal }) => {
       const owner = (body as WithOwner).owner;
       if (fraction < hitFraction && isHittable(owner)) {
         hitFraction = fraction;
         hit = owner;
+        // To keep at most one allocation
+        if (hitNormal) {
+          hitNormal.set(normal);
+        } else {
+          hitNormal = V(normal);
+        }
       }
     };
 
     this.game!.world.raycast(this.raycastResult, this.ray);
 
     if (hit) {
-      this.hitPosition = V(0, 0);
-      vec2.lerp(this.hitPosition, this.ray.from, this.ray.to, hitFraction);
+      const hitPosition = V(0, 0);
+      vec2.lerp(hitPosition, this.ray.from, this.ray.to, hitFraction);
+      return { hit, hitNormal: hitNormal!, hitPosition };
+    } else {
+      return undefined;
+    }
+  }
+
+  onTick(dt: number) {
+    if (this.hitPosition) {
+      this.destroy();
+      return;
+    }
+
+    // Every frame we want to render the bullet starting from where we started checking
+    this.renderPosition.set(this.position);
+
+    const hitResult = this.checkForCollision(dt);
+
+    if (hitResult) {
+      const { hitPosition, hitNormal, hit } = hitResult;
+      this.hitPosition = hitPosition;
       hit.onBulletHit(this, this.hitPosition);
+      this.game?.addEntity(new WallImpact(hitPosition, hitNormal));
       this.destroy();
     } else {
-      this.position.set(this.ray.to);
+      this.position.iaddScaled(this.velocity, dt);
     }
   }
 
-  onBeginContact(other: Entity) {
-    if (isHittable(other)) {
-      // TODO: Get actual collision position. I believe it can be found on the third parameter
-      other.onBulletHit(this, this.getPosition());
-    }
-    this.destroy();
-  }
-
-  getLocalEndPoint(dt: number) {
+  getRenderEndPoint(dt: number) {
     if (this.hitPosition) {
-      return this.hitPosition.sub(this.position);
+      return this.hitPosition.sub(this.renderPosition);
     } else {
       return this.velocity.mul(dt);
     }
   }
 
   afterPhysics() {
-    const velocity = this.velocity;
     const dt = this.game!.renderTimestep;
 
-    const endPoint = this.getLocalEndPoint(dt);
+    const endPoint = this.getRenderEndPoint(dt);
 
-    this.sprite.clear();
-    this.sprite.lineStyle(0.03, 0xffaa00, 0.9);
-    this.sprite.moveTo(0, 0);
-    this.sprite.lineTo(endPoint[0], endPoint[1]);
+    this.sprite
+      .clear()
+      .lineStyle(0.03, 0xffaa00, 0.6)
+      .moveTo(0, 0)
+      .lineTo(endPoint[0], endPoint[1]);
 
-    this.lightGraphics.clear();
-    for (const t of [0.01, 0.02, 0.04]) {
-      this.lightGraphics.lineStyle(t, 0xffdd33, 0.1);
-      this.lightGraphics.moveTo(0, 0);
-      this.lightGraphics.lineTo(endPoint[0], endPoint[1]);
-    }
+    // thia
 
     [this.sprite.x, this.sprite.y] = this.position;
-    [this.light.lightSprite.x, this.light.lightSprite.y] = this.position;
+    [this.light.lightSprite.x, this.light.lightSprite.y] = this.renderPosition;
   }
 }

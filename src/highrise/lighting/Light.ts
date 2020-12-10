@@ -1,4 +1,4 @@
-import { BLEND_MODES, RenderTexture, Sprite } from "pixi.js";
+import { BLEND_MODES, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V, V2d } from "../../core/Vector";

@@ -6,6 +6,7 @@ import shotgunShot2 from "../../../../resources/audio/guns/shotgun/shotgun-shot-
 import shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
 import rifle from "../../../../resources/images/weapons/rifle.png";
 import spas12 from "../../../../resources/images/weapons/spas12.png";
+import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
   FireMode,
@@ -17,8 +18,10 @@ export const SPAS12: GunStats = {
   ...defaultGunStats,
 
   name: "SPAS12",
-  fireRate: 6,
+  fireRate: 8,
   bulletDamage: 30,
+  bulletsPerShot: 9,
+  bulletSpread: degToRad(7),
   muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   fireMode: FireMode.SEMI_AUTO,

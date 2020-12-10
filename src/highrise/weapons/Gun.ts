@@ -100,9 +100,10 @@ export default class Gun extends BaseEntity implements Entity {
         -this.stats.bulletSpread / 2,
         this.stats.bulletSpread / 2
       );
+      console.log(i, direction + spread);
       this.game?.addEntity(
         new Bullet(
-          position,
+          position.clone(),
           direction + spread,
           this.stats.muzzleVelocity * rUniform(0.9, 1.1),
           this.stats.bulletDamage,
@@ -154,8 +155,10 @@ export default class Gun extends BaseEntity implements Entity {
   ): PositionalSound | undefined {
     const sound = this.sounds[soundClass].getNext();
     if (sound) {
+      // TODO: We should really just edit the sound files to be balanced
+      const gain = soundClass === "shoot" ? 0.2 : 1.0;
       return this.game?.addEntity(
-        new PositionalSound(sound, position, { gain: 0.5 })
+        new PositionalSound(sound, position, { gain })
       );
     }
   }

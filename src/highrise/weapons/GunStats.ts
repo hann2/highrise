@@ -15,46 +15,46 @@ import { BaseWeaponStats } from "./WeaponStats";
 
 export interface GunStats extends BaseWeaponStats {
   // Maximum rounds per second
-  fireRate: number;
+  readonly fireRate: number;
   // meters/second of bullet when fired
-  muzzleVelocity: number;
+  readonly muzzleVelocity: number;
   // base damage the bullet does
-  bulletDamage: number;
+  readonly bulletDamage: number;
   // Distance from the shooter that the bullet is created
-  muzzleLength: number;
+  readonly muzzleLength: number;
   // Full Auto, Semi Auto, Pump, Burst ...
-  fireMode: FireMode;
+  readonly fireMode: FireMode;
   // Maximum number of rounds in the gun
-  ammoCapacity: number;
+  readonly ammoCapacity: number;
   // Whether you load rounds one-at-a-time or all-at-once
-  reloadingStyle: ReloadingStyle;
+  readonly reloadingStyle: ReloadingStyle;
   // Seconds to complete a reload. For INDIVIDUAL, this is seconds per round loaded
-  reloadTime: number;
+  readonly reloadTime: number;
 
   // The number of bullets per round fired
-  bulletsPerShot: number;
+  readonly bulletsPerShot: number;
   // The maximum spread of bullets fired
-  bulletSpread: number;
+  readonly bulletSpread: number;
 
   // Sounds that play for various things
-  sounds: {
-    shoot: SoundName[];
-    empty: SoundName[];
-    pickup: SoundName[];
-    reload: SoundName[];
-    reloadInsert: SoundName[];
-    reloadFinish: SoundName[];
-    pump: SoundName[];
-    shellDrop: SoundName[];
+  readonly sounds: {
+    readonly shoot: SoundName[];
+    readonly empty: SoundName[];
+    readonly pickup: SoundName[];
+    readonly reload: SoundName[];
+    readonly reloadInsert: SoundName[];
+    readonly reloadFinish: SoundName[];
+    readonly pump: SoundName[];
+    readonly shellDrop: SoundName[];
   };
 
-  textures: {
+  readonly textures: {
     // Texture to use when the item's on the ground
-    pickup: string;
+    readonly pickup: string;
     // Texture while in person's hands
-    holding: string;
+    readonly holding: string;
     // Texture of the ejected shell casing
-    shellCasing: string;
+    readonly shellCasing: string;
   };
 }
 

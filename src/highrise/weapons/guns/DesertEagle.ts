@@ -12,7 +12,7 @@ export const DesertEagle: GunStats = {
   ...defaultGunStats,
 
   name: "Desert Eagle",
-  fireRate: 5,
+  fireRate: 10,
   bulletDamage: 50,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.MAGAZINE,

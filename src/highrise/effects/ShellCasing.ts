@@ -12,7 +12,7 @@ import { ShuffleRing } from "../utils/ShuffleRing";
 
 const LINEAR_FRICTION = 0.85;
 const ANGULAR_FRICTION = 0.75;
-const SIZE = 0.05; // meters
+const SIZE = 0.025; // meters wide
 
 const SPEED = 7; // meters
 const MAX_SPIN = Math.PI * 20;
@@ -51,7 +51,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
     this.spin = rUniform(0, MAX_SPIN);
 
-    this.zVelocity = rUniform(0, 4);
+    this.zVelocity = rUniform(0, 2);
 
     this.bounceSounds = new ShuffleRing(sounds);
   }
@@ -98,7 +98,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.sprite.position.set(...this.position);
     this.sprite.rotation = this.rotation;
 
-    const scale = 1 + this.z;
+    const scale = 1 + this.z * 0.8;
     this.sprite.scale.set((SIZE / this.sprite.texture.width) * scale);
   }
 }

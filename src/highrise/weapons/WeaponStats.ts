@@ -4,15 +4,15 @@ import { MeleeWeaponStats } from "./MeleeWeaponStats";
 // For extending
 export interface BaseWeaponStats {
   // A friend
-  name: string;
+  readonly name: string;
   // Physical size of the weapon
-  size: [number, number];
+  readonly size: [number, number];
 
-  textures: {
-    pickup: string;
+  readonly textures: {
+    readonly pickup: string;
   };
 
-  sounds: {};
+  readonly sounds: {};
 }
 
 // For actually using
