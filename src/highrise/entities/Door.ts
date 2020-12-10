@@ -94,9 +94,11 @@ export default class Door extends BaseEntity implements Entity, Hittable {
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
 
-  onBulletHit(bullet: Bullet, position: V2d) {
+  onBulletHit(bullet: Bullet, hitPosition: V2d) {
+    this.body.applyImpulse(bullet.velocity.mul(bullet.mass), hitPosition);
+
     this.game!.addEntity(
-      new PositionalSound(choose(wallHit1, wallHit2), position)
+      new PositionalSound(choose(wallHit1, wallHit2), hitPosition)
     );
   }
 }
