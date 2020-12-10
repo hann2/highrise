@@ -100,7 +100,6 @@ export default class Gun extends BaseEntity implements Entity {
         -this.stats.bulletSpread / 2,
         this.stats.bulletSpread / 2
       );
-      console.log(i, direction + spread);
       this.game?.addEntity(
         new Bullet(
           position.clone(),

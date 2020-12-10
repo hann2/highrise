@@ -6,7 +6,7 @@ import LightingManager from "./LightingManager";
 import { ShadowMask } from "./Shadows";
 
 export default class Light extends BaseEntity implements Entity {
-  shadows?: ShadowMask;
+  public shadows?: ShadowMask;
 
   constructor(
     public lightSprite: Sprite = new Sprite(),
@@ -16,20 +16,14 @@ export default class Light extends BaseEntity implements Entity {
     super();
     this.lightSprite.blendMode = BLEND_MODES.ADD;
 
-    // TODO: Light shadows are drawing over each other. They need to be contained.
-    // Do I need to render each shadow to a texture? That seems expensive
-    // Is there something I can do with alpha, or shaders?
-
-    // this.texture = new RenderTexture();
-    // this.game?.renderer.pixiRenderer.render(this.lightSprite, this.renderTexture)
-    // this.game?.renderer.pixiRenderer.render(this.shadows, this.renderTexture)
-
     if (shadowsEnabled) {
       this.enableShadows();
     }
 
     position && this.setPosition(position);
   }
+
+  // TODO: Add bake method
 
   private lightManager?: LightingManager;
 
@@ -40,7 +34,10 @@ export default class Light extends BaseEntity implements Entity {
       this.shadows = this.addChild(
         new ShadowMask(V(x, y), this.getShadowRadius())
       );
-      this.lightSprite.addChild(this.shadows.graphics);
+
+      // TODO: This is kinda hacky
+      this.lightManager?.removeLight(this);
+      this.lightManager?.addLight(this);
     }
   }
 
@@ -49,6 +46,10 @@ export default class Light extends BaseEntity implements Entity {
     this.shadows?.destroy();
     this.shadows = undefined;
     this.lightSprite.mask = null;
+
+    // TODO: This is kinda hacky
+    this.lightManager?.removeLight(this);
+    this.lightManager?.addLight(this);
   }
 
   getShadowRadius(): number {

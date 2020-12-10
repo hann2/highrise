@@ -78,9 +78,9 @@ export default class Human extends BaseEntity implements Entity {
     this.body.angle += turnAmount;
   }
 
-  setPosition(position: V2d) {
-    this.body.position[0] = position[0];
-    this.body.position[1] = position[1];
+  setPosition([x, y]: [number, number]) {
+    this.body.position[0] = x;
+    this.body.position[1] = y;
   }
 
   getDirection(): number {

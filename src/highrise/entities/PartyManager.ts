@@ -56,7 +56,9 @@ export default class PartyManager extends BaseEntity implements Entity {
       );
 
       this.partyMembers.forEach((partyMember, i) => {
-        partyMember.setPosition(spawnLocations[i].position);
+        partyMember.setPosition(
+          spawnLocations[i % spawnLocations.length].position
+        );
       });
 
       await this.wait(2);

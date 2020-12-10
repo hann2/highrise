@@ -19,7 +19,6 @@ export class ShadowMask extends BaseEntity implements Entity {
   constructor(private lightPos: V2d, private radius: number = 10) {
     super();
     this.graphics = new Graphics();
-    this.graphics.blendMode = BLEND_MODES.MULTIPLY;
   }
 
   setPosition(position: V2d) {
@@ -39,25 +38,27 @@ export class ShadowMask extends BaseEntity implements Entity {
   }
 
   update() {
-    this.graphics.clear();
+    if (this.dirty) {
+      this.graphics.clear();
 
-    const shadows = this.getShadowCorners();
+      const shadows = this.getShadowCorners();
 
-    for (const corners of shadows) {
-      if (corners.length) {
-        this.graphics
-          .beginFill(0x000000)
-          .drawPolygon(
-            corners
-              // TODO: Do we really want this translation here?
-              .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
-              .flat()
-          )
-          .endFill();
+      for (const corners of shadows) {
+        if (corners.length) {
+          this.graphics
+            .beginFill(0x000000)
+            .drawPolygon(
+              corners
+                // TODO: Do we really want this translation here?
+                // .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
+                .flat()
+            )
+            .endFill();
+        }
       }
-    }
 
-    this.dirty = false;
+      this.dirty = false;
+    }
   }
 
   // TODO: This is really slow. Ideas for fixing
