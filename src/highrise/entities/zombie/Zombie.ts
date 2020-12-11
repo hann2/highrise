@@ -105,7 +105,9 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   }
 
   walk(direction: V2d) {
-    if (!this.isStunned) this.body.applyImpulse(direction.mul(this.speed));
+    if (this.canWalk()) {
+      this.body.applyImpulse(direction.mul(this.speed));
+    }
   }
 
   setDirection(angle: number) {

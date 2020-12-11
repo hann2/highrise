@@ -22,14 +22,15 @@ Simon Baumgardt-Wellander
 
 
   VOICE ACTORS
-Philip Hann — Clyde
-Simon Baumgardt-Wellander — Simon
+Andy Moreland — Andy
+Cole Graham — Lucky Jack
+Lawlfrats — Cindy
 Marisa DeNicolo-Hann — Clarice, Kyle
 Michael Wiktorek — Chad, Demitri, Shadowlord66
-Lawlfrats — Cindy
-Andy Moreland — Andy
+Philip Hann — Clyde
+Rory Jackson — Takeshi
+Simon Baumgardt-Wellander — Simon
 Wendy Vang — Wendy
-Cole Graham — Lucky Jack
 
 
   MUSIC

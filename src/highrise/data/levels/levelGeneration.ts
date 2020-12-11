@@ -6,6 +6,7 @@ import { V, V2d } from "../../../core/Vector";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Decoration from "../../entities/Decoration";
 import Door from "../../entities/Door";
+import VendingMachine from "../../entities/environment/VendingMachine";
 import Exit from "../../entities/Exit";
 import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/human/Human";
@@ -645,23 +646,16 @@ class LevelBuilder {
         }
 
         if (isANubby) {
+          // Fill with vending machine
           const wallDirection = openDirection!;
-          const machinePosition = cell.sub(wallDirection.mul(0.2));
-          const machineDimensions = wallDirection.x ? V(0.3, 0.5) : V(0.5, 0.3);
+          const machinePosition = cell.sub(wallDirection.mul(0.1));
 
-          const light = new PointLight();
-          light.setIntensity(0.3);
-          light.setColor(0xadff2f);
-          light.setPosition(this.levelCoordToWorldCoord(machinePosition));
-          entities.push(light);
-
-          const corner1 = this.levelCoordToWorldCoord(
-            machinePosition.sub(machineDimensions.mul(0.5))
+          entities.push(
+            new VendingMachine(
+              this.levelCoordToWorldCoord(machinePosition),
+              wallDirection.angle + Math.PI / 2
+            )
           );
-          const corner2 = this.levelCoordToWorldCoord(
-            machinePosition.add(machineDimensions.mul(0.5))
-          );
-          entities.push(new Wall(corner1.x, corner1.y, corner2.x, corner2.y));
         }
       }
     }

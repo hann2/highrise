@@ -36,7 +36,7 @@ export function rSign(chanceOfPositive: number = 0.5): -1 | 1 {
   return rBool(chanceOfPositive) ? 1 : -1;
 }
 
-/** Return a random integer between min and max. */
+/** Return a random integer in range [min, max) */
 export function rInteger(min: number, max: number): number {
   return Math.floor(rUniform(min, max));
 }

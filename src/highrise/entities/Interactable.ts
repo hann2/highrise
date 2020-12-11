@@ -9,7 +9,8 @@ export default class Interactable extends BaseEntity implements Entity {
 
   constructor(
     public position: V2d,
-    private onInteract?: (human: Human, self: Interactable) => void
+    private onInteract?: (human: Human, self: Interactable) => void,
+    public maxDistance: number = 3
   ) {
     super();
   }

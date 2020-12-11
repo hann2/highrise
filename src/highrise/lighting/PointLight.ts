@@ -10,7 +10,8 @@ export class PointLight extends Light {
     shadowsEnabled: boolean = false,
     position?: [number, number]
   ) {
-    super(Sprite.from(pointLight), shadowsEnabled, position);
+    super(Sprite.from(pointLight), shadowsEnabled);
+    this.lightSprite.anchor.set(0.5, 0.5);
 
     this.setRadius(radius);
     this.setIntensity(intensity);
@@ -20,18 +21,17 @@ export class PointLight extends Light {
   }
 
   setRadius(radius: number) {
+    this.dirty = true;
     this.radius = radius;
     this.shadows?.setRadius(radius);
-    this.shadows?.graphics.scale.set(256 / radius);
 
-    // TODO: Don't scale the main light sprite, so we don't have to scale the shadows
     this.lightSprite.width = radius * 2;
     this.lightSprite.height = radius * 2;
 
     this.resizeBakedTexture();
   }
 
-  getShadowRadius() {
+  getShadowRadius(): number {
     return this.radius;
   }
 }

@@ -19,7 +19,7 @@ export class Shadows extends BaseEntity implements Entity {
   constructor(private lightPos: V2d, private radius: number = 10) {
     super();
     this.graphics = new Graphics();
-    this.graphics.blendMode = BLEND_MODES.MULTIPLY;
+    // this.graphics.blendMode = BLEND_MODES.MULTIPLY;
   }
 
   setPosition(position: V2d) {

@@ -11,7 +11,7 @@ export default class WallImpact extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
   particles: Particle[] = [];
 
-  constructor(position: V2d, normal: V2d) {
+  constructor(position: V2d, normal: V2d, color: number = 0xffff00) {
     super();
 
     this.sprite = new Graphics();
@@ -26,8 +26,8 @@ export default class WallImpact extends BaseEntity implements Entity {
       this.particles.push({
         position: V(0, 0),
         velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
-        color: 0xffff00,
-        radius: 0.08,
+        color: color,
+        radius: rUniform(0.04, 0.08),
         alpha: rUniform(0.5, 1.0),
         sprite: particleSprite,
       });

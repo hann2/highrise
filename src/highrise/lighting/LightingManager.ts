@@ -88,7 +88,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     for (const light of this.lights) {
       if (this.shouldRenderLight(light)) {
         light.bakeIfNeeded();
-        this.lightContainer.addChild(light.bakedLightSprite);
+        this.lightContainer.addChild(light.bakedSprite);
       }
     }
 
