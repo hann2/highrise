@@ -6,8 +6,10 @@ import { Chad } from "./Chad";
 import { Cindy } from "./Cindy";
 import { Clarice } from "./Clarice";
 import { Kyle } from "./Kyle";
+import { LuckyJack } from "./LuckyJack";
 import { Nancy } from "./Nancy";
 import { Simon } from "./Simon";
+import { Takeshi } from "./Takeshi";
 import { Wendy } from "./Wendy";
 
 // Data about a character
@@ -46,8 +48,10 @@ export const CHARACTERS = [
   Clarice,
   // Clyde,
   Kyle,
+  LuckyJack,
   Nancy,
   Simon,
+  Takeshi,
   Wendy,
 ];
 

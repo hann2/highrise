@@ -41,13 +41,13 @@ export default class PartyManager extends BaseEntity implements Entity {
       );
 
       if (this.partyMembers.length > 1) {
-        human.speak("joinParty");
+        human.voice.speak("joinParty");
       }
     },
 
     levelComplete: () => {
       const speaker = choose(...this.partyMembers);
-      speaker.speak("relief");
+      speaker.voice.speak("relief");
     },
 
     startLevel: async ({ level }: { level: Level }) => {
@@ -63,7 +63,7 @@ export default class PartyManager extends BaseEntity implements Entity {
 
       await this.wait(2);
       const speaker = choose(...this.partyMembers);
-      speaker.speak(choose("newLevel", "misc"));
+      speaker.voice.speak(choose("newLevel", "misc"));
     },
 
     humanDied: ({ human }: PartyEvent) => {
@@ -81,10 +81,11 @@ export default class PartyManager extends BaseEntity implements Entity {
     },
 
     zombieDied: async () => {
-      if (rBool(1 / 10)) {
+      if (rBool(1 / 2)) {
         await this.wait(0.5);
+        // TODO: Choose the actual killer
         const speaker = choose(...this.partyMembers);
-        speaker.speak("taunts");
+        speaker.voice.speak("taunts");
       }
     },
   };

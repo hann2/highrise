@@ -60,6 +60,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
   async onAdd() {
     // TODO: Should we destroy these? It's kinda fun having them around.
+    //       maybe just make a maximum number of them and start deleting the oldest
     // await this.wait(5);
     // await this.wait(3, (_, t) => (this.sprite.alpha = 1.0 - t));
     // this.destroy();

@@ -22,7 +22,7 @@ export default class CameraController extends BaseEntity implements Entity {
   onRender() {
     const player = this.getPlayer();
     if (player) {
-      this.camera.smoothCenter(player.getPosition(), undefined);
+      this.camera.smoothCenter(player.getPosition());
     } else {
       this.camera.smoothSetVelocity(V(0, 0));
     }

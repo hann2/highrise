@@ -36,7 +36,7 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     levelComplete: async () => {
-      this.getPartyLeader()?.speak("relief");
+      this.getPartyLeader()?.voice.speak("relief");
       this.currentLevel += 1;
       this.clearLevel();
 

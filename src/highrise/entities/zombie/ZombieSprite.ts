@@ -58,8 +58,9 @@ export default class ZombieSprite extends BaseEntity implements Entity {
       return this.bodySprites.stunned;
     } else {
       switch (attackPhase) {
+        case "cooldown":
         case "ready":
-          return this.bodySprites.walking; // TODO: Standing still
+          return this.bodySprites.walking; // TODO: Idle
         case "windup":
         case "attack":
           return this.bodySprites.windup;

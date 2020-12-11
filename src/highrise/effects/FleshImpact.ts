@@ -31,7 +31,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
         position: V(0, 0),
         velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
         color: darken(0xff0000, rUniform(0, 0.2)),
-        radius: 0.1,
+        radius: rUniform(0.1, 0.1 * amount),
         z: rUniform(0.4, 1.6),
         zVelocity: rUniform(-20, 3),
         sprite: particleSprite,
