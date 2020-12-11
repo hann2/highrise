@@ -614,7 +614,7 @@ class LevelBuilder {
       for (let j = 0; j < LEVEL_SIZE; j++) {
         if (!this.cells[i][j].content) {
           this.cells[i][j].content = "zombie";
-          // enemies.push(new Zombie(this.levelCoordToWorldCoord(V(i, j))));
+          enemies.push(new Zombie(this.levelCoordToWorldCoord(V(i, j))));
         }
       }
     }

@@ -1,5 +1,6 @@
 import { Body, Box } from "p2";
 import { Graphics } from "pixi.js";
+import elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
 import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
@@ -96,6 +97,7 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
   state: "STOPPED" | "OPENING" | "CLOSING" = "STOPPED";
   topDoor: HalfDoor;
   bottomDoor: HalfDoor;
+  center: V2d;
 
   constructor(
     upperLeftCorner: V2d,
@@ -104,8 +106,8 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
   ) {
     super();
 
-    const center = upperLeftCorner.add(dimensions.mul(0.5));
-    const [x, y] = center;
+    this.center = upperLeftCorner.add(dimensions.mul(0.5));
+    const [x, y] = this.center;
     const [w, h] = dimensions;
 
     if (verticalMovement) {
@@ -165,6 +167,7 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
 
   onInteract() {
     if (this.state === "STOPPED") {
+      this.game?.addEntity(new PositionalSound(elevatorDing, this.center));
       if (this.openPerentage === 1) {
         this.state = "CLOSING";
       } else {
