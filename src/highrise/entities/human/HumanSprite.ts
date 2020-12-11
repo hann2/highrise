@@ -64,7 +64,7 @@ export default class HumanSprite extends BaseEntity implements Entity {
     }
   }
 
-  getCurrentBodySprite() {
+  getCurrentBodySprite(): Sprite {
     const { weapon } = this.human;
     if (weapon instanceof Gun) {
       if (weapon.isReloading) {
