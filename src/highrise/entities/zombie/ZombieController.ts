@@ -108,7 +108,8 @@ export default class ZombieController extends BaseEntity implements Entity {
   atMoveTarget() {
     return (
       !!this.moveTarget &&
-      this.zombie.getPosition().sub(this.moveTarget).magnitude < ZOMBIE_RADIUS
+      this.zombie.getPosition().sub(this.moveTarget).magnitude <
+        1.2 * ZOMBIE_RADIUS
     );
   }
 
