@@ -1,31 +1,28 @@
-import { BLEND_MODES, RenderTexture, Sprite } from "pixi.js";
+import { BLEND_MODES, Container, Matrix, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V, V2d } from "../../core/Vector";
 import LightingManager from "./LightingManager";
 import { Shadows } from "./Shadows";
 
-const RESOLUTION = 64;
+const RESOLUTION = 32;
 
 export default class Light extends BaseEntity implements Entity {
   public shadows?: Shadows;
 
-  public bakedLightSprite: Sprite;
+  public bakedSprite: Sprite;
   public bakedTexture: RenderTexture;
   public dirty: boolean;
+  public container: Container = new Container();
 
   constructor(
     public lightSprite: Sprite = new Sprite(),
-    public shadowsEnabled: boolean = false,
-    position?: [number, number]
+    public shadowsEnabled: boolean = false
   ) {
     super();
 
-    if (shadowsEnabled) {
-      this.enableShadows();
-    }
-
-    position && this.setPosition(position);
+    // Make sure we add this before shadows
+    this.container.addChild(lightSprite);
 
     this.dirty = true;
     this.bakedTexture = RenderTexture.create({
@@ -33,11 +30,20 @@ export default class Light extends BaseEntity implements Entity {
       height: this.lightSprite.height,
       resolution: RESOLUTION,
     });
-    this.bakedLightSprite = Sprite.from(this.bakedTexture);
-    this.bakedLightSprite.anchor.set(0.5, 0.5);
-    this.bakedLightSprite.blendMode = BLEND_MODES.ADD;
+    this.bakedSprite = Sprite.from(this.bakedTexture);
+    this.bakedSprite.anchor.set(0.5, 0.5);
+    this.bakedSprite.blendMode = BLEND_MODES.ADD;
+  }
 
-    // TODO: Resizing and stuff
+  onAdd() {
+    this.lightManager = this.game!.entities.getById(
+      "lighting_manager"
+    ) as LightingManager;
+    this.lightManager.addLight(this);
+
+    if (this.shadowsEnabled) {
+      this.enableShadows();
+    }
   }
 
   resizeBakedTexture() {
@@ -56,10 +62,16 @@ export default class Light extends BaseEntity implements Entity {
     if (this.needsBaking) {
       this.shadows?.updateIfDirty();
 
+      const transform = new Matrix();
+      transform.translate(
+        this.lightSprite.width * 0.5,
+        this.lightSprite.height * 0.5
+      );
       this.game?.renderer.pixiRenderer.render(
-        this.lightSprite,
+        this.container,
         this.bakedTexture,
-        true
+        true,
+        transform
       );
 
       this.dirty = false;
@@ -73,15 +85,9 @@ export default class Light extends BaseEntity implements Entity {
     this.shadowsEnabled = true;
     if (!this.shadows) {
       const { x, y } = this.lightSprite.position;
-      const sx = x + this.lightSprite.width / 2;
-      const sy = y + this.lightSprite.height / 2;
       const r = this.getShadowRadius();
-      this.shadows = this.addChild(new Shadows(V(sx, sy), r));
-      this.shadows.graphics.position.set(
-        this.lightSprite.width / 2,
-        this.lightSprite.height / 2
-      );
-      this.lightSprite.addChild(this.shadows.graphics);
+      this.shadows = this.addChild(new Shadows(V(x, y), r));
+      this.container.addChild(this.shadows.graphics);
 
       // TODO: This is kinda hacky, but it gets the job done
       this.lightManager?.removeLight(this);
@@ -94,7 +100,7 @@ export default class Light extends BaseEntity implements Entity {
     this.shadowsEnabled = false;
     if (this.shadows) {
       this.shadows?.destroy();
-      this.lightSprite.removeChild(this.shadows.graphics);
+      this.container.removeChild(this.shadows.graphics);
       this.shadows = undefined;
     }
 
@@ -108,30 +114,18 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   setPosition([x, y]: [number, number]) {
-    this.bakedLightSprite.position.set(x, y);
-    // this.lightSprite.position.set(x, y);
+    this.bakedSprite.position.set(x, y);
     this.shadows?.setPosition(V(x, y));
   }
 
-  getPosition(): V2d {
-    return V(this.lightSprite.x, this.lightSprite.y);
-  }
-
   setIntensity(value: number) {
-    // TODO: This is unreliable since it also messes with shadows
-    // this.lightSprite.alpha = value;
+    this.dirty = true;
+    this.lightSprite.alpha = value;
   }
 
   setColor(value: number) {
-    // TODO: This is unreliable since it also messes with shadows
+    this.dirty = true;
     this.lightSprite.tint = value;
-  }
-
-  onAdd() {
-    this.lightManager = this.game!.entities.getById(
-      "lighting_manager"
-    ) as LightingManager;
-    this.lightManager.addLight(this);
   }
 
   onDestroy() {

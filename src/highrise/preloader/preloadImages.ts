@@ -7,6 +7,8 @@ import industrialCarpet001 from "../../../resources/images/environment/floor/Ind
 import industrialCarpet002 from "../../../resources/images/environment/floor/IndustrialCarpet-002.jpg";
 import furniture from "../../../resources/images/environment/furniture.png";
 import market from "../../../resources/images/environment/market.png";
+import vendingMachineGlow from "../../../resources/images/environment/vending-machine-glow.png";
+import vendingMachine from "../../../resources/images/environment/vending-machine.png";
 import woodenFloor from "../../../resources/images/environment/wooden-floor.png";
 import healthPack from "../../../resources/images/health_pack.png";
 import pointLight from "../../../resources/images/lights/point-light.png";
@@ -33,6 +35,8 @@ export function getImagesToPreload(): Set<string> {
     market,
     pointLight,
     solidCircle,
+    vendingMachine,
+    vendingMachineGlow,
     woodenFloor,
     zombie1Hold,
     zombie1Stand,

@@ -132,13 +132,12 @@ export default class Human extends BaseEntity implements Entity {
         // .filter((i) => testLineOfSight(i, this))
         .filter(
           (i) =>
-            i.getPosition().sub(this.getPosition()).magnitude <
-            INTERACT_DISTANCE
+            i.getPosition().sub(this.body.position).magnitude < i.maxDistance
         )
         .sort(
           (i1, i2) =>
-            i1.getPosition().sub(this.getPosition()).magnitude -
-            i2.getPosition().sub(this.getPosition()).magnitude
+            i1.getPosition().sub(this.body.position).magnitude -
+            i2.getPosition().sub(this.body.position).magnitude
         )
     );
   }
