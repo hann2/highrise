@@ -48,8 +48,7 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     startLevel: ({ level }: { level: Level }) => {
-      const entities = level.entities.filter((e) => !(e instanceof Light));
-      this.game!.addEntities(entities);
+      this.game!.addEntities(level.entities);
     },
 
     gameOver: async () => {
