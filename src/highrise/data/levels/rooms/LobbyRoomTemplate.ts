@@ -1,10 +1,12 @@
 import Entity from "../../../../core/entity/Entity";
 import { choose } from "../../../../core/util/Random";
-import { V } from "../../../../core/Vector";
+import { V, V2d } from "../../../../core/Vector";
 import Decoration from "../../../entities/Decoration";
+import ElevatorDoor from "../../../entities/ElevatorDoor";
 import TiledFloor, { Tiles } from "../../../entities/environment/TiledFloor";
 import Furniture from "../../../entities/Furniture";
 import { PointLight } from "../../../lighting/PointLight";
+import { CARDINAL_DIRECTIONS, Direction } from "../../../utils/directions";
 import {
   chairRight,
   chairUp,
@@ -29,7 +31,7 @@ import {
   rug,
 } from "../../../view/DecorationSprite";
 import { DirectionalSprite } from "../../../view/DirectionalSprite";
-import { CELL_WIDTH, WallID } from "../levelGeneration";
+import { CELL_WIDTH, getWallInDirection, WallID } from "../levelGeneration";
 import {
   AngleTransformer,
   CellTransformer,
@@ -43,7 +45,7 @@ import {
 } from "./floorUtils";
 import RoomTemplate from "./RoomTemplate";
 
-const directionalRug: DirectionalSprite = {
+const directionalCarpet: DirectionalSprite = {
   baseSprites: {
     RIGHT: redCarpetRight,
     DOWN: redCarpetBottom,
@@ -63,6 +65,26 @@ const directionalRug: DirectionalSprite = {
   },
 };
 
+interface Elevator {
+  cell: V2d;
+  openDirection: keyof typeof Direction;
+}
+
+const ELEVATORS: Elevator[] = [
+  { cell: V(0, 0), openDirection: "RIGHT" },
+  { cell: V(0, 1), openDirection: "RIGHT" },
+  { cell: V(0, 2), openDirection: "RIGHT" },
+  { cell: V(2, 0), openDirection: "LEFT" },
+  { cell: V(2, 1), openDirection: "LEFT" },
+  { cell: V(2, 2), openDirection: "LEFT" },
+  { cell: V(3, 0), openDirection: "RIGHT" },
+  { cell: V(3, 1), openDirection: "RIGHT" },
+  { cell: V(3, 2), openDirection: "RIGHT" },
+  { cell: V(5, 0), openDirection: "LEFT" },
+  { cell: V(5, 1), openDirection: "LEFT" },
+  { cell: V(5, 2), openDirection: "LEFT" },
+];
+
 export default class LobbyRoomTemplate extends RoomTemplate {
   constructor() {
     super(V(6, 7), [
@@ -72,23 +94,33 @@ export default class LobbyRoomTemplate extends RoomTemplate {
   }
 
   generateWalls(transformWall: WallTransformer): WallID[] {
-    return [
-      transformWall([V(0, 0), false]),
-      transformWall([V(0, 1), false]),
-      transformWall([V(0, 2), false]),
-      transformWall([V(2, 0), false]),
-      transformWall([V(2, 1), false]),
-      transformWall([V(2, 2), false]),
-      transformWall([V(3, 0), false]),
-      transformWall([V(3, 1), false]),
-      transformWall([V(3, 2), false]),
-      transformWall([V(5, 0), false]),
-      transformWall([V(5, 1), false]),
-      transformWall([V(5, 2), false]),
-      transformWall([V(2, 0), true]),
-      transformWall([V(2, 1), true]),
-      transformWall([V(2, 2), true]),
-    ];
+    const walls: WallID[] = [];
+    for (const elevator of ELEVATORS) {
+      for (const direction of CARDINAL_DIRECTIONS) {
+        if (direction !== elevator.openDirection) {
+          walls.push(
+            transformWall(
+              getWallInDirection(elevator.cell, Direction[direction])
+            )
+          );
+        }
+      }
+    }
+    return walls;
+  }
+
+  generateFloorMask(): FloorMask {
+    const lowResolutionFloorMask: FloorMask = [];
+    for (let i = 0; i < this.dimensions.x; i++) {
+      lowResolutionFloorMask[i] = [];
+      for (let j = 0; j < this.dimensions.y; j++) {
+        lowResolutionFloorMask[i][j] = true;
+      }
+    }
+    ELEVATORS.forEach(
+      (e) => (lowResolutionFloorMask[e.cell.x][e.cell.y] = false)
+    );
+    return doubleResolution(doubleResolution(lowResolutionFloorMask));
   }
 
   generateEntities(
@@ -98,42 +130,19 @@ export default class LobbyRoomTemplate extends RoomTemplate {
     const entities: Entity[] = [];
 
     const carpetScale = redCarpetUpperLeft.heightMeters / CELL_WIDTH;
-
-    const elevatorLocations = [];
-    for (let j = 0; j < 3; j++) {
-      elevatorLocations.push(V(0, j));
-      elevatorLocations.push(V(2, j));
-      elevatorLocations.push(V(3, j));
-      elevatorLocations.push(V(5, j));
-    }
-
-    const lowResolutionFloorMask: FloorMask = [];
-    for (let i = 0; i < this.dimensions.x; i++) {
-      lowResolutionFloorMask[i] = [];
-      for (let j = 0; j < this.dimensions.y; j++) {
-        lowResolutionFloorMask[i][j] = true;
-      }
-    }
-
-    elevatorLocations.forEach(
-      (p) => (lowResolutionFloorMask[p.x][p.y] = false)
-    );
-
-    const floorMask = doubleResolution(
-      doubleResolution(lowResolutionFloorMask)
-    );
+    const floorMask = this.generateFloorMask();
 
     const mainTiles: Tiles = insetBorders(
-      fillFloorWithBorders(floorMask, directionalRug),
-      directionalRug
+      fillFloorWithBorders(floorMask, directionalCarpet),
+      directionalCarpet
     );
 
     const elevatorTiles = insetBorders(
       fillFloorWithBorders(
         doubleResolution(doubleResolution([[true]])),
-        directionalRug
+        directionalCarpet
       ),
-      directionalRug
+      directionalCarpet
     );
 
     const tileScale = V(carpetScale * CELL_WIDTH, carpetScale * CELL_WIDTH);
@@ -142,15 +151,31 @@ export default class LobbyRoomTemplate extends RoomTemplate {
       new TiledFloor(transformCell(V(-0.5, -0.5)), tileScale, mainTiles)
     );
 
-    elevatorLocations.forEach((p) =>
+    ELEVATORS.forEach((e) => {
       entities.push(
         new TiledFloor(
-          transformCell(p.add(V(-0.5, -0.5))),
+          transformCell(e.cell.add(V(-0.5, -0.5))),
           tileScale,
           elevatorTiles
         )
-      )
-    );
+      );
+
+      const doorDimensionsLevelCoords = V(0.25 / CELL_WIDTH, 1);
+      const doorDimensionsWorldCoords = doorDimensionsLevelCoords.mul(
+        CELL_WIDTH
+      );
+      const doorUpperLeftCorner = e.cell
+        .add(Direction[e.openDirection].mul(0.5))
+        .sub(doorDimensionsLevelCoords.mul(0.5));
+
+      entities.push(
+        new ElevatorDoor(
+          transformCell(doorUpperLeftCorner),
+          doorDimensionsWorldCoords,
+          true
+        )
+      );
+    });
 
     entities.push(new Decoration(transformCell(V(2.5, 5)), rug));
     entities.push(new Furniture(transformCell(V(2.5, 3.5)), lobbyDesk));

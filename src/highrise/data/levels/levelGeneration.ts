@@ -67,6 +67,14 @@ interface Cell {
   bottomWall: WallBuilder;
 }
 
+export function getWallInDirection(cell: V2d, direction: V2d): WallID {
+  let newCell = cell;
+  if (direction.x === -1 || direction.y === -1) {
+    newCell = newCell.add(direction);
+  }
+  return [newCell, direction.y === 0];
+}
+
 export function pointToV2d(p: Point): V2d {
   return V(p.x, p.y);
 }
@@ -104,11 +112,17 @@ class LevelBuilder {
 
   undestroyWall(id: WallID) {
     const [[i, j], right] = id;
+    if (i < 0 || j < 0) {
+      return;
+    }
     this.cells[i][j][right ? "rightWall" : "bottomWall"].exists = true;
   }
 
   markIndestructible(id: WallID) {
     const [[i, j], right] = id;
+    if (i < 0 || j < 0) {
+      return;
+    }
     this.cells[i][j][right ? "rightWall" : "bottomWall"].destructible = false;
   }
 
@@ -133,11 +147,7 @@ class LevelBuilder {
   }
 
   getWallInDirection(cell: V2d, direction: V2d): WallID {
-    let newCell = cell;
-    if (direction.x === -1 || direction.y === -1) {
-      newCell = newCell.add(direction);
-    }
-    return [newCell, direction.y === 0];
+    return getWallInDirection(cell, direction);
   }
 
   generateLevel(
