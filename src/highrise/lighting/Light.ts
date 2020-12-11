@@ -1,12 +1,18 @@
-import { BLEND_MODES, Sprite } from "pixi.js";
+import { BLEND_MODES, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V, V2d } from "../../core/Vector";
 import LightingManager from "./LightingManager";
-import { ShadowMask } from "./Shadows";
+import { Shadows } from "./Shadows";
+
+const RESOLUTION = 64;
 
 export default class Light extends BaseEntity implements Entity {
-  public shadows?: ShadowMask;
+  public shadows?: Shadows;
+
+  public bakedLightSprite: Sprite;
+  public bakedTexture: RenderTexture;
+  public dirty: boolean;
 
   constructor(
     public lightSprite: Sprite = new Sprite(),
@@ -14,40 +20,85 @@ export default class Light extends BaseEntity implements Entity {
     position?: [number, number]
   ) {
     super();
-    this.lightSprite.blendMode = BLEND_MODES.ADD;
 
     if (shadowsEnabled) {
       this.enableShadows();
     }
 
     position && this.setPosition(position);
+
+    this.dirty = true;
+    this.bakedTexture = RenderTexture.create({
+      width: this.lightSprite.width,
+      height: this.lightSprite.height,
+      resolution: RESOLUTION,
+    });
+    this.bakedLightSprite = Sprite.from(this.bakedTexture);
+    this.bakedLightSprite.anchor.set(0.5, 0.5);
+    this.bakedLightSprite.blendMode = BLEND_MODES.ADD;
+
+    // TODO: Resizing and stuff
   }
 
-  // TODO: Add bake method
+  resizeBakedTexture() {
+    this.bakedTexture.resize(
+      this.lightSprite.width,
+      this.lightSprite.height,
+      true
+    );
+  }
+
+  get needsBaking(): boolean {
+    return this.dirty || Boolean(this.shadows?.dirty);
+  }
+
+  bakeIfNeeded() {
+    if (this.needsBaking) {
+      this.shadows?.updateIfDirty();
+
+      this.game?.renderer.pixiRenderer.render(
+        this.lightSprite,
+        this.bakedTexture,
+        true
+      );
+
+      this.dirty = false;
+    }
+  }
 
   private lightManager?: LightingManager;
 
   enableShadows() {
+    this.dirty = true;
     this.shadowsEnabled = true;
     if (!this.shadows) {
       const { x, y } = this.lightSprite.position;
-      this.shadows = this.addChild(
-        new ShadowMask(V(x, y), this.getShadowRadius())
+      const sx = x + this.lightSprite.width / 2;
+      const sy = y + this.lightSprite.height / 2;
+      const r = this.getShadowRadius();
+      this.shadows = this.addChild(new Shadows(V(sx, sy), r));
+      this.shadows.graphics.position.set(
+        this.lightSprite.width / 2,
+        this.lightSprite.height / 2
       );
+      this.lightSprite.addChild(this.shadows.graphics);
 
-      // TODO: This is kinda hacky
+      // TODO: This is kinda hacky, but it gets the job done
       this.lightManager?.removeLight(this);
       this.lightManager?.addLight(this);
     }
   }
 
   disableShadows() {
+    this.dirty = true;
     this.shadowsEnabled = false;
-    this.shadows?.destroy();
-    this.shadows = undefined;
-    this.lightSprite.mask = null;
+    if (this.shadows) {
+      this.shadows?.destroy();
+      this.lightSprite.removeChild(this.shadows.graphics);
+      this.shadows = undefined;
+    }
 
-    // TODO: This is kinda hacky
+    // TODO: This is kinda hacky, but it gets the job done
     this.lightManager?.removeLight(this);
     this.lightManager?.addLight(this);
   }
@@ -57,7 +108,8 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   setPosition([x, y]: [number, number]) {
-    this.lightSprite.position.set(x, y);
+    this.bakedLightSprite.position.set(x, y);
+    // this.lightSprite.position.set(x, y);
     this.shadows?.setPosition(V(x, y));
   }
 
@@ -66,10 +118,12 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   setIntensity(value: number) {
-    this.lightSprite.alpha = value;
+    // TODO: This is unreliable since it also messes with shadows
+    // this.lightSprite.alpha = value;
   }
 
   setColor(value: number) {
+    // TODO: This is unreliable since it also messes with shadows
     this.lightSprite.tint = value;
   }
 

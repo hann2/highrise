@@ -125,7 +125,7 @@ export default class Gun extends BaseEntity implements Entity {
       } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
         this.playSound("reload", shooter.getPosition());
         this.isReloading = true;
-        await this.wait(this.stats.reloadTime, undefined, "reload");
+        await this.wait(this.stats.reloadTime * 0.4, undefined, "reload");
         while (this.ammo < this.stats.ammoCapacity) {
           this.playSound("reloadInsert", shooter.getPosition());
           await this.wait(this.stats.reloadTime, undefined, "reload");

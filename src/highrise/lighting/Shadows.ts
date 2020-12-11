@@ -12,13 +12,14 @@ import { getShapeCorners } from "./shapeUtils";
  * https://stackoverflow.com/questions/55855767/algorithm-to-determine-back-sides-of-a-polygon
  * https://archive.gamedev.net/archive/reference/programming/features/2dsoftshadow/page3.html
  */
-export class ShadowMask extends BaseEntity implements Entity {
+export class Shadows extends BaseEntity implements Entity {
   dirty: boolean = true;
   graphics: Graphics;
 
   constructor(private lightPos: V2d, private radius: number = 10) {
     super();
     this.graphics = new Graphics();
+    this.graphics.blendMode = BLEND_MODES.MULTIPLY;
   }
 
   setPosition(position: V2d) {
@@ -31,13 +32,7 @@ export class ShadowMask extends BaseEntity implements Entity {
     this.dirty = true;
   }
 
-  afterPhysics() {
-    if (this.game && this.dirty) {
-      this.update();
-    }
-  }
-
-  update() {
+  updateIfDirty() {
     if (this.dirty) {
       this.graphics.clear();
 
@@ -50,7 +45,7 @@ export class ShadowMask extends BaseEntity implements Entity {
             .drawPolygon(
               corners
                 // TODO: Do we really want this translation here?
-                // .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
+                .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
                 .flat()
             )
             .endFill();
@@ -62,13 +57,11 @@ export class ShadowMask extends BaseEntity implements Entity {
   }
 
   // TODO: This is really slow. Ideas for fixing
-  //   - Don't use V2ds anywhere, and try to keep allocation down in general
+  //   - Don't use V2ds anywhere, and try to keep allocation down in general.
+  //     This would probably at least double the speed of this.
   private getShadowCorners(): [number, number][][] {
     const lightPos = this.lightPos;
-    // const bodies = this.game!.entities.getTagged("cast_shadow");
-
     const bodies = this.getAffectedBodies();
-
     const shadows: [number, number][][] = [];
 
     for (const body of bodies) {

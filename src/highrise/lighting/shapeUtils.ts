@@ -1,5 +1,6 @@
-import { Body, Box, Convex, Line, Shape } from "p2";
+import { Body, Box, Capsule, Circle, Convex, Line, Shape, vec2 } from "p2";
 import { PI_2 } from "pixi.js";
+import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 
 // Returns the "corners" of a shape in world coordinates
@@ -17,9 +18,20 @@ export function getShapeCorners(shape: Shape, body: Body, center: V2d): V2d[] {
       return points;
     }
     case Shape.CAPSULE:
-      return []; // TODO this one seems a bit tricky, could probably approximate
-    case Shape.CIRCLE:
-      return []; // TODO: Just a few points on the edge? Really I suppose we want to draw the curve in the shadow, but that's a whole nother level of complexity
+      const capsule = shape as Capsule;
+      return []; // TODO: this one seems a bit tricky, could probably approximate
+    case Shape.CIRCLE: {
+      // TODO: We really wanna add the points that are tangent to the center I think
+      const points = [];
+      const n = 8;
+      for (let i = 0; i < n; i++) {
+        const circle = shape as Circle;
+        points.push(
+          polarToVec((i * 2 * Math.PI) / n, circle.radius).iadd(circle.position)
+        );
+      }
+      return [];
+    }
     case Shape.LINE:
       const line = shape as Line;
       const start = V(-line.length / PI_2, 0);

@@ -32,7 +32,8 @@ export default class Bullet extends BaseEntity implements Entity {
     direction: number,
     speed: number = 50,
     public damage: number = 40,
-    private shooter?: Human
+    private shooter?: Human,
+    public mass: number = 0.01 // kg?
   ) {
     super();
 
@@ -76,8 +77,7 @@ export default class Bullet extends BaseEntity implements Entity {
     if (hitResult) {
       const { hitPosition, hitNormal, hit } = hitResult;
       this.hitPosition = hitPosition;
-      hit.onBulletHit(this, this.hitPosition);
-      this.game?.addEntity(new WallImpact(hitPosition, hitNormal));
+      hit.onBulletHit(this, this.hitPosition, hitNormal);
       this.destroy();
     } else {
       this.position.iaddScaled(this.velocity, dt);

@@ -9,6 +9,7 @@ import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
 import { choose, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import BloodSplat from "../../effects/BloodSplat";
+import FleshImpact from "../../effects/FleshImpact";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
@@ -104,12 +105,13 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.clearTimers("windup");
   }
 
-  onBulletHit(bullet: Bullet, position: V2d) {
+  onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
 
-    this.game?.addEntity(
-      new PositionalSound(choose(fleshHit1, fleshHit2, fleshHit3), position)
-    );
+    this.game?.addEntities([
+      new PositionalSound(choose(fleshHit1, fleshHit2, fleshHit3), position),
+      new FleshImpact(position, bullet.damage / 10, normal),
+    ]);
 
     this.voice.speak("hit");
 
@@ -153,7 +155,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
   die() {
     this.game?.dispatch({ type: "zombieDied", zombie: this });
-    this.game?.addEntity(new BloodSplat(this.getPosition()));
+    this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
     this.voice.speak("death");
     this.destroy();
   }

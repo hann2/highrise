@@ -1,9 +1,8 @@
-import { BLEND_MODES, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
 import pointLight from "../../../resources/images/lights/point-light.png";
 import Light from "./Light";
 
 export class PointLight extends Light {
-  pointLightSprite: Sprite;
   constructor(
     private radius: number = 1,
     intensity: number = 1.0,
@@ -11,11 +10,7 @@ export class PointLight extends Light {
     shadowsEnabled: boolean = false,
     position?: [number, number]
   ) {
-    super(undefined, shadowsEnabled, position);
-    this.pointLightSprite = Sprite.from(pointLight);
-    this.pointLightSprite.blendMode = BLEND_MODES.ADD;
-    this.pointLightSprite.anchor.set(0.5, 0.5);
-    this.lightSprite.addChildAt(this.pointLightSprite, 0);
+    super(Sprite.from(pointLight), shadowsEnabled, position);
 
     this.setRadius(radius);
     this.setIntensity(intensity);
@@ -27,8 +22,13 @@ export class PointLight extends Light {
   setRadius(radius: number) {
     this.radius = radius;
     this.shadows?.setRadius(radius);
-    this.pointLightSprite.width = radius * 2;
-    this.pointLightSprite.height = radius * 2;
+    this.shadows?.graphics.scale.set(256 / radius);
+
+    // TODO: Don't scale the main light sprite, so we don't have to scale the shadows
+    this.lightSprite.width = radius * 2;
+    this.lightSprite.height = radius * 2;
+
+    this.resizeBakedTexture();
   }
 
   getShadowRadius() {

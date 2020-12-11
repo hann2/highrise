@@ -1,11 +1,13 @@
 import { BLEND_MODES, Graphics, RenderTexture, Sprite, Texture } from "pixi.js";
+import { threadId } from "worker_threads";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import { V } from "../../core/Vector";
 import { Layers } from "../layers";
 import Light from "./Light";
 import { LightFilter, ShadowFilter } from "./LightingFilter";
 
-const AMBIENT_LIGHT = 0x111133;
+const AMBIENT_LIGHT = 0x000000;
 export default class LightingManager extends BaseEntity implements Entity {
   id = "lighting_manager";
   persistent = true;
@@ -13,11 +15,9 @@ export default class LightingManager extends BaseEntity implements Entity {
   texture!: RenderTexture;
   sprite!: Sprite & GameSprite;
   lightContainer = new Sprite();
-  shadowContainer = new Sprite();
   darkness: Graphics = new Graphics();
 
-  lightsWithoutShadows: Set<Light> = new Set();
-  lightsWithShadows: Set<Light> = new Set();
+  lights: Set<Light> = new Set();
 
   private get renderer() {
     return this.game!.renderer.pixiRenderer;
@@ -40,8 +40,7 @@ export default class LightingManager extends BaseEntity implements Entity {
 
     this.sprite = new Sprite(this.texture);
     this.sprite.layerName = Layers.LIGHTING;
-    // this.sprite.blendMode = BLEND_MODES.MULTIPLY;
-    this.sprite.blendMode = BLEND_MODES.NORMAL;
+    this.sprite.blendMode = BLEND_MODES.MULTIPLY;
     this.sprite.anchor.set(0, 0);
 
     this.darkness
@@ -50,58 +49,51 @@ export default class LightingManager extends BaseEntity implements Entity {
       .endFill();
 
     this.lightContainer.blendMode = BLEND_MODES.ADD;
-    this.lightContainer.filters = [new LightFilter()];
-
-    this.shadowContainer.blendMode = BLEND_MODES.MULTIPLY;
-    this.shadowContainer.filters = [new ShadowFilter()];
   }
 
   addLight(light: Light) {
-    if (light.shadows) {
-      this.lightsWithShadows.add(light);
-      console.log("shadow light");
-    } else {
-      this.lightsWithoutShadows.add(light);
-      console.log("shadowless light");
-    }
+    this.lights.add(light);
   }
 
   removeLight(light: Light) {
-    this.lightsWithShadows.delete(light);
-    this.lightsWithoutShadows.delete(light);
+    this.lights.delete(light);
+  }
+
+  // Decide whether or not to render a light
+  private shouldRenderLight(light: Light) {
+    const { x, y } = light.lightSprite.position;
+    const { width, height } = light.lightSprite;
+
+    const camera = this.game!.camera;
+    const [minX, minY] = camera.toWorld(V(0, 0));
+    const [maxX, maxY] = camera.toWorld(camera.getViewportSize());
+
+    // Make sure that the light overlaps the viewport
+    // TODO: This is broken
+    return (
+      true || (x < maxX && x + width > minX && y < maxY && y + height > minY)
+    );
   }
 
   onRender() {
     const matrix = this.game!.camera.getMatrix();
+    // const inverseMatrix = matrix.clone().invert();
     this.lightContainer.transform.setFromMatrix(matrix);
-    this.shadowContainer.transform.setFromMatrix(matrix);
 
     // Clear everything
+    // TODO: This doesn't really have to be a separate render pass
     this.renderer.render(this.darkness, this.texture, true);
 
-    // We can render all the shadowless lights in a single pass
-    for (const light of this.lightsWithoutShadows) {
-      this.lightContainer.addChild(light.lightSprite);
+    // Make sure all lights are baked, then add them to the render object
+    for (const light of this.lights) {
+      if (this.shouldRenderLight(light)) {
+        light.bakeIfNeeded();
+        this.lightContainer.addChild(light.bakedLightSprite);
+      }
     }
+
+    // Then render it all
     this.renderer.render(this.lightContainer, this.texture, false);
     this.lightContainer.removeChildren();
-
-    // TODO: Somehow use fewer render calls
-    //   - Bake lights
-    //   -
-    for (const light of this.lightsWithShadows) {
-      this.shadowContainer.addChild(light.shadows!.graphics);
-      this.renderer.render(this.shadowContainer, this.texture, false);
-      this.shadowContainer.removeChild(light.shadows!.graphics);
-      this.lightContainer.addChild(light.lightSprite);
-      this.renderer.render(this.lightContainer, this.texture, false);
-      this.lightContainer.removeChild(light.lightSprite);
-    }
-
-    // TODO: Different stuff for static lights
-    // TODO: For Each Light:
-    //   render shadows to alpha channel
-    //   render light to color channels, but multiply color by alpha
-    //   clear alpha channel
   }
 }
