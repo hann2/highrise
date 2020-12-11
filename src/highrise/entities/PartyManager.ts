@@ -1,7 +1,9 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import Game from "../../core/Game";
 import { choose, rBool } from "../../core/util/Random";
 import { Level } from "../data/levels/Level";
+import VisionController from "../VisionController";
 import { Axe } from "../weapons/melee-weapons/Axe";
 import { BaseballBat } from "../weapons/melee-weapons/BaseballBat";
 import MeleeWeapon from "../weapons/MeleeWeapon";
@@ -27,6 +29,7 @@ export default class PartyManager extends BaseEntity implements Entity {
       this.partyMembers = [];
       this.leader = this.game!.addEntity(new Human());
       this.game!.addEntity(new PlayerHumanController(() => this.leader));
+      this.game!.addEntity(new VisionController());
       this.game?.dispatch({ type: "addToParty", human: this.leader });
     },
 
@@ -110,4 +113,12 @@ export default class PartyManager extends BaseEntity implements Entity {
       allyController.enabled = allyController.human != leader;
     }
   }
+}
+
+export function getPartyManager(game: Game): PartyManager | undefined {
+  return game.entities.getById("party_manager") as PartyManager;
+}
+
+export function getPartyLeader(game: Game): Human | undefined {
+  return getPartyManager(game)?.leader;
 }

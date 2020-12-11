@@ -12,7 +12,7 @@ export default class Flashlight extends BaseEntity implements Entity {
   constructor(public human: Human) {
     super();
 
-    this.pointLight = this.addChild(new PointLight(10, 1, 0xffffff, true));
+    // this.pointLight = this.addChild(new PointLight(10, 1, 0xffffff, true));
     // this.directinoalLight = this.addChild(
     //   new DirectionalLight(8, degToRad(35), 0.3, 0x00ffff)
     // );

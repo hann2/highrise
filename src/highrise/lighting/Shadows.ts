@@ -34,26 +34,30 @@ export class Shadows extends BaseEntity implements Entity {
 
   updateIfDirty() {
     if (this.dirty) {
-      this.graphics.clear();
-
-      const shadows = this.getShadowCorners();
-
-      for (const corners of shadows) {
-        if (corners.length) {
-          this.graphics
-            .beginFill(0x000000)
-            .drawPolygon(
-              corners
-                // TODO: Do we really want this translation here?
-                .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
-                .flat()
-            )
-            .endFill();
-        }
-      }
-
-      this.dirty = false;
+      this.forceUpdate();
     }
+  }
+
+  forceUpdate() {
+    this.graphics.clear();
+
+    const shadows = this.getShadowCorners();
+
+    for (const corners of shadows) {
+      if (corners.length) {
+        this.graphics
+          .beginFill(0x000000)
+          .drawPolygon(
+            corners
+              // TODO: Do we really want this translation here?
+              .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
+              .flat()
+          )
+          .endFill();
+      }
+    }
+
+    this.dirty = false;
   }
 
   // TODO: This is really slow. Ideas for fixing

@@ -246,7 +246,8 @@ export default class Game {
       if (
         entity.game &&
         !this.entitiesToRemove.has(entity) &&
-        !entity.persistent
+        !entity.persistent &&
+        !entity.parent
       ) {
         entity.destroy();
       }
