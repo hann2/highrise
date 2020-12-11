@@ -1,5 +1,4 @@
-import shellDrop1 from "../../../resources/audio/guns/misc/shell-drop-1.mp3";
-import shellDrop2 from "../../../resources/audio/guns/misc/shell-drop-2.mp3";
+import elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
 import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import pop1 from "../../../resources/audio/misc/pop1.flac";
@@ -22,6 +21,7 @@ export function getSoundsToPreload(): string[] {
     swordShing2,
     swordShing3,
     swordShing4,
+    elevatorDing,
 
     ...MUSIC_URLS,
   ]);
