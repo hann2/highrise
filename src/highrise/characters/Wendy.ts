@@ -26,7 +26,6 @@ import wendyNewLevel1 from "../../../resources/audio/characters/wendy/wendy-new-
 import wendyNewLevel2 from "../../../resources/audio/characters/wendy/wendy-new-level-2.flac";
 import wendyNewLevel3 from "../../../resources/audio/characters/wendy/wendy-new-level-3.flac";
 import wendyNewLevel4 from "../../../resources/audio/characters/wendy/wendy-new-level-4.flac";
-import wendyNewLevel5 from "../../../resources/audio/characters/wendy/wendy-new-level-5.flac";
 import wendyPickup1 from "../../../resources/audio/characters/wendy/wendy-pickup-1.flac";
 import wendyPickup2 from "../../../resources/audio/characters/wendy/wendy-pickup-2.flac";
 import wendyPickup3 from "../../../resources/audio/characters/wendy/wendy-pickup-3.flac";
@@ -87,13 +86,7 @@ export const Wendy: Character = {
       wendyNearDeath4,
       wendyNearDeath5,
     ],
-    newLevel: [
-      wendyNewLevel1,
-      wendyNewLevel2,
-      wendyNewLevel3,
-      wendyNewLevel4,
-      wendyNewLevel5,
-    ],
+    newLevel: [wendyNewLevel1, wendyNewLevel2, wendyNewLevel3, wendyNewLevel4],
     pickupItem: [
       wendyPickup1,
       wendyPickup2,

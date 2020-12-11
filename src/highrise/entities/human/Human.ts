@@ -78,9 +78,9 @@ export default class Human extends BaseEntity implements Entity {
     this.body.angle += turnAmount;
   }
 
-  setPosition(position: V2d) {
-    this.body.position[0] = position[0];
-    this.body.position[1] = position[1];
+  setPosition([x, y]: [number, number]) {
+    this.body.position[0] = x;
+    this.body.position[1] = y;
   }
 
   getDirection(): number {
@@ -90,25 +90,8 @@ export default class Human extends BaseEntity implements Entity {
   useWeapon() {
     if (this.weapon instanceof Gun) {
       this.weapon.pullTrigger(this);
-
-      if (this.weapon.stats.fireMode === FireMode.FULL_AUTO) {
-        if (rBool(1 / 1000)) {
-          // TODO: Also this could be way better
-          this.speak("taunts");
-        }
-      } else {
-        if (rBool(1 / 200)) {
-          // TODO: Also this could be way better
-          this.speak("taunts");
-        }
-      }
     } else if (this.weapon instanceof MeleeWeapon) {
       this.weapon.attack(this);
-
-      if (rBool(1 / 100)) {
-        // TODO: Also this could be way better
-        this.speak("taunts");
-      }
     }
   }
 
@@ -130,7 +113,7 @@ export default class Human extends BaseEntity implements Entity {
 
     if (shouldSpeak) {
       await this.wait(0.5);
-      this.speak("pickupItem");
+      this.voice.speak("pickupItem");
     }
   }
 
@@ -178,29 +161,25 @@ export default class Human extends BaseEntity implements Entity {
     if (this.hp <= 0) {
       this.die();
     } else if (this.hp < 30) {
-      this.speak("nearDeath"); // TODO: We actually probably want this delayed a bit
+      this.voice.speak("nearDeath", true); // TODO: We actually probably want this delayed a bit
     } else {
-      this.speak("hurt");
+      this.voice.speak("hurt");
     }
   }
 
   die() {
-    this.speak("death");
+    this.voice.speak("death", true);
     this.game?.dispatch({ type: "humanDied", human: this });
     this.game?.addEntity(new BloodSplat(this.getPosition()));
     this.destroy();
   }
 
   heal(amount: number) {
-    this.speak("pickupItem");
+    this.voice.speak("pickupItem");
 
     this.hp += amount;
     if (this.hp > MAX_HEALTH) {
       this.hp = MAX_HEALTH;
     }
-  }
-
-  speak(soundClass: CharacterSoundClass) {
-    this.voice.speak(soundClass);
   }
 }

@@ -13,8 +13,13 @@ export default class CameraController extends BaseEntity implements Entity {
     super();
   }
 
-  onRender() {
+  onAdd() {
     this.camera.z = 50;
+  }
+
+  // TODO: Camera Shake!
+
+  onRender() {
     const player = this.getPlayer();
     if (player) {
       this.camera.smoothCenter(player.getPosition());
@@ -23,6 +28,13 @@ export default class CameraController extends BaseEntity implements Entity {
     }
 
     this.getListener().setPosition(this.camera.position);
+
+    if (this.game?.io.keyIsDown("Equal")) {
+      this.camera.z *= 1.01;
+    }
+    if (this.game?.io.keyIsDown("Minus")) {
+      this.camera.z *= 0.99;
+    }
   }
 
   getListener(): PositionalSoundListener {

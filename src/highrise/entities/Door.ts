@@ -1,18 +1,19 @@
 import { Body, Box, RevoluteConstraint } from "p2";
 import { Graphics, Point, Sprite } from "pixi.js";
+import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../physics/CollisionGroups";
+import WallImpact from "../effects/WallImpact";
 import { Layers } from "../layers";
+import { CollisionGroups } from "../physics/CollisionGroups";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
-import SwingingWeapon from "../weapons/SwingingWeapon";
-import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 
 const DOOR_THICKNESS = 0.25;
 
@@ -94,9 +95,12 @@ export default class Door extends BaseEntity implements Entity, Hittable {
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
 
-  onBulletHit(bullet: Bullet, position: V2d) {
-    this.game!.addEntity(
-      new PositionalSound(choose(wallHit1, wallHit2), position)
-    );
+  onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
+    this.body.applyImpulse(bullet.velocity.mul(bullet.mass * 0.7), position);
+
+    this.game!.addEntities([
+      new PositionalSound(choose(wallHit1, wallHit2), position),
+      new WallImpact(position, normal),
+    ]);
   }
 }

@@ -66,8 +66,6 @@ export enum FireMode {
   SEMI_AUTO,
   // Constant bullets as long as trigger is down
   FULL_AUTO,
-  // 3 bullets per trigger pull
-  BURST, // TODO: Implement burst fire
   // Pumps after every shot
   PUMP,
 }

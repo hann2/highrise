@@ -10,8 +10,8 @@ import { V2d } from "../../core/Vector";
 import { Layers } from "../layers";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
-const LINEAR_FRICTION = 0.85;
-const ANGULAR_FRICTION = 0.75;
+const LINEAR_FRICTION = 3;
+const ANGULAR_FRICTION = 1.0;
 const SIZE = 0.025; // meters wide
 
 const SPEED = 7; // meters
@@ -21,6 +21,8 @@ const MIN_BOUNCE_SPEED = 1.0; // meters / second
 const BOUNCE_RESTITUTION = 0.3; // percent of engergy retained in bounce
 
 const PORT_HEIGHT = 1.0; // meters off the ground
+
+// TODO: Different sound depending on floor
 
 export default class ShellCasing extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
@@ -49,7 +51,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
       SPEED * rNormal(1, 0.3)
     );
 
-    this.spin = rUniform(0, MAX_SPIN);
+    this.spin = rUniform(MAX_SPIN / 10, MAX_SPIN);
 
     this.zVelocity = rUniform(0, 2);
 
@@ -58,17 +60,18 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
   async onAdd() {
     // TODO: Should we destroy these? It's kinda fun having them around.
+    //       maybe just make a maximum number of them and start deleting the oldest
     // await this.wait(5);
     // await this.wait(3, (_, t) => (this.sprite.alpha = 1.0 - t));
     // this.destroy();
   }
 
   onTick(dt: number) {
-    this.velocity.imul((1.0 - LINEAR_FRICTION) ** dt);
     this.position.iadd(this.velocity.mul(dt));
+    this.velocity.imul(Math.exp(-LINEAR_FRICTION * dt));
 
     this.rotation += this.spin * dt;
-    this.spin *= (1.0 - ANGULAR_FRICTION) ** dt;
+    this.spin *= Math.exp(-ANGULAR_FRICTION * dt);
 
     if (this.z < 0) {
       this.z = 0;
@@ -85,8 +88,8 @@ export default class ShellCasing extends BaseEntity implements Entity {
       } else {
         // on ground
         this.zVelocity = 0;
-        this.spin *= 0.01 ** dt;
-        this.velocity.imul((1.0 - LINEAR_FRICTION) ** dt);
+        this.velocity.imul(Math.exp(-LINEAR_FRICTION * dt));
+        this.spin *= Math.exp(-ANGULAR_FRICTION * dt);
       }
     } else {
       this.z += this.zVelocity * dt;

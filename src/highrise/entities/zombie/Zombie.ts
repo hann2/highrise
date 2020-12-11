@@ -8,7 +8,7 @@ import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
 import { choose, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import BloodSplat from "../../effects/BloodSplat";
+import FleshImpact from "../../effects/FleshImpact";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
@@ -26,6 +26,7 @@ const ATTACK_ANGLE = degToRad(90);
 const ATTACK_DAMAGE = 20;
 const WINDUP_TIME = 0.2; // Time in animation from beginning of attack to doing damage
 const WINDDOWN_TIME = 0.1; // Time in animation from doing damage to end of attack
+const COOLDOWN_TIME = 0.5; // Time after windown before starting another attack
 
 export default class Zombie extends BaseEntity implements Entity, Hittable {
   tags = ["zombie"];
@@ -34,7 +35,8 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   speed: number = rNormal(SPEED, SPEED / 5);
   stunnedTimer = 0;
   voice: ZombieVoice;
-  attackPhase: "ready" | "windup" | "attack" | "winddown" = "ready";
+  attackPhase: "ready" | "windup" | "attack" | "winddown" | "cooldown" =
+    "ready";
 
   constructor(position: V2d) {
     super();
@@ -76,12 +78,14 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
       }
       this.attackPhase = "winddown";
       await this.wait(WINDDOWN_TIME, undefined, "winddown");
+      this.attackPhase = "cooldown";
+      await this.wait(COOLDOWN_TIME, undefined, "cooldown");
       this.attackPhase = "ready";
     }
   }
 
   getHumansInRange(): Human[] {
-    const humans = this.game?.entities.getTagged("human") as Human[];
+    const humans = (this.game?.entities.getTagged("human") as Human[]) ?? [];
     return humans.filter((human) => {
       const displacement = human.getPosition().isub(this.body.position);
       const inRange = displacement.magnitude < ATTACK_RANGE;
@@ -91,8 +95,17 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     });
   }
 
+  canWalk(): boolean {
+    return (
+      !this.isStunned &&
+      this.attackPhase !== "windup" &&
+      this.attackPhase !== "attack" &&
+      this.attackPhase !== "winddown"
+    );
+  }
+
   walk(direction: V2d) {
-    this.body.applyImpulse(direction.mul(this.speed));
+    if (!this.isStunned) this.body.applyImpulse(direction.mul(this.speed));
   }
 
   setDirection(angle: number) {
@@ -104,12 +117,13 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.clearTimers("windup");
   }
 
-  onBulletHit(bullet: Bullet, position: V2d) {
+  onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
 
-    this.game?.addEntity(
-      new PositionalSound(choose(fleshHit1, fleshHit2, fleshHit3), position)
-    );
+    this.game?.addEntities([
+      new PositionalSound(choose(fleshHit1, fleshHit2, fleshHit3), position),
+      new FleshImpact(position, bullet.damage / 10, normal),
+    ]);
 
     this.voice.speak("hit");
 
@@ -153,7 +167,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
   die() {
     this.game?.dispatch({ type: "zombieDied", zombie: this });
-    this.game?.addEntity(new BloodSplat(this.getPosition()));
+    this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
     this.voice.speak("death");
     this.destroy();
   }

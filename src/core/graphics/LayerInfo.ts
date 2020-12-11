@@ -3,8 +3,6 @@ import { V2d, V } from "../Vector";
 
 /**
  * Info about a rendering layer
- *
- * TODO: Should we stick z on here?
  */
 export class LayerInfo {
   readonly container: Pixi.Container;

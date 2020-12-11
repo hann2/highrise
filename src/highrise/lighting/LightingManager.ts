@@ -1,19 +1,23 @@
-import { BLEND_MODES, Graphics, RenderTexture, Sprite } from "pixi.js";
+import { BLEND_MODES, Graphics, RenderTexture, Sprite, Texture } from "pixi.js";
+import { threadId } from "worker_threads";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import { V } from "../../core/Vector";
 import { Layers } from "../layers";
 import Light from "./Light";
+import { LightFilter, ShadowFilter } from "./LightingFilter";
 
-const AMBIENT_LIGHT = 0x0a0a0a;
+const AMBIENT_LIGHT = 0x000000;
 export default class LightingManager extends BaseEntity implements Entity {
   id = "lighting_manager";
   persistent = true;
+
   texture!: RenderTexture;
-
   sprite!: Sprite & GameSprite;
-  lightwrapper = new Graphics();
+  lightContainer = new Sprite();
+  darkness: Graphics = new Graphics();
 
-  lights: Light[] = [];
+  lights: Set<Light> = new Set();
 
   private get renderer() {
     return this.game!.renderer.pixiRenderer;
@@ -31,7 +35,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.texture = RenderTexture.create({
       width: width / resolution,
       height: height / resolution,
-      resolution,
+      resolution: resolution / 2,
     });
 
     this.sprite = new Sprite(this.texture);
@@ -39,30 +43,57 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.sprite.blendMode = BLEND_MODES.MULTIPLY;
     this.sprite.anchor.set(0, 0);
 
-    const darkness = new Graphics();
-    darkness.beginFill(AMBIENT_LIGHT);
-    darkness.drawRect(-100, -100, 1000, 1000);
-    darkness.endFill();
+    this.darkness
+      .beginFill(AMBIENT_LIGHT)
+      .drawRect(0, 0, width, height)
+      .endFill();
 
-    this.lightwrapper.blendMode = BLEND_MODES.ADD;
-    this.lightwrapper.addChild(darkness);
+    this.lightContainer.blendMode = BLEND_MODES.ADD;
   }
 
   addLight(light: Light) {
-    this.lightwrapper.addChild(light.lightSprite);
+    this.lights.add(light);
   }
 
   removeLight(light: Light) {
-    this.lightwrapper.removeChild(light.lightSprite);
+    this.lights.delete(light);
+  }
+
+  // Decide whether or not to render a light
+  private shouldRenderLight(light: Light) {
+    const { x, y } = light.lightSprite.position;
+    const { width, height } = light.lightSprite;
+
+    const camera = this.game!.camera;
+    const [minX, minY] = camera.toWorld(V(0, 0));
+    const [maxX, maxY] = camera.toWorld(camera.getViewportSize());
+
+    // Make sure that the light overlaps the viewport
+    // TODO: This is broken
+    return (
+      true || (x < maxX && x + width > minX && y < maxY && y + height > minY)
+    );
   }
 
   onRender() {
-    this.lightwrapper.transform.setFromMatrix(this.game!.camera.getMatrix());
-    this.renderer.render(this.lightwrapper, this.texture);
+    const matrix = this.game!.camera.getMatrix();
+    // const inverseMatrix = matrix.clone().invert();
+    this.lightContainer.transform.setFromMatrix(matrix);
 
-    // TODO: For Each Light:
-    //   render shadows to alpha channel
-    //   render light to color channels, but multiply color by alpha
-    //   clear alpha channel
+    // Clear everything
+    // TODO: This doesn't really have to be a separate render pass
+    this.renderer.render(this.darkness, this.texture, true);
+
+    // Make sure all lights are baked, then add them to the render object
+    for (const light of this.lights) {
+      if (this.shouldRenderLight(light)) {
+        light.bakeIfNeeded();
+        this.lightContainer.addChild(light.bakedLightSprite);
+      }
+    }
+
+    // Then render it all
+    this.renderer.render(this.lightContainer, this.texture, false);
+    this.lightContainer.removeChildren();
   }
 }

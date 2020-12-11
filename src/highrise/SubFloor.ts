@@ -7,6 +7,7 @@ import { hsvToRgb, rgbToHex } from "../core/util/ColorUtils";
 import { choose, rUniform } from "../core/util/Random";
 import { Layers } from "./layers";
 
+export const SUBFLOOR_TEXTURES = [industrialCarpet001, industrialCarpet002];
 export default class SubFloor extends BaseEntity implements Entity {
   sprite: TilingSprite & GameSprite;
 
@@ -14,7 +15,7 @@ export default class SubFloor extends BaseEntity implements Entity {
     super();
 
     this.sprite = TilingSprite.from(
-      choose(industrialCarpet001, industrialCarpet002),
+      choose(...SUBFLOOR_TEXTURES),
       {}
     ) as TilingSprite;
 

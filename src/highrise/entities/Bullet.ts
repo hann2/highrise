@@ -1,4 +1,4 @@
-import { Ray, RaycastResult, vec2 } from "p2";
+import { Ray, RaycastResult } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
@@ -14,7 +14,6 @@ import Human from "./human/Human";
 export const BULLET_RADIUS = 0.05; // meters
 const MAX_LIFESPAN = 3.0; // seconds
 
-// TODO: Don't draw line past collision point. I thought the code does that, but the results differ
 export default class Bullet extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
   light: Light;
@@ -32,7 +31,8 @@ export default class Bullet extends BaseEntity implements Entity {
     direction: number,
     speed: number = 50,
     public damage: number = 40,
-    private shooter?: Human
+    private shooter?: Human,
+    public mass: number = 0.01 // kg?
   ) {
     super();
 
@@ -62,6 +62,27 @@ export default class Bullet extends BaseEntity implements Entity {
     this.destroy();
   }
 
+  onTick(dt: number) {
+    if (this.hitPosition) {
+      this.destroy();
+      return;
+    }
+
+    // Every frame we want to render the bullet starting from where we started checking
+    this.renderPosition.set(this.position);
+
+    const hitResult = this.checkForCollision(dt);
+
+    if (hitResult) {
+      const { hitPosition, hitNormal, hit } = hitResult;
+      this.hitPosition = hitPosition;
+      hit.onBulletHit(this, this.hitPosition, hitNormal);
+      this.destroy();
+    } else {
+      this.position.iaddScaled(this.velocity, dt);
+    }
+  }
+
   checkForCollision(
     dt: number
   ): { hit: Hittable; hitNormal: V2d; hitPosition: V2d } | undefined {
@@ -89,33 +110,10 @@ export default class Bullet extends BaseEntity implements Entity {
     this.game!.world.raycast(this.raycastResult, this.ray);
 
     if (hit) {
-      const hitPosition = V(0, 0);
-      vec2.lerp(hitPosition, this.ray.from, this.ray.to, hitFraction);
+      const hitPosition = V(this.ray.from).ilerp(this.ray.to, hitFraction);
       return { hit, hitNormal: hitNormal!, hitPosition };
     } else {
       return undefined;
-    }
-  }
-
-  onTick(dt: number) {
-    if (this.hitPosition) {
-      this.destroy();
-      return;
-    }
-
-    // Every frame we want to render the bullet starting from where we started checking
-    this.renderPosition.set(this.position);
-
-    const hitResult = this.checkForCollision(dt);
-
-    if (hitResult) {
-      const { hitPosition, hitNormal, hit } = hitResult;
-      this.hitPosition = hitPosition;
-      hit.onBulletHit(this, this.hitPosition);
-      this.game?.addEntity(new WallImpact(hitPosition, hitNormal));
-      this.destroy();
-    } else {
-      this.position.iaddScaled(this.velocity, dt);
     }
   }
 
@@ -138,9 +136,13 @@ export default class Bullet extends BaseEntity implements Entity {
       .moveTo(0, 0)
       .lineTo(endPoint[0], endPoint[1]);
 
-    // thia
+    this.lightGraphics
+      .clear()
+      .lineStyle(0.2, 0xffaa00, 1.0)
+      .moveTo(0, 0)
+      .lineTo(endPoint[0], endPoint[1]);
 
-    [this.sprite.x, this.sprite.y] = this.position;
-    [this.light.lightSprite.x, this.light.lightSprite.y] = this.renderPosition;
+    this.sprite.position.set(...this.renderPosition);
+    this.light.lightSprite.position.set(...this.renderPosition);
   }
 }

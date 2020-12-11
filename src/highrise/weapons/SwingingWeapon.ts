@@ -136,7 +136,6 @@ export default class SwingingWeapon extends BaseEntity {
   }
 
   onBeginContact(other: Entity, _: unknown, __: unknown) {
-    console.log("SwingingWeapon contact");
     if (other != this.holder && isHittable(other)) {
       other.onMeleeHit(this, this.getPosition());
     }

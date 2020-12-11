@@ -12,7 +12,7 @@ import { getShapeCorners } from "./shapeUtils";
  * https://stackoverflow.com/questions/55855767/algorithm-to-determine-back-sides-of-a-polygon
  * https://archive.gamedev.net/archive/reference/programming/features/2dsoftshadow/page3.html
  */
-export class ShadowMask extends BaseEntity implements Entity {
+export class Shadows extends BaseEntity implements Entity {
   dirty: boolean = true;
   graphics: Graphics;
 
@@ -32,42 +32,36 @@ export class ShadowMask extends BaseEntity implements Entity {
     this.dirty = true;
   }
 
-  afterPhysics() {
-    if (this.game && this.dirty) {
-      this.update();
-    }
-  }
+  updateIfDirty() {
+    if (this.dirty) {
+      this.graphics.clear();
 
-  update() {
-    this.graphics.clear();
+      const shadows = this.getShadowCorners();
 
-    const shadows = this.getShadowCorners();
-
-    for (const corners of shadows) {
-      if (corners.length) {
-        this.graphics
-          .beginFill(0x000000)
-          .drawPolygon(
-            corners
-              // TODO: Do we really want this translation here?
-              .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
-              .flat()
-          )
-          .endFill();
+      for (const corners of shadows) {
+        if (corners.length) {
+          this.graphics
+            .beginFill(0x000000)
+            .drawPolygon(
+              corners
+                // TODO: Do we really want this translation here?
+                .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
+                .flat()
+            )
+            .endFill();
+        }
       }
-    }
 
-    this.dirty = false;
+      this.dirty = false;
+    }
   }
 
   // TODO: This is really slow. Ideas for fixing
-  //   - Don't use V2ds anywhere, and try to keep allocation down in general
+  //   - Don't use V2ds anywhere, and try to keep allocation down in general.
+  //     This would probably at least double the speed of this.
   private getShadowCorners(): [number, number][][] {
     const lightPos = this.lightPos;
-    // const bodies = this.game!.entities.getTagged("cast_shadow");
-
     const bodies = this.getAffectedBodies();
-
     const shadows: [number, number][][] = [];
 
     for (const body of bodies) {

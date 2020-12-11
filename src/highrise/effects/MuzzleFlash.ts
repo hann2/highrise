@@ -41,7 +41,7 @@ export const MUZZLE_FLASH_URLS = [
   muzzleFlash16,
 ];
 
-const SCALE = 1 / 200; // scale of the image
+const SCALE = 1 / 220; // scale of the image
 const DURATION = 0.1; // seconds
 const RADIUS = 12; // meters for light
 export default class MuzzleFlash extends BaseEntity implements Entity {
@@ -53,8 +53,8 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     super();
 
     this.sprite = Sprite.from(choose(...MUZZLE_FLASH_URLS));
-    this.sprite.anchor.set(0.3, 0.5);
-    this.sprite.scale.set(1 / 150);
+    this.sprite.anchor.set(0.1, 0.5);
+    this.sprite.scale.set(SCALE);
     this.sprite.position.set(...position);
     this.sprite.rotation = angle;
     this.sprite.blendMode = BLEND_MODES.ADD;
@@ -71,9 +71,9 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     this.light?.setIntensity(0.9 * t);
 
     this.sprite.alpha = t;
-    this.sprite.scale.set(SCALE * (1.8 - t ** 2));
-
+    this.sprite.scale.set(SCALE * (2.0 - t ** 2));
     this.timeLeft -= dt;
+
     if (this.timeLeft < 0) {
       this.destroy();
     }

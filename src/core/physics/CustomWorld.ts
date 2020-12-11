@@ -85,14 +85,13 @@ export default class CustomWorld extends World {
     this.kinematicBodies.delete(body);
   }
 
-
   raycast(result: RaycastResult, ray: Ray, shouldAddBodies: boolean = true) {
     // Get all bodies within the ray AABB
     // const bodies = this.broadphase.rayQuery(ray, shouldAddBodies);
     // ray.intersectBodies(result, bodies);
     // return result.hasHit();
 
-    const aabb = new AABB()
+    const aabb = new AABB();
     // @ts-ignore
     const bodies: Body = [];
     // @ts-ignore
@@ -104,8 +103,6 @@ export default class CustomWorld extends World {
 
     return result.hasHit();
   }
-
-  // TODO: Implement better hitTest
 
   internalStep(dt: number) {
     this.stepping = true;
@@ -322,7 +319,7 @@ export default class CustomWorld extends World {
         for (const constraint of this.constraints) {
           Utils.appendArray(islandManager.equations, constraint.equations);
         }
-        for (let i = 0; i < this.constraints.length; i++) { }
+        for (let i = 0; i < this.constraints.length; i++) {}
         islandManager.split(this);
 
         for (const island of islandManager.islands) {

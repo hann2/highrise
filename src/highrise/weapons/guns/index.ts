@@ -7,6 +7,7 @@ import { FiveSeven } from "./FiveSeven";
 import { Glock } from "./Glock";
 import { M1911 } from "./M1911";
 import { Magnum } from "./Magnum";
+import { P90 } from "./P90";
 import { PumpShotgun } from "./PumpShotgun";
 import { SPAS12 } from "./SPAS12";
 
@@ -20,6 +21,7 @@ export const GUNS: Array<GunStats> = [
   Glock,
   M1911,
   Magnum,
+  P90,
   PumpShotgun,
   SPAS12,
 ];

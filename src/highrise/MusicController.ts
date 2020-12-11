@@ -5,6 +5,7 @@ import { KeyCode } from "../core/io/Keys";
 import { SoundInstance } from "../core/sound/SoundInstance";
 
 export const MUSIC_URLS = [bassGrooveLoop1];
+const MUSIC_VOLUME = 0.7;
 
 export default class MusicController extends BaseEntity implements Entity {
   persistent = true;
@@ -31,18 +32,18 @@ export default class MusicController extends BaseEntity implements Entity {
     await this.wait(
       seconds,
       (_, t) => {
-        this.soundInstance.gain = t ** 2 * 0.6;
+        this.soundInstance.gain = t ** 2 * MUSIC_VOLUME;
       },
       "fade"
     );
-    this.soundInstance.gain = 0.6;
+    this.soundInstance.gain = MUSIC_VOLUME;
   }
 
   onKeyDown(key: KeyCode) {
     if (key === "KeyM") {
       if (this.soundInstance.gain > 0) {
-        this.soundInstance.gain = 0;
         this.clearTimers("fade");
+        this.soundInstance.gain = 0;
       } else {
         this.fadeIn(0.5);
       }

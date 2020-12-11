@@ -58,6 +58,11 @@ export default class PlayerHumanController
   }
 
   onTick() {
+    if (this.human.isDestroyed) {
+      this.destroy();
+      return;
+    }
+
     const io = this.game!.io;
 
     this.game!.slowMo = io.keyIsDown("ShiftLeft") ? 0.2 : 1.0;

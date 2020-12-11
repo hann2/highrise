@@ -30,9 +30,13 @@ export default class HumanVoice extends BaseEntity implements Entity {
     }
   }
 
-  speak(soundClass: CharacterSoundClass) {
+  speak(soundClass: CharacterSoundClass, interrupt: boolean = false) {
     // TODO: Interrupt sound
-    if (!this.currentSound) {
+    if (interrupt && this.currentSound) {
+      this.currentSound.gain = 0;
+      this.currentSound = undefined;
+    }
+    if (interrupt || !this.currentSound) {
       const sound = this.sounds[soundClass].getNext();
       if (sound) {
         this.currentSound = this.game?.addEntity(

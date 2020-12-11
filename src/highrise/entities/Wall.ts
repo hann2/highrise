@@ -7,6 +7,7 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
+import WallImpact from "../effects/WallImpact";
 import { Layers } from "../layers";
 import { CollisionGroups } from "../physics/CollisionGroups";
 import SwingingWeapon from "../weapons/SwingingWeapon";
@@ -58,9 +59,10 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
 
-  onBulletHit(bullet: Bullet, position: V2d) {
-    this.game!.addEntity(
-      new PositionalSound(choose(wallHit1, wallHit2), position)
-    );
+  onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
+    this.game!.addEntities([
+      new PositionalSound(choose(wallHit1, wallHit2), position),
+      new WallImpact(position, normal),
+    ]);
   }
 }

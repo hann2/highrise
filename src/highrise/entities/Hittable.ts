@@ -4,7 +4,7 @@ import Bullet from "./Bullet";
 import SwingingWeapon from "../weapons/SwingingWeapon";
 
 export default interface Hittable extends Entity {
-  onBulletHit(bullet: Bullet, position: V2d): void;
+  onBulletHit(bullet: Bullet, position: V2d, normal: V2d): void;
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void;
 }
 
