@@ -3,12 +3,10 @@ import bathroom from "../../../resources/images/environment/bathroom.png";
 import carpet from "../../../resources/images/environment/carpet.png";
 import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../../resources/images/environment/fences-lights.png";
-import industrialCarpet001 from "../../../resources/images/environment/floor/IndustrialCarpet-001.jpg";
-import industrialCarpet002 from "../../../resources/images/environment/floor/IndustrialCarpet-002.jpg";
 import furniture from "../../../resources/images/environment/furniture.png";
 import market from "../../../resources/images/environment/market.png";
-import vendingMachineGlow from "../../../resources/images/environment/vending-machine-glow.png";
-import vendingMachine from "../../../resources/images/environment/vending-machine.png";
+import vendingMachine1 from "../../../resources/images/environment/vending-machine-1.png";
+import vendingMachineGlow1 from "../../../resources/images/environment/vending-machine-glow-1.png";
 import woodenFloor from "../../../resources/images/environment/wooden-floor.png";
 import healthPack from "../../../resources/images/health_pack.png";
 import pointLight from "../../../resources/images/lights/point-light.png";
@@ -18,6 +16,7 @@ import zombie1Stand from "../../../resources/images/zombies/zombie1_stand.png";
 import { CHARACTERS } from "../characters/Character";
 import { BLOOD_SPLAT_URLS } from "../effects/BloodSplat";
 import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
+import { VENDING_MACHINES } from "../entities/environment/VendingMachine";
 import { SUBFLOOR_TEXTURES } from "../SubFloor";
 import { WEAPONS } from "../weapons";
 
@@ -35,11 +34,11 @@ export function getImagesToPreload(): Set<string> {
     market,
     pointLight,
     solidCircle,
-    vendingMachine,
-    vendingMachineGlow,
     woodenFloor,
     zombie1Hold,
     zombie1Stand,
+
+    ...VENDING_MACHINES.flat(),
 
     ...SUBFLOOR_TEXTURES,
     ...MUZZLE_FLASH_URLS,
