@@ -3,10 +3,12 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Decoration from "../../entities/Decoration";
 import Door from "../../entities/Door";
 import Exit from "../../entities/Exit";
 import HealthPickup from "../../entities/HealthPickup";
+import Human from "../../entities/human/Human";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Zombie from "../../entities/zombie/Zombie";
@@ -22,6 +24,9 @@ import {
 } from "../../view/DecorationSprite";
 import Gun from "../../weapons/Gun";
 import { GUNS } from "../../weapons/guns";
+import { FiveSeven } from "../../weapons/guns/FiveSeven";
+import { Glock } from "../../weapons/guns/Glock";
+import { M1911 } from "../../weapons/guns/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee-weapons";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import { Level } from "./Level";
@@ -741,11 +746,11 @@ class LevelBuilder {
       (l: V2d) => new WeaponPickup(l, new MeleeWeapon(choose(...MELEE_WEAPONS)))
     );
     consumeLocation((l: V2d) => new HealthPickup(l));
-    // consumeLocation((l: V2d) => {
-    //   const surv = new Human(l);
-    //   surv.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
-    //   return [surv, new SurvivorHumanController(surv)];
-    // });
+    consumeLocation((l: V2d) => {
+      const surv = new Human(l);
+      surv.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
+      return [surv, new SurvivorHumanController(surv)];
+    });
 
     for (let i = counter; i < shuffledClosets.length; i++) {
       consumeLocation((l: V2d) => new Zombie(l));
