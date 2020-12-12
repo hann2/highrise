@@ -1,8 +1,9 @@
-import { AABB, Body } from "p2";
-import { BLEND_MODES, Graphics } from "pixi.js";
+import { AABB, Body, vec2 } from "p2";
+import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
+import light from "./light.frag";
 import { getShapeCorners } from "./shapeUtils";
 /**
  * Draws shadows from a given point
@@ -75,15 +76,19 @@ export class Shadows extends BaseEntity implements Entity {
         const shadowPoints: [number, number][] = [];
         const edgesVisible: boolean[] = [];
 
+        // Declare here so we can reuse them and avoid allocations.
+        // Though that may be worse for cache? I don't know with JavaScript
+        const edgeNormal = vec2.create();
+        const centerNormal = vec2.create();
+
         // Figure out which faces are visible
         for (let i = 0; i < corners.length; i++) {
           const a = corners[i % corners.length];
           const b = corners[(i + 1) % corners.length];
-          const edgeNormal = b.sub(a);
-          edgeNormal.irotate90cw();
-          const centerNormal = a.sub(lightPos);
-
-          const dot = edgeNormal.dot(centerNormal);
+          vec2.sub(edgeNormal, b, a);
+          vec2.rotate90cw(edgeNormal, edgeNormal);
+          vec2.sub(centerNormal, a, lightPos);
+          const dot = vec2.dot(centerNormal, edgeNormal);
           edgesVisible.push(dot <= 0);
         }
 
@@ -92,25 +97,30 @@ export class Shadows extends BaseEntity implements Entity {
           const previousEdge = edgesVisible[i - 1];
           const nextEdge = edgesVisible[i % edgesVisible.length];
 
-          const shadowDistance = 2 * this.radius;
+          // TODO: This won't always reach the end of the light, it needs either to be suuuper long, or to add more points
+          const shadowDistance = 10 * this.radius;
           if (previousEdge && !nextEdge) {
             // left breaking point
             shadowPoints.push(point);
-            shadowPoints.push(displacePoint(point, lightPos, shadowDistance));
+            shadowPoints.push(
+              getDisplacedPoint(point, lightPos, shadowDistance)
+            );
           } else if (!previousEdge && nextEdge) {
             // right breaking point
-            shadowPoints.push(displacePoint(point, lightPos, shadowDistance));
+            shadowPoints.push(
+              getDisplacedPoint(point, lightPos, shadowDistance)
+            );
             shadowPoints.push(point);
           } else if (previousEdge && nextEdge) {
             // front side
             shadowPoints.push(point);
           } else {
             // back side
-            shadowPoints.push(displacePoint(point, lightPos, shadowDistance));
+            shadowPoints.push(
+              getDisplacedPoint(point, lightPos, shadowDistance)
+            );
           }
         }
-
-        // TODO: This won't always reach the end of the light, it needs either to be suuuper long, or to add more points
 
         shadows.push(shadowPoints);
       }
@@ -137,7 +147,16 @@ export class Shadows extends BaseEntity implements Entity {
   }
 }
 
-function displacePoint(point: V2d, lightPos: V2d, distance: number): V2d {
-  const displacement = point.sub(lightPos).inormalize().imul(distance);
-  return displacement.iadd(point);
+// Returns a new point that is the projection from point to lightPos out to given distance
+function getDisplacedPoint(
+  point: [number, number],
+  lightPos: [number, number],
+  distance: number
+): [number, number] {
+  const result = vec2.create();
+  vec2.sub(result, point, lightPos);
+  vec2.normalize(result, result);
+  vec2.scale(result, result, distance);
+  vec2.add(result, result, point);
+  return result;
 }
