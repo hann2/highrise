@@ -1,12 +1,52 @@
-import { Sprite } from "pixi.js";
+import { Sprite, Text } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity from "../../core/entity/Entity";
+import Entity, { GameSprite } from "../../core/entity/Entity";
+import Game from "../../core/Game";
+import { KeyCode } from "../../core/io/Keys";
+import { Layers } from "../layers";
+import MainMenu from "./MainMenu";
 
-export default class Credits extends BaseEntity implements Entity {
+const SCROLL_SPEED = 1.0;
+const TEXT_SIZE = 22;
+const LINE_HEIGHT = 32;
+export default class CreditsScreen extends BaseEntity implements Entity {
+  sprite: Sprite & GameSprite;
+
   constructor() {
     super();
 
     this.sprite = new Sprite();
+    this.sprite.layerName = Layers.MENU;
+
+    const lines = TEXT.split("\n");
+    console.log(lines);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const textSprite = new Text(line, {
+        fontSize: 24,
+        fill: "white",
+        align: "left",
+      });
+      textSprite.y = i * 30;
+      this.sprite.addChild(textSprite);
+    }
+  }
+
+  onAdd(game: Game) {
+    this.sprite.x = 30;
+    this.sprite.y = game.renderer.getHeight();
+  }
+
+  onKeyDown(key: KeyCode) {
+    switch (key) {
+      case "Escape":
+        this.game?.addEntity(new MainMenu());
+        this.destroy();
+    }
+  }
+
+  onRender() {
+    this.sprite!.y -= SCROLL_SPEED;
   }
 }
 

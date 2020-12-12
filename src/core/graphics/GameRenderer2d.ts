@@ -58,7 +58,7 @@ export class GameRenderer2d {
   }
 
   getSize(): V2d {
-    return V(this.getHeight(), this.getWidth());
+    return V(this.getWidth(), this.getHeight());
   }
 
   handleResize() {

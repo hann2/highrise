@@ -8,6 +8,7 @@ import {
 } from "../../data/levels/levelGeneration";
 import FadeEffect from "../../effects/FadeEffect";
 import Light from "../../lighting/Light";
+import MainMenu from "../../menu/MainMenu";
 import Human from "../human/Human";
 import PartyManager from "../PartyManager";
 import AllyHumanController from "./AllyController";
@@ -38,11 +39,11 @@ export default class LevelController extends BaseEntity implements Entity {
     levelComplete: async () => {
       this.getPartyLeader()?.voice.speak("relief");
       this.currentLevel += 1;
-      this.clearLevel();
 
       this.game?.addEntity(new FadeEffect(1, 0.5, 1));
 
       await this.wait(1.5);
+      this.clearLevel();
       const level = generateLevel(chooseTemplate(this.currentLevel));
       this.game?.dispatch({ type: "startLevel", level });
     },
@@ -52,9 +53,10 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     gameOver: async () => {
-      this.game!.addEntity(new FadeEffect(2.0, 1.001, 0, 0x000000));
-      await this.wait(3);
-      this.game!.dispatch({ type: "newGame" });
+      this.game!.addEntity(new FadeEffect(3.0, 2.0, 0, 0x000000));
+      await this.wait(5);
+      this.game?.clearScene();
+      this.game?.addEntity(new MainMenu());
     },
   };
 
