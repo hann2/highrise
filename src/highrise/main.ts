@@ -51,7 +51,6 @@ export async function main() {
 
   game.addEntity(new AutoPauser());
   game.addEntity(new PauseMenuController());
-  game.addEntity(new FPSMeter());
   game.addEntity(new ResizeListener());
   game.addEntity(new LevelController());
   game.addEntity(new PartyManager());
@@ -62,6 +61,7 @@ export async function main() {
   game.addEntity(new MainMenu());
 
   if (process.env.NODE_ENV === "development") {
+    game.addEntity(new FPSMeter());
     game.addEntity(new CheatController());
   }
 
