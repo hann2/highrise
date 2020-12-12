@@ -1,17 +1,25 @@
-import { Sprite } from "pixi.js";
+import { BLEND_MODES, Sprite } from "pixi.js";
 import pointLight from "../../../resources/images/lights/point-light.png";
 import Light from "./Light";
 
+interface Options {
+  radius?: number;
+  intensity?: number;
+  color?: number;
+  shadowsEnabled?: boolean;
+  position?: [number, number];
+}
 export class PointLight extends Light {
-  constructor(
-    private radius: number = 1,
-    intensity: number = 1.0,
-    color: number = 0xffffff,
-    shadowsEnabled: boolean = false,
-    position?: [number, number]
-  ) {
+  constructor({
+    radius = 1,
+    intensity = 1.0,
+    color = 0xffffff,
+    shadowsEnabled = true,
+    position,
+  }: Options) {
     super(Sprite.from(pointLight), shadowsEnabled);
     this.lightSprite.anchor.set(0.5, 0.5);
+    this.lightSprite.blendMode = BLEND_MODES.ADD;
 
     this.setRadius(radius);
     this.setIntensity(intensity);
@@ -22,16 +30,12 @@ export class PointLight extends Light {
 
   setRadius(radius: number) {
     this.dirty = true;
-    this.radius = radius;
+    this.shadowRadius = radius;
     this.shadows?.setRadius(radius);
 
     this.lightSprite.width = radius * 2;
     this.lightSprite.height = radius * 2;
 
     this.resizeBakedTexture();
-  }
-
-  getShadowRadius(): number {
-    return this.radius;
   }
 }

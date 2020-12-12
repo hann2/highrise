@@ -84,9 +84,15 @@ export default class BathroomTemplate extends RoomTemplate {
     addToiletAt(V(1, 1));
     addToiletAt(V(1, 2));
 
-    const light = new PointLight(7, 0.8, 0xfaf0e6);
-    light.setPosition(transformCell(V(0.5, 1)));
-    entities.push(light);
+    entities.push(
+      new PointLight({
+        radius: 7,
+        intensity: 0.8,
+        color: 0xfaf0e6,
+        shadowsEnabled: true,
+        position: transformCell(V(0.5, 1)),
+      })
+    );
 
     return entities;
   }

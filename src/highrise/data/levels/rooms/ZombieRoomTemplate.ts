@@ -26,12 +26,22 @@ export default class ZombieRoomTemplate extends RoomTemplate {
         entities.push(new Zombie(transformCell(V(i, j).add(V(-0.25, -0.25)))));
       }
     }
-    const light1 = new PointLight(4, 0.8, 0xb0e0e6);
-    light1.setPosition(transformCell(V(0.5, 0.5)));
-    entities.push(light1);
-    const light2 = new PointLight(4, 0.8, 0xb0e0e6);
-    light2.setPosition(transformCell(V(1.5, 0.5)));
-    entities.push(light2);
+    entities.push(
+      new PointLight({
+        radius: 4,
+        intensity: 0.8,
+        color: 0xb0e0e6,
+        position: transformCell(V(0.5, 0.5)),
+      })
+    );
+    entities.push(
+      new PointLight({
+        radius: 4,
+        intensity: 0.8,
+        color: 0xb0e0e6,
+        position: transformCell(V(1.5, 0.5)),
+      })
+    );
     return entities;
   }
 }

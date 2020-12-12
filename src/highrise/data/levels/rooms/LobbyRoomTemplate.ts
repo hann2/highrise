@@ -190,8 +190,11 @@ export default class LobbyRoomTemplate extends RoomTemplate {
 
     entities.push(new Furniture(transformCell(V(4.5, 5.5)), piano));
 
-    const l1 = new PointLight(10);
-    l1.setPosition(transformCell(V(0, 0)));
+    const l1 = new PointLight({
+      radius: 1,
+      shadowsEnabled: true,
+      position: transformCell(V(0, 0)),
+    });
     entities.push(l1);
 
     return entities;

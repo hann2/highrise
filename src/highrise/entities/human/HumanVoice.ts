@@ -2,22 +2,25 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
-import { choose } from "../../../core/util/Random";
 import {
   CharacterSoundClass,
   CharacterSounds,
 } from "../../characters/Character";
+import SpeakingCircle from "../../effects/SpeakingCircle";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 import Human from "./Human";
 
 export default class HumanVoice extends BaseEntity implements Entity {
   currentSound?: PositionalSound;
   sounds: CharacterSoundRings;
+  speakingCircle: SpeakingCircle;
 
   constructor(public human: Human) {
     super();
 
     this.sounds = makeSoundRings(human.character.sounds);
+
+    this.speakingCircle = this.addChild(new SpeakingCircle(human));
   }
 
   // TODO: Handle the events that make us speak -- Do we actually want to do that here?
@@ -28,6 +31,8 @@ export default class HumanVoice extends BaseEntity implements Entity {
     if (this.currentSound?.isDestroyed) {
       this.currentSound = undefined;
     }
+
+    this.speakingCircle.active = Boolean(this.currentSound);
   }
 
   speak(soundClass: CharacterSoundClass, interrupt: boolean = false) {

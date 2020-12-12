@@ -21,6 +21,7 @@ const OPEN_TIME = 2;
  * Represents one of the two doors representing an elevator door
  */
 class HalfDoor extends BaseEntity implements Entity, Hittable {
+  tags = ["cast_shadow"];
   staticCorner: V2d;
   oppositeCorner: V2d;
   dimensions: V2d;

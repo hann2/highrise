@@ -49,9 +49,13 @@ export default class Florist extends RoomTemplate {
     entities.push(new Furniture(transformCell(V(2.1, -0.15)), housePlantTall1));
     entities.push(new Furniture(transformCell(V(2.1, -0.15)), housePlantTall2));
     entities.push(new Furniture(transformCell(V(2.1, -0.15)), housePlantTall3));
-    const light = new PointLight(6, 0.6);
-    light.setPosition(transformCell(V(1, 1)));
-    entities.push(light);
+    entities.push(
+      new PointLight({
+        radius: 6,
+        intensity: 0.6,
+        position: transformCell(V(1, 1)),
+      })
+    );
 
     return entities;
   }

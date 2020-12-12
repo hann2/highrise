@@ -55,7 +55,6 @@ export default class VendingMachine
     lightSprite.rotation = rotation;
 
     this.light = this.addChild(new Light(lightSprite, false));
-    this.light.getShadowRadius = () => 1.5;
     this.light.setPosition(position.add([0.25, 0.25])); // TODO: WHYY?!?!
 
     this.body = new Body({

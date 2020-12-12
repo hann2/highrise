@@ -28,9 +28,14 @@ export default class SpawnRoom extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
-    const light = new PointLight(6, 0.8);
-    light.setPosition(transformCell(V(1, 1)));
-    entities.push(light);
+    entities.push(
+      new PointLight({
+        radius: 6,
+        intensity: 0.8,
+        shadowsEnabled: true,
+        position: transformCell(V(1, 1)),
+      })
+    );
 
     entities.push(new SpawnLocation(transformCell(V(1, 2))));
     entities.push(new SpawnLocation(transformCell(V(0, 1))));

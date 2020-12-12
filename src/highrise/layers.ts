@@ -7,19 +7,25 @@ export enum Layers {
   SUBFLOOR = "subfloor",
   // The floor
   FLOOR = "floor",
+  // ambient occlusion on the floor
+  AO = "ao",
   // Stuff on the floor
   WORLD_BACK = "world_back",
-  // Stuff at the human's level
+  // Stuff at the human's chest level
   WEAPONS = "world_weapons",
+  // Walls n stuff
+  WALLS = "walls",
   // Stuff at the human's level
   WORLD = "world",
   // Stuff above the humans
   WORLD_FRONT = "world_front",
-  // Special layer for lighting
+  // Special layer for lighting, in screen coordinates because the LightingManager does the transforms
   LIGHTING = "lighting",
-  // Special layer for vision
+  // Layer for stuff that is lit on its own, in world coordinates
+  EMISSIVES = "emissives",
+  // Special layer for vision, in world coordinates
   VISION = "vision",
-  // Most top level thing for HUD elements that are physically placed
+  // Most top level thing for HUD elements that are placed in world coordinates
   WORLD_OVERLAY = "world_overlay",
   // Stuff not in the world
   HUD = "hud",
@@ -31,11 +37,14 @@ export enum Layers {
 export function initLayers(game: Game) {
   game.renderer.createLayer(Layers.SUBFLOOR, new LayerInfo());
   game.renderer.createLayer(Layers.FLOOR, new LayerInfo());
+  game.renderer.createLayer(Layers.AO, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_BACK, new LayerInfo());
   game.renderer.createLayer(Layers.WEAPONS, new LayerInfo());
+  game.renderer.createLayer(Layers.WALLS, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_FRONT, new LayerInfo());
   game.renderer.createLayer(Layers.LIGHTING, new LayerInfo({ paralax: 0 }));
+  game.renderer.createLayer(Layers.EMISSIVES, new LayerInfo());
   game.renderer.createLayer(Layers.VISION, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_OVERLAY, new LayerInfo());
   game.renderer.createLayer(Layers.HUD, new LayerInfo({ paralax: 0 }));

@@ -58,12 +58,19 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     this.sprite.position.set(...position);
     this.sprite.rotation = angle;
     this.sprite.blendMode = BLEND_MODES.ADD;
-    this.sprite.layerName = Layers.WORLD_OVERLAY;
+    this.sprite.layerName = Layers.EMISSIVES;
   }
 
   onAdd() {
-    this.light = this.addChild(new PointLight(RADIUS, 0.8, 0xffeeaa, true));
-    this.light.setPosition([this.sprite.position.x, this.sprite.position.y]);
+    this.light = this.addChild(
+      new PointLight({
+        radius: RADIUS,
+        intensity: 0.8,
+        color: 0xffeeaa,
+        shadowsEnabled: true,
+        position: [this.sprite.position.x, this.sprite.position.y],
+      })
+    );
   }
 
   onTick(dt: number) {

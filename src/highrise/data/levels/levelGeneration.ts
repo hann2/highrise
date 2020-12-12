@@ -38,9 +38,11 @@ import SpawnRoom from "./rooms/SpawnRoom";
 import ShopLevel from "./ShopLevel";
 
 export const LEVEL_SIZE = 14;
-export const WALL_WIDTH = 0.3;
-export const OPEN_WIDTH = 1.8;
+export const WALL_WIDTH = 0.0;
+export const OPEN_WIDTH = 2.0;
 export const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
+
+const DOOR_INSET = 0.15;
 
 // List of all possible reflections/rotations
 export const POSSIBLE_ORIENTATIONS: Matrix[] = [
@@ -247,8 +249,8 @@ class LevelBuilder {
       const wallsCounterClockwise = [...wallsClockwise].reverse();
 
       return new Door(
-        V(x + OPEN_WIDTH / 2 + WALL_WIDTH / 2, y - OPEN_WIDTH / 2),
-        OPEN_WIDTH,
+        V(x + OPEN_WIDTH / 2, y - OPEN_WIDTH / 2 + DOOR_INSET / 2),
+        OPEN_WIDTH - DOOR_INSET,
         Math.PI / 2,
         (countWallsThatExist(wallsCounterClockwise) * -Math.PI) / 2,
         (countWallsThatExist(wallsClockwise) * Math.PI) / 2
@@ -262,8 +264,8 @@ class LevelBuilder {
       const wallsCounterClockwise = [...wallsClockwise].reverse();
 
       return new Door(
-        V(x - OPEN_WIDTH / 2, y + OPEN_WIDTH / 2 + WALL_WIDTH / 2),
-        OPEN_WIDTH,
+        V(x - OPEN_WIDTH / 2, y + OPEN_WIDTH / 2),
+        OPEN_WIDTH - 0.3,
         0,
         (countWallsThatExist(wallsCounterClockwise) * -Math.PI) / 2,
         (countWallsThatExist(wallsClockwise) * Math.PI) / 2
@@ -452,21 +454,13 @@ class LevelBuilder {
   }
 
   addOuterWalls(): Entity[] {
+    const max = CELL_WIDTH * LEVEL_SIZE;
+    // TODO: Wall width offsets
     return [
-      new Wall(0, 0, CELL_WIDTH * LEVEL_SIZE + WALL_WIDTH, WALL_WIDTH),
-      new Wall(0, 0, WALL_WIDTH, CELL_WIDTH * LEVEL_SIZE + WALL_WIDTH),
-      new Wall(
-        CELL_WIDTH * LEVEL_SIZE,
-        0,
-        CELL_WIDTH * LEVEL_SIZE + WALL_WIDTH,
-        CELL_WIDTH * LEVEL_SIZE + WALL_WIDTH
-      ),
-      new Wall(
-        0,
-        CELL_WIDTH * LEVEL_SIZE,
-        CELL_WIDTH * LEVEL_SIZE + WALL_WIDTH,
-        CELL_WIDTH * LEVEL_SIZE + WALL_WIDTH
-      ),
+      new Wall([0, 0], [max, 0]),
+      new Wall([0, 0], [0, max]),
+      new Wall([max, 0], [max, max]),
+      new Wall([0, max], [max, max]),
     ];
   }
 
@@ -676,9 +670,15 @@ class LevelBuilder {
       }
       this.cells[closet.backCell[0]][closet.backCell[1]].content = "pickup";
       const location = closet.backCell.add(closet.backWallDirection.mul(0.5));
-      const light = new PointLight(CELL_WIDTH * 3, 0.5, 0xffffff, true);
-      light.setPosition(this.levelCoordToWorldCoord(location));
-      entities.push(light);
+      entities.push(
+        new PointLight({
+          radius: CELL_WIDTH * 3,
+          intensity: 0.5,
+          color: 0xffffff,
+          shadowsEnabled: true,
+          position: this.levelCoordToWorldCoord(location),
+        })
+      );
       const entity = f(this.levelCoordToWorldCoord(location));
       if (entity instanceof Array) {
         entities.push(...entity);
@@ -816,20 +816,16 @@ class LevelBuilder {
         if (this.cells[i][j].rightWall.exists) {
           wallEntities.push(
             new Wall(
-              x + OPEN_WIDTH / 2,
-              y - (WALL_WIDTH + OPEN_WIDTH / 2),
-              x + WALL_WIDTH + OPEN_WIDTH / 2,
-              y + WALL_WIDTH + OPEN_WIDTH / 2
+              [x + OPEN_WIDTH / 2, y - OPEN_WIDTH / 2],
+              [x + OPEN_WIDTH / 2, y + OPEN_WIDTH / 2]
             )
           );
         }
         if (this.cells[i][j].bottomWall.exists) {
           wallEntities.push(
             new Wall(
-              x - (WALL_WIDTH + OPEN_WIDTH / 2),
-              y + OPEN_WIDTH / 2,
-              x + WALL_WIDTH + OPEN_WIDTH / 2,
-              y + WALL_WIDTH + OPEN_WIDTH / 2
+              [x - OPEN_WIDTH / 2, y + OPEN_WIDTH / 2],
+              [x + OPEN_WIDTH / 2, y + OPEN_WIDTH / 2]
             )
           );
         }

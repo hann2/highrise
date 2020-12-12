@@ -2,10 +2,13 @@ import { Body, Box, RevoluteConstraint } from "p2";
 import { Graphics, Point, Sprite } from "pixi.js";
 import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
+import door1 from "../../../resources/images/environment/door-1.png";
+import door2 from "../../../resources/images/environment/door-2.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
+import { polarToVec } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import WallImpact from "../effects/WallImpact";
@@ -17,63 +20,41 @@ import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
 
-export default class Door extends BaseEntity implements Entity, Hittable {
-  hingePoint: V2d;
-  length: number;
-  restingAngle: number;
-  minAngle: number;
-  maxAngle: number;
+export const DOOR_SPRITES = [door1, door2];
 
-  sprite: Sprite;
+export default class Door extends BaseEntity implements Entity, Hittable {
+  tags = ["casts_shadow"];
+
+  sprite: Sprite & GameSprite;
   body: Body;
 
   constructor(
-    hingePoint: V2d,
+    private hingePoint: V2d,
     length: number,
-    restingAngle: number,
-    minAngle: number,
-    maxAngle: number
+    private restingAngle: number,
+    private minAngle: number,
+    private maxAngle: number
   ) {
     super();
     this.hingePoint = hingePoint;
-    this.length = length;
-    this.restingAngle = restingAngle;
-    this.minAngle = minAngle;
-    this.maxAngle = maxAngle;
 
-    const [x1, y1] = [0, -DOOR_THICKNESS / 2];
-    const [w, h] = [length, DOOR_THICKNESS];
-    const [x2, y2] = [x1 + w, y1 + h];
-
-    const corners = [
-      new Point(x1, y1),
-      new Point(x1, y2),
-      new Point(x2, y2),
-      new Point(x2, y1),
-    ];
-
-    const graphics = new Graphics();
-    graphics.beginFill(0xff6666);
-    graphics.drawPolygon(corners);
-    graphics.endFill();
-
-    this.sprite = new Sprite();
+    this.sprite = Sprite.from(choose(...DOOR_SPRITES));
+    this.sprite.scale.set(length / this.sprite.width);
+    this.sprite.anchor.set(0, 0.5); // door sprites are horizontal
     this.sprite.position.set(...hingePoint);
-    this.sprite.addChild(graphics);
-    this.sprite.anchor.set(0.5, 0);
-    (this.sprite as GameSprite).layerName = Layers.WORLD_FRONT;
+    this.sprite.layerName = Layers.WORLD_FRONT;
 
     this.body = new Body({
       mass: 1.5,
       position: hingePoint,
     });
 
-    const shape = new Box({ width: w, height: h });
+    const shape = new Box({ width: DOOR_THICKNESS, height: length });
     shape.collisionGroup = CollisionGroups.World | CollisionGroups.CastsShadow;
     shape.collisionMask =
       CollisionGroups.All ^
       (CollisionGroups.World | CollisionGroups.CastsShadow);
-    this.body.addShape(shape, [length / 2, 0], 0);
+    this.body.addShape(shape, [length / 2, 0], Math.PI / 2);
     this.body.angle = restingAngle;
     this.body.angularDamping = 1.0;
   }

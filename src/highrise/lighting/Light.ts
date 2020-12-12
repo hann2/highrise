@@ -17,7 +17,8 @@ export default class Light extends BaseEntity implements Entity {
 
   constructor(
     public lightSprite: Sprite = new Sprite(),
-    public shadowsEnabled: boolean = false
+    public shadowsEnabled: boolean = false,
+    public shadowRadius: number = 1
   ) {
     super();
 
@@ -33,6 +34,10 @@ export default class Light extends BaseEntity implements Entity {
     this.bakedSprite = Sprite.from(this.bakedTexture);
     this.bakedSprite.anchor.set(0.5, 0.5);
     this.bakedSprite.blendMode = BLEND_MODES.ADD;
+
+    if (this.shadowsEnabled) {
+      this.enableShadows();
+    }
   }
 
   onAdd() {
@@ -40,10 +45,6 @@ export default class Light extends BaseEntity implements Entity {
       "lighting_manager"
     ) as LightingManager;
     this.lightManager.addLight(this);
-
-    if (this.shadowsEnabled) {
-      this.enableShadows();
-    }
   }
 
   resizeBakedTexture() {
@@ -85,8 +86,7 @@ export default class Light extends BaseEntity implements Entity {
     this.shadowsEnabled = true;
     if (!this.shadows) {
       const { x, y } = this.lightSprite.position;
-      const r = this.getShadowRadius();
-      this.shadows = this.addChild(new Shadows(V(x, y), r));
+      this.shadows = this.addChild(new Shadows(V(x, y), this.shadowRadius));
       this.container.addChild(this.shadows.graphics);
 
       // TODO: This is kinda hacky, but it gets the job done
@@ -107,10 +107,6 @@ export default class Light extends BaseEntity implements Entity {
     // TODO: This is kinda hacky, but it gets the job done
     this.lightManager?.removeLight(this);
     this.lightManager?.addLight(this);
-  }
-
-  getShadowRadius(): number {
-    return 0;
   }
 
   setPosition([x, y]: [number, number]) {

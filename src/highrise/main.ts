@@ -66,5 +66,5 @@ export async function main() {
   }
 
   // It seems like we were kinda loud on average
-  game.masterGain.gain.value = 0.3;
+  game.masterGain.gain.value = 0.8;
 }

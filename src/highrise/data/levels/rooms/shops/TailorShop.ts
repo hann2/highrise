@@ -26,9 +26,13 @@ export default class TailorShop extends RoomTemplate {
     const entities: Entity[] = [];
 
     entities.push(new Furniture(transformCell(V(0.63, 0.28)), tailorStall));
-    const light = new PointLight(6, 0.6);
-    light.setPosition(transformCell(V(1, 1)));
-    entities.push(light);
+    entities.push(
+      new PointLight({
+        radius: 6,
+        intensity: 0.6,
+        position: transformCell(V(1, 1)),
+      })
+    );
 
     return entities;
   }

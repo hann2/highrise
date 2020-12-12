@@ -33,9 +33,13 @@ export default class Jeweler extends RoomTemplate {
     entities.push(new Furniture(transformCell(V(0.28, 0.28)), jewelryStall));
     entities.push(new Furniture(transformCell(V(1.4, -0.15)), shelfEmpty));
     entities.push(new Furniture(transformCell(V(2.1, -0.15)), shelfJars));
-    const light = new PointLight(6, 0.6);
-    light.setPosition(transformCell(V(1, 1)));
-    entities.push(light);
+    entities.push(
+      new PointLight({
+        radius: 6,
+        intensity: 0.6,
+        position: transformCell(V(1, 1)),
+      })
+    );
 
     return entities;
   }

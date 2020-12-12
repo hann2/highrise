@@ -1,13 +1,11 @@
-import { BLEND_MODES, Graphics, RenderTexture, Sprite, Texture } from "pixi.js";
-import { threadId } from "worker_threads";
+import { BLEND_MODES, Graphics, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V } from "../../core/Vector";
 import { Layers } from "../layers";
 import Light from "./Light";
-import { LightFilter, ShadowFilter } from "./LightingFilter";
 
-const AMBIENT_LIGHT = 0x222222;
+const AMBIENT_LIGHT = 0x191919;
 export default class LightingManager extends BaseEntity implements Entity {
   id = "lighting_manager";
   persistent = true;
