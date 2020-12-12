@@ -7,7 +7,8 @@ import { Layers } from "../layers";
 import MainMenu from "./MainMenu";
 
 const SCROLL_SPEED = 0.8;
-const TEXT_SIZE = 20;
+const NAME_SIZE = 20;
+const LABEL_SIZE = 14;
 const HEADING_SIZE = 32;
 const LINE_SPACING = 8;
 export default class CreditsScreen extends BaseEntity implements Entity {
@@ -27,18 +28,46 @@ export default class CreditsScreen extends BaseEntity implements Entity {
       if (isHeading) {
         line = line.substring(1);
       }
-      const fontSize = isHeading ? HEADING_SIZE : TEXT_SIZE;
-      const textSprite = new Text(line, {
-        fontSize,
-        fontFamily: "Comfortaa",
-        fill: "white",
-        align: "center",
-        fontWeight: isHeading ? "700" : "300",
-      });
-      textSprite.y = nextHeight;
-      nextHeight += fontSize + LINE_SPACING;
-      textSprite.anchor.set(0.5);
-      this.sprite.addChild(textSprite);
+      const parts = line.split("—");
+
+      if (parts.length == 2) {
+        const leftTextSprite = new Text(parts[0], {
+          fontSize: LABEL_SIZE,
+          fontFamily: "Comfortaa",
+          fill: "white",
+          align: "right",
+          fontWeight: isHeading ? "700" : "300",
+        });
+        const rightTextSprite = new Text(parts[1], {
+          fontSize: NAME_SIZE,
+          fontFamily: "Comfortaa",
+          fill: "white",
+          align: "left",
+          fontWeight: isHeading ? "700" : "300",
+        });
+        leftTextSprite.y = nextHeight;
+        rightTextSprite.y = nextHeight;
+        leftTextSprite.x = -2;
+        rightTextSprite.x = 2;
+        nextHeight += NAME_SIZE + LINE_SPACING;
+        leftTextSprite.anchor.set(1, 0.5);
+        rightTextSprite.anchor.set(0, 0.5);
+        this.sprite.addChild(leftTextSprite);
+        this.sprite.addChild(rightTextSprite);
+      } else if (parts.length == 1) {
+        const fontSize = isHeading ? HEADING_SIZE : NAME_SIZE;
+        const textSprite = new Text(line, {
+          fontSize,
+          fontFamily: "Comfortaa",
+          fill: "white",
+          align: "center",
+          fontWeight: isHeading ? "700" : "300",
+        });
+        textSprite.y = nextHeight;
+        nextHeight += fontSize + LINE_SPACING;
+        textSprite.anchor.set(0.5);
+        this.sprite.addChild(textSprite);
+      }
     }
   }
 
@@ -92,16 +121,16 @@ Simon Baumgardt-Wellander
 
 
 #VOICE ACTORS
-@ICREATENOVELTY — Cowboy
-Andy Moreland — Andy
-Cole Graham — Lucky Jack
-Lawlfrats — Cindy
-Marisa DeNicolo-Hann — Clarice, Kyle
-Michael Wiktorek — Chad, Demitri, Shadowlord66
-Philip Hann — Clyde
-Rory Jackson — Takeshi
-Simon Baumgardt-Wellander — Simon
-Wendy Vang — Wendy
+Andy—Andy Moreland
+Chad, Demitri, Shadowlord66—Michael Wiktorek
+Cindy—Lawlfrats
+Clarice, Kyle—Marisa DeNicolo-Hann
+Clyde—Philip Hann
+Dusty Rusty—@ICREATENOVELTY
+Lucky Jack—Cole Graham
+Simon—Simon Baumgardt-Wellander
+Takeshi—Rory Jackson
+Wendy—Wendy Vang
 
 
 #MUSIC
@@ -112,21 +141,23 @@ Simon Baumgardt-Wellander
 #SOUND EFFECTS
 Simon Baumgardt-Wellander
 Morgan Thurlow
- With thanks to
-Fesliyan Studios - Guns
-The Free Firearm Sound Library — Guns
+
+With thanks to
+Gun Sounds—Fesliyan Studios
+ —The Free Firearm Sound Library
 
 
 #ART
 Philip Hann
 Simon Baumgardt-Wellander
+
 With thanks to:
-Kenny NL - Humans and Zombies
-PWL - Blood Splatters
-Project Cordon Sprites - Guns
-Panda Maru - Environment
-Nicnubill - Environment
-Ayene Chan - Environment
+Humans and Zombies—Kenny NL
+Blood Splatters—PWL
+Gun Sprites—Project Cordon Sprites
+Environment Sprites—Panda Maru 
+ —Nicnubill
+ —Ayene Chan
 
 
 No zombies were harmed in the making of this game.

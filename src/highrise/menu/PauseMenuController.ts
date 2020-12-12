@@ -4,11 +4,19 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { Layers } from "../layers";
+import ClickableText from "./ClickableText";
+import FeedbackButton from "./FeedbackButton";
+import MainMenu from "./MainMenu";
 
 export default class PauseMenuController extends BaseEntity implements Entity {
   persistent = true;
   pausable = false;
   sprite: Sprite & GameSprite;
+  feedbackButton: FeedbackButton;
+  pausedText: Text;
+  mainMenuButton: ClickableText;
+  resumeText: Text;
+
   constructor() {
     super();
 
@@ -22,36 +30,65 @@ export default class PauseMenuController extends BaseEntity implements Entity {
     background.endFill();
     this.sprite.addChild(background);
 
-    const text = new Text("PAUSED", {
+    this.pausedText = new Text("PAUSED", {
       fontSize: 64,
       fontFamily: "Capture It",
       fill: "white",
       align: "center",
     });
-    text.anchor.set(0.5, 0.5);
-    this.sprite.addChild(text);
+    this.pausedText.anchor.set(0.5, 1);
+    this.sprite.addChild(this.pausedText);
+    this.resumeText = new Text("Press ESC to resume", {
+      fontSize: 48,
+      fontFamily: "Capture It",
+      fill: "red",
+      align: "center",
+    });
+    this.resumeText.anchor.set(0.5, 0);
+    this.sprite.addChild(this.resumeText);
+
+    this.mainMenuButton = this.addChild(
+      new ClickableText("Main Menu", () => {
+        this.game!.addEntity(new MainMenu());
+        this.destroy();
+      })
+    );
+
+    this.feedbackButton = this.addChild(new FeedbackButton());
   }
 
   handlers = {
-    resize: () => this.centerText(),
+    resize: () => this.positionText(),
     gameOver: () => this.destroy(),
   };
 
   onAdd() {
-    this.centerText();
+    this.positionText();
   }
 
-  centerText() {
-    this.sprite.x = this.game!.renderer.getWidth() / 2;
-    this.sprite.y = this.game!.renderer.getHeight() / 3;
+  positionText() {
+    const [width, height] = this.game!.renderer.getSize();
+    this.pausedText.position.set(width / 2, height / 2);
+    this.resumeText.position.set(width / 2, height / 2);
+
+    this.mainMenuButton.sprite.position.set(10, 10);
+    this.feedbackButton.sprite.position.set(10, 50);
   }
 
   onPause() {
     this.sprite.visible = true;
+    this.mainMenuButton.sprite.visible = true;
+    this.feedbackButton.sprite.visible = true;
+    this.mainMenuButton.sprite.interactive = true;
+    this.feedbackButton.sprite.interactive = true;
   }
 
   onUnpause() {
     this.sprite.visible = false;
+    this.mainMenuButton.sprite.visible = false;
+    this.feedbackButton.sprite.visible = false;
+    this.mainMenuButton.sprite.interactive = false;
+    this.feedbackButton.sprite.interactive = false;
   }
 
   onKeyDown(key: KeyCode) {
