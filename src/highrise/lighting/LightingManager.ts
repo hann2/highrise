@@ -7,7 +7,7 @@ import { Layers } from "../layers";
 import Light from "./Light";
 import { LightFilter, ShadowFilter } from "./LightingFilter";
 
-const AMBIENT_LIGHT = 0x000000;
+const AMBIENT_LIGHT = 0x444444;
 export default class LightingManager extends BaseEntity implements Entity {
   id = "lighting_manager";
   persistent = true;

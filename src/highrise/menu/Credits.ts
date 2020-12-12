@@ -22,6 +22,7 @@ Simon Baumgardt-Wellander
 
 
   VOICE ACTORS
+@ICREATENOVELTY — Cowboy
 Andy Moreland — Andy
 Cole Graham — Lucky Jack
 Lawlfrats — Cindy
@@ -31,7 +32,6 @@ Philip Hann — Clyde
 Rory Jackson — Takeshi
 Simon Baumgardt-Wellander — Simon
 Wendy Vang — Wendy
-
 
   MUSIC
 Michael Wiktorek

@@ -114,6 +114,7 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   setPosition([x, y]: [number, number]) {
+    this.dirty = true;
     this.bakedSprite.position.set(x, y);
     this.shadows?.setPosition(V(x, y));
   }
