@@ -6,9 +6,10 @@ import { KeyCode } from "../../core/io/Keys";
 import { Layers } from "../layers";
 import MainMenu from "./MainMenu";
 
-const SCROLL_SPEED = 1.0;
-const TEXT_SIZE = 22;
-const LINE_HEIGHT = 32;
+const SCROLL_SPEED = 0.8;
+const TEXT_SIZE = 20;
+const HEADING_SIZE = 32;
+const LINE_SPACING = 8;
 export default class CreditsScreen extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
 
@@ -19,49 +20,78 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     this.sprite.layerName = Layers.MENU;
 
     const lines = TEXT.split("\n");
-    console.log(lines);
+    let nextHeight = 0;
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+      let line = lines[i];
+      const isHeading = line[0] === "#";
+      if (isHeading) {
+        line = line.substring(1);
+      }
+      const fontSize = isHeading ? HEADING_SIZE : TEXT_SIZE;
       const textSprite = new Text(line, {
-        fontSize: 24,
+        fontSize,
+        fontFamily: "Comfortaa",
         fill: "white",
-        align: "left",
+        align: "center",
+        fontWeight: isHeading ? "700" : "300",
       });
-      textSprite.y = i * 30;
+      textSprite.y = nextHeight;
+      nextHeight += fontSize + LINE_SPACING;
+      textSprite.anchor.set(0.5);
       this.sprite.addChild(textSprite);
     }
   }
 
+  handlers = {
+    resize: () => this.centerText(),
+  };
+
   onAdd(game: Game) {
-    this.sprite.x = 30;
+    this.centerText();
     this.sprite.y = game.renderer.getHeight();
+  }
+
+  centerText() {
+    this.sprite.x = this.game!.renderer.getWidth() / 2;
   }
 
   onKeyDown(key: KeyCode) {
     switch (key) {
       case "Escape":
-        this.game?.addEntity(new MainMenu());
-        this.destroy();
+        this.backToMenu();
     }
   }
 
+  backToMenu() {
+    this.game?.addEntity(new MainMenu());
+    this.destroy();
+  }
+
   onRender() {
-    this.sprite!.y -= SCROLL_SPEED;
+    let speed = SCROLL_SPEED;
+    if (this.game!.io.keyIsDown("Space")) {
+      speed *= 10;
+    }
+    this.sprite!.y -= speed;
+
+    if (this.sprite.getBounds().bottom < 0) {
+      this.backToMenu();
+    }
   }
 }
 
 const TEXT = `
-  DESIGN
+#DESIGN
 Philip Hann
 Simon Baumgardt-Wellander
 
 
-  PROGRAMMING
+#PROGRAMMING
 Philip Hann
 Simon Baumgardt-Wellander
 
 
-  VOICE ACTORS
+#VOICE ACTORS
 @ICREATENOVELTY — Cowboy
 Andy Moreland — Andy
 Cole Graham — Lucky Jack
@@ -73,12 +103,13 @@ Rory Jackson — Takeshi
 Simon Baumgardt-Wellander — Simon
 Wendy Vang — Wendy
 
-  MUSIC
+
+#MUSIC
 Michael Wiktorek
 Simon Baumgardt-Wellander
 
 
-  SOUND EFFECTS
+#SOUND EFFECTS
 Simon Baumgardt-Wellander
 Morgan Thurlow
  With thanks to
@@ -86,10 +117,10 @@ Fesliyan Studios - Guns
 The Free Firearm Sound Library — Guns
 
 
-  ART
+#ART
 Philip Hann
 Simon Baumgardt-Wellander
-  With thanks to:
+With thanks to:
 Kenny NL - Humans and Zombies
 PWL - Blood Splatters
 Project Cordon Sprites - Guns

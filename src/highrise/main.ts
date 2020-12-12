@@ -50,7 +50,6 @@ export async function main() {
   preloader.destroy();
 
   game.addEntity(new AutoPauser());
-  game.addEntity(new PauseMenuController());
   game.addEntity(new ResizeListener());
   game.addEntity(new LevelController());
   game.addEntity(new PartyManager());

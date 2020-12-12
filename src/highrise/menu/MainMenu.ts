@@ -41,6 +41,10 @@ export default class MainMenu extends BaseEntity implements Entity {
     });
     this.startText.anchor.set(0.5, 0.0);
     this.sprite.addChild(this.startText);
+    this.startText.interactive = true;
+    this.startText.addListener("click", () => {
+      this.startGame();
+    });
 
     this.creditsButton = new Text("Credits", {
       fontSize: 48,
@@ -100,6 +104,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     await this.wait();
     this.game?.addEntity(new CreditsScreen());
     this.creditsButton.interactive = false;
+    this.startText.interactive = false;
     await this.wait(4.0, (dt, t) => {
       this.titleText.alpha = smoothStep(clamp(2.0 - 2 * t));
       this.startText.alpha = smoothStep(clamp(1.0 - 4 * t));
@@ -110,6 +115,8 @@ export default class MainMenu extends BaseEntity implements Entity {
   }
 
   async startGame() {
+    this.creditsButton.interactive = false;
+    this.startText.interactive = false;
     await this.wait(3.0, (dt, t) => {
       this.titleText.alpha = smoothStep(clamp(2.0 - 2 * t));
       this.startText.alpha = smoothStep(clamp(1.0 - 4 * t));

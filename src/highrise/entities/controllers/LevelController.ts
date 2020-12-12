@@ -7,8 +7,8 @@ import {
   generateLevel,
 } from "../../data/levels/levelGeneration";
 import FadeEffect from "../../effects/FadeEffect";
-import Light from "../../lighting/Light";
 import MainMenu from "../../menu/MainMenu";
+import PauseMenuController from "../../menu/PauseMenuController";
 import Human from "../human/Human";
 import PartyManager from "../PartyManager";
 import AllyHumanController from "./AllyController";
@@ -32,8 +32,9 @@ export default class LevelController extends BaseEntity implements Entity {
       const level = generateLevel(chooseTemplate(this.currentLevel));
 
       await this.wait(0.0); // so that this happens async
-      this.game!.dispatch({ type: "startLevel", level });
+      this.game?.dispatch({ type: "startLevel", level });
       this.game?.addEntity(new FadeEffect(0, 0, 1.5));
+      this.game?.addEntity(new PauseMenuController());
     },
 
     levelComplete: async () => {

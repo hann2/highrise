@@ -34,6 +34,7 @@ export default class PauseMenuController extends BaseEntity implements Entity {
 
   handlers = {
     resize: () => this.centerText(),
+    gameOver: () => this.destroy(),
   };
 
   onAdd() {
