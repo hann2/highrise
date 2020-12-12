@@ -1,6 +1,7 @@
 import { Graphics, Sprite, Text } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { Layers } from "../layers";
@@ -62,7 +63,8 @@ export default class PauseMenuController extends BaseEntity implements Entity {
     gameOver: () => this.destroy(),
   };
 
-  onAdd() {
+  onAdd(game: Game) {
+    this.setVisibility(game.paused);
     this.positionText();
   }
 
@@ -75,20 +77,20 @@ export default class PauseMenuController extends BaseEntity implements Entity {
     this.feedbackButton.sprite.position.set(10, 50);
   }
 
+  setVisibility(visible: boolean) {
+    this.sprite.visible = visible;
+    this.mainMenuButton.sprite.visible = visible;
+    this.feedbackButton.sprite.visible = visible;
+    this.mainMenuButton.sprite.interactive = visible;
+    this.feedbackButton.sprite.interactive = visible;
+  }
+
   onPause() {
-    this.sprite.visible = true;
-    this.mainMenuButton.sprite.visible = true;
-    this.feedbackButton.sprite.visible = true;
-    this.mainMenuButton.sprite.interactive = true;
-    this.feedbackButton.sprite.interactive = true;
+    this.setVisibility(true);
   }
 
   onUnpause() {
-    this.sprite.visible = false;
-    this.mainMenuButton.sprite.visible = false;
-    this.feedbackButton.sprite.visible = false;
-    this.mainMenuButton.sprite.interactive = false;
-    this.feedbackButton.sprite.interactive = false;
+    this.setVisibility(false);
   }
 
   onKeyDown(key: KeyCode) {
