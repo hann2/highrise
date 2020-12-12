@@ -1,10 +1,11 @@
 import { SoundName } from "../../core/resources/sounds";
-import { shuffle } from "../../core/util/Random";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import { Andy } from "./Andy";
 import { Chad } from "./Chad";
 import { Cindy } from "./Cindy";
 import { Clarice } from "./Clarice";
+import { Clyde } from "./Clyde";
+import { DustyRusty } from "./DustyRusty";
 import { Kyle } from "./Kyle";
 import { LuckyJack } from "./LuckyJack";
 import { Nancy } from "./Nancy";
@@ -46,7 +47,8 @@ export const CHARACTERS = [
   Chad,
   Cindy,
   Clarice,
-  // Clyde,
+  DustyRusty,
+  Clyde,
   Kyle,
   LuckyJack,
   Nancy,
