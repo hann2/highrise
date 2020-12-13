@@ -1,13 +1,14 @@
 import bloodDrop from "../../../resources/images/bloodsplats/blood-drop.png";
 import bathroom from "../../../resources/images/environment/bathroom.png";
-import carpet from "../../../resources/images/environment/carpet.png";
 import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../../resources/images/environment/fences-lights.png";
+import carpet from "../../../resources/images/environment/floor/carpet.png";
+import cement from "../../../resources/images/environment/floor/cement.png";
+import woodenFloor from "../../../resources/images/environment/floor/wooden-floor.png";
 import furniture from "../../../resources/images/environment/furniture.png";
 import market from "../../../resources/images/environment/market.png";
 import wall1 from "../../../resources/images/environment/wall-1.png";
 import wallAo1 from "../../../resources/images/environment/wall-ao-1.png";
-import woodenFloor from "../../../resources/images/environment/wooden-floor.png";
 import healthPack from "../../../resources/images/health_pack.png";
 import pointLight from "../../../resources/images/lights/point-light.png";
 import solidCircle from "../../../resources/images/solid-circle.png";
@@ -26,6 +27,7 @@ export function getImagesToPreload(): Set<string> {
   const imageUrls = new Set([
     // use a set to make sure we don't include stuff multiple times
     bathroom,
+    cement,
     bloodDrop,
     carpet,
     fancyFurniture,

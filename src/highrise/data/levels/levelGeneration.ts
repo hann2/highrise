@@ -28,6 +28,7 @@ import {
 } from "../../utils/directions";
 import {
   boxes,
+  cementFloor,
   garbageCan,
   sack,
   shelfEmpty,
@@ -189,6 +190,7 @@ class LevelBuilder {
     const doors = this.doors.map(this.buildDoorEntity.bind(this));
 
     const entities = [
+      new SubFloor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
       ...outerWalls,
       ...roomEntities,
       ...innerWalls,
@@ -198,7 +200,6 @@ class LevelBuilder {
       ...pickups,
       ...nubbyEntities,
       ...doors,
-      new SubFloor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
     ];
 
     return {
@@ -732,6 +733,22 @@ class LevelBuilder {
       } else {
         entities.push(entity);
       }
+
+      const dimensions = V(1, 1)
+        .add(
+          closet.backWallDirection.y === 1 || closet.backWallDirection.y === -1
+            ? V(0, 1)
+            : V(1, 0)
+        )
+        .mul(CELL_WIDTH);
+      const upperLeftCell =
+        closet.backWallDirection.x === 1 || closet.backWallDirection.y === 1
+          ? closet.backCell
+          : closet.frontCell;
+      const upperLeftCorner = this.levelCoordToWorldCoord(
+        upperLeftCell.sub(V(0.5, 0.5))
+      );
+      entities.push(new Floor(cementFloor, upperLeftCorner, dimensions));
 
       if (counter % 4 === 0) {
         entities.push(
