@@ -1,9 +1,14 @@
+import { vec2 } from "p2";
 import { Sprite } from "pixi.js";
 import img_crawler from "../../../../resources/images/zombies/crawler.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
+import { rUniform } from "../../../core/util/Random";
 import { Layers } from "../../layers";
 import Zombie, { ZOMBIE_RADIUS } from "./Zombie";
+
+const WIGGLE_SPEED = 12.0;
+const WIGGLE_AMOUNT = 0.3;
 
 interface BodySprites {
   standing: Sprite;
@@ -14,8 +19,8 @@ interface BodySprites {
 }
 export default class ZombieSprite extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
-
   bodySprites: BodySprites;
+  wigglePhase = rUniform(0, Math.PI * 2);
 
   constructor(public zombie: Zombie) {
     super();
@@ -39,10 +44,23 @@ export default class ZombieSprite extends BaseEntity implements Entity {
     }
   }
 
+  onTick(dt: number) {
+    const moveSpeed = vec2.length(this.zombie.body.velocity);
+    this.wigglePhase += moveSpeed * WIGGLE_SPEED * dt;
+  }
+
+  getWiggleAmount() {
+    const t = this.wigglePhase;
+    const sign = Math.sign(Math.sin(t));
+    const p = sign * Math.abs(Math.sin(t));
+    return p * WIGGLE_AMOUNT;
+  }
+
   onRender() {
     const { body } = this.zombie;
     [this.sprite.x, this.sprite.y] = body.position;
-    this.sprite.rotation = body.angle;
+
+    this.sprite.rotation = body.angle + this.getWiggleAmount();
 
     const currentBodySprite = this.getCurrentBodySprite();
 
