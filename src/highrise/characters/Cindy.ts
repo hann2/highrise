@@ -13,18 +13,22 @@ import cindyRelief1 from "../../../resources/audio/characters/cindy/cindy-relief
 import cindyTaunt1 from "../../../resources/audio/characters/cindy/cindy-taunt-1.flac";
 import cindyTaunt2 from "../../../resources/audio/characters/cindy/cindy-taunt-2.flac";
 import cindyWorried1 from "../../../resources/audio/characters/cindy/cindy-worried-1.flac";
-import cindyGun from "../../../resources/images/characters/cindy/cindy_gun.png";
-import cindyHold from "../../../resources/images/characters/cindy/cindy_hold.png";
-import cindyReload from "../../../resources/images/characters/cindy/cindy_reload.png";
-import cindyStand from "../../../resources/images/characters/cindy/cindy_stand.png";
+import chadHead from "../../../resources/images/characters/chad-head.png";
+import chadLeftArm from "../../../resources/images/characters/chad-left-arm.png";
+import chadLeftHand from "../../../resources/images/characters/chad-left-hand.png";
+import chadRightArm from "../../../resources/images/characters/chad-right-arm.png";
+import chadRightHand from "../../../resources/images/characters/chad-right-hand.png";
+import chadTorso from "../../../resources/images/characters/chad-torso.png";
 import { Character } from "./Character";
 
 export const Cindy: Character = {
   textures: {
-    gun: cindyGun,
-    stand: cindyStand,
-    reload: cindyReload,
-    hold: cindyHold,
+    head: chadHead,
+    leftArm: chadLeftArm,
+    leftHand: chadLeftHand,
+    rightArm: chadRightArm,
+    rightHand: chadRightHand,
+    torso: chadTorso,
   },
 
   sounds: {

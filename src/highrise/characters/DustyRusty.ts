@@ -64,18 +64,22 @@ import dustyRustyWorried3 from "../../../resources/audio/characters/dusty-rusty/
 import dustyRustyWorried4 from "../../../resources/audio/characters/dusty-rusty/dusty-rusty-worried-4.flac";
 import dustyRustyWorried5 from "../../../resources/audio/characters/dusty-rusty/dusty-rusty-worried-5.flac";
 import dustyRustyWorried6 from "../../../resources/audio/characters/dusty-rusty/dusty-rusty-worried-6.flac";
-import dustyRustyGun from "../../../resources/images/characters/dusty-rusty/dusty-rusty_gun.png";
-import dustyRustyHold from "../../../resources/images/characters/dusty-rusty/dusty-rusty_hold.png";
-import dustyRustyReload from "../../../resources/images/characters/dusty-rusty/dusty-rusty_reload.png";
-import dustyRustyStand from "../../../resources/images/characters/dusty-rusty/dusty-rusty_stand.png";
+import dustyRustyHead from "../../../resources/images/characters/dusty-rusty-head.png";
+import dustyRustyLeftArm from "../../../resources/images/characters/dusty-rusty-left-arm.png";
+import dustyRustyLeftHand from "../../../resources/images/characters/dusty-rusty-left-hand.png";
+import dustyRustyRightArm from "../../../resources/images/characters/dusty-rusty-right-arm.png";
+import dustyRustyRightHand from "../../../resources/images/characters/dusty-rusty-right-hand.png";
+import dustyRustyTorso from "../../../resources/images/characters/dusty-rusty-torso.png";
 import { Character } from "./Character";
 
 export const DustyRusty: Character = {
   textures: {
-    gun: dustyRustyGun,
-    stand: dustyRustyStand,
-    reload: dustyRustyReload,
-    hold: dustyRustyHold,
+    head: dustyRustyHead,
+    leftArm: dustyRustyLeftArm,
+    leftHand: dustyRustyLeftHand,
+    rightArm: dustyRustyRightArm,
+    rightHand: dustyRustyRightHand,
+    torso: dustyRustyTorso,
   },
 
   sounds: {

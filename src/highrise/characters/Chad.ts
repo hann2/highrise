@@ -33,6 +33,12 @@ import chadTaunt6 from "../../../resources/audio/characters/chad/chad-taunt-6.fl
 import chadWorried1 from "../../../resources/audio/characters/chad/chad-worried-1.flac";
 import chadWorried2 from "../../../resources/audio/characters/chad/chad-worried-2.flac";
 import chadWorried3 from "../../../resources/audio/characters/chad/chad-worried-3.flac";
+import chadHead from "../../../resources/images/characters/chad-head.png";
+import chadLeftArm from "../../../resources/images/characters/chad-left-arm.png";
+import chadLeftHand from "../../../resources/images/characters/chad-left-hand.png";
+import chadRightArm from "../../../resources/images/characters/chad-right-arm.png";
+import chadRightHand from "../../../resources/images/characters/chad-right-hand.png";
+import chadTorso from "../../../resources/images/characters/chad-torso.png";
 import chadGun from "../../../resources/images/characters/chad/chad_gun.png";
 import chadHold from "../../../resources/images/characters/chad/chad_hold.png";
 import chadReload from "../../../resources/images/characters/chad/chad_reload.png";
@@ -41,10 +47,12 @@ import { Character } from "./Character";
 
 export const Chad: Character = {
   textures: {
-    gun: chadGun,
-    stand: chadStand,
-    reload: chadReload,
-    hold: chadHold,
+    head: chadHead,
+    leftArm: chadLeftArm,
+    leftHand: chadLeftHand,
+    rightArm: chadRightArm,
+    rightHand: chadRightHand,
+    torso: chadTorso,
   },
 
   sounds: {

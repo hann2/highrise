@@ -20,7 +20,7 @@ export const Katana: MeleeWeaponStats = {
   windDownDamage: 30,
 
   size: [0.2, 1],
-  handlePosition: [0.5, 0.9],
+  handlePosition: [0.5, 0.85],
 
   swing: {
     durations: [0.08, 0.17, 0.2],

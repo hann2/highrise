@@ -48,18 +48,23 @@ import wendyWorried1 from "../../../resources/audio/characters/wendy/wendy-worri
 import wendyWorried2 from "../../../resources/audio/characters/wendy/wendy-worried-2.flac";
 import wendyWorried3 from "../../../resources/audio/characters/wendy/wendy-worried-3.flac";
 import wendyWorried4 from "../../../resources/audio/characters/wendy/wendy-worried-4.flac";
-import wendyGun from "../../../resources/images/characters/wendy/wendy_gun.png";
-import wendyHold from "../../../resources/images/characters/wendy/wendy_hold.png";
-import wendyReload from "../../../resources/images/characters/wendy/wendy_reload.png";
-import wendyStand from "../../../resources/images/characters/wendy/wendy_stand.png";
+import kyleHead from "../../../resources/images/characters/kyle-head.png";
+import kyleLeftArm from "../../../resources/images/characters/kyle-left-arm.png";
+import kyleLeftHand from "../../../resources/images/characters/kyle-left-hand.png";
+import kyleRightArm from "../../../resources/images/characters/kyle-right-arm.png";
+import kyleRightHand from "../../../resources/images/characters/kyle-right-hand.png";
+import kyleTorso from "../../../resources/images/characters/kyle-torso.png";
 import { Character } from "./Character";
 
 export const Wendy: Character = {
+  // TODO: Wendy textures
   textures: {
-    gun: wendyGun,
-    stand: wendyStand,
-    reload: wendyReload,
-    hold: wendyHold,
+    head: kyleHead,
+    leftArm: kyleLeftArm,
+    leftHand: kyleLeftHand,
+    rightArm: kyleRightArm,
+    rightHand: kyleRightHand,
+    torso: kyleTorso,
   },
 
   sounds: {

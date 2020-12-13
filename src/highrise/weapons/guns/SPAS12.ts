@@ -36,6 +36,9 @@ export const SPAS12: GunStats = {
   },
   size: [1.1, 1.1],
 
+  leftHandPosition: [0.4, 0],
+  rightHandPosition: [0.2, 0],
+
   sounds: {
     ...defaultGunStats.sounds,
     shoot: [shotgunShot2],

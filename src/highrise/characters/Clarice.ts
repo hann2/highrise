@@ -14,18 +14,22 @@ import clariceRelief1 from "../../../resources/audio/characters/clarice/clarice-
 import clariceRelief2 from "../../../resources/audio/characters/clarice/clarice-relief-2.flac";
 import clariceTaunt1 from "../../../resources/audio/characters/clarice/clarice-taunt-1.flac";
 import clariceWorried1 from "../../../resources/audio/characters/clarice/clarice-worried-1.flac";
-import clariceGun from "../../../resources/images/characters/clarice/clarice_gun.png";
-import clariceHold from "../../../resources/images/characters/clarice/clarice_hold.png";
-import clariceReload from "../../../resources/images/characters/clarice/clarice_reload.png";
-import clariceStand from "../../../resources/images/characters/clarice/clarice_stand.png";
+import chadHead from "../../../resources/images/characters/chad-head.png";
+import chadLeftArm from "../../../resources/images/characters/chad-left-arm.png";
+import chadLeftHand from "../../../resources/images/characters/chad-left-hand.png";
+import chadRightArm from "../../../resources/images/characters/chad-right-arm.png";
+import chadRightHand from "../../../resources/images/characters/chad-right-hand.png";
+import chadTorso from "../../../resources/images/characters/chad-torso.png";
 import { Character } from "./Character";
 
 export const Clarice: Character = {
   textures: {
-    gun: clariceGun,
-    stand: clariceStand,
-    reload: clariceReload,
-    hold: clariceHold,
+    head: chadHead,
+    leftArm: chadLeftArm,
+    leftHand: chadLeftHand,
+    rightArm: chadRightArm,
+    rightHand: chadRightHand,
+    torso: chadTorso,
   },
 
   sounds: {

@@ -36,6 +36,9 @@ export const PumpShotgun: GunStats = {
   },
   size: [1.1, 1.1],
 
+  leftHandPosition: [0.45, 0],
+  rightHandPosition: [0.2, 0],
+
   sounds: {
     ...defaultGunStats.sounds,
     shoot: [shotgunShot3],

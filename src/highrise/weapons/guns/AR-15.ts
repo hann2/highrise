@@ -36,6 +36,9 @@ export const AR15: GunStats = {
   },
   size: [0.8, 0.4],
 
+  leftHandPosition: [0.5, 0],
+  rightHandPosition: [0.2, 0],
+
   sounds: {
     ...defaultGunStats.sounds,
     shoot: [rifleShot1, rifleShot2, rifleShot3],

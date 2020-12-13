@@ -13,6 +13,8 @@ export default class MeleeWeapon extends BaseEntity implements Entity {
   currentCooldown: number = 0;
   swing: SwingDescriptor;
 
+  private _currentSwing?: SwingingWeapon;
+
   constructor(stats: MeleeWeaponStats) {
     super();
     this.stats = stats;
@@ -27,10 +29,18 @@ export default class MeleeWeapon extends BaseEntity implements Entity {
     );
   }
 
+  get currentSwing(): SwingingWeapon | undefined {
+    if (this._currentSwing && !this._currentSwing.isDestroyed) {
+      return this._currentSwing;
+    } else {
+      return undefined;
+    }
+  }
+
   attack(holder: Human) {
     if (this.currentCooldown <= 0) {
       this.currentCooldown += this.swing.duration;
-      this.addChild(new SwingingWeapon(this, holder));
+      this._currentSwing = this.addChild(new SwingingWeapon(this, holder));
     }
   }
 

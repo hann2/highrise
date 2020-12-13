@@ -32,9 +32,9 @@ export async function main() {
     world: new CustomWorld({
       gravity: [0, 0],
       broadphase: new SpatialHashingBroadphase(
-        CELL_WIDTH,
-        LEVEL_SIZE,
-        LEVEL_SIZE
+        CELL_WIDTH / 2,
+        LEVEL_SIZE * 2,
+        LEVEL_SIZE * 2
       ),
     }),
   });

@@ -93,6 +93,8 @@ export default class VendingMachine
 
       this.light?.destroy();
       this.light = undefined;
+      this.interactable?.destroy();
+      this.interactable = undefined;
     }
   }
 

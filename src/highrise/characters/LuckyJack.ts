@@ -13,18 +13,23 @@ import luckyJackPickup1 from "../../../resources/audio/characters/lucky-jack/luc
 import luckyJackRelief1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-relief-1.flac";
 import luckyJackTaunt1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-taunt-1.flac";
 import luckyJackWorried1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-worried-1.flac";
-import luckyJackGun from "../../../resources/images/characters/lucky-jack/lucky-jack_gun.png";
-import luckyJackHold from "../../../resources/images/characters/lucky-jack/lucky-jack_hold.png";
-import luckyJackReload from "../../../resources/images/characters/lucky-jack/lucky-jack_reload.png";
-import luckyJackStand from "../../../resources/images/characters/lucky-jack/lucky-jack_stand.png";
+import kyleHead from "../../../resources/images/characters/kyle-head.png";
+import kyleLeftArm from "../../../resources/images/characters/kyle-left-arm.png";
+import kyleLeftHand from "../../../resources/images/characters/kyle-left-hand.png";
+import kyleRightArm from "../../../resources/images/characters/kyle-right-arm.png";
+import kyleRightHand from "../../../resources/images/characters/kyle-right-hand.png";
+import kyleTorso from "../../../resources/images/characters/kyle-torso.png";
 import { Character } from "./Character";
 
 export const LuckyJack: Character = {
+  // TODO: Lucky Jack Textures
   textures: {
-    gun: luckyJackGun,
-    stand: luckyJackStand,
-    reload: luckyJackReload,
-    hold: luckyJackHold,
+    head: kyleHead,
+    leftArm: kyleLeftArm,
+    leftHand: kyleLeftHand,
+    rightArm: kyleRightArm,
+    rightHand: kyleRightHand,
+    torso: kyleTorso,
   },
 
   sounds: {

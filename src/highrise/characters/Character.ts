@@ -20,10 +20,12 @@ export interface Character {
 }
 
 export interface CharacterTextures {
-  stand: string;
-  gun: string;
-  reload: string;
-  hold: string;
+  head: string;
+  torso: string;
+  leftHand: string;
+  rightHand: string;
+  leftArm: string;
+  rightArm: string;
 }
 
 export interface CharacterSounds {

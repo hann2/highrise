@@ -27,6 +27,9 @@ export const FiveSeven: GunStats = {
   },
   size: [0.45, 0.45],
 
+  leftHandPosition: [0.4, 0],
+  rightHandPosition: [0.4, 0],
+
   sounds: {
     ...defaultGunStats.sounds,
     shoot: [pistolShot1],

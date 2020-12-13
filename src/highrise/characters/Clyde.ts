@@ -20,18 +20,22 @@ import clydeWorried1 from "../../../resources/audio/characters/clyde/clyde-worri
 import clydeWorried2 from "../../../resources/audio/characters/clyde/clyde-worried-2.flac";
 import clydeWorried3 from "../../../resources/audio/characters/clyde/clyde-worried-3.flac";
 import clydeWorried4 from "../../../resources/audio/characters/clyde/clyde-worried-4.flac";
-import clydeGun from "../../../resources/images/characters/clyde/clyde_gun.png";
-import clydeHold from "../../../resources/images/characters/clyde/clyde_hold.png";
-import clydeReload from "../../../resources/images/characters/clyde/clyde_reload.png";
-import clydeStand from "../../../resources/images/characters/clyde/clyde_stand.png";
+import demitriHead from "../../../resources/images/characters/demitri-head.png";
+import demitriLeftArm from "../../../resources/images/characters/demitri-left-arm.png";
+import demitriLeftHand from "../../../resources/images/characters/demitri-left-hand.png";
+import demitriRightArm from "../../../resources/images/characters/demitri-right-arm.png";
+import demitriRightHand from "../../../resources/images/characters/demitri-right-hand.png";
+import demitriTorso from "../../../resources/images/characters/demitri-torso.png";
 import { Character } from "./Character";
 
 export const Clyde: Character = {
   textures: {
-    gun: clydeGun,
-    stand: clydeStand,
-    reload: clydeReload,
-    hold: clydeHold,
+    head: demitriHead,
+    leftArm: demitriLeftArm,
+    leftHand: demitriLeftHand,
+    rightArm: demitriRightArm,
+    rightHand: demitriRightHand,
+    torso: demitriTorso,
   },
 
   sounds: {

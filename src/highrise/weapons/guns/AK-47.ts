@@ -34,6 +34,9 @@ export const AK47: GunStats = {
   },
   size: [1.4, 1.4],
 
+  leftHandPosition: [0.5, -0.03],
+  rightHandPosition: [0.25, 0.07],
+
   sounds: {
     ...defaultGunStats.sounds,
     shoot: [rifle2Shot1],

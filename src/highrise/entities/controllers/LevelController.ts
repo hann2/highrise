@@ -26,7 +26,6 @@ export default class LevelController extends BaseEntity implements Entity {
 
   handlers = {
     newGame: async () => {
-      console.log("newGame");
       this.game!.clearScene();
       this.currentLevel = 1;
       const level = generateLevel(chooseTemplate(this.currentLevel));
@@ -38,7 +37,6 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     levelComplete: async () => {
-      this.getPartyLeader()?.voice.speak("relief");
       this.currentLevel += 1;
 
       this.game?.addEntity(new FadeEffect(1, 0.5, 1));
@@ -73,11 +71,6 @@ export default class LevelController extends BaseEntity implements Entity {
   getPartyMembers() {
     return (this.game!.entities.getById("party_manager") as PartyManager)
       .partyMembers;
-  }
-
-  getPartyLeader() {
-    return (this.game!.entities.getById("party_manager") as PartyManager)
-      .leader;
   }
 
   /** Determines whether or not we should clear an entity */

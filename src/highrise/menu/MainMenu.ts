@@ -125,8 +125,8 @@ export default class MainMenu extends BaseEntity implements Entity {
       this.startText.interactive = false;
       this.creditsButton.sprite.interactive = false;
       this.feedbackButton.sprite.interactive = false;
-      await this.wait(3.0, (dt, t) => {
-        this.titleText.alpha = smoothStep(clamp(2.0 - 2 * t));
+      await this.wait(2.2, (dt, t) => {
+        this.titleText.alpha = smoothStep(clamp(1.5 - 1.5 * t));
         this.startText.alpha = smoothStep(clamp(1.0 - 4 * t));
         this.creditsButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));
         this.feedbackButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));

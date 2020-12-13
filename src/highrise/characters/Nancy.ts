@@ -25,18 +25,23 @@ import nancyRelief3 from "../../../resources/audio/characters/nancy/nancy-relief
 import nancyWorried1 from "../../../resources/audio/characters/nancy/nancy-worried-1.flac";
 import nancyWorried2 from "../../../resources/audio/characters/nancy/nancy-worried-2.flac";
 import nancyWorried3 from "../../../resources/audio/characters/nancy/nancy-worried-3.flac";
-import nancyGun from "../../../resources/images/characters/nancy/nancy_gun.png";
-import nancyHold from "../../../resources/images/characters/nancy/nancy_hold.png";
-import nancyReload from "../../../resources/images/characters/nancy/nancy_reload.png";
-import nancyStand from "../../../resources/images/characters/nancy/nancy_stand.png";
+import kyleHead from "../../../resources/images/characters/kyle-head.png";
+import kyleLeftArm from "../../../resources/images/characters/kyle-left-arm.png";
+import kyleLeftHand from "../../../resources/images/characters/kyle-left-hand.png";
+import kyleRightArm from "../../../resources/images/characters/kyle-right-arm.png";
+import kyleRightHand from "../../../resources/images/characters/kyle-right-hand.png";
+import kyleTorso from "../../../resources/images/characters/kyle-torso.png";
 import { Character } from "./Character";
 
 export const Nancy: Character = {
+  // TODO: Nancy Textures
   textures: {
-    gun: nancyGun,
-    stand: nancyStand,
-    reload: nancyReload,
-    hold: nancyHold,
+    head: kyleHead,
+    leftArm: kyleLeftArm,
+    leftHand: kyleLeftHand,
+    rightArm: kyleRightArm,
+    rightHand: kyleRightHand,
+    torso: kyleTorso,
   },
 
   sounds: {

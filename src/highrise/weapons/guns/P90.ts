@@ -38,6 +38,9 @@ export const P90: GunStats = {
   },
   size: [1.0, 1.0],
 
+  leftHandPosition: [0.4, 0],
+  rightHandPosition: [0.2, 0],
+
   sounds: {
     ...defaultGunStats.sounds,
     shoot: [p90Shoot1, p90Shoot2, p90Shoot3],

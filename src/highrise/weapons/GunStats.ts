@@ -56,6 +56,11 @@ export interface GunStats extends BaseWeaponStats {
     // Texture of the ejected shell casing
     readonly shellCasing: string;
   };
+
+  // Position of the left hand
+  leftHandPosition: [number, number];
+  // Position of the right hand
+  rightHandPosition: [number, number];
 }
 
 export type GunSounds = GunStats["sounds"];
@@ -91,7 +96,14 @@ export const defaultGunStats: GunStats = {
   bulletSpread: degToRad(0.5),
 
   size: [1, 1],
-  textures: { pickup: ar15, holding: pistol, shellCasing: pistolCasing },
+  leftHandPosition: [0.3, 0],
+  rightHandPosition: [0.3, 0],
+
+  textures: {
+    pickup: ar15,
+    holding: pistol,
+    shellCasing: pistolCasing,
+  },
 
   sounds: {
     shoot: [pistol2Shot1],

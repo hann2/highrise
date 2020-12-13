@@ -31,6 +31,9 @@ export const Magnum: GunStats = {
   },
   size: [0.55, 0.55],
 
+  leftHandPosition: [0.4, 0],
+  rightHandPosition: [0.4, 0],
+
   sounds: {
     ...defaultGunStats.sounds,
     shoot: [revolverShot3],
