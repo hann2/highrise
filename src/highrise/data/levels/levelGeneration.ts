@@ -13,6 +13,7 @@ import Decoration from "../../entities/Decoration";
 import Door from "../../entities/Door";
 import VendingMachine from "../../entities/environment/VendingMachine";
 import Exit from "../../entities/Exit";
+import Furniture from "../../entities/Furniture";
 import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/human/Human";
 import Wall from "../../entities/Wall";
@@ -33,6 +34,7 @@ import {
   garbageCan,
   sack,
   shelfEmpty,
+  waterCooler,
 } from "../../view/DecorationSprite";
 import Gun from "../../weapons/Gun";
 import { GUNS } from "../../weapons/guns";
@@ -715,17 +717,29 @@ class LevelBuilder {
         }
 
         if (isANubby) {
-          // Fill with vending machine
+          const content = choose("vending", "water-cooler");
+          this.cells[i][j].content = content;
           const wallDirection = openDirection!;
-          const machinePosition = cell.sub(wallDirection.mul(0.1));
-          this.cells[i][j].content = "vending";
 
-          entities.push(
-            new VendingMachine(
-              this.levelCoordToWorldCoord(machinePosition),
-              wallDirection.angle + Math.PI / 2
-            )
-          );
+          if (content === "vending") {
+            // Fill with vending machine
+            const machinePosition = cell.sub(wallDirection.mul(0.1));
+
+            entities.push(
+              new VendingMachine(
+                this.levelCoordToWorldCoord(machinePosition),
+                wallDirection.angle + Math.PI / 2
+              )
+            );
+          } else if (content === "water-cooler") {
+            const machinePosition = cell.sub(wallDirection.mul(0.13));
+            entities.push(
+              new Furniture(
+                this.levelCoordToWorldCoord(machinePosition),
+                waterCooler
+              )
+            );
+          }
         }
       }
     }

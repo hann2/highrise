@@ -12,6 +12,7 @@ import { V, V2d } from "../../core/Vector";
 import WallImpact from "../effects/WallImpact";
 import { Layers } from "../layers";
 import { CollisionGroups } from "../physics/CollisionGroups";
+import { P2Materials } from "../physics/PhysicsMaterials";
 import SwingingWeapon from "../weapons/SwingingWeapon";
 import Bullet from "./Bullet";
 import Hittable from "./Hittable";
@@ -66,6 +67,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     const shape = new Box({ width: width, height: length });
     shape.collisionGroup = CollisionGroups.World | CollisionGroups.CastsShadow;
     shape.collisionMask = CollisionGroups.All;
+    shape.material = P2Materials.wall;
     this.body.addShape(shape);
   }
 

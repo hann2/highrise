@@ -10,6 +10,7 @@ import img_oldPlankFlooring1 from "../../../resources/images/environment/floor/o
 import img_oldPlankFlooring2 from "../../../resources/images/environment/floor/old-plank-flooring-2.png";
 import img_furniture from "../../../resources/images/environment/furniture.png";
 import img_market from "../../../resources/images/environment/market.png";
+import img_waterCooler from "../../../resources/images/environment/water-cooler.png";
 import { V, V2d } from "../../core/Vector";
 
 /**
@@ -665,4 +666,11 @@ export const industrialCarpet2: DecorationSprite = {
   offset: V(0, 0),
   dimensions: V(512, 512),
   heightMeters: 4,
+};
+
+export const waterCooler: DecorationSprite = {
+  imageName: img_waterCooler,
+  offset: V(0, 0),
+  dimensions: V(69, 62),
+  heightMeters: 0.6,
 };
