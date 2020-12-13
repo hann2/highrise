@@ -1,5 +1,5 @@
 import { Body, Box, RevoluteConstraint } from "p2";
-import { Graphics, Point, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
 import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import door1 from "../../../resources/images/environment/door-1.png";
@@ -8,7 +8,6 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { polarToVec } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import WallImpact from "../effects/WallImpact";

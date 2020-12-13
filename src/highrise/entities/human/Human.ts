@@ -1,25 +1,19 @@
 import { Body, Circle } from "p2";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { angleDelta, clamp, normalizeAngle } from "../../../core/util/MathUtil";
-import { rBool } from "../../../core/util/Random";
+import { angleDelta, clamp } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
-import {
-  Character,
-  CharacterSoundClass,
-  randomCharacter,
-} from "../../characters/Character";
+import { Character, randomCharacter } from "../../characters/Character";
 import BloodSplat from "../../effects/BloodSplat";
 import { PointLight } from "../../lighting/PointLight";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import Gun from "../../weapons/Gun";
-import { FireMode } from "../../weapons/GunStats";
-import Interactable, { isInteractable } from "../Interactable";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
+import Interactable, { isInteractable } from "../Interactable";
 import WeaponPickup from "../WeaponPickup";
+import Flashlight from "./Flashlight";
 import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
-import Flashlight from "./Flashlight";
 
 export const HUMAN_RADIUS = 0.35; // meters
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
