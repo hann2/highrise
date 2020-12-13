@@ -35,6 +35,7 @@ export interface DecorationSprite {
   offset: V2d; // in pixes
   dimensions: V2d; // in pixels
   heightMeters: number; // height of object in world space (meters)
+  rotation?: number; // in radians CCW
 }
 
 export const rightToilet1: DecorationSprite = {

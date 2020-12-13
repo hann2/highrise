@@ -3,7 +3,7 @@ import { V } from "../../../../../core/Vector";
 import Furniture from "../../../../entities/Furniture";
 import { PointLight } from "../../../../lighting/PointLight";
 import {
-  bathroomTiles,
+  oakFloor,
   redWineCrate,
   shelfEmpty,
   shelfJars,
@@ -23,7 +23,7 @@ export default class WineShop extends RoomTemplate {
         [V(1, 2), false],
         [V(-1, 2), true],
       ],
-      bathroomTiles
+      oakFloor
     );
   }
 
