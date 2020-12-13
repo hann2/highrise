@@ -1,6 +1,6 @@
 import { Body, Box } from "p2";
 import { Sprite } from "pixi.js";
-import stairs from "../../../resources/images/environment/stairs.png";
+import img_stairs from "../../../resources/images/environment/stairs.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V } from "../../core/Vector";
@@ -23,7 +23,7 @@ export default class Exit extends BaseEntity implements Entity {
     const w = Math.abs(x2 - x1);
     const h = Math.abs(y2 - y1);
 
-    this.sprite = Sprite.from(stairs);
+    this.sprite = Sprite.from(img_stairs);
     this.sprite.layerName = Layers.WORLD_BACK;
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(x1 + w / 2, y1 + h / 2);

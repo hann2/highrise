@@ -2,18 +2,11 @@ import { Body, Box } from "p2";
 import { Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import {
-  clamp,
-  lerp,
-  polarToVec,
-  radToDeg,
-  smootherStep,
-} from "../../core/util/MathUtil";
-import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../physics/CollisionGroups";
-import { Layers } from "../layers";
+import { V2d } from "../../core/Vector";
 import { isHittable } from "../entities/Hittable";
 import Human from "../entities/human/Human";
+import { Layers } from "../layers";
+import { CollisionGroups } from "../physics/CollisionGroups";
 import MeleeWeapon from "./MeleeWeapon";
 import { SwingPhase } from "./SwingDescriptor";
 

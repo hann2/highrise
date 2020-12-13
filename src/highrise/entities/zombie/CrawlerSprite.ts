@@ -1,5 +1,5 @@
 import { Sprite } from "pixi.js";
-import crawler from "../../../../resources/images/zombies/crawler.png";
+import img_crawler from "../../../../resources/images/zombies/crawler.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { Layers } from "../../layers";
@@ -25,11 +25,11 @@ export default class ZombieSprite extends BaseEntity implements Entity {
     this.sprite.anchor.set(0.5, 0.5);
 
     this.bodySprites = {
-      standing: Sprite.from(crawler),
-      stunned: Sprite.from(crawler),
-      walking: Sprite.from(crawler),
-      windup: Sprite.from(crawler),
-      winddown: Sprite.from(crawler),
+      standing: Sprite.from(img_crawler),
+      stunned: Sprite.from(img_crawler),
+      walking: Sprite.from(img_crawler),
+      windup: Sprite.from(img_crawler),
+      winddown: Sprite.from(img_crawler),
     };
 
     for (const bodySprite of Object.values(this.bodySprites)) {

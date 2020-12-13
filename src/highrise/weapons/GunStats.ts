@@ -1,12 +1,12 @@
-import dryFire1 from "../../../resources/audio/guns/misc/dry-fire-1.mp3";
-import shellDrop1 from "../../../resources/audio/guns/misc/shell-drop-1.mp3";
-import pistolCock1 from "../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
-import pistol2Shot1 from "../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
-import ar15Reload1 from "../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
-import shotgunPump1 from "../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
-import pistolCasing from "../../../resources/images/shell-casings/pistol-casing.png";
-import ar15 from "../../../resources/images/weapons/ar-15.png";
-import pistol from "../../../resources/images/weapons/pistol.png";
+import snd_dryFire1 from "../../../resources/audio/guns/misc/dry-fire-1.mp3";
+import snd_shellDrop1 from "../../../resources/audio/guns/misc/shell-drop-1.mp3";
+import snd_pistolCock1 from "../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
+import snd_pistol2Shot1 from "../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
+import snd_ar15Reload1 from "../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
+import snd_shotgunPump1 from "../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
+import img_pistolCasing from "../../../resources/images/shell-casings/pistol-casing.png";
+import img_ar15 from "../../../resources/images/weapons/ar-15.png";
+import img_pistol from "../../../resources/images/weapons/pistol.png";
 import { SoundName } from "../../core/resources/sounds";
 import { degToRad } from "../../core/util/MathUtil";
 import { BaseWeaponStats } from "./WeaponStats";
@@ -100,19 +100,19 @@ export const defaultGunStats: GunStats = {
   rightHandPosition: [0.3, 0],
 
   textures: {
-    pickup: ar15,
-    holding: pistol,
-    shellCasing: pistolCasing,
+    pickup: img_ar15,
+    holding: img_pistol,
+    shellCasing: img_pistolCasing,
   },
 
   sounds: {
-    shoot: [pistol2Shot1],
-    empty: [dryFire1],
-    pickup: [pistolCock1],
-    reload: [ar15Reload1],
+    shoot: [snd_pistol2Shot1],
+    empty: [snd_dryFire1],
+    pickup: [snd_pistolCock1],
+    reload: [snd_ar15Reload1],
     reloadInsert: [],
     reloadFinish: [],
-    pump: [shotgunPump1],
-    shellDrop: [shellDrop1],
+    pump: [snd_shotgunPump1],
+    shellDrop: [snd_shellDrop1],
   },
 };

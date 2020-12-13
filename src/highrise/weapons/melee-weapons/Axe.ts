@@ -1,9 +1,9 @@
-import fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
-import swordShing3 from "../../../../resources/audio/weapons/sword-shing-3.flac";
-import swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
-import swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
-import swordSwoosh3 from "../../../../resources/audio/weapons/sword-swoosh-3.flac";
-import axe from "../../../../resources/images/weapons/axe.png";
+import snd_fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
+import snd_swordShing3 from "../../../../resources/audio/weapons/sword-shing-3.flac";
+import snd_swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
+import snd_swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
+import snd_swordSwoosh3 from "../../../../resources/audio/weapons/sword-swoosh-3.flac";
+import img_axe from "../../../../resources/images/weapons/axe.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import { defaultMeleeWeapon, MeleeWeaponStats } from "../MeleeWeaponStats";
 
@@ -30,16 +30,16 @@ export const Axe: MeleeWeaponStats = {
   },
 
   textures: {
-    pickup: axe,
-    attack: axe,
-    hold: axe,
+    pickup: img_axe,
+    attack: img_axe,
+    hold: img_axe,
   },
 
   sounds: {
     ...defaultMeleeWeapon.sounds,
-    swing: [swordSwoosh2, swordSwoosh3],
-    windup: [swordSwoosh1],
-    hitFlesh: [fleshHit4],
-    pickup: [swordShing3],
+    swing: [snd_swordSwoosh2, snd_swordSwoosh3],
+    windup: [snd_swordSwoosh1],
+    hitFlesh: [snd_fleshHit4],
+    pickup: [snd_swordShing3],
   },
 };

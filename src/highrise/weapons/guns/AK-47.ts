@@ -1,12 +1,12 @@
-import dryFire3 from "../../../../resources/audio/guns/misc/dry-fire-3.mp3";
-import magazineLoad1 from "../../../../resources/audio/guns/misc/magazine-load-1.mp3";
-import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
-import ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
-import ar15ReloadEmpty from "../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
-import rifle2Shot1 from "../../../../resources/audio/guns/rifle/rifle2-shot-1.mp3";
-import rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
-import ak47 from "../../../../resources/images/weapons/ak47.png";
-import rifle from "../../../../resources/images/weapons/rifle.png";
+import snd_dryFire3 from "../../../../resources/audio/guns/misc/dry-fire-3.mp3";
+import snd_magazineLoad1 from "../../../../resources/audio/guns/misc/magazine-load-1.mp3";
+import snd_shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
+import snd_ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
+import snd_ar15ReloadEmpty from "../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
+import snd_rifle2Shot1 from "../../../../resources/audio/guns/rifle/rifle2-shot-1.mp3";
+import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
+import img_ak47 from "../../../../resources/images/weapons/ak47.png";
+import img_rifle from "../../../../resources/images/weapons/rifle.png";
 import {
   defaultGunStats,
   FireMode,
@@ -28,9 +28,9 @@ export const AK47: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: ak47,
-    holding: rifle,
-    shellCasing: rifleCasing,
+    pickup: img_ak47,
+    holding: img_rifle,
+    shellCasing: img_rifleCasing,
   },
   size: [1.4, 1.4],
 
@@ -39,10 +39,10 @@ export const AK47: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [rifle2Shot1],
-    empty: [dryFire3],
-    pickup: [magazineLoad1],
-    reload: [ar15Reload1, ar15ReloadEmpty],
-    shellDrop: [shellDrop1],
+    shoot: [snd_rifle2Shot1],
+    empty: [snd_dryFire3],
+    pickup: [snd_magazineLoad1],
+    reload: [snd_ar15Reload1, snd_ar15ReloadEmpty],
+    shellDrop: [snd_shellDrop1],
   },
 };

@@ -3,7 +3,6 @@ import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
-import light from "./light.frag";
 import { getShapeCorners } from "./shapeUtils";
 /**
  * Draws shadows from a given point

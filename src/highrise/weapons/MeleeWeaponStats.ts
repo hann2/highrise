@@ -1,9 +1,9 @@
-import fleshHit1 from "../../../resources/audio/impacts/flesh-hit-1.flac";
-import fleshHit2 from "../../../resources/audio/impacts/flesh-hit-2.flac";
-import fleshHit3 from "../../../resources/audio/impacts/flesh-hit-3.flac";
-import pop1 from "../../../resources/audio/misc/pop1.flac";
-import swordShing1 from "../../../resources/audio/weapons/sword-shing-1.flac";
-import axe from "../../../resources/images/weapons/axe.png";
+import snd_fleshHit1 from "../../../resources/audio/impacts/flesh-hit-1.flac";
+import snd_fleshHit2 from "../../../resources/audio/impacts/flesh-hit-2.flac";
+import snd_fleshHit3 from "../../../resources/audio/impacts/flesh-hit-3.flac";
+import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
+import snd_swordShing1 from "../../../resources/audio/weapons/sword-shing-1.flac";
+import img_axe from "../../../resources/images/weapons/axe.png";
 import { SoundName } from "../../core/resources/sounds";
 import { SwingAngles, SwingDurations } from "./SwingDescriptor";
 import { BaseWeaponStats } from "./WeaponStats";
@@ -76,16 +76,16 @@ export const defaultMeleeWeapon: MeleeWeaponStats = {
   handlePosition: [0.5, 0.9],
 
   textures: {
-    pickup: axe,
-    hold: axe,
-    attack: axe,
+    pickup: img_axe,
+    hold: img_axe,
+    attack: img_axe,
   },
 
   sounds: {
-    swing: [pop1],
+    swing: [snd_pop1],
     windup: [],
     winddown: [],
-    hitFlesh: [fleshHit1, fleshHit2, fleshHit3],
-    pickup: [swordShing1],
+    hitFlesh: [snd_fleshHit1, snd_fleshHit2, snd_fleshHit3],
+    pickup: [snd_swordShing1],
   },
 };

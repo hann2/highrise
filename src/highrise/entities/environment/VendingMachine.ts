@@ -3,10 +3,10 @@ import { BLEND_MODES, Sprite } from "pixi.js";
 import wallHit1 from "../../../../resources/audio/impacts/wall-hit-1.flac";
 import wallHit2 from "../../../../resources/audio/impacts/wall-hit-2.flac";
 import quarterDrop1 from "../../../../resources/audio/misc/quarter-drop-1.flac";
-import vendingMachine1 from "../../../../resources/images/environment/vending-machine-1.png";
-import vendingMachine2 from "../../../../resources/images/environment/vending-machine-2.png";
-import vendingMachineGlow1 from "../../../../resources/images/environment/vending-machine-glow-1.png";
-import vendingMachineGlow2 from "../../../../resources/images/environment/vending-machine-glow-2.png";
+import img_vendingMachine1 from "../../../../resources/images/environment/vending-machine-1.png";
+import img_vendingMachine2 from "../../../../resources/images/environment/vending-machine-2.png";
+import img_vendingMachineGlow1 from "../../../../resources/images/environment/vending-machine-glow-1.png";
+import img_vendingMachineGlow2 from "../../../../resources/images/environment/vending-machine-glow-2.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
@@ -20,12 +20,9 @@ import Bullet from "../Bullet";
 import Hittable from "../Hittable";
 import Interactable from "../Interactable";
 
-export const VENDING_MACHINE_SPRITES = [vendingMachine1, vendingMachine2];
-export const VENDING_MACHINE_GLOWS = [vendingMachineGlow1, vendingMachineGlow2];
-
 export const VENDING_MACHINES = [
-  [vendingMachine1, vendingMachineGlow1],
-  [vendingMachine2, vendingMachineGlow2],
+  [img_vendingMachine1, img_vendingMachineGlow1],
+  [img_vendingMachine2, img_vendingMachineGlow2],
 ];
 export default class VendingMachine
   extends BaseEntity

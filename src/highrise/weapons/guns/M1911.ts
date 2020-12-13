@@ -1,11 +1,11 @@
-import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
-import m1911DryFire from "../../../../resources/audio/guns/pistol/m1911-dry-fire.flac";
-import m1911Pickup from "../../../../resources/audio/guns/pistol/M1911-pickup.flac";
-import m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
-import pistol2Shot1 from "../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
-import pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
-import glock from "../../../../resources/images/weapons/glock.png";
-import pistol from "../../../../resources/images/weapons/pistol.png";
+import snd_shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
+import snd_m1911DryFire from "../../../../resources/audio/guns/pistol/m1911-dry-fire.flac";
+import snd_m1911Pickup from "../../../../resources/audio/guns/pistol/M1911-pickup.flac";
+import snd_m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
+import snd_pistol2Shot1 from "../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
+import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
+import img_glock from "../../../../resources/images/weapons/glock.png";
+import img_pistol from "../../../../resources/images/weapons/pistol.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const M1911: GunStats = {
@@ -21,9 +21,9 @@ export const M1911: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: glock,
-    holding: pistol,
-    shellCasing: pistolCasing,
+    pickup: img_glock,
+    holding: img_pistol,
+    shellCasing: img_pistolCasing,
   },
   size: [0.45, 0.45],
 
@@ -32,10 +32,10 @@ export const M1911: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [pistol2Shot1],
-    empty: [m1911DryFire],
-    pickup: [m1911Pickup],
-    reload: [m1911Reload1],
-    shellDrop: [shellDrop1],
+    shoot: [snd_pistol2Shot1],
+    empty: [snd_m1911DryFire],
+    pickup: [snd_m1911Pickup],
+    reload: [snd_m1911Reload1],
+    shellDrop: [snd_shellDrop1],
   },
 };

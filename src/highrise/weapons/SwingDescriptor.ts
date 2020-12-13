@@ -1,5 +1,4 @@
 import {
-  clamp,
   degToRad,
   lerp,
   polarToVec,

@@ -1,9 +1,9 @@
 import { Body, Box, RevoluteConstraint } from "p2";
 import { Sprite } from "pixi.js";
-import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
-import door1 from "../../../resources/images/environment/door-1.png";
-import door2 from "../../../resources/images/environment/door-2.png";
+import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
+import img_door1 from "../../../resources/images/environment/door-1.png";
+import img_door2 from "../../../resources/images/environment/door-2.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
@@ -19,7 +19,7 @@ import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
 
-export const DOOR_SPRITES = [door1, door2];
+export const DOOR_SPRITES = [img_door1, img_door2];
 
 export default class Door extends BaseEntity implements Entity, Hittable {
   tags = ["casts_shadow"];
@@ -79,7 +79,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.body.applyImpulse(bullet.velocity.mul(bullet.mass * 0.7), position);
 
     this.game!.addEntities([
-      new PositionalSound(choose(wallHit1, wallHit2), position),
+      new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position),
       new WallImpact(position, normal),
     ]);
   }

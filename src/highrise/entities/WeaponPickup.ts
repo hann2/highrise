@@ -1,13 +1,13 @@
-import { Sprite, Text, Texture } from "pixi.js";
+import { Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
+import { GameSprite } from "../../core/entity/Entity";
 import { rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
+import { Layers } from "../layers";
 import Gun from "../weapons/Gun";
+import MeleeWeapon from "../weapons/MeleeWeapon";
 import Human from "./human/Human";
 import Interactable from "./Interactable";
-import MeleeWeapon from "../weapons/MeleeWeapon";
-import { GameSprite } from "../../core/entity/Entity";
-import { Layers } from "../layers";
 
 export default class WeaponPickup extends BaseEntity {
   sprite: Sprite & GameSprite;

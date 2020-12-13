@@ -1,8 +1,8 @@
 import { Body, Box } from "p2";
 import { Graphics } from "pixi.js";
-import elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
-import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
+import snd_elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
+import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
@@ -85,7 +85,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
-      new PositionalSound(choose(wallHit1, wallHit2), position)
+      new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position)
     );
   }
 }
@@ -168,7 +168,7 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
 
   onInteract() {
     if (this.state === "STOPPED") {
-      this.game?.addEntity(new PositionalSound(elevatorDing, this.center));
+      this.game?.addEntity(new PositionalSound(snd_elevatorDing, this.center));
       if (this.openPerentage === 1) {
         this.state = "CLOSING";
       } else {

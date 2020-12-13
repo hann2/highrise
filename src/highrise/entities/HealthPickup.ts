@@ -1,6 +1,6 @@
 import { Body } from "p2";
 import { Sprite } from "pixi.js";
-import healthPack from "../../../resources/images/health_pack.png";
+import img_healthPack from "../../../resources/images/health_pack.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import { V2d } from "../../core/Vector";
 import Human from "./human/Human";
@@ -16,7 +16,7 @@ export default class HealthPickup extends BaseEntity {
 
     this.addChild(new Interactable(position, this.onInteract.bind(this)));
 
-    this.sprite = Sprite.from(healthPack);
+    this.sprite = Sprite.from(img_healthPack);
     this.sprite.scale.set(0.7 / this.sprite.width);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(...position);

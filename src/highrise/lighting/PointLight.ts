@@ -1,5 +1,5 @@
 import { BLEND_MODES, Sprite } from "pixi.js";
-import pointLight from "../../../resources/images/lights/point-light.png";
+import img_pointLight from "../../../resources/images/lights/point-light.png";
 import Light from "./Light";
 
 interface Options {
@@ -17,7 +17,7 @@ export class PointLight extends Light {
     shadowsEnabled = true,
     position,
   }: Options) {
-    super(Sprite.from(pointLight), shadowsEnabled);
+    super(Sprite.from(img_pointLight), shadowsEnabled);
     this.lightSprite.anchor.set(0.5, 0.5);
     this.lightSprite.blendMode = BLEND_MODES.ADD;
 

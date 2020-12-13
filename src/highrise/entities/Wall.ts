@@ -1,9 +1,9 @@
 import { Body, Box, vec2 } from "p2";
-import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
-import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
-import wall1 from "../../../resources/images/environment/wall-1.png";
-import wallAo1 from "../../../resources/images/environment/wall-ao-1.png";
+import { BLEND_MODES, Sprite } from "pixi.js";
+import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import sndwallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
+import img_wall1 from "../../../resources/images/environment/wall-1.png";
+import img_wallAo1 from "../../../resources/images/environment/wall-ao-1.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
@@ -37,7 +37,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     const drawHeight = length + width; // add in width to make things line up nicely
 
     // TODO: AO Breaks on outside corners
-    const aoSprite = Sprite.from(wallAo1);
+    const aoSprite = Sprite.from(img_wallAo1);
     (aoSprite as GameSprite).layerName = Layers.AO;
     aoSprite.blendMode = BLEND_MODES.MULTIPLY;
     aoSprite.anchor.set(0.5, 0.5);
@@ -46,7 +46,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     aoSprite.position.set(x, y);
     aoSprite.rotation = angle + Math.PI / 2;
 
-    const wallSprite = Sprite.from(wall1);
+    const wallSprite = Sprite.from(img_wall1);
     (wallSprite as GameSprite).layerName = Layers.WALLS;
     wallSprite.anchor.set(0.5, 0.5);
     wallSprite.width = drawHeight;
@@ -73,7 +73,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.game!.addEntities([
-      new PositionalSound(choose(wallHit1, wallHit2), position),
+      new PositionalSound(choose(snd_wallHit1, sndwallHit2), position),
       new WallImpact(position, normal),
     ]);
   }

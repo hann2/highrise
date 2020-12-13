@@ -4,7 +4,6 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
-import WallImpact from "../effects/WallImpact";
 import { Layers } from "../layers";
 import Light from "../lighting/Light";
 import { CollisionGroups } from "../physics/CollisionGroups";

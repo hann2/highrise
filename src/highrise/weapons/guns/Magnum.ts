@@ -1,15 +1,15 @@
-import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
-import revolverDryFire from "../../../../resources/audio/guns/revolver/revolver-dry-fire.flac";
-import revolverInsertShell1 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-1.flac";
-import revolverInsertShell2 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-2.flac";
-import revolverInsertShell3 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-3.flac";
-import revolverPickup from "../../../../resources/audio/guns/revolver/revolver-pickup.flac";
-import revolverReloadFinish from "../../../../resources/audio/guns/revolver/revolver-reload-finish.flac";
-import revolverReloadStart from "../../../../resources/audio/guns/revolver/revolver-reload-start.flac";
-import revolverShot3 from "../../../../resources/audio/guns/revolver/revolver-shot-3.mp3";
-import pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
-import magnum from "../../../../resources/images/weapons/magnum.png";
-import pistol from "../../../../resources/images/weapons/pistol.png";
+import snd_shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
+import snd_revolverDryFire from "../../../../resources/audio/guns/revolver/revolver-dry-fire.flac";
+import snd_revolverInsertShell1 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-1.flac";
+import snd_revolverInsertShell2 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-2.flac";
+import snd_revolverInsertShell3 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-3.flac";
+import snd_revolverPickup from "../../../../resources/audio/guns/revolver/revolver-pickup.flac";
+import snd_revolverReloadFinish from "../../../../resources/audio/guns/revolver/revolver-reload-finish.flac";
+import snd_revolverReloadStart from "../../../../resources/audio/guns/revolver/revolver-reload-start.flac";
+import snd_revolverShot3 from "../../../../resources/audio/guns/revolver/revolver-shot-3.mp3";
+import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
+import img_magnum from "../../../../resources/images/weapons/magnum.png";
+import img_pistol from "../../../../resources/images/weapons/pistol.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const Magnum: GunStats = {
@@ -25,9 +25,9 @@ export const Magnum: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: magnum,
-    holding: pistol,
-    shellCasing: pistolCasing,
+    pickup: img_magnum,
+    holding: img_pistol,
+    shellCasing: img_pistolCasing,
   },
   size: [0.55, 0.55],
 
@@ -36,16 +36,16 @@ export const Magnum: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [revolverShot3],
-    empty: [revolverDryFire],
-    pickup: [revolverPickup],
-    reload: [revolverReloadStart],
+    shoot: [snd_revolverShot3],
+    empty: [snd_revolverDryFire],
+    pickup: [snd_revolverPickup],
+    reload: [snd_revolverReloadStart],
     reloadInsert: [
-      revolverInsertShell1,
-      revolverInsertShell2,
-      revolverInsertShell3,
+      snd_revolverInsertShell1,
+      snd_revolverInsertShell2,
+      snd_revolverInsertShell3,
     ],
-    reloadFinish: [revolverReloadFinish],
-    shellDrop: [shellDrop1],
+    reloadFinish: [snd_revolverReloadFinish],
+    shellDrop: [snd_shellDrop1],
   },
 };

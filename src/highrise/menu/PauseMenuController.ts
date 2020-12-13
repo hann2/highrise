@@ -7,7 +7,6 @@ import { KeyCode } from "../../core/io/Keys";
 import { Layers } from "../layers";
 import ClickableText from "./ClickableText";
 import FeedbackButton from "./FeedbackButton";
-import MainMenu from "./MainMenu";
 
 export default class PauseMenuController extends BaseEntity implements Entity {
   persistent = true;

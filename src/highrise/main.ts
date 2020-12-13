@@ -13,7 +13,6 @@ import PartyManager from "./entities/PartyManager";
 import { initLayers, Layers } from "./layers";
 import LightingManager from "./lighting/LightingManager";
 import MainMenu from "./menu/MainMenu";
-import PauseMenuController from "./menu/PauseMenuController";
 import MusicController from "./MusicController";
 import { initContactMaterials } from "./physics/PhysicsMaterials";
 import Preloader from "./preloader/Preloader";

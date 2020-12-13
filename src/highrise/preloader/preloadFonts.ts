@@ -1,11 +1,11 @@
-import captureIt from "../../../resources/fonts/capture_it/capture_it.ttf";
-import comfortaaVariableFontWght from "../../../resources/fonts/Comfortaa/Comfortaa-VariableFont_wght.ttf";
-import dsDigi from "../../../resources/fonts/ds-digi/ds-digi.ttf";
+import fnt_captureIt from "../../../resources/fonts/capture_it/capture_it.ttf";
+import fnt_comfortaaVariableFontWght from "../../../resources/fonts/Comfortaa/Comfortaa-VariableFont_wght.ttf";
+import fnt_dsDigi from "../../../resources/fonts/ds-digi/ds-digi.ttf";
 
 export function getFontsToPreload() {
   return [
-    new FontFace("DS Digital", `url(${dsDigi})`),
-    new FontFace("Capture It", `url(${captureIt})`),
-    new FontFace("Comfortaa", `url(${comfortaaVariableFontWght})`),
+    new FontFace("DS Digital", `url(${fnt_dsDigi})`),
+    new FontFace("Capture It", `url(${fnt_captureIt})`),
+    new FontFace("Comfortaa", `url(${fnt_comfortaaVariableFontWght})`),
   ];
 }

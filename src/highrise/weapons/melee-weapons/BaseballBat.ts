@@ -1,11 +1,11 @@
-import fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
-import fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
-import swordShing2 from "../../../../resources/audio/weapons/sword-shing-2.flac";
-import swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
-import swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
-import swordSwoosh3 from "../../../../resources/audio/weapons/sword-swoosh-3.flac";
-import baseballBatHold from "../../../../resources/images/weapons/baseball-bat-hold.png";
-import baseballBatPickup from "../../../../resources/images/weapons/baseball-bat-pickup.png";
+import snd_fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
+import snd_fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
+import snd_swordShing2 from "../../../../resources/audio/weapons/sword-shing-2.flac";
+import snd_swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
+import snd_swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
+import snd_swordSwoosh3 from "../../../../resources/audio/weapons/sword-swoosh-3.flac";
+import img_baseballBatHold from "../../../../resources/images/weapons/baseball-bat-hold.png";
+import img_baseballBatPickup from "../../../../resources/images/weapons/baseball-bat-pickup.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import { defaultMeleeWeapon, MeleeWeaponStats } from "../MeleeWeaponStats";
 
@@ -30,15 +30,15 @@ export const BaseballBat: MeleeWeaponStats = {
   },
 
   textures: {
-    pickup: baseballBatPickup,
-    attack: baseballBatPickup,
-    hold: baseballBatHold,
+    pickup: img_baseballBatPickup,
+    attack: img_baseballBatPickup,
+    hold: img_baseballBatHold,
   },
 
   sounds: {
     ...defaultMeleeWeapon.sounds,
-    swing: [swordSwoosh1, swordSwoosh2, swordSwoosh3],
-    hitFlesh: [fleshHit3, fleshHit4],
-    pickup: [swordShing2],
+    swing: [snd_swordSwoosh1, snd_swordSwoosh2, snd_swordSwoosh3],
+    hitFlesh: [snd_fleshHit3, snd_fleshHit4],
+    pickup: [snd_swordShing2],
   },
 };

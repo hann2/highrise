@@ -1,16 +1,16 @@
-import rachelZombie5 from "../../../../resources/audio/zombie/ rachel-zombie-5.flac";
-import rachelZombie1 from "../../../../resources/audio/zombie/rachel-zombie-1.flac";
-import rachelZombie10 from "../../../../resources/audio/zombie/rachel-zombie-10.flac";
-import rachelZombie11 from "../../../../resources/audio/zombie/rachel-zombie-11.flac";
-import rachelZombie12 from "../../../../resources/audio/zombie/rachel-zombie-12.flac";
-import rachelZombie13 from "../../../../resources/audio/zombie/rachel-zombie-13.flac";
-import rachelZombie2 from "../../../../resources/audio/zombie/rachel-zombie-2.flac";
-import rachelZombie3 from "../../../../resources/audio/zombie/rachel-zombie-3.flac";
-import rachelZombie4 from "../../../../resources/audio/zombie/rachel-zombie-4.flac";
-import rachelZombie6 from "../../../../resources/audio/zombie/rachel-zombie-6.flac";
-import rachelZombie7 from "../../../../resources/audio/zombie/rachel-zombie-7.flac";
-import rachelZombie8 from "../../../../resources/audio/zombie/rachel-zombie-8.flac";
-import rachelZombie9 from "../../../../resources/audio/zombie/rachel-zombie-9.flac";
+import snd_rachelZombie5 from "../../../../resources/audio/zombie/ rachel-zombie-5.flac";
+import snd_rachelZombie1 from "../../../../resources/audio/zombie/rachel-zombie-1.flac";
+import snd_rachelZombie10 from "../../../../resources/audio/zombie/rachel-zombie-10.flac";
+import snd_rachelZombie11 from "../../../../resources/audio/zombie/rachel-zombie-11.flac";
+import snd_rachelZombie12 from "../../../../resources/audio/zombie/rachel-zombie-12.flac";
+import snd_rachelZombie13 from "../../../../resources/audio/zombie/rachel-zombie-13.flac";
+import snd_rachelZombie2 from "../../../../resources/audio/zombie/rachel-zombie-2.flac";
+import snd_rachelZombie3 from "../../../../resources/audio/zombie/rachel-zombie-3.flac";
+import snd_rachelZombie4 from "../../../../resources/audio/zombie/rachel-zombie-4.flac";
+import snd_rachelZombie6 from "../../../../resources/audio/zombie/rachel-zombie-6.flac";
+import snd_rachelZombie7 from "../../../../resources/audio/zombie/rachel-zombie-7.flac";
+import snd_rachelZombie8 from "../../../../resources/audio/zombie/rachel-zombie-8.flac";
+import snd_rachelZombie9 from "../../../../resources/audio/zombie/rachel-zombie-9.flac";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
@@ -80,11 +80,11 @@ interface ZombieSounds {
 }
 
 const rachelZombieSounds: ZombieSounds = {
-  hit: [rachelZombie5, rachelZombie6, rachelZombie13],
-  targetAquired: [rachelZombie1, rachelZombie8],
-  attack: [rachelZombie4, rachelZombie7, rachelZombie10],
-  death: [rachelZombie3, rachelZombie9, rachelZombie12],
-  idle: [rachelZombie2, rachelZombie11],
+  hit: [snd_rachelZombie5, snd_rachelZombie6, snd_rachelZombie13],
+  targetAquired: [snd_rachelZombie1, snd_rachelZombie8],
+  attack: [snd_rachelZombie4, snd_rachelZombie7, snd_rachelZombie10],
+  death: [snd_rachelZombie3, snd_rachelZombie9, snd_rachelZombie12],
+  idle: [snd_rachelZombie2, snd_rachelZombie11],
 };
 
 export const ZOMBIE_SOUNDS: ZombieSounds[] = [rachelZombieSounds];

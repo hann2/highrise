@@ -1,6 +1,5 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import Game from "../../../core/Game";
 import { KeyCode } from "../../../core/io/Keys";
 import FPSMeter from "../../../core/util/FPSMeter";
 

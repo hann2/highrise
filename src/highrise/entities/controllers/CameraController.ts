@@ -4,7 +4,6 @@ import { Camera2d } from "../../../core/graphics/Camera2d";
 import PositionalSoundListener from "../../../core/sound/PositionalSoundListener";
 import { V } from "../../../core/Vector";
 import PartyManager from "../PartyManager";
-import LevelController from "./LevelController";
 
 export default class CameraController extends BaseEntity implements Entity {
   persistent = true;

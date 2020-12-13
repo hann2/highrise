@@ -1,8 +1,8 @@
-import elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
-import wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
-import pop1 from "../../../resources/audio/misc/pop1.flac";
-import quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac";
+import snd_elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
+import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
+import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
+import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
+import snd_quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac";
 import { CHARACTERS } from "../characters/Character";
 import { ZOMBIE_SOUNDS } from "../entities/zombie/ZombieVoice";
 import { MUSIC_URLS } from "../MusicController";
@@ -11,11 +11,11 @@ import { WEAPONS } from "../weapons";
 export function getSoundsToPreload(): string[] {
   const urls = new Set<string>([
     // Misc sounds. Probably will/should get lumped in with other stuff later
-    elevatorDing,
-    pop1,
-    quarterDrop1,
-    wallHit1,
-    wallHit2,
+    snd_elevatorDing,
+    snd_pop1,
+    snd_quarterDrop1,
+    snd_wallHit1,
+    snd_wallHit2,
 
     ...MUSIC_URLS,
   ]);

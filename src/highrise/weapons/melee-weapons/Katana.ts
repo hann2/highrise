@@ -1,12 +1,12 @@
-import fleshHit1 from "../../../../resources/audio/impacts/flesh-hit-1.flac";
-import fleshHit2 from "../../../../resources/audio/impacts/flesh-hit-2.flac";
-import fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
-import fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
-import swordShing2 from "../../../../resources/audio/weapons/sword-shing-2.flac";
-import swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
-import swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
-import swordSwoosh3 from "../../../../resources/audio/weapons/sword-swoosh-3.flac";
-import katana from "../../../../resources/images/weapons/katana.png";
+import snd_fleshHit1 from "../../../../resources/audio/impacts/flesh-hit-1.flac";
+import snd_fleshHit2 from "../../../../resources/audio/impacts/flesh-hit-2.flac";
+import snd_fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
+import snd_fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
+import snd_swordShing2 from "../../../../resources/audio/weapons/sword-shing-2.flac";
+import snd_swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
+import snd_swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
+import snd_swordSwoosh3 from "../../../../resources/audio/weapons/sword-swoosh-3.flac";
+import img_katana from "../../../../resources/images/weapons/katana.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import { defaultMeleeWeapon, MeleeWeaponStats } from "../MeleeWeaponStats";
 
@@ -31,15 +31,15 @@ export const Katana: MeleeWeaponStats = {
   },
 
   textures: {
-    pickup: katana,
-    attack: katana,
-    hold: katana,
+    pickup: img_katana,
+    attack: img_katana,
+    hold: img_katana,
   },
 
   sounds: {
     ...defaultMeleeWeapon.sounds,
-    swing: [swordSwoosh1, swordSwoosh2, swordSwoosh3],
-    hitFlesh: [fleshHit1, fleshHit2, fleshHit3, fleshHit4],
-    pickup: [swordShing2],
+    swing: [snd_swordSwoosh1, snd_swordSwoosh2, snd_swordSwoosh3],
+    hitFlesh: [snd_fleshHit1, snd_fleshHit2, snd_fleshHit3, snd_fleshHit4],
+    pickup: [snd_swordShing2],
   },
 };

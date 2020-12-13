@@ -1,11 +1,11 @@
-import dryFire2 from "../../../../resources/audio/guns/misc/dry-fire-2.mp3";
-import shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
-import deagleShot1 from "../../../../resources/audio/guns/pistol/deagle-shot-1.mp3";
-import deagleShot2 from "../../../../resources/audio/guns/pistol/deagle-shot-2.mp3";
-import m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
-import pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
-import rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
-import desertEagle from "../../../../resources/images/weapons/desert-eagle.png";
+import snd_dryFire2 from "../../../../resources/audio/guns/misc/dry-fire-2.mp3";
+import snd_shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
+import snd_deagleShot1 from "../../../../resources/audio/guns/pistol/deagle-shot-1.mp3";
+import snd_deagleShot2 from "../../../../resources/audio/guns/pistol/deagle-shot-2.mp3";
+import snd_m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
+import snd_pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
+import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
+import img_desertEagle from "../../../../resources/images/weapons/desert-eagle.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const DesertEagle: GunStats = {
@@ -21,8 +21,8 @@ export const DesertEagle: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: desertEagle,
-    shellCasing: rifleCasing,
+    pickup: img_desertEagle,
+    shellCasing: img_rifleCasing,
   },
   size: [0.55, 0.55],
 
@@ -31,10 +31,10 @@ export const DesertEagle: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [deagleShot1, deagleShot2],
-    empty: [dryFire2],
-    pickup: [pistolCock1],
-    reload: [m1911Reload1],
-    shellDrop: [shellDrop1],
+    shoot: [snd_deagleShot1, snd_deagleShot2],
+    empty: [snd_dryFire2],
+    pickup: [snd_pistolCock1],
+    reload: [snd_m1911Reload1],
+    shellDrop: [snd_shellDrop1],
   },
 };

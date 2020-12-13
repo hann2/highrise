@@ -1,11 +1,11 @@
-import dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
-import shellDrop2 from "../../../../resources/audio/guns/misc/shell-drop-2.mp3";
-import shotgunLoadShell2 from "../../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
-import shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
-import shotgunShot2 from "../../../../resources/audio/guns/shotgun/shotgun-shot-2.mp3";
-import shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
-import rifle from "../../../../resources/images/weapons/rifle.png";
-import spas12 from "../../../../resources/images/weapons/spas12.png";
+import snd_dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
+import snd_shellDrop2 from "../../../../resources/audio/guns/misc/shell-drop-2.mp3";
+import snd_shotgunLoadShell2 from "../../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
+import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
+import snd_shotgunShot2 from "../../../../resources/audio/guns/shotgun/shotgun-shot-2.mp3";
+import img_shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
+import img_rifle from "../../../../resources/images/weapons/rifle.png";
+import img_spas12 from "../../../../resources/images/weapons/spas12.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
@@ -30,9 +30,9 @@ export const SPAS12: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: spas12,
-    holding: rifle,
-    shellCasing: shotgunCasing,
+    pickup: img_spas12,
+    holding: img_rifle,
+    shellCasing: img_shotgunCasing,
   },
   size: [1.1, 1.1],
 
@@ -41,13 +41,13 @@ export const SPAS12: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [shotgunShot2],
-    empty: [dryFire1],
-    pickup: [shotgunPump1],
+    shoot: [snd_shotgunShot2],
+    empty: [snd_dryFire1],
+    pickup: [snd_shotgunPump1],
     reload: [],
-    reloadInsert: [shotgunLoadShell2],
-    reloadFinish: [shotgunPump1],
-    pump: [shotgunPump1],
-    shellDrop: [shellDrop2],
+    reloadInsert: [snd_shotgunLoadShell2],
+    reloadFinish: [snd_shotgunPump1],
+    pump: [snd_shotgunPump1],
+    shellDrop: [snd_shellDrop2],
   },
 };
