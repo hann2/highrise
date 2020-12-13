@@ -42,23 +42,22 @@ import andyWorried2 from "../../../resources/audio/characters/andy/andy-worried-
 import andyWorried3 from "../../../resources/audio/characters/andy/andy-worried-3.flac";
 import andyWorried4 from "../../../resources/audio/characters/andy/andy-worried-4.flac";
 import andyWorried5 from "../../../resources/audio/characters/andy/andy-worried-5.flac";
-import kyleHead from "../../../resources/images/characters/kyle-head.png";
-import kyleLeftArm from "../../../resources/images/characters/kyle-left-arm.png";
-import kyleLeftHand from "../../../resources/images/characters/kyle-left-hand.png";
-import kyleRightArm from "../../../resources/images/characters/kyle-right-arm.png";
-import kyleRightHand from "../../../resources/images/characters/kyle-right-hand.png";
-import kyleTorso from "../../../resources/images/characters/kyle-torso.png";
+import andyHead from "../../../resources/images/characters/andy-head.png";
+import andyLeftArm from "../../../resources/images/characters/andy-left-arm.png";
+import andyLeftHand from "../../../resources/images/characters/andy-left-hand.png";
+import andyRightArm from "../../../resources/images/characters/andy-right-arm.png";
+import andyRightHand from "../../../resources/images/characters/andy-right-hand.png";
+import andyTorso from "../../../resources/images/characters/andy-torso.png";
 import { Character } from "./Character";
 
 export const Andy: Character = {
-  // TODO: Andy textures
   textures: {
-    head: kyleHead,
-    leftArm: kyleLeftArm,
-    leftHand: kyleLeftHand,
-    rightArm: kyleRightArm,
-    rightHand: kyleRightHand,
-    torso: kyleTorso,
+    head: andyHead,
+    leftArm: andyLeftArm,
+    leftHand: andyLeftHand,
+    rightArm: andyRightArm,
+    rightHand: andyRightHand,
+    torso: andyTorso,
   },
 
   sounds: {

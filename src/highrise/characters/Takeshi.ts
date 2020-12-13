@@ -23,23 +23,22 @@ import takeshiTaunt4 from "../../../resources/audio/characters/takeshi/takeshi-t
 import takeshiWorried1 from "../../../resources/audio/characters/takeshi/takeshi-worried-1.flac";
 import takeshiWorried2 from "../../../resources/audio/characters/takeshi/takeshi-worried-2.flac";
 import takeshiWorried3 from "../../../resources/audio/characters/takeshi/takeshi-worried-3.flac";
-import simonHead from "../../../resources/images/characters/simon/simon-head.png";
-import simonLeftArm from "../../../resources/images/characters/simon/simon-left-arm.png";
-import simonLeftHand from "../../../resources/images/characters/simon/simon-left-hand.png";
-import simonRightArm from "../../../resources/images/characters/simon/simon-right-arm.png";
-import simonRightHand from "../../../resources/images/characters/simon/simon-right-hand.png";
-import simonTorso from "../../../resources/images/characters/simon/simon-torso.png";
+import takeshiHead from "../../../resources/images/characters/takeshi-head.png";
+import takeshiLeftArm from "../../../resources/images/characters/takeshi-left-arm.png";
+import takeshiLeftHand from "../../../resources/images/characters/takeshi-left-hand.png";
+import takeshiRightArm from "../../../resources/images/characters/takeshi-right-arm.png";
+import takeshiRightHand from "../../../resources/images/characters/takeshi-right-hand.png";
+import takeshiTorso from "../../../resources/images/characters/takeshi-torso.png";
 import { Character } from "./Character";
 
 export const Takeshi: Character = {
-  // TODO: Takeshi textures
   textures: {
-    head: simonHead,
-    leftArm: simonLeftArm,
-    leftHand: simonLeftHand,
-    rightArm: simonRightArm,
-    rightHand: simonRightHand,
-    torso: simonTorso,
+    head: takeshiHead,
+    leftArm: takeshiLeftArm,
+    leftHand: takeshiLeftHand,
+    rightArm: takeshiRightArm,
+    rightHand: takeshiRightHand,
+    torso: takeshiTorso,
   },
 
   sounds: {

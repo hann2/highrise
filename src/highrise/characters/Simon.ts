@@ -19,12 +19,12 @@ import simonTaunt2 from "../../../resources/audio/characters/simon/simon-taunt-2
 import simonWorried1 from "../../../resources/audio/characters/simon/simon-worried-1.flac";
 import simonWorried2 from "../../../resources/audio/characters/simon/simon-worried-2.flac";
 import simonWorried3 from "../../../resources/audio/characters/simon/simon-worried-3.flac";
-import simonHead from "../../../resources/images/characters/simon/simon-head.png";
-import simonLeftArm from "../../../resources/images/characters/simon/simon-left-arm.png";
-import simonLeftHand from "../../../resources/images/characters/simon/simon-left-hand.png";
-import simonRightArm from "../../../resources/images/characters/simon/simon-right-arm.png";
-import simonRightHand from "../../../resources/images/characters/simon/simon-right-hand.png";
-import simonTorso from "../../../resources/images/characters/simon/simon-torso.png";
+import simonHead from "../../../resources/images/characters/simon-head.png";
+import simonLeftArm from "../../../resources/images/characters/simon-left-arm.png";
+import simonLeftHand from "../../../resources/images/characters/simon-left-hand.png";
+import simonRightArm from "../../../resources/images/characters/simon-right-arm.png";
+import simonRightHand from "../../../resources/images/characters/simon-right-hand.png";
+import simonTorso from "../../../resources/images/characters/simon-torso.png";
 import { Character } from "./Character";
 
 export const Simon: Character = {
