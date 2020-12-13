@@ -3,6 +3,7 @@ import bathroom from "../../../resources/images/environment/bathroom.png";
 import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../../resources/images/environment/fences-lights.png";
 import carpet from "../../../resources/images/environment/floor/carpet.png";
+import cement from "../../../resources/images/environment/floor/cement.png";
 import woodenFloor from "../../../resources/images/environment/floor/wooden-floor.png";
 import furniture from "../../../resources/images/environment/furniture.png";
 import market from "../../../resources/images/environment/market.png";
@@ -26,6 +27,7 @@ export function getImagesToPreload(): Set<string> {
   const imageUrls = new Set([
     // use a set to make sure we don't include stuff multiple times
     bathroom,
+    cement,
     bloodDrop,
     carpet,
     fancyFurniture,

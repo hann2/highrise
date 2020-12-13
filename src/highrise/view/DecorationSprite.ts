@@ -2,6 +2,7 @@ import bathroom from "../../../resources/images/environment/bathroom.png";
 import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../../resources/images/environment/fences-lights.png";
 import carpet from "../../../resources/images/environment/floor/carpet.png";
+import cement from "../../../resources/images/environment/floor/cement.png";
 import furniture from "../../../resources/images/environment/furniture.png";
 import market from "../../../resources/images/environment/market.png";
 import { V, V2d } from "../../core/Vector";
@@ -616,4 +617,11 @@ export const redCarpetInnerTopLeft: DecorationSprite = {
   offset: V(224, 304 - 16),
   dimensions: V(16, 16),
   heightMeters: redCarpetUpperLeft.heightMeters,
+};
+
+export const cementFloor: DecorationSprite = {
+  imageName: cement,
+  offset: V(0, 0),
+  dimensions: V(512, 512),
+  heightMeters: 4,
 };
