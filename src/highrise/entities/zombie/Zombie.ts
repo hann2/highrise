@@ -130,7 +130,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.voice.speak("hit");
 
     if (this.hp <= 0) {
-      this.die();
+      this.die(bullet.shooter);
     }
   }
 
@@ -152,7 +152,6 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
       this.hp -= swingingWeapon.weapon.stats.damage;
       this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.6, 0.1));
 
-      // TODO: Get sound from weapon
       const sounds = swingingWeapon.weapon.stats.sounds.hitFlesh;
       if (sounds) {
         const soundName = choose(...sounds);
@@ -163,12 +162,12 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     }
 
     if (this.hp <= 0) {
-      this.die();
+      this.die(swingingWeapon.holder);
     }
   }
 
-  die() {
-    this.game?.dispatch({ type: "zombieDied", zombie: this });
+  die(killer?: Human) {
+    this.game?.dispatch({ type: "zombieDied", zombie: this, killer });
     this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
     this.voice.speak("death");
     this.destroy();

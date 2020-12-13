@@ -81,7 +81,8 @@ export function darken(from: number, percent: number = 0.1): number {
 
 /**
  * Returns the maximum component distance between two colors
- * TODO: This probably isn't the most accurate color distance formula.
+ * This probably isn't the most accurate color distance formula.
+ * Consider using something better.
  */
 export function colorDistance(c1: number, c2: number): number {
   const rgb1 = hexToRgb(c1);

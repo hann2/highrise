@@ -1,5 +1,5 @@
 import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
-import pointLight from "../../../resources/images/lights/point-light.png";
+import impactParticle from "../../../resources/images/effects/impact-particle.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
@@ -20,7 +20,7 @@ export default class WallImpact extends BaseEntity implements Entity {
     this.particles = [];
 
     for (let i = 0; i < 10; i++) {
-      const particleSprite = Sprite.from(pointLight);
+      const particleSprite = Sprite.from(impactParticle);
       particleSprite.blendMode = BLEND_MODES.ADD;
       this.sprite.addChild(particleSprite);
       this.particles.push({
@@ -53,7 +53,8 @@ export default class WallImpact extends BaseEntity implements Entity {
     for (const { position, color, radius, alpha, sprite } of this.particles) {
       sprite.position.set(...position);
       sprite.tint = color;
-      sprite.scale.set(radius / 256); // TODO: This is a bit hacky
+      sprite.width = radius;
+      sprite.height = radius;
       sprite.alpha = alpha;
     }
   }

@@ -482,7 +482,6 @@ class LevelBuilder {
 
   addOuterWalls(): Entity[] {
     const max = CELL_WIDTH * LEVEL_SIZE;
-    // TODO: Wall width offsets
     return [
       new Wall([0, 0], [max, 0]),
       new Wall([0, 0], [0, max]),

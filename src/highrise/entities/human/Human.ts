@@ -28,7 +28,7 @@ export default class Human extends BaseEntity implements Entity {
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
   light?: PointLight;
-  humanSprite: HumanSprite; // TODO: Communicate through events instead
+  humanSprite: HumanSprite;
   voice: HumanVoice;
   // flashLight: DirectionalLight;
 
@@ -154,7 +154,7 @@ export default class Human extends BaseEntity implements Entity {
     if (this.hp <= 0) {
       this.die();
     } else if (this.hp < 30) {
-      this.voice.speak("nearDeath", true); // TODO: We actually probably want this delayed a bit
+      this.voice.speak("nearDeath", true);
     } else {
       this.voice.speak("hurt");
     }

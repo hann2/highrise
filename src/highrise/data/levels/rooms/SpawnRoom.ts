@@ -4,7 +4,9 @@ import Entity, { GameSprite } from "../../../../core/entity/Entity";
 import Game from "../../../../core/Game";
 import { choose } from "../../../../core/util/Random";
 import { V } from "../../../../core/Vector";
-import LevelController from "../../../entities/controllers/LevelController";
+import LevelController, {
+  getCurrentLevelNumber,
+} from "../../../entities/controllers/LevelController";
 import SpawnLocation from "../../../entities/SpawnLocation";
 import WeaponPickup from "../../../entities/WeaponPickup";
 import { Layers } from "../../../layers";
@@ -74,9 +76,7 @@ class SpawnRoomFloor extends BaseEntity implements Entity {
   }
 
   onAdd(game: Game) {
-    // TODO: This is kinda hacky, but it works for now
-    const level = (game.entities.getById("level_controller") as LevelController)
-      .currentLevel;
+    const level = getCurrentLevelNumber(game);
     this.sprite.text = `Level ${level}`;
   }
 }

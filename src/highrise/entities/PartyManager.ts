@@ -83,12 +83,10 @@ export default class PartyManager extends BaseEntity implements Entity {
       }
     },
 
-    zombieDied: async () => {
-      if (rBool(1 / 2)) {
+    zombieDied: async ({ killer }: { killer: Human }) => {
+      if (killer && this.hasMember(killer) && rBool(1 / 2)) {
         await this.wait(0.5);
-        // TODO: Choose the actual killer
-        const speaker = choose(...this.partyMembers);
-        speaker.voice.speak("taunts");
+        killer.voice.speak("taunts");
       }
     },
   };

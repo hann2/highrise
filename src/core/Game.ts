@@ -41,8 +41,6 @@ export default class Game {
   masterGain: GainNode;
   /** Readonly. Whether or not the game is paused */
   paused: boolean = false;
-  /** Multiplier of time that passes during tick */
-  slowMo: number = 1;
   /** Target number of frames per second */
   framerate: number;
   /** Readonly. Number of frames that have gone by */
@@ -56,6 +54,20 @@ export default class Game {
 
   get camera() {
     return this.renderer.camera;
+  }
+
+  private _slowMo: number = 1.0;
+  /** Multiplier of time that passes during tick */
+  get slowMo() {
+    return this._slowMo;
+  }
+
+  set slowMo(value: number) {
+    const oldSlowMo = this._slowMo;
+    this._slowMo = value;
+    if (value != this._slowMo) {
+      this.dispatch({ type: "slowMoChanged", slowMo: this._slowMo });
+    }
   }
 
   /**

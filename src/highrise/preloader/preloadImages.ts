@@ -1,4 +1,5 @@
 import bloodDrop from "../../../resources/images/bloodsplats/blood-drop.png";
+import impactParticle from "../../../resources/images/effects/impact-particle.png";
 import bathroom from "../../../resources/images/environment/bathroom.png";
 import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../../resources/images/environment/fences-lights.png";
@@ -27,13 +28,14 @@ export function getImagesToPreload(): Set<string> {
   const imageUrls = new Set([
     // use a set to make sure we don't include stuff multiple times
     bathroom,
-    cement,
     bloodDrop,
     carpet,
+    cement,
     fancyFurniture,
     fencesLights,
     furniture,
     healthPack,
+    impactParticle,
     market,
     pointLight,
     solidCircle,

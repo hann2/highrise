@@ -29,7 +29,6 @@ import mikeTorso from "../../../resources/images/characters/mike-torso.png";
 import { Character } from "./Character";
 
 export const Clyde: Character = {
-  // TODO: Actual Clyde textures
   textures: {
     head: mikeHead,
     leftArm: mikeLeftArm,

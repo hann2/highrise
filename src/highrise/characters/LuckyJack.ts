@@ -22,7 +22,6 @@ import luckyJackTorso from "../../../resources/images/characters/lucky-jack-tors
 import { Character } from "./Character";
 
 export const LuckyJack: Character = {
-  // TODO: Lucky Jack Textures
   textures: {
     head: luckyJackHead,
     leftArm: luckyJackLeftArm,

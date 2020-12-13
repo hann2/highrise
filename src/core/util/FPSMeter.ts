@@ -11,7 +11,7 @@ export default class FPSMeter extends BaseEntity implements Entity {
   slowFrameCount: number = 0;
   sprite: Text & GameSprite;
 
-  constructor() {
+  constructor(layerName?: string) {
     super();
     this.lastUpdate = performance.now();
     this.sprite = new Text("", {
@@ -19,7 +19,7 @@ export default class FPSMeter extends BaseEntity implements Entity {
       fill: "white",
       align: "left",
     });
-    this.sprite.layerName = "hud"; // TODO: Don't hardcode this I guess
+    this.sprite.layerName = layerName;
   }
 
   onAdd(game: Game) {

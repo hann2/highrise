@@ -23,8 +23,6 @@ export default class HumanVoice extends BaseEntity implements Entity {
     this.speakingCircle = this.addChild(new SpeakingCircle(human));
   }
 
-  // TODO: Handle the events that make us speak -- Do we actually want to do that here?
-
   onTick() {
     this.currentSound?.setPosition(this.human.getPosition());
 
@@ -36,12 +34,11 @@ export default class HumanVoice extends BaseEntity implements Entity {
   }
 
   speak(soundClass: CharacterSoundClass, interrupt: boolean = false) {
-    // TODO: Interrupt sound
     if (interrupt && this.currentSound) {
       this.currentSound.gain = 0;
       this.currentSound = undefined;
     }
-    if (interrupt || !this.currentSound) {
+    if (!this.currentSound) {
       const sound = this.sounds[soundClass].getNext();
       if (sound) {
         this.currentSound = this.game?.addEntity(

@@ -1,5 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import Game from "../../../core/Game";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { Level } from "../../data/levels/Level";
 import {
@@ -98,4 +99,9 @@ export default class LevelController extends BaseEntity implements Entity {
     }
     return true;
   }
+}
+
+export function getCurrentLevelNumber(game: Game): number {
+  return (game.entities.getById("level_controller") as LevelController)
+    .currentLevel;
 }

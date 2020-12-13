@@ -10,7 +10,7 @@ import CameraController from "./entities/controllers/CameraController";
 import CheatController from "./entities/controllers/CheatController";
 import LevelController from "./entities/controllers/LevelController";
 import PartyManager from "./entities/PartyManager";
-import { initLayers } from "./layers";
+import { initLayers, Layers } from "./layers";
 import LightingManager from "./lighting/LightingManager";
 import MainMenu from "./menu/MainMenu";
 import PauseMenuController from "./menu/PauseMenuController";
@@ -60,7 +60,7 @@ export async function main() {
   game.addEntity(new MainMenu());
 
   if (process.env.NODE_ENV === "development") {
-    game.addEntity(new FPSMeter());
+    game.addEntity(new FPSMeter(Layers.MENU));
     game.addEntity(new CheatController());
   }
 

@@ -88,10 +88,6 @@ export default class Light extends BaseEntity implements Entity {
       const { x, y } = this.lightSprite.position;
       this.shadows = this.addChild(new Shadows(V(x, y), this.shadowRadius));
       this.container.addChild(this.shadows.graphics);
-
-      // TODO: This is kinda hacky, but it gets the job done
-      this.lightManager?.removeLight(this);
-      this.lightManager?.addLight(this);
     }
   }
 
@@ -103,10 +99,6 @@ export default class Light extends BaseEntity implements Entity {
       this.container.removeChild(this.shadows.graphics);
       this.shadows = undefined;
     }
-
-    // TODO: This is kinda hacky, but it gets the job done
-    this.lightManager?.removeLight(this);
-    this.lightManager?.addLight(this);
   }
 
   setPosition([x, y]: [number, number]) {

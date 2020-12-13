@@ -31,7 +31,7 @@ export default class Bullet extends BaseEntity implements Entity {
     direction: number,
     speed: number = 50,
     public damage: number = 40,
-    private shooter?: Human,
+    public readonly shooter?: Human,
     public mass: number = 0.01 // kg?
   ) {
     super();

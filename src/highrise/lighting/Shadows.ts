@@ -46,24 +46,13 @@ export class Shadows extends BaseEntity implements Entity {
 
     for (const corners of shadows) {
       if (corners.length) {
-        this.graphics
-          .beginFill(0x000000)
-          .drawPolygon(
-            corners
-              // TODO: Do we really want this translation here?
-              .map(([x, y]) => [x - this.lightPos.x, y - this.lightPos.y])
-              .flat()
-          )
-          .endFill();
+        this.graphics.beginFill(0x000000).drawPolygon(corners.flat()).endFill();
       }
     }
 
     this.dirty = false;
   }
 
-  // TODO: This is really slow. Ideas for fixing
-  //   - Don't use V2ds anywhere, and try to keep allocation down in general.
-  //     This would probably at least double the speed of this.
   private getShadowCorners(): [number, number][][] {
     const lightPos = this.lightPos;
     const bodies = this.getAffectedBodies();
@@ -71,7 +60,6 @@ export class Shadows extends BaseEntity implements Entity {
 
     for (const body of bodies) {
       for (const shape of body.shapes) {
-        // TODO: Don't use V2d anywhere here, and try to eliminate as much allocation as possible
         const corners = getShapeCorners(shape, body, lightPos);
         const shadowPoints: [number, number][] = [];
         const edgesVisible: boolean[] = [];
@@ -124,6 +112,14 @@ export class Shadows extends BaseEntity implements Entity {
 
         shadows.push(shadowPoints);
       }
+    }
+
+    // Make everything relative to the light position
+    for (let i = 0; i < shadows.length; i++) {
+      shadows[i] = shadows[i].map((corner) => [
+        corner[0] - lightPos[0],
+        corner[1] - lightPos[1],
+      ]);
     }
 
     return shadows;

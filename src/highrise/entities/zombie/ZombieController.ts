@@ -143,7 +143,7 @@ export default class ZombieController extends BaseEntity implements Entity {
   }
 
   // Searches the map for the nearest human in range that is visible
-  // TODO: This is slow, so be careful
+  // This is slow, so be careful
   anyoneInVision(maxDistance: number = 15): Human | undefined {
     const humans = (this.game?.entities.getTagged("human") as Human[]) ?? [];
 

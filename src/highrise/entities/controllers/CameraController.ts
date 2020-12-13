@@ -17,8 +17,6 @@ export default class CameraController extends BaseEntity implements Entity {
     this.camera.z = 50;
   }
 
-  // TODO: Camera Shake!
-
   onRender() {
     const player = this.getPlayer();
     if (player) {

@@ -36,13 +36,6 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     );
   }
 
-  autoResize(totalCells: number) {
-    // TODO: Implement me
-    // go through all bodies, find min x, min y, max x, max y
-    // do some math to split those cells up nicely?
-    throw new Error("Not yet implemented");
-  }
-
   resize(cellSize: number, width: number, height: number) {
     this.cellSize = cellSize;
     const oldBodies = new Set<Body>();

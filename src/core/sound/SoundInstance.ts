@@ -70,6 +70,9 @@ export class SoundInstance extends BaseEntity implements Entity {
     }
   }
 
+  private _promise: Promise<void>;
+  private _resolve!: () => void;
+
   constructor(
     public readonly soundName: SoundName,
     private options: SoundOptions = {}
@@ -81,6 +84,10 @@ export class SoundInstance extends BaseEntity implements Entity {
     if (!hasSoundBuffer(soundName)) {
       throw new Error(`Unloaded Sound ${soundName}`);
     }
+
+    this._promise = new Promise((resolve) => {
+      this._resolve = resolve;
+    });
   }
 
   onAdd(game: Game) {
@@ -121,7 +128,7 @@ export class SoundInstance extends BaseEntity implements Entity {
     if (this.continuous) {
       throw new Error("Can't wait for end of continuous sound");
     }
-    // TODO: This looks like it needs an implementation
+    return this._promise;
   }
 
   onTick() {
@@ -141,7 +148,6 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   handlers = {
     slowMoChanged: () => {
-      // TODO: This is never fired
       this.updatePlaybackRate();
     },
   };
@@ -190,5 +196,6 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   onDestroy() {
     this.sourceNode.stop();
+    this._resolve();
   }
 }

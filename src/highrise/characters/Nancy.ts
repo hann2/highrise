@@ -22,6 +22,8 @@ import nancyPickup3 from "../../../resources/audio/characters/nancy/nancy-pickup
 import nancyRelief1 from "../../../resources/audio/characters/nancy/nancy-relief-1.flac";
 import nancyRelief2 from "../../../resources/audio/characters/nancy/nancy-relief-2.flac";
 import nancyRelief3 from "../../../resources/audio/characters/nancy/nancy-relief-3.flac";
+import nancyTaunt1 from "../../../resources/audio/characters/nancy/nancy-taunt-1.flac";
+import nancyTaunt2 from "../../../resources/audio/characters/nancy/nancy-taunt-2.flac";
 import nancyWorried1 from "../../../resources/audio/characters/nancy/nancy-worried-1.flac";
 import nancyWorried2 from "../../../resources/audio/characters/nancy/nancy-worried-2.flac";
 import nancyWorried3 from "../../../resources/audio/characters/nancy/nancy-worried-3.flac";
@@ -34,7 +36,6 @@ import nancyTorso from "../../../resources/images/characters/nancy-torso.png";
 import { Character } from "./Character";
 
 export const Nancy: Character = {
-  // TODO: Nancy Textures
   textures: {
     head: nancyHead,
     leftArm: nancyLeftArm,
@@ -61,7 +62,7 @@ export const Nancy: Character = {
     newLevel: [nancyNewLevel3],
     pickupItem: [nancyPickup1, nancyPickup2, nancyPickup3],
     relief: [nancyRelief1, nancyRelief2, nancyRelief3],
-    taunts: [], // TODO: Find nancy taunt
+    taunts: [nancyTaunt1, nancyTaunt2],
     worried: [nancyWorried1, nancyWorried2, nancyWorried3],
   },
 };

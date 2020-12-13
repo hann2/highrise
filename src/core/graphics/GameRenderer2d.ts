@@ -6,7 +6,7 @@ import { LayerInfo } from "./LayerInfo";
 
 // The thing that renders stuff to the screen. Mostly for handling layers.
 export class GameRenderer2d {
-  private layerInfos: Map<string, LayerInfo> = new Map();
+  layerInfos: Map<string, LayerInfo> = new Map();
   private cursor: CSSStyleDeclaration["cursor"] = "none";
   defaultLayer: string = "_default";
   spriteCount: number = 0;

@@ -43,8 +43,11 @@ export default class ZombieVoice extends BaseEntity implements Entity {
     }
   }
 
-  speak(soundClass: keyof ZombieSounds) {
-    // TODO: Interrupt sound
+  speak(soundClass: keyof ZombieSounds, interrupt: boolean = false) {
+    if (interrupt && this.currentSound) {
+      this.currentSound.gain = 0;
+      this.currentSound = undefined;
+    }
     if (!this.currentSound) {
       const sound = this.sounds[soundClass].getNext();
       if (sound) {

@@ -37,7 +37,7 @@ export function getShapeCorners(
           capsule.angle + body.angle
         );
       }
-      return points; // TODO: this one seems a bit tricky, could probably approximate
+      return points;
     }
     case Shape.CIRCLE: {
       const points = [];
