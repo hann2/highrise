@@ -1,7 +1,12 @@
 import { Matrix, Point } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
-import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
+import {
+  choose,
+  rBool,
+  rInteger,
+  seededShuffle,
+} from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Decoration from "../../entities/Decoration";
@@ -16,7 +21,11 @@ import Zombie from "../../entities/zombie/Zombie";
 import Floor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
 import SubFloor from "../../SubFloor";
-import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
+import {
+  CARDINAL_DIRECTIONS_VALUES,
+  DIAGONAL_DIRECTIONS,
+  Direction,
+} from "../../utils/directions";
 import {
   boxes,
   garbageCan,
@@ -39,6 +48,9 @@ import ShopLevel from "./ShopLevel";
 
 export const LEVEL_SIZE = 14;
 export const CELL_WIDTH = 2;
+
+// 1 means every possible slot is filled with a zombie
+const ZOMBIE_CONCENTRATION = 0.1;
 
 // List of all possible reflections/rotations
 export const POSSIBLE_ORIENTATIONS: Matrix[] = [
@@ -633,7 +645,17 @@ class LevelBuilder {
       for (let j = 0; j < LEVEL_SIZE; j++) {
         if (!this.cells[i][j].content) {
           this.cells[i][j].content = "zombie";
-          enemies.push(new Zombie(this.levelCoordToWorldCoord(V(i, j))));
+          for (const direction of DIAGONAL_DIRECTIONS) {
+            if (rBool(ZOMBIE_CONCENTRATION)) {
+              enemies.push(
+                new Zombie(
+                  this.levelCoordToWorldCoord(
+                    V(i, j).add(Direction[direction].mul(0.25))
+                  )
+                )
+              );
+            }
+          }
         }
       }
     }

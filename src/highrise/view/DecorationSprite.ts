@@ -531,7 +531,7 @@ export const redCarpetUpperLeft: DecorationSprite = {
   imageName: carpet,
   offset: V(192, 320),
   dimensions: V(16, 16),
-  heightMeters: 0.2625,
+  heightMeters: 0.25,
 };
 
 export const redCarpetUpperRight: DecorationSprite = {
