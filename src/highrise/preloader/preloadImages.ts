@@ -13,6 +13,7 @@ import wallAo1 from "../../../resources/images/environment/wall-ao-1.png";
 import healthPack from "../../../resources/images/health_pack.png";
 import pointLight from "../../../resources/images/lights/point-light.png";
 import solidCircle from "../../../resources/images/solid-circle.png";
+import crawler from "../../../resources/images/zombies/crawler.png";
 import zombie1Hold from "../../../resources/images/zombies/zombie1_hold.png";
 import zombie1Stand from "../../../resources/images/zombies/zombie1_stand.png";
 import { CHARACTERS } from "../characters/Character";
@@ -44,6 +45,7 @@ export function getImagesToPreload(): Set<string> {
     woodenFloor,
     zombie1Hold,
     zombie1Stand,
+    crawler,
 
     ...DOOR_SPRITES,
     ...VENDING_MACHINES.flat(),
