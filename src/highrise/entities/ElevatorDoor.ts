@@ -60,6 +60,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
     this.body = new Body({
       mass: 0,
     });
+    this.body.type = Body.KINEMATIC;
     this.body.addShape(shape);
 
     this.setOpenPercentage(0);
