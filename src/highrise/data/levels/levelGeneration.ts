@@ -1,7 +1,12 @@
 import { Matrix, Point } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
-import { choose, rInteger, seededShuffle } from "../../../core/util/Random";
+import {
+  choose,
+  rBool,
+  rInteger,
+  seededShuffle,
+} from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Decoration from "../../entities/Decoration";
@@ -16,7 +21,11 @@ import Zombie from "../../entities/zombie/Zombie";
 import Floor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
 import SubFloor from "../../SubFloor";
-import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
+import {
+  CARDINAL_DIRECTIONS_VALUES,
+  DIAGONAL_DIRECTIONS,
+  Direction,
+} from "../../utils/directions";
 import {
   boxes,
   garbageCan,
@@ -38,11 +47,10 @@ import SpawnRoom from "./rooms/SpawnRoom";
 import ShopLevel from "./ShopLevel";
 
 export const LEVEL_SIZE = 14;
-export const WALL_WIDTH = 0.0;
-export const OPEN_WIDTH = 2.0;
-export const CELL_WIDTH = WALL_WIDTH + OPEN_WIDTH;
+export const CELL_WIDTH = 2;
 
-const DOOR_INSET = 0.15;
+// 1 means every possible slot is filled with a zombie
+const ZOMBIE_CONCENTRATION = 0.1;
 
 // List of all possible reflections/rotations
 export const POSSIBLE_ORIENTATIONS: Matrix[] = [
@@ -64,6 +72,7 @@ interface Closet {
   backWallDirection: V2d;
 }
 export type WallID = [V2d, boolean];
+export type DoorID = [V2d, V2d];
 interface WallBuilder {
   exists: boolean;
   destructible: boolean;
@@ -89,7 +98,7 @@ export function pointToV2d(p: Point): V2d {
 class LevelBuilder {
   closets: Closet[] = [];
   cells: Cell[][] = [];
-  doors: WallID[] = [];
+  doors: DoorID[] = [];
   spawnLocation?: V2d;
 
   constructor() {
@@ -136,7 +145,7 @@ class LevelBuilder {
 
   isExisting(id: WallID) {
     const [[i, j], right] = id;
-    if (i === -1 || j === -1) {
+    if (i < 0 || j < 0 || i >= LEVEL_SIZE || j >= LEVEL_SIZE) {
       return true;
     }
     return this.cells[i][j][right ? "rightWall" : "bottomWall"].exists;
@@ -158,6 +167,13 @@ class LevelBuilder {
     return getWallInDirection(cell, direction);
   }
 
+  // Grid points are where walls intersect. Grid coordinate x & y values always end in .5
+  getWallInDirectionFromGridPoint(gridPoint: V2d, direction: V2d): WallID {
+    const perpDirection = direction.rotate90cw();
+    const cell = gridPoint.add(direction.add(perpDirection).mul(0.5));
+    return getWallInDirection(cell, perpDirection.mul(-1));
+  }
+
   generateLevel(
     levelTemplate: LevelTemplate,
     seed: number = rInteger(0, 2 ** 32)
@@ -170,7 +186,7 @@ class LevelBuilder {
     const pickups = this.fillClosets(seed);
     const nubbyEntities = this.fillNubbies();
     const enemies = this.addEnemies();
-    const doors = this.doors.map(this.wallIdToDoorEntity.bind(this));
+    const doors = this.doors.map(this.buildDoorEntity.bind(this));
 
     const entities = [
       ...outerWalls,
@@ -191,7 +207,7 @@ class LevelBuilder {
   }
 
   levelCoordToWorldCoord(coord: V2d): V2d {
-    const firstCellCenter = WALL_WIDTH + OPEN_WIDTH / 2;
+    const firstCellCenter = CELL_WIDTH / 2;
     return coord.mul(CELL_WIDTH).add(V(firstCellCenter, firstCellCenter));
   }
 
@@ -225,11 +241,9 @@ class LevelBuilder {
     }
   }
 
-  wallIdToDoorEntity(id: WallID): Entity {
-    const [[i, j], right] = id;
-    const [x, y] = this.levelCoordToWorldCoord(V(i, j));
-
-    const countWallsThatExist = (walls: WallID[]) => {
+  buildDoorEntity([cell, doorDirection]: DoorID): Entity {
+    // Used to determine how far a door can swing before it will hit a wall.
+    const countConsecutiveWallsThatExist = (walls: WallID[]) => {
       let count = 0;
       for (const wall of walls) {
         count += 1;
@@ -240,37 +254,49 @@ class LevelBuilder {
       return count;
     };
 
-    if (right) {
-      const wallsClockwise: WallID[] = [
-        this.getWallInDirection(V(i, j), Direction.UP),
-        this.getWallInDirection(V(i, j - 1), Direction.RIGHT),
-        this.getWallInDirection(V(i + 1, j), Direction.UP),
-      ];
-      const wallsCounterClockwise = [...wallsClockwise].reverse();
+    const directionsClockwise = [
+      Direction.DOWN,
+      Direction.LEFT,
+      Direction.UP,
+      Direction.RIGHT,
+    ];
 
-      return new Door(
-        V(x + OPEN_WIDTH / 2, y - OPEN_WIDTH / 2 + DOOR_INSET / 2),
-        OPEN_WIDTH - DOOR_INSET,
-        Math.PI / 2,
-        (countWallsThatExist(wallsCounterClockwise) * -Math.PI) / 2,
-        (countWallsThatExist(wallsClockwise) * Math.PI) / 2
-      );
-    } else {
-      const wallsClockwise: WallID[] = [
-        this.getWallInDirection(V(i, j + 1), Direction.LEFT),
-        this.getWallInDirection(V(i - 1, j), Direction.DOWN),
-        this.getWallInDirection(V(i, j), Direction.LEFT),
-      ];
-      const wallsCounterClockwise = [...wallsClockwise].reverse();
+    const hingeDirection = doorDirection
+      .mul(-1)
+      .add(!!doorDirection.y ? Direction.RIGHT : Direction.DOWN);
+    const hingePoint = cell.add(hingeDirection.mul(0.5));
 
-      return new Door(
-        V(x - OPEN_WIDTH / 2, y + OPEN_WIDTH / 2),
-        OPEN_WIDTH - 0.3,
-        0,
-        (countWallsThatExist(wallsCounterClockwise) * -Math.PI) / 2,
-        (countWallsThatExist(wallsClockwise) * Math.PI) / 2
+    const dIndex = directionsClockwise.findIndex(
+      (dir) => dir.x === doorDirection.x && dir.y === doorDirection.y
+    );
+
+    const wallsClockwiseFromHingePoint: WallID[] = [];
+    for (let i = 0; i < 3; i++) {
+      const wall = this.getWallInDirectionFromGridPoint(
+        hingePoint,
+        directionsClockwise[(i + dIndex + 1) % 4]
       );
+      wallsClockwiseFromHingePoint.push(wall);
     }
+
+    const wallsCounterClockwiseFromHingePoint = [
+      ...wallsClockwiseFromHingePoint,
+    ].reverse();
+    const minAngle =
+      (countConsecutiveWallsThatExist(wallsCounterClockwiseFromHingePoint) *
+        -Math.PI) /
+      2;
+    const maxAngle =
+      (countConsecutiveWallsThatExist(wallsClockwiseFromHingePoint) * Math.PI) /
+      2;
+
+    return new Door(
+      this.levelCoordToWorldCoord(hingePoint),
+      CELL_WIDTH,
+      doorDirection.angle,
+      minAngle,
+      maxAngle
+    );
   }
 
   getCellOnOtherSideOfWall(cell: V2d, wall: WallID): V2d {
@@ -418,7 +444,7 @@ class LevelBuilder {
         this.cells[cell.x][cell.y].content = "empty";
         this.cells[farCell.x][farCell.y].content = "empty";
         this.destroyWall(wall);
-        this.doors.push(wall);
+        this.doors.push([cell, right ? Direction.DOWN : Direction.RIGHT]);
       }
 
       if (template.floor) {
@@ -492,7 +518,7 @@ class LevelBuilder {
           continue;
         }
 
-        let doorDirection;
+        let directionFromFrontCellToDoorWall;
         let frontFound = 0;
         for (const direction of CARDINAL_DIRECTIONS_VALUES) {
           let wall = this.getWallInDirection(frontCell, direction);
@@ -502,15 +528,26 @@ class LevelBuilder {
               direction.y != -openDirection.y)
           ) {
             frontFound += 1;
-            doorDirection = direction;
+            directionFromFrontCellToDoorWall = direction;
           }
         }
-        if (frontFound !== 1 || !doorDirection) {
+        if (frontFound !== 1 || !directionFromFrontCellToDoorWall) {
           continue;
         }
 
-        const doorWall = this.getWallInDirection(frontCell, doorDirection);
-        this.doors.push(doorWall);
+        const doorWall = this.getWallInDirection(
+          frontCell,
+          directionFromFrontCellToDoorWall
+        );
+        const [cell, right] = doorWall;
+        let doorRestingDirection = right ? Direction.DOWN : Direction.RIGHT;
+        const reverseHinge =
+          doorRestingDirection.x === openDirection.x &&
+          doorRestingDirection.y === openDirection.y;
+        if (reverseHinge) {
+          doorRestingDirection = doorRestingDirection.mul(-1);
+        }
+        this.doors.push([cell, doorRestingDirection]);
 
         this.cells[frontCell.x][frontCell.y].content = "empty";
         const backWall = this.getWallInDirection(
@@ -593,10 +630,10 @@ class LevelBuilder {
     const exitWorldCoords = this.levelCoordToWorldCoord(furthestPointSeen);
     return [
       new Exit(
-        exitWorldCoords[0] - OPEN_WIDTH / 2,
-        exitWorldCoords[1] - OPEN_WIDTH / 2,
-        exitWorldCoords[0] + OPEN_WIDTH / 2,
-        exitWorldCoords[1] + OPEN_WIDTH / 2,
+        exitWorldCoords[0] - CELL_WIDTH / 2,
+        exitWorldCoords[1] - CELL_WIDTH / 2,
+        exitWorldCoords[0] + CELL_WIDTH / 2,
+        exitWorldCoords[1] + CELL_WIDTH / 2,
         openDirection!.angle + Math.PI
       ),
     ];
@@ -608,7 +645,17 @@ class LevelBuilder {
       for (let j = 0; j < LEVEL_SIZE; j++) {
         if (!this.cells[i][j].content) {
           this.cells[i][j].content = "zombie";
-          enemies.push(new Zombie(this.levelCoordToWorldCoord(V(i, j))));
+          for (const direction of DIAGONAL_DIRECTIONS) {
+            if (rBool(ZOMBIE_CONCENTRATION)) {
+              enemies.push(
+                new Zombie(
+                  this.levelCoordToWorldCoord(
+                    V(i, j).add(Direction[direction].mul(0.25))
+                  )
+                )
+              );
+            }
+          }
         }
       }
     }
@@ -816,16 +863,16 @@ class LevelBuilder {
         if (this.cells[i][j].rightWall.exists) {
           wallEntities.push(
             new Wall(
-              [x + OPEN_WIDTH / 2, y - OPEN_WIDTH / 2],
-              [x + OPEN_WIDTH / 2, y + OPEN_WIDTH / 2]
+              [x + CELL_WIDTH / 2, y - CELL_WIDTH / 2],
+              [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2]
             )
           );
         }
         if (this.cells[i][j].bottomWall.exists) {
           wallEntities.push(
             new Wall(
-              [x - OPEN_WIDTH / 2, y + OPEN_WIDTH / 2],
-              [x + OPEN_WIDTH / 2, y + OPEN_WIDTH / 2]
+              [x - CELL_WIDTH / 2, y + CELL_WIDTH / 2],
+              [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2]
             )
           );
         }
