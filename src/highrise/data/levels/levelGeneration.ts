@@ -675,7 +675,7 @@ class LevelBuilder {
         if (this.cells[i][j].content) {
           continue;
         }
-        if (rBool(0.4)) {
+        if ((i + j) % 2 == 0 && rBool(0.95)) {
           entities.push(
             new PointLight({
               radius: 5,
