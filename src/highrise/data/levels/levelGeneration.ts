@@ -188,6 +188,7 @@ class LevelBuilder {
     const closetEntities = this.addClosets();
     const pickups = this.fillClosets(seed);
     const nubbyEntities = this.fillNubbies();
+    const hallwayLights = this.addHallwayLights();
     const enemies = this.addEnemies();
     const doors = this.doors.map(this.buildDoorEntity.bind(this));
 
@@ -201,6 +202,7 @@ class LevelBuilder {
       ...enemies,
       ...pickups,
       ...nubbyEntities,
+      ...hallwayLights,
       ...doors,
     ];
 
@@ -665,6 +667,29 @@ class LevelBuilder {
     return enemies;
   }
 
+  addHallwayLights(): Entity[] {
+    const entities: Entity[] = [];
+
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      for (let j = 0; j < LEVEL_SIZE; j++) {
+        if (this.cells[i][j].content) {
+          continue;
+        }
+        if (rBool(0.2)) {
+          entities.push(
+            new PointLight({
+              radius: 5,
+              intensity: 0.3,
+              position: this.levelCoordToWorldCoord(V(i, j)),
+            })
+          );
+        }
+      }
+    }
+
+    return entities;
+  }
+
   fillNubbies(): Entity[] {
     const entities: Entity[] = [];
 
@@ -693,6 +718,7 @@ class LevelBuilder {
           // Fill with vending machine
           const wallDirection = openDirection!;
           const machinePosition = cell.sub(wallDirection.mul(0.1));
+          this.cells[i][j].content = "vending";
 
           entities.push(
             new VendingMachine(

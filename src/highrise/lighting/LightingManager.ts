@@ -5,7 +5,7 @@ import { V } from "../../core/Vector";
 import { Layers } from "../layers";
 import Light from "./Light";
 
-const AMBIENT_LIGHT = 0x191919;
+const AMBIENT_LIGHT = 0x0;
 export default class LightingManager extends BaseEntity implements Entity {
   id = "lighting_manager";
   persistent = true;
