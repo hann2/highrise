@@ -1,4 +1,4 @@
-import { Text } from "pixi.js";
+import { Container, DisplayObject, Text } from "pixi.js";
 import BaseEntity from "../entity/BaseEntity";
 import Entity, { GameSprite } from "../entity/Entity";
 import Game from "../Game";
@@ -41,11 +41,22 @@ export default class FPSMeter extends BaseEntity implements Entity {
       fps: Math.ceil(1000 / this.averageDuration),
       bodyCount: this.game?.world.bodies.length ?? 0,
       entityCount: this.game?.entities.all.size ?? 0,
+      spriteCount: getSpriteCount(this.game!.renderer.stage),
     };
   }
 
   getText() {
-    const { fps, bodyCount, entityCount } = this.getStats();
-    return `fps: ${fps} | bodies: ${bodyCount} | entities: ${entityCount}`;
+    const { fps, bodyCount, entityCount, spriteCount } = this.getStats();
+    return `fps: ${fps} | bodies: ${bodyCount} | entities: ${entityCount} | sprites ${spriteCount}`;
   }
+}
+
+function getSpriteCount(root: DisplayObject): number {
+  let total = 1;
+
+  for (const child of (root as Container).children ?? []) {
+    total += getSpriteCount(child);
+  }
+
+  return total;
 }
