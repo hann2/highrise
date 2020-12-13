@@ -30,7 +30,6 @@ export default class Human extends BaseEntity implements Entity {
   light?: PointLight;
   humanSprite: HumanSprite;
   voice: HumanVoice;
-  // flashLight: DirectionalLight;
 
   constructor(
     position: V2d = V(0, 0),

@@ -4,14 +4,12 @@ import Entity, { GameSprite } from "../../../../core/entity/Entity";
 import Game from "../../../../core/Game";
 import { choose } from "../../../../core/util/Random";
 import { V } from "../../../../core/Vector";
-import LevelController, {
-  getCurrentLevelNumber,
-} from "../../../entities/controllers/LevelController";
+import { getCurrentLevelNumber } from "../../../entities/controllers/LevelController";
 import SpawnLocation from "../../../entities/SpawnLocation";
 import WeaponPickup from "../../../entities/WeaponPickup";
 import { Layers } from "../../../layers";
 import { PointLight } from "../../../lighting/PointLight";
-import { bathroomTiles } from "../../../view/DecorationSprite";
+import { cementFloor } from "../../../view/DecorationSprite";
 import Gun from "../../../weapons/Gun";
 import { GUNS } from "../../../weapons/guns";
 import { MELEE_WEAPONS } from "../../../weapons/melee-weapons";
@@ -21,7 +19,7 @@ import RoomTemplate from "./RoomTemplate";
 
 export default class SpawnRoom extends RoomTemplate {
   constructor() {
-    super(V(3, 3), [[V(2, 0), true]], bathroomTiles);
+    super(V(3, 3), [[V(2, 0), true]], cementFloor);
   }
 
   generateEntities(
