@@ -1,7 +1,7 @@
 import bathroom from "../../../resources/images/environment/bathroom.png";
-import carpet from "../../../resources/images/environment/carpet.png";
 import fancyFurniture from "../../../resources/images/environment/fancy-furniture.png";
 import fencesLights from "../../../resources/images/environment/fences-lights.png";
+import carpet from "../../../resources/images/environment/floor/carpet.png";
 import furniture from "../../../resources/images/environment/furniture.png";
 import market from "../../../resources/images/environment/market.png";
 import { V, V2d } from "../../core/Vector";
