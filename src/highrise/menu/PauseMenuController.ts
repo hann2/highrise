@@ -26,23 +26,24 @@ export default class PauseMenuController extends BaseEntity implements Entity {
     this.sprite.visible = false;
 
     const background = new Graphics();
-    background.beginFill(0x331111, 0.3);
-    background.drawRect(-5000, -5000, 10000, 10000);
+    background.beginFill(0x111111, 0.5);
+    background.drawRect(0, 0, 10000, 10000);
     background.endFill();
     this.sprite.addChild(background);
 
     this.pausedText = new Text("PAUSED", {
-      fontSize: 64,
+      fontSize: 96,
       fontFamily: "Capture It",
-      fill: "white",
+      fill: "red",
       align: "center",
     });
     this.pausedText.anchor.set(0.5, 1);
     this.sprite.addChild(this.pausedText);
     this.resumeText = new Text("Press ESC to resume", {
       fontSize: 48,
+
       fontFamily: "Capture It",
-      fill: "red",
+      fill: "white",
       align: "center",
     });
     this.resumeText.anchor.set(0.5, 0);
@@ -50,7 +51,8 @@ export default class PauseMenuController extends BaseEntity implements Entity {
 
     this.mainMenuButton = this.addChild(
       new ClickableText("Main Menu", () => {
-        this.game!.addEntity(new MainMenu());
+        this.game?.unpause();
+        this.game?.dispatch({ type: "gameOver" });
         this.destroy();
       })
     );

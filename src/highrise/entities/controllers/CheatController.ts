@@ -25,4 +25,8 @@ export default class CheatController extends BaseEntity implements Entity {
         fpsMeter!.sprite.visible = !fpsMeter?.sprite.visible;
     }
   }
+
+  onTick() {
+    this.game!.slowMo = this.game?.io.keyIsDown("ShiftLeft") ? 0.2 : 1.0;
+  }
 }

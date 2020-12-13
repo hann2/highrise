@@ -1,5 +1,4 @@
 import { Sprite } from "pixi.js";
-import solidCircle from "../../resources/images/solid-circle.png";
 import BaseEntity from "../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../core/entity/Entity";
 import { V } from "../core/Vector";

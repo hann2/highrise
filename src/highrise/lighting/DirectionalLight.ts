@@ -1,8 +1,7 @@
+import * as Pixi from "pixi.js";
 import { Graphics } from "pixi.js";
 import { degToRad } from "../../core/util/MathUtil";
-import { V, V2d } from "../../core/Vector";
 import Light from "./Light";
-import * as Pixi from "pixi.js";
 
 export class DirectionalLight extends Light {
   graphics: Graphics;

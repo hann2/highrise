@@ -1,7 +1,7 @@
 import { BLEND_MODES, Container, Matrix, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { V, V2d } from "../../core/Vector";
+import { V } from "../../core/Vector";
 import LightingManager from "./LightingManager";
 import { Shadows } from "./Shadows";
 
