@@ -39,10 +39,6 @@ import chadLeftHand from "../../../resources/images/characters/chad-left-hand.pn
 import chadRightArm from "../../../resources/images/characters/chad-right-arm.png";
 import chadRightHand from "../../../resources/images/characters/chad-right-hand.png";
 import chadTorso from "../../../resources/images/characters/chad-torso.png";
-import chadGun from "../../../resources/images/characters/chad/chad_gun.png";
-import chadHold from "../../../resources/images/characters/chad/chad_hold.png";
-import chadReload from "../../../resources/images/characters/chad/chad_reload.png";
-import chadStand from "../../../resources/images/characters/chad/chad_stand.png";
 import { Character } from "./Character";
 
 export const Chad: Character = {

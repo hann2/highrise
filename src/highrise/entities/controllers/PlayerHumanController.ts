@@ -65,8 +65,6 @@ export default class PlayerHumanController
 
     const io = this.game!.io;
 
-    this.game!.slowMo = io.keyIsDown("ShiftLeft") ? 0.2 : 1.0;
-
     // Shooting
     if (
       (io.lmb || this.game?.io.getButton(ControllerButton.RT)) &&
