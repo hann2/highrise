@@ -17,6 +17,7 @@ import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/human/Human";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
+import Crawler from "../../entities/zombie/Crawler";
 import Zombie from "../../entities/zombie/Zombie";
 import Floor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
@@ -52,6 +53,7 @@ export const CELL_WIDTH = 2;
 
 // 1 means every possible slot is filled with a zombie
 const ZOMBIE_CONCENTRATION = 0.1;
+const CRAWLER_PERCENTAGE = 0.05;
 
 // List of all possible reflections/rotations
 export const POSSIBLE_ORIENTATIONS: Matrix[] = [
@@ -647,13 +649,14 @@ class LevelBuilder {
           this.cells[i][j].content = "zombie";
           for (const direction of DIAGONAL_DIRECTIONS) {
             if (rBool(ZOMBIE_CONCENTRATION)) {
-              enemies.push(
-                new Zombie(
-                  this.levelCoordToWorldCoord(
-                    V(i, j).add(Direction[direction].mul(0.25))
-                  )
-                )
+              const p = this.levelCoordToWorldCoord(
+                V(i, j).add(Direction[direction].mul(0.25))
               );
+              if (rBool(CRAWLER_PERCENTAGE)) {
+                enemies.push(new Crawler(p));
+              } else {
+                enemies.push(new Zombie(p));
+              }
             }
           }
         }
