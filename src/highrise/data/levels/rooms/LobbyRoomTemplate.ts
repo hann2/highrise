@@ -160,6 +160,14 @@ export default class LobbyRoomTemplate extends RoomTemplate {
         )
       );
 
+      entities.push(
+        new PointLight({
+          radius: 5,
+          shadowsEnabled: true,
+          position: transformCell(e.cell),
+        })
+      );
+
       const doorDimensionsLevelCoords = V(0.25 / CELL_WIDTH, 1);
       const doorDimensionsWorldCoords = doorDimensionsLevelCoords.mul(
         CELL_WIDTH
@@ -190,12 +198,37 @@ export default class LobbyRoomTemplate extends RoomTemplate {
 
     entities.push(new Furniture(transformCell(V(4.5, 5.5)), piano));
 
-    const l1 = new PointLight({
-      radius: 1,
-      shadowsEnabled: true,
-      position: transformCell(V(0, 0)),
-    });
-    entities.push(l1);
+    entities.push(
+      new PointLight({
+        radius: 10,
+        shadowsEnabled: true,
+        position: transformCell(V(1, 1)),
+      })
+    );
+
+    entities.push(
+      new PointLight({
+        radius: 10,
+        shadowsEnabled: true,
+        position: transformCell(V(4, 1)),
+      })
+    );
+
+    entities.push(
+      new PointLight({
+        radius: 10,
+        shadowsEnabled: true,
+        position: transformCell(V(1, 4)),
+      })
+    );
+
+    entities.push(
+      new PointLight({
+        radius: 10,
+        shadowsEnabled: true,
+        position: transformCell(V(4, 4)),
+      })
+    );
 
     return entities;
   }
