@@ -54,6 +54,9 @@ export const Simon: Character = {
     nearDeath: [simonNearDeath2],
     newLevel: [], // TODO: simon newLevel
     pickupItem: [simonPickupItem1, simonPickupItem2, simonPickupItem3],
+    pickupGun: [simonPickupItem1, simonPickupItem2, simonPickupItem3],
+    pickupMelee: [simonPickupItem1, simonPickupItem2, simonPickupItem3],
+    pickupHealth: [simonPickupItem1, simonPickupItem2, simonPickupItem3],
     relief: [simonRelief1],
     taunts: [simonTaunt1, simonTaunt2],
     worried: [simonWorried1, simonWorried2, simonWorried3],

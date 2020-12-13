@@ -119,15 +119,17 @@ export const DustyRusty: Character = {
       dustyRustyNewLevel11,
       dustyRustyNewLevel12,
     ],
-    pickupItem: [
+    pickupItem: [],
+    pickupGun: [
       dustyRustyPickup1,
-      dustyRustyPickup2,
       dustyRustyPickup3,
       dustyRustyPickup4,
-      dustyRustyPickup5,
       dustyRustyPickup6,
       dustyRustyPickup7,
       dustyRustyPickup8,
+    ],
+    pickupMelee: [dustyRustyPickup2, dustyRustyPickup5],
+    pickupHealth: [
       dustyRustyPickup9Health,
       dustyRustyPickup10Health,
       dustyRustyPickup11Health,

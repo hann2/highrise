@@ -52,6 +52,9 @@ export const LuckyJack: Character = {
     nearDeath: [luckyJackNearDeath1],
     newLevel: [luckyJackNewLevel1, luckyJackNewLevel2, luckyJackNewLevel3],
     pickupItem: [luckyJackPickup1],
+    pickupGun: [luckyJackPickup1],
+    pickupMelee: [luckyJackPickup1],
+    pickupHealth: [luckyJackPickup1],
     relief: [luckyJackRelief1],
     taunts: [
       luckyJackTaunt1,

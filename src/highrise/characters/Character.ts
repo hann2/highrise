@@ -37,6 +37,9 @@ export interface CharacterSounds {
   nearDeath: SoundName[];
   newLevel: SoundName[];
   pickupItem: SoundName[];
+  pickupGun: SoundName[];
+  pickupMelee: SoundName[];
+  pickupHealth: SoundName[];
   relief: SoundName[];
   taunts: SoundName[];
   worried: SoundName[];

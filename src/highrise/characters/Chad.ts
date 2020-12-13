@@ -68,6 +68,9 @@ export const Chad: Character = {
     nearDeath: [chadNearDeath1, chadNearDeath2],
     newLevel: [chadNewLevel1, chadNewLevel2, chadNewLevel3, chadNewLevel4],
     pickupItem: [chadPickup1, chadPickup2, chadPickup3],
+    pickupGun: [chadPickup1, chadPickup2, chadPickup3],
+    pickupMelee: [chadPickup1, chadPickup2, chadPickup3],
+    pickupHealth: [chadPickup1, chadPickup2, chadPickup3],
     relief: [chadLevelComplete1, chadLevelComplete2, chadLevelComplete3],
     taunts: [
       chadTaunt1,

@@ -84,6 +84,27 @@ export const Andy: Character = {
       andyPickup4,
       andyPickup5,
     ],
+    pickupGun: [
+      andyPickup1,
+      andyPickup2,
+      andyPickup3,
+      andyPickup4,
+      andyPickup5,
+    ],
+    pickupMelee: [
+      andyPickup1,
+      andyPickup2,
+      andyPickup3,
+      andyPickup4,
+      andyPickup5,
+    ],
+    pickupHealth: [
+      andyPickup1,
+      andyPickup2,
+      andyPickup3,
+      andyPickup4,
+      andyPickup5,
+    ],
     relief: [
       andyRelief1,
       andyRelief2,

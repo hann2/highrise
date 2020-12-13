@@ -52,7 +52,7 @@ export default class HumanVoice extends BaseEntity implements Entity {
 function makeSoundRings(character: CharacterSounds): CharacterSoundRings {
   const result = {} as CharacterSoundRings;
   for (const [soundName, sounds] of Object.entries(character)) {
-    result[soundName as CharacterSoundClass] = new ShuffleRing(sounds);
+    result[soundName as CharacterSoundClass] = new ShuffleRing(sounds ?? []);
   }
   return result;
 }

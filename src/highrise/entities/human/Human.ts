@@ -107,7 +107,7 @@ export default class Human extends BaseEntity implements Entity {
 
     if (shouldSpeak) {
       await this.wait(0.5);
-      this.voice.speak("pickupItem");
+      this.voice.speak(weapon instanceof Gun ? "pickupGun" : "pickupMelee");
     }
   }
 
@@ -168,7 +168,7 @@ export default class Human extends BaseEntity implements Entity {
   }
 
   heal(amount: number) {
-    this.voice.speak("pickupItem");
+    this.voice.speak("pickupHealth");
 
     this.hp += amount;
     if (this.hp > MAX_HEALTH) {
