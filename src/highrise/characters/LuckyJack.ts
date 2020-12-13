@@ -13,7 +13,7 @@ import luckyJackPickup1 from "../../../resources/audio/characters/lucky-jack/luc
 import luckyJackRelief1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-relief-1.flac";
 import luckyJackTaunt1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-taunt-1.flac";
 import luckyJackWorried1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-worried-1.flac";
-import kyleHead from "../../../resources/images/characters/kyle-head.png";
+import luckyJackHead from "../../../resources/images/characters/lucky-jack-head.png";
 import luckyJackLeftArm from "../../../resources/images/characters/lucky-jack-left-arm.png";
 import luckyJackLeftHand from "../../../resources/images/characters/lucky-jack-left-hand.png";
 import luckyJackRightArm from "../../../resources/images/characters/lucky-jack-right-arm.png";
@@ -24,7 +24,7 @@ import { Character } from "./Character";
 export const LuckyJack: Character = {
   // TODO: Lucky Jack Textures
   textures: {
-    head: kyleHead,
+    head: luckyJackHead,
     leftArm: luckyJackLeftArm,
     leftHand: luckyJackLeftHand,
     rightArm: luckyJackRightArm,

@@ -58,19 +58,17 @@ export default class LightingManager extends BaseEntity implements Entity {
   }
 
   // Decide whether or not to render a light
-  private shouldRenderLight(light: Light) {
-    const { x, y } = light.lightSprite.position;
-    const { width, height } = light.lightSprite;
+  private shouldRenderLight(
+    light: Light,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number
+  ) {
+    const { position, width, height } = light.bakedSprite;
+    const { x, y } = position;
 
-    const camera = this.game!.camera;
-    const [minX, minY] = camera.toWorld(V(0, 0));
-    const [maxX, maxY] = camera.toWorld(camera.getViewportSize());
-
-    // Make sure that the light overlaps the viewport
-    // TODO: This is broken
-    return (
-      true || (x < maxX && x + width > minX && y < maxY && y + height > minY)
-    );
+    return x < maxX && x + width > minX && y < maxY && y + height > minY;
   }
 
   onRender() {
@@ -82,9 +80,13 @@ export default class LightingManager extends BaseEntity implements Entity {
     // TODO: This doesn't really have to be a separate render pass
     this.renderer.render(this.darkness, this.texture, true);
 
+    const camera = this.game!.camera;
+    const [minX, minY] = camera.toWorld(V(0, 0));
+    const [maxX, maxY] = camera.toWorld(camera.getViewportSize());
+
     // Make sure all lights are baked, then add them to the render object
     for (const light of this.lights) {
-      if (this.shouldRenderLight(light)) {
+      if (this.shouldRenderLight(light, minX, minY, maxX, maxY)) {
         light.bakeIfNeeded();
         this.lightContainer.addChild(light.bakedSprite);
       }
