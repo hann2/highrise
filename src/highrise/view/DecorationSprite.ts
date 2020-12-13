@@ -3,7 +3,11 @@ import img_fancyFurniture from "../../../resources/images/environment/fancy-furn
 import img_fencesLights from "../../../resources/images/environment/fences-lights.png";
 import img_carpet from "../../../resources/images/environment/floor/carpet.png";
 import img_cement from "../../../resources/images/environment/floor/cement.png";
+import img_industrialCarpet001 from "../../../resources/images/environment/floor/IndustrialCarpet-001.jpg";
+import img_industrialCarpet002 from "../../../resources/images/environment/floor/IndustrialCarpet-002.jpg";
 import img_oakFloor from "../../../resources/images/environment/floor/oak-floor.png";
+import img_oldPlankFlooring1 from "../../../resources/images/environment/floor/old-plank-flooring-1.png";
+import img_oldPlankFlooring2 from "../../../resources/images/environment/floor/old-plank-flooring-2.png";
 import img_furniture from "../../../resources/images/environment/furniture.png";
 import img_market from "../../../resources/images/environment/market.png";
 import { V, V2d } from "../../core/Vector";
@@ -629,6 +633,34 @@ export const cementFloor: DecorationSprite = {
 
 export const oakFloor: DecorationSprite = {
   imageName: img_oakFloor,
+  offset: V(0, 0),
+  dimensions: V(512, 512),
+  heightMeters: 4,
+};
+
+export const oldPlankFloor1: DecorationSprite = {
+  imageName: img_oldPlankFlooring1,
+  offset: V(0, 0),
+  dimensions: V(512, 512),
+  heightMeters: 4,
+};
+
+export const oldPlankFloor2: DecorationSprite = {
+  imageName: img_oldPlankFlooring2,
+  offset: V(0, 0),
+  dimensions: V(512, 512),
+  heightMeters: 4,
+};
+
+export const industrialCarpet1: DecorationSprite = {
+  imageName: img_industrialCarpet001,
+  offset: V(0, 0),
+  dimensions: V(512, 512),
+  heightMeters: 4,
+};
+
+export const industrialCarpet2: DecorationSprite = {
+  imageName: img_industrialCarpet002,
   offset: V(0, 0),
   dimensions: V(512, 512),
   heightMeters: 4,
