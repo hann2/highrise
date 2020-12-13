@@ -9,9 +9,15 @@ import luckyJackLookHere from "../../../resources/audio/characters/lucky-jack/lu
 import luckyJackMisc1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-misc-1.flac";
 import luckyJackNearDeath1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-near-death-1.flac";
 import luckyJackNewLevel1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-new-level-1.flac";
+import luckyJackNewLevel2 from "../../../resources/audio/characters/lucky-jack/lucky-jack-new-level-2.flac";
+import luckyJackNewLevel3 from "../../../resources/audio/characters/lucky-jack/lucky-jack-new-level-3.flac";
 import luckyJackPickup1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-pickup-1.flac";
 import luckyJackRelief1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-relief-1.flac";
 import luckyJackTaunt1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-taunt-1.flac";
+import luckyJackTaunt2 from "../../../resources/audio/characters/lucky-jack/lucky-jack-taunt-2.flac";
+import luckyJackTaunt3 from "../../../resources/audio/characters/lucky-jack/lucky-jack-taunt-3.flac";
+import luckyJackTaunt4 from "../../../resources/audio/characters/lucky-jack/lucky-jack-taunt-4.flac";
+import luckyJackTaunt5 from "../../../resources/audio/characters/lucky-jack/lucky-jack-taunt-5.flac";
 import luckyJackWorried1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-worried-1.flac";
 import luckyJackHead from "../../../resources/images/characters/lucky-jack-head.png";
 import luckyJackLeftArm from "../../../resources/images/characters/lucky-jack-left-arm.png";
@@ -44,10 +50,16 @@ export const LuckyJack: Character = {
     lookHere: [luckyJackLookHere],
     misc: [luckyJackMisc1],
     nearDeath: [luckyJackNearDeath1],
-    newLevel: [luckyJackNewLevel1],
+    newLevel: [luckyJackNewLevel1, luckyJackNewLevel2, luckyJackNewLevel3],
     pickupItem: [luckyJackPickup1],
     relief: [luckyJackRelief1],
-    taunts: [luckyJackTaunt1],
+    taunts: [
+      luckyJackTaunt1,
+      luckyJackTaunt2,
+      luckyJackTaunt3,
+      luckyJackTaunt4,
+      luckyJackTaunt5,
+    ],
     worried: [luckyJackWorried1],
   },
 };
