@@ -8,7 +8,7 @@ export const P2Materials = {
 
 export const ContactMaterials: ReadonlyArray<ContactMaterial> = [
   new ContactMaterial(P2Materials.wall, P2Materials.glowstick, {
-    restitution: 0.8,
+    restitution: 0.5,
   }),
 ];
 

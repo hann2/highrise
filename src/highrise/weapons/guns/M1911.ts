@@ -1,4 +1,7 @@
-import snd_shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
+import snd_casingDropBoard1 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
+import snd_casingDropBoard2 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
+import snd_casingDropBoard3 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
+import snd_casingDropBoard4 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_m1911DryFire from "../../../../resources/audio/guns/pistol/m1911-dry-fire.flac";
 import snd_m1911Pickup from "../../../../resources/audio/guns/pistol/M1911-pickup.flac";
 import snd_m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
@@ -36,6 +39,11 @@ export const M1911: GunStats = {
     empty: [snd_m1911DryFire],
     pickup: [snd_m1911Pickup],
     reload: [snd_m1911Reload1],
-    shellDrop: [snd_shellDrop1],
+    shellDrop: [
+      snd_casingDropBoard1,
+      snd_casingDropBoard2,
+      snd_casingDropBoard3,
+      snd_casingDropBoard4,
+    ],
   },
 };

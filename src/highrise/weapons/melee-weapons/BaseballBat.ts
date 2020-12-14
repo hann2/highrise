@@ -1,5 +1,6 @@
 import snd_fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
 import snd_fleshHit4 from "../../../../resources/audio/impacts/flesh-hit-4.flac";
+import snd_fleshHitBat1 from "../../../../resources/audio/impacts/flesh-hit-bat-1.flac";
 import snd_swordShing2 from "../../../../resources/audio/weapons/sword-shing-2.flac";
 import snd_swordSwoosh1 from "../../../../resources/audio/weapons/sword-swoosh-1.flac";
 import snd_swordSwoosh2 from "../../../../resources/audio/weapons/sword-swoosh-2.flac";
@@ -38,7 +39,7 @@ export const BaseballBat: MeleeWeaponStats = {
   sounds: {
     ...defaultMeleeWeapon.sounds,
     swing: [snd_swordSwoosh1, snd_swordSwoosh2, snd_swordSwoosh3],
-    hitFlesh: [snd_fleshHit3, snd_fleshHit4],
+    hitFlesh: [snd_fleshHitBat1],
     pickup: [snd_swordShing2],
   },
 };

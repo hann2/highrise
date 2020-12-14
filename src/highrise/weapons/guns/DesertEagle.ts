@@ -1,5 +1,8 @@
+import snd_casingDropBoard1 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
+import snd_casingDropBoard2 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
+import snd_casingDropBoard3 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
+import snd_casingDropBoard4 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire2 from "../../../../resources/audio/guns/misc/dry-fire-2.mp3";
-import snd_shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import snd_deagleShot1 from "../../../../resources/audio/guns/pistol/deagle-shot-1.mp3";
 import snd_deagleShot2 from "../../../../resources/audio/guns/pistol/deagle-shot-2.mp3";
 import snd_m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
@@ -35,6 +38,11 @@ export const DesertEagle: GunStats = {
     empty: [snd_dryFire2],
     pickup: [snd_pistolCock1],
     reload: [snd_m1911Reload1],
-    shellDrop: [snd_shellDrop1],
+    shellDrop: [
+      snd_casingDropBoard1,
+      snd_casingDropBoard2,
+      snd_casingDropBoard3,
+      snd_casingDropBoard4,
+    ],
   },
 };
