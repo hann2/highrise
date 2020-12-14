@@ -5,6 +5,11 @@ export function mod(a: number, b: number): number {
   return ((a % b) + b) % b;
 }
 
+// Make sure a value is >= zero
+export function clampUp(value: number) {
+  return Math.max(value, 0);
+}
+
 // Limit a value to be in a range.
 export function clamp(value: number, min = 0, max = 1): number {
   return Math.max(min, Math.min(max, value));

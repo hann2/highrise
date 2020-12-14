@@ -1,19 +1,32 @@
-import { Body, Capsule } from "p2";
+import { Body, Capsule, vec2 } from "p2";
 import { Sprite } from "pixi.js";
+import snd_glowStickDrop1 from "../../../resources/audio/misc/ glow-stick-drop-1.flac";
+import snd_glowStickCrack1 from "../../../resources/audio/misc/glow-stick-crack-1.flac";
+import snd_glowStickDrop2 from "../../../resources/audio/misc/glow-stick-drop-2.flac";
 import img_glowStick1 from "../../../resources/images/effects/glow-stick-1.png";
 import img_glowStick2 from "../../../resources/images/effects/glow-stick-2.png";
 import img_glowStick3 from "../../../resources/images/effects/glow-stick-3.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
-import { choose, rUniform } from "../../core/util/Random";
-import { V2d } from "../../core/Vector";
+import { clamp } from "../../core/util/MathUtil";
+import { choose, rNormal, rUniform } from "../../core/util/Random";
+import { V, V2d } from "../../core/Vector";
 import { Layers } from "../layers";
 import { PointLight } from "../lighting/PointLight";
 import { CollisionGroups } from "../physics/CollisionGroups";
 import { P2Materials } from "../physics/PhysicsMaterials";
 
-export const GLOWSTICK_URLS = [img_glowStick1, img_glowStick2, img_glowStick3];
+export const GLOWSTICK_TEXTURES = [
+  img_glowStick1,
+  img_glowStick2,
+  img_glowStick3,
+];
+
+const DROP_SOUNDS = [snd_glowStickDrop1, snd_glowStickDrop2];
+const CRACK_SOUNDS = [snd_glowStickCrack1];
+export const GLOWSTICK_SOUNDS = [...DROP_SOUNDS, ...CRACK_SOUNDS];
 
 const SIZE = [0.3, 0.08];
 const SPRITE_LENGTH = 0.45;
@@ -32,7 +45,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     super();
 
     this.z = 1;
-    this.zVelocity = 1;
+    this.zVelocity = rNormal(1, 0.4);
 
     this.body = new Body({
       mass: 0.1,
@@ -55,13 +68,11 @@ export default class GlowStick extends BaseEntity implements Entity {
 
     this.light = this.addChild(new PointLight({ radius: 3, color: color }));
 
-    this.sprite = Sprite.from(choose(...GLOWSTICK_URLS));
+    this.sprite = Sprite.from(choose(...GLOWSTICK_TEXTURES));
     this.sprite.tint = color;
     this.sprite.anchor.set(0.5);
     this.sprite.scale.set(SPRITE_LENGTH / this.sprite.texture.width);
     this.sprite.layerName = Layers.EMISSIVES;
-
-    console.log("new glowstick");
   }
 
   onTick(dt: number) {
@@ -69,8 +80,10 @@ export default class GlowStick extends BaseEntity implements Entity {
       this.z = 0;
       if (Math.abs(this.zVelocity) > MIN_BOUNCE_SPEED) {
         // bounce
-
-        // TODO: Bounce sound
+        const gain = clamp(Math.abs(this.zVelocity) / 15) * 2;
+        const sound = choose(...DROP_SOUNDS);
+        const position = this.getPosition();
+        this.game?.addEntity(new PositionalSound(sound, position, { gain }));
 
         this.zVelocity *= -BOUNCE_RESTITUTION;
         this.body.angularVelocity *= 0.5;
@@ -79,13 +92,19 @@ export default class GlowStick extends BaseEntity implements Entity {
       } else {
         // on ground
         this.zVelocity = 0;
-
         this.turnToStatic();
       }
     } else {
       this.z += this.zVelocity * dt;
       this.zVelocity -= 9.8 * dt; // gravity
     }
+  }
+
+  onImpact() {
+    const gain = clamp(vec2.length(this.body.velocity) / 5);
+    const sound = choose(...DROP_SOUNDS);
+    const position = this.getPosition();
+    this.game?.addEntity(new PositionalSound(sound, position, { gain }));
   }
 
   afterPhysics() {

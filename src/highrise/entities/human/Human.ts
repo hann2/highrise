@@ -6,6 +6,7 @@ import { PositionalSound } from "../../../core/sound/PositionalSound";
 import {
   angleDelta,
   clamp,
+  clampUp,
   degToRad,
   polarToVec,
 } from "../../../core/util/MathUtil";
@@ -20,6 +21,7 @@ import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import Interactable, { isInteractable } from "../Interactable";
 import WeaponPickup from "../WeaponPickup";
+import { ZOMBIE_RADIUS } from "../zombie/Crawler";
 import Zombie from "../zombie/Zombie";
 import Flashlight from "./Flashlight";
 import HumanSprite from "./HumanSprite";
@@ -31,9 +33,9 @@ const SPEED = 3.5; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
 const MAX_HEALTH = 100;
 
-export const PUSH_RANGE = 2; // meters
+export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
-export const PUSH_KNOCKBACK = 100; // newtons?
+export const PUSH_KNOCKBACK = 200; // newtons?
 export const PUSH_STUN = 0.75; // seconds
 export const PUSH_COOLDOWN = 0.4; // seconds
 
@@ -230,7 +232,9 @@ export default class Human extends BaseEntity implements Entity {
         "zombie"
       ) as Zombie[]) {
         const relPosition = zombie.getPosition().isub(this.getPosition());
-        const distance = relPosition.magnitude;
+        const distance = clampUp(
+          relPosition.magnitude - HUMAN_RADIUS - ZOMBIE_RADIUS
+        );
         const theta = Math.abs(angleDelta(relPosition.angle, this.body.angle));
 
         if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
@@ -244,7 +248,7 @@ export default class Human extends BaseEntity implements Entity {
     }
   }
 
-  throwGlowstick() {
+  async throwGlowstick() {
     if (this.glowstickCooldown <= 0) {
       this.glowstickCooldown = GLOWSTICK_COOLDOWN;
       this.game?.addEntity(

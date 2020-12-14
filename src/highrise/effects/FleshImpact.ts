@@ -1,14 +1,33 @@
 import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
+import snd_melonPlop1 from "../../../resources/audio/food/individual/melon-plop-1.flac";
+import snd_melonPlop2 from "../../../resources/audio/food/individual/melon-plop-2.flac";
+import snd_melonPlop3 from "../../../resources/audio/food/individual/melon-plop-3.flac";
+import snd_melonPlop4 from "../../../resources/audio/food/individual/melon-plop-4.flac";
+import snd_melonPlop5 from "../../../resources/audio/food/individual/melon-plop-5.flac";
+import snd_melonPlop6 from "../../../resources/audio/food/individual/melon-plop-6.flac";
 import bloodDrop from "../../../resources/images/bloodsplats/blood-drop.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import { PositionalSound } from "../../core/sound/PositionalSound";
 import { darken } from "../../core/util/ColorUtils";
 import { polarToVec } from "../../core/util/MathUtil";
-import { rUniform } from "../../core/util/Random";
+import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import BloodSplat from "./BloodSplat";
+import { ShuffleRing } from "../utils/ShuffleRing";
+import BloodSplat, { BLOOD_SPLAT_URLS } from "./BloodSplat";
 
 const FRICTION = 5.0;
+
+export const FLESH_SPLAT_SOUNDS = [
+  snd_melonPlop1,
+  snd_melonPlop2,
+  snd_melonPlop3,
+  snd_melonPlop4,
+  snd_melonPlop5,
+  snd_melonPlop6,
+];
+
+const splatSoundRing = new ShuffleRing(FLESH_SPLAT_SOUNDS);
 
 export default class FleshImpact extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
@@ -54,11 +73,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
         particle.z = Math.max(particle.z, 0);
 
         if (particle.z <= 0) {
-          const splatPos = particle.position.add([
-            this.sprite.x,
-            this.sprite.y,
-          ]);
-          this.game?.addEntity(new BloodSplat(splatPos, particle.radius * 2));
+          this.particleToSplat(particle);
         }
       }
     }
@@ -66,6 +81,14 @@ export default class FleshImpact extends BaseEntity implements Entity {
     if (this.particles.every((p) => p.z <= 0)) {
       this.destroy();
     }
+  }
+
+  particleToSplat(particle: Particle) {
+    const splatPos = particle.position.add([this.sprite.x, this.sprite.y]);
+    this.game?.addEntity(new BloodSplat(splatPos, particle.radius * 2));
+    this.game?.addEntity(
+      new PositionalSound(splatSoundRing.getNext(), splatPos)
+    );
   }
 
   onRender() {
