@@ -1,20 +1,19 @@
+import { Body, Capsule, vec2 } from "p2";
 import { Sprite } from "pixi.js";
-import shellDrop1 from "../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { clamp, degToRad, polarToVec } from "../../core/util/MathUtil";
-import { rNormal, rUniform } from "../../core/util/Random";
+import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { Layers } from "../layers";
+import { CollisionGroups } from "../physics/CollisionGroups";
+import { P2Materials } from "../physics/PhysicsMaterials";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
-const LINEAR_FRICTION = 3;
-const ANGULAR_FRICTION = 1.0;
-const SIZE = 0.025; // meters wide
-
-const SPEED = 7; // meters
+const SIZE = 0.03; // meters wide
+const SPEED = 4; // average meters / second
 const MAX_SPIN = Math.PI * 20;
 
 const MIN_BOUNCE_SPEED = 1.0; // meters / second
@@ -26,9 +25,8 @@ const PORT_HEIGHT = 1.0; // meters off the ground
 
 export default class ShellCasing extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
-  velocity: V2d;
-  spin: number;
-  z: number = PORT_HEIGHT;
+  body: Body;
+  z: number;
   zVelocity: number;
   bounceSounds: ShuffleRing<string>;
 
@@ -37,58 +35,66 @@ export default class ShellCasing extends BaseEntity implements Entity {
     direction: number,
     private rotation: number,
     texture: string,
-    sounds: SoundName[] = [shellDrop1]
+    sounds: SoundName[]
   ) {
     super();
+
+    this.z = PORT_HEIGHT;
+    this.zVelocity = rUniform(0, 2);
 
     this.sprite = Sprite.from(texture);
     this.sprite.layerName = Layers.WORLD_BACK;
     this.sprite.scale.set(SIZE / this.sprite.texture.width);
     this.sprite.anchor.set(0.5, 0.5);
 
-    this.velocity = polarToVec(
+    const velocity = polarToVec(
       rNormal(direction, degToRad(20)),
       SPEED * rNormal(1, 0.3)
     );
 
-    this.spin = rUniform(MAX_SPIN / 10, MAX_SPIN);
+    this.body = new Body({
+      mass: 0.1,
+      position,
+      velocity,
+    });
 
-    this.zVelocity = rUniform(0, 2);
+    this.body.angularDamping = 1;
+    this.body.damping = 1;
+    this.body.angularVelocity = rUniform(MAX_SPIN / 10, MAX_SPIN);
+
+    const shape = new Capsule({
+      radius: this.sprite.width / 2,
+      length: this.sprite.height,
+    });
+    shape.collisionGroup = CollisionGroups.Particle;
+    shape.collisionMask = CollisionGroups.World | CollisionGroups.Zombies;
+    shape.material = P2Materials.glowstick;
+    this.body.addShape(shape, undefined, Math.PI / 2);
 
     this.bounceSounds = new ShuffleRing(sounds);
   }
 
-  async onAdd() {
-    // TODO: Destroy only the oldest ones
-    await this.wait(5);
-    await this.wait(3, (_, t) => (this.sprite.alpha = 1.0 - t));
-    this.destroy();
-  }
-
   onTick(dt: number) {
-    this.position.iadd(this.velocity.mul(dt));
-    this.velocity.imul(Math.exp(-LINEAR_FRICTION * dt));
-
-    this.rotation += this.spin * dt;
-    this.spin *= Math.exp(-ANGULAR_FRICTION * dt);
-
     if (this.z < 0) {
       this.z = 0;
       if (Math.abs(this.zVelocity) > MIN_BOUNCE_SPEED) {
         // bounce
         const sound = this.bounceSounds.getNext();
-        const gain = clamp(Math.abs(this.zVelocity) / 15);
+        const gain = clamp(Math.abs(this.zVelocity) / 15) * 0.5;
+        const speed = rNormal(1, 0.05);
+        const position = this.getPosition();
         this.game?.addEntity(
-          new PositionalSound(sound, this.position, { gain })
+          new PositionalSound(sound, position, { gain, speed })
         );
+
         this.zVelocity *= -BOUNCE_RESTITUTION;
-        this.spin *= 0.5;
-        this.velocity.imul(0.5);
+        this.body.angularVelocity *= 0.5;
+        this.body.velocity[0] *= 0.5;
+        this.body.velocity[1] *= 0.5;
       } else {
         // on ground
         this.zVelocity = 0;
-        this.velocity.imul(Math.exp(-LINEAR_FRICTION * dt));
-        this.spin *= Math.exp(-ANGULAR_FRICTION * dt);
+        this.turnToStatic();
       }
     } else {
       this.z += this.zVelocity * dt;
@@ -98,11 +104,48 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
   onRender() {
     this.sprite.position.set(...this.position);
-    this.sprite.rotation = this.rotation;
+    this.sprite.position.set(...this.body.position);
+    this.sprite.rotation = this.body.angle;
 
     const scale = 1 + this.z * 0.8;
     this.sprite.scale.set((SIZE / this.sprite.texture.width) * scale);
   }
+
+  onImpact() {
+    const gain = clamp(vec2.length(this.body.velocity) / 10) * 0.5;
+    const sound = this.bounceSounds.getNext();
+    const position = this.getPosition();
+    this.game?.addEntity(new PositionalSound(sound, position, { gain }));
+  }
+
+  // Turn this into a static thing so we don't have any more on ticks or on renders or physics or whatnot
+  turnToStatic() {
+    const sprite = new Sprite();
+    sprite.texture = this.sprite.texture;
+    sprite.scale.copyFrom(this.sprite.scale);
+    sprite.anchor.copyFrom(this.sprite.anchor);
+    sprite.tint = this.sprite.tint;
+    sprite.position.copyFrom(this.sprite.position);
+    sprite.rotation = this.sprite.rotation;
+    (sprite as GameSprite).layerName = this.sprite.layerName;
+
+    this.game?.addEntity(new StaticShellCasing(sprite));
+
+    this.destroy();
+  }
 }
 
-// TODO: Replace with static sticker when this stops moving
+// A cheaper non-moving effect
+class StaticShellCasing extends BaseEntity {
+  constructor(public sprite: Sprite & GameSprite) {
+    super();
+  }
+
+  async onAdd() {
+    await this.wait(120);
+    await this.wait(10, (dt, t) => {
+      this.sprite.alpha = 1 - t;
+    });
+    this.destroy();
+  }
+}

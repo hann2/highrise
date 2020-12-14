@@ -1,5 +1,8 @@
+import snd_casingDropBoard1 from "../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
+import snd_casingDropBoard2 from "../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
+import snd_casingDropBoard3 from "../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
+import snd_casingDropBoard4 from "../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire1 from "../../../resources/audio/guns/misc/dry-fire-1.mp3";
-import snd_shellDrop1 from "../../../resources/audio/guns/misc/shell-drop-1.mp3";
 import snd_pistolCock1 from "../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
 import snd_pistol2Shot1 from "../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
 import snd_ar15Reload1 from "../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
@@ -113,6 +116,11 @@ export const defaultGunStats: GunStats = {
     reloadInsert: [],
     reloadFinish: [],
     pump: [snd_shotgunPump1],
-    shellDrop: [snd_shellDrop1],
+    shellDrop: [
+      snd_casingDropBoard1,
+      snd_casingDropBoard2,
+      snd_casingDropBoard3,
+      snd_casingDropBoard4,
+    ],
   },
 };

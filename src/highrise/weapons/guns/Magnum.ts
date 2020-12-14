@@ -1,4 +1,7 @@
-import snd_shellDrop1 from "../../../../resources/audio/guns/misc/shell-drop-1.mp3";
+import snd_casingDropBoard1 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
+import snd_casingDropBoard2 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
+import snd_casingDropBoard3 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
+import snd_casingDropBoard4 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_revolverDryFire from "../../../../resources/audio/guns/revolver/revolver-dry-fire.flac";
 import snd_revolverInsertShell1 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-1.flac";
 import snd_revolverInsertShell2 from "../../../../resources/audio/guns/revolver/revolver-insert-shell-2.flac";
@@ -46,6 +49,11 @@ export const Magnum: GunStats = {
       snd_revolverInsertShell3,
     ],
     reloadFinish: [snd_revolverReloadFinish],
-    shellDrop: [snd_shellDrop1],
+    shellDrop: [
+      snd_casingDropBoard1,
+      snd_casingDropBoard2,
+      snd_casingDropBoard3,
+      snd_casingDropBoard4,
+    ],
   },
 };

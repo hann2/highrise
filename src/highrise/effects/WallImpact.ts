@@ -11,7 +11,7 @@ export default class WallImpact extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
   particles: Particle[] = [];
 
-  constructor(position: V2d, normal: V2d, color: number = 0xffff00) {
+  constructor(position: V2d, normal?: V2d, color: number = 0xffff00) {
     super();
 
     this.sprite = new Graphics();

@@ -34,11 +34,11 @@ const MAX_HEALTH = 100;
 
 export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
-export const PUSH_KNOCKBACK = 200; // newtons?
+export const PUSH_KNOCKBACK = 100; // newtons?
 export const PUSH_STUN = 0.75; // seconds
 export const PUSH_COOLDOWN = 0.4; // seconds
 
-export const GLOWSTICK_COOLDOWN = 2.0; // seconds
+export const GLOWSTICK_COOLDOWN = 1.0; // seconds
 
 export default class Human extends BaseEntity implements Entity {
   body: Body;

@@ -1,5 +1,5 @@
+import snd_shotgunCasingDrop1 from "../../../../resources/audio/guns/casing-drops/shotgun-casing-drop-1.mp3";
 import snd_dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
-import snd_shellDrop2 from "../../../../resources/audio/guns/misc/shell-drop-2.mp3";
 import snd_shotgunLoadShell2 from "../../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
 import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import snd_shotgunShot2 from "../../../../resources/audio/guns/shotgun/shotgun-shot-2.mp3";
@@ -48,6 +48,6 @@ export const SPAS12: GunStats = {
     reloadInsert: [snd_shotgunLoadShell2],
     reloadFinish: [snd_shotgunPump1],
     pump: [snd_shotgunPump1],
-    shellDrop: [snd_shellDrop2],
+    shellDrop: [snd_shotgunCasingDrop1],
   },
 };

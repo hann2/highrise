@@ -59,7 +59,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     this.body.angle = rUniform(0, Math.PI * 2);
 
     const shape = new Capsule({ radius: SIZE[1] / 2, length: SIZE[0] });
-    shape.collisionGroup = CollisionGroups.GlowStick;
+    shape.collisionGroup = CollisionGroups.Particle;
     shape.collisionMask = CollisionGroups.World | CollisionGroups.Zombies;
     shape.material = P2Materials.glowstick;
     this.body.addShape(shape);
@@ -118,6 +118,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     this.sprite.scale.set((SPRITE_LENGTH / this.sprite.texture.width) * scale);
   }
 
+  // Turn this into a static thing so we don't have any more on ticks or on renders or physics or whatnot
   turnToStatic() {
     const sprite = new Sprite();
     sprite.texture = this.sprite.texture;
@@ -134,6 +135,7 @@ export default class GlowStick extends BaseEntity implements Entity {
   }
 }
 
+// A cheaper, non-moving effect
 class StaticGlowstick extends BaseEntity {
   constructor(public sprite: Sprite & GameSprite, public light: PointLight) {
     super();
@@ -150,5 +152,5 @@ class StaticGlowstick extends BaseEntity {
     this.destroy();
   }
 
-  // TODO: Eventually destroy
+  // TODO: Destroy only the oldest ones
 }
