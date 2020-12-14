@@ -9,6 +9,8 @@ import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import Human, { PUSH_COOLDOWN } from "./Human";
 
+const GUN_SCALE = 1 / 160;
+
 // Renders a human
 export default class HumanSprite extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
@@ -74,10 +76,6 @@ export default class HumanSprite extends BaseEntity implements Entity {
     [this.sprite.x, this.sprite.y] = body.position;
     this.sprite.rotation = body.angle;
 
-    const healthPercent = clamp(hp / 100);
-    this.torsoSprite.tint = colorLerp(0xff0000, 0xffffff, healthPercent);
-    this.headSprite.tint = colorLerp(0xff0000, 0xffffff, healthPercent);
-
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();
     const [leftHandPos, rightHandPos] = this.getHandPositions();
 
@@ -104,6 +102,10 @@ export default class HumanSprite extends BaseEntity implements Entity {
       const swayAmount = degToRad(3);
       const sway = Math.sin(this.game!.elapsedTime * swaySpeed) * swayAmount;
       this.weaponSprite.rotation = weapon.swing.restAngle + sway + Math.PI / 2;
+    } else if (weapon instanceof Gun && this.weaponSprite) {
+      const xOffset = this.getRecoilOffset(weapon);
+      const [baseX, baseY] = weapon.stats.holdPosition;
+      this.weaponSprite.position.set(baseX + xOffset, baseY);
     }
   }
 
@@ -112,11 +114,19 @@ export default class HumanSprite extends BaseEntity implements Entity {
     return [V(0, -y), V(0, y)];
   }
 
+  getRecoilOffset(gun: Gun): number {
+    return -0.15 * gun.getCurrentRecoilAmount() ** 1.5;
+  }
+
   getHandPositions(): [V2d, V2d] {
     const { weapon } = this.human;
     if (weapon instanceof Gun) {
       const gun = weapon;
-      return [V(gun.stats.leftHandPosition), V(gun.stats.rightHandPosition)];
+      const xOffset = this.getRecoilOffset(gun);
+      const [leftX, leftY] = gun.stats.leftHandPosition;
+      const [rightX, rightY] = gun.stats.rightHandPosition;
+
+      return [V(leftX + xOffset, leftY), V(rightX + xOffset, rightY)];
     } else if (weapon instanceof MeleeWeapon) {
       if (weapon.currentSwing) {
         const t = weapon.currentSwing.attackProgress;
@@ -138,11 +148,9 @@ export default class HumanSprite extends BaseEntity implements Entity {
     if (weapon instanceof Gun) {
       const { textures, muzzleLength } = weapon.stats;
       this.weaponSprite = Sprite.from(textures.holding);
-      this.weaponSprite.scale.set(
-        1 / 64 // TODO: sprite size
-      );
-      this.weaponSprite.anchor.set(1, 0.5);
-      this.weaponSprite.position.set(muzzleLength, 0);
+      this.weaponSprite.scale.set(GUN_SCALE);
+      this.weaponSprite.anchor.set(0.5, 0.5);
+      this.weaponSprite.position.set(...weapon.stats.holdPosition);
       this.sprite.addChild(this.weaponSprite);
     } else if (weapon instanceof MeleeWeapon) {
       const { handlePosition, textures, size } = weapon.stats;

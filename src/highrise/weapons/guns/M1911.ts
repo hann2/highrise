@@ -7,6 +7,7 @@ import snd_m1911Pickup from "../../../../resources/audio/guns/pistol/M1911-picku
 import snd_m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
 import snd_pistol2Shot1 from "../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
 import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
+import img_glockHold from "../../../../resources/images/weapons/glock-hold.png";
 import img_glock from "../../../../resources/images/weapons/glock.png";
 import img_pistol from "../../../../resources/images/weapons/pistol.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
@@ -25,13 +26,14 @@ export const M1911: GunStats = {
   textures: {
     ...defaultGunStats.textures,
     pickup: img_glock,
-    holding: img_pistol,
+    holding: img_glockHold,
     shellCasing: img_pistolCasing,
   },
   size: [0.45, 0.45],
 
   leftHandPosition: [0.4, 0],
   rightHandPosition: [0.4, 0],
+  holdPosition: [0.5, 0],
 
   sounds: {
     ...defaultGunStats.sounds,

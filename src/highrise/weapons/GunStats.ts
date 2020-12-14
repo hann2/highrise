@@ -33,6 +33,8 @@ export interface GunStats extends BaseWeaponStats {
   readonly reloadingStyle: ReloadingStyle;
   // Seconds to complete a reload. For INDIVIDUAL, this is seconds per round loaded
   readonly reloadTime: number;
+  // How much recoil this has. Arbitrary units. 1 is a little, 100 is a lot.
+  recoil: number;
 
   // The number of bullets per round fired
   readonly bulletsPerShot: number;
@@ -99,6 +101,8 @@ export const defaultGunStats: GunStats = {
   reloadingStyle: ReloadingStyle.MAGAZINE,
   bulletsPerShot: 1,
   bulletSpread: degToRad(0.5),
+
+  recoil: 10,
 
   size: [1, 1],
   leftHandPosition: [0.3, 0],
