@@ -7,6 +7,10 @@ import img_healthPack from "../../../resources/images/health_pack.png";
 import img_pointLight from "../../../resources/images/lights/point-light.png";
 import img_solidCircle from "../../../resources/images/solid-circle.png";
 import img_crawler from "../../../resources/images/zombies/crawler.png";
+import img_heavy from "../../../resources/images/zombies/heavy.png";
+import img_necromancer from "../../../resources/images/zombies/necromancer.png";
+import img_spitter from "../../../resources/images/zombies/spitter.png";
+import img_zombie from "../../../resources/images/zombies/zombie.png";
 import img_zombie1Hold from "../../../resources/images/zombies/zombie1_hold.png";
 import img_zombie1Stand from "../../../resources/images/zombies/zombie1_stand.png";
 import { CHARACTERS } from "../characters/Character";
@@ -34,6 +38,10 @@ export function getImagesToPreload(): Set<string> {
     img_woodenFloor,
     img_zombie1Hold,
     img_zombie1Stand,
+    img_zombie,
+    img_heavy,
+    img_spitter,
+    img_necromancer,
 
     ...Object.values(DecorationSprites).map((sprite) => sprite.imageName),
 
