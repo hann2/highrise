@@ -1,10 +1,11 @@
 import { Body, Circle } from "p2";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { angleDelta, clamp } from "../../../core/util/MathUtil";
+import { angleDelta, clamp, polarToVec } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
 import { Character, randomCharacter } from "../../characters/Character";
 import BloodSplat from "../../effects/BloodSplat";
+import GlowStick from "../../effects/GlowStick";
 import { PointLight } from "../../lighting/PointLight";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import Gun from "../../weapons/Gun";
@@ -19,7 +20,6 @@ export const HUMAN_RADIUS = 0.35; // meters
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
 const SPEED = 3.5; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
-const INTERACT_DISTANCE = 3; // meters
 const MAX_HEALTH = 100;
 
 export default class Human extends BaseEntity implements Entity {
@@ -173,5 +173,15 @@ export default class Human extends BaseEntity implements Entity {
     if (this.hp > MAX_HEALTH) {
       this.hp = MAX_HEALTH;
     }
+  }
+
+  push() {
+    // TODO: Implement me
+  }
+
+  throwGlowstick() {
+    this.game?.addEntity(
+      new GlowStick(this.getPosition(), polarToVec(this.getDirection(), 5))
+    );
   }
 }

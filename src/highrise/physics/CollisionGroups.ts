@@ -7,5 +7,6 @@ export const CollisionGroups = {
   Sensors: 0b10000,
   CastsShadow: 0b100000,
   Shadow: 0b1000000,
+  GlowStick: 0b10000000,
   All: 0b11111111111111111111111111111111,
 };

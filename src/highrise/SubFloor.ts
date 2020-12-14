@@ -5,12 +5,15 @@ import BaseEntity from "../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../core/entity/Entity";
 import { hsvToRgb, rgbToHex } from "../core/util/ColorUtils";
 import { choose, rUniform } from "../core/util/Random";
+import { CELL_WIDTH, LEVEL_SIZE } from "./data/levels/levelGeneration";
 import { Layers } from "./layers";
 
 export const SUBFLOOR_TEXTURES = [
   img_industrialCarpet001,
   img_industrialCarpet002,
 ];
+
+// TODO: Make the subfloor exactly the level size
 export default class SubFloor extends BaseEntity implements Entity {
   sprite: TilingSprite & GameSprite;
 
@@ -25,8 +28,8 @@ export default class SubFloor extends BaseEntity implements Entity {
     const color = rgbToHex(hsvToRgb({ h: rUniform(0, 1), s: 0.4, v: 0.8 }));
     this.sprite.tint = color;
 
-    this.sprite.width = 100;
-    this.sprite.height = 100;
+    this.sprite.width = LEVEL_SIZE * CELL_WIDTH;
+    this.sprite.height = LEVEL_SIZE * CELL_WIDTH;
     this.sprite.tileScale.set(1 / 192);
     this.sprite.layerName = Layers.SUBFLOOR;
   }

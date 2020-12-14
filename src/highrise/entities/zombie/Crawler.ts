@@ -6,7 +6,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
-import { choose, rNormal } from "../../../core/util/Random";
+import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import FleshImpact from "../../effects/FleshImpact";
 import { CollisionGroups } from "../../physics/CollisionGroups";
@@ -40,10 +40,10 @@ export default class Crawler extends BaseEntity implements Entity, Hittable {
   attackPhase: "ready" | "windup" | "attack" | "winddown" | "cooldown" =
     "ready";
 
-  constructor(position: V2d) {
+  constructor(position: V2d, angle: number = rUniform(0, Math.PI * 2)) {
     super();
 
-    this.body = new Body({ mass: 1, position: position.clone() });
+    this.body = new Body({ mass: 1, position: position.clone(), angle });
 
     const shape = new Circle({ radius: ZOMBIE_RADIUS });
     shape.collisionGroup = CollisionGroups.Zombies;
@@ -170,7 +170,9 @@ export default class Crawler extends BaseEntity implements Entity, Hittable {
 
   die(killer?: Human) {
     this.game?.dispatch({ type: "zombieDied", zombie: this, killer });
-    this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
+    this.game?.addEntity(
+      new FleshImpact(this.getPosition(), 5, undefined, 0.2)
+    );
     this.voice.speak("death");
     this.destroy();
   }

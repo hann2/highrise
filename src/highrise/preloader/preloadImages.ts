@@ -11,6 +11,7 @@ import img_zombie1Hold from "../../../resources/images/zombies/zombie1_hold.png"
 import img_zombie1Stand from "../../../resources/images/zombies/zombie1_stand.png";
 import { CHARACTERS } from "../characters/Character";
 import { BLOOD_SPLAT_URLS } from "../effects/BloodSplat";
+import { GLOWSTICK_URLS } from "../effects/GlowStick";
 import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
 import { DOOR_SPRITES } from "../entities/Door";
 import { VENDING_MACHINES } from "../entities/environment/VendingMachine";
@@ -36,12 +37,12 @@ export function getImagesToPreload(): Set<string> {
 
     ...Object.values(DecorationSprites).map((sprite) => sprite.imageName),
 
-    ...DOOR_SPRITES,
-    ...VENDING_MACHINES.flat(),
-
-    ...SUBFLOOR_TEXTURES,
-    ...MUZZLE_FLASH_URLS,
     ...BLOOD_SPLAT_URLS,
+    ...DOOR_SPRITES,
+    ...GLOWSTICK_URLS,
+    ...MUZZLE_FLASH_URLS,
+    ...SUBFLOOR_TEXTURES,
+    ...VENDING_MACHINES.flat(),
 
     ...CHARACTERS.map((c) => Object.values(c.textures)).flat(),
     ...WEAPONS.map((weapon) => Object.values(weapon.textures)).flat(),

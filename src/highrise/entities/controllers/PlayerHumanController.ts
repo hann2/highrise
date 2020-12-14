@@ -38,8 +38,8 @@ export default class PlayerHumanController
       case ControllerButton.X:
         this.human.reload();
         break;
-      case ControllerButton.BACK:
-        this.human.giveWeapon(new Gun(choose(...GUNS)));
+      case ControllerButton.A:
+        this.human.throwGlowstick();
         break;
     }
   }
@@ -47,12 +47,13 @@ export default class PlayerHumanController
   onKeyDown(key: KeyCode) {
     switch (key) {
       case "KeyE":
-        // Interacting
         this.human.interactWithNearest();
         break;
       case "KeyR":
-        // Interacting
         this.human.reload();
+        break;
+      case "KeyG":
+        this.human.throwGlowstick();
         break;
     }
   }

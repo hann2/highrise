@@ -14,7 +14,12 @@ export default class FleshImpact extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
   particles: Particle[] = [];
 
-  constructor(position: V2d, amount: number = 3, direction?: V2d) {
+  constructor(
+    position: V2d,
+    amount: number = 3,
+    direction?: V2d,
+    height: number = 1.0
+  ) {
     super();
 
     this.sprite = new Graphics();
@@ -32,8 +37,8 @@ export default class FleshImpact extends BaseEntity implements Entity {
         velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
         color: darken(0xff0000, rUniform(0, 0.2)),
         radius: rUniform(0.1, 0.1 * amount),
-        z: rUniform(0.4, 1.6),
-        zVelocity: rUniform(-20, 3),
+        z: rUniform(height * 0.3, height * 1.5),
+        zVelocity: rUniform(-5, 3),
         sprite: particleSprite,
       });
     }
@@ -46,8 +51,9 @@ export default class FleshImpact extends BaseEntity implements Entity {
         particle.velocity.imul(Math.exp(-FRICTION * dt));
         particle.zVelocity += -9.8 * dt;
         particle.z += particle.zVelocity * dt;
+        particle.z = Math.max(particle.z, 0);
 
-        if (particle.z < 0) {
+        if (particle.z <= 0) {
           const splatPos = particle.position.add([
             this.sprite.x,
             this.sprite.y,
@@ -66,11 +72,9 @@ export default class FleshImpact extends BaseEntity implements Entity {
     this.sprite.clear();
 
     for (const { position, color, radius, sprite, z } of this.particles) {
-      if (z > 0) {
-        sprite.position.set(...position);
-        sprite.tint = color;
-        sprite.scale.set((radius * (1.0 + z)) / 64);
-      }
+      sprite.position.set(...position);
+      sprite.tint = color;
+      sprite.scale.set((radius * (1.0 + z)) / 64);
     }
   }
 }

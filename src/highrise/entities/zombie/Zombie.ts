@@ -6,7 +6,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
-import { choose, rNormal } from "../../../core/util/Random";
+import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import FleshImpact from "../../effects/FleshImpact";
 import { CollisionGroups } from "../../physics/CollisionGroups";
@@ -14,6 +14,7 @@ import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
 import Hittable from "../Hittable";
 import Human, { HUMAN_RADIUS } from "../human/Human";
+import Crawler from "./Crawler";
 import ZombieController from "./ZombieController";
 import ZombieSprite from "./ZombieSprite";
 import ZombieVoice from "./ZombieVoice";
@@ -27,6 +28,8 @@ const ATTACK_DAMAGE = 20;
 const WINDUP_TIME = 0.2; // Time in animation from beginning of attack to doing damage
 const WINDDOWN_TIME = 0.1; // Time in animation from doing damage to end of attack
 const COOLDOWN_TIME = 0.5; // Time after windown before starting another attack
+
+const CRAWLER_CHANCE = 0.2;
 
 export default class Zombie extends BaseEntity implements Entity, Hittable {
   tags = ["zombie"];
@@ -170,6 +173,11 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.game?.dispatch({ type: "zombieDied", zombie: this, killer });
     this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
     this.voice.speak("death");
+
+    if (rBool(CRAWLER_CHANCE)) {
+      this.game?.addEntity(new Crawler(this.getPosition(), this.body.angle));
+    }
+
     this.destroy();
   }
 }

@@ -37,4 +37,11 @@ export default class BloodSplat extends BaseEntity implements Entity {
     this.sprite.rotation = rUniform(0, Math.PI / 2);
     this.sprite.tint = darken(0xffffff, rUniform(0, 0.2));
   }
+
+  async onAdd() {
+    // TODO: Destroy only the oldest ones
+    await this.wait(10);
+    await this.wait(3, (_, t) => (this.sprite.alpha = 1.0 - t));
+    this.destroy();
+  }
 }
