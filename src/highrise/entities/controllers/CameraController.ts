@@ -14,6 +14,7 @@ export default class CameraController extends BaseEntity implements Entity {
 
   onAdd() {
     this.camera.z = 50;
+    this.onInputDeviceChange(this.game!.io.usingGamepad);
   }
 
   onRender() {
@@ -43,5 +44,13 @@ export default class CameraController extends BaseEntity implements Entity {
   getPlayer() {
     return (this.game!.entities.getById("party_manager") as PartyManager)
       ?.leader;
+  }
+
+  onInputDeviceChange(usingGamepad: boolean) {
+    if (usingGamepad) {
+      this.game?.renderer.hideCursor();
+    } else {
+      this.game?.renderer.showCursor();
+    }
   }
 }

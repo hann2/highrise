@@ -38,8 +38,11 @@ export default class PlayerHumanController
       case ControllerButton.X:
         this.human.reload();
         break;
-      case ControllerButton.A:
+      case ControllerButton.LB:
         this.human.throwGlowstick();
+        break;
+      case ControllerButton.RB:
+        this.human.push();
         break;
     }
   }
@@ -52,8 +55,11 @@ export default class PlayerHumanController
       case "KeyR":
         this.human.reload();
         break;
-      case "KeyG":
+      case "KeyQ":
         this.human.throwGlowstick();
+        break;
+      case "Space":
+        this.human.push();
         break;
     }
   }

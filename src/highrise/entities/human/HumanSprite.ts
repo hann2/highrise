@@ -6,7 +6,7 @@ import { clamp, degToRad } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
 import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
-import Human, { HUMAN_RADIUS } from "./Human";
+import Human, { HUMAN_RADIUS, PUSH_COOLDOWN } from "./Human";
 
 // Renders a human
 export default class HumanSprite extends BaseEntity implements Entity {
@@ -127,8 +127,9 @@ export default class HumanSprite extends BaseEntity implements Entity {
       }
     } else {
       // Wave em in the air like you just don't care?
+      const x = 0.1 + clamp(this.human.pushCooldown / PUSH_COOLDOWN) * 0.4;
       const y = Math.sin(this.game!.elapsedTime * 2) * 0.05;
-      return [V(0.2, -0.2 + y), V(0.2, 0.2 - y)];
+      return [V(x, -0.2 + y), V(x, 0.2 - y)];
     }
   }
 
