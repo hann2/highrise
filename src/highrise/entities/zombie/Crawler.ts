@@ -31,7 +31,7 @@ const WINDDOWN_TIME = 0.1; // Time in animation from doing damage to end of atta
 const COOLDOWN_TIME = 0.5; // Time after windown before starting another attack
 
 export default class Crawler extends BaseEntity implements Entity, Hittable {
-  tags = ["zombie"];
+  tags = ["zombie", "crawler"];
   body: Body;
   hp: number = HEALTH;
   speed: number = rNormal(SPEED, SPEED / 5);

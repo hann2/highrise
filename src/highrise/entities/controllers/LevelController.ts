@@ -9,7 +9,7 @@ import {
 } from "../../data/levels/levelGeneration";
 import FadeEffect from "../../effects/FadeEffect";
 import MainMenu from "../../menu/MainMenu";
-import PauseMenuController from "../../menu/PauseMenuController";
+import PauseMenu from "../../menu/PauseMenu";
 import Human from "../human/Human";
 import PartyManager from "../PartyManager";
 import AllyHumanController from "./AllyController";
@@ -34,7 +34,7 @@ export default class LevelController extends BaseEntity implements Entity {
       await this.wait(0.0); // so that this happens async
       this.game?.dispatch({ type: "startLevel", level });
       this.game?.addEntity(new FadeEffect(0, 0, 1.5));
-      this.game?.addEntity(new PauseMenuController());
+      this.game?.addEntity(new PauseMenu());
     },
 
     levelComplete: async () => {
@@ -77,13 +77,13 @@ export default class LevelController extends BaseEntity implements Entity {
   /** Determines whether or not we should clear an entity */
   shouldClear(entity: Entity) {
     if (entity.persistent) {
-      // Whatever is persistent we probably don't wanna delete it (like the pause controller)
+      // Whatever is persistent we probably don't wanna delete it (like ourselves)
       return false;
-    }
-    if (entity instanceof PositionalSound && !entity.continuous) {
+    } else if (entity instanceof PositionalSound && !entity.continuous) {
       return false;
-    }
-    if (entity instanceof Human) {
+    } else if (entity instanceof PositionalSound) {
+      return false;
+    } else if (entity instanceof Human) {
       if (this.getPartyMembers().includes(entity)) {
         return false;
       } else {

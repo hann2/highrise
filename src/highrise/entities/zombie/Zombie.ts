@@ -118,7 +118,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   }
 
   stun(duration: number) {
-    this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.3, 0.05));
+    this.stunnedTimer = Math.max(this.stunnedTimer, duration);
     this.clearTimers("windup");
   }
 
@@ -147,7 +147,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
     // Knockback on the windup or the swing
     if (knockbackAmount) {
-      this.stun(knockbackAmount / 50);
+      this.stun((knockbackAmount / 25) * rNormal(1, 0.2));
       this.knockback(this.getPosition().sub(position).angle, knockbackAmount);
     }
 

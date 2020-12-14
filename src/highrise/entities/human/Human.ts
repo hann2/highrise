@@ -1,10 +1,18 @@
 import { Body, Circle } from "p2";
+import snd_pop1 from "../../../../resources/audio/misc/pop1.flac";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { angleDelta, clamp, polarToVec } from "../../../core/util/MathUtil";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
+import {
+  angleDelta,
+  clamp,
+  degToRad,
+  polarToVec,
+} from "../../../core/util/MathUtil";
+import { rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { Character, randomCharacter } from "../../characters/Character";
-import BloodSplat from "../../effects/BloodSplat";
+import FleshImpact from "../../effects/FleshImpact";
 import GlowStick from "../../effects/GlowStick";
 import { PointLight } from "../../lighting/PointLight";
 import { CollisionGroups } from "../../physics/CollisionGroups";
@@ -12,6 +20,7 @@ import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import Interactable, { isInteractable } from "../Interactable";
 import WeaponPickup from "../WeaponPickup";
+import Zombie from "../zombie/Zombie";
 import Flashlight from "./Flashlight";
 import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
@@ -22,6 +31,14 @@ const SPEED = 3.5; // arbitrary units
 const FRICTION = 0.4; // arbitrary units
 const MAX_HEALTH = 100;
 
+export const PUSH_RANGE = 2; // meters
+export const PUSH_ANGLE = degToRad(70);
+export const PUSH_KNOCKBACK = 100; // newtons?
+export const PUSH_STUN = 0.75; // seconds
+export const PUSH_COOLDOWN = 0.4; // seconds
+
+export const GLOWSTICK_COOLDOWN = 2.0; // seconds
+
 export default class Human extends BaseEntity implements Entity {
   body: Body;
   tags = ["human"];
@@ -30,6 +47,8 @@ export default class Human extends BaseEntity implements Entity {
   light?: PointLight;
   humanSprite: HumanSprite;
   voice: HumanVoice;
+  pushCooldown = 0;
+  glowstickCooldown = 0;
 
   constructor(
     position: V2d = V(0, 0),
@@ -57,11 +76,33 @@ export default class Human extends BaseEntity implements Entity {
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
+
+    this.pushCooldown = Math.max(this.pushCooldown - dt, 0);
+    this.glowstickCooldown = Math.max(this.glowstickCooldown - dt, 0);
+  }
+
+  getLimpPercent() {
+    const healthPercent = this.hp / MAX_HEALTH;
+    if (healthPercent > 0.5) {
+      return 0;
+    } else {
+      return 1.0 - 2 * healthPercent;
+    }
+  }
+
+  getLimpPhase() {
+    return this.game!.elapsedTime * Math.PI * 5;
+  }
+
+  getLimpSpeedMultiplier() {
+    const phase = 1.0 + Math.sin(this.getLimpPhase());
+    return 1.0 - phase * 0.8 * this.getLimpPercent();
   }
 
   // Move the human along a specified vector
   walk(direction: V2d) {
-    this.body.applyImpulse(direction.mul(SPEED));
+    const speed = SPEED * this.getLimpSpeedMultiplier();
+    this.body.applyImpulse(direction.mul(speed));
   }
 
   // Have the human face a specific angle
@@ -150,6 +191,8 @@ export default class Human extends BaseEntity implements Entity {
   inflictDamage(amount: number) {
     this.hp -= amount;
 
+    this.game?.addEntity(new FleshImpact(this.getPosition(), 1));
+
     if (this.hp <= 0) {
       this.die();
     } else if (this.hp < 30) {
@@ -162,7 +205,11 @@ export default class Human extends BaseEntity implements Entity {
   die() {
     this.voice.speak("death", true);
     this.game?.dispatch({ type: "humanDied", human: this });
-    this.game?.addEntity(new BloodSplat(this.getPosition()));
+    this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
+
+    if (this.weapon) {
+      this.game?.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
+    }
     this.destroy();
   }
 
@@ -176,12 +223,38 @@ export default class Human extends BaseEntity implements Entity {
   }
 
   push() {
-    // TODO: Implement me
+    if (this.pushCooldown <= 0) {
+      this.pushCooldown = PUSH_COOLDOWN;
+      this.game?.addEntity(new PositionalSound(snd_pop1, this.getPosition()));
+      for (const zombie of this.game!.entities.getTagged(
+        "zombie"
+      ) as Zombie[]) {
+        const relPosition = zombie.getPosition().isub(this.getPosition());
+        const distance = relPosition.magnitude;
+        const theta = Math.abs(angleDelta(relPosition.angle, this.body.angle));
+
+        if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
+          const amount =
+            PUSH_KNOCKBACK - PUSH_KNOCKBACK * (distance / PUSH_RANGE);
+          zombie.knockback(relPosition.angle, amount);
+          zombie.stun(PUSH_STUN * rNormal(1, 0.2));
+          zombie.voice.speak("hit");
+        }
+      }
+    }
   }
 
   throwGlowstick() {
-    this.game?.addEntity(
-      new GlowStick(this.getPosition(), polarToVec(this.getDirection(), 5))
-    );
+    if (this.glowstickCooldown <= 0) {
+      this.glowstickCooldown = GLOWSTICK_COOLDOWN;
+      this.game?.addEntity(
+        new GlowStick(
+          this.getPosition(),
+          polarToVec(this.getDirection(), rNormal(5, 1)).iadd(
+            this.body.velocity
+          )
+        )
+      );
+    }
   }
 }
