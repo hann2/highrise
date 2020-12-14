@@ -13,7 +13,7 @@ import { P2Materials } from "../physics/PhysicsMaterials";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
 const SIZE = 0.03; // meters wide
-const SPEED = 7; // meters
+const SPEED = 4; // average meters / second
 const MAX_SPIN = Math.PI * 20;
 
 const MIN_BOUNCE_SPEED = 1.0; // meters / second
@@ -80,9 +80,12 @@ export default class ShellCasing extends BaseEntity implements Entity {
       if (Math.abs(this.zVelocity) > MIN_BOUNCE_SPEED) {
         // bounce
         const sound = this.bounceSounds.getNext();
-        const gain = clamp(Math.abs(this.zVelocity) / 15);
+        const gain = clamp(Math.abs(this.zVelocity) / 15) * 0.5;
+        const speed = rNormal(1, 0.05);
         const position = this.getPosition();
-        this.game?.addEntity(new PositionalSound(sound, position, { gain }));
+        this.game?.addEntity(
+          new PositionalSound(sound, position, { gain, speed })
+        );
 
         this.zVelocity *= -BOUNCE_RESTITUTION;
         this.body.angularVelocity *= 0.5;
@@ -109,7 +112,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
   }
 
   onImpact() {
-    const gain = clamp(vec2.length(this.body.velocity) / 10);
+    const gain = clamp(vec2.length(this.body.velocity) / 10) * 0.5;
     const sound = this.bounceSounds.getNext();
     const position = this.getPosition();
     this.game?.addEntity(new PositionalSound(sound, position, { gain }));
