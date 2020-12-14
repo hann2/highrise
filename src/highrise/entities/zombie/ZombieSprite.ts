@@ -1,6 +1,5 @@
 import { Sprite } from "pixi.js";
-import img_zombie1Hold from "../../../../resources/images/zombies/zombie1_hold.png";
-import img_zombie1Stand from "../../../../resources/images/zombies/zombie1_stand.png";
+import img_zombie from "../../../../resources/images/zombies/zombie.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { Layers } from "../../layers";
@@ -26,11 +25,11 @@ export default class ZombieSprite extends BaseEntity implements Entity {
     this.sprite.anchor.set(0.5, 0.5);
 
     this.bodySprites = {
-      standing: Sprite.from(img_zombie1Stand),
-      stunned: Sprite.from(img_zombie1Stand),
-      walking: Sprite.from(img_zombie1Hold),
-      windup: Sprite.from(img_zombie1Hold),
-      winddown: Sprite.from(img_zombie1Stand),
+      standing: Sprite.from(img_zombie),
+      stunned: Sprite.from(img_zombie),
+      walking: Sprite.from(img_zombie),
+      windup: Sprite.from(img_zombie),
+      winddown: Sprite.from(img_zombie),
     };
 
     for (const bodySprite of Object.values(this.bodySprites)) {
