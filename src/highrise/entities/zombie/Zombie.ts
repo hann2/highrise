@@ -8,18 +8,17 @@ import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants";
 import FleshImpact from "../../effects/FleshImpact";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
 import Hittable from "../Hittable";
-import Human, { HUMAN_RADIUS } from "../human/Human";
+import Human from "../human/Human";
 import Crawler from "./Crawler";
 import ZombieController from "./ZombieController";
 import ZombieSprite from "./ZombieSprite";
 import ZombieVoice from "./ZombieVoice";
-
-export const ZOMBIE_RADIUS = 0.35; // meters
 const SPEED = 0.4;
 const FRICTION = 0.1;
 const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;
@@ -90,7 +89,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   getHumansInRange(): Human[] {
     const humans = (this.game?.entities.getTagged("human") as Human[]) ?? [];
     return humans.filter((human) => {
-      const displacement = human.getPosition().isub(this.body.position);
+      const displacement = human.getPosition().sub(this.body.position);
       const inRange = displacement.magnitude < ATTACK_RANGE;
       const diffAngle = angleDelta(displacement.angle, this.body.angle);
       const inAngle = Math.abs(diffAngle) < ATTACK_ANGLE;

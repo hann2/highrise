@@ -8,12 +8,13 @@ import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants";
 import FleshImpact from "../../effects/FleshImpact";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
 import Hittable from "../Hittable";
-import Human, { HUMAN_RADIUS } from "../human/Human";
+import Human from "../human/Human";
 import CrawlerSprite from "./CrawlerSprite";
 import ZombieController from "./ZombieController";
 import ZombieVoice from "./ZombieVoice";
@@ -21,7 +22,6 @@ import ZombieVoice from "./ZombieVoice";
 const SPEED = 0.1;
 const HEALTH = 25;
 
-export const ZOMBIE_RADIUS = 0.35; // meters
 const FRICTION = 0.1;
 const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;
 const ATTACK_ANGLE = degToRad(90);

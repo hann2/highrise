@@ -2,8 +2,9 @@ import { Sprite } from "pixi.js";
 import img_zombie from "../../../../resources/images/zombies/zombie.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
+import { ZOMBIE_RADIUS } from "../../constants";
 import { Layers } from "../../layers";
-import Zombie, { ZOMBIE_RADIUS } from "./Zombie";
+import Zombie from "./Zombie";
 
 interface BodySprites {
   standing: Sprite;

@@ -13,6 +13,7 @@ import {
 import { rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { Character, randomCharacter } from "../../characters/Character";
+import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants";
 import FleshImpact from "../../effects/FleshImpact";
 import GlowStick from "../../effects/GlowStick";
 import { PointLight } from "../../lighting/PointLight";
@@ -21,13 +22,11 @@ import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import Interactable, { isInteractable } from "../Interactable";
 import WeaponPickup from "../WeaponPickup";
-import { ZOMBIE_RADIUS } from "../zombie/Crawler";
 import Zombie from "../zombie/Zombie";
 import Flashlight from "./Flashlight";
 import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
 
-export const HUMAN_RADIUS = 0.35; // meters
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
 const SPEED = 3.5; // arbitrary units
 const FRICTION = 0.4; // arbitrary units

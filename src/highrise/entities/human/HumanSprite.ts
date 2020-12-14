@@ -4,9 +4,10 @@ import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { colorLerp } from "../../../core/util/ColorUtils";
 import { clamp, degToRad } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
+import { HUMAN_RADIUS } from "../../constants";
 import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
-import Human, { HUMAN_RADIUS, PUSH_COOLDOWN } from "./Human";
+import Human, { PUSH_COOLDOWN } from "./Human";
 
 // Renders a human
 export default class HumanSprite extends BaseEntity implements Entity {

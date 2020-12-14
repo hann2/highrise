@@ -4,11 +4,12 @@ import Entity from "../../../core/entity/Entity";
 import CustomWorld from "../../../core/physics/CustomWorld";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import { testLineOfSight } from "../../utils/visionUtils";
-import Human, { HUMAN_RADIUS } from "../human/Human";
-import Zombie, { ZOMBIE_RADIUS } from "./Zombie";
+import Human from "../human/Human";
+import Zombie from "./Zombie";
 
 const NORMAL_SPEED = 1.0;
 const SHAMBLE_SPEED = 0.2;
