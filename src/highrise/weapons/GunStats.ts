@@ -64,6 +64,8 @@ export interface GunStats extends BaseWeaponStats {
   leftHandPosition: [number, number];
   // Position of the right hand
   rightHandPosition: [number, number];
+  // Position of the sprite
+  holdPosition: [number, number];
 }
 
 export type GunSounds = GunStats["sounds"];
@@ -101,6 +103,7 @@ export const defaultGunStats: GunStats = {
   size: [1, 1],
   leftHandPosition: [0.3, 0],
   rightHandPosition: [0.3, 0],
+  holdPosition: [0.3, 0],
 
   textures: {
     pickup: img_ar15,

@@ -16,7 +16,7 @@ export default interface GameEventHandler {
   /** Called before the tick happens */
   beforeTick?(): void;
   /** Called before rendering */
-  onRender?(): void;
+  onRender?(dt: number): void;
   /** Called during the update tick */
   onTick?(dt: number): void;
   /** Called when the game is paused */

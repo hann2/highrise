@@ -23,7 +23,7 @@ export const Magnum: GunStats = {
   bulletDamage: 55,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
-  reloadTime: 0.3,
+  reloadTime: 0.2,
   ammoCapacity: 6,
 
   textures: {
