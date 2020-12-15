@@ -33,13 +33,14 @@ export interface GunStats extends BaseWeaponStats {
   readonly reloadingStyle: ReloadingStyle;
   // Seconds to complete a reload. For INDIVIDUAL, this is seconds per round loaded
   readonly reloadTime: number;
-  // How much recoil this has. Arbitrary units. 1 is a little, 100 is a lot.
-  recoil: number;
 
   // The number of bullets per round fired
   readonly bulletsPerShot: number;
   // The maximum spread of bullets fired
   readonly bulletSpread: number;
+
+  // Whether the shells eject after each shot or on reload
+  ejectionType: EjectionType;
 
   // Sounds that play for various things
   readonly sounds: {
@@ -82,8 +83,15 @@ export enum FireMode {
   SEMI_AUTO,
   // Constant bullets as long as trigger is down
   FULL_AUTO,
-  // Pumps after every shot
+}
+
+export enum EjectionType {
+  // Shells eject on each shot
+  AUTOMATIC,
+  // Shells eject when pumped
   PUMP,
+  // Shells eject at start of reload
+  RELOAD,
 }
 
 export enum ReloadingStyle {
@@ -102,10 +110,9 @@ export const defaultGunStats: GunStats = {
   ammoCapacity: 10,
   reloadTime: 1,
   reloadingStyle: ReloadingStyle.MAGAZINE,
+  ejectionType: EjectionType.AUTOMATIC,
   bulletsPerShot: 1,
   bulletSpread: degToRad(0.5),
-
-  recoil: 10,
 
   size: [1, 1],
   muzzleLength: 0.5,

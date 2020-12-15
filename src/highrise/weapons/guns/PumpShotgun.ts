@@ -10,6 +10,7 @@ import img_remingtonPickup from "../../../../resources/images/weapons/remington-
 import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
+  EjectionType,
   FireMode,
   GunStats,
   ReloadingStyle,
@@ -25,7 +26,7 @@ export const PumpShotgun: GunStats = {
   bulletSpread: degToRad(9),
   muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
-  fireMode: FireMode.PUMP,
+  ejectionType: EjectionType.PUMP,
   reloadTime: 0.5,
   ammoCapacity: 7,
 
@@ -37,9 +38,9 @@ export const PumpShotgun: GunStats = {
   },
   size: [1.1, 1.1],
 
-  leftHandPosition: [0.65, -0.03],
+  leftHandPosition: [0.7, -0.03],
   rightHandPosition: [0.3, 0],
-  holdPosition: [0.58, 0],
+  holdPosition: [0.5, 0],
   stanceAngle: degToRad(55),
   stanceOffset: [0, -0.25],
   muzzleLength: 1.1,

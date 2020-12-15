@@ -255,8 +255,8 @@ export class IOManager {
       axes.magnitude = clampUp(
         (axes.magnitude - GAMEPAD_MINIMUM) / gamepadRange
       );
-      axes.x = clamp(axes.x);
-      axes.y = clamp(axes.y);
+      axes.x = clamp(axes.x, -1, 1);
+      axes.y = clamp(axes.y, -1, 1);
     }
     return axes;
   }

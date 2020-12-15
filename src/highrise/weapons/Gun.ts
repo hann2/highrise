@@ -2,15 +2,16 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { clamp, clampUp, polarToVec } from "../../core/util/MathUtil";
-import { rUniform } from "../../core/util/Random";
-import { V2d } from "../../core/Vector";
+import { clamp, degToRad, polarToVec } from "../../core/util/MathUtil";
+import { rNormal, rUniform } from "../../core/util/Random";
+import { V, V2d } from "../../core/Vector";
 import MuzzleFlash from "../effects/MuzzleFlash";
 import ShellCasing from "../effects/ShellCasing";
 import Bullet from "../entities/Bullet";
 import Human from "../entities/human/Human";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import {
+  EjectionType,
   FireMode,
   GunSoundName,
   GunSounds,
@@ -19,19 +20,25 @@ import {
 } from "./GunStats";
 
 export default class Gun extends BaseEntity implements Entity {
+  // All the defining characteristics of this gun
   stats: GunStats;
+  // Seconds until we can shoot again
   shootCooldown: number = 0;
+  // Amount of ammo currently loaded in the gun
   ammo: number;
+  // Whether or not we're currently in the middle of reloading
   isReloading: boolean = false;
+  // Easy way to play random characteristic sounds for this gun
   sounds: GunSoundRings;
-  recoil = 0;
+  // What percentage we're currently pumping the gun. Unused for non-pump guns
   pumpAmount = 0;
+  // How many shells we've fired that haven't been ejected yet
+  shellsToEject = 0;
 
   constructor(stats: GunStats) {
     super();
     this.stats = stats;
     this.ammo = this.stats.ammoCapacity;
-
     this.sounds = makeSoundRings(stats.sounds);
   }
 
@@ -45,7 +52,7 @@ export default class Gun extends BaseEntity implements Entity {
         this.cancelReload();
         this.playSound("reloadFinish", shooter.getPosition());
       }
-    } else if (this.shootCooldown <= 0) {
+    } else if (this.shootCooldown <= 0 && this.pumpAmount <= 0) {
       const direction = shooter.getDirection();
       const muzzlePosition = shooter
         .getPosition()
@@ -65,32 +72,43 @@ export default class Gun extends BaseEntity implements Entity {
     this.makeProjectile(position, direction, shooter);
 
     this.shootCooldown += 1.0 / this.stats.fireRate;
-    this.recoil += this.stats.recoil;
     this.ammo -= 1;
+    this.shellsToEject += 1;
 
     // Various effects
     this.playSound("shoot", position);
     this.game?.addEntity(new MuzzleFlash(position, direction));
 
-    if (this.stats.fireMode === FireMode.PUMP) {
-      await this.wait(0.2);
+    if (this.stats.ejectionType === EjectionType.AUTOMATIC) {
+      this.makeShellCasing(shooter);
+    } else if (this.stats.ejectionType === EjectionType.PUMP) {
+      await this.wait(0.175);
       this.pump(shooter);
-    } else {
-      this.makeShellCasing(direction, shooter);
     }
   }
 
   private async pump(shooter: Human) {
     this.playSound("pump", shooter.getPosition());
-    await this.wait(0.26, (dt, t) => {
-      this.pumpAmount = t;
-    });
+    await this.wait(
+      0.15,
+      (dt, t) => {
+        this.pumpAmount = t;
+      },
+      "pump"
+    );
 
-    this.makeShellCasing(shooter.getDirection(), shooter);
+    await this.wait(0.05, undefined, "pump");
+    if (this.shellsToEject > 0) {
+      this.makeShellCasing(shooter);
+    }
 
-    await this.wait(0.16, (dt, t) => {
-      this.pumpAmount = 1.0 - t;
-    });
+    await this.wait(
+      0.13,
+      (dt, t) => {
+        this.pumpAmount = 1.0 - t;
+      },
+      "pump"
+    );
     this.pumpAmount = 0;
   }
 
@@ -99,15 +117,26 @@ export default class Gun extends BaseEntity implements Entity {
     return clamp(this.shootCooldown / maxShootCooldown);
   }
 
-  makeShellCasing(direction: number, shooter: Human) {
-    const position = shooter
-      .getPosition()
-      .add(polarToVec(direction, this.stats.muzzleLength * 0.5)); // Halfway seems to be a good estimate
+  makeShellCasing(shooter: Human) {
+    this.shellsToEject -= 1;
+    const shooterDirection = shooter.getDirection();
+    const position = shooter.localToWorld(this.stats.holdPosition);
+
+    let velocity;
+    if (this.stats.ejectionType === EjectionType.RELOAD) {
+      velocity = V(polarToVec(rUniform(0, Math.PI * 2), rUniform(0, 1)));
+    } else {
+      velocity = polarToVec(
+        rNormal(shooterDirection + Math.PI / 2, degToRad(20)),
+        4 * rNormal(1, 0.3)
+      );
+    }
+
     this.game?.addEntity(
       new ShellCasing(
         position,
-        direction + Math.PI / 2,
-        direction,
+        velocity,
+        shooterDirection,
         this.stats.textures.shellCasing,
         this.stats.sounds.shellDrop
       )
@@ -134,6 +163,13 @@ export default class Gun extends BaseEntity implements Entity {
 
   async reload(shooter: Human) {
     if (!this.isReloading && this.ammo < this.stats.ammoCapacity) {
+      if (this.stats.ejectionType === EjectionType.RELOAD) {
+        while (this.shellsToEject > 0) {
+          this.makeShellCasing(shooter);
+          await this.wait(0.02);
+        }
+      }
+
       if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
         this.isReloading = true;
         this.playSound("reload", shooter.getPosition());
@@ -151,8 +187,12 @@ export default class Gun extends BaseEntity implements Entity {
           await this.wait(this.stats.reloadTime, undefined, "reload");
           this.ammo += 1;
         }
-        this.playSound("reloadFinish", shooter.getPosition());
         this.isReloading = false;
+        if (this.stats.ejectionType === EjectionType.PUMP) {
+          this.pump(shooter);
+        } else {
+          this.playSound("reloadFinish", shooter.getPosition());
+        }
       }
     }
   }

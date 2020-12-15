@@ -13,7 +13,12 @@ import { cementFloor } from "../../../view/DecorationSprite";
 import Gun from "../../../weapons/Gun";
 import { GUNS } from "../../../weapons/guns";
 import { AK47 } from "../../../weapons/guns/AK-47";
+import { AR15 } from "../../../weapons/guns/AR-15";
+import { DesertEagle } from "../../../weapons/guns/DesertEagle";
+import { DoubleBarrelShotgun } from "../../../weapons/guns/DoubleBarrelShotgun";
+import { Magnum } from "../../../weapons/guns/Magnum";
 import { P90 } from "../../../weapons/guns/P90";
+import { PumpShotgun } from "../../../weapons/guns/PumpShotgun";
 import { MELEE_WEAPONS } from "../../../weapons/melee-weapons";
 import MeleeWeapon from "../../../weapons/MeleeWeapon";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
@@ -45,13 +50,21 @@ export default class SpawnRoom extends RoomTemplate {
     entities.push(new SpawnLocation(transformCell(V(2, 1))));
 
     const gun = new Gun(choose(...GUNS));
-    entities.push(new WeaponPickup(transformCell(V(0, 0)), gun));
 
     const meleeWeapon = new MeleeWeapon(choose(...MELEE_WEAPONS));
-    entities.push(new WeaponPickup(transformCell(V(1, 0)), meleeWeapon));
+    entities.push(new WeaponPickup(transformCell(V(2, 0)), meleeWeapon));
 
-    entities.push(new WeaponPickup(transformCell(V(0, 1)), new Gun(AK47)));
-    entities.push(new WeaponPickup(transformCell(V(0, 2)), new Gun(P90)));
+    entities.push(new WeaponPickup(transformCell(V(0, 0)), new Gun(AK47)));
+    entities.push(new WeaponPickup(transformCell(V(0, 1)), new Gun(P90)));
+    entities.push(
+      new WeaponPickup(transformCell(V(0, 2)), new Gun(PumpShotgun))
+    );
+
+    entities.push(new WeaponPickup(transformCell(V(1, 0)), new Gun(AR15)));
+    entities.push(new WeaponPickup(transformCell(V(1, 1)), new Gun(Magnum)));
+    entities.push(
+      new WeaponPickup(transformCell(V(1, 2)), new Gun(DoubleBarrelShotgun))
+    );
 
     entities.push(new SpawnRoomFloor(transformCell(V(1, 1))));
 
@@ -75,7 +88,7 @@ class SpawnRoomFloor extends BaseEntity implements Entity {
     this.sprite.position.set(x, y);
     this.sprite.scale.set(1 / 64);
     this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.layerName = Layers.WORLD_BACK;
+    this.sprite.layerName = Layers.FLOOR2;
   }
 
   onAdd(game: Game) {

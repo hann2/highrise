@@ -6,7 +6,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
-import { choose, rBool, rNormal } from "../../../core/util/Random";
+import { choose, rBool, rInteger, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants";
 import FleshImpact from "../../effects/FleshImpact";
@@ -19,11 +19,12 @@ import Crawler from "./Crawler";
 import ZombieController from "./ZombieController";
 import ZombieSprite from "./ZombieSprite";
 import ZombieVoice from "./ZombieVoice";
+
 const SPEED = 0.4;
 const FRICTION = 0.1;
 const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;
 const ATTACK_ANGLE = degToRad(90);
-const ATTACK_DAMAGE = 20;
+const ATTACK_DAMAGE = 10;
 const WINDUP_TIME = 0.2; // Time in animation from beginning of attack to doing damage
 const WINDDOWN_TIME = 0.1; // Time in animation from doing damage to end of attack
 const COOLDOWN_TIME = 0.5; // Time after windown before starting another attack
@@ -33,7 +34,7 @@ const CRAWLER_CHANCE = 0.2;
 export default class Zombie extends BaseEntity implements Entity, Hittable {
   tags = ["zombie"];
   body: Body;
-  hp: number = 100;
+  hp: number = rInteger(75, 120);
   speed: number = rNormal(SPEED, SPEED / 5);
   stunnedTimer = 0;
   voice: ZombieVoice;

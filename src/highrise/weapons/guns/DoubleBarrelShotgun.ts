@@ -11,6 +11,7 @@ import img_doubleBarrelShotgunPickup from "../../../../resources/images/weapons/
 import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
+  EjectionType,
   FireMode,
   GunStats,
   ReloadingStyle,
@@ -27,6 +28,7 @@ export const DoubleBarrelShotgun: GunStats = {
   muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   fireMode: FireMode.SEMI_AUTO,
+  ejectionType: EjectionType.RELOAD,
   reloadTime: 1.2,
   ammoCapacity: 2,
 

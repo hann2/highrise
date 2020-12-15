@@ -32,7 +32,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
   constructor(
     private position: V2d,
-    direction: number,
+    velocity: V2d,
     private rotation: number,
     texture: string,
     sounds: SoundName[]
@@ -40,17 +40,12 @@ export default class ShellCasing extends BaseEntity implements Entity {
     super();
 
     this.z = PORT_HEIGHT;
-    this.zVelocity = rUniform(0, 2);
+    this.zVelocity = rUniform(0, velocity.magnitude * 0.3);
 
     this.sprite = Sprite.from(texture);
     this.sprite.layerName = Layers.WORLD_BACK;
     this.sprite.scale.set(SIZE / this.sprite.texture.width);
     this.sprite.anchor.set(0.5, 0.5);
-
-    const velocity = polarToVec(
-      rNormal(direction, degToRad(20)),
-      SPEED * rNormal(1, 0.3)
-    );
 
     this.body = new Body({
       mass: 0.1,

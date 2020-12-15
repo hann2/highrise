@@ -6,7 +6,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../../core/util/MathUtil";
-import { choose, rNormal, rUniform } from "../../../core/util/Random";
+import { choose, rInteger, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants";
 import FleshImpact from "../../effects/FleshImpact";
@@ -20,7 +20,6 @@ import ZombieController from "./ZombieController";
 import ZombieVoice from "./ZombieVoice";
 
 const SPEED = 0.1;
-const HEALTH = 25;
 
 const FRICTION = 0.1;
 const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;
@@ -33,7 +32,7 @@ const COOLDOWN_TIME = 0.5; // Time after windown before starting another attack
 export default class Crawler extends BaseEntity implements Entity, Hittable {
   tags = ["zombie", "crawler"];
   body: Body;
-  hp: number = HEALTH;
+  hp: number = rInteger(20, 30);
   speed: number = rNormal(SPEED, SPEED / 5);
   stunnedTimer = 0;
   voice: ZombieVoice;

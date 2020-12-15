@@ -13,7 +13,12 @@ import snd_revolverShot3 from "../../../../resources/audio/guns/revolver/revolve
 import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
 import img_magnumHold from "../../../../resources/images/weapons/magnum-hold.png";
 import img_magnumPickup from "../../../../resources/images/weapons/magnum-pickup.png";
-import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
+import {
+  defaultGunStats,
+  EjectionType,
+  GunStats,
+  ReloadingStyle,
+} from "../GunStats";
 
 export const Magnum: GunStats = {
   ...defaultGunStats,
@@ -23,6 +28,7 @@ export const Magnum: GunStats = {
   bulletDamage: 55,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
+  ejectionType: EjectionType.RELOAD,
   reloadTime: 0.28,
   ammoCapacity: 6,
 

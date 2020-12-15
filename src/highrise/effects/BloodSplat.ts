@@ -30,6 +30,7 @@ export default class BloodSplat extends BaseEntity implements Entity {
     super();
 
     this.sprite = Sprite.from(choose(...BLOOD_SPLAT_URLS));
+    this.sprite.alpha = 0.9;
     this.sprite.scale.set(size * SCALE);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.layerName = Layers.FLOOR2;

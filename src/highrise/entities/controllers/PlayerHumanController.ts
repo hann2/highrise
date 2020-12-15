@@ -1,11 +1,9 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { ControllerAxis, ControllerButton } from "../../../core/io/Gamepad";
+import { ControllerButton } from "../../../core/io/Gamepad";
 import { KeyCode } from "../../../core/io/Keys";
-import { choose } from "../../../core/util/Random";
 import { V } from "../../../core/Vector";
 import Gun from "../../weapons/Gun";
-import { GUNS } from "../../weapons/guns";
 import { FireMode } from "../../weapons/GunStats";
 import Human from "../human/Human";
 
@@ -84,10 +82,7 @@ export default class PlayerHumanController
 
     // Direction
     if (io.usingGamepad) {
-      const direction = V(
-        io.getAxis(ControllerAxis.RIGHT_X),
-        io.getAxis(ControllerAxis.RIGHT_Y)
-      );
+      const direction = io.getStick("right");
       if (direction.magnitude > 0.1) {
         // account for dead zone
         this.human.setDirection(direction.angle);
@@ -113,8 +108,7 @@ export default class PlayerHumanController
       direction[0] += 1;
     }
 
-    direction[0] += io.getAxis(ControllerAxis.LEFT_X);
-    direction[1] += io.getAxis(ControllerAxis.LEFT_Y);
+    direction.iadd(io.getStick("left"));
 
     if (direction.magnitude > 1) {
       direction.magnitude = 1;
