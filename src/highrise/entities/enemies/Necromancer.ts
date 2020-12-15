@@ -36,7 +36,7 @@ const ATTACK_ANGLE = degToRad(90);
 const ATTACK_DAMAGE = 20;
 const WINDUP_TIME = 1; // Time in animation from beginning of attack to doing damage
 const WINDDOWN_TIME = 0.2; // Time in animation from doing damage to end of attack
-const COOLDOWN_TIME = 5; // Time after windown before starting another attack
+const COOLDOWN_TIME = 3; // Time after windown before starting another attack
 
 export default class Necromancer
   extends BaseEntity
