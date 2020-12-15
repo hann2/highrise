@@ -7,6 +7,10 @@ export enum Layers {
   SUBFLOOR = "subfloor",
   // The floor
   FLOOR = "floor",
+  // The floor
+  FLOOR2 = "floor2",
+  // The floor
+  FLOOR3 = "floor3",
   // ambient occlusion on the floor
   AO = "ao",
   // Stuff on the floor
@@ -37,6 +41,8 @@ export enum Layers {
 export function initLayers(game: Game) {
   game.renderer.createLayer(Layers.SUBFLOOR, new LayerInfo());
   game.renderer.createLayer(Layers.FLOOR, new LayerInfo());
+  game.renderer.createLayer(Layers.FLOOR2, new LayerInfo());
+  game.renderer.createLayer(Layers.FLOOR3, new LayerInfo());
   game.renderer.createLayer(Layers.AO, new LayerInfo());
   game.renderer.createLayer(Layers.WORLD_BACK, new LayerInfo());
   game.renderer.createLayer(Layers.WEAPONS, new LayerInfo());

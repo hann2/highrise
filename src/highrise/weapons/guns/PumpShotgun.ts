@@ -5,6 +5,7 @@ import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-p
 import snd_shotgunShot3 from "../../../../resources/audio/guns/shotgun/shotgun-shot-3.mp3";
 import img_shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
 import img_ar15Hold from "../../../../resources/images/weapons/ar15-hold.png";
+import img_remington870Hold from "../../../../resources/images/weapons/remington-870-hold.png";
 import img_remingtonPickup from "../../../../resources/images/weapons/remington-pickup.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import {
@@ -31,14 +32,14 @@ export const PumpShotgun: GunStats = {
   textures: {
     ...defaultGunStats.textures,
     pickup: img_remingtonPickup,
-    holding: img_ar15Hold,
+    holding: img_remington870Hold,
     shellCasing: img_shotgunCasing,
   },
   size: [1.1, 1.1],
 
   leftHandPosition: [0.65, -0.03],
   rightHandPosition: [0.3, 0],
-  holdPosition: [0.6, 0],
+  holdPosition: [0.58, 0],
   stanceAngle: degToRad(55),
   stanceOffset: [0, -0.25],
   muzzleLength: 1.1,

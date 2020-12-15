@@ -139,6 +139,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
 class StaticShellCasing extends BaseEntity {
   constructor(public sprite: Sprite & GameSprite) {
     super();
+    sprite.layerName = Layers.FLOOR3;
   }
 
   async onAdd() {

@@ -5,6 +5,7 @@ import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-p
 import snd_shotgunShot2 from "../../../../resources/audio/guns/shotgun/shotgun-shot-2.mp3";
 import img_shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
 import img_ar15Hold from "../../../../resources/images/weapons/ar15-hold.png";
+import img_spas12Hold from "../../../../resources/images/weapons/spas12-hold.png";
 import img_spas12Pickup from "../../../../resources/images/weapons/spas12-pickup.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import {
@@ -31,7 +32,7 @@ export const SPAS12: GunStats = {
   textures: {
     ...defaultGunStats.textures,
     pickup: img_spas12Pickup,
-    holding: img_ar15Hold,
+    holding: img_spas12Hold,
     shellCasing: img_shotgunCasing,
   },
   size: [1.1, 1.1],
@@ -41,7 +42,7 @@ export const SPAS12: GunStats = {
   holdPosition: [0.6, 0],
   stanceAngle: degToRad(55),
   stanceOffset: [0, -0.25],
-  muzzleLength: 1.1,
+  muzzleLength: 1.2,
 
   sounds: {
     ...defaultGunStats.sounds,

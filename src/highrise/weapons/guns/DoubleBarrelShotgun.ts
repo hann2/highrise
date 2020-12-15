@@ -6,6 +6,7 @@ import snd_shotgunShot1 from "../../../../resources/audio/guns/shotgun/shotgun-s
 import img_shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
 import img_ak47Hold from "../../../../resources/images/weapons/ak-47-hold.png";
 import img_ar15Hold from "../../../../resources/images/weapons/ar15-hold.png";
+import img_doubleBarrelShotgunHold from "../../../../resources/images/weapons/double-barrel-shotgun-hold.png";
 import img_doubleBarrelShotgunPickup from "../../../../resources/images/weapons/double-barrel-shotgun-pickup.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import {
@@ -32,16 +33,16 @@ export const DoubleBarrelShotgun: GunStats = {
   textures: {
     ...defaultGunStats.textures,
     pickup: img_doubleBarrelShotgunPickup,
-    holding: img_ak47Hold,
+    holding: img_doubleBarrelShotgunHold,
     shellCasing: img_shotgunCasing,
   },
   size: [1.1, 1.1],
 
-  leftHandPosition: [0.65, -0.03],
+  leftHandPosition: [0.45, -0.03],
   rightHandPosition: [0.3, 0],
-  holdPosition: [0.6, 0],
-  stanceAngle: degToRad(55),
-  stanceOffset: [0, -0.25],
+  holdPosition: [0.4, 0],
+  stanceAngle: degToRad(35),
+  stanceOffset: [0, -0.2],
 
   sounds: {
     ...defaultGunStats.sounds,

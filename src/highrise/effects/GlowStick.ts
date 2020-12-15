@@ -141,6 +141,7 @@ class StaticGlowstick extends BaseEntity {
     super();
 
     this.addChild(light, true); // steal it from the original
+    this.sprite.layerName = Layers.WORLD_BACK;
   }
 
   async onAdd() {

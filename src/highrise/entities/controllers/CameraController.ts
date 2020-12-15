@@ -13,7 +13,7 @@ export default class CameraController extends BaseEntity implements Entity {
   }
 
   onAdd() {
-    this.camera.z = 50;
+    this.camera.z = 65;
     this.onInputDeviceChange(this.game!.io.usingGamepad);
   }
 
