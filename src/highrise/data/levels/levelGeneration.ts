@@ -45,6 +45,7 @@ import { Glock } from "../../weapons/guns/Glock";
 import { M1911 } from "../../weapons/guns/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee-weapons";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
+import GeneratorLevel from "./GeneratorLevel";
 import { Level } from "./Level";
 import LevelTemplate from "./LevelTemplate";
 import LobbyLevel from "./LobbyLevel";
@@ -950,6 +951,8 @@ class LevelBuilder {
 }
 
 export function chooseTemplate(level: number): LevelTemplate {
+  return new GeneratorLevel();
+
   return level === 1 ? new LobbyLevel() : new ShopLevel();
 }
 

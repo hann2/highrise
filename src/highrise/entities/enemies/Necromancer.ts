@@ -99,13 +99,20 @@ export default class Necromancer
     }
   }
 
-  async summonShield(direction: V2d) {
+  async summonShield(direction: V2d = polarToVec(rUniform(0, 2 * Math.PI), 1)) {
+    const nZombies = 5;
+    const separation = Math.PI / 5;
+    const angles: number[] = [];
+    for (let i = 0; i < nZombies; i++) {
+      angles.push(normalizeAngle(separation * (i - nZombies / 2)));
+    }
+
     this.useAbility(() =>
-      this.game!.addEntities([
-        new Zombie(this.getPosition().add(direction.rotate(Math.PI / 4))),
-        new Zombie(this.getPosition().add(direction)),
-        new Zombie(this.getPosition().add(direction.rotate(-Math.PI / 4))),
-      ])
+      this.game!.addEntities(
+        angles.map(
+          (a) => new Zombie(this.getPosition().add(direction.rotate(a)))
+        )
+      )
     );
   }
 
@@ -131,9 +138,7 @@ export default class Necromancer
     this.useAbility(() => {
       const p = human.getPosition();
       this.game!.addEntities(
-        angles.map(
-          (a) => new Crawler(human.getPosition().add(polarToVec(a, 2)))
-        )
+        angles.map((a) => new Crawler(p.add(polarToVec(a, 2))))
       );
     });
   }

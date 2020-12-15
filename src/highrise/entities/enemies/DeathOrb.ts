@@ -25,7 +25,7 @@ export default class DeathOrb extends BaseEntity implements Entity {
   constructor(
     public position: V2d,
     direction: number,
-    speed: number = 5,
+    speed: number = 15,
     public damage: number = 40,
     public readonly shooter?: Spitter,
     public mass: number = 0.25
