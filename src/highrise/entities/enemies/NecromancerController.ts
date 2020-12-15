@@ -53,7 +53,16 @@ export default class NecromancerController
     }
   }
 
-  async onTick(dt: number) {
+  async onTick() {
+    if (this.objective === "FLEE") {
+      if (this.atMoveTarget()) {
+        this.objective = "DEFEND";
+      } else {
+        this.moveTowardsTarget();
+      }
+      return;
+    }
+
     const enemies = this.getEnemiesInArena();
     const occupiedZones: string[] = enemies
       .map((e) => this.positionToZone(e.getPosition()))
@@ -63,13 +72,7 @@ export default class NecromancerController
     if (!enemies.length) {
       return;
     }
-
-    // TODO: handle getting pushed out of room
-    if (!currentZone) {
-      return;
-    }
-
-    if (currentZone in occupiedZones) {
+    if (!currentZone || currentZone in occupiedZones) {
       this.flee(occupiedZones);
       return;
     }
@@ -79,15 +82,8 @@ export default class NecromancerController
     }
 
     switch (this.objective) {
-      case "FLEE":
-        if (this.atMoveTarget()) {
-          this.objective = "DEFEND";
-        } else {
-          this.moveTowardsTarget();
-        }
-        break;
       case "DEFEND":
-        await this.necromancer.summonShield(
+        this.necromancer.summonShield(
           currentZone === "CENTER"
             ? undefined
             : Direction[opposite(currentZone)]
@@ -95,11 +91,11 @@ export default class NecromancerController
         this.objective = "ATTACK";
         break;
       case "ATTACK":
-        await this.necromancer.attack(enemies[0]);
+        this.necromancer.attack(enemies[0]);
         this.objective = "SURROUND";
         break;
       case "SURROUND":
-        await this.necromancer.surround(enemies[0]);
+        this.necromancer.surround(enemies[0]);
         this.flee(occupiedZones);
         break;
       default:
