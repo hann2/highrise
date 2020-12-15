@@ -27,7 +27,7 @@ import NecromancerSprite from "./NecromancerSprite";
 import Zombie from "./Zombie";
 import ZombieVoice from "./ZombieVoice";
 
-const SPEED = 0.1;
+const SPEED = 0.4;
 const HEALTH = 4000;
 
 const FRICTION = 0.1;
