@@ -17,13 +17,12 @@ import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { choose, rBool } from "../../../core/util/Random";
 import { ShuffleRing } from "../../utils/ShuffleRing";
-import Zombie from "./Zombie";
 
 export default class ZombieVoice extends BaseEntity implements Entity {
   currentSound?: PositionalSound;
   sounds: ZombieSoundRings;
 
-  constructor(public zombie: Zombie) {
+  constructor(public zombie: BaseEntity) {
     super();
 
     this.sounds = makeSoundRings(choose(...ZOMBIE_SOUNDS));

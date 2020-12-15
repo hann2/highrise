@@ -10,7 +10,7 @@ import snd_quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac"
 import { CHARACTERS } from "../characters/Character";
 import { FLESH_SPLAT_SOUNDS } from "../effects/FleshImpact";
 import { GLOWSTICK_SOUNDS } from "../effects/GlowStick";
-import { ZOMBIE_SOUNDS } from "../entities/zombie/ZombieVoice";
+import { ZOMBIE_SOUNDS } from "../entities/enemies/ZombieVoice";
 import { MUSIC_URLS } from "../MusicController";
 import { WEAPONS } from "../weapons";
 

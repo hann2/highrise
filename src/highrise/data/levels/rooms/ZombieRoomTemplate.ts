@@ -1,6 +1,6 @@
 import Entity from "../../../../core/entity/Entity";
 import { V } from "../../../../core/Vector";
-import Zombie from "../../../entities/zombie/Zombie";
+import Zombie from "../../../entities/enemies/Zombie";
 import { PointLight } from "../../../lighting/PointLight";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";

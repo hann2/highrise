@@ -20,9 +20,9 @@ import { PointLight } from "../../lighting/PointLight";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
+import Zombie from "../enemies/Zombie";
 import Interactable, { isInteractable } from "../Interactable";
 import WeaponPickup from "../WeaponPickup";
-import Zombie from "../zombie/Zombie";
 import Flashlight from "./Flashlight";
 import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
@@ -68,7 +68,7 @@ export default class Human extends BaseEntity implements Entity {
 
     const shape = new Circle({ radius: HUMAN_RADIUS });
     shape.collisionGroup = CollisionGroups.Humans;
-    shape.collisionMask = CollisionGroups.All ^ CollisionGroups.Bullets;
+    shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
 
     this.addChild(new Flashlight(this));

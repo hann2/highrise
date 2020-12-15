@@ -11,6 +11,10 @@ import { V, V2d } from "../../../core/Vector";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
 import Decoration from "../../entities/Decoration";
 import Door from "../../entities/Door";
+import Crawler from "../../entities/enemies/Crawler";
+import Heavy from "../../entities/enemies/Heavy";
+import Spitter from "../../entities/enemies/Spitter";
+import Zombie from "../../entities/enemies/Zombie";
 import VendingMachine from "../../entities/environment/VendingMachine";
 import Exit from "../../entities/Exit";
 import Furniture from "../../entities/Furniture";
@@ -18,8 +22,6 @@ import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/human/Human";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
-import Crawler from "../../entities/zombie/Crawler";
-import Zombie from "../../entities/zombie/Zombie";
 import Floor from "../../Floor";
 import { PointLight } from "../../lighting/PointLight";
 import SubFloor from "../../SubFloor";
@@ -656,8 +658,13 @@ class LevelBuilder {
               const p = this.levelCoordToWorldCoord(
                 V(i, j).add(Direction[direction].mul(0.25))
               );
-              if (rBool(CRAWLER_PERCENTAGE)) {
+              const r = Math.random();
+              if (r < 0.05) {
                 enemies.push(new Crawler(p));
+              } else if (r < 0.15) {
+                enemies.push(new Spitter(p));
+              } else if (r < 0.25) {
+                enemies.push(new Heavy(p));
               } else {
                 enemies.push(new Zombie(p));
               }

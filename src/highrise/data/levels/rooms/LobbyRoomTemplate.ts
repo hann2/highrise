@@ -3,6 +3,7 @@ import { choose } from "../../../../core/util/Random";
 import { V, V2d } from "../../../../core/Vector";
 import Decoration from "../../../entities/Decoration";
 import ElevatorDoor from "../../../entities/ElevatorDoor";
+import Necromancer from "../../../entities/enemies/Necromancer";
 import TiledFloor, { Tiles } from "../../../entities/environment/TiledFloor";
 import Furniture from "../../../entities/Furniture";
 import { PointLight } from "../../../lighting/PointLight";
@@ -185,6 +186,13 @@ export default class LobbyRoomTemplate extends RoomTemplate {
       );
     });
 
+    entities.push(
+      new Necromancer(
+        transformCell(V(2.5, 5)),
+        transformCell(V(0, 3)),
+        V(5, 3).mul(CELL_WIDTH)
+      )
+    );
     entities.push(new Decoration(transformCell(V(2.5, 5)), rug));
     entities.push(new Furniture(transformCell(V(2.5, 3.5)), lobbyDesk));
     entities.push(new Furniture(transformCell(V(-0.15, 5)), chairRight));

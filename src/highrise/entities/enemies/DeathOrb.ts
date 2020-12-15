@@ -1,22 +1,19 @@
 import { Ray, RaycastResult } from "p2";
 import { Graphics } from "pixi.js";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
-import { polarToVec } from "../../core/util/MathUtil";
-import { V, V2d } from "../../core/Vector";
-import { Layers } from "../layers";
-import Light from "../lighting/Light";
-import { CollisionGroups } from "../physics/CollisionGroups";
-import Hittable, { isHittable } from "./Hittable";
-import Human from "./human/Human";
+import BaseEntity from "../../../core/entity/BaseEntity";
+import Entity, { GameSprite, WithOwner } from "../../../core/entity/Entity";
+import { polarToVec } from "../../../core/util/MathUtil";
+import { V, V2d } from "../../../core/Vector";
+import { Layers } from "../../layers";
+import { CollisionGroups } from "../../physics/CollisionGroups";
+import Human from "../human/Human";
+import Spitter from "./Spitter";
 
-export const BULLET_RADIUS = 0.05; // meters
+export const DEATH_ORB_RADIUS = 0.4; // meters
 const MAX_LIFESPAN = 3.0; // seconds
 
-export default class Bullet extends BaseEntity implements Entity {
+export default class DeathOrb extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
-  light: Light;
-  lightGraphics: Graphics;
   velocity: V2d;
 
   private ray: Ray;
@@ -28,10 +25,10 @@ export default class Bullet extends BaseEntity implements Entity {
   constructor(
     public position: V2d,
     direction: number,
-    speed: number = 50,
+    speed: number = 5,
     public damage: number = 40,
-    public readonly shooter?: Human,
-    public mass: number = 0.01 // kg?
+    public readonly shooter?: Spitter,
+    public mass: number = 0.25
   ) {
     super();
 
@@ -41,16 +38,15 @@ export default class Bullet extends BaseEntity implements Entity {
       to: V(0, 0),
       mode: Ray.ALL,
       collisionGroup: CollisionGroups.Projectiles,
-      collisionMask: CollisionGroups.All ^ CollisionGroups.Humans,
+      collisionMask: CollisionGroups.All ^ CollisionGroups.Zombies,
       checkCollisionResponse: true,
     });
 
     this.sprite = new Graphics();
+    this.sprite.beginFill(0xff0000);
+    this.sprite.drawCircle(0, 0, DEATH_ORB_RADIUS);
+    this.sprite.endFill();
     this.sprite.layerName = Layers.WEAPONS;
-
-    this.lightGraphics = new Graphics();
-    this.light = this.addChild(new Light());
-    this.light.lightSprite.addChild(this.lightGraphics);
 
     this.renderPosition = position.clone();
   }
@@ -75,7 +71,9 @@ export default class Bullet extends BaseEntity implements Entity {
     if (hitResult) {
       const { hitPosition, hitNormal, hit } = hitResult;
       this.hitPosition = hitPosition;
-      hit.onBulletHit(this, this.hitPosition, hitNormal);
+      if (hit instanceof Human) {
+        hit.inflictDamage(this.damage);
+      }
       this.destroy();
     } else {
       this.position.iaddScaled(this.velocity, dt);
@@ -84,17 +82,17 @@ export default class Bullet extends BaseEntity implements Entity {
 
   checkForCollision(
     dt: number
-  ): { hit: Hittable; hitNormal: V2d; hitPosition: V2d } | undefined {
+  ): { hit: Entity; hitNormal: V2d; hitPosition: V2d } | undefined {
     this.raycastResult.reset();
     this.ray.to = this.position.addScaled(this.velocity, dt);
     this.ray.update();
 
     let hitFraction = Infinity;
-    let hit: Hittable | undefined;
+    let hit: Entity | undefined;
     let hitNormal: V2d;
     this.ray.callback = ({ fraction, body, normal }) => {
       const owner = (body as WithOwner).owner;
-      if (fraction < hitFraction && isHittable(owner)) {
+      if (fraction < hitFraction) {
         hitFraction = fraction;
         hit = owner;
         // To keep at most one allocation
@@ -125,23 +123,6 @@ export default class Bullet extends BaseEntity implements Entity {
   }
 
   afterPhysics() {
-    const dt = this.game!.renderTimestep;
-
-    const endPoint = this.getRenderEndPoint(dt);
-
-    this.sprite
-      .clear()
-      .lineStyle(0.03, 0xffaa00, 0.6)
-      .moveTo(0, 0)
-      .lineTo(endPoint[0], endPoint[1]);
-
-    this.lightGraphics
-      .clear()
-      .lineStyle(0.2, 0xffaa00, 1.0)
-      .moveTo(0, 0)
-      .lineTo(endPoint[0], endPoint[1]);
-
     this.sprite.position.set(...this.renderPosition);
-    this.light.lightSprite.position.set(...this.renderPosition);
   }
 }
