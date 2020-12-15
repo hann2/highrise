@@ -1,36 +1,32 @@
-import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
-import snd_melonPlop1 from "../../../resources/audio/food/individual/melon-plop-1.flac";
-import snd_melonPlop2 from "../../../resources/audio/food/individual/melon-plop-2.flac";
-import snd_melonPlop3 from "../../../resources/audio/food/individual/melon-plop-3.flac";
-import snd_melonPlop4 from "../../../resources/audio/food/individual/melon-plop-4.flac";
-import snd_melonPlop5 from "../../../resources/audio/food/individual/melon-plop-5.flac";
-import snd_melonPlop6 from "../../../resources/audio/food/individual/melon-plop-6.flac";
-import bloodDrop from "../../../resources/images/bloodsplats/blood-drop.png";
+import { BLEND_MODES, Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import { LayerInfo } from "../../core/graphics/LayerInfo";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import { Layers } from "../layers";
 import { ShuffleRing } from "../utils/ShuffleRing";
-import BloodSplat, { BLOOD_SPLAT_URLS } from "./BloodSplat";
+import BloodSplat from "./BloodSplat";
+import { BLOB_TEXTURES, getSplatSound, SPLAT_SOUNDS } from "./Splat";
 
 const FRICTION = 5.0;
 
-export const FLESH_SPLAT_SOUNDS = [
-  snd_melonPlop1,
-  snd_melonPlop2,
-  snd_melonPlop3,
-  snd_melonPlop4,
-  snd_melonPlop5,
-  snd_melonPlop6,
-];
-
-const splatSoundRing = new ShuffleRing(FLESH_SPLAT_SOUNDS);
+interface Particle {
+  color: number;
+  position: V2d;
+  radius: number;
+  spin: number;
+  sprite: Sprite;
+  velocity: V2d;
+  z: number;
+  zVelocity: number;
+}
 
 export default class FleshImpact extends BaseEntity implements Entity {
-  sprite: Graphics & GameSprite;
+  sprite: Container & GameSprite;
   particles: Particle[] = [];
 
   constructor(
@@ -41,24 +37,26 @@ export default class FleshImpact extends BaseEntity implements Entity {
   ) {
     super();
 
-    this.sprite = new Graphics();
-    this.sprite.blendMode = BLEND_MODES.ADD;
+    this.sprite = new Container();
+    this.sprite.layerName = Layers.WORLD_BACK;
     this.sprite.position.set(...position);
     this.particles = [];
 
     for (let i = 0; i < amount; i++) {
-      const particleSprite = Sprite.from(bloodDrop);
-      particleSprite.blendMode = BLEND_MODES.NORMAL;
-      particleSprite.anchor.set(0.5, 0.5);
-      this.sprite.addChild(particleSprite);
+      const sprite = Sprite.from(choose(...BLOB_TEXTURES));
+      sprite.blendMode = BLEND_MODES.NORMAL;
+      sprite.anchor.set(0.5, 0.5);
+      sprite.rotation = rUniform(0, Math.PI * 2);
+      this.sprite.addChild(sprite);
       this.particles.push({
-        position: V(0, 0),
-        velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
         color: darken(0xff0000, rUniform(0, 0.2)),
+        position: V(0, 0),
         radius: rUniform(0.1, 0.1 * amount),
+        sprite,
+        velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
         z: rUniform(height * 0.3, height * 1.5),
         zVelocity: rUniform(-5, 3),
-        sprite: particleSprite,
+        spin: rUniform(-10, 10),
       });
     }
   }
@@ -71,6 +69,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
         particle.zVelocity += -9.8 * dt;
         particle.z += particle.zVelocity * dt;
         particle.z = clampUp(particle.z);
+        particle.sprite.rotation += particle.spin * dt;
 
         if (particle.z <= 0) {
           this.particleToSplat(particle);
@@ -83,31 +82,17 @@ export default class FleshImpact extends BaseEntity implements Entity {
     }
   }
 
-  particleToSplat(particle: Particle) {
-    const splatPos = particle.position.add([this.sprite.x, this.sprite.y]);
-    this.game?.addEntity(new BloodSplat(splatPos, particle.radius * 2));
-    this.game?.addEntity(
-      new PositionalSound(splatSoundRing.getNext(), splatPos)
-    );
-  }
-
   onRender() {
-    this.sprite.clear();
-
     for (const { position, color, radius, sprite, z } of this.particles) {
       sprite.position.set(...position);
       sprite.tint = color;
-      sprite.scale.set((radius * (1.0 + z)) / 64);
+      sprite.scale.set((radius * (1.0 + z)) / sprite.texture.width);
     }
   }
-}
 
-interface Particle {
-  position: V2d;
-  velocity: V2d;
-  color: number;
-  radius: number;
-  z: number;
-  zVelocity: number;
-  sprite: Sprite;
+  particleToSplat(particle: Particle) {
+    const splatPos = particle.position.add([this.sprite.x, this.sprite.y]);
+    this.game?.addEntity(new BloodSplat(splatPos, particle.radius * 2));
+    this.game?.addEntity(new PositionalSound(getSplatSound(), splatPos));
+  }
 }

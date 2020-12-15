@@ -13,7 +13,6 @@ export const SUBFLOOR_TEXTURES = [
   img_industrialCarpet002,
 ];
 
-// TODO: Make the subfloor exactly the level size
 export default class SubFloor extends BaseEntity implements Entity {
   sprite: TilingSprite & GameSprite;
 

@@ -141,25 +141,27 @@ Simon Baumgardt-Wellander
 #SOUND EFFECTS
 Simon Baumgardt-Wellander
 Morgan Thurlow
+Philip Hann
 
-With thanks to
-Gun Sounds—Fesliyan Studios
- —The Free Firearm Sound Library
+With thanks to—
+Fesliyan Studios
+The Free Firearm Sound Library
 
 
 #ART
 Philip Hann
 Simon Baumgardt-Wellander
 
-With thanks to:
-Humans and Zombies—Kenny NL
-Blood Splatters—PWL
-Gun Sprites—Project Cordon Sprites
-Environment Sprites—Panda Maru 
- —Nicnubill
- —Ayene Chan
- —Caym
- —FreePBR.com
+With thanks to:—
+Kenny NL
+PWL
+Project Cordon Sprites
+Panda Maru 
+Nicnubill
+Ayene Chan
+Caym
+FreePBR.com
+
 
 
 No zombies were harmed in the making of this game.

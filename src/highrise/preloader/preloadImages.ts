@@ -1,4 +1,3 @@
-import img_bloodDrop from "../../../resources/images/bloodsplats/blood-drop.png";
 import img_impactParticle from "../../../resources/images/effects/impact-particle.png";
 import img_woodenFloor from "../../../resources/images/environment/floor/wooden-floor.png";
 import img_wall1 from "../../../resources/images/environment/wall-1.png";
@@ -14,9 +13,14 @@ import img_zombie from "../../../resources/images/zombies/zombie.png";
 import img_zombie1Hold from "../../../resources/images/zombies/zombie1_hold.png";
 import img_zombie1Stand from "../../../resources/images/zombies/zombie1_stand.png";
 import { CHARACTERS } from "../characters/Character";
-import { BLOOD_SPLAT_URLS } from "../effects/BloodSplat";
 import { GLOWSTICK_TEXTURES } from "../effects/GlowStick";
 import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
+import {
+  BLOB_GLOW_TEXTURES,
+  BLOB_TEXTURES,
+  SPLAT_GLOW_TEXTURES,
+  SPLAT_TEXTURES,
+} from "../effects/Splat";
 import { DOOR_SPRITES } from "../entities/Door";
 import { VENDING_MACHINES } from "../entities/environment/VendingMachine";
 import { SUBFLOOR_TEXTURES } from "../SubFloor";
@@ -27,7 +31,6 @@ import { WEAPONS } from "../weapons";
 export function getImagesToPreload(): Set<string> {
   const imageUrls = new Set([
     // use a set to make sure we don't include stuff multiple times
-    img_bloodDrop,
     img_crawler,
     img_healthPack,
     img_impactParticle,
@@ -45,7 +48,10 @@ export function getImagesToPreload(): Set<string> {
 
     ...Object.values(DecorationSprites).map((sprite) => sprite.imageName),
 
-    ...BLOOD_SPLAT_URLS,
+    ...SPLAT_TEXTURES,
+    ...SPLAT_GLOW_TEXTURES,
+    ...BLOB_TEXTURES,
+    ...BLOB_GLOW_TEXTURES,
     ...DOOR_SPRITES,
     ...GLOWSTICK_TEXTURES,
     ...MUZZLE_FLASH_URLS,

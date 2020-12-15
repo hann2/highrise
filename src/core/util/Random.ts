@@ -19,6 +19,10 @@ export function rUniform(min: number, max: number): number {
   return (max - min) * r() + min;
 }
 
+export function rDirection(): number {
+  return rUniform(0, Math.PI * 2);
+}
+
 /**
  * Returns a random number from an (approximately) normal distribution
  * centered at `mean` with `deviation`

@@ -11,24 +11,25 @@ import snd_rachelZombie6 from "../../../../resources/audio/zombie/rachel-zombie-
 import snd_rachelZombie7 from "../../../../resources/audio/zombie/rachel-zombie-7.flac";
 import snd_rachelZombie8 from "../../../../resources/audio/zombie/rachel-zombie-8.flac";
 import snd_rachelZombie9 from "../../../../resources/audio/zombie/rachel-zombie-9.flac";
+import snd_spitterSpit1 from "../../../../resources/audio/zombie/spitter-spit-1.flac";
+import snd_spitterSpit2 from "../../../../resources/audio/zombie/spitter-spit-2.flac";
+import snd_spitterSpit3 from "../../../../resources/audio/zombie/spitter-spit-3.flac";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
-import { choose, rBool } from "../../../core/util/Random";
+import { rBool } from "../../../core/util/Random";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 
 export default class ZombieVoice extends BaseEntity implements Entity {
   currentSound?: PositionalSound;
   sounds: ZombieSoundRings;
 
-  constructor(public zombie: BaseEntity) {
+  constructor(public zombie: BaseEntity, sounds = RACHEL_ZOMBIE_SOUNDS) {
     super();
 
-    this.sounds = makeSoundRings(choose(...ZOMBIE_SOUNDS));
+    this.sounds = makeSoundRings(sounds);
   }
-
-  // TODO: Handle the events that make us speak -- Do we actually want to do that here?
 
   onTick(dt: number) {
     this.currentSound?.setPosition(this.zombie.getPosition());
@@ -78,7 +79,7 @@ interface ZombieSounds {
   idle: SoundName[];
 }
 
-const rachelZombieSounds: ZombieSounds = {
+export const RACHEL_ZOMBIE_SOUNDS: ZombieSounds = {
   hit: [snd_rachelZombie5, snd_rachelZombie6, snd_rachelZombie13],
   targetAquired: [snd_rachelZombie1, snd_rachelZombie8],
   attack: [snd_rachelZombie4, snd_rachelZombie7, snd_rachelZombie10],
@@ -86,4 +87,12 @@ const rachelZombieSounds: ZombieSounds = {
   idle: [snd_rachelZombie2, snd_rachelZombie11],
 };
 
-export const ZOMBIE_SOUNDS: ZombieSounds[] = [rachelZombieSounds];
+export const SPITTER_SOUNDS: ZombieSounds = {
+  ...RACHEL_ZOMBIE_SOUNDS,
+  attack: [snd_spitterSpit1, snd_spitterSpit2, snd_spitterSpit3],
+};
+
+export const ENEMY_SOUNDS: ZombieSounds[] = [
+  RACHEL_ZOMBIE_SOUNDS,
+  SPITTER_SOUNDS,
+];

@@ -9,8 +9,7 @@ import { polarToVec } from "../../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants";
-import FleshImpact from "../../effects/FleshImpact";
-import { PointLight } from "../../lighting/PointLight";
+import GooImpact from "../../effects/GooImpact";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
@@ -19,16 +18,19 @@ import Human from "../human/Human";
 import Phlegm from "./Phlegm";
 import SpitterController from "./SpitterController";
 import SpitterSprite from "./SpitterSprite";
-import ZombieVoice from "./ZombieVoice";
+import ZombieVoice, { SPITTER_SOUNDS } from "./ZombieVoice";
 
-const SPEED = 0.4;
+const SPEED = 0.3;
 const HEALTH = 100;
 
 const FRICTION = 0.1;
-export const SPITTER_ATTACK_RANGE = 30;
-const WINDUP_TIME = 0.2; // Time in animation from beginning of attack to doing damage
-const WINDDOWN_TIME = 0.1; // Time in animation from doing damage to end of attack
-const COOLDOWN_TIME = 0.5; // Time after windown before starting another attack
+export const SPITTER_ATTACK_RANGE = 10;
+const WINDUP_TIME = 0.3; // Time in animation from beginning of attack to doing damage
+const WINDDOWN_TIME = 0.6; // Time in animation from doing damage to end of attack
+const COOLDOWN_TIME = 0.8; // Time after windown before starting another attack
+
+const PHLEGM_SPEED = 8; // Meters / second
+const DAMAGE = 20;
 
 export default class Spitter extends BaseEntity implements Entity, Hittable {
   tags = ["zombie"];
@@ -39,7 +41,6 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
   voice: ZombieVoice;
   attackPhase: "ready" | "windup" | "attack" | "winddown" | "cooldown" =
     "ready";
-  glow: PointLight;
 
   constructor(position: V2d, angle: number = rUniform(0, Math.PI * 2)) {
     super();
@@ -52,10 +53,9 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape);
     this.body.angularDamping = 0.9;
 
-    this.glow = this.addChild(new PointLight({ color: 0x00ff00 }));
     this.addChild(new SpitterController(this));
     this.addChild(new SpitterSprite(this));
-    this.voice = this.addChild(new ZombieVoice(this));
+    this.voice = this.addChild(new ZombieVoice(this, SPITTER_SOUNDS));
   }
 
   get isStunned() {
@@ -71,33 +71,27 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
     this.body.applyImpulse(friction);
   }
 
-  onRender() {
-    this.glow.setPosition(this.getPosition());
-  }
-
   async attack() {
     if (this.attackPhase === "ready") {
-      this.voice.speak("attack");
+      this.voice.speak("attack", true);
       this.attackPhase = "windup";
       await this.wait(WINDUP_TIME, undefined, "windup");
       this.attackPhase = "attack";
-      for (const human of this.getHumansInRange()) {
-        this.shootPhlegmAt(human);
-        break;
-      }
+      this.game!.addEntity(
+        new Phlegm(
+          this.getPosition(),
+          this.body.angle,
+          PHLEGM_SPEED,
+          DAMAGE,
+          this
+        )
+      );
       this.attackPhase = "winddown";
       await this.wait(WINDDOWN_TIME, undefined, "winddown");
       this.attackPhase = "cooldown";
       await this.wait(COOLDOWN_TIME, undefined, "cooldown");
       this.attackPhase = "ready";
     }
-  }
-
-  shootPhlegmAt(human: Human) {
-    const direction = human.getPosition().sub(this.getPosition()).angle;
-    this.body.angle = direction;
-    this.body.angularVelocity = 0;
-    this.game!.addEntity(new Phlegm(this.getPosition(), direction));
   }
 
   getHumansInRange(): Human[] {
@@ -138,7 +132,7 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
 
     this.game?.addEntities([
       new PositionalSound(choose(fleshHit1, fleshHit2, fleshHit3), position),
-      new FleshImpact(position, bullet.damage / 10, normal),
+      new GooImpact(position, bullet.damage / 10, normal),
     ]);
 
     this.voice.speak("hit");
@@ -182,9 +176,7 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
 
   die(killer?: Human) {
     this.game?.dispatch({ type: "zombieDied", zombie: this, killer });
-    this.game?.addEntity(
-      new FleshImpact(this.getPosition(), 5, undefined, 0.2)
-    );
+    this.game?.addEntity(new GooImpact(this.getPosition(), 5, undefined, 0.2));
     this.voice.speak("death");
     this.destroy();
   }

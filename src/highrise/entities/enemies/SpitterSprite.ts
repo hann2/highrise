@@ -4,6 +4,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { ZOMBIE_RADIUS } from "../../constants";
 import { Layers } from "../../layers";
+import { PointLight } from "../../lighting/PointLight";
 import Zombie from "./Zombie";
 
 interface BodySprites {
@@ -17,6 +18,7 @@ export default class SpitterSprite extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
 
   bodySprites: BodySprites;
+  glow: PointLight;
 
   constructor(public zombie: Zombie) {
     super();
@@ -38,12 +40,15 @@ export default class SpitterSprite extends BaseEntity implements Entity {
       bodySprite.scale.set((2 * ZOMBIE_RADIUS) / bodySprite.height);
       this.sprite.addChild(bodySprite);
     }
+
+    this.glow = this.addChild(new PointLight({ color: 0x00ff00 }));
   }
 
   onRender() {
     const { body } = this.zombie;
-    [this.sprite.x, this.sprite.y] = body.position;
+    this.sprite.position.set(...body.position);
     this.sprite.rotation = body.angle;
+    this.glow.setPosition(body.position);
 
     const currentBodySprite = this.getCurrentBodySprite();
 
@@ -60,7 +65,7 @@ export default class SpitterSprite extends BaseEntity implements Entity {
       switch (attackPhase) {
         case "cooldown":
         case "ready":
-          return this.bodySprites.walking; // TODO: Idle
+          return this.bodySprites.walking;
         case "windup":
         case "attack":
           return this.bodySprites.windup;

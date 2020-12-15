@@ -294,13 +294,14 @@ class LevelBuilder {
     const wallsCounterClockwiseFromHingePoint = [
       ...wallsClockwiseFromHingePoint,
     ].reverse();
-    const minAngle =
-      (countConsecutiveWallsThatExist(wallsCounterClockwiseFromHingePoint) *
-        -Math.PI) /
-      2;
-    const maxAngle =
-      (countConsecutiveWallsThatExist(wallsClockwiseFromHingePoint) * Math.PI) /
-      2;
+    const ccwWallCount = countConsecutiveWallsThatExist(
+      wallsCounterClockwiseFromHingePoint
+    );
+    const cwWallCount = countConsecutiveWallsThatExist(
+      wallsClockwiseFromHingePoint
+    );
+    const minAngle = (ccwWallCount - 0.1) * -(Math.PI / 2);
+    const maxAngle = (cwWallCount - 0.1) * (Math.PI / 2);
 
     return new Door(
       this.levelCoordToWorldCoord(hingePoint),

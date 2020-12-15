@@ -78,7 +78,7 @@ export default class CrawlerSprite extends BaseEntity implements Entity {
       switch (attackPhase) {
         case "cooldown":
         case "ready":
-          return this.bodySprites.walking; // TODO: Idle
+          return this.bodySprites.walking;
         case "windup":
         case "attack":
           return this.bodySprites.windup;

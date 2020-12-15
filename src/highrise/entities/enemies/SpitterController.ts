@@ -30,6 +30,9 @@ export default class SpitterController extends BaseEntity implements Entity {
           if (this.target!.isDestroyed) {
             this.objective = "SEARCH";
           } else {
+            this.zombie.setDirection(
+              this.target!.getPosition().isub(this.zombie.body.position).angle
+            );
             this.zombie.attack();
           }
         } else if (this.targetInVision()) {

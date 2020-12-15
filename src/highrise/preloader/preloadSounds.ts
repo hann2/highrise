@@ -8,9 +8,9 @@ import snd_glowStickDrop2 from "../../../resources/audio/misc/glow-stick-drop-2.
 import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
 import snd_quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac";
 import { CHARACTERS } from "../characters/Character";
-import { FLESH_SPLAT_SOUNDS } from "../effects/FleshImpact";
 import { GLOWSTICK_SOUNDS } from "../effects/GlowStick";
-import { ZOMBIE_SOUNDS } from "../entities/enemies/ZombieVoice";
+import { SPLAT_SOUNDS } from "../effects/Splat";
+import { ENEMY_SOUNDS } from "../entities/enemies/ZombieVoice";
 import { MUSIC_URLS } from "../MusicController";
 import { WEAPONS } from "../weapons";
 
@@ -27,13 +27,13 @@ export function getSoundsToPreload(): string[] {
     snd_wallHit3,
     snd_wallHit4,
 
-    ...FLESH_SPLAT_SOUNDS,
+    ...SPLAT_SOUNDS,
     ...GLOWSTICK_SOUNDS,
     ...MUSIC_URLS,
 
     ...WEAPONS.map((w) => Object.values(w.sounds).flat()).flat(),
     ...CHARACTERS.map((c) => Object.values(c.sounds).flat()).flat(),
-    ...ZOMBIE_SOUNDS.map((z) => Object.values(z).flat()).flat(),
+    ...ENEMY_SOUNDS.map((z) => Object.values(z).flat()).flat(),
   ]);
 
   return Array.from(urls);
