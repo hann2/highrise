@@ -37,10 +37,6 @@ export default class ZombieVoice extends BaseEntity implements Entity {
     if (this.currentSound?.isDestroyed) {
       this.currentSound = undefined;
     }
-
-    if (this.currentSound === undefined && rBool(0.005 * dt)) {
-      this.speak("idle");
-    }
   }
 
   speak(soundClass: keyof ZombieSounds, interrupt: boolean = false) {

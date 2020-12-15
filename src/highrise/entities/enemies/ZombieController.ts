@@ -43,6 +43,7 @@ export default class ZombieController extends BaseEntity implements Entity {
         // May be too aggressive to check vision every tick while in SEARCH
         const newTarget = this.anyoneInVision();
         if (newTarget) {
+          this.zombie.voice.speak("targetAquired");
           this.objective = "CLOSE_IN";
           this.target = newTarget;
           this.moveTarget = newTarget.getPosition();
@@ -130,6 +131,10 @@ export default class ZombieController extends BaseEntity implements Entity {
 
     this.moveTarget = V(out[0], out[1]);
     this.objective = "SHAMBLE";
+
+    if (rBool(0.01)) {
+      this.zombie.voice.speak("idle");
+    }
   }
 
   moveTowardsTarget(speed: number = 1) {
