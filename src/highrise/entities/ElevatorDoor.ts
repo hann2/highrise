@@ -1,11 +1,14 @@
 import { Body, Box } from "p2";
 import { Graphics } from "pixi.js";
 import snd_elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
+import snd_elevatorDoorClose from "../../../resources/audio/environment/elevator-door-close.flac";
+import snd_elevatorDoorOpen from "../../../resources/audio/environment/elevator-door-open.flac";
 import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
+import { smoothStep } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Layers } from "../layers";
@@ -15,7 +18,9 @@ import Bullet from "./Bullet";
 import Hittable from "./Hittable";
 import Interactable from "./Interactable";
 
-const OPEN_TIME = 2;
+const OPEN_TIME = 1.9;
+const CLOSE_TIME = 2.8;
+const DING_TIME = 0.5;
 
 /**
  * Represents one of the two doors representing an elevator door
@@ -147,34 +152,21 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
     );
   }
 
-  onTick(dt: number) {
-    if (this.state === "OPENING") {
-      this.openPerentage += dt / OPEN_TIME;
-      if (this.openPerentage >= 1) {
-        this.state = "STOPPED";
-        this.openPerentage = 1;
-      }
-      this.topDoor.setOpenPercentage(this.openPerentage);
-      this.bottomDoor.setOpenPercentage(this.openPerentage);
-    } else if (this.state === "CLOSING") {
-      this.openPerentage -= dt / OPEN_TIME;
-      if (this.openPerentage <= 0) {
-        this.state = "STOPPED";
-        this.openPerentage = 0;
-      }
-      this.topDoor.setOpenPercentage(this.openPerentage);
-      this.bottomDoor.setOpenPercentage(this.openPerentage);
-    }
-  }
 
-  onInteract() {
+  async onInteract() {
     if (this.state === "STOPPED") {
       this.game?.addEntity(new PositionalSound(snd_elevatorDing, this.center));
-      if (this.openPerentage === 1) {
-        this.state = "CLOSING";
-      } else {
-        this.state = "OPENING";
-      }
-    }
+      const isClosing = this.openPerentage === 1;
+      this.state = isClosing ? "CLOSING" : "OPENING";
+      await this.wait(DING_TIME);
+      const sound = isClosing ? snd_elevatorDoorClose : snd_elevatorDoorOpen;
+      this.game?.addEntity(new PositionalSound(sound, this.center));
+      await this.wait(isClosing ? CLOSE_TIME : OPEN_TIME, (dt, t) => {
+        this.openPerentage = smoothStep(isClosing ? 1 - t : t);
+        this.topDoor.setOpenPercentage(this.openPerentage);
+        this.bottomDoor.setOpenPercentage(this.openPerentage);
+      });
+      this.openPerentage = isClosing ? 0 : 1;
+      this.state = "STOPPED";
   }
 }

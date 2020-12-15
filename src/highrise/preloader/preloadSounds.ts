@@ -1,4 +1,6 @@
 import snd_elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
+import snd_elevatorDoorClose from "../../../resources/audio/environment/elevator-door-close.flac";
+import snd_elevatorDoorOpen from "../../../resources/audio/environment/elevator-door-open.flac";
 import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
@@ -18,6 +20,8 @@ export function getSoundsToPreload(): string[] {
   const urls = new Set<string>([
     // Misc sounds. Probably will/should get lumped in with other stuff later
     snd_elevatorDing,
+    snd_elevatorDoorOpen,
+    snd_elevatorDoorClose,
     snd_glowStickDrop1,
     snd_glowStickDrop2,
     snd_pop1,
