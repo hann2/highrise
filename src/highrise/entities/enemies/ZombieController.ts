@@ -24,7 +24,6 @@ export default class ZombieController extends BaseEntity implements Entity {
   }
 
   onTick(dt: number) {
-    let original = this.objective;
     switch (this.objective) {
       case "ATTACK":
         if (this.targetInAttackRange()) {

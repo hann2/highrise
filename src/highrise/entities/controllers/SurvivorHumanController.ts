@@ -1,12 +1,12 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { rBool } from "../../../core/util/Random";
 import { getNearestVisibleZombie } from "../../utils/visionUtils";
 import Gun from "../../weapons/Gun";
+import MeleeWeapon from "../../weapons/MeleeWeapon";
+import Zombie from "../enemies/Zombie";
 import Human from "../human/Human";
 import Interactable from "../Interactable";
-import MeleeWeapon from "../../weapons/MeleeWeapon";
-import { rBool } from "../../../core/util/Random";
-import Zombie from "../zombie/Zombie";
 
 const MAX_ATTACK_DISTANCE = 10; // meters
 // Controller for a human that is waiting to be found
