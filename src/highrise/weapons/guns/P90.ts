@@ -4,14 +4,13 @@ import snd_casingDropBoard3 from "../../../../resources/audio/guns/casing-drops/
 import snd_casingDropBoard4 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire3 from "../../../../resources/audio/guns/misc/dry-fire-3.mp3";
 import snd_magazineLoad1 from "../../../../resources/audio/guns/misc/magazine-load-1.mp3";
+import snd_pistol2Shot1 from "../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
 import snd_ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
 import snd_ar15ReloadEmpty from "../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
-import snd_p90Shoot1 from "../../../../resources/audio/guns/smg/p90-shoot-1.flac";
-import snd_p90Shoot2 from "../../../../resources/audio/guns/smg/p90-shoot-2.flac";
-import snd_p90Shoot3 from "../../../../resources/audio/guns/smg/p90-shoot-3.flac";
-import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
+import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
 import img_p90Hold from "../../../../resources/images/weapons/p90-hold.png";
 import img_p90Pickup from "../../../../resources/images/weapons/p90-pickup.png";
+import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
   FireMode,
@@ -35,17 +34,20 @@ export const P90: GunStats = {
     ...defaultGunStats.textures,
     pickup: img_p90Pickup,
     holding: img_p90Hold,
-    shellCasing: img_rifleCasing,
+    shellCasing: img_pistolCasing,
   },
   size: [1.0, 1.0],
 
-  leftHandPosition: [0.4, 0],
+  leftHandPosition: [0.45, -0.03],
   rightHandPosition: [0.2, 0],
-  holdPosition: [0.5, 0],
+  holdPosition: [0.35, 0],
+  stanceAngle: degToRad(50),
+  stanceOffset: [0, -0.2],
+  muzzleLength: 0.7,
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [snd_p90Shoot1, snd_p90Shoot2, snd_p90Shoot3],
+    shoot: [snd_pistol2Shot1],
     empty: [snd_dryFire3],
     pickup: [snd_magazineLoad1],
     reload: [snd_ar15Reload1, snd_ar15ReloadEmpty],

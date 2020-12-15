@@ -1,15 +1,23 @@
 import { Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
-import { colorLerp } from "../../../core/util/ColorUtils";
-import { clamp, degToRad } from "../../../core/util/MathUtil";
+import {
+  clamp,
+  degToRad,
+  lerpOrSnap,
+  polarToVec,
+  stepToward,
+} from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
 import { HUMAN_RADIUS } from "../../constants";
 import Gun from "../../weapons/Gun";
+import { FireMode } from "../../weapons/GunStats";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import Human, { PUSH_COOLDOWN } from "./Human";
 
 const GUN_SCALE = 1 / 300;
+const STANCE_ADJUST_SPEED = 3; // meters per second
+const STANCE_ROTATE_SPEED = Math.PI * 2; // radians per second
 
 // Renders a human
 export default class HumanSprite extends BaseEntity implements Entity {
@@ -24,8 +32,11 @@ export default class HumanSprite extends BaseEntity implements Entity {
   leftHandSprite: Sprite;
   rightHandSprite: Sprite;
 
-  armThickness = 0.2;
-  handSize = 0.24;
+  armThickness: number;
+  handSize = 0.2;
+
+  stanceAngle: number = 0;
+  stanceOffset: [number, number] = [0, 0];
 
   constructor(private human: Human) {
     super();
@@ -71,10 +82,32 @@ export default class HumanSprite extends BaseEntity implements Entity {
     this.sprite.addChild(this.headSprite);
   }
 
-  onRender() {
-    const { body, hp, weapon } = this.human;
+  onRender(dt: number) {
+    const { body, weapon } = this.human;
     [this.sprite.x, this.sprite.y] = body.position;
     this.sprite.rotation = body.angle;
+
+    this.stanceAngle = stepToward(
+      this.stanceAngle,
+      this.getTargetStanceAngle(),
+      dt * STANCE_ROTATE_SPEED
+    );
+
+    const targetStanceOffset = this.getTargetStanceOffset();
+    this.stanceOffset[0] = stepToward(
+      this.stanceOffset[0],
+      targetStanceOffset[0],
+      dt * STANCE_ADJUST_SPEED
+    );
+    this.stanceOffset[1] = stepToward(
+      this.stanceOffset[1],
+      targetStanceOffset[1],
+      dt * STANCE_ADJUST_SPEED
+    );
+
+    this.stanceAngle = this.torsoSprite.rotation = this.stanceAngle;
+    this.torsoSprite.position.set(...this.stanceOffset);
+    this.headSprite.position.set(...this.stanceOffset);
 
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();
     const [leftHandPos, rightHandPos] = this.getHandPositions();
@@ -109,24 +142,49 @@ export default class HumanSprite extends BaseEntity implements Entity {
     }
   }
 
+  getTargetStanceAngle(): number {
+    if (this.human.weapon instanceof Gun) {
+      return this.human.weapon.stats.stanceAngle;
+    } else {
+      return 0;
+    }
+  }
+
+  getTargetStanceOffset(): [number, number] {
+    if (this.human.weapon instanceof Gun) {
+      return this.human.weapon.stats.stanceOffset;
+    } else {
+      return [0, 0];
+    }
+  }
+
   getShoulderPositions(): [V2d, V2d] {
-    const y = HUMAN_RADIUS - this.armThickness / 2;
-    return [V(0, -y), V(0, y)];
+    const stanceAngle = this.stanceAngle;
+    const offset = this.stanceOffset;
+    const r = HUMAN_RADIUS - this.armThickness / 2;
+    return [
+      polarToVec(stanceAngle - Math.PI / 2, r).iadd(offset),
+      polarToVec(stanceAngle + Math.PI / 2, r).iadd(offset),
+    ];
   }
 
   getRecoilOffset(gun: Gun): number {
-    return -0.15 * gun.getCurrentRecoilAmount() ** 1.5;
+    return -0.125 * gun.getCurrentRecoilAmount() ** 1.5;
   }
 
   getHandPositions(): [V2d, V2d] {
     const { weapon } = this.human;
     if (weapon instanceof Gun) {
       const gun = weapon;
-      const xOffset = this.getRecoilOffset(gun);
+      const recoilOffset = this.getRecoilOffset(gun);
+      const pumpOffset = -0.2 * gun.pumpAmount;
       const [leftX, leftY] = gun.stats.leftHandPosition;
       const [rightX, rightY] = gun.stats.rightHandPosition;
 
-      return [V(leftX + xOffset, leftY), V(rightX + xOffset, rightY)];
+      return [
+        V(leftX + recoilOffset + pumpOffset, leftY),
+        V(rightX + recoilOffset, rightY),
+      ];
     } else if (weapon instanceof MeleeWeapon) {
       if (weapon.currentSwing) {
         const t = weapon.currentSwing.attackProgress;

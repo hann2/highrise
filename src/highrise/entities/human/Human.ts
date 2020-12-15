@@ -80,7 +80,7 @@ export default class Human extends BaseEntity implements Entity {
     this.body.applyImpulse(friction);
 
     this.pushCooldown = Math.max(this.pushCooldown - dt, 0);
-    this.glowstickCooldown = Math.max(this.glowstickCooldown - dt, 0);
+    this.glowstickCooldown = clampUp(this.glowstickCooldown - dt);
   }
 
   // Move the human along a specified vector

@@ -68,6 +68,10 @@ export interface GunStats extends BaseWeaponStats {
   rightHandPosition: [number, number];
   // Position of the sprite
   holdPosition: [number, number];
+  // Angle that the shooter stands at while holding the gun
+  stanceAngle: number;
+  // Position offset that the shooter stands at while holding the gun
+  stanceOffset: [number, number];
 }
 
 export type GunSounds = GunStats["sounds"];
@@ -92,7 +96,6 @@ export enum ReloadingStyle {
 export const defaultGunStats: GunStats = {
   name: "Gun",
   fireRate: 1.0,
-  muzzleLength: 0.5,
   muzzleVelocity: 80,
   bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
@@ -105,9 +108,12 @@ export const defaultGunStats: GunStats = {
   recoil: 10,
 
   size: [1, 1],
+  muzzleLength: 0.5,
   leftHandPosition: [0.3, 0],
   rightHandPosition: [0.3, 0],
   holdPosition: [0.3, 0],
+  stanceAngle: 0,
+  stanceOffset: [0, 0],
 
   textures: {
     pickup: img_glockPickup,

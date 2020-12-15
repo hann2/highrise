@@ -2,7 +2,7 @@ import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
 import impactParticle from "../../../resources/images/effects/impact-particle.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { polarToVec } from "../../core/util/MathUtil";
+import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 
@@ -37,7 +37,7 @@ export default class WallImpact extends BaseEntity implements Entity {
   onTick(dt: number) {
     for (const particle of this.particles) {
       particle.position.iaddScaled(particle.velocity, dt);
-      particle.alpha = Math.max(particle.alpha - dt * 2.0, 0);
+      particle.alpha = clampUp(particle.alpha - dt * 2.0);
       particle.velocity.imul(Math.exp(-FRICTION * dt));
       particle.radius *= Math.exp(dt);
     }

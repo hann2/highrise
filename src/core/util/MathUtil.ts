@@ -87,3 +87,12 @@ export function isCCW(points: readonly V2d[]): boolean {
   }
   return total > 0;
 }
+
+// Step from one number towards another with a maximum step size
+export function stepToward(from: number, to: number, stepSize: number): number {
+  if (to > from) {
+    return Math.min(from + stepSize, to);
+  } else {
+    return Math.max(from - stepSize, to);
+  }
+}

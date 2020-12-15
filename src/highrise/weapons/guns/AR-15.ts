@@ -12,7 +12,7 @@ import snd_rifleShot3 from "../../../../resources/audio/guns/rifle/rifle-shot-3.
 import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
 import img_ar15Pickup from "../../../../resources/images/weapons/ar-15-pickup.png";
 import img_ar15Hold from "../../../../resources/images/weapons/ar15-hold.png";
-import img_rifle from "../../../../resources/images/weapons/rifle.png";
+import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
   FireMode,
@@ -40,9 +40,12 @@ export const AR15: GunStats = {
   },
   size: [0.8, 0.4],
 
-  leftHandPosition: [0.5, 0],
-  rightHandPosition: [0.3, 0],
-  holdPosition: [0.5, 0],
+  leftHandPosition: [0.65, -0.03],
+  rightHandPosition: [0.32, 0],
+  holdPosition: [0.55, 0],
+  stanceAngle: degToRad(55),
+  stanceOffset: [0, -0.25],
+  muzzleLength: 1.1,
 
   sounds: {
     ...defaultGunStats.sounds,

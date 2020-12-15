@@ -25,6 +25,7 @@ export default class Gun extends BaseEntity implements Entity {
   isReloading: boolean = false;
   sounds: GunSoundRings;
   recoil = 0;
+  pumpAmount = 0;
 
   constructor(stats: GunStats) {
     super();
@@ -71,14 +72,26 @@ export default class Gun extends BaseEntity implements Entity {
     this.playSound("shoot", position);
     this.game?.addEntity(new MuzzleFlash(position, direction));
 
-    //
     if (this.stats.fireMode === FireMode.PUMP) {
-      await this.wait(0.1);
-      this.playSound("pump", shooter.getPosition());
-      this.makeShellCasing(direction, shooter);
+      await this.wait(0.2);
+      this.pump(shooter);
     } else {
       this.makeShellCasing(direction, shooter);
     }
+  }
+
+  private async pump(shooter: Human) {
+    this.playSound("pump", shooter.getPosition());
+    await this.wait(0.26, (dt, t) => {
+      this.pumpAmount = t;
+    });
+
+    this.makeShellCasing(shooter.getDirection(), shooter);
+
+    await this.wait(0.16, (dt, t) => {
+      this.pumpAmount = 1.0 - t;
+    });
+    this.pumpAmount = 0;
   }
 
   getCurrentRecoilAmount() {

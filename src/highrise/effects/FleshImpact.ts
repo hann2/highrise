@@ -10,7 +10,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { darken } from "../../core/util/ColorUtils";
-import { polarToVec } from "../../core/util/MathUtil";
+import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { ShuffleRing } from "../utils/ShuffleRing";
@@ -70,7 +70,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
         particle.velocity.imul(Math.exp(-FRICTION * dt));
         particle.zVelocity += -9.8 * dt;
         particle.z += particle.zVelocity * dt;
-        particle.z = Math.max(particle.z, 0);
+        particle.z = clampUp(particle.z);
 
         if (particle.z <= 0) {
           this.particleToSplat(particle);

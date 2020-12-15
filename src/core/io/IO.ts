@@ -1,9 +1,10 @@
 import IOEventHandler from "../entity/IOEventHandler";
+import { clamp, clampUp } from "../util/MathUtil";
+import { V, V2d } from "../Vector";
 import { ControllerAxis, ControllerButton } from "./Gamepad";
 import IOHandlerList from "./IOHandlerList";
-import * as MouseButtons from "./MouseButtons";
 import { KeyCode } from "./Keys";
-import { V2d, V } from "../Vector";
+import * as MouseButtons from "./MouseButtons";
 
 const GAMEPAD_POLLING_FREQUENCY = 250; // Hz
 
@@ -251,12 +252,11 @@ export class IOManager {
         axes.y = gamepad.axes[ControllerAxis.RIGHT_Y];
       }
       const gamepadRange = GAMEPAD_MAXIMUM - GAMEPAD_MINIMUM;
-      axes.magnitude = Math.max(
-        (axes.magnitude - GAMEPAD_MINIMUM) / gamepadRange,
-        0
+      axes.magnitude = clampUp(
+        (axes.magnitude - GAMEPAD_MINIMUM) / gamepadRange
       );
-      axes.x = Math.min(1, axes.x);
-      axes.y = Math.min(1, axes.y);
+      axes.x = clamp(axes.x);
+      axes.y = clamp(axes.y);
     }
     return axes;
   }

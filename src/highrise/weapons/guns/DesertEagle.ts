@@ -34,6 +34,7 @@ export const DesertEagle: GunStats = {
   leftHandPosition: [0.4, 0],
   rightHandPosition: [0.4, 0],
   holdPosition: [0.52, 0],
+  muzzleLength: 0.62,
 
   sounds: {
     ...defaultGunStats.sounds,

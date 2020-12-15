@@ -12,6 +12,8 @@ import { PointLight } from "../../../lighting/PointLight";
 import { cementFloor } from "../../../view/DecorationSprite";
 import Gun from "../../../weapons/Gun";
 import { GUNS } from "../../../weapons/guns";
+import { AK47 } from "../../../weapons/guns/AK-47";
+import { P90 } from "../../../weapons/guns/P90";
 import { MELEE_WEAPONS } from "../../../weapons/melee-weapons";
 import MeleeWeapon from "../../../weapons/MeleeWeapon";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
@@ -31,7 +33,7 @@ export default class SpawnRoom extends RoomTemplate {
     entities.push(
       new PointLight({
         radius: 6,
-        intensity: 0.8,
+        intensity: 1.0,
         shadowsEnabled: true,
         position: transformCell(V(1, 1)),
       })
@@ -46,7 +48,10 @@ export default class SpawnRoom extends RoomTemplate {
     entities.push(new WeaponPickup(transformCell(V(0, 0)), gun));
 
     const meleeWeapon = new MeleeWeapon(choose(...MELEE_WEAPONS));
-    entities.push(new WeaponPickup(transformCell(V(1.0, 0)), meleeWeapon));
+    entities.push(new WeaponPickup(transformCell(V(1, 0)), meleeWeapon));
+
+    entities.push(new WeaponPickup(transformCell(V(0, 1)), new Gun(AK47)));
+    entities.push(new WeaponPickup(transformCell(V(0, 2)), new Gun(P90)));
 
     entities.push(new SpawnRoomFloor(transformCell(V(1, 1))));
 

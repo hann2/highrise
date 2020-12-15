@@ -26,7 +26,11 @@ export const GUNS: Array<GunStats> = [
   SPAS12,
 ];
 
-export const TIERS = [
+export const PISTOLS = [M1911, Glock, FiveSeven, Magnum, DesertEagle];
+export const SHOTGUNS = [DoubleBarrelShotgun, PumpShotgun, SPAS12];
+export const RIFLES = [AR15, AK47, P90];
+
+export const GUN_TIERS = [
   [M1911, Glock, Magnum, FiveSeven],
   [DesertEagle, AR15, DoubleBarrelShotgun],
   [PumpShotgun],

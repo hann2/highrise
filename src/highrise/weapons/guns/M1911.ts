@@ -33,6 +33,7 @@ export const M1911: GunStats = {
   leftHandPosition: [0.4, 0],
   rightHandPosition: [0.4, 0],
   holdPosition: [0.5, 0],
+  muzzleLength: 0.6,
 
   sounds: {
     ...defaultGunStats.sounds,
