@@ -45,10 +45,12 @@ import { Glock } from "../../weapons/guns/Glock";
 import { M1911 } from "../../weapons/guns/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee-weapons";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
+import ChapelLevel from "./ChapelLevel";
 import GeneratorLevel from "./GeneratorLevel";
 import { Level } from "./Level";
 import LevelTemplate from "./LevelTemplate";
 import LobbyLevel from "./LobbyLevel";
+import MaintenanceLevel from "./MaintenanceLevel";
 import RoomTemplate from "./rooms/RoomTemplate";
 import SpawnRoom from "./rooms/SpawnRoom";
 import ShopLevel from "./ShopLevel";
@@ -951,9 +953,16 @@ class LevelBuilder {
 }
 
 export function chooseTemplate(level: number): LevelTemplate {
-  return new GeneratorLevel();
-
-  return level === 1 ? new LobbyLevel() : new ShopLevel();
+  switch (level) {
+    case 1:
+      return new LobbyLevel();
+    case 5:
+      return new GeneratorLevel();
+    case 9:
+      return new ChapelLevel();
+    default:
+      return level < 5 ? new ShopLevel() : new MaintenanceLevel();
+  }
 }
 
 export const generateLevel = (
