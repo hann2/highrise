@@ -38,7 +38,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
     });
     this.pausedText.anchor.set(0.5, 1);
     this.sprite.addChild(this.pausedText);
-    this.resumeText = new Text("Press ESC to resume", {
+    this.resumeText = new Text("", {
       fontSize: 48,
 
       fontFamily: "Capture It",
@@ -67,6 +67,12 @@ export default class PauseMenu extends BaseEntity implements Entity {
   onAdd(game: Game) {
     this.setVisibility(game.paused);
     this.positionText();
+    this.onInputDeviceChange(game.io.usingGamepad);
+  }
+
+  onInputDeviceChange(usingGamepad: boolean) {
+    const buttonName = usingGamepad ? "START" : "ESC";
+    this.resumeText.text = `Press ${buttonName} to resume`;
   }
 
   positionText() {
