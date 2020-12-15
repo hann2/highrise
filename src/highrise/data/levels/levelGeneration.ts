@@ -23,6 +23,7 @@ import Human from "../../entities/human/Human";
 import Wall from "../../entities/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
 import Floor from "../../Floor";
+import LevelGridMap from "../../LevelGridMap";
 import { PointLight } from "../../lighting/PointLight";
 import SubFloor from "../../SubFloor";
 import {
@@ -201,6 +202,7 @@ class LevelBuilder {
 
     const entities = [
       new SubFloor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
+      this.makeLevelGridMap(),
       ...outerWalls,
       ...roomEntities,
       ...innerWalls,
@@ -216,6 +218,11 @@ class LevelBuilder {
     return {
       entities,
     };
+  }
+
+  makeLevelGridMap(): LevelGridMap {
+    const levelGriMap = new LevelGridMap(LEVEL_SIZE, LEVEL_SIZE, CELL_WIDTH);
+    return levelGriMap;
   }
 
   levelCoordToWorldCoord(coord: V2d): V2d {

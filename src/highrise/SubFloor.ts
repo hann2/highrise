@@ -27,8 +27,8 @@ export default class SubFloor extends BaseEntity implements Entity {
     const color = rgbToHex(hsvToRgb({ h: rUniform(0, 1), s: 0.4, v: 0.8 }));
     this.sprite.tint = color;
 
-    this.sprite.width = LEVEL_SIZE * CELL_WIDTH;
-    this.sprite.height = LEVEL_SIZE * CELL_WIDTH;
+    this.sprite.width = width;
+    this.sprite.height = height;
     this.sprite.tileScale.set(1 / 192);
     this.sprite.layerName = Layers.SUBFLOOR;
   }
