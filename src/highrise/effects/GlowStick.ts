@@ -1,6 +1,6 @@
 import { Body, Capsule, vec2 } from "p2";
 import { Sprite } from "pixi.js";
-import snd_glowStickDrop1 from "../../../resources/audio/misc/ glow-stick-drop-1.flac";
+import snd_glowStickDrop1 from "../../../resources/audio/misc/glow-stick-drop-1.flac";
 import snd_glowStickCrack1 from "../../../resources/audio/misc/glow-stick-crack-1.flac";
 import snd_glowStickDrop2 from "../../../resources/audio/misc/glow-stick-drop-2.flac";
 import img_glowStick1 from "../../../resources/images/effects/glow-stick-1.png";
@@ -12,7 +12,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { colorLerp } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../core/util/Random";
-import { V, V2d } from "../../core/Vector";
+import { V2d } from "../../core/Vector";
 import { Layers } from "../layers";
 import { PointLight } from "../lighting/PointLight";
 import { CollisionGroups } from "../physics/CollisionGroups";

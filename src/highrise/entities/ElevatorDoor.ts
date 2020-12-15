@@ -152,7 +152,6 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
     );
   }
 
-
   async onInteract() {
     if (this.state === "STOPPED") {
       this.game?.addEntity(new PositionalSound(snd_elevatorDing, this.center));
@@ -167,6 +166,9 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
         this.bottomDoor.setOpenPercentage(this.openPerentage);
       });
       this.openPerentage = isClosing ? 0 : 1;
+      this.topDoor.setOpenPercentage(this.openPerentage);
+      this.bottomDoor.setOpenPercentage(this.openPerentage);
       this.state = "STOPPED";
+    }
   }
 }

@@ -5,7 +5,7 @@ import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
 import snd_wallHit4 from "../../../resources/audio/impacts/wall-hit-4.flac";
-import snd_glowStickDrop1 from "../../../resources/audio/misc/ glow-stick-drop-1.flac";
+import snd_glowStickDrop1 from "../../../resources/audio/misc/glow-stick-drop-1.flac";
 import snd_glowStickDrop2 from "../../../resources/audio/misc/glow-stick-drop-2.flac";
 import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
 import snd_quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac";
