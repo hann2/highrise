@@ -1,27 +1,33 @@
-import FilterList from "../util/FilterList";
 import IOEventHandler from "../entity/IOEventHandler";
-
+import {
+  hasOnButtonDown,
+  hasOnButtonUp,
+  hasOnClick,
+  hasOnInputDeviceChange,
+  hasOnKeyDown,
+  hasOnKeyUp,
+  hasOnMouseDown,
+  hasOnMouseUp,
+  hasOnRightClick,
+  hasOnRightDown,
+  hasOnRightUp,
+} from "../EntityFilter";
+import FilterList from "../util/FilterList";
 export default class IOHandlerList implements Iterable<IOEventHandler> {
   all = new Set<IOEventHandler>();
 
   filtered = {
-    onButtonDown: new FilterList<IOEventHandler>((e) =>
-      Boolean(e.onButtonDown)
-    ),
-    onButtonUp: new FilterList<IOEventHandler>((e) => Boolean(e.onButtonUp)),
-    onClick: new FilterList<IOEventHandler>((e) => Boolean(e.onClick)),
-    onKeyDown: new FilterList<IOEventHandler>((e) => Boolean(e.onKeyDown)),
-    onKeyUp: new FilterList<IOEventHandler>((e) => Boolean(e.onKeyUp)),
-    onMouseDown: new FilterList<IOEventHandler>((e) => Boolean(e.onMouseDown)),
-    onMouseUp: new FilterList<IOEventHandler>((e) => Boolean(e.onMouseUp)),
-    onRightClick: new FilterList<IOEventHandler>((e) =>
-      Boolean(e.onRightClick)
-    ),
-    onRightDown: new FilterList<IOEventHandler>((e) => Boolean(e.onRightDown)),
-    onRightUp: new FilterList<IOEventHandler>((e) => Boolean(e.onRightUp)),
-    onInputDeviceChange: new FilterList<IOEventHandler>((e) =>
-      Boolean(e.onInputDeviceChange)
-    ),
+    onButtonDown: new FilterList(hasOnButtonDown),
+    onButtonUp: new FilterList(hasOnButtonUp),
+    onClick: new FilterList(hasOnClick),
+    onKeyDown: new FilterList(hasOnKeyDown),
+    onKeyUp: new FilterList(hasOnKeyUp),
+    onMouseDown: new FilterList(hasOnMouseDown),
+    onMouseUp: new FilterList(hasOnMouseUp),
+    onRightClick: new FilterList(hasOnRightClick),
+    onRightDown: new FilterList(hasOnRightDown),
+    onRightUp: new FilterList(hasOnRightUp),
+    onInputDeviceChange: new FilterList(hasOnInputDeviceChange),
   };
 
   add(handler: IOEventHandler) {

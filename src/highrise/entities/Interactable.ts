@@ -24,5 +24,5 @@ export default class Interactable extends BaseEntity implements Entity {
   }
 }
 
-export const isInteractable = (x: any): x is Interactable =>
+export const isInteractable = (x: Entity): x is Entity & Interactable =>
   x instanceof Interactable;

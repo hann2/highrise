@@ -1,7 +1,17 @@
-import FilterList from "./util/FilterList";
 import Entity from "./entity/Entity";
+import {
+  EntityFilter,
+  hasAfterPhysics,
+  hasBeforeTick,
+  hasBody,
+  hasOnPause,
+  hasOnRender,
+  hasOnRender2,
+  hasOnTick,
+  hasOnUnpause,
+} from "./EntityFilter";
+import { FilterListMap } from "./util/FilterListMap";
 import ListMap from "./util/ListMap";
-import { CustomHandlersMap } from "./entity/GameEventHandler";
 
 /**
  * Keeps track of entities. Has lots of useful indexes.
@@ -10,28 +20,53 @@ export default class EntityList implements Iterable<Entity> {
   private idToEntity = new Map<string, Entity>();
   private tagged = new ListMap<string, Entity>();
   private handlers = new ListMap<string, Entity>();
+  private filters = new FilterListMap<Entity>();
 
   all = new Set<Entity>();
 
-  // TODO: Replace these with getByFilter after improving getByFilter
-  filtered = {
-    afterPhysics: new FilterList<Entity>((e) => Boolean(e.afterPhysics)),
-    beforeTick: new FilterList<Entity>((e) => Boolean(e.beforeTick)),
-    onRender: new FilterList<Entity>((e) => Boolean(e.onRender)),
-    onTick: new FilterList<Entity>((e) => Boolean(e.onTick)),
-    onPause: new FilterList<Entity>((e) => Boolean(e.onPause)),
-    onUnpause: new FilterList<Entity>((e) => Boolean(e.onUnpause)),
-    hasBody: new FilterList<Entity>((e) => Boolean(e.body)),
-  };
+  constructor() {
+    this.addFilter(hasAfterPhysics);
+    this.addFilter(hasBeforeTick);
+    this.addFilter(hasOnRender);
+    this.addFilter(hasOnRender2);
+    this.addFilter(hasOnTick);
+    this.addFilter(hasOnPause);
+    this.addFilter(hasOnUnpause);
+    this.addFilter(hasBody);
+  }
+
+  get withAfterPhysics() {
+    return this.getByFilter(hasAfterPhysics);
+  }
+  get withBeforeTick() {
+    return this.getByFilter(hasBeforeTick);
+  }
+  get withOnRender() {
+    return this.getByFilter(hasOnRender);
+  }
+  get withOnRender2() {
+    return this.getByFilter(hasOnRender2);
+  }
+  get withOnTick() {
+    return this.getByFilter(hasOnTick);
+  }
+  get withOnPause() {
+    return this.getByFilter(hasOnPause);
+  }
+  get withOnUnpause() {
+    return this.getByFilter(hasOnUnpause);
+  }
+  get withBody() {
+    return this.getByFilter(hasBody);
+  }
 
   /**
    * Adds an entity to this list and all sublists and does all the bookkeeping
    */
   add(entity: Entity) {
     this.all.add(entity);
-    for (const list of Object.values(this.filtered)) {
-      list.addIfValid(entity);
-    }
+
+    this.filters.addItem(entity);
 
     if (entity.tags) {
       for (const tag of entity.tags) {
@@ -58,9 +93,8 @@ export default class EntityList implements Iterable<Entity> {
    */
   remove(entity: Entity) {
     this.all.delete(entity);
-    for (const list of Object.values(this.filtered)) {
-      list.remove(entity);
-    }
+
+    this.filters.removeItem(entity);
 
     if (entity.tags) {
       for (const tag of entity.tags) {
@@ -113,12 +147,26 @@ export default class EntityList implements Iterable<Entity> {
   }
 
   /**
+   * Adds a filter for fast lookup with getByFilter() in the future.
+   */
+  addFilter<T extends Entity>(filter: EntityFilter<T>): void {
+    this.filters.addFilter(filter, this.all);
+  }
+
+  /**
+   * Removes a filter.
+   */
+  removeFilter<T extends Entity>(filter: EntityFilter<T>): void {
+    this.filters.removeFilter(filter);
+  }
+
+  /**
    * Return all the entities that pass a type guard
-   * TODO: Add a way to create filter lists for this for performance optimization
    * Then we could replace the hardCoded filters with something nicer
    */
-  getByFilter<T extends Entity>(filter: (e: Entity) => e is T): T[] {
-    return [...this.all].filter(filter);
+  getByFilter<T extends Entity>(filter: EntityFilter<T>): Iterable<T> {
+    const result = this.filters.getFilterList(filter);
+    return result ?? [...this.all].filter(filter);
   }
 
   /**

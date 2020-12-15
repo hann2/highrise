@@ -1,10 +1,10 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { rBool } from "../../../core/util/Random";
-import { getNearestVisibleZombie } from "../../utils/visionUtils";
+import { getNearestVisibleEnemy } from "../../utils/visionUtils";
 import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
-import Zombie from "../enemies/Zombie";
+import { Enemy } from "../enemies/Enemy";
 import Human from "../human/Human";
 import Interactable from "../Interactable";
 
@@ -18,7 +18,7 @@ export default class SurvivorHumanController
   // The human this AI is controlling
   human: Human;
   // The zombie this AI is currently shooting at
-  target?: Zombie;
+  target?: Enemy;
 
   // The interaction target to make this human follow the player
   interactable: Interactable;
@@ -38,7 +38,7 @@ export default class SurvivorHumanController
   }
 
   scanForTargets() {
-    this.target = getNearestVisibleZombie(
+    this.target = getNearestVisibleEnemy(
       this.game!,
       this.human,
       MAX_ATTACK_DISTANCE

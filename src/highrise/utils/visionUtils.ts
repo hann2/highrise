@@ -2,7 +2,7 @@ import { Ray, RaycastResult } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Game from "../../core/Game";
 import CustomWorld from "../../core/physics/CustomWorld";
-import Zombie from "../entities/enemies/Zombie";
+import { Enemy, isEnemy } from "../entities/enemies/Enemy";
 import Human from "../entities/human/Human";
 import { CollisionGroups } from "../physics/CollisionGroups";
 
@@ -24,26 +24,26 @@ export function testLineOfSight(
 }
 
 // Returns the zombie that is nearest to and visible by a given human
-export function getNearestVisibleZombie(
+export function getNearestVisibleEnemy(
   game: Game,
   human: Human,
   maxDistance: number = Infinity
-): Zombie | undefined {
-  const zombies = game.entities.getTagged("zombie") as Zombie[];
+): Enemy | undefined {
+  const enemies = game.entities.getByFilter(isEnemy);
 
-  let nearestVisibleZombie: Zombie | undefined;
+  let nearestVisibleEnemy: Enemy | undefined;
   let nearestDistance: number = maxDistance;
 
-  for (const zombie of zombies) {
-    const distance = zombie.getPosition().sub(human.getPosition()).magnitude;
+  for (const enemy of enemies) {
+    const distance = enemy.getPosition().sub(human.getPosition()).magnitude;
     if (distance < maxDistance) {
-      const isVisible = testLineOfSight(human, zombie);
+      const isVisible = testLineOfSight(human, enemy);
       if (isVisible) {
         nearestDistance = distance;
-        nearestVisibleZombie = zombie;
+        nearestVisibleEnemy = enemy;
       }
     }
   }
 
-  return nearestVisibleZombie;
+  return nearestVisibleEnemy;
 }

@@ -4,7 +4,7 @@ import { rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants";
 import { Direction, opposite } from "../../utils/directions";
-import Human from "../human/Human";
+import Human, { isHuman } from "../human/Human";
 import Necromancer from "./Necromancer";
 
 interface Zone {
@@ -135,7 +135,7 @@ export default class NecromancerController
   }
 
   getEnemiesInArena(): Human[] {
-    const humans = (this.game?.entities.getTagged("human") as Human[]) ?? [];
+    const humans = [...this.game!.entities.getByFilter(isHuman)];
 
     const result: Human[] = [];
 

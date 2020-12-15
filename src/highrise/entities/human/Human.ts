@@ -2,6 +2,7 @@ import { Body, Circle } from "p2";
 import snd_pop1 from "../../../../resources/audio/misc/pop1.flac";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import type Game from "../../../core/Game";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import {
   angleDelta,
@@ -20,7 +21,7 @@ import { PointLight } from "../../lighting/PointLight";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
-import Zombie from "../enemies/Zombie";
+import { isEnemy } from "../enemies/Enemy";
 import Interactable, { isInteractable } from "../Interactable";
 import WeaponPickup from "../WeaponPickup";
 import Flashlight from "./Flashlight";
@@ -60,6 +61,7 @@ export default class Human extends BaseEntity implements Entity {
 
     this.humanSprite = this.addChild(new HumanSprite(this));
     this.voice = this.addChild(new HumanVoice(this));
+    this.addChild(new Flashlight(this));
 
     this.body = new Body({
       mass: 1,
@@ -71,8 +73,10 @@ export default class Human extends BaseEntity implements Entity {
     shape.collisionGroup = CollisionGroups.Humans;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
+  }
 
-    this.addChild(new Flashlight(this));
+  onAdd(game: Game) {
+    game.entities.addFilter(isEnemy);
   }
 
   onTick(dt: number) {
@@ -149,9 +153,11 @@ export default class Human extends BaseEntity implements Entity {
 
   // Return a list of all interactables within range
   getNearbyInteractables(): Interactable[] {
+    const result = [];
+
     return (
-      this.game!.entities.getByFilter(isInteractable)
-        // .filter((i) => testLineOfSight(i, this))
+      [...this.game!.entities.getByFilter(isInteractable)]
+        // .filter((i) => testLineOfSight(i, this)) // TODO: Fast vision test for interactables
         .filter(
           (i) =>
             i.getPosition().sub(this.body.position).magnitude < i.maxDistance
@@ -214,10 +220,9 @@ export default class Human extends BaseEntity implements Entity {
     if (this.pushCooldown <= 0) {
       this.pushCooldown = PUSH_COOLDOWN;
       this.game?.addEntity(new PositionalSound(snd_pop1, this.getPosition()));
-      for (const zombie of this.game!.entities.getTagged(
-        "zombie"
-      ) as Zombie[]) {
-        const relPosition = zombie.getPosition().isub(this.getPosition());
+      const enemies = this.game!.entities.getByFilter(isEnemy);
+      for (const enemy of enemies) {
+        const relPosition = enemy.getPosition().isub(this.getPosition());
         const distance = clampUp(
           relPosition.magnitude - HUMAN_RADIUS - ZOMBIE_RADIUS
         );
@@ -226,9 +231,9 @@ export default class Human extends BaseEntity implements Entity {
         if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
           const amount =
             PUSH_KNOCKBACK - PUSH_KNOCKBACK * (distance / PUSH_RANGE);
-          zombie.knockback(relPosition.angle, amount);
-          zombie.stun(PUSH_STUN * rNormal(1, 0.2));
-          zombie.voice.speak("hit");
+          enemy.knockback(relPosition.angle, amount);
+          enemy.stun(PUSH_STUN * rNormal(1, 0.2));
+          enemy.voice.speak("hit");
         }
       }
     }
@@ -247,4 +252,8 @@ export default class Human extends BaseEntity implements Entity {
       );
     }
   }
+}
+
+export function isHuman(e: Entity): e is Human {
+  return e instanceof Human;
 }

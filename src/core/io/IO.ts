@@ -44,7 +44,7 @@ export class IOManager {
       for (const keyCode of this.keys.keys()) {
         this.keys.set(keyCode, false);
         for (const handler of this.handlers.filtered.onKeyUp) {
-          handler.onKeyUp!(keyCode);
+          handler.onKeyUp(keyCode);
         }
       }
     };
@@ -90,11 +90,11 @@ export class IOManager {
         if (button && !this.lastButtons[buttonIndex]) {
           this.setUsingGamepad(true);
           for (const handler of this.handlers.filtered.onButtonDown) {
-            handler.onButtonDown!(buttonIndex);
+            handler.onButtonDown(buttonIndex);
           }
         } else if (!button && this.lastButtons[buttonIndex]) {
           for (const handler of this.handlers.filtered.onButtonUp) {
-            handler.onButtonUp!(buttonIndex);
+            handler.onButtonUp(buttonIndex);
           }
         }
       }
@@ -108,7 +108,7 @@ export class IOManager {
     if (this.usingGamepad != value) {
       this.usingGamepad = value;
       for (const handler of this.handlers.filtered.onInputDeviceChange) {
-        handler.onInputDeviceChange!(this.usingGamepad);
+        handler.onInputDeviceChange(this.usingGamepad);
       }
     }
   }
@@ -134,12 +134,12 @@ export class IOManager {
     switch (event.button) {
       case MouseButtons.LEFT:
         for (const handler of this.handlers.filtered.onClick) {
-          handler.onClick!();
+          handler.onClick();
         }
         break;
       case MouseButtons.RIGHT:
         for (const handler of this.handlers.filtered.onRightClick) {
-          handler.onRightClick!();
+          handler.onRightClick();
         }
         break;
     }
@@ -153,12 +153,12 @@ export class IOManager {
     switch (event.button) {
       case MouseButtons.LEFT:
         for (const handler of this.handlers.filtered.onMouseDown) {
-          handler.onMouseDown!();
+          handler.onMouseDown();
         }
         break;
       case MouseButtons.RIGHT:
         for (const handler of this.handlers.filtered.onRightDown) {
-          handler.onRightDown!();
+          handler.onRightDown();
         }
         break;
     }
@@ -172,12 +172,12 @@ export class IOManager {
     switch (event.button) {
       case MouseButtons.LEFT:
         for (const handler of this.handlers.filtered.onMouseUp) {
-          handler.onMouseUp!();
+          handler.onMouseUp();
         }
         break;
       case MouseButtons.RIGHT:
         for (const handler of this.handlers.filtered.onRightUp) {
-          handler.onRightUp!();
+          handler.onRightUp();
         }
         break;
     }
@@ -202,7 +202,7 @@ export class IOManager {
     this.keys.set(code, true);
     if (!wasPressed) {
       for (const handler of this.handlers.filtered.onKeyDown) {
-        handler.onKeyDown!(code, event);
+        handler.onKeyDown(code, event);
       }
     }
     if (this.shouldPreventDefault(event)) {
@@ -216,7 +216,7 @@ export class IOManager {
     const code = event.code as KeyCode;
     this.keys.set(code, false);
     for (const handler of this.handlers.filtered.onKeyUp) {
-      handler.onKeyUp!(code, event);
+      handler.onKeyUp(code, event);
     }
     if (this.shouldPreventDefault(event)) {
       event.preventDefault();

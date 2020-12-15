@@ -19,7 +19,7 @@ import { CollisionGroups } from "../../physics/CollisionGroups";
 import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
 import Hittable from "../Hittable";
-import Human from "../human/Human";
+import Human, { isHuman } from "../human/Human";
 import Crawler from "./Crawler";
 import DeathOrb from "./DeathOrb";
 import NecromancerController from "./NecromancerController";
@@ -144,7 +144,7 @@ export default class Necromancer
   }
 
   getHumansInRange(): Human[] {
-    const humans = (this.game?.entities.getTagged("human") as Human[]) ?? [];
+    const humans = [...this.game!.entities.getByFilter(isHuman)];
     return humans.filter((human) => {
       const displacement = human.getPosition().isub(this.body.position);
       const inRange = displacement.magnitude < ATTACK_RANGE;

@@ -14,7 +14,7 @@ import { CollisionGroups } from "../../physics/CollisionGroups";
 import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
 import Hittable from "../Hittable";
-import Human from "../human/Human";
+import Human, { isHuman } from "../human/Human";
 import Crawler from "./Crawler";
 import ZombieController from "./ZombieController";
 import ZombieSprite from "./ZombieSprite";
@@ -88,7 +88,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   }
 
   getHumansInRange(): Human[] {
-    const humans = (this.game?.entities.getTagged("human") as Human[]) ?? [];
+    const humans = [...this.game!.entities.getByFilter(isHuman)];
     return humans.filter((human) => {
       const displacement = human.getPosition().sub(this.body.position);
       const inRange = displacement.magnitude < ATTACK_RANGE;

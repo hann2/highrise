@@ -8,7 +8,7 @@ import { ZOMBIE_RADIUS } from "../../constants";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import { testLineOfSight } from "../../utils/visionUtils";
-import Human from "../human/Human";
+import Human, { isHuman } from "../human/Human";
 import Spitter, { SPITTER_ATTACK_RANGE } from "./Spitter";
 
 const NORMAL_SPEED = 1.0;
@@ -83,7 +83,7 @@ export default class SpitterController extends BaseEntity implements Entity {
   }
 
   anyoneInAttackRange(): Human | undefined {
-    const humans = (this.game?.entities.getTagged("human") as Human[]) ?? [];
+    const humans = [...this.game!.entities.getByFilter(isHuman)];
     for (const human of humans) {
       if (this.inAttackRange(human)) {
         return human;
@@ -148,7 +148,7 @@ export default class SpitterController extends BaseEntity implements Entity {
   // Searches the map for the nearest human in range that is visible
   // This is slow, so be careful
   anyoneInVision(maxDistance: number = 15): Human | undefined {
-    const humans = (this.game?.entities.getTagged("human") as Human[]) ?? [];
+    const humans = [...this.game!.entities.getByFilter(isHuman)];
 
     let nearestVisibleHuman: Human | undefined;
     let nearestDistance: number = maxDistance;

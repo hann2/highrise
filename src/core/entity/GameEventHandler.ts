@@ -17,6 +17,8 @@ export default interface GameEventHandler {
   beforeTick?(): void;
   /** Called before rendering */
   onRender?(dt: number): void;
+  /** Called _right_ before rendering. This is for special cases only */
+  onRender2?(dt: number): void;
   /** Called during the update tick */
   onTick?(dt: number): void;
   /** Called when the game is paused */

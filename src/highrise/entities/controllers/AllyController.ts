@@ -3,7 +3,7 @@ import Entity from "../../../core/entity/Entity";
 import { rBool } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import {
-  getNearestVisibleZombie,
+  getNearestVisibleEnemy,
   testLineOfSight,
 } from "../../utils/visionUtils";
 import Gun from "../../weapons/Gun";
@@ -36,7 +36,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
       return;
     }
 
-    const nearestVisibleZombie = getNearestVisibleZombie(
+    const nearestVisibleZombie = getNearestVisibleEnemy(
       this.game!,
       this.human,
       MAX_SHOOT_DISTANCE
@@ -84,4 +84,8 @@ export default class AllyHumanController extends BaseEntity implements Entity {
   get leader() {
     return this.getLeader();
   }
+}
+
+export function isAllyController(e: Entity): e is AllyHumanController {
+  return e instanceof AllyHumanController;
 }

@@ -4,7 +4,9 @@ import Game from "../../core/Game";
 import { choose, rBool } from "../../core/util/Random";
 import { Level } from "../data/levels/Level";
 import VisionController from "../VisionController";
-import AllyHumanController from "./controllers/AllyController";
+import AllyHumanController, {
+  isAllyController,
+} from "./controllers/AllyController";
 import PlayerHumanController from "./controllers/PlayerHumanController";
 import SurvivorHumanController from "./controllers/SurvivorHumanController";
 import Human from "./human/Human";
@@ -20,6 +22,10 @@ export default class PartyManager extends BaseEntity implements Entity {
 
   partyMembers: Human[] = [];
   leader!: Human;
+
+  onAdd(game: Game) {
+    game.entities.addFilter(isAllyController);
+  }
 
   handlers = {
     newGame: () => {
@@ -93,9 +99,7 @@ export default class PartyManager extends BaseEntity implements Entity {
   }
 
   getAllyControllers() {
-    return this.game?.entities.getTagged(
-      "ally_controller"
-    ) as AllyHumanController[];
+    return this.game!.entities.getByFilter(isAllyController);
   }
 
   setLeader(leader: Human) {

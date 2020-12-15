@@ -9,6 +9,7 @@ import { CELL_WIDTH, LEVEL_SIZE } from "./data/levels/levelGeneration";
 import CameraController from "./entities/controllers/CameraController";
 import CheatController from "./entities/controllers/CheatController";
 import LevelController from "./entities/controllers/LevelController";
+import { isHuman } from "./entities/human/Human";
 import PartyManager from "./entities/PartyManager";
 import { initLayers, Layers } from "./layers";
 import LightingManager from "./lighting/LightingManager";
@@ -44,9 +45,16 @@ export async function main() {
   window.DEBUG = { game };
   game.start();
 
+  // It seems like we were kinda loud on average
+  game.masterGain.gain.value = 0.8;
+
   const preloader = game.addEntity(new Preloader());
   await preloader.waitTillLoaded();
   preloader.destroy();
+
+  // Add some filters for fast lookup of certain entities later
+  // Think of these like indexes in a DB
+  game.entities.addFilter(isHuman);
 
   game.addEntity(new AutoPauser());
   game.addEntity(new ResizeListener());
@@ -62,7 +70,4 @@ export async function main() {
     game.addEntity(new FPSMeter(Layers.MENU));
     game.addEntity(new CheatController());
   }
-
-  // It seems like we were kinda loud on average
-  game.masterGain.gain.value = 0.8;
 }

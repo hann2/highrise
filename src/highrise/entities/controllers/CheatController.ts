@@ -20,10 +20,11 @@ export default class CheatController extends BaseEntity implements Entity {
         this.game!.dispatch({ type: "newGame" });
         break;
       case "Backslash":
-        const fpsMeter = this.game?.entities.getByFilter(
+        for (const fpsMeter of this.game!.entities.getByFilter(
           (e): e is FPSMeter => e instanceof FPSMeter
-        )[0];
-        fpsMeter!.sprite.visible = !fpsMeter?.sprite.visible;
+        )) {
+          fpsMeter.sprite.visible = !fpsMeter.sprite.visible;
+        }
     }
   }
 

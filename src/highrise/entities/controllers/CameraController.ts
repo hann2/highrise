@@ -50,7 +50,7 @@ export default class CameraController extends BaseEntity implements Entity {
     if (usingGamepad) {
       this.game?.renderer.hideCursor();
     } else {
-      this.game?.renderer.showCursor();
+      this.game?.renderer.setCursor("crosshair");
     }
   }
 }

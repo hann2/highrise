@@ -2,7 +2,11 @@ import BaseEntity from "../entity/BaseEntity";
 import Entity from "../entity/Entity";
 import { PositionalSound } from "./PositionalSound";
 import { V2d } from "../Vector";
+import Game from "../Game";
 
+function isPositionalSound(e: Entity): e is PositionalSound {
+  return e instanceof PositionalSound;
+}
 export default class PositionalSoundListener
   extends BaseEntity
   implements Entity {
@@ -10,15 +14,14 @@ export default class PositionalSoundListener
   persistent = true;
   onTick() {}
 
-  setPosition(position: V2d) {
-    for (const sound of this.getPositionalSounds()) {
-      sound.setListenerPosition(position);
-    }
+  onAdd(game: Game) {
+    // So we can get these all quickly
+    game.entities.addFilter(isPositionalSound);
   }
 
-  private getPositionalSounds(): PositionalSound[] {
-    return this.game!.entities.getTagged(
-      "positional_sound"
-    ) as PositionalSound[];
+  setPosition(position: V2d) {
+    for (const sound of this.game!.entities.getByFilter(isPositionalSound)) {
+      sound.setListenerPosition(position);
+    }
   }
 }

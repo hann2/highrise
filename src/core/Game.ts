@@ -150,7 +150,7 @@ export default class Game {
   pause() {
     if (!this.paused) {
       this.paused = true;
-      for (const entity of this.entities.filtered.onPause) {
+      for (const entity of this.entities.withOnPause) {
         entity.onPause!();
       }
     }
@@ -159,7 +159,7 @@ export default class Game {
   /** Resumes the game and calls onUnpause() handlers. */
   unpause() {
     this.paused = false;
-    for (const entity of this.entities.filtered.onUnpause) {
+    for (const entity of this.entities.withOnUnpause) {
       entity.onUnpause!();
     }
   }
@@ -279,8 +279,9 @@ export default class Game {
       this.tick(dt);
       if (!this.paused) {
         this.world.step(dt);
+        this.cleanupEntities();
+        this.contacts();
       }
-      this.contacts();
     }
     this.afterPhysics();
 
@@ -336,27 +337,24 @@ export default class Game {
   /** Called before physics. */
   private tick(dt: number) {
     this.ticknumber += 1;
-    this.cleanupEntities();
-    for (const entity of this.entities.filtered.beforeTick) {
+    for (const entity of this.entities.withBeforeTick) {
       if (entity.game && !(this.paused && entity.pausable)) {
-        entity.beforeTick!();
+        entity.beforeTick();
       }
     }
-    this.cleanupEntities();
-    for (const entity of this.entities.filtered.onTick) {
+    for (const entity of this.entities.withOnTick) {
       if (entity.game && !(this.paused && entity.pausable)) {
-        entity.onTick!(dt);
+        entity.onTick(dt);
       }
     }
-    this.cleanupEntities();
   }
 
   /** Called after physics. */
   private afterPhysics() {
     this.cleanupEntities();
-    for (const entity of this.entities.filtered.afterPhysics) {
+    for (const entity of this.entities.withAfterPhysics) {
       if (entity.game && !(this.paused && entity.pausable)) {
-        entity.afterPhysics!();
+        entity.afterPhysics();
       }
     }
   }
@@ -364,9 +362,16 @@ export default class Game {
   /** Called before actually rendering. */
   private render() {
     this.cleanupEntities();
-    for (const entity of this.entities.filtered.onRender) {
+    for (const entity of this.entities.withOnRender) {
       if (entity.game) {
-        entity.onRender!(this.renderTimestep);
+        entity.onRender(this.renderTimestep);
+      } else {
+        console.warn(`entity doesn't have game`);
+      }
+    }
+    for (const entity of this.entities.withOnRender2) {
+      if (entity.game) {
+        entity.onRender2(this.renderTimestep);
       }
     }
     // this.renderer2d?.render();
