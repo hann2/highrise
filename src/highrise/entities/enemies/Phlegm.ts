@@ -5,6 +5,7 @@ import Entity, { GameSprite, WithOwner } from "../../../core/entity/Entity";
 import { polarToVec } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
 import { Layers } from "../../layers";
+import { PointLight } from "../../lighting/PointLight";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import Human from "../human/Human";
 import Spitter from "./Spitter";
@@ -15,6 +16,7 @@ const MAX_LIFESPAN = 3.0; // seconds
 export default class Phlegm extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
   velocity: V2d;
+  glow: PointLight;
 
   private ray: Ray;
   private raycastResult = new RaycastResult();
@@ -48,6 +50,9 @@ export default class Phlegm extends BaseEntity implements Entity {
     this.sprite.endFill();
     this.sprite.layerName = Layers.WEAPONS;
 
+    this.glow = this.addChild(
+      new PointLight({ color: 0x00ff00, shadowsEnabled: false })
+    );
     this.renderPosition = position.clone();
   }
 
@@ -124,5 +129,6 @@ export default class Phlegm extends BaseEntity implements Entity {
 
   afterPhysics() {
     this.sprite.position.set(...this.renderPosition);
+    this.glow.setPosition(this.renderPosition);
   }
 }

@@ -28,7 +28,7 @@ import Zombie from "./Zombie";
 import ZombieVoice from "./ZombieVoice";
 
 const SPEED = 0.1;
-const HEALTH = 2000;
+const HEALTH = 4000;
 
 const FRICTION = 0.1;
 const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;

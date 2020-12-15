@@ -10,6 +10,7 @@ import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants";
 import FleshImpact from "../../effects/FleshImpact";
+import { PointLight } from "../../lighting/PointLight";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import SwingingWeapon from "../../weapons/SwingingWeapon";
 import Bullet from "../Bullet";
@@ -38,6 +39,7 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
   voice: ZombieVoice;
   attackPhase: "ready" | "windup" | "attack" | "winddown" | "cooldown" =
     "ready";
+  glow: PointLight;
 
   constructor(position: V2d, angle: number = rUniform(0, Math.PI * 2)) {
     super();
@@ -50,6 +52,7 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape);
     this.body.angularDamping = 0.9;
 
+    this.glow = this.addChild(new PointLight({ color: 0x00ff00 }));
     this.addChild(new SpitterController(this));
     this.addChild(new SpitterSprite(this));
     this.voice = this.addChild(new ZombieVoice(this));
@@ -66,6 +69,10 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
 
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
+  }
+
+  onRender() {
+    this.glow.setPosition(this.getPosition());
   }
 
   async attack() {
@@ -90,7 +97,7 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
     const direction = human.getPosition().sub(this.getPosition()).angle;
     this.body.angle = direction;
     this.body.angularVelocity = 0;
-    this.addChild(new Phlegm(this.getPosition(), direction));
+    this.game!.addEntity(new Phlegm(this.getPosition(), direction));
   }
 
   getHumansInRange(): Human[] {
