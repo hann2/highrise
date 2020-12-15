@@ -10,7 +10,8 @@ import snd_rifleShot1 from "../../../../resources/audio/guns/rifle/rifle-shot-1.
 import snd_rifleShot2 from "../../../../resources/audio/guns/rifle/rifle-shot-2.mp3";
 import snd_rifleShot3 from "../../../../resources/audio/guns/rifle/rifle-shot-3.mp3";
 import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
-import img_ar15 from "../../../../resources/images/weapons/ar-15.png";
+import img_ar15Pickup from "../../../../resources/images/weapons/ar-15-pickup.png";
+import img_ar15Hold from "../../../../resources/images/weapons/ar15-hold.png";
 import img_rifle from "../../../../resources/images/weapons/rifle.png";
 import {
   defaultGunStats,
@@ -33,14 +34,15 @@ export const AR15: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_ar15,
-    holding: img_rifle,
+    pickup: img_ar15Pickup,
+    holding: img_ar15Hold,
     shellCasing: img_rifleCasing,
   },
   size: [0.8, 0.4],
 
   leftHandPosition: [0.5, 0],
-  rightHandPosition: [0.2, 0],
+  rightHandPosition: [0.3, 0],
+  holdPosition: [0.5, 0],
 
   sounds: {
     ...defaultGunStats.sounds,

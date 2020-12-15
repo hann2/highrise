@@ -8,8 +8,8 @@ import snd_pistol2Shot1 from "../../../resources/audio/guns/pistol/pistol2-shot-
 import snd_ar15Reload1 from "../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
 import snd_shotgunPump1 from "../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import img_pistolCasing from "../../../resources/images/shell-casings/pistol-casing.png";
-import img_ar15 from "../../../resources/images/weapons/ar-15.png";
-import img_pistol from "../../../resources/images/weapons/pistol.png";
+import img_glockHold from "../../../resources/images/weapons/glock-hold.png";
+import img_glockPickup from "../../../resources/images/weapons/glock-pickup.png";
 import { SoundName } from "../../core/resources/sounds";
 import { degToRad } from "../../core/util/MathUtil";
 import { BaseWeaponStats } from "./WeaponStats";
@@ -33,6 +33,8 @@ export interface GunStats extends BaseWeaponStats {
   readonly reloadingStyle: ReloadingStyle;
   // Seconds to complete a reload. For INDIVIDUAL, this is seconds per round loaded
   readonly reloadTime: number;
+  // How much recoil this has. Arbitrary units. 1 is a little, 100 is a lot.
+  recoil: number;
 
   // The number of bullets per round fired
   readonly bulletsPerShot: number;
@@ -64,6 +66,8 @@ export interface GunStats extends BaseWeaponStats {
   leftHandPosition: [number, number];
   // Position of the right hand
   rightHandPosition: [number, number];
+  // Position of the sprite
+  holdPosition: [number, number];
 }
 
 export type GunSounds = GunStats["sounds"];
@@ -98,13 +102,16 @@ export const defaultGunStats: GunStats = {
   bulletsPerShot: 1,
   bulletSpread: degToRad(0.5),
 
+  recoil: 10,
+
   size: [1, 1],
   leftHandPosition: [0.3, 0],
   rightHandPosition: [0.3, 0],
+  holdPosition: [0.3, 0],
 
   textures: {
-    pickup: img_ar15,
-    holding: img_pistol,
+    pickup: img_glockPickup,
+    holding: img_glockHold,
     shellCasing: img_pistolCasing,
   },
 

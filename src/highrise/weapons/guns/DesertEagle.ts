@@ -8,7 +8,8 @@ import snd_deagleShot2 from "../../../../resources/audio/guns/pistol/deagle-shot
 import snd_m1911Reload1 from "../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
 import snd_pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
 import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
-import img_desertEagle from "../../../../resources/images/weapons/desert-eagle.png";
+import img_desertEagleHold from "../../../../resources/images/weapons/desert-eagle-hold.png";
+import img_desertEaglePickup from "../../../../resources/images/weapons/desert-eagle-pickup.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const DesertEagle: GunStats = {
@@ -24,13 +25,15 @@ export const DesertEagle: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_desertEagle,
+    pickup: img_desertEaglePickup,
+    holding: img_desertEagleHold,
     shellCasing: img_rifleCasing,
   },
   size: [0.55, 0.55],
 
   leftHandPosition: [0.4, 0],
   rightHandPosition: [0.4, 0],
+  holdPosition: [0.52, 0],
 
   sounds: {
     ...defaultGunStats.sounds,

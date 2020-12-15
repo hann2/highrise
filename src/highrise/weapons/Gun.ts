@@ -2,7 +2,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { polarToVec } from "../../core/util/MathUtil";
+import { clamp, clampUp, polarToVec } from "../../core/util/MathUtil";
 import { rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import MuzzleFlash from "../effects/MuzzleFlash";
@@ -24,6 +24,7 @@ export default class Gun extends BaseEntity implements Entity {
   ammo: number;
   isReloading: boolean = false;
   sounds: GunSoundRings;
+  recoil = 0;
 
   constructor(stats: GunStats) {
     super();
@@ -63,6 +64,7 @@ export default class Gun extends BaseEntity implements Entity {
     this.makeProjectile(position, direction, shooter);
 
     this.shootCooldown += 1.0 / this.stats.fireRate;
+    this.recoil += this.stats.recoil;
     this.ammo -= 1;
 
     // Various effects
@@ -77,6 +79,11 @@ export default class Gun extends BaseEntity implements Entity {
     } else {
       this.makeShellCasing(direction, shooter);
     }
+  }
+
+  getCurrentRecoilAmount() {
+    const maxShootCooldown = 1.0 / this.stats.fireRate;
+    return clamp(this.shootCooldown / maxShootCooldown);
   }
 
   makeShellCasing(direction: number, shooter: Human) {

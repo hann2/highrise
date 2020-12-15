@@ -4,8 +4,8 @@ import snd_shotgunLoadShell2 from "../../../../resources/audio/guns/shotgun/shot
 import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import snd_shotgunShot3 from "../../../../resources/audio/guns/shotgun/shotgun-shot-3.mp3";
 import img_shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
-import img_remington from "../../../../resources/images/weapons/remington.png";
-import img_rifle from "../../../../resources/images/weapons/rifle.png";
+import img_ar15Hold from "../../../../resources/images/weapons/ar15-hold.png";
+import img_remingtonPickup from "../../../../resources/images/weapons/remington-pickup.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
@@ -30,14 +30,15 @@ export const PumpShotgun: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_remington,
-    holding: img_rifle,
+    pickup: img_remingtonPickup,
+    holding: img_ar15Hold,
     shellCasing: img_shotgunCasing,
   },
   size: [1.1, 1.1],
 
   leftHandPosition: [0.45, 0],
   rightHandPosition: [0.2, 0],
+  holdPosition: [0.5, 0],
 
   sounds: {
     ...defaultGunStats.sounds,

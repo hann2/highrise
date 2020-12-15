@@ -11,8 +11,8 @@ import snd_revolverReloadFinish from "../../../../resources/audio/guns/revolver/
 import snd_revolverReloadStart from "../../../../resources/audio/guns/revolver/revolver-reload-start.flac";
 import snd_revolverShot3 from "../../../../resources/audio/guns/revolver/revolver-shot-3.mp3";
 import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
-import img_magnum from "../../../../resources/images/weapons/magnum.png";
-import img_pistol from "../../../../resources/images/weapons/pistol.png";
+import img_magnumHold from "../../../../resources/images/weapons/magnum-hold.png";
+import img_magnumPickup from "../../../../resources/images/weapons/magnum-pickup.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const Magnum: GunStats = {
@@ -23,19 +23,20 @@ export const Magnum: GunStats = {
   bulletDamage: 55,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
-  reloadTime: 0.3,
+  reloadTime: 0.28,
   ammoCapacity: 6,
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_magnum,
-    holding: img_pistol,
+    pickup: img_magnumPickup,
+    holding: img_magnumHold,
     shellCasing: img_pistolCasing,
   },
   size: [0.55, 0.55],
 
   leftHandPosition: [0.4, 0],
   rightHandPosition: [0.4, 0],
+  holdPosition: [0.55, 0],
 
   sounds: {
     ...defaultGunStats.sounds,

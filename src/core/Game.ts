@@ -366,7 +366,7 @@ export default class Game {
     this.cleanupEntities();
     for (const entity of this.entities.filtered.onRender) {
       if (entity.game) {
-        entity.onRender!();
+        entity.onRender!(this.renderTimestep);
       }
     }
     // this.renderer2d?.render();

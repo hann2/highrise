@@ -10,8 +10,8 @@ import snd_p90Shoot1 from "../../../../resources/audio/guns/smg/p90-shoot-1.flac
 import snd_p90Shoot2 from "../../../../resources/audio/guns/smg/p90-shoot-2.flac";
 import snd_p90Shoot3 from "../../../../resources/audio/guns/smg/p90-shoot-3.flac";
 import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
-import img_p90 from "../../../../resources/images/weapons/p90.png";
-import img_rifle from "../../../../resources/images/weapons/rifle.png";
+import img_p90Hold from "../../../../resources/images/weapons/p90-hold.png";
+import img_p90Pickup from "../../../../resources/images/weapons/p90-pickup.png";
 import {
   defaultGunStats,
   FireMode,
@@ -33,14 +33,15 @@ export const P90: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_p90,
-    holding: img_rifle,
+    pickup: img_p90Pickup,
+    holding: img_p90Hold,
     shellCasing: img_rifleCasing,
   },
   size: [1.0, 1.0],
 
   leftHandPosition: [0.4, 0],
   rightHandPosition: [0.2, 0],
+  holdPosition: [0.5, 0],
 
   sounds: {
     ...defaultGunStats.sounds,

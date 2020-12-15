@@ -41,7 +41,7 @@ export default class PlayerHumanController
       case ControllerButton.LB:
         this.human.throwGlowstick();
         break;
-      case ControllerButton.RB:
+      case ControllerButton.A:
         this.human.push();
         break;
     }

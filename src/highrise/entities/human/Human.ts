@@ -29,6 +29,7 @@ import HumanVoice from "./HumanVoice";
 
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
 const SPEED = 3.5; // arbitrary units
+const HURT_SPEED = 3.0; // Speed while hurt
 const FRICTION = 0.4; // arbitrary units
 const MAX_HEALTH = 100;
 
@@ -82,27 +83,13 @@ export default class Human extends BaseEntity implements Entity {
     this.glowstickCooldown = Math.max(this.glowstickCooldown - dt, 0);
   }
 
-  getLimpPercent() {
-    const healthPercent = this.hp / MAX_HEALTH;
-    if (healthPercent > 0.5) {
-      return 0;
-    } else {
-      return 1.0 - 2 * healthPercent;
-    }
-  }
-
-  getLimpPhase() {
-    return this.game!.elapsedTime * Math.PI * 5;
-  }
-
-  getLimpSpeedMultiplier() {
-    const phase = 1.0 + Math.sin(this.getLimpPhase());
-    return 1.0 - phase * 0.8 * this.getLimpPercent();
-  }
-
   // Move the human along a specified vector
   walk(direction: V2d) {
-    const speed = SPEED * this.getLimpSpeedMultiplier();
+    let speed = SPEED;
+    const healthPercent = this.hp / MAX_HEALTH;
+    if (healthPercent < 0.3) {
+      speed = HURT_SPEED;
+    }
     this.body.applyImpulse(direction.mul(speed));
   }
 
