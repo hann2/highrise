@@ -4,8 +4,9 @@ import snd_shotgunLoadShell2 from "../../../../resources/audio/guns/shotgun/shot
 import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import snd_shotgunShot1 from "../../../../resources/audio/guns/shotgun/shotgun-shot-1.mp3";
 import img_shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
-import img_doubleBarrelShotgun from "../../../../resources/images/weapons/double-barrel-shotgun.png";
-import img_rifle from "../../../../resources/images/weapons/rifle.png";
+import img_ak47Hold from "../../../../resources/images/weapons/ak-47-hold.png";
+import img_ar15Hold from "../../../../resources/images/weapons/ar15-hold.png";
+import img_doubleBarrelShotgunPickup from "../../../../resources/images/weapons/double-barrel-shotgun-pickup.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,
@@ -30,14 +31,15 @@ export const DoubleBarrelShotgun: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_doubleBarrelShotgun,
-    holding: img_rifle,
+    pickup: img_doubleBarrelShotgunPickup,
+    holding: img_ak47Hold,
     shellCasing: img_shotgunCasing,
   },
   size: [1.1, 1.1],
 
   leftHandPosition: [0.35, 0],
   rightHandPosition: [0.2, 0],
+  holdPosition: [0.5, 0],
 
   sounds: {
     ...defaultGunStats.sounds,

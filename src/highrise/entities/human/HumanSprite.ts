@@ -9,7 +9,7 @@ import Gun from "../../weapons/Gun";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import Human, { PUSH_COOLDOWN } from "./Human";
 
-const GUN_SCALE = 1 / 160;
+const GUN_SCALE = 1 / 300;
 
 // Renders a human
 export default class HumanSprite extends BaseEntity implements Entity {

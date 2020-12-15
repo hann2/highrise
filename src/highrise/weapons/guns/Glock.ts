@@ -8,7 +8,7 @@ import snd_pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock
 import snd_pistolShot2 from "../../../../resources/audio/guns/pistol/pistol-shot-2.mp3";
 import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
 import img_glockHold from "../../../../resources/images/weapons/glock-hold.png";
-import img_glock from "../../../../resources/images/weapons/glock.png";
+import img_glockPickup from "../../../../resources/images/weapons/glock-pickup.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const Glock: GunStats = {
@@ -24,7 +24,7 @@ export const Glock: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_glock,
+    pickup: img_glockPickup,
     holding: img_glockHold,
     shellCasing: img_pistolCasing,
   },

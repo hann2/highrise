@@ -8,7 +8,8 @@ import snd_ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload
 import snd_ar15ReloadEmpty from "../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
 import snd_rifle2Shot1 from "../../../../resources/audio/guns/rifle/rifle2-shot-1.mp3";
 import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
-import img_ak47 from "../../../../resources/images/weapons/ak47.png";
+import img_ak47Hold from "../../../../resources/images/weapons/ak-47-hold.png";
+import img_ak47Pickup from "../../../../resources/images/weapons/ak47-pickup.png";
 import img_rifle from "../../../../resources/images/weapons/rifle.png";
 import {
   defaultGunStats,
@@ -31,14 +32,15 @@ export const AK47: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_ak47,
-    holding: img_rifle,
+    pickup: img_ak47Pickup,
+    holding: img_ak47Hold,
     shellCasing: img_rifleCasing,
   },
   size: [1.4, 1.4],
 
   leftHandPosition: [0.5, -0.03],
   rightHandPosition: [0.25, 0.07],
+  holdPosition: [0.5, 0],
 
   sounds: {
     ...defaultGunStats.sounds,

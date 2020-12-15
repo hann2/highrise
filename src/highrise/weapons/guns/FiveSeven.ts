@@ -8,8 +8,7 @@ import snd_pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock
 import snd_pistolShot1 from "../../../../resources/audio/guns/pistol/pistol-shot-1.mp3";
 import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
 import img_fiveSevenHold from "../../../../resources/images/weapons/five-seven-hold.png";
-import img_fiveseven from "../../../../resources/images/weapons/fiveseven.png";
-import img_pistol from "../../../../resources/images/weapons/pistol.png";
+import img_fiveSevenPickup from "../../../../resources/images/weapons/five-seven-pickup.png";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const FiveSeven: GunStats = {
@@ -25,7 +24,7 @@ export const FiveSeven: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_fiveseven,
+    pickup: img_fiveSevenPickup,
     holding: img_fiveSevenHold,
     shellCasing: img_pistolCasing,
   },
