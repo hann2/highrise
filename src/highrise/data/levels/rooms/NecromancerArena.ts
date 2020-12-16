@@ -1,6 +1,6 @@
 import Entity from "../../../../core/entity/Entity";
 import { V } from "../../../../core/Vector";
-import Decoration from "../../../entities/Decoration";
+import Decoration from "../../../entities/environment/Decoration";
 import Necromancer from "../../../entities/enemies/Necromancer";
 import TiledFloor, { Tiles } from "../../../entities/environment/TiledFloor";
 import { PointLight } from "../../../lighting/PointLight";
@@ -19,8 +19,8 @@ import {
   redCarpetUpperLeft,
   redCarpetUpperRight,
   rug,
-} from "../../../view/DecorationSprite";
-import { DirectionalSprite } from "../../../view/DirectionalSprite";
+} from "../../../entities/environment/decorations";
+import { DirectionalSprite } from "../../../entities/environment/decorations/DirectionalSprite";
 import { CELL_WIDTH } from "../levelGeneration";
 import { CellTransformer } from "./ElementTransformer";
 import {

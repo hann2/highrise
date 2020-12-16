@@ -21,10 +21,10 @@ import {
   SPLAT_GLOW_TEXTURES,
   SPLAT_TEXTURES,
 } from "../effects/Splat";
-import { DOOR_SPRITES } from "../entities/Door";
+import { DOOR_SPRITES } from "../entities/environment/Door";
 import { VENDING_MACHINES } from "../entities/environment/VendingMachine";
 import { SUBFLOOR_TEXTURES } from "../SubFloor";
-import * as DecorationSprites from "../view/DecorationSprite";
+import * as DecorationSprites from "../entities/environment/decorations";
 import { WEAPONS } from "../weapons";
 
 // Returns the list of all

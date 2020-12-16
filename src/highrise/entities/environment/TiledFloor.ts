@@ -4,16 +4,16 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { V, V2d } from "../../../core/Vector";
 import { Layers } from "../../layers";
-import { DecorationSprite } from "../../view/DecorationSprite";
+import { DecorationInfo } from "./decorations/DecorationInfo";
 
-export type Tiles = (DecorationSprite | undefined)[][];
+export type Tiles = ((DecorationInfo & {}) | undefined)[][];
 
 export default class TiledFloor extends BaseEntity implements Entity {
   constructor(position: V2d, tileDimensions: V2d, tiles: Tiles) {
     super();
 
-    const exampleTile: DecorationSprite = this.getExampleTile(tiles)!;
-    const scale = tileDimensions.x / exampleTile.dimensions.x;
+    const exampleTile: DecorationInfo = this.getExampleTile(tiles);
+    const scale = tileDimensions.x / exampleTile.sheetInfo!.dimensions.x;
     const tileLayer = new CompositeRectTileLayer(0, [
       Texture.from(exampleTile.imageName, {}),
     ]);
@@ -23,10 +23,13 @@ export default class TiledFloor extends BaseEntity implements Entity {
 
     for (let i = 0; i < tiles.length; i++) {
       for (let j = 0; j < tiles[i].length; j++) {
-        const tile: DecorationSprite | undefined = tiles[i][j];
+        const tile: DecorationInfo | undefined = tiles[i][j];
         if (!tile) {
           continue;
         }
+
+        const { offset, dimensions } = tile.sheetInfo!;
+
         const childPosition = position
           .add(V(i * tileW, j * tileH))
           // Have to reverse the scale from above for these positions
@@ -34,12 +37,12 @@ export default class TiledFloor extends BaseEntity implements Entity {
 
         tileLayer.addRect(
           0,
-          tile.offset.x,
-          tile.offset.y,
+          offset.x,
+          offset.y,
           childPosition.x,
           childPosition.y,
-          tile.dimensions.x,
-          tile.dimensions.y
+          dimensions.x,
+          dimensions.y
         );
       }
     }
@@ -48,13 +51,16 @@ export default class TiledFloor extends BaseEntity implements Entity {
     this.sprite.layerName = Layers.FLOOR;
   }
 
-  getExampleTile(tiles: Tiles) {
+  // Grab the first non-empty tile to look at
+  getExampleTile(tiles: Tiles): DecorationInfo {
     for (let i = 0; i < tiles.length; i++) {
       for (let j = 0; j < tiles[i].length; j++) {
-        if (tiles[i] && tiles[i][j]) {
-          return tiles[i][j];
+        const tile = tiles[i][j];
+        if (tile) {
+          return tile;
         }
       }
     }
+    throw new Error("All tiles were blank");
   }
 }

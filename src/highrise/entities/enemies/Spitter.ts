@@ -95,7 +95,7 @@ export default class Spitter extends BaseEntity implements Entity, Hittable {
   }
 
   getHumansInRange(): Human[] {
-    const humans = [...this.game!.entities.getByFilter(isHuman)];
+    const humans = [...(this.game?.entities.getByFilter(isHuman) ?? [])];
     return humans.filter((human) => {
       const displacement = human.getPosition().isub(this.body.position);
       const inRange = displacement.magnitude < SPITTER_ATTACK_RANGE;

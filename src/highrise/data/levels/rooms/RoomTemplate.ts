@@ -1,6 +1,6 @@
 import Entity from "../../../../core/entity/Entity";
 import { V2d } from "../../../../core/Vector";
-import { DecorationSprite } from "../../../view/DecorationSprite";
+import { DecorationInfo } from "../../../entities/environment/decorations/DecorationInfo";
 import { WallID } from "../levelGeneration";
 import {
   AngleTransformer,
@@ -11,9 +11,9 @@ import {
 export default class RoomTemplate {
   dimensions: V2d;
   doors: WallID[];
-  floor?: DecorationSprite;
+  floor?: DecorationInfo;
 
-  constructor(dimensions: V2d, doors: WallID[], floor?: DecorationSprite) {
+  constructor(dimensions: V2d, doors: WallID[], floor?: DecorationInfo) {
     this.dimensions = dimensions;
     this.doors = doors;
     this.floor = floor;

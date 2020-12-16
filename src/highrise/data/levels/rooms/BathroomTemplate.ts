@@ -1,23 +1,16 @@
 import Entity from "../../../../core/entity/Entity";
-import { polarToVec } from "../../../../core/util/MathUtil";
 import { choose } from "../../../../core/util/Random";
-import { V, V2d } from "../../../../core/Vector";
-import Decoration from "../../../entities/Decoration";
-import Furniture from "../../../entities/Furniture";
-import { PointLight } from "../../../lighting/PointLight";
+import { V } from "../../../../core/Vector";
 import {
   bathroomTiles,
-  downSink1,
-  downSink2,
-  downToilet1,
-  downToilet2,
-  leftSink1,
-  leftToilet1,
-  leftToilet2,
-  rightSink1,
-  rightToilet1,
-  rightToilet2,
-} from "../../../view/DecorationSprite";
+  sink1,
+  toilet1,
+  toilet2,
+  toilet3,
+  toilet4,
+} from "../../../entities/environment/decorations";
+import Furniture from "../../../entities/environment/Furniture";
+import { PointLight } from "../../../lighting/PointLight";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 
@@ -32,57 +25,30 @@ export default class BathroomTemplate extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
-    const addToiletAt = (p: V2d) => {
-      const vec = polarToVec(transformAngle(0), 1);
-      if (vec.x === 1) {
-        entities.push(
-          new Furniture(
-            transformCell(p).add(V(0.4, 0)),
-            choose(leftToilet1, leftToilet2)
-          )
-        );
-      } else if (vec.x === -1) {
-        entities.push(
-          new Furniture(
-            transformCell(p).add(V(-0.4, 0)),
-            choose(rightToilet1, rightToilet2)
-          )
-        );
-      } else if (vec.y === -1) {
-        entities.push(
-          new Furniture(
-            transformCell(p).add(V(0, -0.3)),
-            choose(downToilet1, downToilet2)
-          )
-        );
-      }
-    };
+    const doorOpenDirection = transformCell(V(1, 0)).sub(transformCell(V(0, 0)))
+      .angle;
 
-    const addSinkAt = (p: V2d) => {
-      const vec = polarToVec(transformAngle(0), 1);
-      if (vec.x === 1) {
-        entities.push(
-          new Decoration(transformCell(p).add(V(-0.5, 0)), rightSink1)
-        );
-      } else if (vec.x === -1) {
-        entities.push(
-          new Decoration(transformCell(p).add(V(0.5, 0)), leftSink1)
-        );
-      } else if (vec.y === 1) {
-        entities.push(
-          new Decoration(
-            transformCell(p).add(V(0, -0.5)),
-            choose(downSink1, downSink2)
-          )
-        );
-      }
-    };
+    // This is either a black-seat bathroom or a white-seat bathroom
+    const toiletSet = choose([toilet1, toilet2], [toilet3, toilet4]);
 
-    addSinkAt(V(0, 1));
-    addSinkAt(V(0, 2));
-    addToiletAt(V(1, 0));
-    addToiletAt(V(1, 1));
-    addToiletAt(V(1, 2));
+    for (const toiletPosition of [
+      V(0.375, 0),
+      V(0.375, 0.5),
+      V(0.375, 1),
+      V(0.375, 1.5),
+      V(0.375, 2),
+    ]) {
+      const angle = doorOpenDirection + Math.PI * 2;
+      const p = transformCell(toiletPosition);
+      const sprite = choose(...toiletSet);
+      entities.push(new Furniture(p, sprite, angle));
+    }
+
+    for (const sinkPosition of [V(2 - 0.375, 1), V(2 - 0.375, 2)]) {
+      const angle = doorOpenDirection;
+      const p = transformCell(sinkPosition);
+      entities.push(new Furniture(p, sink1, angle));
+    }
 
     entities.push(
       new PointLight({

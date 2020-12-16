@@ -1,8 +1,11 @@
 import Entity from "../../../../../core/entity/Entity";
 import { V } from "../../../../../core/Vector";
-import Furniture from "../../../../entities/Furniture";
+import Furniture from "../../../../entities/environment/Furniture";
 import { PointLight } from "../../../../lighting/PointLight";
-import { bathroomTiles, tailorStall } from "../../../../view/DecorationSprite";
+import {
+  bathroomTiles,
+  tailorStall,
+} from "../../../../entities/environment/decorations";
 import { AngleTransformer, CellTransformer } from "../ElementTransformer";
 import RoomTemplate from "../RoomTemplate";
 

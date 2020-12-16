@@ -71,6 +71,7 @@ export default class MainMenu extends BaseEntity implements Entity {
 
   async onAdd(game: Game) {
     this.positionText();
+    this.onInputDeviceChange(game.io.usingGamepad);
 
     this.titleText.alpha = 0;
     this.startText.alpha = 0;

@@ -1,21 +1,21 @@
 import { Body, Box, vec2 } from "p2";
 import { BLEND_MODES, Sprite } from "pixi.js";
-import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
-import snd_wallHit4 from "../../../resources/audio/impacts/wall-hit-4.flac";
-import img_wall1 from "../../../resources/images/environment/wall-1.png";
-import img_wallAo1 from "../../../resources/images/environment/wall-ao-1.png";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
-import { PositionalSound } from "../../core/sound/PositionalSound";
-import { choose, rNormal } from "../../core/util/Random";
-import { V, V2d } from "../../core/Vector";
-import WallImpact from "../effects/WallImpact";
-import { Layers } from "../layers";
-import { CollisionGroups } from "../physics/CollisionGroups";
-import { P2Materials } from "../physics/PhysicsMaterials";
-import SwingingWeapon from "../weapons/SwingingWeapon";
-import Bullet from "./Bullet";
-import Hittable from "./Hittable";
+import snd_wallHit3 from "../../../../resources/audio/impacts/wall-hit-3.flac";
+import snd_wallHit4 from "../../../../resources/audio/impacts/wall-hit-4.flac";
+import img_wall1 from "../../../../resources/images/environment/wall-1.png";
+import img_wallAo1 from "../../../../resources/images/environment/wall-ao-1.png";
+import BaseEntity from "../../../core/entity/BaseEntity";
+import Entity, { GameSprite } from "../../../core/entity/Entity";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
+import { choose, rNormal } from "../../../core/util/Random";
+import { V, V2d } from "../../../core/Vector";
+import WallImpact from "../../effects/WallImpact";
+import { Layers } from "../../layers";
+import { CollisionGroups } from "../../physics/CollisionGroups";
+import { P2Materials } from "../../physics/PhysicsMaterials";
+import SwingingWeapon from "../../weapons/SwingingWeapon";
+import Bullet from "../Bullet";
+import Hittable from "../Hittable";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {
   tags = ["cast_shadow"];

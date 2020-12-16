@@ -1,9 +1,10 @@
 import { Ray, RaycastResult } from "p2";
-import { Graphics } from "pixi.js";
+import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../../core/entity/Entity";
 import { polarToVec } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
+import { getBlobPair } from "../../effects/Splat";
 import { Layers } from "../../layers";
 import { CollisionGroups } from "../../physics/CollisionGroups";
 import Human from "../human/Human";
@@ -13,7 +14,7 @@ export const DEATH_ORB_RADIUS = 0.4; // meters
 const MAX_LIFESPAN = 3.0; // seconds
 
 export default class DeathOrb extends BaseEntity implements Entity {
-  sprite: Graphics & GameSprite;
+  sprite: Sprite & GameSprite;
   velocity: V2d;
 
   private ray: Ray;
@@ -42,11 +43,18 @@ export default class DeathOrb extends BaseEntity implements Entity {
       checkCollisionResponse: true,
     });
 
-    this.sprite = new Graphics();
-    this.sprite.beginFill(0xff0000);
-    this.sprite.drawCircle(0, 0, DEATH_ORB_RADIUS);
-    this.sprite.endFill();
+    const [texture, glowTexture] = getBlobPair();
+
+    this.sprite = Sprite.from(texture);
+    const scale = (2 * DEATH_ORB_RADIUS) / this.sprite.texture.width;
+    this.sprite.scale.set(scale);
+    this.sprite.tint = 0xff0000;
     this.sprite.layerName = Layers.WEAPONS;
+    const glow = Sprite.from(glowTexture);
+    glow.tint = 0xff3333;
+    glow.blendMode = BLEND_MODES.ADD;
+    glow.alpha = 0.3;
+    this.sprite.addChild(glow);
 
     this.renderPosition = position.clone();
   }
@@ -114,15 +122,8 @@ export default class DeathOrb extends BaseEntity implements Entity {
     }
   }
 
-  getRenderEndPoint(dt: number) {
-    if (this.hitPosition) {
-      return this.hitPosition.sub(this.renderPosition);
-    } else {
-      return this.velocity.mul(dt);
-    }
-  }
-
-  afterPhysics() {
+  onRender(dt: number) {
     this.sprite.position.set(...this.renderPosition);
+    this.sprite.rotation += dt * 1.5;
   }
 }

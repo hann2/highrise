@@ -1,21 +1,21 @@
 import { Body, Box, RevoluteConstraint } from "p2";
 import { Sprite } from "pixi.js";
-import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
-import img_door1 from "../../../resources/images/environment/door-1.png";
-import img_door2 from "../../../resources/images/environment/door-2.png";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
-import Game from "../../core/Game";
-import { PositionalSound } from "../../core/sound/PositionalSound";
-import { choose } from "../../core/util/Random";
-import { V2d } from "../../core/Vector";
-import WallImpact from "../effects/WallImpact";
-import { Layers } from "../layers";
-import { CollisionGroups } from "../physics/CollisionGroups";
-import SwingingWeapon from "../weapons/SwingingWeapon";
-import Bullet from "./Bullet";
-import Hittable from "./Hittable";
+import snd_wallHit1 from "../../../../resources/audio/impacts/wall-hit-1.flac";
+import snd_wallHit2 from "../../../../resources/audio/impacts/wall-hit-2.flac";
+import img_door1 from "../../../../resources/images/environment/door-1.png";
+import img_door2 from "../../../../resources/images/environment/door-2.png";
+import BaseEntity from "../../../core/entity/BaseEntity";
+import Entity, { GameSprite } from "../../../core/entity/Entity";
+import Game from "../../../core/Game";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
+import { choose } from "../../../core/util/Random";
+import { V2d } from "../../../core/Vector";
+import WallImpact from "../../effects/WallImpact";
+import { Layers } from "../../layers";
+import { CollisionGroups } from "../../physics/CollisionGroups";
+import SwingingWeapon from "../../weapons/SwingingWeapon";
+import Bullet from "../Bullet";
+import Hittable from "../Hittable";
 
 const DOOR_THICKNESS = 0.25;
 

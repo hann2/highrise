@@ -1,12 +1,12 @@
 import { Body, Box } from "p2";
 import { Sprite } from "pixi.js";
-import img_stairs from "../../../resources/images/environment/stairs.png";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
-import { V } from "../../core/Vector";
-import { CollisionGroups } from "../physics/CollisionGroups";
-import { Layers } from "../layers";
-import Interactable from "./Interactable";
+import img_stairs from "../../../../resources/images/environment/stairs.png";
+import BaseEntity from "../../../core/entity/BaseEntity";
+import Entity, { GameSprite } from "../../../core/entity/Entity";
+import { V } from "../../../core/Vector";
+import { CollisionGroups } from "../../physics/CollisionGroups";
+import { Layers } from "../../layers";
+import Interactable from "../Interactable";
 
 export default class Exit extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;

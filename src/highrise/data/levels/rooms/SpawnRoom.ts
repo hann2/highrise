@@ -9,7 +9,7 @@ import SpawnLocation from "../../../entities/SpawnLocation";
 import WeaponPickup from "../../../entities/WeaponPickup";
 import { Layers } from "../../../layers";
 import { PointLight } from "../../../lighting/PointLight";
-import { cementFloor } from "../../../view/DecorationSprite";
+import { cementFloor } from "../../../entities/environment/decorations";
 import Gun from "../../../weapons/Gun";
 import { GUNS } from "../../../weapons/guns";
 import { AK47 } from "../../../weapons/guns/AK-47";

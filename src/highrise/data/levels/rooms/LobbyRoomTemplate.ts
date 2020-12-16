@@ -1,10 +1,10 @@
 import Entity from "../../../../core/entity/Entity";
 import { choose } from "../../../../core/util/Random";
 import { V, V2d } from "../../../../core/Vector";
-import Decoration from "../../../entities/Decoration";
-import ElevatorDoor from "../../../entities/ElevatorDoor";
+import Decoration from "../../../entities/environment/Decoration";
+import ElevatorDoor from "../../../entities/environment/ElevatorDoor";
 import TiledFloor, { Tiles } from "../../../entities/environment/TiledFloor";
-import Furniture from "../../../entities/Furniture";
+import Furniture from "../../../entities/environment/Furniture";
 import { PointLight } from "../../../lighting/PointLight";
 import { CARDINAL_DIRECTIONS, Direction } from "../../../utils/directions";
 import {
@@ -29,8 +29,8 @@ import {
   redCarpetUpperLeft,
   redCarpetUpperRight,
   rug,
-} from "../../../view/DecorationSprite";
-import { DirectionalSprite } from "../../../view/DirectionalSprite";
+} from "../../../entities/environment/decorations";
+import { DirectionalSprite } from "../../../entities/environment/decorations/DirectionalSprite";
 import { CELL_WIDTH, getWallInDirection, WallID } from "../levelGeneration";
 import {
   AngleTransformer,

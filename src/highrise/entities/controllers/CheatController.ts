@@ -4,6 +4,7 @@ import { ControllerButton } from "../../../core/io/Gamepad";
 import { KeyCode } from "../../../core/io/Keys";
 import FPSMeter from "../../../core/util/FPSMeter";
 import { lerp } from "../../../core/util/MathUtil";
+import VisionController from "../../VisionController";
 
 // Put stuff in here that we want to disable on actual release
 export default class CheatController extends BaseEntity implements Entity {
@@ -18,6 +19,14 @@ export default class CheatController extends BaseEntity implements Entity {
       case "KeyL":
         console.log("dispatching newGame");
         this.game!.dispatch({ type: "newGame" });
+        break;
+      case "KeyV":
+        console.log("Toggling vision");
+        for (const visionController of this.game!.entities.getByFilter(
+          (e): e is VisionController => e instanceof VisionController
+        )) {
+          visionController.sprite.visible = !visionController.sprite.visible;
+        }
         break;
       case "Backslash":
         for (const fpsMeter of this.game!.entities.getByFilter(

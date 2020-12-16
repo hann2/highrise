@@ -8,8 +8,8 @@ import {
   isCardinal,
   opposite,
 } from "../../../utils/directions";
-import { DecorationSprite } from "../../../view/DecorationSprite";
-import { DirectionalSprite } from "../../../view/DirectionalSprite";
+import { DecorationInfo } from "../../../entities/environment/decorations/DecorationInfo";
+import { DirectionalSprite } from "../../../entities/environment/decorations/DirectionalSprite";
 
 export type FloorMask = (boolean | undefined)[][];
 
@@ -37,7 +37,7 @@ export function fillTile(
   floorMask: FloorMask,
   directionalSprite: DirectionalSprite,
   p: V2d
-): DecorationSprite | undefined {
+): DecorationInfo | undefined {
   if (!isMasked(floorMask, p)) {
     return;
   }
@@ -86,10 +86,10 @@ export function fillFloorWithBorders(
 }
 
 export function insetTile(
-  originalSprite: DecorationSprite | undefined,
+  originalSprite: DecorationInfo | undefined,
   directionalSprite: DirectionalSprite,
   subDirection: keyof typeof Direction
-): DecorationSprite | undefined {
+): DecorationInfo | undefined {
   if (!originalSprite) {
     return;
   }

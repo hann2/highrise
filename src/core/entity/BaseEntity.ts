@@ -119,6 +119,20 @@ export default abstract class BaseEntity implements Entity {
       }
     }
   }
+
+  /**
+   * Update the time remaing on a timer (or all timers).
+   */
+  updateTimers(value: number = 0, timerId?: string): void {
+    if (this.children) {
+      const timers = this.children.filter(isTimer);
+      for (const timer of timers) {
+        if (!timerId || timerId === timer.timerId) {
+          timer.timeRemaining = value;
+        }
+      }
+    }
+  }
 }
 
 class Timer extends BaseEntity implements Entity {

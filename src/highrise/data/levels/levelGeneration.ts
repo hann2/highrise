@@ -9,20 +9,20 @@ import {
 } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import SurvivorHumanController from "../../entities/controllers/SurvivorHumanController";
-import Decoration from "../../entities/Decoration";
-import Door from "../../entities/Door";
+import Decoration from "../../entities/environment/Decoration";
+import Door from "../../entities/environment/Door";
 import Crawler from "../../entities/enemies/Crawler";
 import Heavy from "../../entities/enemies/Heavy";
 import Spitter from "../../entities/enemies/Spitter";
 import Zombie from "../../entities/enemies/Zombie";
 import VendingMachine from "../../entities/environment/VendingMachine";
-import Exit from "../../entities/Exit";
-import Furniture from "../../entities/Furniture";
+import Exit from "../../entities/environment/Exit";
+import Furniture from "../../entities/environment/Furniture";
 import HealthPickup from "../../entities/HealthPickup";
 import Human from "../../entities/human/Human";
-import Wall from "../../entities/Wall";
+import Wall from "../../entities/environment/Wall";
 import WeaponPickup from "../../entities/WeaponPickup";
-import Floor from "../../Floor";
+import RepeatingFloor from "../../entities/environment/RepeatingFloor";
 import LevelGridMap from "../../LevelGridMap";
 import { PointLight } from "../../lighting/PointLight";
 import SubFloor from "../../SubFloor";
@@ -38,7 +38,7 @@ import {
   sack,
   shelfEmpty,
   waterCooler,
-} from "../../view/DecorationSprite";
+} from "../../entities/environment/decorations";
 import Gun from "../../weapons/Gun";
 import { GUNS } from "../../weapons/guns";
 import { FiveSeven } from "../../weapons/guns/FiveSeven";
@@ -469,7 +469,7 @@ class LevelBuilder {
 
       if (template.floor) {
         entities.push(
-          new Floor(
+          new RepeatingFloor(
             template.floor,
             this.levelCoordToWorldCoord(corner.sub(V(0.5, 0.5))),
             dimensions.mul(CELL_WIDTH)
@@ -808,7 +808,9 @@ class LevelBuilder {
       const upperLeftCorner = this.levelCoordToWorldCoord(
         upperLeftCell.sub(V(0.5, 0.5))
       );
-      entities.push(new Floor(cementFloor, upperLeftCorner, dimensions));
+      entities.push(
+        new RepeatingFloor(cementFloor, upperLeftCorner, dimensions)
+      );
 
       if (counter % 4 === 0) {
         entities.push(
