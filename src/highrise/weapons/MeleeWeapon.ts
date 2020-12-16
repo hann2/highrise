@@ -3,7 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import Human from "../entities/human/Human";
+import Human from "../human/Human";
 import { MeleeWeaponStats } from "./MeleeWeaponStats";
 import { SwingDescriptor } from "./SwingDescriptor";
 import SwingingWeapon from "./SwingingWeapon";

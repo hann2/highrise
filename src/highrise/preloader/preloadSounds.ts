@@ -12,9 +12,9 @@ import snd_quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac"
 import { CHARACTERS } from "../characters/Character";
 import { GLOWSTICK_SOUNDS } from "../effects/GlowStick";
 import { SPLAT_SOUNDS } from "../effects/Splat";
-import { ENEMY_SOUNDS } from "../entities/enemies/ZombieVoice";
-import { MUSIC_URLS } from "../MusicController";
-import { WEAPONS } from "../weapons";
+import { ENEMY_SOUNDS } from "../enemies/ZombieVoice";
+import { MUSIC_URLS } from "../controllers/MusicController";
+import { WEAPONS } from "../weapons/weapons";
 
 export function getSoundsToPreload(): string[] {
   const urls = new Set<string>([

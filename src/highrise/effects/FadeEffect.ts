@@ -1,7 +1,7 @@
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { Layers } from "../layers";
+import { Layers } from "../config/layers";
 
 export default class FadeEffect extends BaseEntity implements Entity {
   persistent = true;

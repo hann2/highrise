@@ -5,10 +5,12 @@ import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { clamp, smoothStep } from "../../core/util/MathUtil";
-import { Layers } from "../layers";
+import { Layers } from "../config/layers";
 import ClickableText from "./ClickableText";
 import CreditsScreen from "./Credits";
 import FeedbackButton from "./FeedbackButton";
+
+const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 2.2;
 
 let firstTime = true;
 export default class MainMenu extends BaseEntity implements Entity {
@@ -126,7 +128,7 @@ export default class MainMenu extends BaseEntity implements Entity {
       this.startText.interactive = false;
       this.creditsButton.sprite.interactive = false;
       this.feedbackButton.sprite.interactive = false;
-      await this.wait(2.2, (dt, t) => {
+      await this.wait(FADE_OUT_TIME, (dt, t) => {
         this.titleText.alpha = smoothStep(clamp(1.5 - 1.5 * t));
         this.startText.alpha = smoothStep(clamp(1.0 - 4 * t));
         this.creditsButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));

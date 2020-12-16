@@ -4,7 +4,7 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import { darken } from "../../core/util/ColorUtils";
 import { smoothStep } from "../../core/util/MathUtil";
 import { rUniform } from "../../core/util/Random";
-import { Layers } from "../layers";
+import { Layers } from "../config/layers";
 import { getSplatPair } from "./Splat";
 
 const SCALE = 1.0 / 64;

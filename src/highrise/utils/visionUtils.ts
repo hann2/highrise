@@ -2,9 +2,9 @@ import { Ray, RaycastResult } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Game from "../../core/Game";
 import CustomWorld from "../../core/physics/CustomWorld";
-import { Enemy, isEnemy } from "../entities/enemies/Enemy";
-import Human from "../entities/human/Human";
-import { CollisionGroups } from "../physics/CollisionGroups";
+import { Enemy, isEnemy } from "../enemies/Enemy";
+import Human from "../human/Human";
+import { CollisionGroups } from "../config/CollisionGroups";
 
 // Returns true if there is an unobstructed line-of-sight from the looker to the target
 export function testLineOfSight(

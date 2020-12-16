@@ -21,11 +21,11 @@ import {
   SPLAT_GLOW_TEXTURES,
   SPLAT_TEXTURES,
 } from "../effects/Splat";
-import { DOOR_SPRITES } from "../entities/environment/Door";
-import { VENDING_MACHINES } from "../entities/environment/VendingMachine";
-import { SUBFLOOR_TEXTURES } from "../SubFloor";
-import * as DecorationSprites from "../entities/environment/decorations";
-import { WEAPONS } from "../weapons";
+import { DOOR_SPRITES } from "../environment/Door";
+import { VENDING_MACHINES } from "../environment/VendingMachine";
+import { SUBFLOOR_TEXTURES } from "../environment/SubFloor";
+import * as DecorationSprites from "../environment/decorations/decorations";
+import { WEAPONS } from "../weapons/weapons";
 
 // Returns the list of all
 export function getImagesToPreload(): Set<string> {

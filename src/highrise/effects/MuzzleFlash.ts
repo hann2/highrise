@@ -19,8 +19,8 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layers } from "../layers";
-import { PointLight } from "../lighting/PointLight";
+import { Layers } from "../config/layers";
+import { PointLight } from "../lighting-and-vision/PointLight";
 
 export const MUZZLE_FLASH_URLS = [
   muzzleFlash1,

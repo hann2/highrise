@@ -7,7 +7,7 @@ import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { Layers } from "../layers";
+import { Layers } from "../config/layers";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import BloodSplat from "./BloodSplat";
 import { BLOB_TEXTURES, getSplatSound, SPLAT_SOUNDS } from "./Splat";

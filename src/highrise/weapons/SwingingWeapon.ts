@@ -3,10 +3,10 @@ import { Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
-import { isHittable } from "../entities/Hittable";
-import Human from "../entities/human/Human";
-import { Layers } from "../layers";
-import { CollisionGroups } from "../physics/CollisionGroups";
+import { isHittable } from "../environment/Hittable";
+import Human from "../human/Human";
+import { Layers } from "../config/layers";
+import { CollisionGroups } from "../config/CollisionGroups";
 import MeleeWeapon from "./MeleeWeapon";
 import { SwingPhase } from "./SwingDescriptor";
 

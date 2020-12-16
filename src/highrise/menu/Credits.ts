@@ -3,7 +3,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
-import { Layers } from "../layers";
+import { Layers } from "../config/layers";
 import MainMenu from "./MainMenu";
 
 const SCROLL_SPEED = 0.8;

@@ -7,9 +7,9 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { clamp, degToRad, polarToVec } from "../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layers } from "../layers";
-import { CollisionGroups } from "../physics/CollisionGroups";
-import { P2Materials } from "../physics/PhysicsMaterials";
+import { Layers } from "../config/layers";
+import { CollisionGroups } from "../config/CollisionGroups";
+import { P2Materials } from "../config/PhysicsMaterials";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
 const SIZE = 0.03; // meters wide

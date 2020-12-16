@@ -13,10 +13,10 @@ import { colorLerp } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layers } from "../layers";
-import { PointLight } from "../lighting/PointLight";
-import { CollisionGroups } from "../physics/CollisionGroups";
-import { P2Materials } from "../physics/PhysicsMaterials";
+import { Layers } from "../config/layers";
+import { PointLight } from "../lighting-and-vision/PointLight";
+import { CollisionGroups } from "../config/CollisionGroups";
+import { P2Materials } from "../config/PhysicsMaterials";
 
 export const GLOWSTICK_TEXTURES = [
   img_glowStick1,

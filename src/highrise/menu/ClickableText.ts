@@ -1,7 +1,7 @@
 import { Text } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { Layers } from "../layers";
+import { Layers } from "../config/layers";
 
 interface Options {
   inactiveColor?: string;

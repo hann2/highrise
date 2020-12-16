@@ -1,0 +1,39 @@
+
+
+
+Sprites to Fix in order of amount they bother me most:
+
+- Bookshelfs
+- Boxes
+- Shop tables
+- Lobby chairs
+- lobby tables
+- piano
+- health pack (sorry Philip)
+
+
+
+Other gameplay things that bother me
+- Bullets hit furniture
+- goo/blood goes under rug
+- I want mute settings to be remembered on refresh
+
+
+Ally AI Ideas
+- Make AI a state machine
+- Run away when zombies are too close
+- Pick up better guns when they see them
+- Call out health packs when they see them
+
+
+Ideas for performance improvements
+- Separate custom broadphase system for shadows
+- Make walls use lines instead of boxes (at least for shadows)
+- A* for AI
+- Somehow make raycasting fast, then use it for shadows and AI
+
+
+Code cleanliness things that bug me
+- Lots of duplicated code in:
+  - Enemies
+  - Projectiles

@@ -4,9 +4,10 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
-import { Layers } from "../layers";
+import { Layers } from "../config/layers";
 import ClickableText from "./ClickableText";
 import FeedbackButton from "./FeedbackButton";
+import MuteButton from "./MuteButton";
 
 export default class PauseMenu extends BaseEntity implements Entity {
   persistent = true;
@@ -16,6 +17,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
   pausedText: Text;
   mainMenuButton: ClickableText;
   resumeText: Text;
+  muteButton: ClickableText;
 
   constructor() {
     super();
@@ -38,6 +40,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
     });
     this.pausedText.anchor.set(0.5, 1);
     this.sprite.addChild(this.pausedText);
+
     this.resumeText = new Text("", {
       fontSize: 48,
 
@@ -57,6 +60,8 @@ export default class PauseMenu extends BaseEntity implements Entity {
     );
 
     this.feedbackButton = this.addChild(new FeedbackButton());
+
+    this.muteButton = this.addChild(new MuteButton());
   }
 
   handlers = {
@@ -82,14 +87,19 @@ export default class PauseMenu extends BaseEntity implements Entity {
 
     this.mainMenuButton.sprite.position.set(10, 10);
     this.feedbackButton.sprite.position.set(10, 50);
+    this.muteButton.sprite.position.set(10, 90);
   }
 
   setVisibility(visible: boolean) {
     this.sprite.visible = visible;
+
     this.mainMenuButton.sprite.visible = visible;
     this.feedbackButton.sprite.visible = visible;
+    this.muteButton.sprite.visible = visible;
+
     this.mainMenuButton.sprite.interactive = visible;
     this.feedbackButton.sprite.interactive = visible;
+    this.muteButton.sprite.interactive = visible;
   }
 
   onPause() {

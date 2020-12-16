@@ -7,8 +7,8 @@ import { rNormal, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import MuzzleFlash from "../effects/MuzzleFlash";
 import ShellCasing from "../effects/ShellCasing";
-import Bullet from "../entities/Bullet";
-import Human from "../entities/human/Human";
+import Bullet from "../projectiles/Bullet";
+import Human from "../human/Human";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import {
   EjectionType,

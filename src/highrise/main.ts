@@ -5,18 +5,22 @@ import SpatialHashingBroadphase from "../core/physics/SpatialHashingBroadphase";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import FPSMeter from "../core/util/FPSMeter";
 import ResizeListener from "../core/util/ResizeListener";
-import { CELL_WIDTH, LEVEL_SIZE } from "./data/levels/levelGeneration";
-import CameraController from "./entities/controllers/CameraController";
-import CheatController from "./entities/controllers/CheatController";
-import LevelController from "./entities/controllers/LevelController";
-import { isHuman } from "./entities/human/Human";
-import PartyManager from "./entities/PartyManager";
-import { initLayers, Layers } from "./layers";
-import LightingManager from "./lighting/LightingManager";
+import {
+  CELL_WIDTH,
+  LEVEL_SIZE,
+} from "./levels/level-generation/levelGeneration";
+import CameraController from "./controllers/CameraController";
+import CheatController from "./controllers/CheatController";
+import LevelController from "./controllers/LevelController";
+import { isHuman } from "./human/Human";
+import PartyManager from "./environment/PartyManager";
+import { initLayers, Layers } from "./config/layers";
+import LightingManager from "./lighting-and-vision/LightingManager";
 import MainMenu from "./menu/MainMenu";
-import MusicController from "./MusicController";
-import { initContactMaterials } from "./physics/PhysicsMaterials";
+import MusicController from "./controllers/MusicController";
+import { initContactMaterials } from "./config/PhysicsMaterials";
 import Preloader from "./preloader/Preloader";
+import VolumeController from "./controllers/VolumeController";
 
 declare global {
   interface Window {
@@ -45,9 +49,6 @@ export async function main() {
   window.DEBUG = { game };
   game.start();
 
-  // It seems like we were kinda loud on average
-  game.masterGain.gain.value = 0.8;
-
   const preloader = game.addEntity(new Preloader());
   await preloader.waitTillLoaded();
   preloader.destroy();
@@ -58,12 +59,13 @@ export async function main() {
 
   game.addEntity(new AutoPauser());
   game.addEntity(new ResizeListener());
+  game.addEntity(new VolumeController());
+  game.addEntity(new MusicController());
   game.addEntity(new LevelController());
   game.addEntity(new PartyManager());
   game.addEntity(new CameraController(game.camera));
   game.addEntity(new PositionalSoundListener());
   game.addEntity(new LightingManager());
-  game.addEntity(new MusicController());
   game.addEntity(new MainMenu());
 
   if (process.env.NODE_ENV === "development") {

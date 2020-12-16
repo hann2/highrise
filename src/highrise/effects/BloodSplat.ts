@@ -3,7 +3,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { darken } from "../../core/util/ColorUtils";
 import { choose, rUniform } from "../../core/util/Random";
-import { Layers } from "../layers";
+import { Layers } from "../config/layers";
 import { SPLAT_TEXTURES } from "./Splat";
 
 const SCALE = 1.0 / 64;
