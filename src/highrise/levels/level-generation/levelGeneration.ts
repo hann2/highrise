@@ -755,7 +755,8 @@ class LevelBuilder {
             entities.push(
               new Furniture(
                 this.levelCoordToWorldCoord(machinePosition),
-                waterCooler
+                waterCooler,
+                wallDirection.angle
               )
             );
           }

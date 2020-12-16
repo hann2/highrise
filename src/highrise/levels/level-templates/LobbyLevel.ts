@@ -39,6 +39,24 @@ export default class LobbyLevel extends LevelTemplate {
     );
     rooms.push(
       new TransformedRoomTemplate(
+        new BathroomTemplate(),
+        shuffledOrientations[4]
+      )
+    );
+    rooms.push(
+      new TransformedRoomTemplate(
+        new BathroomTemplate(),
+        shuffledOrientations[5]
+      )
+    );
+    rooms.push(
+      new TransformedRoomTemplate(
+        new BathroomTemplate(),
+        shuffledOrientations[6]
+      )
+    );
+    rooms.push(
+      new TransformedRoomTemplate(
         new ZombieRoomTemplate(),
         shuffledOrientations[2]
       )

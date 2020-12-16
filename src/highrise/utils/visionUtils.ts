@@ -16,7 +16,7 @@ export function testLineOfSight(
     from: looker.getPosition(),
     to: target.getPosition(),
     skipBackfaces: true,
-    collisionMask: CollisionGroups.World,
+    collisionMask: CollisionGroups.Walls,
   });
   const result = new RaycastResult();
   (looker.game!.world as CustomWorld).raycast(result, ray, true);

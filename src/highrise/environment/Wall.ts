@@ -66,7 +66,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     });
 
     const shape = new Box({ width: width, height: length });
-    shape.collisionGroup = CollisionGroups.World | CollisionGroups.CastsShadow;
+    shape.collisionGroup = CollisionGroups.Walls | CollisionGroups.CastsShadow;
     shape.collisionMask = CollisionGroups.All;
     shape.material = P2Materials.wall;
     this.body.addShape(shape);

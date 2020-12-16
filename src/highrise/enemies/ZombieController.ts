@@ -122,7 +122,7 @@ export default class ZombieController extends BaseEntity implements Entity {
       from: this.zombie.getPosition(),
       to: this.zombie.getPosition().add(shamblingDirection.mul(100)),
       skipBackfaces: true,
-      collisionMask: CollisionGroups.World,
+      collisionMask: CollisionGroups.Walls,
     });
     const result = new RaycastResult();
     (this.game!.world as CustomWorld).raycast(result, ray, true);

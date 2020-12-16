@@ -41,6 +41,12 @@ export default class VisionController extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.VISION;
   }
 
+  handlers = {
+    newGame: () => {
+      this.destroy();
+    },
+  };
+
   onAdd() {
     console.log("new vision controller");
   }

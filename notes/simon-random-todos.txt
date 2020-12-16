@@ -10,13 +10,19 @@ Sprites to Fix in order of amount they bother me most:
 - lobby tables
 - piano
 - health pack (sorry Philip)
-
+- Chad (I feel like his lines just aren't very distinct)
 
 
 Other gameplay things that bother me
 - Bullets hit furniture
 - goo/blood goes under rug
 - I want mute settings to be remembered on refresh
+
+
+Polish things to add:
+- Laser sight
+- Reloading "animation"
+- Colored shadows and finite-length shadows -- might actually be hard, dunno
 
 
 Ally AI Ideas
@@ -37,3 +43,4 @@ Code cleanliness things that bug me
 - Lots of duplicated code in:
   - Enemies
   - Projectiles
+- We need more fine-grained control over entity persistence

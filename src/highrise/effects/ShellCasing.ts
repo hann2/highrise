@@ -62,7 +62,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
       length: this.sprite.height,
     });
     shape.collisionGroup = CollisionGroups.Particle;
-    shape.collisionMask = CollisionGroups.World | CollisionGroups.Zombies;
+    shape.collisionMask = CollisionGroups.Walls | CollisionGroups.Zombies;
     shape.material = P2Materials.glowstick;
     this.body.addShape(shape, undefined, Math.PI / 2);
 

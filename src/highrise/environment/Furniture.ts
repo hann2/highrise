@@ -13,29 +13,32 @@ import Bullet from "../projectiles/Bullet";
 import Hittable from "./Hittable";
 import Decoration from "./Decoration";
 import { DecorationInfo } from "./decorations/DecorationInfo";
+import { Layer } from "../config/layers";
 
 export default class Furniture extends BaseEntity implements Entity, Hittable {
   constructor(
     position: V2d,
     decorationInfo: DecorationInfo,
-    rotation: number = 0
+    angle: number = 0
   ) {
     super();
 
     const decoration = this.addChild(
-      new Decoration(position, decorationInfo, rotation)
+      new Decoration(position, decorationInfo, angle, Layer.FURNITURE)
     );
     decoration.sprite.layerName;
 
     this.body = new Body({
       mass: 0,
       position,
+      angle: angle,
     });
 
     const shape = new Box({
       width: decoration.sprite.width,
       height: decoration.sprite.height,
     });
+    shape.collisionGroup = CollisionGroups.Furniture;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0], 0);
   }

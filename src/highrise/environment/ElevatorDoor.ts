@@ -56,10 +56,10 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
       width: Math.abs(this.dimensions.x),
       height: Math.abs(this.dimensions.y),
     });
-    shape.collisionGroup = CollisionGroups.World | CollisionGroups.CastsShadow;
+    shape.collisionGroup = CollisionGroups.Walls | CollisionGroups.CastsShadow;
     shape.collisionMask =
       CollisionGroups.All ^
-      (CollisionGroups.World | CollisionGroups.CastsShadow);
+      (CollisionGroups.Walls | CollisionGroups.CastsShadow);
     this.doorShape = shape;
 
     this.body = new Body({

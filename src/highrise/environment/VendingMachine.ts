@@ -3,22 +3,22 @@ import { BLEND_MODES, Sprite } from "pixi.js";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
 import quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac";
-import img_vendingMachine1 from "../../../resources/images/environment/vending-machine-1.png";
-import img_vendingMachine2 from "../../../resources/images/environment/vending-machine-2.png";
-import img_vendingMachine3 from "../../../resources/images/environment/vending-machine-3.png";
-import img_vendingMachineGlow1 from "../../../resources/images/environment/vending-machine-glow-1.png";
-import img_vendingMachineGlow2 from "../../../resources/images/environment/vending-machine-glow-2.png";
-import img_vendingMachineGlow3 from "../../../resources/images/environment/vending-machine-glow-3.png";
+import img_vendingMachine1 from "../../../resources/images/environment/vending-machines/vending-machine-1.png";
+import img_vendingMachine2 from "../../../resources/images/environment/vending-machines/vending-machine-2.png";
+import img_vendingMachine3 from "../../../resources/images/environment/vending-machines/vending-machine-3.png";
+import img_vendingMachineGlow1 from "../../../resources/images/environment/vending-machines/vending-machine-glow-1.png";
+import img_vendingMachineGlow2 from "../../../resources/images/environment/vending-machines/vending-machine-glow-2.png";
+import img_vendingMachineGlow3 from "../../../resources/images/environment/vending-machines/vending-machine-glow-3.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose, rInteger, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import WallImpact from "../effects/WallImpact";
-import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
-import SwingingWeapon from "../weapons/SwingingWeapon";
+import { Layer } from "../config/layers";
+import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 import Hittable from "./Hittable";
 import Interactable from "./Interactable";
 
@@ -69,7 +69,7 @@ export default class VendingMachine
       width: 1.1,
       height: 0.9,
     });
-    shape.collisionGroup = CollisionGroups.World;
+    shape.collisionGroup = CollisionGroups.Walls;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0.3]);
 

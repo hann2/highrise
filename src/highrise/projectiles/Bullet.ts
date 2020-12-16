@@ -41,7 +41,10 @@ export default class Bullet extends BaseEntity implements Entity {
       to: V(0, 0),
       mode: Ray.ALL,
       collisionGroup: CollisionGroups.Projectiles,
-      collisionMask: CollisionGroups.All ^ CollisionGroups.Humans,
+      collisionMask:
+        CollisionGroups.All ^
+        CollisionGroups.Humans ^
+        CollisionGroups.Furniture,
       checkCollisionResponse: true,
     });
 
