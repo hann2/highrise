@@ -13,7 +13,7 @@ import { colorLerp } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { PointLight } from "../lighting-and-vision/PointLight";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { P2Materials } from "../config/PhysicsMaterials";
@@ -72,7 +72,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     this.sprite.tint = color;
     this.sprite.anchor.set(0.5);
     this.sprite.scale.set(SPRITE_LENGTH / this.sprite.texture.width);
-    this.sprite.layerName = Layers.EMISSIVES;
+    this.sprite.layerName = Layer.EMISSIVES;
   }
 
   onTick(dt: number) {
@@ -141,7 +141,7 @@ class StaticGlowstick extends BaseEntity {
     super();
 
     this.addChild(light, true); // steal it from the original
-    this.sprite.layerName = Layers.WORLD_BACK;
+    this.sprite.layerName = Layer.FLOOR_STUFF;
   }
 
   async onAdd() {

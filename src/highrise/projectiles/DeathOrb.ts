@@ -5,7 +5,7 @@ import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { getBlobPair } from "../effects/Splat";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import Human from "../human/Human";
 import Spitter from "../enemies/Spitter";
@@ -49,7 +49,7 @@ export default class DeathOrb extends BaseEntity implements Entity {
     const scale = (2 * DEATH_ORB_RADIUS) / this.sprite.texture.width;
     this.sprite.scale.set(scale);
     this.sprite.tint = 0xff0000;
-    this.sprite.layerName = Layers.WEAPONS;
+    this.sprite.layerName = Layer.WEAPONS;
     const glow = Sprite.from(glowTexture);
     glow.tint = 0xff3333;
     glow.blendMode = BLEND_MODES.ADD;

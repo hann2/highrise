@@ -7,7 +7,7 @@ import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import BloodSplat from "./BloodSplat";
 import { BLOB_TEXTURES, getSplatSound, SPLAT_SOUNDS } from "./Splat";
@@ -38,7 +38,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
     super();
 
     this.sprite = new Container();
-    this.sprite.layerName = Layers.WORLD_BACK;
+    this.sprite.layerName = Layer.PARTICLES;
     this.sprite.position.set(...position);
     this.particles = [];
 

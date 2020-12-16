@@ -3,7 +3,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { clamp } from "../../core/util/MathUtil";
 import Human from "../human/Human";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 
 const RESOLUTION = 8; // To draw the circle with more triangles
 const START_PHASE = (3 / 2) * Math.PI; // radians
@@ -23,7 +23,7 @@ export default class SpeakingCircle extends BaseEntity implements Entity {
 
     this.sprite = new Graphics();
     this.sprite.scale.set(1 / RESOLUTION); // For higher resolution cicles
-    this.sprite.layerName = Layers.WORLD_OVERLAY;
+    this.sprite.layerName = Layer.WORLD_OVERLAY;
     this.sprite.alpha = 0;
   }
 

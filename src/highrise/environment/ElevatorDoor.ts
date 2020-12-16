@@ -11,7 +11,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { smoothStep } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import SwingingWeapon from "../weapons/SwingingWeapon";
 import Bullet from "../projectiles/Bullet";
@@ -50,7 +50,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
 
     this.sprite = new Graphics();
     this.sprite.position.set(...staticCorner);
-    (this.sprite as GameSprite).layerName = Layers.WORLD_FRONT;
+    (this.sprite as GameSprite).layerName = Layer.WORLD_FRONT;
 
     const shape = new Box({
       width: Math.abs(this.dimensions.x),

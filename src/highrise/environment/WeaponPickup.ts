@@ -3,7 +3,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import { GameSprite } from "../../core/entity/Entity";
 import { rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import Gun from "../weapons/Gun";
 import MeleeWeapon from "../weapons/MeleeWeapon";
 import Human from "../human/Human";
@@ -24,7 +24,7 @@ export default class WeaponPickup extends BaseEntity {
     this.sprite.position.set(...position);
     this.sprite.rotation = rUniform(0, Math.PI * 2);
 
-    this.sprite.layerName = Layers.WORLD_BACK;
+    this.sprite.layerName = Layer.ITEMS;
   }
 
   onInteract(human: Human) {

@@ -3,7 +3,7 @@ import { Texture } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V, V2d } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { DecorationInfo } from "./decorations/DecorationInfo";
 
 export type Tiles = ((DecorationInfo & {}) | undefined)[][];
@@ -48,7 +48,7 @@ export default class TiledFloor extends BaseEntity implements Entity {
     }
 
     this.sprite = tileLayer;
-    this.sprite.layerName = Layers.FLOOR;
+    this.sprite.layerName = Layer.FLOOR;
   }
 
   // Grab the first non-empty tile to look at

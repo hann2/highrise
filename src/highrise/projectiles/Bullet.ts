@@ -4,7 +4,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import Light from "../lighting-and-vision/Light";
 import { CollisionGroups } from "../config/CollisionGroups";
 import Hittable, { isHittable } from "../environment/Hittable";
@@ -46,7 +46,7 @@ export default class Bullet extends BaseEntity implements Entity {
     });
 
     this.sprite = new Graphics();
-    this.sprite.layerName = Layers.WEAPONS;
+    this.sprite.layerName = Layer.WEAPONS;
 
     this.lightGraphics = new Graphics();
     this.light = this.addChild(new Light());

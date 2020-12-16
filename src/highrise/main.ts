@@ -14,7 +14,7 @@ import CheatController from "./controllers/CheatController";
 import LevelController from "./controllers/LevelController";
 import { isHuman } from "./human/Human";
 import PartyManager from "./environment/PartyManager";
-import { initLayers, Layers } from "./config/layers";
+import { initLayers, Layer } from "./config/layers";
 import LightingManager from "./lighting-and-vision/LightingManager";
 import MainMenu from "./menu/MainMenu";
 import MusicController from "./controllers/MusicController";
@@ -69,7 +69,7 @@ export async function main() {
   game.addEntity(new MainMenu());
 
   if (process.env.NODE_ENV === "development") {
-    game.addEntity(new FPSMeter(Layers.MENU));
+    game.addEntity(new FPSMeter(Layer.MENU));
     game.addEntity(new CheatController());
   }
 }

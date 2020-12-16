@@ -3,7 +3,7 @@ import img_heavy from "../../../resources/images/zombies/heavy.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { ZOMBIE_RADIUS } from "../constants";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import Zombie from "./Zombie";
 
 interface BodySprites {
@@ -22,7 +22,7 @@ export default class HeavySprite extends BaseEntity implements Entity {
     super();
 
     this.sprite = new Sprite();
-    this.sprite.layerName = Layers.WORLD;
+    this.sprite.layerName = Layer.WORLD;
     this.sprite.anchor.set(0.5, 0.5);
 
     this.bodySprites = {

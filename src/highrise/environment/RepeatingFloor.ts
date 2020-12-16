@@ -2,7 +2,7 @@ import { BaseTexture, Rectangle, Texture, TilingSprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import {
   DecorationInfo,
   getDecorationTexture,
@@ -24,6 +24,6 @@ export default class RepeatingFloor extends BaseEntity implements Entity {
     const scale = decorationInfo.heightMeters / texture.height;
     this.sprite.tileScale.set(scale);
     this.sprite.position.set(x, y);
-    this.sprite.layerName = Layers.FLOOR;
+    this.sprite.layerName = Layer.FLOOR;
   }
 }

@@ -4,7 +4,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V } from "../../core/Vector";
 import { getPartyLeader } from "../environment/PartyManager";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { Shadows } from "./Shadows";
 
 export const MAX_VISION = 10; // meters
@@ -38,7 +38,7 @@ export default class VisionController extends BaseEntity implements Entity {
     this.sprite.addChild(this.shadows.graphics);
     this.sprite.addChild(fog);
     this.sprite.addChild(distanceShadows);
-    this.sprite.layerName = Layers.VISION;
+    this.sprite.layerName = Layer.VISION;
   }
 
   onAdd() {

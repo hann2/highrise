@@ -10,7 +10,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import WallImpact from "../effects/WallImpact";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { P2Materials } from "../config/PhysicsMaterials";
 import SwingingWeapon from "../weapons/SwingingWeapon";
@@ -40,7 +40,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
     // TODO: AO Breaks on outside corners
     const aoSprite = Sprite.from(img_wallAo1);
-    (aoSprite as GameSprite).layerName = Layers.AO;
+    (aoSprite as GameSprite).layerName = Layer.FLOOR_AO;
     aoSprite.blendMode = BLEND_MODES.MULTIPLY;
     aoSprite.anchor.set(0.5, 0.5);
     aoSprite.width = drawHeight;
@@ -49,7 +49,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     aoSprite.rotation = angle + Math.PI / 2;
 
     const wallSprite = Sprite.from(img_wall1);
-    (wallSprite as GameSprite).layerName = Layers.WALLS;
+    (wallSprite as GameSprite).layerName = Layer.WALLS;
     wallSprite.anchor.set(0.5, 0.5);
     wallSprite.width = drawHeight;
     wallSprite.height = drawWidth;

@@ -3,7 +3,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import MainMenu from "./MainMenu";
 
 const SCROLL_SPEED = 0.8;
@@ -18,7 +18,7 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     super();
 
     this.sprite = new Sprite();
-    this.sprite.layerName = Layers.MENU;
+    this.sprite.layerName = Layer.MENU;
 
     const lines = TEXT.split("\n");
     let nextHeight = 0;

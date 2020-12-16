@@ -10,7 +10,7 @@ import { V, V2d } from "../../core/Vector";
 import GooImpact from "../effects/GooImpact";
 import GooSplat from "../effects/GooSplat";
 import { BLOB_TEXTURES, getBlobPair, getSplatSound } from "../effects/Splat";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import Human from "../human/Human";
 import Spitter from "../enemies/Spitter";
@@ -65,7 +65,7 @@ export default class Phlegm extends BaseEntity implements Entity {
     this.mainSprite.scale.set(scale);
     this.mainSprite.rotation = rUniform(0, Math.PI * 2);
     this.mainSprite.tint = color;
-    (this.mainSprite as GameSprite).layerName = Layers.WEAPONS;
+    (this.mainSprite as GameSprite).layerName = Layer.WEAPONS;
 
     this.glowSprite = Sprite.from(glowTexture);
     this.glowSprite.blendMode = BLEND_MODES.ADD;
@@ -74,7 +74,7 @@ export default class Phlegm extends BaseEntity implements Entity {
     this.glowSprite.tint = color;
     this.glowSprite.alpha = 0.8;
     this.mainSprite.rotation = this.mainSprite.rotation;
-    (this.glowSprite as GameSprite).layerName = Layers.EMISSIVES;
+    (this.glowSprite as GameSprite).layerName = Layer.EMISSIVES;
 
     this.sprites = [this.mainSprite, this.glowSprite];
 

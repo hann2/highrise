@@ -4,7 +4,7 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import ClickableText from "./ClickableText";
 import FeedbackButton from "./FeedbackButton";
 import MuteButton from "./MuteButton";
@@ -23,7 +23,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
     super();
 
     this.sprite = new Sprite();
-    this.sprite.layerName = Layers.MENU;
+    this.sprite.layerName = Layer.MENU;
     this.sprite.visible = false;
 
     const background = new Graphics();

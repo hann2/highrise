@@ -7,7 +7,7 @@ import { V } from "../../../core/Vector";
 import { getCurrentLevelNumber } from "../../controllers/LevelController";
 import SpawnLocation from "../../environment/SpawnLocation";
 import WeaponPickup from "../../environment/WeaponPickup";
-import { Layers } from "../../config/layers";
+import { Layer } from "../../config/layers";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { cementFloor } from "../../environment/decorations/decorations";
 import Gun from "../../weapons/Gun";
@@ -88,7 +88,7 @@ class SpawnRoomFloor extends BaseEntity implements Entity {
     this.sprite.position.set(x, y);
     this.sprite.scale.set(1 / 64);
     this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.layerName = Layers.FLOOR2;
+    this.sprite.layerName = Layer.FLOOR_DECALS;
   }
 
   onAdd(game: Game) {

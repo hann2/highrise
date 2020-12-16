@@ -15,7 +15,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose, rInteger, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import WallImpact from "../effects/WallImpact";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import SwingingWeapon from "../weapons/SwingingWeapon";
 import Bullet from "../projectiles/Bullet";
@@ -47,7 +47,7 @@ export default class VendingMachine
     this.machineSprite.width = 1.5;
     this.machineSprite.height = 1.5;
     this.machineSprite.rotation = rotation;
-    (this.machineSprite as GameSprite).layerName = Layers.WORLD;
+    (this.machineSprite as GameSprite).layerName = Layer.WORLD;
 
     this.lightSprite = Sprite.from(glowUrl);
     this.lightSprite.anchor.set(0.5, 0.5);
@@ -57,7 +57,7 @@ export default class VendingMachine
     this.lightSprite.height = 1.5;
     this.lightSprite.rotation = rotation;
 
-    (this.lightSprite as GameSprite).layerName = Layers.EMISSIVES;
+    (this.lightSprite as GameSprite).layerName = Layer.EMISSIVES;
 
     this.sprites = [this.machineSprite, this.lightSprite];
 

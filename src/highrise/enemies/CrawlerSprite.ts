@@ -5,7 +5,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { rUniform } from "../../core/util/Random";
 import { ZOMBIE_RADIUS } from "../constants";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import Crawler from "./Crawler";
 
 const WIGGLE_SPEED = 12.0;
@@ -27,7 +27,7 @@ export default class CrawlerSprite extends BaseEntity implements Entity {
     super();
 
     this.sprite = new Sprite();
-    this.sprite.layerName = Layers.WORLD;
+    this.sprite.layerName = Layer.WORLD;
     this.sprite.anchor.set(0.5, 0.5);
 
     this.bodySprites = {

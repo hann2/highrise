@@ -9,7 +9,7 @@ import {
   CELL_WIDTH,
   LEVEL_SIZE,
 } from "../levels/level-generation/levelGeneration";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 
 export const SUBFLOOR_TEXTURES = [
   img_industrialCarpet001,
@@ -33,6 +33,6 @@ export default class SubFloor extends BaseEntity implements Entity {
     this.sprite.width = width;
     this.sprite.height = height;
     this.sprite.tileScale.set(1 / 192);
-    this.sprite.layerName = Layers.SUBFLOOR;
+    this.sprite.layerName = Layer.SUBFLOOR;
   }
 }

@@ -6,6 +6,7 @@ import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import { Layer } from "../config/layers";
 import GooSplat from "./GooSplat";
 import { getBlobPair, getSplatSound } from "./Splat";
 
@@ -35,11 +36,11 @@ export default class GooImpact extends BaseEntity implements Entity {
     super();
 
     const mainContainer = new Container();
-    (mainContainer as GameSprite).layerName;
+    (mainContainer as GameSprite).layerName = Layer.PARTICLES;
     mainContainer.position.set(...position);
 
     const emissiveContainer = new Container();
-    (emissiveContainer as GameSprite).layerName;
+    (emissiveContainer as GameSprite).layerName = Layer.EMISSIVES;
     emissiveContainer.position.set(...position);
 
     this.sprites = [mainContainer, emissiveContainer];

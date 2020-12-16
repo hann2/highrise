@@ -25,6 +25,7 @@ export default class Furniture extends BaseEntity implements Entity, Hittable {
     const decoration = this.addChild(
       new Decoration(position, decorationInfo, rotation)
     );
+    decoration.sprite.layerName;
 
     this.body = new Body({
       mass: 0,

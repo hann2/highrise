@@ -5,7 +5,7 @@ import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { clamp, smoothStep } from "../../core/util/MathUtil";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import ClickableText from "./ClickableText";
 import CreditsScreen from "./Credits";
 import FeedbackButton from "./FeedbackButton";
@@ -28,7 +28,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     super();
 
     this.sprite = new Sprite();
-    this.sprite.layerName = Layers.MENU;
+    this.sprite.layerName = Layer.MENU;
 
     this.titleText = new Text("HIGHRISE", {
       align: "center",

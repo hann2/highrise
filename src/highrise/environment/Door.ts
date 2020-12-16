@@ -11,7 +11,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import WallImpact from "../effects/WallImpact";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import SwingingWeapon from "../weapons/SwingingWeapon";
 import Bullet from "../projectiles/Bullet";
@@ -41,7 +41,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.sprite.scale.set(length / this.sprite.width);
     this.sprite.anchor.set(0, 0.5); // door sprites are horizontal
     this.sprite.position.set(...hingePoint);
-    this.sprite.layerName = Layers.WORLD_FRONT;
+    this.sprite.layerName = Layer.WORLD_FRONT;
 
     this.body = new Body({
       mass: 1.5,

@@ -2,7 +2,7 @@ import { BLEND_MODES, Graphics, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import Light from "./Light";
 
 const AMBIENT_LIGHT = 0x0;
@@ -37,7 +37,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     });
 
     this.sprite = new Sprite(this.texture);
-    this.sprite.layerName = Layers.LIGHTING;
+    this.sprite.layerName = Layer.LIGHTING;
     this.sprite.blendMode = BLEND_MODES.MULTIPLY;
     this.sprite.anchor.set(0, 0);
 

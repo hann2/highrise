@@ -5,7 +5,7 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
 import { isHittable } from "../environment/Hittable";
 import Human from "../human/Human";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import MeleeWeapon from "./MeleeWeapon";
 import { SwingPhase } from "./SwingDescriptor";
@@ -34,7 +34,7 @@ export default class SwingingWeapon extends BaseEntity {
     this.sprite = Sprite.from(textures.attack);
     this.sprite.scale.set(size[1] / this.sprite.height);
     this.sprite.anchor.set(...handlePosition);
-    this.sprite.layerName = Layers.WEAPONS;
+    this.sprite.layerName = Layer.WEAPONS;
 
     const hitbox = new Graphics();
     this.sprite.addChild(hitbox);

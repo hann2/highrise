@@ -7,7 +7,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { clamp, degToRad, polarToVec } from "../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layers } from "../config/layers";
+import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { P2Materials } from "../config/PhysicsMaterials";
 import { ShuffleRing } from "../utils/ShuffleRing";
@@ -43,7 +43,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.zVelocity = rUniform(0, velocity.magnitude * 0.3);
 
     this.sprite = Sprite.from(texture);
-    this.sprite.layerName = Layers.WORLD_BACK;
+    this.sprite.layerName = Layer.FLOOR_STUFF;
     this.sprite.scale.set(SIZE / this.sprite.texture.width);
     this.sprite.anchor.set(0.5, 0.5);
 
@@ -134,7 +134,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
 class StaticShellCasing extends BaseEntity {
   constructor(public sprite: Sprite & GameSprite) {
     super();
-    sprite.layerName = Layers.FLOOR3;
+    sprite.layerName = Layer.FLOOR_STUFF;
   }
 
   async onAdd() {
