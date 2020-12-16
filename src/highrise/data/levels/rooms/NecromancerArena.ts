@@ -51,7 +51,7 @@ const directionalCarpet: DirectionalSprite = {
   },
 };
 
-export default class LobbyRoomTemplate extends RoomTemplate {
+export default class NecromancerArena extends RoomTemplate {
   constructor() {
     super(V(6, 4), [
       [V(-1, 1), true],

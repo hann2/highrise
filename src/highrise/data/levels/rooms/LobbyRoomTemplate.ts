@@ -1,12 +1,8 @@
 import Entity from "../../../../core/entity/Entity";
 import { choose } from "../../../../core/util/Random";
 import { V, V2d } from "../../../../core/Vector";
+import Heavy from "../../../entities/enemies/Heavy";
 import Decoration from "../../../entities/environment/Decoration";
-import ElevatorDoor from "../../../entities/environment/ElevatorDoor";
-import TiledFloor, { Tiles } from "../../../entities/environment/TiledFloor";
-import Furniture from "../../../entities/environment/Furniture";
-import { PointLight } from "../../../lighting/PointLight";
-import { CARDINAL_DIRECTIONS, Direction } from "../../../utils/directions";
 import {
   chairRight,
   chairUp,
@@ -31,6 +27,11 @@ import {
   rug,
 } from "../../../entities/environment/decorations";
 import { DirectionalSprite } from "../../../entities/environment/decorations/DirectionalSprite";
+import ElevatorDoor from "../../../entities/environment/ElevatorDoor";
+import Furniture from "../../../entities/environment/Furniture";
+import TiledFloor, { Tiles } from "../../../entities/environment/TiledFloor";
+import { PointLight } from "../../../lighting/PointLight";
+import { CARDINAL_DIRECTIONS, Direction } from "../../../utils/directions";
 import { CELL_WIDTH, getWallInDirection, WallID } from "../levelGeneration";
 import {
   AngleTransformer,
@@ -186,6 +187,7 @@ export default class LobbyRoomTemplate extends RoomTemplate {
     });
 
     entities.push(new Decoration(transformCell(V(2.5, 5)), rug));
+    entities.push(new Heavy(transformCell(V(2.5, 3)))); // Hello my name is Bob, the wifi password is BAIINNNNSS!
     entities.push(new Furniture(transformCell(V(2.5, 3.5)), lobbyDesk));
     entities.push(new Furniture(transformCell(V(-0.15, 5)), chairRight));
     entities.push(new Furniture(transformCell(V(-0.15, 5.47)), chairRight));
