@@ -25,7 +25,7 @@ import {
   toilet4,
   toilet5,
 } from "../../environment/decorations/decorations";
-import Furniture from "../../environment/Furniture";
+import Decoration from "../../environment/Decoration";
 import Wall from "../../environment/Wall";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
@@ -43,7 +43,7 @@ const blackToilets = [toilet1, toilet2];
 const whiteToilets = [toilet3, toilet4];
 const steelToilets = [toilet5];
 
-const STYLES: BathroomStyle[] = [
+export const BATHROOM_STYLES: BathroomStyle[] = [
   {
     floor: bathroomTilesFloor1,
     sink: sink1,
@@ -124,12 +124,8 @@ const STYLES: BathroomStyle[] = [
 ];
 
 export default class BathroomTemplate extends RoomTemplate {
-  private style: BathroomStyle;
-  constructor() {
-    super(V(2, 3), [[V(-1, 0), true]], bathroomTilesFloor1);
-
-    this.style = choose(...STYLES);
-    this.floor = this.style.floor;
+  constructor(private style: BathroomStyle = choose(...BATHROOM_STYLES)) {
+    super(V(2, 3), [[V(-1, 0), true]], style.floor);
   }
 
   generateEntities(
@@ -151,7 +147,7 @@ export default class BathroomTemplate extends RoomTemplate {
       const sprite = choose(...toilets);
       const angle = doorOpenDirection + Math.PI / 2;
       const p = transformCell(toiletPosition);
-      entities.push(new Furniture(p, sprite, angle));
+      entities.push(new Decoration(p, sprite, angle));
     }
 
     for (const wallY of [0.33, 1, 1.66]) {
@@ -164,7 +160,7 @@ export default class BathroomTemplate extends RoomTemplate {
     if (isSinkGroup) {
       const angle = doorOpenDirection - Math.PI / 2;
       const p = transformCell(V(-0.245, 1.55));
-      entities.push(new Furniture(p, sink, angle));
+      entities.push(new Decoration(p, sink, angle));
     } else {
       for (const sinkPosition of [
         V(-0.295, 0.8),
@@ -174,7 +170,7 @@ export default class BathroomTemplate extends RoomTemplate {
       ]) {
         const angle = doorOpenDirection - Math.PI / 2;
         const p = transformCell(sinkPosition);
-        entities.push(new Furniture(p, sink, angle));
+        entities.push(new Decoration(p, sink, angle));
       }
     }
 

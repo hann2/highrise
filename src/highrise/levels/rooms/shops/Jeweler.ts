@@ -1,9 +1,9 @@
 import Entity from "../../../../core/entity/Entity";
 import { V } from "../../../../core/Vector";
-import Furniture from "../../../environment/Furniture";
+import Decoration from "../../../environment/Decoration";
 import { PointLight } from "../../../lighting-and-vision/PointLight";
 import {
-  bathroomTiles,
+  bathroomTilesFloor5,
   jewelryStall,
   shelfEmpty,
   shelfJars,
@@ -20,7 +20,7 @@ export default class Jeweler extends RoomTemplate {
         [V(1, 2), false],
         [V(-1, 2), true],
       ],
-      bathroomTiles
+      bathroomTilesFloor5
     );
   }
 
@@ -30,9 +30,9 @@ export default class Jeweler extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
-    entities.push(new Furniture(transformCell(V(0.28, 0.28)), jewelryStall));
-    entities.push(new Furniture(transformCell(V(1.4, -0.15)), shelfEmpty));
-    entities.push(new Furniture(transformCell(V(2.1, -0.15)), shelfJars));
+    entities.push(new Decoration(transformCell(V(0.28, 0.28)), jewelryStall));
+    entities.push(new Decoration(transformCell(V(1.4, -0.15)), shelfEmpty));
+    entities.push(new Decoration(transformCell(V(2.1, -0.15)), shelfJars));
     entities.push(
       new PointLight({
         radius: 6,

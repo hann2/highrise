@@ -8,53 +8,53 @@ import {
   seededShuffle,
 } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import SurvivorHumanController from "../../human/SurvivorHumanController";
-import Decoration from "../../environment/Decoration";
-import Door from "../../environment/Door";
 import Crawler from "../../enemies/Crawler";
 import Heavy from "../../enemies/Heavy";
 import Spitter from "../../enemies/Spitter";
 import Zombie from "../../enemies/Zombie";
-import VendingMachine from "../../environment/VendingMachine";
+import Decoration from "../../environment/Decoration";
+import {
+  bookcase1,
+  bookcase2,
+  boxes,
+  cementFloor,
+  garbageCan,
+  sack,
+  waterCooler,
+} from "../../environment/decorations/decorations";
+import Door from "../../environment/Door";
 import Exit from "../../environment/Exit";
-import Furniture from "../../environment/Furniture";
 import HealthPickup from "../../environment/HealthPickup";
-import Human from "../../human/Human";
+import RepeatingFloor from "../../environment/RepeatingFloor";
+import SubFloor from "../../environment/SubFloor";
+import VendingMachine from "../../environment/VendingMachine";
 import Wall from "../../environment/Wall";
 import WeaponPickup from "../../environment/WeaponPickup";
-import RepeatingFloor from "../../environment/RepeatingFloor";
-import LevelGridMap from "../LevelGridMap";
+import Human from "../../human/Human";
+import SurvivorHumanController from "../../human/SurvivorHumanController";
 import { PointLight } from "../../lighting-and-vision/PointLight";
-import SubFloor from "../../environment/SubFloor";
 import {
   CARDINAL_DIRECTIONS_VALUES,
   DIAGONAL_DIRECTIONS,
   Direction,
 } from "../../utils/directions";
-import {
-  boxes,
-  cementFloor,
-  garbageCan,
-  sack,
-  shelfEmpty,
-  waterCooler,
-} from "../../environment/decorations/decorations";
 import Gun from "../../weapons/Gun";
-import { GUNS } from "../../weapons/guns/guns";
 import { FiveSeven } from "../../weapons/guns/FiveSeven";
 import { Glock } from "../../weapons/guns/Glock";
+import { GUNS } from "../../weapons/guns/guns";
 import { M1911 } from "../../weapons/guns/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
+import { Level } from "../Level";
 import ChapelLevel from "../level-templates/ChapelLevel";
 import GeneratorLevel from "../level-templates/GeneratorLevel";
-import { Level } from "../Level";
 import LevelTemplate from "../level-templates/LevelTemplate";
 import LobbyLevel from "../level-templates/LobbyLevel";
 import MaintenanceLevel from "../level-templates/MaintenanceLevel";
+import ShopLevel from "../level-templates/ShopLevel";
+import LevelGridMap from "../LevelGridMap";
 import RoomTemplate from "../rooms/RoomTemplate";
 import SpawnRoom from "../rooms/SpawnRoom";
-import ShopLevel from "../level-templates/ShopLevel";
 
 export const LEVEL_SIZE = 14;
 export const CELL_WIDTH = 2;
@@ -753,7 +753,7 @@ class LevelBuilder {
           } else if (content === "water-cooler") {
             const machinePosition = cell.sub(wallDirection.mul(0.13));
             entities.push(
-              new Furniture(
+              new Decoration(
                 this.levelCoordToWorldCoord(machinePosition),
                 waterCooler,
                 wallDirection.angle
@@ -857,7 +857,8 @@ class LevelBuilder {
             this.levelCoordToWorldCoord(
               closet.backCell.add(closet.backWallDirection.mul(-0.15))
             ),
-            shelfEmpty
+            choose(bookcase1, bookcase2),
+            closet.backWallDirection.angle + Math.PI
           )
         );
       }

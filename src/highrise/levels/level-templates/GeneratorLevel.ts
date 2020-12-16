@@ -6,6 +6,7 @@ import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
 import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
+import { makeBathroomPair } from "./levelTemplateHelpers";
 
 // A level on which there is an electrical generator
 export default class GeneratorLevel extends LevelTemplate {
@@ -14,18 +15,7 @@ export default class GeneratorLevel extends LevelTemplate {
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
     rooms.push(new NecromancerArena());
-    rooms.push(
-      new TransformedRoomTemplate(
-        new BathroomTemplate(),
-        shuffledOrientations[0]
-      )
-    );
-    rooms.push(
-      new TransformedRoomTemplate(
-        new BathroomTemplate(),
-        shuffledOrientations[1]
-      )
-    );
+    rooms.push(...makeBathroomPair(seed));
     rooms.push(
       new TransformedRoomTemplate(
         new ZombieRoomTemplate(),

@@ -13,49 +13,55 @@ import { DecorationInfo } from "./DecorationInfo";
 export const toilet1: DecorationInfo = {
   imageName: img_toilet1,
   heightMeters: 0.92,
+  isSolid: true,
+  bodyInset: [0.1, 0.1],
 };
 
 export const toilet2: DecorationInfo = {
+  ...toilet1,
   imageName: img_toilet2,
-  heightMeters: 0.92,
 };
 
 export const toilet3: DecorationInfo = {
+  ...toilet1,
   imageName: img_toilet3,
-  heightMeters: 0.92,
 };
 
 export const toilet4: DecorationInfo = {
+  ...toilet1,
   imageName: img_toilet4,
-  heightMeters: 0.92,
 };
 
 export const toilet5: DecorationInfo = {
+  ...toilet1,
   imageName: img_toilet5,
-  heightMeters: 0.92,
 };
 
 export const sink1: DecorationInfo = {
   imageName: img_sink1,
   heightMeters: 0.58,
+  isSolid: true,
 };
 
 export const sink2: DecorationInfo = {
   imageName: img_sink2,
   heightMeters: 0.5,
+  isSolid: true,
+  bodyInset: [0.1, 0.1],
 };
 
 export const sinkGroup1: DecorationInfo = {
   imageName: img_sinkGroup1,
   heightMeters: 0.82,
+  isSolid: true,
 };
 
 export const sinkGroup2: DecorationInfo = {
+  ...sinkGroup1,
   imageName: img_sinkGroup2,
-  heightMeters: 0.82,
 };
 
 export const sinkGroup3: DecorationInfo = {
+  ...sinkGroup1,
   imageName: img_sinkGroup3,
-  heightMeters: 0.82,
 };

@@ -12,6 +12,7 @@ import ProduceShop2 from "../rooms/shops/ProduceShop2";
 import TailorShop from "../rooms/shops/TailorShop";
 import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
+import { makeBathroomPair } from "./levelTemplateHelpers";
 
 export default class ShopLevel extends LevelTemplate {
   chooseRoomTemplates(seed: number): RoomTemplate[] {
@@ -41,18 +42,7 @@ export default class ShopLevel extends LevelTemplate {
     }
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
-    rooms.push(
-      new TransformedRoomTemplate(
-        new BathroomTemplate(),
-        shuffledOrientations[0]
-      )
-    );
-    rooms.push(
-      new TransformedRoomTemplate(
-        new BathroomTemplate(),
-        shuffledOrientations[1]
-      )
-    );
+    rooms.push(...makeBathroomPair(seed));
     rooms.push(
       new TransformedRoomTemplate(
         new ZombieRoomTemplate(),

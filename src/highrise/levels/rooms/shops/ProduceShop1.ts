@@ -1,9 +1,9 @@
 import Entity from "../../../../core/entity/Entity";
 import { V } from "../../../../core/Vector";
-import Furniture from "../../../environment/Furniture";
+import Decoration from "../../../environment/Decoration";
 import { PointLight } from "../../../lighting-and-vision/PointLight";
 import {
-  bathroomTiles,
+  bathroomTilesFloor5,
   produceStall,
 } from "../../../environment/decorations/decorations";
 import { AngleTransformer, CellTransformer } from "../ElementTransformer";
@@ -18,7 +18,7 @@ export default class ProduceShop1 extends RoomTemplate {
         [V(1, 2), false],
         [V(-1, 2), true],
       ],
-      bathroomTiles
+      bathroomTilesFloor5
     );
   }
 
@@ -28,7 +28,7 @@ export default class ProduceShop1 extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
-    entities.push(new Furniture(transformCell(V(0.63, 0.28)), produceStall));
+    entities.push(new Decoration(transformCell(V(0.63, 0.28)), produceStall));
     entities.push(
       new PointLight({
         radius: 6,

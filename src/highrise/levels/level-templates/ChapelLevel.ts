@@ -6,6 +6,7 @@ import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
 import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
+import { makeBathroomPair } from "./levelTemplateHelpers";
 
 export default class ChapelLevel extends LevelTemplate {
   chooseRoomTemplates(seed: number): RoomTemplate[] {
@@ -13,18 +14,7 @@ export default class ChapelLevel extends LevelTemplate {
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
     rooms.push(new NecromancerArena());
-    rooms.push(
-      new TransformedRoomTemplate(
-        new BathroomTemplate(),
-        shuffledOrientations[0]
-      )
-    );
-    rooms.push(
-      new TransformedRoomTemplate(
-        new BathroomTemplate(),
-        shuffledOrientations[1]
-      )
-    );
+    rooms.push(...makeBathroomPair(seed));
     rooms.push(
       new TransformedRoomTemplate(
         new ZombieRoomTemplate(),

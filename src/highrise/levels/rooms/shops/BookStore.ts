@@ -1,10 +1,10 @@
 import Entity from "../../../../core/entity/Entity";
 import { V } from "../../../../core/Vector";
-import Furniture from "../../../environment/Furniture";
+import Decoration from "../../../environment/Decoration";
 import { PointLight } from "../../../lighting-and-vision/PointLight";
 import {
   bakeryStall,
-  bathroomTiles,
+  bathroomTilesFloor5,
   oakFloor,
   shelfEmpty,
   shelfJars,
@@ -31,9 +31,9 @@ export default class BookStore extends RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
-    entities.push(new Furniture(transformCell(V(0.28, 0.28)), bakeryStall));
-    entities.push(new Furniture(transformCell(V(1.4, -0.15)), shelfEmpty));
-    entities.push(new Furniture(transformCell(V(2.1, -0.15)), shelfJars));
+    entities.push(new Decoration(transformCell(V(0.28, 0.28)), bakeryStall));
+    entities.push(new Decoration(transformCell(V(1.4, -0.15)), shelfEmpty));
+    entities.push(new Decoration(transformCell(V(2.1, -0.15)), shelfJars));
     entities.push(
       new PointLight({
         radius: 6,

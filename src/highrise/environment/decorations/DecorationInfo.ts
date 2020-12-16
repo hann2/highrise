@@ -30,7 +30,9 @@ interface SheetInfo {
 export interface DecorationInfo {
   imageName: string;
   heightMeters: number; // height of object in world space (meters)
-  sheetInfo?: SheetInfo;
+  sheetInfo?: SheetInfo; // how to get the decoration from the sprite sheet
+  isSolid?: boolean; // whether or not this blocks movement
+  bodyInset?: [number, number]; // meters to inset the body from the outside of the image
 }
 
 const textureCache = new Map<string, Texture>();

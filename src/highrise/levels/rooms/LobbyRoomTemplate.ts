@@ -28,7 +28,6 @@ import {
 } from "../../environment/decorations/decorations";
 import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
 import ElevatorDoor from "../../environment/ElevatorDoor";
-import Furniture from "../../environment/Furniture";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS, Direction } from "../../utils/directions";
@@ -192,17 +191,20 @@ export default class LobbyRoomTemplate extends RoomTemplate {
 
     entities.push(new Decoration(transformCell(V(2.5, 5)), rug));
     entities.push(new Heavy(transformCell(V(2.5, 3)))); // Hello my name is Bob, the wifi password is BAIINNNNSS!
-    entities.push(new Furniture(transformCell(V(2.5, 3.5)), lobbyDesk));
-    entities.push(new Furniture(transformCell(V(-0.15, 5)), chairRight));
-    entities.push(new Furniture(transformCell(V(-0.15, 5.47)), chairRight));
-    entities.push(new Furniture(transformCell(V(0.35, 6)), chairUp));
-    entities.push(new Furniture(transformCell(V(0.85, 6)), chairUp));
+    entities.push(new Decoration(transformCell(V(2.5, 3.5)), lobbyDesk));
+    entities.push(new Decoration(transformCell(V(-0.15, 5)), chairRight));
+    entities.push(new Decoration(transformCell(V(-0.15, 5.47)), chairRight));
+    entities.push(new Decoration(transformCell(V(0.35, 6)), chairUp));
+    entities.push(new Decoration(transformCell(V(0.85, 6)), chairUp));
     entities.push(
-      new Furniture(transformCell(V(-0.15, 6.15)), choose(endTable1, endTable2))
+      new Decoration(
+        transformCell(V(-0.15, 6.15)),
+        choose(endTable1, endTable2)
+      )
     );
-    entities.push(new Furniture(transformCell(V(0.6, 5)), coffeeTable));
+    entities.push(new Decoration(transformCell(V(0.6, 5)), coffeeTable));
 
-    entities.push(new Furniture(transformCell(V(4.5, 5.5)), piano));
+    entities.push(new Decoration(transformCell(V(4.5, 5.5)), piano));
 
     entities.push(
       new PointLight({

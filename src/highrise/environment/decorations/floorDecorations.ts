@@ -1,3 +1,4 @@
+import img_bathroom from "../../../../resources/images/environment/bathroom.png";
 import img_bathroomTileFloor1 from "../../../../resources/images/environment/floor/bathroom-tile-floor-1.png";
 import img_bathroomTileFloor2 from "../../../../resources/images/environment/floor/bathroom-tile-floor-2.png";
 import img_bathroomTileFloor3 from "../../../../resources/images/environment/floor/bathroom-tile-floor-3.png";
@@ -15,6 +16,7 @@ import img_tileFloor4 from "../../../../resources/images/environment/floor/tile-
 import img_tileFloor5 from "../../../../resources/images/environment/floor/tile-floor-5.png";
 import img_tileFloor6 from "../../../../resources/images/environment/floor/tile-floor-6.png";
 import img_tileFloor7 from "../../../../resources/images/environment/floor/tile-floor-7.png";
+import { V } from "../../../core/Vector";
 import { DecorationInfo } from "./DecorationInfo";
 
 export const cementFloor: DecorationInfo = {
@@ -100,4 +102,10 @@ export const bathroomTilesFloor3: DecorationInfo = {
 export const bathroomTilesFloor4: DecorationInfo = {
   imageName: img_bathroomTileFloor4,
   heightMeters: 0.3,
+};
+
+export const bathroomTilesFloor5: DecorationInfo = {
+  imageName: img_bathroom,
+  sheetInfo: { offset: V(36, 180), dimensions: V(24, 24) },
+  heightMeters: 1,
 };
