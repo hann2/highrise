@@ -984,26 +984,19 @@ class LevelBuilder {
 }
 
 export function chooseTemplate(level: number): LevelTemplate {
-  return new BathroomLevel(level);
   switch (level) {
-    case 1:
-      return new LobbyLevel(level);
-    case 2:
-      return new ShopLevel(level);
-    case 3:
-      return new MaintenanceLevel(level);
-    case 4:
-      return new GeneratorLevel(level);
-    case 5:
-      return new ChapelLevel(level);
+    // case 1:
+    //   return new LobbyLevel(level);
+    // case 2:
+    //   return new ShopLevel(level);
+    // case 3:
+    //   return new MaintenanceLevel(level);
+    // case 4:
+    //   return new GeneratorLevel(level);
+    // case 5:
+    //   return new ChapelLevel(level);
     default:
-      return choose(
-        new LobbyLevel(level),
-        new ShopLevel(level),
-        new MaintenanceLevel(level),
-        new GeneratorLevel(level),
-        new ChapelLevel(level)
-      );
+      return choose(new BathroomLevel(level));
   }
 }
 

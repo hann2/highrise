@@ -1,7 +1,7 @@
 import { Body, Capsule, vec2 } from "p2";
 import { Sprite } from "pixi.js";
-import snd_glowStickDrop1 from "../../../resources/audio/misc/glow-stick-drop-1.flac";
 import snd_glowStickCrack1 from "../../../resources/audio/misc/glow-stick-crack-1.flac";
+import snd_glowStickDrop1 from "../../../resources/audio/misc/glow-stick-drop-1.flac";
 import snd_glowStickDrop2 from "../../../resources/audio/misc/glow-stick-drop-2.flac";
 import img_glowStick1 from "../../../resources/images/effects/glow-stick-1.png";
 import img_glowStick2 from "../../../resources/images/effects/glow-stick-2.png";
@@ -9,14 +9,14 @@ import img_glowStick3 from "../../../resources/images/effects/glow-stick-3.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { colorLerp } from "../../core/util/ColorUtils";
+import { hslToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layer } from "../config/layers";
-import { PointLight } from "../lighting-and-vision/PointLight";
 import { CollisionGroups } from "../config/CollisionGroups";
+import { Layer } from "../config/layers";
 import { P2Materials } from "../config/PhysicsMaterials";
+import { PointLight } from "../lighting-and-vision/PointLight";
 
 export const GLOWSTICK_TEXTURES = [
   img_glowStick1,
@@ -64,8 +64,11 @@ export default class GlowStick extends BaseEntity implements Entity {
     shape.material = P2Materials.glowstick;
     this.body.addShape(shape);
 
-    const color = colorLerp(0x44ff00, 0x33ffff, Math.random());
-
+    const color = hslToHex({
+      h: Math.random(),
+      s: 1,
+      l: 0.8,
+    });
     this.light = this.addChild(new PointLight({ radius: 3, color: color }));
 
     this.sprite = Sprite.from(choose(...GLOWSTICK_TEXTURES));

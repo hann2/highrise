@@ -1,31 +1,32 @@
 import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
 import { V } from "../../../core/Vector";
+import Decoration from "../../environment/Decoration";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import {
-  bathroomTilesFloor1,
-  bathroomTilesFloor2,
-  bathroomTilesFloor3,
-  bathroomTilesFloor4,
+  graniteFloor1,
+  graniteFloor2,
+  graniteFloor3,
   sink1,
-  sink2,
   sinkGroup1,
   sinkGroup2,
-  sinkGroup3,
+  sinkGroup4,
+  sinkGroup5,
+  sinkGroup6,
   tilesFloor1,
+  tilesFloor10,
   tilesFloor2,
-  tilesFloor3,
   tilesFloor4,
   tilesFloor5,
   tilesFloor6,
-  tilesFloor7,
+  tilesFloor8,
+  tilesFloor9,
   toilet1,
   toilet2,
   toilet3,
   toilet4,
   toilet5,
 } from "../../environment/decorations/decorations";
-import Decoration from "../../environment/Decoration";
 import Wall from "../../environment/Wall";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { AngleTransformer, CellTransformer } from "./ElementTransformer";
@@ -45,34 +46,6 @@ const steelToilets = [toilet5];
 
 export const BATHROOM_STYLES: BathroomStyle[] = [
   {
-    floor: bathroomTilesFloor1,
-    sink: sink1,
-    isSinkGroup: false,
-    wallColor: 0x88aacc,
-    toilets: blackToilets,
-  },
-  {
-    floor: bathroomTilesFloor2,
-    sink: sinkGroup3,
-    isSinkGroup: true,
-    wallColor: 0xdd9999,
-    toilets: whiteToilets,
-  },
-  {
-    floor: bathroomTilesFloor3,
-    sink: sink1,
-    isSinkGroup: false,
-    wallColor: 0xffffff,
-    toilets: blackToilets,
-  },
-  {
-    floor: bathroomTilesFloor4,
-    sink: sinkGroup3,
-    isSinkGroup: true,
-    wallColor: 0x333333,
-    toilets: blackToilets,
-  },
-  {
     floor: tilesFloor1,
     sink: sink1,
     isSinkGroup: false,
@@ -81,17 +54,10 @@ export const BATHROOM_STYLES: BathroomStyle[] = [
   },
   {
     floor: tilesFloor2,
-    sink: sink1,
-    isSinkGroup: false,
-    wallColor: 0x6699aa,
-    toilets: whiteToilets,
-  },
-  {
-    floor: tilesFloor3,
-    sink: sinkGroup1,
+    sink: sinkGroup6,
     isSinkGroup: true,
-    wallColor: 0x777777,
-    toilets: steelToilets,
+    wallColor: 0x7799a3,
+    toilets: whiteToilets,
   },
   {
     floor: tilesFloor4,
@@ -102,7 +68,7 @@ export const BATHROOM_STYLES: BathroomStyle[] = [
   },
   {
     floor: tilesFloor5,
-    sink: sinkGroup2,
+    sink: sinkGroup4,
     isSinkGroup: true,
     wallColor: 0x99bb99,
     toilets: whiteToilets,
@@ -115,7 +81,35 @@ export const BATHROOM_STYLES: BathroomStyle[] = [
     toilets: blackToilets,
   },
   {
-    floor: tilesFloor7,
+    floor: tilesFloor8,
+    sink: sink1,
+    isSinkGroup: false,
+    wallColor: 0x666666,
+    toilets: whiteToilets,
+  },
+  {
+    floor: tilesFloor9,
+    sink: sink1,
+    isSinkGroup: false,
+    wallColor: 0x666666,
+    toilets: whiteToilets,
+  },
+  {
+    floor: tilesFloor10,
+    sink: sinkGroup4,
+    isSinkGroup: true,
+    wallColor: 0xbbaa99,
+    toilets: whiteToilets,
+  },
+  {
+    floor: graniteFloor1,
+    sink: sinkGroup5,
+    isSinkGroup: true,
+    wallColor: 0x666666,
+    toilets: whiteToilets,
+  },
+  {
+    floor: graniteFloor3,
     sink: sink1,
     isSinkGroup: false,
     wallColor: 0x666666,

@@ -21,6 +21,14 @@ export function hexToRgb(hex: number): RGB {
   };
 }
 
+export function hsvToHex(hsv: HSV): number {
+  return rgbToHex(hsvToRgb(hsv));
+}
+
+export function hslToHex(hsl: HSL): number {
+  return rgbToHex(hslToRgb(hsl));
+}
+
 // Converts a hex value into h,s,l components
 export function hexToHsl(hex: number) {
   return rgbToHsl(hexToRgb(hex));

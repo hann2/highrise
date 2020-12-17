@@ -28,6 +28,7 @@ import {
 } from "../../environment/decorations/decorations";
 import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
 import ElevatorDoor from "../../environment/ElevatorDoor";
+import { OverheadLight } from "../../environment/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS, Direction } from "../../utils/directions";
@@ -206,37 +207,10 @@ export default class LobbyRoomTemplate extends RoomTemplate {
 
     entities.push(new Decoration(transformCell(V(4.5, 5.5)), piano));
 
-    entities.push(
-      new PointLight({
-        radius: 10,
-        shadowsEnabled: true,
-        position: transformCell(V(1, 1)),
-      })
-    );
-
-    entities.push(
-      new PointLight({
-        radius: 10,
-        shadowsEnabled: true,
-        position: transformCell(V(4, 1)),
-      })
-    );
-
-    entities.push(
-      new PointLight({
-        radius: 10,
-        shadowsEnabled: true,
-        position: transformCell(V(1, 4)),
-      })
-    );
-
-    entities.push(
-      new PointLight({
-        radius: 10,
-        shadowsEnabled: true,
-        position: transformCell(V(4, 4)),
-      })
-    );
+    entities.push(new OverheadLight(transformCell(V(1, 1)), { radius: 10 }));
+    entities.push(new OverheadLight(transformCell(V(4, 1)), { radius: 10 }));
+    entities.push(new OverheadLight(transformCell(V(1, 4)), { radius: 10 }));
+    entities.push(new OverheadLight(transformCell(V(4, 4)), { radius: 10 }));
 
     return entities;
   }
