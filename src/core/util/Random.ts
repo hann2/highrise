@@ -23,6 +23,10 @@ export function rDirection(): number {
   return rUniform(0, Math.PI * 2);
 }
 
+export function rCardinal(): number {
+  return choose(0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2);
+}
+
 /**
  * Returns a random number from an (approximately) normal distribution
  * centered at `mean` with `deviation`

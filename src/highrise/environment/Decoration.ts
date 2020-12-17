@@ -35,7 +35,7 @@ export default class Decoration extends BaseEntity implements Entity {
     this.sprite = new Sprite(texture);
     this.sprite.layerName = layerName;
     this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.rotation = angle;
+    this.sprite.rotation = angle + (decorationInfo.rotation ?? 0);
     this.sprite.position.set(...position);
     const scale = decorationInfo.heightMeters / texture.height;
     this.sprite.scale.set(scale);

@@ -2,7 +2,7 @@ import Entity from "../../../../core/entity/Entity";
 import { V } from "../../../../core/Vector";
 import Decoration from "../../../environment/Decoration";
 import {
-  oakFloor,
+  woodFloor1,
   redWineCrate,
   shelfEmpty,
   shelfJars,
@@ -23,7 +23,7 @@ export default class WineShop extends RoomTemplate {
         [V(1, 2), false],
         [V(-1, 2), true],
       ],
-      oakFloor
+      woodFloor1
     );
   }
 

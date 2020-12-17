@@ -17,8 +17,8 @@ export default class CheatController extends BaseEntity implements Entity {
   onKeyDown(key: KeyCode) {
     switch (key) {
       case "KeyL":
-        console.log("dispatching newGame");
-        this.game!.dispatch({ type: "newGame" });
+        console.log("dispatching levelComplete");
+        this.game!.dispatch({ type: "levelComplete" });
         break;
       case "KeyV":
         console.log("Toggling vision");

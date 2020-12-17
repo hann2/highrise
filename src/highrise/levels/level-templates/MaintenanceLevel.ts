@@ -1,11 +1,12 @@
-import { seededShuffle } from "../../../core/util/Random";
+import { rCardinal, seededShuffle } from "../../../core/util/Random";
+import { oldPlankFloor1 } from "../../environment/decorations/decorations";
+import RepeatingFloor from "../../environment/RepeatingFloor";
 import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
-import LevelTemplate from "./LevelTemplate";
-import BathroomTemplate from "../rooms/BathroomTemplate";
 import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
 import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
+import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./levelTemplateHelpers";
 
 export default class MaintenanceLevel extends LevelTemplate {
@@ -23,5 +24,11 @@ export default class MaintenanceLevel extends LevelTemplate {
     );
 
     return rooms;
+  }
+
+  makeSubfloor(size: [number, number]) {
+    const decorationInfo = { ...oldPlankFloor1 };
+    decorationInfo.rotation = rCardinal();
+    return new RepeatingFloor(oldPlankFloor1, [0, 0], size);
   }
 }

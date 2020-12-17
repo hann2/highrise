@@ -6,7 +6,6 @@ import img_bathroomTileFloor4 from "../../../../resources/images/environment/flo
 import img_cement from "../../../../resources/images/environment/floor/cement.png";
 import img_industrialCarpet001 from "../../../../resources/images/environment/floor/IndustrialCarpet-001.jpg";
 import img_industrialCarpet002 from "../../../../resources/images/environment/floor/IndustrialCarpet-002.jpg";
-import img_oakFloor from "../../../../resources/images/environment/floor/oak-floor.png";
 import img_oldPlankFlooring1 from "../../../../resources/images/environment/floor/old-plank-flooring-1.png";
 import img_oldPlankFlooring2 from "../../../../resources/images/environment/floor/old-plank-flooring-2.png";
 import img_tileFloor1 from "../../../../resources/images/environment/floor/tile-floor-1.png";
@@ -16,6 +15,9 @@ import img_tileFloor4 from "../../../../resources/images/environment/floor/tile-
 import img_tileFloor5 from "../../../../resources/images/environment/floor/tile-floor-5.png";
 import img_tileFloor6 from "../../../../resources/images/environment/floor/tile-floor-6.png";
 import img_tileFloor7 from "../../../../resources/images/environment/floor/tile-floor-7.png";
+import img_woodFloor1 from "../../../../resources/images/environment/floor/wood-floor-1.png";
+import img_woodFloor2 from "../../../../resources/images/environment/floor/wood-floor-2.png";
+import img_woodFloor3 from "../../../../resources/images/environment/floor/wood-floor-3.png";
 import { V } from "../../../core/Vector";
 import { DecorationInfo } from "./DecorationInfo";
 
@@ -24,8 +26,23 @@ export const cementFloor: DecorationInfo = {
   heightMeters: 4,
 };
 
-export const oakFloor: DecorationInfo = {
-  imageName: img_oakFloor,
+export const woodFloor1: DecorationInfo = {
+  imageName: img_woodFloor1,
+  heightMeters: 4,
+};
+
+export const woodFloor2: DecorationInfo = {
+  imageName: img_woodFloor2,
+  heightMeters: 3.8,
+};
+
+export const woodFloor3: DecorationInfo = {
+  imageName: img_woodFloor3,
+  heightMeters: 4,
+};
+
+export const woodFloor4: DecorationInfo = {
+  imageName: img_woodFloor3,
   heightMeters: 4,
 };
 
@@ -39,12 +56,12 @@ export const oldPlankFloor2: DecorationInfo = {
   heightMeters: 4,
 };
 
-export const industrialCarpet1: DecorationInfo = {
+export const carpetFloor1: DecorationInfo = {
   imageName: img_industrialCarpet001,
   heightMeters: 4,
 };
 
-export const industrialCarpet2: DecorationInfo = {
+export const carpetFloor2: DecorationInfo = {
   imageName: img_industrialCarpet002,
   heightMeters: 4,
 };

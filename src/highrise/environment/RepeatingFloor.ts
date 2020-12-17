@@ -13,7 +13,7 @@ export default class RepeatingFloor extends BaseEntity implements Entity {
   constructor(
     decorationInfo: DecorationInfo,
     [x, y]: [number, number],
-    [width, height]: V2d
+    [width, height]: [number, number]
   ) {
     super();
 

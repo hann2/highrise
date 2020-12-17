@@ -1,6 +1,7 @@
 Level themes
 
-1. Ground floor
+
+Ground floor
 2-9. Shops.
 10. Generator.  Enables light switches and elevators.  Requires fuel to run.
 11-19. Maintenance floors.  Lots of darkness and chain link fences.

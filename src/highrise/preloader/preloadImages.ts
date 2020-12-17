@@ -18,12 +18,12 @@ import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
 import {
   BLOB_GLOW_TEXTURES,
   BLOB_TEXTURES,
+  SPLATS_AND_BLOBS_TEXTURES,
   SPLAT_GLOW_TEXTURES,
   SPLAT_TEXTURES,
 } from "../effects/Splat";
 import { DOOR_SPRITES } from "../environment/Door";
 import { VENDING_MACHINES } from "../environment/VendingMachine";
-import { SUBFLOOR_TEXTURES } from "../environment/SubFloor";
 import * as DecorationSprites from "../environment/decorations/decorations";
 import { WEAPONS } from "../weapons/weapons";
 
@@ -48,14 +48,10 @@ export function getImagesToPreload(): Set<string> {
 
     ...Object.values(DecorationSprites).map((sprite) => sprite.imageName),
 
-    ...SPLAT_TEXTURES,
-    ...SPLAT_GLOW_TEXTURES,
-    ...BLOB_TEXTURES,
-    ...BLOB_GLOW_TEXTURES,
+    ...SPLATS_AND_BLOBS_TEXTURES,
     ...DOOR_SPRITES,
     ...GLOWSTICK_TEXTURES,
     ...MUZZLE_FLASH_URLS,
-    ...SUBFLOOR_TEXTURES,
     ...VENDING_MACHINES.flat(),
 
     ...CHARACTERS.map((c) => Object.values(c.textures)).flat(),

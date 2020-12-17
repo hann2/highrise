@@ -2,24 +2,20 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
+import FadeEffect from "../effects/FadeEffect";
+import PartyManager from "../environment/PartyManager";
+import AllyHumanController from "../human/AllyController";
+import Human from "../human/Human";
+import PlayerHumanController from "../human/PlayerHumanController";
 import { Level } from "../levels/Level";
 import {
   chooseTemplate,
   generateLevel,
 } from "../levels/level-generation/levelGeneration";
-import FadeEffect from "../effects/FadeEffect";
 import MainMenu from "../menu/MainMenu";
 import PauseMenu from "../menu/PauseMenu";
-import Human from "../human/Human";
-import PartyManager from "../environment/PartyManager";
-import AllyHumanController from "../human/AllyController";
-import PlayerHumanController from "../human/PlayerHumanController";
 
 const LEVEL_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
-
-interface PartyEvent {
-  human: Human;
-}
 
 // High level control flow for levels and the party
 export default class LevelController extends BaseEntity implements Entity {
@@ -46,7 +42,7 @@ export default class LevelController extends BaseEntity implements Entity {
         new FadeEffect(LEVEL_FADE_TIME, LEVEL_FADE_TIME / 2, LEVEL_FADE_TIME)
       );
 
-      await this.wait(1.5);
+      await this.wait(LEVEL_FADE_TIME);
       this.clearLevel();
       const level = generateLevel(chooseTemplate(this.currentLevel));
       this.game?.dispatch({ type: "startLevel", level });
@@ -57,8 +53,10 @@ export default class LevelController extends BaseEntity implements Entity {
     },
 
     gameOver: async () => {
-      this.game!.addEntity(new FadeEffect(3.0, 2.0, 0, 0x000000));
-      await this.wait(5);
+      this.game!.addEntity(
+        new FadeEffect(LEVEL_FADE_TIME * 2, LEVEL_FADE_TIME, 0, 0x000000)
+      );
+      await this.wait(LEVEL_FADE_TIME * 2.5);
       this.game?.clearScene();
       this.game?.addEntity(new MainMenu());
     },

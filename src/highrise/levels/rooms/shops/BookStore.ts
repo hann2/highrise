@@ -5,7 +5,7 @@ import { PointLight } from "../../../lighting-and-vision/PointLight";
 import {
   bakeryStall,
   bathroomTilesFloor5,
-  oakFloor,
+  woodFloor1,
   shelfEmpty,
   shelfJars,
 } from "../../../environment/decorations/decorations";
@@ -21,7 +21,7 @@ export default class BookStore extends RoomTemplate {
         [V(1, 2), false],
         [V(-1, 2), true],
       ],
-      oakFloor
+      woodFloor1
     );
   }
 

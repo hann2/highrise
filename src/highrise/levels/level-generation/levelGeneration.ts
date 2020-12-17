@@ -16,17 +16,19 @@ import Decoration from "../../environment/Decoration";
 import {
   bookcase1,
   bookcase2,
-  boxes,
+  boxPile1,
+  boxPile2,
+  boxShelf1,
+  boxShelf2,
   cementFloor,
-  garbageCan,
   sack,
   waterCooler,
 } from "../../environment/decorations/decorations";
 import Door from "../../environment/Door";
 import Exit from "../../environment/Exit";
 import HealthPickup from "../../environment/HealthPickup";
+import { OverheadLight } from "../../environment/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
-import SubFloor from "../../environment/SubFloor";
 import VendingMachine from "../../environment/VendingMachine";
 import Wall from "../../environment/Wall";
 import WeaponPickup from "../../environment/WeaponPickup";
@@ -46,6 +48,7 @@ import { M1911 } from "../../weapons/guns/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import { Level } from "../Level";
+import BathroomLevel from "../level-templates/BathroomLevel";
 import ChapelLevel from "../level-templates/ChapelLevel";
 import GeneratorLevel from "../level-templates/GeneratorLevel";
 import LevelTemplate from "../level-templates/LevelTemplate";
@@ -201,8 +204,13 @@ class LevelBuilder {
     const enemies = this.addEnemies();
     const doors = this.doors.map(this.buildDoorEntity.bind(this));
 
+    const subFloor = levelTemplate.makeSubfloor([
+      LEVEL_SIZE * CELL_WIDTH,
+      LEVEL_SIZE * CELL_WIDTH,
+    ]);
+
     const entities = [
-      new SubFloor([LEVEL_SIZE * CELL_WIDTH, LEVEL_SIZE * CELL_WIDTH]),
+      subFloor,
       this.makeLevelGridMap(),
       ...outerWalls,
       ...roomEntities,
@@ -740,6 +748,14 @@ class LevelBuilder {
           this.cells[i][j].content = content;
           const wallDirection = openDirection!;
 
+          if (rBool(0.5)) {
+            entities.push(
+              new OverheadLight(this.levelCoordToWorldCoord(cell), {
+                intensity: 0.2,
+              })
+            );
+          }
+
           if (content === "vending") {
             // Fill with vending machine
             const machinePosition = cell.sub(wallDirection.mul(0.1));
@@ -829,13 +845,10 @@ class LevelBuilder {
         entities.push(
           new Decoration(
             this.levelCoordToWorldCoord(
-              closet.backCell.add(
-                closet.backWallDirection
-                  .mul(-0.25)
-                  .add(closet.backWallDirection.rotate90cw().mul(0.1))
-              )
+              closet.backCell.add(closet.backWallDirection.mul(-0.2))
             ),
-            boxes
+            choose(boxPile1, boxPile2),
+            closet.backWallDirection.angle + Math.PI
           )
         );
       } else if (counter % 4 === 2) {
@@ -844,18 +857,23 @@ class LevelBuilder {
             this.levelCoordToWorldCoord(
               closet.backCell.add(
                 closet.backWallDirection
-                  .mul(-0.2)
-                  .add(closet.backWallDirection.rotate90cw().mul(0.2))
+                  .mul(-0.25)
+                  .add(
+                    closet.backWallDirection
+                      .rotate90cw()
+                      .mul(choose(-0.1, 0, 0.1))
+                  )
               )
             ),
-            garbageCan
+            choose(boxShelf1, boxShelf2),
+            closet.backWallDirection.angle + Math.PI
           )
         );
       } else {
         entities.push(
           new Decoration(
             this.levelCoordToWorldCoord(
-              closet.backCell.add(closet.backWallDirection.mul(-0.15))
+              closet.backCell.add(closet.backWallDirection.mul(-0.22))
             ),
             choose(bookcase1, bookcase2),
             closet.backWallDirection.angle + Math.PI
@@ -966,15 +984,26 @@ class LevelBuilder {
 }
 
 export function chooseTemplate(level: number): LevelTemplate {
+  return new BathroomLevel(level);
   switch (level) {
     case 1:
-      return new LobbyLevel();
+      return new LobbyLevel(level);
+    case 2:
+      return new ShopLevel(level);
+    case 3:
+      return new MaintenanceLevel(level);
+    case 4:
+      return new GeneratorLevel(level);
     case 5:
-      return new GeneratorLevel();
-    case 9:
-      return new ChapelLevel();
+      return new ChapelLevel(level);
     default:
-      return level < 5 ? new ShopLevel() : new MaintenanceLevel();
+      return choose(
+        new LobbyLevel(level),
+        new ShopLevel(level),
+        new MaintenanceLevel(level),
+        new GeneratorLevel(level),
+        new ChapelLevel(level)
+      );
   }
 }
 

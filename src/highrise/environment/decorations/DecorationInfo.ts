@@ -33,6 +33,7 @@ export interface DecorationInfo {
   sheetInfo?: SheetInfo; // how to get the decoration from the sprite sheet
   isSolid?: boolean; // whether or not this blocks movement
   bodyInset?: [number, number]; // meters to inset the body from the outside of the image
+  rotation?: number; // radians to rotate the texture
 }
 
 const textureCache = new Map<string, Texture>();

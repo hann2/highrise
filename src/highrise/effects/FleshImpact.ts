@@ -1,16 +1,14 @@
 import { BLEND_MODES, Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { LayerInfo } from "../../core/graphics/LayerInfo";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Layer } from "../config/layers";
-import { ShuffleRing } from "../utils/ShuffleRing";
 import BloodSplat from "./BloodSplat";
-import { BLOB_TEXTURES, getSplatSound, SPLAT_SOUNDS } from "./Splat";
+import { BLOB_TEXTURES, getSplatSound } from "./Splat";
 
 const FRICTION = 5.0;
 

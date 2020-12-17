@@ -93,3 +93,11 @@ export function getBlobPair() {
   const i = rInteger(0, BLOB_TEXTURES.length);
   return [BLOB_TEXTURES[i], BLOB_GLOW_TEXTURES[i]];
 }
+
+// Export everything so it can get preloaded
+export const SPLATS_AND_BLOBS_TEXTURES = [
+  ...SPLAT_TEXTURES,
+  ...SPLAT_GLOW_TEXTURES,
+  ...BLOB_TEXTURES,
+  ...BLOB_GLOW_TEXTURES,
+];

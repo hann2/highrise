@@ -1,11 +1,14 @@
 import { choose, seededShuffle } from "../../../core/util/Random";
+import {
+  carpetFloor1,
+  carpetFloor2,
+} from "../../environment/decorations/decorations";
 import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
-import LevelTemplate from "./LevelTemplate";
-import BathroomTemplate, { BATHROOM_STYLES } from "../rooms/BathroomTemplate";
 import LobbyRoomTemplate from "../rooms/LobbyRoomTemplate";
 import RoomTemplate from "../rooms/RoomTemplate";
 import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
+import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./levelTemplateHelpers";
 
 export default class LobbyLevel extends LevelTemplate {

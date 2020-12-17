@@ -5,9 +5,11 @@ import { PointLight } from "../../../lighting-and-vision/PointLight";
 import {
   bathroomTilesFloor5,
   butcherStall,
+  woodFloor4,
 } from "../../../environment/decorations/decorations";
 import { AngleTransformer, CellTransformer } from "../ElementTransformer";
 import RoomTemplate from "../RoomTemplate";
+import { rCardinal } from "../../../../core/util/Random";
 
 export default class Butcher extends RoomTemplate {
   constructor() {
@@ -18,7 +20,7 @@ export default class Butcher extends RoomTemplate {
         [V(1, 2), false],
         [V(-1, 2), true],
       ],
-      bathroomTilesFloor5
+      { ...woodFloor4, rotation: rCardinal() }
     );
   }
 

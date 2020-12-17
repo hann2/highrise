@@ -4,6 +4,7 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
 import { Layer } from "../config/layers";
+import { CREDITS_TEXT } from "./CreditsText";
 import MainMenu from "./MainMenu";
 
 const SCROLL_SPEED = 0.8;
@@ -20,7 +21,7 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     this.sprite = new Sprite();
     this.sprite.layerName = Layer.MENU;
 
-    const lines = TEXT.split("\n");
+    const lines = CREDITS_TEXT.split("\n");
     let nextHeight = 0;
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i];
@@ -108,62 +109,3 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     }
   }
 }
-
-const TEXT = `
-#DESIGN
-Philip Hann
-Simon Baumgardt-Wellander
-
-
-#PROGRAMMING
-Philip Hann
-Simon Baumgardt-Wellander
-
-
-#VOICE ACTORS
-Andy—Andy Moreland
-Chad, Demitri, Shadowlord66—Michael Wiktorek
-Cindy—Lawlfrats
-Clarice, Kyle—Marisa DeNicolo-Hann
-Clyde—Philip Hann
-Dusty Rusty—@ICREATENOVELTY
-Lucky Jack—Cole Graham
-Simon—Simon Baumgardt-Wellander
-Takeshi—Rory Jackson
-Wendy—Wendy Vang
-
-
-#MUSIC
-Michael Wiktorek
-Simon Baumgardt-Wellander
-
-
-#SOUND EFFECTS
-Simon Baumgardt-Wellander
-Morgan Thurlow
-Philip Hann
-
-With thanks to—
-Fesliyan Studios
-The Free Firearm Sound Library
-
-
-#ART
-Philip Hann
-Simon Baumgardt-Wellander
-
-With thanks to:—
-Kenny NL
-PWL
-Project Cordon Sprites
-Panda Maru 
-Nicnubill
-Ayene Chan
-Caym
-FreePBR.com
-
-
-
-No zombies were harmed in the making of this game.
-Some celery, walnuts, potatoes, and a lemon were though.
-`;

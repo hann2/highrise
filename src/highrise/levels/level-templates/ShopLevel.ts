@@ -1,5 +1,10 @@
 import { Matrix } from "pixi.js";
-import { choose, seededShuffle } from "../../../core/util/Random";
+import {
+  choose,
+  rCardinal,
+  rInteger,
+  seededShuffle,
+} from "../../../core/util/Random";
 import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
 import LevelTemplate from "./LevelTemplate";
 import BathroomTemplate from "../rooms/BathroomTemplate";
@@ -13,6 +18,13 @@ import TailorShop from "../rooms/shops/TailorShop";
 import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
 import { makeBathroomPair } from "./levelTemplateHelpers";
+import {
+  cementFloor,
+  woodFloor1,
+  woodFloor2,
+  woodFloor3,
+} from "../../environment/decorations/decorations";
+import RepeatingFloor from "../../environment/RepeatingFloor";
 
 export default class ShopLevel extends LevelTemplate {
   chooseRoomTemplates(seed: number): RoomTemplate[] {
@@ -51,5 +63,11 @@ export default class ShopLevel extends LevelTemplate {
     );
 
     return rooms;
+  }
+
+  makeSubfloor(size: [number, number]) {
+    const decoration = { ...choose(woodFloor1, woodFloor2, woodFloor3) };
+    decoration.rotation = rCardinal();
+    return new RepeatingFloor(decoration, [0, 0], size);
   }
 }
