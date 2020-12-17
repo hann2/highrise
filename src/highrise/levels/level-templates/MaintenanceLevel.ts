@@ -1,6 +1,7 @@
 import { rCardinal, seededShuffle } from "../../../core/util/Random";
 import { oldPlankFloor1 } from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
+import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
 import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
@@ -30,5 +31,9 @@ export default class MaintenanceLevel extends LevelTemplate {
     const decorationInfo = { ...oldPlankFloor1 };
     decorationInfo.rotation = rCardinal();
     return new RepeatingFloor(oldPlankFloor1, [0, 0], size);
+  }
+
+  getAmbientLight(): AmbientLight {
+    return new AmbientLight(0x000000);
   }
 }

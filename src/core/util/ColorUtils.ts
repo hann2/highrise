@@ -1,11 +1,11 @@
 import { clamp } from "./MathUtil";
 
-// Red Green Blue color representation
-type RGB = { r: number; g: number; b: number };
-// Hue Saturation Lightness color representation
-type HSL = { h: number; s: number; l: number };
-// Hue Saturation Value color representation
-type HSV = { h: number; s: number; v: number };
+// Red Green Blue color representation, values between [0, 255].
+export type RGB = { r: number; g: number; b: number };
+// Hue Saturation Lightness color representation. Values betwee [0, 1].
+export type HSL = { h: number; s: number; l: number };
+// Hue Saturation Value color representation. Values betwee [0, 1].
+export type HSV = { h: number; s: number; v: number };
 
 // Converts int values 0-255 to single hex value
 export function rgbToHex({ r, g, b }: RGB): number {
@@ -85,6 +85,18 @@ export function lighten(from: number, percent: number = 0.1): number {
 /** Returns a new darker color */
 export function darken(from: number, percent: number = 0.1): number {
   return colorLerp(from, 0x000000, percent);
+}
+
+export function colorAdd(a: number, b: number): number {
+  return rgbToHex(rgbAdd(hexToRgb(a), hexToRgb(b)));
+}
+
+export function rgbAdd(a: RGB, b: RGB): RGB {
+  return {
+    r: clamp(a.r + b.r, 0, 255),
+    g: clamp(a.g + b.g, 0, 255),
+    b: clamp(a.b + b.b, 0, 255),
+  };
 }
 
 /**

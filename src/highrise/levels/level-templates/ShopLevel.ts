@@ -1,13 +1,13 @@
 import { Matrix } from "pixi.js";
+import { choose, rCardinal, seededShuffle } from "../../../core/util/Random";
 import {
-  choose,
-  rCardinal,
-  rInteger,
-  seededShuffle,
-} from "../../../core/util/Random";
+  woodFloor1,
+  woodFloor2,
+  woodFloor3,
+} from "../../environment/decorations/decorations";
+import RepeatingFloor from "../../environment/RepeatingFloor";
+import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
-import LevelTemplate from "./LevelTemplate";
-import BathroomTemplate from "../rooms/BathroomTemplate";
 import RoomTemplate from "../rooms/RoomTemplate";
 import Bakery from "../rooms/shops/Bakery";
 import Butcher from "../rooms/shops/Butcher";
@@ -17,14 +17,8 @@ import ProduceShop2 from "../rooms/shops/ProduceShop2";
 import TailorShop from "../rooms/shops/TailorShop";
 import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
+import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./levelTemplateHelpers";
-import {
-  cementFloor,
-  woodFloor1,
-  woodFloor2,
-  woodFloor3,
-} from "../../environment/decorations/decorations";
-import RepeatingFloor from "../../environment/RepeatingFloor";
 
 export default class ShopLevel extends LevelTemplate {
   chooseRoomTemplates(seed: number): RoomTemplate[] {
@@ -69,5 +63,9 @@ export default class ShopLevel extends LevelTemplate {
     const decoration = { ...choose(woodFloor1, woodFloor2, woodFloor3) };
     decoration.rotation = rCardinal();
     return new RepeatingFloor(decoration, [0, 0], size);
+  }
+
+  getAmbientLight(): AmbientLight {
+    return new AmbientLight(0x444444);
   }
 }

@@ -1,8 +1,5 @@
-import { choose, seededShuffle } from "../../../core/util/Random";
-import {
-  carpetFloor1,
-  carpetFloor2,
-} from "../../environment/decorations/decorations";
+import { seededShuffle } from "../../../core/util/Random";
+import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
 import LobbyRoomTemplate from "../rooms/LobbyRoomTemplate";
 import RoomTemplate from "../rooms/RoomTemplate";
@@ -26,5 +23,9 @@ export default class LobbyLevel extends LevelTemplate {
     );
 
     return rooms;
+  }
+
+  getAmbientLight(): AmbientLight {
+    return new AmbientLight(0x060606);
   }
 }

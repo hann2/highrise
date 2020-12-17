@@ -49,12 +49,7 @@ import { MELEE_WEAPONS } from "../../weapons/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/MeleeWeapon";
 import { Level } from "../Level";
 import BathroomLevel from "../level-templates/BathroomLevel";
-import ChapelLevel from "../level-templates/ChapelLevel";
-import GeneratorLevel from "../level-templates/GeneratorLevel";
 import LevelTemplate from "../level-templates/LevelTemplate";
-import LobbyLevel from "../level-templates/LobbyLevel";
-import MaintenanceLevel from "../level-templates/MaintenanceLevel";
-import ShopLevel from "../level-templates/ShopLevel";
 import LevelGridMap from "../LevelGridMap";
 import RoomTemplate from "../rooms/RoomTemplate";
 import SpawnRoom from "../rooms/SpawnRoom";
@@ -208,9 +203,11 @@ class LevelBuilder {
       LEVEL_SIZE * CELL_WIDTH,
       LEVEL_SIZE * CELL_WIDTH,
     ]);
+    const ambientLight = levelTemplate.getAmbientLight();
 
     const entities = [
       subFloor,
+      ambientLight,
       this.makeLevelGridMap(),
       ...outerWalls,
       ...roomEntities,

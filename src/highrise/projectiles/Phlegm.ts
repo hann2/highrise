@@ -1,24 +1,25 @@
 import { Ray, RaycastResult } from "p2";
 import { BLEND_MODES, Sprite } from "pixi.js";
-import img_pointLight from "../../../resources/images/lights/point-light.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { clamp, clampUp, polarToVec } from "../../core/util/MathUtil";
+import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rSign, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import { CollisionGroups } from "../config/CollisionGroups";
+import { Layer } from "../config/layers";
 import GooImpact from "../effects/GooImpact";
 import GooSplat from "../effects/GooSplat";
-import { BLOB_TEXTURES, getBlobPair, getSplatSound } from "../effects/Splat";
-import { Layer } from "../config/layers";
-import { CollisionGroups } from "../config/CollisionGroups";
-import Human from "../human/Human";
+import { getBlobPair, getSplatSound } from "../effects/Splat";
 import Spitter from "../enemies/Spitter";
+import Human from "../human/Human";
+import { PointLight } from "../lighting-and-vision/PointLight";
 
 export const PHLEGM_RADIUS = 0.1; // meters
 const MAX_LIFESPAN = 3.0; // seconds
 
 export default class Phlegm extends BaseEntity implements Entity {
+  light: PointLight;
   private ray: Ray;
   private raycastResult = new RaycastResult();
 
@@ -75,11 +76,15 @@ export default class Phlegm extends BaseEntity implements Entity {
     this.glowSprite.anchor.set(0.5);
     this.glowSprite.scale.set(scale);
     this.glowSprite.tint = color;
-    this.glowSprite.alpha = 0.8;
+    this.glowSprite.alpha = 0.3;
     this.mainSprite.rotation = this.mainSprite.rotation;
     (this.glowSprite as GameSprite).layerName = Layer.EMISSIVES;
 
     this.sprites = [this.mainSprite, this.glowSprite];
+
+    this.light = this.addChild(
+      new PointLight({ radius: 1, shadowsEnabled: false, position })
+    );
 
     this.renderPosition = position.clone();
   }
@@ -164,6 +169,7 @@ export default class Phlegm extends BaseEntity implements Entity {
   onRender(dt: number) {
     this.mainSprite.position.set(...this.renderPosition);
     this.glowSprite.position.set(...this.renderPosition);
+    this.light.setPosition(this.renderPosition);
 
     this.mainSprite.rotation += dt * this.spin;
     this.glowSprite.rotation = this.mainSprite.rotation;

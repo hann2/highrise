@@ -6,6 +6,7 @@ import {
   carpetFloor2,
 } from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
+import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import RoomTemplate from "../rooms/RoomTemplate";
 
 export default class LevelTemplate {
@@ -21,5 +22,9 @@ export default class LevelTemplate {
     const floor = new RepeatingFloor(decorationInfo, [0, 0], size);
     floor.sprite.tint = color;
     return floor;
+  }
+
+  getAmbientLight(): AmbientLight {
+    return new AmbientLight(0x060606);
   }
 }

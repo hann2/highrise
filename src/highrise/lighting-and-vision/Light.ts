@@ -9,7 +9,7 @@ const RESOLUTION = 32;
 
 export default class Light extends BaseEntity implements Entity {
   public shadows?: Shadows;
-
+  private lightManager?: LightingManager;
   public bakedSprite: Sprite;
   public bakedTexture: RenderTexture;
   public dirty: boolean;
@@ -47,6 +47,11 @@ export default class Light extends BaseEntity implements Entity {
     this.lightManager.addLight(this);
   }
 
+  onDestroy() {
+    this.lightManager!.removeLight(this);
+    this.lightManager = undefined;
+  }
+
   resizeBakedTexture() {
     this.bakedTexture.resize(
       this.lightSprite.width,
@@ -78,8 +83,6 @@ export default class Light extends BaseEntity implements Entity {
       this.dirty = false;
     }
   }
-
-  private lightManager?: LightingManager;
 
   enableShadows() {
     this.dirty = true;
@@ -115,10 +118,5 @@ export default class Light extends BaseEntity implements Entity {
   setColor(value: number) {
     this.dirty = true;
     this.lightSprite.tint = value;
-  }
-
-  onDestroy() {
-    this.lightManager!.removeLight(this);
-    this.lightManager = undefined;
   }
 }

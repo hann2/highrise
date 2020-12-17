@@ -17,6 +17,7 @@ import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { Layer } from "../config/layers";
 import WallImpact from "../effects/WallImpact";
+import Light from "../lighting-and-vision/Light";
 import Bullet from "../projectiles/Bullet";
 import SwingingWeapon from "../weapons/SwingingWeapon";
 import Hittable from "./Hittable";
@@ -56,6 +57,10 @@ export default class VendingMachine
     this.lightSprite.width = 1.5;
     this.lightSprite.height = 1.5;
     this.lightSprite.rotation = rotation;
+
+    // const light = new Light();
+    // light.lightSprite = this.lightSprite;
+    // this.addChild(light);
 
     (this.lightSprite as GameSprite).layerName = Layer.EMISSIVES;
 
