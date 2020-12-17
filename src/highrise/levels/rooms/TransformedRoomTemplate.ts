@@ -1,7 +1,7 @@
 import { Matrix } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { V2d } from "../../../core/Vector";
-import { WallID } from "../level-generation/levelGeneration";
+import { WallID } from "../level-generation/CellGrid";
 import ElementTransformer, {
   AngleTransformer,
   CellTransformer,

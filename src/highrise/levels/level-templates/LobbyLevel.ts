@@ -1,9 +1,10 @@
 import { seededShuffle } from "../../../core/util/Random";
 import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
-import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
 import LobbyRoomTemplate from "../rooms/LobbyRoomTemplate";
 import RoomTemplate from "../rooms/RoomTemplate";
-import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
+import TransformedRoomTemplate, {
+  POSSIBLE_ORIENTATIONS,
+} from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
 import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./levelTemplateHelpers";

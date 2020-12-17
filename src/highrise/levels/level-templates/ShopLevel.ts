@@ -7,7 +7,6 @@ import {
 } from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
-import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
 import RoomTemplate from "../rooms/RoomTemplate";
 import Bakery from "../rooms/shops/Bakery";
 import Butcher from "../rooms/shops/Butcher";
@@ -15,7 +14,9 @@ import Jeweler from "../rooms/shops/Jeweler";
 import ProduceShop1 from "../rooms/shops/ProduceShop1";
 import ProduceShop2 from "../rooms/shops/ProduceShop2";
 import TailorShop from "../rooms/shops/TailorShop";
-import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
+import TransformedRoomTemplate, {
+  POSSIBLE_ORIENTATIONS,
+} from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
 import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./levelTemplateHelpers";

@@ -1,7 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { V2d } from "../../../core/Vector";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
-import { WallID } from "../level-generation/levelGeneration";
+import { WallID } from "../level-generation/CellGrid";
 import {
   AngleTransformer,
   CellTransformer,

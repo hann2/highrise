@@ -1,7 +1,8 @@
 import { choose, seededShuffle } from "../../../core/util/Random";
-import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
 import BathroomTemplate, { BATHROOM_STYLES } from "../rooms/BathroomTemplate";
-import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
+import TransformedRoomTemplate, {
+  POSSIBLE_ORIENTATIONS,
+} from "../rooms/TransformedRoomTemplate";
 
 // Generates two bathrooms with matching style and different orientations
 export function makeBathroomPair(

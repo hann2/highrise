@@ -1,10 +1,11 @@
 import { seededShuffle } from "../../../core/util/Random";
 import { cementFloor } from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
-import { POSSIBLE_ORIENTATIONS } from "../level-generation/levelGeneration";
 import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
-import TransformedRoomTemplate from "../rooms/TransformedRoomTemplate";
+import TransformedRoomTemplate, {
+  POSSIBLE_ORIENTATIONS,
+} from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
 import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./levelTemplateHelpers";
