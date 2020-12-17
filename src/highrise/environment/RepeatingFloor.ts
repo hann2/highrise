@@ -23,6 +23,7 @@ export default class RepeatingFloor extends BaseEntity implements Entity {
 
     const scale = decorationInfo.heightMeters / texture.height;
     this.sprite.tileScale.set(scale);
+    this.sprite.tileTransform.rotation = decorationInfo.rotation ?? 0;
     this.sprite.position.set(x, y);
     this.sprite.layerName = Layer.FLOOR;
   }
