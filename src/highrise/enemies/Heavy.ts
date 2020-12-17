@@ -18,6 +18,7 @@ import Human, { isHuman } from "../human/Human";
 import HeavySprite from "./HeavySprite";
 import ZombieController from "./ZombieController";
 import ZombieVoice from "./ZombieVoice";
+import Zombie from "./Zombie";
 
 const SPEED = 0.2;
 const HEALTH = 500;
@@ -51,7 +52,7 @@ export default class Heavy extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape);
     this.body.angularDamping = 0.9;
 
-    this.addChild(new ZombieController(this));
+    this.addChild(new ZombieController((this as any) as Zombie));
     this.addChild(new HeavySprite(this));
     this.voice = this.addChild(new ZombieVoice(this));
   }

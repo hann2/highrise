@@ -2,9 +2,9 @@ import { Sprite } from "pixi.js";
 import img_heavy from "../../../resources/images/zombies/heavy.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { ZOMBIE_RADIUS } from "../constants";
 import { Layer } from "../config/layers";
-import Zombie from "./Zombie";
+import { ZOMBIE_RADIUS } from "../constants";
+import Heavy from "./Heavy";
 
 interface BodySprites {
   standing: Sprite;
@@ -18,7 +18,7 @@ export default class HeavySprite extends BaseEntity implements Entity {
 
   bodySprites: BodySprites;
 
-  constructor(public zombie: Zombie) {
+  constructor(public heavy: Heavy) {
     super();
 
     this.sprite = new Sprite();
@@ -41,7 +41,7 @@ export default class HeavySprite extends BaseEntity implements Entity {
   }
 
   onRender() {
-    const { body } = this.zombie;
+    const { body } = this.heavy;
     [this.sprite.x, this.sprite.y] = body.position;
     this.sprite.rotation = body.angle;
 
@@ -53,7 +53,7 @@ export default class HeavySprite extends BaseEntity implements Entity {
   }
 
   getCurrentBodySprite() {
-    const { attackPhase, isStunned } = this.zombie;
+    const { attackPhase, isStunned } = this.heavy;
     if (isStunned) {
       return this.bodySprites.stunned;
     } else {

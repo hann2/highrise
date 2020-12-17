@@ -8,14 +8,15 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../core/util/MathUtil";
 import { choose, rInteger, rNormal, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import { CollisionGroups } from "../config/CollisionGroups";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants";
 import FleshImpact from "../effects/FleshImpact";
-import { CollisionGroups } from "../config/CollisionGroups";
-import SwingingWeapon from "../weapons/SwingingWeapon";
-import Bullet from "../projectiles/Bullet";
 import Hittable from "../environment/Hittable";
 import Human, { isHuman } from "../human/Human";
+import Bullet from "../projectiles/Bullet";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 import CrawlerSprite from "./CrawlerSprite";
+import Zombie from "./Zombie";
 import ZombieController from "./ZombieController";
 import ZombieVoice from "./ZombieVoice";
 
@@ -50,7 +51,7 @@ export default class Crawler extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape);
     this.body.angularDamping = 0.9;
 
-    this.addChild(new ZombieController(this));
+    this.addChild(new ZombieController((this as any) as Zombie));
     this.addChild(new CrawlerSprite(this));
     this.voice = this.addChild(new ZombieVoice(this));
   }

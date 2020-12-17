@@ -39,11 +39,11 @@ export default class CheatController extends BaseEntity implements Entity {
 
   onTick() {
     const io = this.game!.io;
-    // if (io.usingGamepad) {
-    //   const t = io.getButton(ControllerButton.LT);
-    //   this.game!.slowMo = lerp(1.0, 0.5, t);
-    // } else {
-    //   this.game!.slowMo = io.keyIsDown("ShiftLeft") ? 0.2 : 1.0;
-    // }
+    if (io.usingGamepad) {
+      const t = io.getButton(ControllerButton.LT);
+      this.game!.slowMo = lerp(1.0, 0.5, t);
+    } else {
+      this.game!.slowMo = io.keyIsDown("ShiftLeft") ? 0.2 : 1.0;
+    }
   }
 }

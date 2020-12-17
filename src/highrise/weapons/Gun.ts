@@ -7,12 +7,11 @@ import { rNormal, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import MuzzleFlash from "../effects/MuzzleFlash";
 import ShellCasing from "../effects/ShellCasing";
-import Bullet from "../projectiles/Bullet";
 import Human from "../human/Human";
+import Bullet from "../projectiles/Bullet";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import {
   EjectionType,
-  FireMode,
   GunSoundName,
   GunSounds,
   GunStats,
@@ -110,6 +109,18 @@ export default class Gun extends BaseEntity implements Entity {
       "pump"
     );
     this.pumpAmount = 0;
+  }
+
+  getCurrentHandPositions(): [V2d, V2d] {
+    const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
+    const pumpOffset = -0.2 * this.pumpAmount;
+    const [leftX, leftY] = this.stats.leftHandPosition;
+    const [rightX, rightY] = this.stats.rightHandPosition;
+
+    return [
+      V(leftX + recoilOffset + pumpOffset, leftY),
+      V(rightX + recoilOffset, rightY),
+    ];
   }
 
   getCurrentRecoilAmount() {

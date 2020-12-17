@@ -8,13 +8,13 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { angleDelta, degToRad, polarToVec } from "../../core/util/MathUtil";
 import { choose, rBool, rInteger, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import { CollisionGroups } from "../config/CollisionGroups";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants";
 import FleshImpact from "../effects/FleshImpact";
-import { CollisionGroups } from "../config/CollisionGroups";
-import SwingingWeapon from "../weapons/SwingingWeapon";
-import Bullet from "../projectiles/Bullet";
 import Hittable from "../environment/Hittable";
 import Human, { isHuman } from "../human/Human";
+import Bullet from "../projectiles/Bullet";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 import Crawler from "./Crawler";
 import ZombieController from "./ZombieController";
 import ZombieSprite from "./ZombieSprite";
@@ -26,11 +26,12 @@ const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;
 const ATTACK_ANGLE = degToRad(90);
 const ATTACK_DAMAGE = 10;
 const WINDUP_TIME = 0.2; // Time in animation from beginning of attack to doing damage
+const ATTACK_TIME = 0.1; // Time in animation from beginning of attack to doing damage
 const WINDDOWN_TIME = 0.1; // Time in animation from doing damage to end of attack
 const COOLDOWN_TIME = 0.5; // Time after windown before starting another attack
+const CRAWLER_CHANCE = 0.2; // Chance to turn into a crawler on death
 
-const CRAWLER_CHANCE = 0.2;
-
+type AttackPhase = "ready" | "windup" | "attack" | "winddown" | "cooldown";
 export default class Zombie extends BaseEntity implements Entity, Hittable {
   tags = ["zombie"];
   body: Body;
@@ -38,8 +39,9 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   speed: number = rNormal(SPEED, SPEED / 5);
   stunnedTimer = 0;
   voice: ZombieVoice;
-  attackPhase: "ready" | "windup" | "attack" | "winddown" | "cooldown" =
-    "ready";
+  attackPhase: AttackPhase = "ready";
+  attackPhasePercent: number = 0;
+  controller: ZombieController;
 
   constructor(position: V2d) {
     super();
@@ -52,7 +54,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape);
     this.body.angularDamping = 0.9;
 
-    this.addChild(new ZombieController(this));
+    this.controller = this.addChild(new ZombieController(this));
     this.addChild(new ZombieSprite(this));
     this.voice = this.addChild(new ZombieVoice(this));
   }
@@ -73,17 +75,44 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   async attack() {
     if (this.attackPhase === "ready") {
       this.voice.speak("attack");
+
       this.attackPhase = "windup";
-      await this.wait(WINDUP_TIME, undefined, "windup");
+      this.attackPhasePercent = 0;
+      await this.wait(
+        WINDUP_TIME,
+        (dt, t) => (this.attackPhasePercent = t),
+        "windup"
+      );
+
       this.attackPhase = "attack";
+      this.attackPhasePercent = 0;
+      await this.wait(
+        ATTACK_TIME,
+        (dt, t) => (this.attackPhasePercent = t),
+        "attack"
+      );
       for (const human of this.getHumansInRange()) {
         human.inflictDamage(ATTACK_DAMAGE);
       }
+
       this.attackPhase = "winddown";
-      await this.wait(WINDDOWN_TIME, undefined, "winddown");
+      this.attackPhasePercent = 0;
+      await this.wait(
+        WINDDOWN_TIME,
+        (dt, t) => (this.attackPhasePercent = t),
+        "winddown"
+      );
+
       this.attackPhase = "cooldown";
-      await this.wait(COOLDOWN_TIME, undefined, "cooldown");
+      this.attackPhasePercent = 0;
+      await this.wait(
+        COOLDOWN_TIME,
+        (dt, t) => (this.attackPhasePercent = t),
+        "cooldown"
+      );
+
       this.attackPhase = "ready";
+      this.attackPhasePercent = 0;
     }
   }
 
@@ -119,7 +148,10 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
   stun(duration: number) {
     this.stunnedTimer = Math.max(this.stunnedTimer, duration);
-    this.clearTimers("windup");
+    if (this.attackPhase === "windup") {
+      this.clearTimers("windup");
+      this.attackPhase = "ready";
+    }
   }
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {

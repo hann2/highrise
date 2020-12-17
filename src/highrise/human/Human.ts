@@ -36,7 +36,7 @@ const MAX_HEALTH = 100;
 
 export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
-export const PUSH_KNOCKBACK = 100; // newtons?
+export const PUSH_KNOCKBACK = 150; // newtons?
 export const PUSH_STUN = 0.75; // seconds
 export const PUSH_COOLDOWN = 0.4; // seconds
 
@@ -230,7 +230,7 @@ export default class Human extends BaseEntity implements Entity {
 
         if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
           const amount =
-            PUSH_KNOCKBACK - PUSH_KNOCKBACK * (distance / PUSH_RANGE);
+            PUSH_KNOCKBACK - 0.5 * PUSH_KNOCKBACK * (distance / PUSH_RANGE);
           enemy.knockback(relPosition.angle, amount);
           enemy.stun(PUSH_STUN * rNormal(1, 0.2));
           enemy.voice.speak("hit");

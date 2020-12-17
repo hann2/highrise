@@ -15,16 +15,11 @@ import img_zombie1Stand from "../../../resources/images/zombies/zombie1_stand.pn
 import { CHARACTERS } from "../characters/Character";
 import { GLOWSTICK_TEXTURES } from "../effects/GlowStick";
 import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
-import {
-  BLOB_GLOW_TEXTURES,
-  BLOB_TEXTURES,
-  SPLATS_AND_BLOBS_TEXTURES,
-  SPLAT_GLOW_TEXTURES,
-  SPLAT_TEXTURES,
-} from "../effects/Splat";
+import { SPLATS_AND_BLOBS_TEXTURES } from "../effects/Splat";
+import { ZOMBIE_TEXTURES } from "../enemies/ZombieSprite";
+import * as DecorationSprites from "../environment/decorations/decorations";
 import { DOOR_SPRITES } from "../environment/Door";
 import { VENDING_MACHINES } from "../environment/VendingMachine";
-import * as DecorationSprites from "../environment/decorations/decorations";
 import { WEAPONS } from "../weapons/weapons";
 
 // Returns the list of all
@@ -48,6 +43,7 @@ export function getImagesToPreload(): Set<string> {
 
     ...Object.values(DecorationSprites).map((sprite) => sprite.imageName),
 
+    ...Object.values(ZOMBIE_TEXTURES),
     ...SPLATS_AND_BLOBS_TEXTURES,
     ...DOOR_SPRITES,
     ...GLOWSTICK_TEXTURES,

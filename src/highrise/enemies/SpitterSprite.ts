@@ -2,10 +2,10 @@ import { Sprite } from "pixi.js";
 import img_spitter from "../../../resources/images/zombies/spitter.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { ZOMBIE_RADIUS } from "../constants";
 import { Layer } from "../config/layers";
+import { ZOMBIE_RADIUS } from "../constants";
 import { PointLight } from "../lighting-and-vision/PointLight";
-import Zombie from "./Zombie";
+import Spitter from "./Spitter";
 
 interface BodySprites {
   standing: Sprite;
@@ -20,7 +20,7 @@ export default class SpitterSprite extends BaseEntity implements Entity {
   bodySprites: BodySprites;
   glow: PointLight;
 
-  constructor(public zombie: Zombie) {
+  constructor(public spitter: Spitter) {
     super();
 
     this.sprite = new Sprite();
@@ -45,7 +45,7 @@ export default class SpitterSprite extends BaseEntity implements Entity {
   }
 
   onRender() {
-    const { body } = this.zombie;
+    const { body } = this.spitter;
     this.sprite.position.set(...body.position);
     this.sprite.rotation = body.angle;
     this.glow.setPosition(body.position);
@@ -58,7 +58,7 @@ export default class SpitterSprite extends BaseEntity implements Entity {
   }
 
   getCurrentBodySprite() {
-    const { attackPhase, isStunned } = this.zombie;
+    const { attackPhase, isStunned } = this.spitter;
     if (isStunned) {
       return this.bodySprites.stunned;
     } else {

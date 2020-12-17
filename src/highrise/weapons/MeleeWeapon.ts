@@ -2,7 +2,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
-import { V2d } from "../../core/Vector";
+import { V, V2d } from "../../core/Vector";
 import Human from "../human/Human";
 import { MeleeWeaponStats } from "./MeleeWeaponStats";
 import { SwingDescriptor } from "./SwingDescriptor";
@@ -34,6 +34,17 @@ export default class MeleeWeapon extends BaseEntity implements Entity {
       return this._currentSwing;
     } else {
       return undefined;
+    }
+  }
+
+  getCurrentHandPositions(): [V2d, V2d] {
+    if (this.currentSwing) {
+      const t = this.currentSwing.attackProgress;
+      const p = this.swing.getHandlePosition(t);
+      return [p, p];
+    } else {
+      const p = V(this.swing.restPosition);
+      return [p, p];
     }
   }
 

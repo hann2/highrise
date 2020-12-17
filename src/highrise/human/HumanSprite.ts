@@ -4,14 +4,12 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import {
   clamp,
   degToRad,
-  lerpOrSnap,
   polarToVec,
   stepToward,
 } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants";
 import Gun from "../weapons/Gun";
-import { FireMode } from "../weapons/GunStats";
 import MeleeWeapon from "../weapons/MeleeWeapon";
 import Human, { PUSH_COOLDOWN } from "./Human";
 
@@ -174,26 +172,9 @@ export default class HumanSprite extends BaseEntity implements Entity {
 
   getHandPositions(): [V2d, V2d] {
     const { weapon } = this.human;
-    if (weapon instanceof Gun) {
-      const gun = weapon;
-      const recoilOffset = this.getRecoilOffset(gun);
-      const pumpOffset = -0.2 * gun.pumpAmount;
-      const [leftX, leftY] = gun.stats.leftHandPosition;
-      const [rightX, rightY] = gun.stats.rightHandPosition;
-
-      return [
-        V(leftX + recoilOffset + pumpOffset, leftY),
-        V(rightX + recoilOffset, rightY),
-      ];
-    } else if (weapon instanceof MeleeWeapon) {
-      if (weapon.currentSwing) {
-        const t = weapon.currentSwing.attackProgress;
-        const p = weapon.swing.getHandlePosition(t);
-        return [p, p];
-      } else {
-        const p = V(weapon.swing.restPosition);
-        return [p, p];
-      }
+    if (weapon) {
+      // TODO: Arms while pushing with weapon
+      return weapon.getCurrentHandPositions();
     } else {
       // Wave em in the air like you just don't care?
       const x = 0.1 + clamp(this.human.pushCooldown / PUSH_COOLDOWN) * 0.4;
