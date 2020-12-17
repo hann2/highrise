@@ -7,7 +7,7 @@ import img_zombieRightHand from "../../../resources/images/zombies/zombie-right-
 import img_zombieTorso from "../../../resources/images/zombies/zombie-torso.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { polarToVec, smoothStep } from "../../core/util/MathUtil";
+import { angleDelta, polarToVec, smoothStep } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants";
 import Zombie from "./Zombie";
@@ -34,8 +34,6 @@ export default class ZombieSprite extends BaseEntity implements Entity {
 
   armThickness: number;
   handSize = 0.2;
-
-  stanceAngle: number = 0;
 
   constructor(private zombie: Zombie) {
     super();
@@ -81,11 +79,15 @@ export default class ZombieSprite extends BaseEntity implements Entity {
     this.sprite.addChild(this.headSprite);
   }
 
+  get stanceAngle(): number {
+    return angleDelta(this.zombie.targetDirection, this.zombie.body.angle);
+  }
+
   onRender(dt: number) {
     [this.sprite.x, this.sprite.y] = this.zombie.body.position;
     this.sprite.rotation = this.zombie.body.angle;
 
-    this.stanceAngle = this.torsoSprite.rotation = this.stanceAngle;
+    this.torsoSprite.rotation = this.stanceAngle;
 
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();
     const [leftHandPos, rightHandPos] = this.getHandPositions();

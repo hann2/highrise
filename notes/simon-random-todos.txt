@@ -14,7 +14,8 @@ Sprites to Fix in order of amount they bother me most:
 Other gameplay things that bother me
 - Zombie movement feels kinda floaty and dumb
 - We get a bunch of the same sound playing on top of each other with zombies
-- 
+- Melee weapons don't feel great
+- You shouldn't be able to see through doors
 
 Polish things to add:
 - Laser sight

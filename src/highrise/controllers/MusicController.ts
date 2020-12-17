@@ -17,6 +17,7 @@ export default class MusicController extends BaseEntity implements Entity {
       new SoundInstance(snd_bassGrooveLoop1, {
         continuous: true,
         gain: 0.0,
+        reactToSlowMo: false,
       })
     );
     this.soundInstance.pausable = false;

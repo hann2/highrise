@@ -143,7 +143,7 @@ export default class ZombieController extends BaseEntity implements Entity {
     }
     const direction = this.moveTarget.sub(this.zombie.body.position);
     direction.magnitude = speed;
-    this.zombie.setDirection(direction.angle);
+    this.zombie.targetDirection = direction.angle;
     this.zombie.walk(direction);
   }
 

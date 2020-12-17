@@ -63,9 +63,8 @@ export default class Game {
   }
 
   set slowMo(value: number) {
-    const oldSlowMo = this._slowMo;
-    this._slowMo = value;
     if (value != this._slowMo) {
+      this._slowMo = value;
       this.dispatch({ type: "slowMoChanged", slowMo: this._slowMo });
     }
   }

@@ -73,10 +73,10 @@ export interface V2d extends ArrayLen2 {
   set(x: number, y: number): this;
 
   /** Return a normalized version of this vector */
-  normalize(): V2d;
+  normalize(length?: number): V2d;
 
   /** (In Place) Return a normalized version of this vector */
-  inormalize(): this;
+  inormalize(length?: number): this;
 
   /** Return a new vector with the same values as this one */
   clone(): V2d;

@@ -127,12 +127,12 @@ export class V2d extends Array {
   }
 
   /** Return a normalized version of this vector */
-  normalize() {
-    return this.clone().inormalize();
+  normalize(length) {
+    return this.clone().inormalize(length);
   }
 
   /** (In Place) Return a normalized version of this vector */
-  inormalize() {
+  inormalize(length = 1) {
     if (!(this[0] === 0 && this[1] === 0)) {
       this.magnitude = 1;
     }

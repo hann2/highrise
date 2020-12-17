@@ -10,6 +10,7 @@ export interface SoundOptions {
   speed?: number;
   continuous?: boolean;
   randomStart?: boolean;
+  reactToSlowMo?: boolean;
 }
 
 /**
@@ -18,6 +19,7 @@ export interface SoundOptions {
 export class SoundInstance extends BaseEntity implements Entity {
   tags = ["sound"];
   public readonly continuous: boolean;
+  public reactToSlowMo: boolean;
 
   private sourceNode!: AudioBufferSourceNode;
   private panNode!: StereoPannerNode;
@@ -80,6 +82,7 @@ export class SoundInstance extends BaseEntity implements Entity {
     super();
     this.speed = options.speed ?? 1.0;
     this.continuous = options.continuous ?? false;
+    this.reactToSlowMo = options.reactToSlowMo ?? true;
 
     if (!hasSoundBuffer(soundName)) {
       throw new Error(`Unloaded Sound ${soundName}`);
@@ -110,8 +113,12 @@ export class SoundInstance extends BaseEntity implements Entity {
   makeChain({ audio, slowMo, masterGain }: Game): AudioNode {
     this.sourceNode = audio.createBufferSource();
     this.sourceNode.buffer = getSoundBuffer(this.soundName)!;
-    this.sourceNode.playbackRate.value = this._speed * slowMo;
     this.sourceNode.loop = this.continuous;
+    if (this.reactToSlowMo) {
+      this.sourceNode.playbackRate.value = this._speed * slowMo;
+    } else {
+      this.sourceNode.playbackRate.value = this._speed;
+    }
 
     this.panNode = audio.createStereoPanner();
     this.panNode.pan.value = this.options.pan ?? 0.0;
@@ -142,7 +149,11 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   updatePlaybackRate() {
     if (this.sourceNode && this.game) {
-      this.sourceNode.playbackRate.value = this._speed * this.game.slowMo;
+      if (this.reactToSlowMo) {
+        this.sourceNode.playbackRate.value = this._speed * this.game.slowMo;
+      } else {
+        this.sourceNode.playbackRate.value = this._speed;
+      }
     }
   }
 

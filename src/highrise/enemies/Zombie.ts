@@ -4,8 +4,14 @@ import fleshHit2 from "../../../resources/audio/impacts/flesh-hit-2.flac";
 import fleshHit3 from "../../../resources/audio/impacts/flesh-hit-3.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { angleDelta, degToRad, polarToVec } from "../../core/util/MathUtil";
+import {
+  angleDelta,
+  degToRad,
+  normalizeAngle,
+  polarToVec,
+} from "../../core/util/MathUtil";
 import { choose, rBool, rInteger, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../config/CollisionGroups";
@@ -14,6 +20,7 @@ import FleshImpact from "../effects/FleshImpact";
 import Hittable from "../environment/Hittable";
 import Human, { isHuman } from "../human/Human";
 import Bullet from "../projectiles/Bullet";
+import AimSpring from "../utils/AimSpring";
 import SwingingWeapon from "../weapons/SwingingWeapon";
 import Crawler from "./Crawler";
 import ZombieController from "./ZombieController";
@@ -42,6 +49,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   attackPhase: AttackPhase = "ready";
   attackPhasePercent: number = 0;
   controller: ZombieController;
+  aimSpring!: AimSpring;
 
   constructor(position: V2d) {
     super();
@@ -52,11 +60,15 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     shape.collisionGroup = CollisionGroups.Zombies;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
-    this.body.angularDamping = 0.9;
 
     this.controller = this.addChild(new ZombieController(this));
     this.addChild(new ZombieSprite(this));
     this.voice = this.addChild(new ZombieVoice(this));
+  }
+
+  onAdd(game: Game) {
+    this.aimSpring = new AimSpring(game.ground, this.body);
+    this.springs = [this.aimSpring];
   }
 
   get isStunned() {
@@ -142,8 +154,13 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
     }
   }
 
-  setDirection(angle: number) {
-    this.body.angle = angle;
+  set targetDirection(angle: number) {
+    angle = normalizeAngle(angle);
+    this.aimSpring.restAngle = angle;
+  }
+
+  get targetDirection(): number {
+    return this.aimSpring.restAngle;
   }
 
   stun(duration: number) {
@@ -156,6 +173,10 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
+
+    const impulse = bullet.velocity.mul(bullet.mass * 2);
+    const relativePos = position.sub(this.body.position);
+    this.body.applyImpulse(impulse, relativePos);
 
     this.game?.addEntities([
       new PositionalSound(choose(fleshHit1, fleshHit2, fleshHit3), position),
