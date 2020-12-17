@@ -9,6 +9,18 @@ import ElementTransformer, {
 } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 
+// List of all possible reflections/rotations
+export const POSSIBLE_ORIENTATIONS: Matrix[] = [
+  new Matrix(1, 0, 0, 1),
+  new Matrix(1, 0, 0, -1),
+  new Matrix(-1, 0, 0, 1),
+  new Matrix(-1, 0, 0, -1),
+  new Matrix(0, 1, 1, 0),
+  new Matrix(0, 1, -1, 0),
+  new Matrix(0, -1, 1, 0),
+  new Matrix(0, -1, -1, 0),
+];
+
 export default class TransformedRoomTemplate extends RoomTemplate {
   base: RoomTemplate;
   transformer: ElementTransformer;

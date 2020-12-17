@@ -32,11 +32,8 @@ import { OverheadLight } from "../../environment/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS, Direction } from "../../utils/directions";
-import {
-  CELL_WIDTH,
-  getWallInDirection,
-  WallID,
-} from "../level-generation/levelGeneration";
+import CellGrid, { WallID } from "../level-generation/CellGrid";
+import { CELL_WIDTH } from "../level-generation/levelGeneration";
 import {
   AngleTransformer,
   CellTransformer,
@@ -105,7 +102,7 @@ export default class LobbyRoomTemplate extends RoomTemplate {
         if (direction !== elevator.openDirection) {
           walls.push(
             transformWall(
-              getWallInDirection(elevator.cell, Direction[direction])
+              CellGrid.getWallInDirection(elevator.cell, Direction[direction])
             )
           );
         }

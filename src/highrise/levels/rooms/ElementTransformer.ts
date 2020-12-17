@@ -1,11 +1,15 @@
-import { Matrix } from "pixi.js";
+import { Matrix, Point } from "pixi.js";
 import { polarToVec } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
-import { pointToV2d, WallID } from "../level-generation/levelGeneration";
+import { WallID } from "../level-generation/levelGeneration";
 
 export type CellTransformer = (cell: V2d) => V2d;
 export type AngleTransformer = (angle: number) => number;
 export type WallTransformer = (wall: WallID) => WallID;
+
+function pointToV2d(p: Point): V2d {
+  return V(p.x, p.y);
+}
 
 export default class ElementTransformer {
   transformation: Matrix;
