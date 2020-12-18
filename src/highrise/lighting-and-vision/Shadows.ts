@@ -17,7 +17,11 @@ export class Shadows extends BaseEntity implements Entity {
   dirty: boolean = true;
   graphics: Graphics;
 
-  constructor(private lightPos: V2d, private radius: number = 10) {
+  constructor(
+    private lightPos: V2d,
+    private radius: number = 10,
+    private checkDynamicBodies = false
+  ) {
     super();
     this.graphics = new Graphics();
     // this.graphics.blendMode = BLEND_MODES.MULTIPLY;
@@ -137,7 +141,7 @@ export class Shadows extends BaseEntity implements Entity {
           upperBound: center.add([this.radius, this.radius]),
         }),
         [],
-        true
+        this.checkDynamicBodies
       )
       .filter((body: Body & WithOwner) =>
         body.owner?.tags?.includes?.("cast_shadow")

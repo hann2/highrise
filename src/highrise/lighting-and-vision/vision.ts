@@ -17,7 +17,7 @@ export default class VisionController extends BaseEntity implements Entity {
   constructor() {
     super();
 
-    this.shadows = this.addChild(new Shadows(V(0, 0), MAX_VISION));
+    this.shadows = this.addChild(new Shadows(V(0, 0), MAX_VISION, true));
 
     const fog = Sprite.from(img_visionFog);
     fog.blendMode = BLEND_MODES.MULTIPLY;
