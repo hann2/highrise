@@ -7,7 +7,7 @@ import { V } from "../../core/Vector";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { Layer } from "../config/layers";
 import Interactable from "./Interactable";
-import { OverheadLight } from "./OverheadLight";
+import { OverheadLight } from "./lighting/OverheadLight";
 
 export default class Exit extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;

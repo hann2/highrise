@@ -3,7 +3,7 @@ import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Decoration from "../../environment/Decoration";
 import { waterCooler } from "../../environment/decorations/decorations";
-import { OverheadLight } from "../../environment/OverheadLight";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import VendingMachine from "../../environment/VendingMachine";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import CellGrid, { LEVEL_SIZE } from "./CellGrid";

@@ -13,6 +13,7 @@ export const LEVEL_SIZE = 14;
 export const CELL_WIDTH = 2;
 
 export function chooseTemplate(level: number): LevelTemplate {
+  return new MaintenanceLevel(level);
   switch (level) {
     case 1:
       return new LobbyLevel(level);

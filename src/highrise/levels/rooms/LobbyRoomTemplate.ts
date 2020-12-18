@@ -28,7 +28,7 @@ import {
 } from "../../environment/decorations/decorations";
 import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
 import ElevatorDoor from "../../environment/ElevatorDoor";
-import { OverheadLight } from "../../environment/OverheadLight";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS, Direction } from "../../utils/directions";

@@ -2,6 +2,7 @@ import { rCardinal, seededShuffle } from "../../../core/util/Random";
 import { oldPlankFloor1 } from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
+import LightSwitchRoomTemplate from "../rooms/LightSwitchRoomTemplate";
 import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
 import TransformedRoomTemplate, {
@@ -18,6 +19,18 @@ export default class MaintenanceLevel extends LevelTemplate {
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
     rooms.push(new NecromancerArena());
     rooms.push(...makeBathroomPair(seed));
+    rooms.push(
+      new TransformedRoomTemplate(
+        new LightSwitchRoomTemplate(),
+        shuffledOrientations[0]
+      )
+    );
+    rooms.push(
+      new TransformedRoomTemplate(
+        new LightSwitchRoomTemplate(),
+        shuffledOrientations[1]
+      )
+    );
     rooms.push(
       new TransformedRoomTemplate(
         new ZombieRoomTemplate(),
