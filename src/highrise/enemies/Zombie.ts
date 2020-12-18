@@ -174,7 +174,7 @@ export default class Zombie extends BaseEntity implements Entity, Hittable {
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
 
-    const impulse = bullet.velocity.mul(bullet.mass * 2);
+    const impulse = bullet.velocity.mul(bullet.mass * 3);
     const relativePos = position.sub(this.body.position);
     this.body.applyImpulse(impulse, relativePos);
 
