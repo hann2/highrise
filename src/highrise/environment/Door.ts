@@ -22,7 +22,7 @@ const DOOR_THICKNESS = 0.25;
 export const DOOR_SPRITES = [img_door1, img_door2];
 
 export default class Door extends BaseEntity implements Entity, Hittable {
-  tags = ["casts_shadow"];
+  tags = ["cast_shadow"];
 
   sprite: Sprite & GameSprite;
   body: Body;
@@ -48,7 +48,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
       position: hingePoint,
     });
 
-    const shape = new Box({ width: DOOR_THICKNESS, height: length });
+    const shape = new Box({ width: DOOR_THICKNESS / 2, height: length });
     shape.collisionGroup = CollisionGroups.Walls | CollisionGroups.CastsShadow;
     shape.collisionMask =
       CollisionGroups.All ^

@@ -14,9 +14,9 @@ export function getShapeCorners(
       const convex = shape as Box | Convex;
       const points = [];
       for (const vertex of convex.vertices) {
-        const point: [number, number] = [0, 0];
-        body.toWorldFrame(point, vertex);
-        points.push(point);
+        const out: [number, number] = [0, 0];
+        shapePointToWorld(out, vertex, shape, body);
+        points.push(out);
       }
       return points;
     }
@@ -30,12 +30,7 @@ export function getShapeCorners(
         [-length / 2, -radius],
       ];
       for (const point of points) {
-        vec2.toLocalFrame(
-          point,
-          body.position,
-          capsule.position,
-          capsule.angle + body.angle
-        );
+        shapePointToWorld(point, point, shape, body);
       }
       return points;
     }
@@ -48,14 +43,17 @@ export function getShapeCorners(
           polarToVec((i * 2 * Math.PI) / n, circle.radius).iadd(circle.position)
         );
       }
+      for (const point of points) {
+        shapePointToWorld(point, point, shape, body);
+      }
       return [];
     }
     case Shape.LINE:
       const line = shape as Line;
       const start: [number, number] = [-line.length / PI_2, 0];
       const end: [number, number] = [line.length / 2, 0];
-      body.toWorldFrame(start, start);
-      body.toWorldFrame(end, end);
+      shapePointToWorld(start, start, shape, body);
+      shapePointToWorld(end, end, shape, body);
       return [start, end];
     case Shape.HEIGHTFIELD:
       return []; // I don't think we really need these
@@ -66,4 +64,15 @@ export function getShapeCorners(
     default:
       return []; // In case I missed one
   }
+}
+
+function shapePointToWorld(
+  out: [number, number],
+  point: [number, number],
+  shape: Shape,
+  body: Body
+): void {
+  shape;
+  vec2.toGlobalFrame(out, point, shape.position, shape.angle);
+  body.toWorldFrame(out, out);
 }
