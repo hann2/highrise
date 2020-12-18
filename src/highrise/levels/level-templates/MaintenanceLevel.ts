@@ -12,7 +12,6 @@ import {
 } from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import LightSwitchRoomTemplate from "../rooms/LightSwitchRoomTemplate";
-import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
 import TransformedRoomTemplate, {
   POSSIBLE_ORIENTATIONS,
@@ -47,7 +46,6 @@ export default class MaintenanceLevel extends LevelTemplate {
     const rooms: RoomTemplate[] = [];
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
-    rooms.push(new NecromancerArena());
     rooms.push(...makeBathroomPair(seed));
     rooms.push(
       new TransformedRoomTemplate(

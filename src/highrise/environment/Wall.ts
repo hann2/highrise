@@ -9,12 +9,12 @@ import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import WallImpact from "../effects/WallImpact";
-import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
+import { Layer } from "../config/layers";
 import { P2Materials } from "../config/PhysicsMaterials";
-import SwingingWeapon from "../weapons/SwingingWeapon";
+import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 import Hittable from "./Hittable";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {
