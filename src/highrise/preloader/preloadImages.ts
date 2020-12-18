@@ -49,8 +49,6 @@ export function getImagesToPreload(): Set<string> {
     ...WEAPONS.map((weapon) => Object.values(weapon.textures)).flat(),
   ]);
 
-  console.log(ZOMBIE_TEXTURES.map((z) => Object.values(z)).flat());
-
   // Just in case this sneaks in there somehow, make sure we don't load it
   imageUrls.delete(undefined!);
 
