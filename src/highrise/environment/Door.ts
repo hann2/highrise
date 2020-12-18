@@ -10,11 +10,11 @@ import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import WallImpact from "../effects/WallImpact";
-import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
-import SwingingWeapon from "../weapons/SwingingWeapon";
+import { Layer } from "../config/layers";
+import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
+import SwingingWeapon from "../weapons/SwingingWeapon";
 import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
@@ -52,7 +52,8 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     shape.collisionGroup = CollisionGroups.Walls | CollisionGroups.CastsShadow;
     shape.collisionMask =
       CollisionGroups.All ^
-      (CollisionGroups.Walls | CollisionGroups.CastsShadow);
+      (CollisionGroups.Walls | CollisionGroups.CastsShadow) ^
+      CollisionGroups.Furniture;
     this.body.addShape(shape, [length / 2, 0], Math.PI / 2);
     this.body.angle = restingAngle;
     this.body.angularDamping = 1.0;
