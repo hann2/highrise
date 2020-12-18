@@ -3,23 +3,25 @@ import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
 import { V } from "../../../core/Vector";
 import Decoration from "../../environment/Decoration";
+import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import { SparkGenerator } from "../../environment/lighting/SparkGenerator";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
-import { AngleTransformer, CellTransformer } from "./ElementTransformer";
+import { CellTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 
 export default class LightSwitchRoomTemplate extends RoomTemplate {
-  constructor() {
-    super(V(3, 3), [
-      [V(1, -1), false],
-      [V(1, 2), false],
-    ]);
+  constructor(public floor: DecorationInfo) {
+    super(
+      V(3, 3),
+      [
+        [V(1, -1), false],
+        [V(1, 2), false],
+      ],
+      floor
+    );
   }
 
-  generateEntities(
-    transformCell: CellTransformer,
-    transformAngle: AngleTransformer
-  ): Entity[] {
+  generateEntities(transformCell: CellTransformer): Entity[] {
     const entities: Entity[] = [];
     entities.push(
       new Decoration(transformCell(V(1, 1)), {

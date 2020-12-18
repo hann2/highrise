@@ -1,10 +1,6 @@
 import Entity from "../../../core/entity/Entity";
 import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import Crawler from "../../enemies/Crawler";
-import Heavy from "../../enemies/Heavy";
-import Spitter from "../../enemies/Spitter";
-import Zombie from "../../enemies/Zombie";
 import Exit from "../../environment/Exit";
 import Wall from "../../environment/Wall";
 import { PointLight } from "../../lighting-and-vision/PointLight";
@@ -36,11 +32,21 @@ export function generateLevelEntities(
   );
   const exits = addExit(cellGrid, exitPoint, exitOpenDirection);
   cellGrid.closets = generateClosets(cellGrid);
-  const closetEntities = fillClosets(cellGrid, seed);
+  const {
+    entities: closetEntities,
+    potentialEnemyLocations: potentialClosetEnemyLocations,
+  } = fillClosets(cellGrid, levelTemplate, seed);
   const nubbyEntities = fillNubbies(cellGrid);
   const hallwayLights = addHallwayLights(cellGrid);
-  const enemies = addEnemies(cellGrid);
+  const hallwayEnemyLocations = findEnemyLocations(cellGrid);
   const doors = cellGrid.doors.map((d) => buildDoorEntity(cellGrid, d));
+
+  const potentialEnemyLocations = [
+    ...potentialClosetEnemyLocations,
+    ...hallwayEnemyLocations,
+  ];
+
+  const enemies = levelTemplate.generateEnemies(potentialEnemyLocations, seed);
 
   const subFloor = levelTemplate.makeSubfloor([
     LEVEL_SIZE * CELL_WIDTH,
@@ -56,10 +62,10 @@ export function generateLevelEntities(
     ...innerWalls,
     ...exits,
     ...closetEntities,
-    ...enemies,
     ...nubbyEntities,
     ...hallwayLights,
     ...doors,
+    ...enemies,
   ];
 
   return entities;
@@ -92,33 +98,22 @@ function addOuterWalls(): Entity[] {
   ];
 }
 
-function addEnemies(cellGrid: CellGrid): Entity[] {
-  const enemies: Entity[] = [];
+function findEnemyLocations(cellGrid: CellGrid): V2d[] {
+  const locations: V2d[] = [];
   for (let i = 0; i < LEVEL_SIZE; i++) {
     for (let j = 0; j < LEVEL_SIZE; j++) {
       if (!cellGrid.cells[i][j].content) {
         cellGrid.cells[i][j].content = "zombie";
         for (const direction of DIAGONAL_DIRECTIONS) {
-          if (rBool(ZOMBIE_CONCENTRATION)) {
-            const p = cellGrid.levelCoordToWorldCoord(
-              V(i, j).add(Direction[direction].mul(0.25))
-            );
-            const r = Math.random();
-            if (r < 0.05) {
-              enemies.push(new Crawler(p));
-            } else if (r < 0.15) {
-              enemies.push(new Spitter(p));
-            } else if (r < 0.25) {
-              enemies.push(new Heavy(p));
-            } else {
-              enemies.push(new Zombie(p));
-            }
-          }
+          const p = cellGrid.levelCoordToWorldCoord(
+            V(i, j).add(Direction[direction].mul(0.25))
+          );
+          locations.push(p);
         }
       }
     }
   }
-  return enemies;
+  return locations;
 }
 
 function addHallwayLights(cellGrid: CellGrid): Entity[] {

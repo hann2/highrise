@@ -1,7 +1,6 @@
 import Entity from "../../../core/entity/Entity";
 import { choose, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import Zombie from "../../enemies/Zombie";
 import Decoration from "../../environment/Decoration";
 import {
   bookcase1,
@@ -10,23 +9,12 @@ import {
   boxPile2,
   boxShelf1,
   boxShelf2,
-  cementFloor,
   sack,
 } from "../../environment/decorations/decorations";
-import HealthPickup from "../../environment/HealthPickup";
 import RepeatingFloor from "../../environment/RepeatingFloor";
-import WeaponPickup from "../../environment/WeaponPickup";
-import Human from "../../human/Human";
-import SurvivorHumanController from "../../human/SurvivorHumanController";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
-import Gun from "../../weapons/Gun";
-import { FiveSeven } from "../../weapons/guns/FiveSeven";
-import { Glock } from "../../weapons/guns/Glock";
-import { GUNS } from "../../weapons/guns/guns";
-import { M1911 } from "../../weapons/guns/M1911";
-import { MELEE_WEAPONS } from "../../weapons/melee-weapons/meleeWeapons";
-import MeleeWeapon from "../../weapons/MeleeWeapon";
+import LevelTemplate from "../level-templates/LevelTemplate";
 import CellGrid, { CELL_WIDTH, Closet, LEVEL_SIZE } from "./CellGrid";
 
 export function generateClosets(cellGrid: CellGrid): Closet[] {
@@ -107,7 +95,11 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
   return closets;
 }
 
-export function fillClosets(cellGrid: CellGrid, seed: number): Entity[] {
+export function fillClosets(
+  cellGrid: CellGrid,
+  levelTemplate: LevelTemplate,
+  seed: number
+): { entities: Entity[]; potentialEnemyLocations: V2d[] } {
   const shuffledClosets: Closet[] = seededShuffle(cellGrid.closets, seed);
 
   let counter = 0;
@@ -151,7 +143,13 @@ export function fillClosets(cellGrid: CellGrid, seed: number): Entity[] {
     const upperLeftCorner = cellGrid.levelCoordToWorldCoord(
       upperLeftCell.sub(V(0.5, 0.5))
     );
-    entities.push(new RepeatingFloor(cementFloor, upperLeftCorner, dimensions));
+    entities.push(
+      new RepeatingFloor(
+        levelTemplate.getClosetFloor(),
+        upperLeftCorner,
+        dimensions
+      )
+    );
 
     if (counter % 4 === 0) {
       entities.push(
@@ -205,20 +203,16 @@ export function fillClosets(cellGrid: CellGrid, seed: number): Entity[] {
     }
   };
 
-  consumeLocation((l: V2d) => new WeaponPickup(l, new Gun(choose(...GUNS))));
-  consumeLocation(
-    (l: V2d) => new WeaponPickup(l, new MeleeWeapon(choose(...MELEE_WEAPONS)))
-  );
-  consumeLocation((l: V2d) => new HealthPickup(l));
-  consumeLocation((l: V2d) => {
-    const surv = new Human(l);
-    surv.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
-    return [surv, new SurvivorHumanController(surv)];
-  });
+  levelTemplate.getPickups().forEach(consumeLocation);
+
+  const potentialEnemyLocations: V2d[] = [];
 
   for (let i = counter; i < shuffledClosets.length; i++) {
-    consumeLocation((l: V2d) => new Zombie(l));
+    consumeLocation((l: V2d) => {
+      potentialEnemyLocations.push(l);
+      return [];
+    });
   }
 
-  return entities;
+  return { entities, potentialEnemyLocations };
 }

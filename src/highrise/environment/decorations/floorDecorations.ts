@@ -12,6 +12,7 @@ import img_industrialCarpet002 from "../../../../resources/images/environment/fl
 import img_marble1 from "../../../../resources/images/environment/floor/marble-1.jpg";
 import img_oldPlankFlooring1 from "../../../../resources/images/environment/floor/old-plank-flooring-1.png";
 import img_oldPlankFlooring2 from "../../../../resources/images/environment/floor/old-plank-flooring-2.png";
+import img_steelFloor from "../../../../resources/images/environment/floor/steel-floor.png";
 import img_tileFloor1 from "../../../../resources/images/environment/floor/tile-floor-1.png";
 import img_tileFloor10 from "../../../../resources/images/environment/floor/tile-floor-10.jpg";
 import img_tileFloor2 from "../../../../resources/images/environment/floor/tile-floor-2.png";
@@ -167,4 +168,34 @@ export const graniteFloor2: DecorationInfo = {
 export const graniteFloor3: DecorationInfo = {
   imageName: img_granite3,
   heightMeters: 4,
+};
+
+export const steelFloor1: DecorationInfo = {
+  imageName: img_steelFloor,
+  heightMeters: 0.5,
+  sheetInfo: { offset: V(0, 32), dimensions: V(64, 64) },
+};
+
+export const steelFloor2: DecorationInfo = {
+  imageName: img_steelFloor,
+  heightMeters: 0.5,
+  sheetInfo: { offset: V(64, 32), dimensions: V(64, 64) },
+};
+
+export const steelFloor3: DecorationInfo = {
+  imageName: img_steelFloor,
+  heightMeters: 0.5,
+  sheetInfo: { offset: V(128, 32), dimensions: V(64, 64) },
+};
+
+export const steelFloor4: DecorationInfo = {
+  imageName: img_steelFloor,
+  heightMeters: 0.5,
+  sheetInfo: { offset: V(192, 32), dimensions: V(64, 64) },
+};
+
+export const steelFloor5: DecorationInfo = {
+  imageName: img_steelFloor,
+  heightMeters: 0.5,
+  sheetInfo: { offset: V(256, 32), dimensions: V(64, 64) },
 };

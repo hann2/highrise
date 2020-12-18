@@ -1,7 +1,16 @@
-import { rCardinal, seededShuffle } from "../../../core/util/Random";
-import { oldPlankFloor1 } from "../../environment/decorations/decorations";
+import { choose, seededShuffle, shuffle } from "../../../core/util/Random";
+import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
+import {
+  carpetFloor1,
+  carpetFloor2,
+  cementFloor,
+  steelFloor1,
+  steelFloor2,
+  steelFloor3,
+  steelFloor4,
+  steelFloor5,
+} from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
-import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import LightSwitchRoomTemplate from "../rooms/LightSwitchRoomTemplate";
 import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
@@ -13,6 +22,27 @@ import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./levelTemplateHelpers";
 
 export default class MaintenanceLevel extends LevelTemplate {
+  subFloor: DecorationInfo;
+  closetFloor: DecorationInfo;
+  roomFloor: DecorationInfo;
+
+  constructor(levelIndex: number) {
+    super(levelIndex);
+
+    const potentialFloors: DecorationInfo[] = shuffle([
+      cementFloor,
+      choose(carpetFloor1, carpetFloor2),
+      steelFloor1,
+      steelFloor2,
+      steelFloor3,
+      steelFloor4,
+      steelFloor5,
+    ]);
+    this.subFloor = potentialFloors[0];
+    this.closetFloor = potentialFloors[1];
+    this.roomFloor = potentialFloors[2];
+  }
+
   chooseRoomTemplates(seed: number): RoomTemplate[] {
     const rooms: RoomTemplate[] = [];
 
@@ -21,13 +51,13 @@ export default class MaintenanceLevel extends LevelTemplate {
     rooms.push(...makeBathroomPair(seed));
     rooms.push(
       new TransformedRoomTemplate(
-        new LightSwitchRoomTemplate(),
+        new LightSwitchRoomTemplate(this.roomFloor),
         shuffledOrientations[0]
       )
     );
     rooms.push(
       new TransformedRoomTemplate(
-        new LightSwitchRoomTemplate(),
+        new LightSwitchRoomTemplate(this.roomFloor),
         shuffledOrientations[1]
       )
     );
@@ -41,13 +71,11 @@ export default class MaintenanceLevel extends LevelTemplate {
     return rooms;
   }
 
-  makeSubfloor(size: [number, number]) {
-    const decorationInfo = { ...oldPlankFloor1 };
-    decorationInfo.rotation = rCardinal();
-    return new RepeatingFloor(oldPlankFloor1, [0, 0], size);
+  getClosetFloor(): DecorationInfo {
+    return this.closetFloor;
   }
 
-  getAmbientLight(): AmbientLight {
-    return new AmbientLight(0x000000);
+  makeSubfloor(size: [number, number]) {
+    return new RepeatingFloor(this.subFloor, [0, 0], size);
   }
 }
