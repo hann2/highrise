@@ -1,4 +1,5 @@
 import { SoundName } from "../../core/resources/sounds";
+import { BodyTextures } from "../creature-stuff/BodySprite";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import { Andy } from "./Andy";
 import { Chad } from "./Chad";
@@ -19,14 +20,7 @@ export interface Character {
   sounds: CharacterSounds;
 }
 
-export interface CharacterTextures {
-  head: string;
-  torso: string;
-  leftHand: string;
-  rightHand: string;
-  leftArm: string;
-  rightArm: string;
-}
+export interface CharacterTextures extends BodyTextures {}
 
 export interface CharacterSounds {
   death: SoundName[];

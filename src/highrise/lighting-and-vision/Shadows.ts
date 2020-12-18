@@ -2,6 +2,7 @@ import { AABB, Body, vec2 } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { WithOwner } from "../../core/entity/Entity";
+import CustomWorld from "../../core/physics/CustomWorld";
 import { V2d } from "../../core/Vector";
 import { getShapeCorners } from "./shapeUtils";
 /**
@@ -128,13 +129,15 @@ export class Shadows extends BaseEntity implements Entity {
   getAffectedBodies() {
     const center = this.lightPos;
     const world = this.game!.world;
-    return world.broadphase
+    return (world as CustomWorld).broadphase
       .aabbQuery(
         world,
         new AABB({
           lowerBound: center.sub([this.radius, this.radius]),
           upperBound: center.add([this.radius, this.radius]),
-        })
+        }),
+        [],
+        true
       )
       .filter((body: Body & WithOwner) =>
         body.owner?.tags?.includes?.("cast_shadow")

@@ -101,7 +101,7 @@ export default class Preloader extends BaseEntity implements Entity {
       element.innerText = `${loaded} / ${total}`;
     });
     loader.onError.add((_, image) => {
-      console.warn(`Image failed to load ${image}`);
+      console.warn(`Image failed to load`, image);
     });
     const completePromise = new Promise<void>((resolve) =>
       loader.onComplete.add(() => resolve())

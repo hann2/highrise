@@ -21,7 +21,6 @@ export class SparkGenerator extends BaseEntity implements Entity {
   }
 
   onTick(dt: number) {
-    console.log(this.game!.elapsedTime);
     const sparkFrequency =
       Math.max(
         0,
