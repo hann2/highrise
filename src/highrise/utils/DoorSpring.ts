@@ -1,7 +1,7 @@
 import { Body, RotationalSpring } from "p2";
 import { angleDelta, normalizeAngle } from "../../core/util/MathUtil";
 
-export default class AimSpring extends RotationalSpring {
+export default class DoorSpring extends RotationalSpring {
   constructor(
     bodyA: Body,
     bodyB: Body,

@@ -53,6 +53,19 @@ export default class HumanSprite extends BodySprite {
     );
   }
 
+  onRender(dt: number) {
+    super.onRender(dt);
+
+    const weapon = this.human.weapon;
+    if (weapon && this.weaponSprite) {
+      if (weapon instanceof MeleeWeapon) {
+        this.weaponSprite.visible = weapon.currentCooldown <= 0;
+      } else {
+        this.weaponSprite.position.set(...weapon.getCurrentHoldPosition());
+      }
+    }
+  }
+
   getTargetStanceAngle(): number {
     if (this.human.weapon instanceof Gun) {
       return this.human.weapon.stats.stanceAngle;
@@ -108,7 +121,7 @@ export default class HumanSprite extends BodySprite {
       this.weaponSprite = Sprite.from(textures.holding);
       this.weaponSprite.scale.set(GUN_SCALE);
       this.weaponSprite.anchor.set(0.5, 0.5);
-      this.weaponSprite.position.set(...weapon.stats.holdPosition);
+      this.weaponSprite.position.set(...weapon.getCurrentHoldPosition());
       this.sprite.addChild(this.weaponSprite);
     } else if (weapon instanceof MeleeWeapon) {
       const { handlePosition, textures, size } = weapon.stats;

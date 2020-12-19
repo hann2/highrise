@@ -37,6 +37,7 @@ Ideas for performance improvements
 - Make walls use lines instead of boxes (at least for shadows)
 - A* for AI
 - Somehow make raycasting fast, then use it for shadows and AI
+- Allow setting resolution/antialiasing
 
 
 Code cleanliness things that bug me

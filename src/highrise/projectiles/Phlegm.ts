@@ -11,7 +11,7 @@ import { Layer } from "../config/layers";
 import GooImpact from "../effects/GooImpact";
 import GooSplat from "../effects/GooSplat";
 import { getBlobPair, getSplatSound } from "../effects/Splat";
-import Spitter from "../enemies/Spitter";
+import Spitter from "../enemies/spitter/Spitter";
 import Human from "../human/Human";
 import { PointLight } from "../lighting-and-vision/PointLight";
 

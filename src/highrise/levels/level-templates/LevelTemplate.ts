@@ -2,7 +2,7 @@ import Entity from "../../../core/entity/Entity";
 import { hsvToRgb, rgbToHex } from "../../../core/util/ColorUtils";
 import { choose, rUniform, seededShuffle } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
-import Zombie from "../../enemies/Zombie";
+import Zombie from "../../enemies/zombie/Zombie";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import {
   carpetFloor1,

@@ -14,7 +14,7 @@ export interface BodyTextures {
 }
 
 // A body with arms that faces a direction
-export class BodySprite extends BaseEntity implements Entity {
+export abstract class BodySprite extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
   torsoSprite: Sprite;
   headSprite: Sprite;
@@ -22,7 +22,6 @@ export class BodySprite extends BaseEntity implements Entity {
   armThickness: number;
   rightArmSprite: Sprite;
   leftHandSprite: Sprite;
-  handSize: any;
   rightHandSprite: Sprite;
 
   constructor(private textures: BodyTextures, private radius: number) {
@@ -33,7 +32,7 @@ export class BodySprite extends BaseEntity implements Entity {
 
     this.torsoSprite = Sprite.from(textures.torso);
     this.torsoSprite.anchor.set(0.5);
-    const baseScale = this.radius / this.torsoSprite.width;
+    const baseScale = (this.radius * 2) / this.torsoSprite.height;
     this.torsoSprite.scale.set(baseScale);
 
     this.headSprite = Sprite.from(textures.head);
@@ -51,13 +50,13 @@ export class BodySprite extends BaseEntity implements Entity {
 
     this.leftHandSprite = Sprite.from(textures.leftHand);
     this.leftHandSprite.anchor.set(0.5, 0.5);
-    this.leftHandSprite.width = this.handSize;
-    this.leftHandSprite.height = this.handSize;
+    this.leftHandSprite.width = this.armThickness;
+    this.leftHandSprite.height = this.armThickness;
 
     this.rightHandSprite = Sprite.from(textures.rightHand);
     this.rightHandSprite.anchor.set(0.5, 0.5);
-    this.rightHandSprite.width = this.handSize;
-    this.rightHandSprite.height = this.handSize;
+    this.rightHandSprite.width = this.armThickness;
+    this.rightHandSprite.height = this.armThickness;
 
     this.sprite.addChild(this.leftArmSprite);
     this.sprite.addChild(this.rightArmSprite);

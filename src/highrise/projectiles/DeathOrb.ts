@@ -8,7 +8,7 @@ import { getBlobPair } from "../effects/Splat";
 import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
 import Human from "../human/Human";
-import Spitter from "../enemies/Spitter";
+import Spitter from "../enemies/spitter/Spitter";
 
 export const DEATH_ORB_RADIUS = 0.4; // meters
 const MAX_LIFESPAN = 3.0; // seconds

@@ -10,10 +10,10 @@ import snd_glowStickDrop2 from "../../../resources/audio/misc/glow-stick-drop-2.
 import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
 import snd_quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac";
 import { CHARACTERS } from "../characters/Character";
+import { ENEMY_SOUNDS } from "../constants";
+import { MUSIC_URLS } from "../controllers/MusicController";
 import { GLOWSTICK_SOUNDS } from "../effects/GlowStick";
 import { SPLAT_SOUNDS } from "../effects/Splat";
-import { ENEMY_SOUNDS } from "../enemies/ZombieVoice";
-import { MUSIC_URLS } from "../controllers/MusicController";
 import { WEAPONS } from "../weapons/weapons";
 
 export function getSoundsToPreload(): string[] {

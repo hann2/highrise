@@ -6,8 +6,8 @@ import { V2d, V } from "../Vector";
  */
 export class LayerInfo {
   readonly container: Pixi.Container;
-  readonly paralax: number;
-  readonly anchor: V2d;
+  paralax: number;
+  anchor: V2d;
 
   constructor({ paralax, anchor, filters, alpha }: LayerInfoOptions = {}) {
     this.container = new Pixi.Container();

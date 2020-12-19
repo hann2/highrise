@@ -111,6 +111,11 @@ export default class Gun extends BaseEntity implements Entity {
     this.pumpAmount = 0;
   }
 
+  getCurrentRecoilAmount() {
+    const maxShootCooldown = 1.0 / this.stats.fireRate;
+    return clamp(this.shootCooldown / maxShootCooldown);
+  }
+
   getCurrentHandPositions(): [V2d, V2d] {
     const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
     const pumpOffset = -0.2 * this.pumpAmount;
@@ -123,9 +128,9 @@ export default class Gun extends BaseEntity implements Entity {
     ];
   }
 
-  getCurrentRecoilAmount() {
-    const maxShootCooldown = 1.0 / this.stats.fireRate;
-    return clamp(this.shootCooldown / maxShootCooldown);
+  getCurrentHoldPosition(): V2d {
+    const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
+    return V(this.stats.holdPosition).iadd([recoilOffset, 0]);
   }
 
   makeShellCasing(shooter: Human) {

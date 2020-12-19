@@ -2,8 +2,8 @@ import { Body, Box, RevoluteConstraint } from "p2";
 import { Sprite } from "pixi.js";
 import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
-import img_door1 from "../../../resources/images/environment/door-1.png";
-import img_door2 from "../../../resources/images/environment/door-2.png";
+import img_door1 from "../../../resources/images/environment/doors/door-1.png";
+import img_door2 from "../../../resources/images/environment/doors/door-2.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
@@ -32,12 +32,13 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     length: number,
     private restingAngle: number,
     private minAngle: number,
-    private maxAngle: number
+    private maxAngle: number,
+    imageName: string = choose(...DOOR_SPRITES)
   ) {
     super();
     this.hingePoint = hingePoint;
 
-    this.sprite = Sprite.from(choose(...DOOR_SPRITES));
+    this.sprite = Sprite.from(imageName);
     this.sprite.scale.set(length / this.sprite.width);
     this.sprite.anchor.set(0, 0.5); // door sprites are horizontal
     this.sprite.position.set(...hingePoint);
@@ -52,7 +53,8 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     shape.collisionGroup = CollisionGroups.Walls | CollisionGroups.CastsShadow;
     shape.collisionMask =
       CollisionGroups.All ^
-      (CollisionGroups.Walls | CollisionGroups.CastsShadow) ^
+      CollisionGroups.Walls ^
+      CollisionGroups.CastsShadow ^
       CollisionGroups.Furniture;
     this.body.addShape(shape, [length / 2, 0], Math.PI / 2);
     this.body.angle = restingAngle;

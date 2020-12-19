@@ -21,7 +21,7 @@ import { PointLight } from "../lighting-and-vision/PointLight";
 import { CollisionGroups } from "../config/CollisionGroups";
 import Gun from "../weapons/Gun";
 import MeleeWeapon from "../weapons/MeleeWeapon";
-import { isEnemy } from "../enemies/Enemy";
+import { isEnemy } from "../enemies/base/Enemy";
 import Interactable, { isInteractable } from "../environment/Interactable";
 import WeaponPickup from "../environment/WeaponPickup";
 import Flashlight from "./Flashlight";

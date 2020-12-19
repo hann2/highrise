@@ -4,7 +4,7 @@ import { rBool } from "../../core/util/Random";
 import { getNearestVisibleEnemy } from "../utils/visionUtils";
 import Gun from "../weapons/Gun";
 import MeleeWeapon from "../weapons/MeleeWeapon";
-import { Enemy } from "../enemies/Enemy";
+import { BaseEnemy } from "../enemies/base/Enemy";
 import Human from "./Human";
 import Interactable from "../environment/Interactable";
 
@@ -18,7 +18,7 @@ export default class SurvivorHumanController
   // The human this AI is controlling
   human: Human;
   // The zombie this AI is currently shooting at
-  target?: Enemy;
+  target?: BaseEnemy;
 
   // The interaction target to make this human follow the player
   interactable: Interactable;

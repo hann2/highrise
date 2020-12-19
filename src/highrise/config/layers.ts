@@ -20,7 +20,7 @@ export enum Layer {
   // Pickupable items sitting on the ground
   ITEMS = "items",
   // Stuff above the floor but below people and weapons and stuff
-  PARTICLES = "world_back",
+  PARTICLES = "particles",
   // Stuff at the human's chest level
   WEAPONS = "world_weapons",
   // Walls n stuff
@@ -49,8 +49,11 @@ const PARALAX_FREE_LAYERS = [Layer.LIGHTING, Layer.HUD, Layer.MENU];
 // Set up the game to use our layers
 export function initLayers(game: Game) {
   for (const layerName of Object.values(Layer)) {
-    const paralax = PARALAX_FREE_LAYERS.includes(layerName) ? 0 : 1;
-    game.renderer.createLayer(layerName, new LayerInfo({ paralax }));
+    game.renderer.createLayer(layerName, new LayerInfo({}));
+  }
+
+  for (const layerName of PARALAX_FREE_LAYERS) {
+    game.renderer.layerInfos.get(layerName)!.paralax = 0;
   }
 
   game.renderer.defaultLayer = Layer.WORLD;

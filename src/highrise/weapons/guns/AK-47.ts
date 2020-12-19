@@ -10,7 +10,6 @@ import snd_rifle2Shot1 from "../../../../resources/audio/guns/rifle/rifle2-shot-
 import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
 import img_ak47Hold from "../../../../resources/images/weapons/ak-47-hold.png";
 import img_ak47Pickup from "../../../../resources/images/weapons/ak47-pickup.png";
-import img_rifle from "../../../../resources/images/weapons/rifle.png";
 import { degToRad } from "../../../core/util/MathUtil";
 import {
   defaultGunStats,

@@ -1,7 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { V } from "../../../core/Vector";
 import Decoration from "../../environment/Decoration";
-import Necromancer from "../../enemies/Necromancer";
+import Necromancer from "../../enemies/necromancer/Necromancer";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import {

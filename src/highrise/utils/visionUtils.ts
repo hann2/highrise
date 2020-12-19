@@ -2,7 +2,7 @@ import { Ray, RaycastResult } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Game from "../../core/Game";
 import CustomWorld from "../../core/physics/CustomWorld";
-import { Enemy, isEnemy } from "../enemies/Enemy";
+import { BaseEnemy, isEnemy } from "../enemies/base/Enemy";
 import Human from "../human/Human";
 import { CollisionGroups } from "../config/CollisionGroups";
 
@@ -28,10 +28,10 @@ export function getNearestVisibleEnemy(
   game: Game,
   human: Human,
   maxDistance: number = Infinity
-): Enemy | undefined {
+): BaseEnemy | undefined {
   const enemies = game.entities.getByFilter(isEnemy);
 
-  let nearestVisibleEnemy: Enemy | undefined;
+  let nearestVisibleEnemy: BaseEnemy | undefined;
   let nearestDistance: number = maxDistance;
 
   for (const enemy of enemies) {

@@ -1,7 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import Heavy from "../../enemies/Heavy";
+import Heavy from "../../enemies/heavy/Heavy";
 import Decoration from "../../environment/Decoration";
 import {
   chairRight,

@@ -21,7 +21,7 @@ export class GameRenderer2d {
     this.pixiRenderer = new Pixi.Renderer({
       width: window.innerWidth,
       height: window.innerHeight,
-      antialias: true,
+      antialias: false,
       autoDensity: true,
       resolution: Pixi.settings.RESOLUTION,
     });
