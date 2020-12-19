@@ -15,7 +15,7 @@ import {
   createAttackAction,
 } from "../../creature-stuff/AttackAction";
 import { Creature } from "../../creature-stuff/Creature";
-import { PhasedAction } from "../../creature-stuff/PhasedAction";
+import { PhasedAction } from "../../utils/PhasedAction";
 import FleshImpact from "../../effects/FleshImpact";
 import Human from "../../human/Human";
 import Bullet from "../../projectiles/Bullet";
@@ -40,7 +40,7 @@ export class BaseEnemy extends Creature {
   }
 
   getAttackPhase() {
-    return this.attackAction?.currentPhase.name ?? "ready";
+    return this.attackAction?.currentPhase?.name ?? "ready";
   }
 
   getAttackPhasePercent() {
@@ -108,7 +108,7 @@ export class BaseEnemy extends Creature {
   }
 
   async attack() {
-    if (this.attackAction?.currentPhase.name === "ready") {
+    if (this.attackAction?.currentPhase?.name === "ready") {
       await this.attackAction.do();
     }
   }

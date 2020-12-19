@@ -29,7 +29,7 @@ export const Magnum: GunStats = {
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   ejectionType: EjectionType.RELOAD,
-  reloadTime: 0.28,
+  reloadInsertTime: 0.28,
   ammoCapacity: 6,
 
   textures: {

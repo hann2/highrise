@@ -1,4 +1,4 @@
-import { PhasedAction } from "./PhasedAction";
+import { PhasedAction } from "../utils/PhasedAction";
 
 export type AttackPhases =
   | "windup"
@@ -43,6 +43,5 @@ export function createAttackAction<Params extends unknown[] = []>({
       name: "cooldown",
       duration: cooldownDuration,
     },
-    { name: "ready" },
   ]);
 }

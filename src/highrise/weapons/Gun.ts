@@ -2,13 +2,20 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { clamp, degToRad, polarToVec } from "../../core/util/MathUtil";
+import {
+  clamp,
+  degToRad,
+  lerp,
+  polarToVec,
+  smoothStep,
+} from "../../core/util/MathUtil";
 import { rNormal, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import MuzzleFlash from "../effects/MuzzleFlash";
 import ShellCasing from "../effects/ShellCasing";
 import Human from "../human/Human";
 import Bullet from "../projectiles/Bullet";
+import { PhasedAction } from "../utils/PhasedAction";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import {
   EjectionType,
@@ -25,8 +32,8 @@ export default class Gun extends BaseEntity implements Entity {
   shootCooldown: number = 0;
   // Amount of ammo currently loaded in the gun
   ammo: number;
-  // Whether or not we're currently in the middle of reloading
-  isReloading: boolean = false;
+
+  reloadAction: PhasedAction<"start" | "insert" | "finish", [Human]>;
   // Easy way to play random characteristic sounds for this gun
   sounds: GunSoundRings;
   // What percentage we're currently pumping the gun. Unused for non-pump guns
@@ -39,6 +46,53 @@ export default class Gun extends BaseEntity implements Entity {
     this.stats = stats;
     this.ammo = this.stats.ammoCapacity;
     this.sounds = makeSoundRings(stats.sounds);
+
+    this.reloadAction = this.addChild(
+      new PhasedAction([
+        {
+          name: "start",
+          duration: this.stats.reloadStartTime,
+          startAction: (shooter: Human) => {
+            this.playSound("reload", shooter.getPosition());
+          },
+          endAction: () => {},
+        },
+        {
+          name: "insert",
+          duration: this.stats.reloadInsertTime,
+          startAction: (shooter: Human) => {
+            this.playSound("reloadInsert", shooter.getPosition());
+          },
+          endAction: () => {
+            if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
+              this.ammo += 1;
+            } else {
+              this.ammo = this.stats.ammoCapacity;
+            }
+          },
+        },
+        {
+          name: "finish",
+          duration: this.stats.reloadEndTime,
+          startAction: (shooter: Human) => {
+            this.playSound("reloadFinish", shooter.getPosition());
+
+            if (this.stats.ejectionType === EjectionType.PUMP) {
+              this.pump(shooter);
+            } else {
+              this.playSound("reloadFinish", shooter.getPosition());
+            }
+          },
+
+          endAction: () => {},
+        },
+      ])
+    );
+  }
+
+  // Whether or not we're currently in the middle of reloading
+  get isReloading() {
+    return Boolean(this.reloadAction.isActive());
   }
 
   canShoot(): boolean {
@@ -111,28 +165,6 @@ export default class Gun extends BaseEntity implements Entity {
     this.pumpAmount = 0;
   }
 
-  getCurrentRecoilAmount() {
-    const maxShootCooldown = 1.0 / this.stats.fireRate;
-    return clamp(this.shootCooldown / maxShootCooldown);
-  }
-
-  getCurrentHandPositions(): [V2d, V2d] {
-    const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
-    const pumpOffset = -0.2 * this.pumpAmount;
-    const [leftX, leftY] = this.stats.leftHandPosition;
-    const [rightX, rightY] = this.stats.rightHandPosition;
-
-    return [
-      V(leftX + recoilOffset + pumpOffset, leftY),
-      V(rightX + recoilOffset, rightY),
-    ];
-  }
-
-  getCurrentHoldPosition(): V2d {
-    const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
-    return V(this.stats.holdPosition).iadd([recoilOffset, 0]);
-  }
-
   makeShellCasing(shooter: Human) {
     this.shellsToEject -= 1;
     const shooterDirection = shooter.getDirection();
@@ -187,35 +219,19 @@ export default class Gun extends BaseEntity implements Entity {
       }
 
       if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
-        this.isReloading = true;
-        this.playSound("reload", shooter.getPosition());
-        this.ammo = 0;
-        await this.wait(this.stats.reloadTime, undefined, "reload");
-        this.playSound("reloadFinish", shooter.getPosition());
-        this.ammo = this.stats.ammoCapacity;
-        this.isReloading = false;
+        await this.reloadAction.do(shooter);
       } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
-        this.playSound("reload", shooter.getPosition());
-        this.isReloading = true;
-        await this.wait(this.stats.reloadTime * 0.4, undefined, "reload");
+        await this.reloadAction.doSinglePhase("start", shooter);
         while (this.ammo < this.stats.ammoCapacity) {
-          this.playSound("reloadInsert", shooter.getPosition());
-          await this.wait(this.stats.reloadTime, undefined, "reload");
-          this.ammo += 1;
+          await this.reloadAction.doSinglePhase("insert", shooter);
         }
-        this.isReloading = false;
-        if (this.stats.ejectionType === EjectionType.PUMP) {
-          this.pump(shooter);
-        } else {
-          this.playSound("reloadFinish", shooter.getPosition());
-        }
+        await this.reloadAction.doSinglePhase("finish", shooter);
       }
     }
   }
 
   cancelReload() {
-    this.clearTimers("reload");
-    this.isReloading = false;
+    this.reloadAction.reset();
   }
 
   onTick(dt: number) {
@@ -235,6 +251,48 @@ export default class Gun extends BaseEntity implements Entity {
       return this.game?.addEntity(
         new PositionalSound(sound, position, { gain })
       );
+    }
+  }
+
+  getCurrentRecoilAmount() {
+    const maxShootCooldown = 1.0 / this.stats.fireRate;
+    return clamp(this.shootCooldown / maxShootCooldown);
+  }
+
+  getCurrentHandPositions(): [V2d, V2d] {
+    const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
+    const pumpOffset = -0.2 * this.pumpAmount;
+    const [leftX, leftY] = this.stats.leftHandPosition;
+    const [rightX, rightY] = this.stats.rightHandPosition;
+
+    return [
+      V(leftX + recoilOffset + pumpOffset, leftY),
+      V(rightX + recoilOffset, rightY),
+    ];
+  }
+
+  getCurrentHoldPosition(): V2d {
+    if (this.isReloading) {
+      return V(this.stats.holdPosition).imul(0.9);
+    } else {
+      const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
+      return V(this.stats.holdPosition).iadd([recoilOffset, 0]);
+    }
+  }
+
+  getCurrentHoldAngle(): number {
+    if (this.isReloading) {
+      const t = smoothStep(this.reloadAction.phasePercent);
+      switch (this.reloadAction.currentPhase!.name) {
+        case "start":
+          return lerp(0, degToRad(-30), t);
+        case "insert":
+          return degToRad(-30);
+        case "finish":
+          return lerp(degToRad(-30), 0, t);
+      }
+    } else {
+      return 0;
     }
   }
 }

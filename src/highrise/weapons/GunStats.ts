@@ -31,8 +31,12 @@ export interface GunStats extends BaseWeaponStats {
   readonly ammoCapacity: number;
   // Whether you load rounds one-at-a-time or all-at-once
   readonly reloadingStyle: ReloadingStyle;
-  // Seconds to complete a reload. For INDIVIDUAL, this is seconds per round loaded
-  readonly reloadTime: number;
+  // Seconds to start a reload.
+  readonly reloadStartTime: number;
+  // Seconds to do the insert part of a reload. For INDIVIDUAL, this is seconds per round loaded
+  readonly reloadInsertTime: number;
+  // Seconds to finish a reload.
+  readonly reloadEndTime: number;
 
   // The number of bullets per round fired
   readonly bulletsPerShot: number;
@@ -108,7 +112,9 @@ export const defaultGunStats: GunStats = {
   bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
   ammoCapacity: 10,
-  reloadTime: 1,
+  reloadStartTime: 0.1,
+  reloadInsertTime: 1,
+  reloadEndTime: 0.1,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   ejectionType: EjectionType.AUTOMATIC,
   bulletsPerShot: 1,

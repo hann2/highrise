@@ -19,7 +19,7 @@ export const M1911: GunStats = {
   bulletDamage: 34,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.MAGAZINE,
-  reloadTime: 0.8,
+  reloadInsertTime: 0.8,
   ammoCapacity: 7,
 
   textures: {

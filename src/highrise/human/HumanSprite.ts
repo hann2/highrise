@@ -1,18 +1,11 @@
 import { Sprite } from "pixi.js";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
-import {
-  clamp,
-  degToRad,
-  polarToVec,
-  stepToward,
-} from "../../core/util/MathUtil";
+import { lerp, smoothStep, stepToward } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants";
 import { BodySprite } from "../creature-stuff/BodySprite";
 import Gun from "../weapons/Gun";
 import MeleeWeapon from "../weapons/MeleeWeapon";
-import Human, { PUSH_COOLDOWN } from "./Human";
+import Human from "./Human";
 
 const GUN_SCALE = 1 / 300;
 const STANCE_ADJUST_SPEED = 3; // meters per second
@@ -61,7 +54,11 @@ export default class HumanSprite extends BodySprite {
       if (weapon instanceof MeleeWeapon) {
         this.weaponSprite.visible = weapon.currentCooldown <= 0;
       } else {
-        this.weaponSprite.position.set(...weapon.getCurrentHoldPosition());
+        const pushOffset = this.getPushOffset();
+        this.weaponSprite.position.set(
+          ...weapon.getCurrentHoldPosition().iadd([pushOffset, 0])
+        );
+        this.weaponSprite.rotation = weapon.getCurrentHoldAngle() + pushOffset;
       }
     }
   }
@@ -104,14 +101,33 @@ export default class HumanSprite extends BodySprite {
 
   getHandPositions(): [V2d, V2d] {
     const { weapon } = this.human;
+    const pushOffset = this.getPushOffset();
     if (weapon) {
-      // TODO: Arms while pushing with weapon
-      return weapon.getCurrentHandPositions();
+      const [left, right] = weapon.getCurrentHandPositions();
+      return [left.iadd([pushOffset, 0]), right.iadd([pushOffset, 0])];
     } else {
       // Wave em in the air like you just don't care?
-      const x = 0.1 + clamp(this.human.pushCooldown / PUSH_COOLDOWN) * 0.4;
+      let x: number = 0.3 + pushOffset;
       const y = Math.sin(this.game!.elapsedTime * 2) * 0.05;
       return [V(x, -0.2 + y), V(x, 0.2 - y)];
+    }
+  }
+
+  getPushOffset(): number {
+    const pushPhase = this.human.pushAction.currentPhase?.name;
+    const t = smoothStep(this.human.pushAction.phasePercent);
+
+    switch (pushPhase) {
+      case undefined:
+        return 0;
+      case "windup":
+        return lerp(0, -0.2, t);
+      case "push":
+        return lerp(-0.2, 0.2, t);
+      case "winddown":
+        return lerp(0.2, 0, t);
+      default:
+        return 0;
     }
   }
 

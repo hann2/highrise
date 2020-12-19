@@ -27,7 +27,7 @@ export const PumpShotgun: GunStats = {
   muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   ejectionType: EjectionType.PUMP,
-  reloadTime: 0.5,
+  reloadInsertTime: 0.5,
   ammoCapacity: 7,
 
   textures: {

@@ -29,7 +29,7 @@ export const DoubleBarrelShotgun: GunStats = {
   reloadingStyle: ReloadingStyle.MAGAZINE,
   fireMode: FireMode.SEMI_AUTO,
   ejectionType: EjectionType.RELOAD,
-  reloadTime: 1.2,
+  reloadInsertTime: 1.2,
   ammoCapacity: 2,
 
   textures: {

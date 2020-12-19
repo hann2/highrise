@@ -26,7 +26,7 @@ export const SPAS12: GunStats = {
   muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   fireMode: FireMode.SEMI_AUTO,
-  reloadTime: 0.4,
+  reloadInsertTime: 0.4,
   ammoCapacity: 8,
 
   textures: {

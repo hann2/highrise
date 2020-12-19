@@ -27,7 +27,7 @@ export const AK47: GunStats = {
   muzzleVelocity: 120,
   fireMode: FireMode.FULL_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
-  reloadTime: 1.8,
+  reloadInsertTime: 1.8,
   ammoCapacity: 30,
 
   textures: {

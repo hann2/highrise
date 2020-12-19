@@ -14,16 +14,17 @@ import {
 import { rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Character, randomCharacter } from "../characters/Character";
+import { CollisionGroups } from "../config/CollisionGroups";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants";
 import FleshImpact from "../effects/FleshImpact";
 import GlowStick from "../effects/GlowStick";
-import { PointLight } from "../lighting-and-vision/PointLight";
-import { CollisionGroups } from "../config/CollisionGroups";
-import Gun from "../weapons/Gun";
-import MeleeWeapon from "../weapons/MeleeWeapon";
 import { isEnemy } from "../enemies/base/Enemy";
 import Interactable, { isInteractable } from "../environment/Interactable";
 import WeaponPickup from "../environment/WeaponPickup";
+import { PointLight } from "../lighting-and-vision/PointLight";
+import { PhasedAction } from "../utils/PhasedAction";
+import Gun from "../weapons/Gun";
+import MeleeWeapon from "../weapons/MeleeWeapon";
 import Flashlight from "./Flashlight";
 import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
@@ -38,7 +39,7 @@ export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
 export const PUSH_KNOCKBACK = 150; // newtons?
 export const PUSH_STUN = 0.75; // seconds
-export const PUSH_COOLDOWN = 0.4; // seconds
+export const PUSH_COOLDOWN = 0.1; // seconds
 
 export const GLOWSTICK_COOLDOWN = 1.0; // seconds
 
@@ -50,8 +51,6 @@ export default class Human extends BaseEntity implements Entity {
   light?: PointLight;
   humanSprite: HumanSprite;
   voice: HumanVoice;
-  pushCooldown = 0;
-  glowstickCooldown = 0;
 
   constructor(
     position: V2d = V(0, 0),
@@ -73,6 +72,9 @@ export default class Human extends BaseEntity implements Entity {
     shape.collisionGroup = CollisionGroups.Humans;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape);
+
+    this.addChild(this.glowstickAction);
+    this.addChild(this.pushAction);
   }
 
   onAdd(game: Game) {
@@ -82,9 +84,6 @@ export default class Human extends BaseEntity implements Entity {
   onTick(dt: number) {
     const friction = V(this.body.velocity).mul(-FRICTION);
     this.body.applyImpulse(friction);
-
-    this.pushCooldown = Math.max(this.pushCooldown - dt, 0);
-    this.glowstickCooldown = clampUp(this.glowstickCooldown - dt);
   }
 
   // Move the human along a specified vector
@@ -216,40 +215,80 @@ export default class Human extends BaseEntity implements Entity {
     }
   }
 
-  push() {
-    if (this.pushCooldown <= 0) {
-      this.pushCooldown = PUSH_COOLDOWN;
-      this.game?.addEntity(new PositionalSound(snd_pop1, this.getPosition()));
-      const enemies = this.game!.entities.getByFilter(isEnemy);
-      for (const enemy of enemies) {
-        const relPosition = enemy.getPosition().isub(this.getPosition());
-        const distance = clampUp(
-          relPosition.magnitude - HUMAN_RADIUS - ZOMBIE_RADIUS
-        );
-        const theta = Math.abs(angleDelta(relPosition.angle, this.body.angle));
+  pushAction = new PhasedAction([
+    {
+      name: "windup",
+      duration: 0.06,
+    },
+    {
+      name: "push",
+      duration: 0.05,
+      startAction: () => {
+        this.game?.addEntity(new PositionalSound(snd_pop1, this.getPosition()));
+        const enemies = this.game!.entities.getByFilter(isEnemy);
+        for (const enemy of enemies) {
+          const relPosition = enemy.getPosition().isub(this.getPosition());
+          const distance = clampUp(
+            relPosition.magnitude - HUMAN_RADIUS - ZOMBIE_RADIUS
+          );
+          const theta = Math.abs(
+            angleDelta(relPosition.angle, this.body.angle)
+          );
 
-        if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
-          const amount =
-            PUSH_KNOCKBACK - 0.5 * PUSH_KNOCKBACK * (distance / PUSH_RANGE);
-          enemy.knockback(relPosition.angle, amount);
-          enemy.stun(PUSH_STUN * rNormal(1, 0.2));
-          enemy.voice.speak("hit");
+          if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
+            const amount =
+              PUSH_KNOCKBACK - 0.5 * PUSH_KNOCKBACK * (distance / PUSH_RANGE);
+            enemy.knockback(relPosition.angle, amount);
+            enemy.stun(PUSH_STUN * rNormal(1, 0.2));
+            enemy.voice.speak("hit");
+          }
         }
-      }
+      },
+    },
+    {
+      name: "winddown",
+      duration: 0.1,
+    },
+    {
+      name: "cooldown",
+      duration: PUSH_COOLDOWN,
+    },
+  ]);
+
+  push() {
+    if (!this.pushAction.isActive()) {
+      this.pushAction.do();
     }
   }
 
-  async throwGlowstick() {
-    if (this.glowstickCooldown <= 0) {
-      this.glowstickCooldown = GLOWSTICK_COOLDOWN;
-      this.game?.addEntity(
-        new GlowStick(
-          this.getPosition(),
-          polarToVec(this.getDirection(), rNormal(5, 1)).iadd(
-            this.body.velocity
+  glowstickAction = new PhasedAction([
+    {
+      name: "windup",
+      duration: 0.0,
+    },
+    {
+      name: "throw",
+      duration: 0.1,
+      startAction: () => {
+        this.game?.addEntity(
+          new GlowStick(
+            this.getPosition(),
+            polarToVec(this.getDirection(), rNormal(5, 1)).iadd(
+              this.body.velocity
+            )
           )
-        )
-      );
+        );
+      },
+    },
+    {
+      name: "cooldown",
+      duration: GLOWSTICK_COOLDOWN,
+    },
+  ]);
+
+  async throwGlowstick() {
+    if (!this.glowstickAction.isActive()) {
+      this.glowstickAction.do();
     }
   }
 }

@@ -27,7 +27,7 @@ export const P90: GunStats = {
   muzzleVelocity: 150,
   fireMode: FireMode.FULL_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
-  reloadTime: 2.2,
+  reloadInsertTime: 2.2,
   ammoCapacity: 50,
 
   textures: {

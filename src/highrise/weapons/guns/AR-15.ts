@@ -29,7 +29,7 @@ export const AR15: GunStats = {
   muzzleVelocity: 120,
   fireMode: FireMode.SEMI_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
-  reloadTime: 1.5,
+  reloadInsertTime: 1.5,
   ammoCapacity: 30,
 
   textures: {

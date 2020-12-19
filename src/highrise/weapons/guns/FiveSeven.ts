@@ -19,7 +19,7 @@ export const FiveSeven: GunStats = {
   bulletDamage: 25,
   muzzleVelocity: 60,
   reloadingStyle: ReloadingStyle.MAGAZINE,
-  reloadTime: 0.8,
+  reloadInsertTime: 0.8,
   ammoCapacity: 20,
 
   textures: {
