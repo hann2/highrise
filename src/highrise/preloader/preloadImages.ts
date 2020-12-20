@@ -1,4 +1,5 @@
 import img_impactParticle from "../../../resources/images/effects/impact-particle.png";
+import img_fence from "../../../resources/images/environment/fence.png";
 import img_woodenFloor from "../../../resources/images/environment/floor/wooden-floor.png";
 import img_transformer from "../../../resources/images/environment/maintenance/transformer.png";
 import img_wall1 from "../../../resources/images/environment/wall-1.png";
@@ -36,6 +37,7 @@ export function getImagesToPreload(): Set<string> {
     img_spitter,
     img_necromancer,
     img_transformer,
+    img_fence,
 
     ...Object.values(DecorationSprites).map((sprite) => sprite.imageName),
     ...ZOMBIE_TEXTURES.map((z) => Object.values(z)).flat(),

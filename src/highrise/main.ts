@@ -5,22 +5,19 @@ import SpatialHashingBroadphase from "../core/physics/SpatialHashingBroadphase";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import FPSMeter from "../core/util/FPSMeter";
 import ResizeListener from "../core/util/ResizeListener";
-import {
-  CELL_WIDTH,
-  LEVEL_SIZE,
-} from "./levels/level-generation/levelGeneration";
+import { initLayers, Layer } from "./config/layers";
+import { initContactMaterials } from "./config/PhysicsMaterials";
+import { CELL_WIDTH, LEVEL_SIZE } from "./constants";
 import CameraController from "./controllers/CameraController";
 import CheatController from "./controllers/CheatController";
 import LevelController from "./controllers/LevelController";
-import { isHuman } from "./human/Human";
+import MusicController from "./controllers/MusicController";
+import VolumeController from "./controllers/VolumeController";
 import PartyManager from "./environment/PartyManager";
-import { initLayers, Layer } from "./config/layers";
+import { isHuman } from "./human/Human";
 import LightingManager from "./lighting-and-vision/LightingManager";
 import MainMenu from "./menu/MainMenu";
-import MusicController from "./controllers/MusicController";
-import { initContactMaterials } from "./config/PhysicsMaterials";
 import Preloader from "./preloader/Preloader";
-import VolumeController from "./controllers/VolumeController";
 
 declare global {
   interface Window {

@@ -2,7 +2,6 @@ import { seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import CellGrid, { WallID } from "./CellGrid";
-import { LEVEL_SIZE } from "./levelGeneration";
 
 /**
  * Given a levelBuilder with all walls existing, randomly destroys destructible walls until all cells are reachable.
@@ -12,13 +11,13 @@ import { LEVEL_SIZE } from "./levelGeneration";
  *
  * It makes a pretty good maze.
  */
-export function buildMaze(levelBuilder: CellGrid, seed: number) {
+export function buildMaze(cellGrid: CellGrid, seed: number) {
   type UpTree = (number[] | null)[][];
 
   const upTree: UpTree = [];
-  for (let i = 0; i < LEVEL_SIZE; i++) {
+  for (let i = 0; i < cellGrid.cells.length; i++) {
     upTree[i] = [];
-    for (let j = 0; j < LEVEL_SIZE; j++) {
+    for (let j = 0; j < cellGrid.cells[i].length; j++) {
       // Here we could initialize all the room cells to point at the same cell and be considered connected, but we choose
       // not to.  See comment above this function.
       upTree[i][j] = null;
@@ -44,14 +43,14 @@ export function buildMaze(levelBuilder: CellGrid, seed: number) {
 
     if (root1[0] !== root2[0] || root1[1] !== root2[1]) {
       upTree[root1[0]][root1[1]] = root2;
-      levelBuilder.destroyWall(id);
+      cellGrid.destroyWall(id);
     }
   };
 
   const destroyableWalls: WallID[] = [];
-  for (let i = 0; i < LEVEL_SIZE; i++) {
-    for (let j = 0; j < LEVEL_SIZE; j++) {
-      const cell = levelBuilder.cells[i][j];
+  for (let i = 0; i < cellGrid.cells.length; i++) {
+    for (let j = 0; j < cellGrid.cells[i].length; j++) {
+      const cell = cellGrid.cells[i][j];
       const rightWall = cell.rightWall;
       const bottomWall = cell.bottomWall;
       if (rightWall.destructible) {
@@ -89,7 +88,7 @@ export function findExit(cellGrid: CellGrid, startingPont: V2d): [V2d, V2d] {
   let furthestDistance = 0;
 
   const seen: boolean[][] = [];
-  for (let i = 0; i < LEVEL_SIZE; i++) {
+  for (let i = 0; i < cellGrid.cells.length; i++) {
     seen[i] = [];
   }
 

@@ -1,4 +1,6 @@
 import { V, V2d } from "../../../core/Vector";
+import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
+import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
 import { Tiles } from "../../environment/TiledFloor";
 import {
   CARDINAL_DIRECTIONS,
@@ -8,8 +10,6 @@ import {
   isCardinal,
   opposite,
 } from "../../utils/directions";
-import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
-import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
 
 export type FloorMask = (boolean | undefined)[][];
 
@@ -148,6 +148,7 @@ export function insetTile(
  *   < X >
  *   / ∨ \
  *
+ * You would have
  *
  *   \ ∨ ∨ ∨ ∨ /
  *   > \ ∧ ∧ / <

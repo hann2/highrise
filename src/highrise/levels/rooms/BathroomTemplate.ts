@@ -1,11 +1,10 @@
 import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
-import { V } from "../../../core/Vector";
+import { V, V2d } from "../../../core/Vector";
 import Decoration from "../../environment/Decoration";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import {
   graniteFloor1,
-  graniteFloor2,
   graniteFloor3,
   sink1,
   sinkGroup1,
@@ -27,10 +26,19 @@ import {
   toilet4,
   toilet5,
 } from "../../environment/decorations/decorations";
+import RepeatingFloor from "../../environment/RepeatingFloor";
 import Wall from "../../environment/Wall";
 import { PointLight } from "../../lighting-and-vision/PointLight";
-import { AngleTransformer, CellTransformer } from "./ElementTransformer";
+import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
+import {
+  AngleTransformer,
+  DimensionsTransformer,
+  PositionTransformer,
+  VectorTransformer,
+  WallTransformer,
+} from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
+import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
 interface BathroomStyle {
   floor: DecorationInfo;
@@ -117,18 +125,34 @@ export const BATHROOM_STYLES: BathroomStyle[] = [
   },
 ];
 
-export default class BathroomTemplate extends RoomTemplate {
-  constructor(private style: BathroomStyle = choose(...BATHROOM_STYLES)) {
-    super(V(2, 3), [[V(-1, 0), true]], style.floor);
+const DIMENSIONS = V(2, 3);
+const DOORS: WallID[] = [[V(-1, 0), true]];
+
+export default class BathroomTemplate implements RoomTemplate {
+  constructor(private style: BathroomStyle = choose(...BATHROOM_STYLES)) {}
+
+  getOccupiedCells(): V2d[] {
+    return defaultOccupiedCells(DIMENSIONS, DOORS);
+  }
+
+  generateWalls(): WallBuilder[] {
+    return defaultWalls(DIMENSIONS, DOORS);
+  }
+
+  generateDoors(): DoorBuilder[] {
+    return defaultDoors(DOORS);
   }
 
   generateEntities(
-    transformCell: CellTransformer,
-    transformAngle: AngleTransformer
+    roomToWorldPosition: PositionTransformer,
+    roomToWorldVector: VectorTransformer,
+    roomToWorldAngle: AngleTransformer,
+    roomToLevelWall: WallTransformer,
+    roomToWorldDimensions: DimensionsTransformer
   ): Entity[] {
     const entities: Entity[] = [];
 
-    const doorOpenDirection = transformAngle(0);
+    const doorOpenDirection = roomToWorldAngle(0);
 
     const { isSinkGroup, sink, toilets, wallColor } = this.style;
 
@@ -140,20 +164,20 @@ export default class BathroomTemplate extends RoomTemplate {
     ]) {
       const sprite = choose(...toilets);
       const angle = doorOpenDirection + Math.PI / 2;
-      const p = transformCell(toiletPosition);
+      const p = roomToWorldPosition(toiletPosition);
       entities.push(new Decoration(p, sprite, angle));
     }
 
     for (const wallY of [0.33, 1, 1.66]) {
-      const start = transformCell(V(0.7, wallY));
-      const end = transformCell(V(1.5, wallY));
+      const start = roomToWorldPosition(V(0.7, wallY));
+      const end = roomToWorldPosition(V(1.5, wallY));
 
       entities.push(new Wall(start, end, 0.05, wallColor, false));
     }
 
     if (isSinkGroup) {
       const angle = doorOpenDirection - Math.PI / 2;
-      const p = transformCell(V(-0.245, 1.55));
+      const p = roomToWorldPosition(V(-0.245, 1.55));
       entities.push(new Decoration(p, sink, angle));
     } else {
       for (const sinkPosition of [
@@ -163,7 +187,7 @@ export default class BathroomTemplate extends RoomTemplate {
         V(-0.295, 2.15),
       ]) {
         const angle = doorOpenDirection - Math.PI / 2;
-        const p = transformCell(sinkPosition);
+        const p = roomToWorldPosition(sinkPosition);
         entities.push(new Decoration(p, sink, angle));
       }
     }
@@ -174,7 +198,7 @@ export default class BathroomTemplate extends RoomTemplate {
         intensity: 0.8,
         color: 0xfafaff,
         shadowsEnabled: true,
-        position: transformCell(V(0.35, 1.75)),
+        position: roomToWorldPosition(V(0.35, 1.75)),
       })
     );
     entities.push(
@@ -183,8 +207,19 @@ export default class BathroomTemplate extends RoomTemplate {
         intensity: 0.8,
         color: 0xfafaff,
         shadowsEnabled: true,
-        position: transformCell(V(0.35, 0.75)),
+        position: roomToWorldPosition(V(0.35, 0.75)),
       })
+    );
+    const centerWorldCoords = roomToWorldPosition(
+      DIMENSIONS.sub(V(1, 1)).mul(0.5)
+    );
+    const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
+    entities.push(
+      new RepeatingFloor(
+        this.style.floor,
+        centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
+        dimensionsWorldCoords
+      )
     );
 
     return entities;

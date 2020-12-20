@@ -2,14 +2,14 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import RepeatingFloor from "../../environment/RepeatingFloor";
+import { CELL_WIDTH, LEVEL_SIZE } from "../../constants";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
 import RoomTemplate from "../rooms/RoomTemplate";
 import SpawnRoom from "../rooms/SpawnRoom";
-import CellGrid, { CELL_WIDTH, LEVEL_SIZE, WallID } from "./CellGrid";
+import CellGrid, { DoorBuilder, WallBuilder, WallID } from "./CellGrid";
 
-function isElligibleCell(cellGrid: CellGrid, [x, y]: V2d): boolean {
+function isEligibleCell(cellGrid: CellGrid, [x, y]: V2d): boolean {
   return (
     x < LEVEL_SIZE &&
     y < LEVEL_SIZE &&
@@ -19,45 +19,13 @@ function isElligibleCell(cellGrid: CellGrid, [x, y]: V2d): boolean {
   );
 }
 
-/**
- * Given a potential room, the potential placement of that room, and a wallId, determines if that wall
- * will be made indestructible by the room if we actually added it in the grid.
- *
- * Probably could be refactored to be less confusing.
- */
-function isWallInRoomIndestructible(
-  upperRightCorner: V2d,
-  template: RoomTemplate,
-  wall: WallID
-): boolean {
-  const [[wx, wy], wr] = wall;
-  const matchDoor = template.doors
-    .map(
-      ([doorP, doorR]: WallID): WallID => [doorP.add(upperRightCorner), doorR]
-    )
-    .some((doorWall: WallID) => CellGrid.wallIdsEqual(doorWall, wall));
-  if (matchDoor) {
-    return false;
-  } else if (wr) {
-    return (
-      (wx === upperRightCorner.x - 1 ||
-        wx === upperRightCorner.x + template.dimensions.x - 1) &&
-      wy >= upperRightCorner.y &&
-      wy <= upperRightCorner.y + template.dimensions.y - 1
-    );
-  }
-  return (
-    (wy === upperRightCorner.y - 1 ||
-      wy === upperRightCorner.y + template.dimensions.y - 1) &&
-    wx >= upperRightCorner.x &&
-    wx <= upperRightCorner.x + template.dimensions.x - 1
-  );
+function translateWallID(wallID: WallID, translation: V2d): WallID {
+  return [wallID[0].add(translation), wallID[1]];
 }
 
 function doesRoomCutoffPartOfMap(
   cellGrid: CellGrid,
-  upperRightCorner: V2d,
-  template: RoomTemplate
+  potentialWallIDsLevelCoords: WallID[]
 ): boolean {
   const startingPont = V(0, 0);
 
@@ -78,10 +46,12 @@ function doesRoomCutoffPartOfMap(
     seen[x][y] = true;
     seenCount += 1;
     for (const direction of CARDINAL_DIRECTIONS_VALUES) {
-      const wall = CellGrid.getWallInDirection(p, direction);
+      const potentialWall = CellGrid.getWallInDirection(p, direction);
       if (
-        cellGrid.isDestructible(wall) &&
-        !isWallInRoomIndestructible(upperRightCorner, template, wall)
+        cellGrid.isDestructible(potentialWall) &&
+        !potentialWallIDsLevelCoords.some((roomWall: WallID) =>
+          CellGrid.wallIdsEqual(roomWall, potentialWall)
+        )
       ) {
         queue.push(p.add(direction));
       }
@@ -91,99 +61,24 @@ function doesRoomCutoffPartOfMap(
   return seenCount === LEVEL_SIZE * LEVEL_SIZE;
 }
 
-function isElligibleRoom(
+function isEligibleRoom(
   cellGrid: CellGrid,
-  upperRightCorner: V2d,
-  template: RoomTemplate
+  potentialWallIDsLevelCoords: WallID[],
+  occupiedCellsLevelCoords: V2d[]
 ): boolean {
-  const dimensions = template.dimensions;
-  for (let i = 0; i < dimensions[0]; i++) {
-    for (let j = 0; j < dimensions[1]; j++) {
-      if (!isElligibleCell(cellGrid, V(i, j).add(upperRightCorner))) {
-        return false;
-      }
-    }
-  }
-  for (const [relativeCell, right] of template.doors) {
-    const cell = relativeCell.add(upperRightCorner);
-    const wall: WallID = [cell, right];
-    const farCell = CellGrid.getCellOnOtherSideOfWall(cell, wall);
-    if (
-      !isElligibleCell(cellGrid, farCell) ||
-      !isElligibleCell(cellGrid, cell)
-    ) {
-      return false;
-    }
-  }
-  return doesRoomCutoffPartOfMap(cellGrid, upperRightCorner, template);
-}
-
-function addRoom(
-  cellGrid: CellGrid,
-  shuffledLocations: V2d[],
-  template: RoomTemplate,
-  locationOverride?: V2d
-): Entity[] {
-  const entities: Entity[] = [];
-
-  const dimensions = template.dimensions;
-  let maybeCorner: V2d | undefined;
-  if (locationOverride) {
-    maybeCorner = locationOverride;
-  } else {
-    do {
-      maybeCorner = shuffledLocations.pop();
-    } while (maybeCorner && !isElligibleRoom(cellGrid, maybeCorner, template));
-    if (!maybeCorner) {
-      console.warn("Couldn't make room!");
-      return entities;
-    }
-  }
-  const corner = maybeCorner!;
-  cellGrid.addIndestructibleBox(maybeCorner, dimensions);
-
-  for (const [relativeCell, right] of template.doors) {
-    const cell = relativeCell.add(corner);
-    const wall: WallID = [cell, right];
-    const farCell = CellGrid.getCellOnOtherSideOfWall(cell, wall);
-
-    cellGrid.cells[cell.x][cell.y].content = "empty";
-    cellGrid.cells[farCell.x][farCell.y].content = "empty";
-    cellGrid.destroyWall(wall);
-    cellGrid.doors.push([cell, right ? Direction.DOWN : Direction.RIGHT]);
-  }
-
-  if (template.floor) {
-    entities.push(
-      new RepeatingFloor(
-        template.floor,
-        cellGrid.levelCoordToWorldCoord(corner.sub(V(0.5, 0.5))),
-        dimensions.mul(CELL_WIDTH)
-      )
-    );
-  }
-
-  entities.push(
-    ...template.generateEntities(
-      (p) => cellGrid.levelCoordToWorldCoord(p.add(corner)),
-      identity
-    )
+  return occupiedCellsLevelCoords.every(
+    (cell) =>
+      isEligibleCell(cellGrid, cell) &&
+      doesRoomCutoffPartOfMap(cellGrid, potentialWallIDsLevelCoords)
   );
-
-  template
-    .generateWalls(([p, r]) => [p.add(corner), r])
-    .forEach((w) => {
-      cellGrid.undestroyWall(w);
-      cellGrid.markIndestructible(w);
-    });
-  return entities;
 }
 
-export function addRooms(
+function findEligibleLocation(
   cellGrid: CellGrid,
-  levelTemplate: LevelTemplate,
-  seed: number
-): Entity[] {
+  seed: number,
+  wallIDsRoomCoords: WallID[],
+  occupiedCellsRoomCoords: V2d[]
+): V2d | undefined {
   const allLocations = [];
   for (let i = 0; i < LEVEL_SIZE; i++) {
     for (let j = 0; j < LEVEL_SIZE; j++) {
@@ -191,16 +86,132 @@ export function addRooms(
     }
   }
   const shuffledLocations = seededShuffle(allLocations, seed);
+  for (const location of shuffledLocations) {
+    const wallIDsLevelCoords = wallIDsRoomCoords.map((w) =>
+      translateWallID(w, location)
+    );
+    const occupiedCellsLevelCoords = occupiedCellsRoomCoords.map((c) =>
+      c.add(location)
+    );
+    if (location.x === 10 && location.y === 10) {
+      console.log(wallIDsLevelCoords);
+    }
+    if (
+      isEligibleRoom(cellGrid, wallIDsLevelCoords, occupiedCellsLevelCoords)
+    ) {
+      return location;
+    }
+  }
+}
 
+function addRoom(
+  cellGrid: CellGrid,
+  template: RoomTemplate,
+  seed: number,
+  locationOverride?: V2d
+): Entity[] {
+  const wallsRoomCoordinates: WallBuilder[] = template.generateWalls();
+  const occupiedCellsRoomCoordinates: V2d[] = template.getOccupiedCells();
+  const wallIDsRoomCoordinates = wallsRoomCoordinates.map((w) => w.id);
+
+  let maybeLocation: V2d | undefined;
+  if (locationOverride) {
+    maybeLocation = locationOverride;
+  } else {
+    maybeLocation = findEligibleLocation(
+      cellGrid,
+      seed,
+      wallIDsRoomCoordinates,
+      occupiedCellsRoomCoordinates
+    );
+    if (!maybeLocation) {
+      console.warn(
+        "Couldn't find a spot for room " + template.constructor.name + "!"
+      );
+      return [];
+    }
+  }
+  const location = maybeLocation!;
+  const wallsLevelCoords: WallBuilder[] = wallsRoomCoordinates.map((w) => {
+    return {
+      ...w,
+      id: translateWallID(w.id, location),
+    };
+  });
+
+  const occupiedCellsLevelCoords = occupiedCellsRoomCoordinates.map((c) =>
+    c.add(location)
+  );
+  for (const cell of occupiedCellsLevelCoords) {
+    const [i, j] = cell;
+    cellGrid.cells[i][j].content = "room";
+    for (const d of [Direction.RIGHT, Direction.DOWN]) {
+      const wall = CellGrid.getWallInDirection(cell, d);
+      const farCell = CellGrid.getCellOnOtherSideOfWall(cell, wall);
+      // TODO: hella slow, put in indexed format
+      for (const c of occupiedCellsLevelCoords) {
+        if (c.x === farCell.x && c.y === farCell.y) {
+          cellGrid.destroyWall(wall);
+        }
+      }
+    }
+  }
+
+  for (const wallBuilder of wallsLevelCoords) {
+    // If your chain link fence is on the edge of the level, its going to be a
+    //    normal wall.  Is that ok?  Maybe those rooms could specify a constraint that those walls can't be at edge of level
+    const [[i, j], right] = wallBuilder.id;
+    if (right && (i === LEVEL_SIZE - 1 || i === -1)) {
+      continue;
+    } else if (!right && (j === LEVEL_SIZE - 1 || j === -1)) {
+      continue;
+    }
+    cellGrid.cells[i][j][right ? "rightWall" : "bottomWall"] = wallBuilder;
+  }
+
+  const doorsLevelCoordinates: DoorBuilder[] = template
+    .generateDoors()
+    .map((d) => {
+      return {
+        ...d,
+        wallID: translateWallID(d.wallID, location),
+        hingePoint: d.hingePoint.add(location),
+      };
+    });
+
+  for (const doorBuilder of doorsLevelCoordinates) {
+    cellGrid.destroyWall(doorBuilder.wallID);
+    cellGrid.doors.push(doorBuilder);
+  }
+
+  return template.generateEntities(
+    // roomToWorldPosition: PositionTransformer
+    (p) => CellGrid.levelCoordToWorldCoord(p.add(location)),
+    // roomToWorldVector: VectorTransformer
+    (v) => v.mul(CELL_WIDTH),
+    // roomToWorldAngle: AngleTransformer
+    identity,
+    // roomToLevelWall: WallTransformer
+    ([p, r]) => [p.add(location), r],
+    // roomToWorldDimensions: DimensionsTransformer
+    (d) => d.mul(CELL_WIDTH)
+  );
+}
+
+export function addRooms(
+  cellGrid: CellGrid,
+  levelTemplate: LevelTemplate,
+  seed: number
+): Entity[] {
   const spawnEntities = addRoom(
     cellGrid,
-    shuffledLocations,
     new SpawnRoom(),
+    seed,
     cellGrid.spawnLocation
   );
   const allRoomEntities = levelTemplate
     .chooseRoomTemplates(seed)
-    .flatMap((t) => addRoom(cellGrid, shuffledLocations, t));
+    .flatMap((t) => addRoom(cellGrid, t, seed));
 
   return [...allRoomEntities, ...spawnEntities];
 }

@@ -1,12 +1,13 @@
 import Entity from "../../../core/entity/Entity";
 import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { LEVEL_SIZE } from "../../constants";
 import Decoration from "../../environment/Decoration";
 import { waterCooler } from "../../environment/decorations/decorations";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import VendingMachine from "../../environment/VendingMachine";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
-import CellGrid, { LEVEL_SIZE } from "./CellGrid";
+import CellGrid from "./CellGrid";
 
 export function fillNubbies(cellGrid: CellGrid): Entity[] {
   const entities: Entity[] = [];
@@ -39,7 +40,7 @@ export function fillNubbies(cellGrid: CellGrid): Entity[] {
 
         if (rBool(0.5)) {
           entities.push(
-            new OverheadLight(cellGrid.levelCoordToWorldCoord(cell), {
+            new OverheadLight(CellGrid.levelCoordToWorldCoord(cell), {
               intensity: 0.2,
             })
           );
@@ -51,7 +52,7 @@ export function fillNubbies(cellGrid: CellGrid): Entity[] {
 
           entities.push(
             new VendingMachine(
-              cellGrid.levelCoordToWorldCoord(machinePosition),
+              CellGrid.levelCoordToWorldCoord(machinePosition),
               wallDirection.angle + Math.PI / 2
             )
           );
@@ -59,7 +60,7 @@ export function fillNubbies(cellGrid: CellGrid): Entity[] {
           const machinePosition = cell.sub(wallDirection.mul(0.13));
           entities.push(
             new Decoration(
-              cellGrid.levelCoordToWorldCoord(machinePosition),
+              CellGrid.levelCoordToWorldCoord(machinePosition),
               waterCooler,
               wallDirection.angle
             )

@@ -1,6 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { CELL_WIDTH } from "../../constants";
 import Heavy from "../../enemies/heavy/Heavy";
 import Decoration from "../../environment/Decoration";
 import {
@@ -32,11 +33,17 @@ import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS, Direction } from "../../utils/directions";
-import CellGrid, { WallID } from "../level-generation/CellGrid";
-import { CELL_WIDTH } from "../level-generation/levelGeneration";
+import CellGrid, {
+  DoorBuilder,
+  WallBuilder,
+  WallID,
+} from "../level-generation/CellGrid";
+import { wallIDToEntity } from "../level-generation/entityPlacement";
 import {
   AngleTransformer,
-  CellTransformer,
+  DimensionsTransformer,
+  PositionTransformer,
+  VectorTransformer,
   WallTransformer,
 } from "./ElementTransformer";
 import {
@@ -46,6 +53,7 @@ import {
   insetBorders,
 } from "./floorUtils";
 import RoomTemplate from "./RoomTemplate";
+import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
 const directionalCarpet: DirectionalSprite = {
   baseSprites: {
@@ -87,35 +95,30 @@ const ELEVATORS: Elevator[] = [
   { cell: V(5, 2), openDirection: "LEFT" },
 ];
 
-export default class LobbyRoomTemplate extends RoomTemplate {
-  constructor() {
-    super(V(6, 7), [
-      [V(-1, 4), true],
-      [V(5, 4), true],
-    ]);
+const DIMENSIONS = V(6, 7);
+const DOORS: WallID[] = [
+  [V(-1, 4), true],
+  [V(5, 4), true],
+];
+
+export default class LobbyRoomTemplate implements RoomTemplate {
+  getOccupiedCells(): V2d[] {
+    return defaultOccupiedCells(DIMENSIONS, DOORS);
   }
 
-  generateWalls(transformWall: WallTransformer): WallID[] {
-    const walls: WallID[] = [];
-    for (const elevator of ELEVATORS) {
-      for (const direction of CARDINAL_DIRECTIONS) {
-        if (direction !== elevator.openDirection) {
-          walls.push(
-            transformWall(
-              CellGrid.getWallInDirection(elevator.cell, Direction[direction])
-            )
-          );
-        }
-      }
-    }
-    return walls;
+  generateWalls(): WallBuilder[] {
+    return defaultWalls(DIMENSIONS, DOORS);
+  }
+
+  generateDoors(): DoorBuilder[] {
+    return defaultDoors(DOORS);
   }
 
   generateFloorMask(): FloorMask {
     const lowResolutionFloorMask: FloorMask = [];
-    for (let i = 0; i < this.dimensions.x; i++) {
+    for (let i = 0; i < DIMENSIONS.x; i++) {
       lowResolutionFloorMask[i] = [];
-      for (let j = 0; j < this.dimensions.y; j++) {
+      for (let j = 0; j < DIMENSIONS.y; j++) {
         lowResolutionFloorMask[i][j] = true;
       }
     }
@@ -126,8 +129,11 @@ export default class LobbyRoomTemplate extends RoomTemplate {
   }
 
   generateEntities(
-    transformCell: CellTransformer,
-    transformAngle: AngleTransformer
+    roomToWorldPosition: PositionTransformer,
+    roomToWorldVector: VectorTransformer,
+    roomToWorldAngle: AngleTransformer,
+    roomToLevelWall: WallTransformer,
+    roomToWorldDimensions: DimensionsTransformer
   ): Entity[] {
     const entities: Entity[] = [];
 
@@ -150,13 +156,13 @@ export default class LobbyRoomTemplate extends RoomTemplate {
     const tileScale = V(carpetScale * CELL_WIDTH, carpetScale * CELL_WIDTH);
 
     entities.push(
-      new TiledFloor(transformCell(V(-0.5, -0.5)), tileScale, mainTiles)
+      new TiledFloor(roomToWorldPosition(V(-0.5, -0.5)), tileScale, mainTiles)
     );
 
     ELEVATORS.forEach((e) => {
       entities.push(
         new TiledFloor(
-          transformCell(e.cell.add(V(-0.5, -0.5))),
+          roomToWorldPosition(e.cell.add(V(-0.5, -0.5))),
           tileScale,
           elevatorTiles
         )
@@ -166,7 +172,7 @@ export default class LobbyRoomTemplate extends RoomTemplate {
         new PointLight({
           radius: 5,
           shadowsEnabled: true,
-          position: transformCell(e.cell),
+          position: roomToWorldPosition(e.cell),
         })
       );
 
@@ -180,34 +186,56 @@ export default class LobbyRoomTemplate extends RoomTemplate {
 
       entities.push(
         new ElevatorDoor(
-          transformCell(doorUpperLeftCorner),
+          roomToWorldPosition(doorUpperLeftCorner),
           doorDimensionsWorldCoords,
           true
         )
       );
+
+      for (const direction of CARDINAL_DIRECTIONS) {
+        if (direction !== e.openDirection) {
+          entities.push(
+            wallIDToEntity(
+              roomToLevelWall(
+                CellGrid.getWallInDirection(e.cell, Direction[direction])
+              )
+            )
+          );
+        }
+      }
     });
 
-    entities.push(new Decoration(transformCell(V(2.5, 5)), rug));
-    entities.push(new Heavy(transformCell(V(2.5, 3)))); // Hello my name is Bob, the wifi password is BAIINNNNSS!
-    entities.push(new Decoration(transformCell(V(2.5, 3.5)), lobbyDesk));
-    entities.push(new Decoration(transformCell(V(-0.15, 5)), chairRight));
-    entities.push(new Decoration(transformCell(V(-0.15, 5.47)), chairRight));
-    entities.push(new Decoration(transformCell(V(0.35, 6)), chairUp));
-    entities.push(new Decoration(transformCell(V(0.85, 6)), chairUp));
+    entities.push(new Decoration(roomToWorldPosition(V(2.5, 5)), rug));
+    entities.push(new Heavy(roomToWorldPosition(V(2.5, 3)))); // Hello my name is Bob, the wifi password is BAIINNNNSS!
+    entities.push(new Decoration(roomToWorldPosition(V(2.5, 3.5)), lobbyDesk));
+    entities.push(new Decoration(roomToWorldPosition(V(-0.15, 5)), chairRight));
+    entities.push(
+      new Decoration(roomToWorldPosition(V(-0.15, 5.47)), chairRight)
+    );
+    entities.push(new Decoration(roomToWorldPosition(V(0.35, 6)), chairUp));
+    entities.push(new Decoration(roomToWorldPosition(V(0.85, 6)), chairUp));
     entities.push(
       new Decoration(
-        transformCell(V(-0.15, 6.15)),
+        roomToWorldPosition(V(-0.15, 6.15)),
         choose(endTable1, endTable2)
       )
     );
-    entities.push(new Decoration(transformCell(V(0.6, 5)), coffeeTable));
+    entities.push(new Decoration(roomToWorldPosition(V(0.6, 5)), coffeeTable));
 
-    entities.push(new Decoration(transformCell(V(4.5, 5.5)), piano));
+    entities.push(new Decoration(roomToWorldPosition(V(4.5, 5.5)), piano));
 
-    entities.push(new OverheadLight(transformCell(V(1, 1)), { radius: 10 }));
-    entities.push(new OverheadLight(transformCell(V(4, 1)), { radius: 10 }));
-    entities.push(new OverheadLight(transformCell(V(1, 4)), { radius: 10 }));
-    entities.push(new OverheadLight(transformCell(V(4, 4)), { radius: 10 }));
+    entities.push(
+      new OverheadLight(roomToWorldPosition(V(1, 1)), { radius: 10 })
+    );
+    entities.push(
+      new OverheadLight(roomToWorldPosition(V(4, 1)), { radius: 10 })
+    );
+    entities.push(
+      new OverheadLight(roomToWorldPosition(V(1, 4)), { radius: 10 })
+    );
+    entities.push(
+      new OverheadLight(roomToWorldPosition(V(4, 4)), { radius: 10 })
+    );
 
     return entities;
   }
