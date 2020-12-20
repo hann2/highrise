@@ -93,9 +93,6 @@ function findEligibleLocation(
     const occupiedCellsLevelCoords = occupiedCellsRoomCoords.map((c) =>
       c.add(location)
     );
-    if (location.x === 10 && location.y === 10) {
-      console.log(wallIDsLevelCoords);
-    }
     if (
       isEligibleRoom(cellGrid, wallIDsLevelCoords, occupiedCellsLevelCoords)
     ) {
