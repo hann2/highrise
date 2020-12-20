@@ -131,9 +131,6 @@ export const defaultGunStats: GunStats = {
   recoilAmount: degToRad(2),
   recoilRecovery: 5,
 
-  // TODO: Remove this
-  laserSightColor: 0xffffff,
-
   size: [1, 1],
   muzzleLength: 0.5,
   leftHandPosition: [0.3, 0],
