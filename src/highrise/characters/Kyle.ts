@@ -3,7 +3,6 @@ import snd_kyleDeath2 from "../../../resources/audio/characters/kyle/kyle-death-
 import snd_kyleDeath3 from "../../../resources/audio/characters/kyle/kyle-death-3.flac";
 import snd_kyleHurt1 from "../../../resources/audio/characters/kyle/kyle-hurt-1.flac";
 import snd_kyleHurt2 from "../../../resources/audio/characters/kyle/kyle-hurt-2.flac";
-import snd_kyleHurt3 from "../../../resources/audio/characters/kyle/kyle-hurt-3.flac";
 import snd_kyleHurt4 from "../../../resources/audio/characters/kyle/kyle-hurt-4.flac";
 import snd_kyleHurt5 from "../../../resources/audio/characters/kyle/kyle-hurt-5.flac";
 import snd_kyleHurt6 from "../../../resources/audio/characters/kyle/kyle-hurt-6.flac";
@@ -46,7 +45,7 @@ export const Kyle: Character = {
     hurt: [
       snd_kyleHurt1,
       snd_kyleHurt2,
-      snd_kyleHurt3,
+      // snd_kyleHurt3,
       snd_kyleHurt4,
       snd_kyleHurt5,
       snd_kyleHurt6,

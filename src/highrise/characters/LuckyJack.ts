@@ -1,4 +1,5 @@
 import snd_luckyJackDeath1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-death-1.flac";
+import snd_luckyJackDeath2 from "../../../resources/audio/characters/lucky-jack/lucky-jack-death-2.flac";
 import snd_luckyJackHurt1 from "../../../resources/audio/characters/lucky-jack/lucky-jack-hurt-1.flac";
 import snd_luckyJackHurt2 from "../../../resources/audio/characters/lucky-jack/lucky-jack-hurt-2.flac";
 import snd_luckyJackHurt3 from "../../../resources/audio/characters/lucky-jack/lucky-jack-hurt-3.flac";
@@ -38,7 +39,7 @@ export const LuckyJack: Character = {
   },
 
   sounds: {
-    death: [snd_luckyJackDeath1],
+    death: [snd_luckyJackDeath1, snd_luckyJackDeath2],
     hurt: [
       snd_luckyJackHurt1,
       snd_luckyJackHurt2,

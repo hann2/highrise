@@ -83,7 +83,11 @@ export const Wendy: Character = {
       snd_wendyJoinParty4,
     ],
     lookHere: [snd_wendyLookHere1, snd_wendyLookHere2, snd_wendyLookHere3],
-    misc: [snd_wendyMisc1, snd_wendyMisc2, snd_wendyMisc3],
+    misc: [
+      // snd_wendyMisc1, // I don't like this one very much
+      snd_wendyMisc2,
+      snd_wendyMisc3,
+    ],
     nearDeath: [
       snd_wendyNearDeath1,
       snd_wendyNearDeath2,
