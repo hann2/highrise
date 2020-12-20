@@ -1,7 +1,5 @@
 import { V, V2d } from "../../../core/Vector";
-
-export const LEVEL_SIZE = 14;
-export const CELL_WIDTH = 2;
+import { CELL_WIDTH, LEVEL_SIZE } from "../../constants";
 
 export interface Closet {
   backCell: V2d;
@@ -11,11 +9,17 @@ export interface Closet {
   backWallDirection: V2d;
 }
 export type WallID = [V2d, boolean];
-export type DoorID = [V2d, V2d];
-interface WallBuilder {
+export interface DoorBuilder {
+  wallID: WallID;
+  hingePoint: V2d;
+  restingDirection: V2d;
+  chainLink: boolean;
+}
+export interface WallBuilder {
   exists: boolean;
   destructible: boolean;
   id: WallID;
+  chainLink: boolean;
 }
 interface CellBuilder {
   content?: string;
@@ -26,7 +30,7 @@ interface CellBuilder {
 export default class CellGrid {
   cells: CellBuilder[][] = [];
   closets: Closet[] = [];
-  doors: DoorID[] = [];
+  doors: DoorBuilder[] = [];
   spawnLocation: V2d;
 
   constructor() {
@@ -42,11 +46,13 @@ export default class CellGrid {
             id: [V(i, j), true],
             exists: true,
             destructible: i < LEVEL_SIZE - 1,
+            chainLink: false,
           },
           bottomWall: {
             id: [V(i, j), false],
             exists: true,
             destructible: j < LEVEL_SIZE - 1,
+            chainLink: false,
           },
         };
       }
@@ -113,7 +119,7 @@ export default class CellGrid {
     return CellGrid.getWallInDirection(cell, perpDirection.mul(-1));
   }
 
-  levelCoordToWorldCoord(coord: V2d): V2d {
+  static levelCoordToWorldCoord(coord: V2d): V2d {
     const firstCellCenter = CELL_WIDTH / 2;
     return coord.mul(CELL_WIDTH).add(V(firstCellCenter, firstCellCenter));
   }

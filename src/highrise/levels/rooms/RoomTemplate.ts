@@ -1,32 +1,30 @@
 import Entity from "../../../core/entity/Entity";
 import { V2d } from "../../../core/Vector";
-import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
-import { WallID } from "../level-generation/CellGrid";
+import { DoorBuilder, WallBuilder } from "../level-generation/CellGrid";
 import {
   AngleTransformer,
-  CellTransformer,
+  DimensionsTransformer,
+  PositionTransformer,
+  VectorTransformer,
   WallTransformer,
 } from "./ElementTransformer";
 
-export default class RoomTemplate {
-  dimensions: V2d;
-  doors: WallID[];
-  floor?: DecorationInfo;
+export default interface RoomTemplate {
+  // In room coordinates
+  getOccupiedCells(): V2d[];
 
-  constructor(dimensions: V2d, doors: WallID[], floor?: DecorationInfo) {
-    this.dimensions = dimensions;
-    this.doors = doors;
-    this.floor = floor;
-  }
+  // In room coordinates
+  generateWalls(): WallBuilder[];
 
-  generateWalls(transformWall: WallTransformer): WallID[] {
-    return [];
-  }
+  // In room coordinates
+  generateDoors(): DoorBuilder[];
 
+  // You do not need to create entities for doors and walls returned by generateWalls/generateDoors
   generateEntities(
-    transformCell: CellTransformer,
-    transformAngle: AngleTransformer
-  ): Entity[] {
-    return [];
-  }
+    roomToWorldPosition: PositionTransformer,
+    roomToWorldVector: VectorTransformer,
+    roomToWorldAngle: AngleTransformer,
+    roomToLevelWall: WallTransformer,
+    roomToWorldDimensions: DimensionsTransformer
+  ): Entity[];
 }

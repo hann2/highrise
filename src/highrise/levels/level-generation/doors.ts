@@ -1,11 +1,36 @@
 import Entity from "../../../core/entity/Entity";
+import { CELL_WIDTH } from "../../constants";
 import Door from "../../environment/Door";
 import { Direction } from "../../utils/directions";
-import CellGrid, { CELL_WIDTH, DoorID, WallID } from "./CellGrid";
+import CellGrid, { DoorBuilder, WallID } from "./CellGrid";
+
+export function wallIDToDoorBuilder(
+  wallID: WallID,
+  reverseHinge: boolean = false,
+  chainLink: boolean = false
+): DoorBuilder {
+  const [cell, right] = wallID;
+  let restingDirection = right ? Direction.DOWN : Direction.RIGHT;
+  if (reverseHinge) {
+    restingDirection = restingDirection.mul(-1);
+  }
+
+  const hingeDirection = restingDirection
+    .mul(-1)
+    .add(right ? Direction.RIGHT : Direction.DOWN);
+  const hingePoint = cell.add(hingeDirection.mul(0.5));
+
+  return {
+    wallID: wallID,
+    hingePoint,
+    restingDirection,
+    chainLink,
+  };
+}
 
 export function buildDoorEntity(
   cellGrid: CellGrid,
-  [cell, doorDirection]: DoorID
+  doorBuilder: DoorBuilder
 ): Entity {
   // Used to determine how far a door can swing before it will hit a wall.
   const countConsecutiveWallsThatExist = (walls: WallID[]) => {
@@ -26,10 +51,8 @@ export function buildDoorEntity(
     Direction.RIGHT,
   ];
 
-  const hingeDirection = doorDirection
-    .mul(-1)
-    .add(!!doorDirection.y ? Direction.RIGHT : Direction.DOWN);
-  const hingePoint = cell.add(hingeDirection.mul(0.5));
+  const doorDirection = doorBuilder.restingDirection;
+  const hingePoint = doorBuilder.hingePoint;
 
   const dIndex = directionsClockwise.findIndex(
     (dir) => dir.x === doorDirection.x && dir.y === doorDirection.y
@@ -56,8 +79,19 @@ export function buildDoorEntity(
   const minAngle = (ccwWallCount - 0.1) * -(Math.PI / 2);
   const maxAngle = (cwWallCount - 0.1) * (Math.PI / 2);
 
+  if (doorBuilder.wallID[0].x === 6 && doorBuilder.wallID[0].y === 0) {
+    console.log("YO!");
+    console.log(doorDirection);
+    console.log(wallsClockwiseFromHingePoint);
+    console.log(cwWallCount);
+    console.log(ccwWallCount);
+    console.log(doorDirection.angle);
+    console.log(minAngle);
+    console.log(maxAngle);
+  }
+
   return new Door(
-    cellGrid.levelCoordToWorldCoord(hingePoint),
+    CellGrid.levelCoordToWorldCoord(hingePoint),
     CELL_WIDTH,
     doorDirection.angle,
     minAngle,

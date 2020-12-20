@@ -1,4 +1,4 @@
-import { choose, rCardinal } from "../../../core/util/Random";
+import { choose, rCardinal, seededShuffle } from "../../../core/util/Random";
 import {
   woodFloor1,
   woodFloor2,
@@ -7,6 +7,9 @@ import {
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import BathroomTemplate, { BATHROOM_STYLES } from "../rooms/BathroomTemplate";
 import RoomTemplate from "../rooms/RoomTemplate";
+import TransformedRoomTemplate, {
+  POSSIBLE_ORIENTATIONS,
+} from "../rooms/TransformedRoomTemplate";
 import LevelTemplate from "./LevelTemplate";
 
 // Level for testing all the bathrooms
@@ -14,8 +17,16 @@ export default class BathroomLevel extends LevelTemplate {
   chooseRoomTemplates(seed: number): RoomTemplate[] {
     const rooms: RoomTemplate[] = [];
 
-    for (const style of BATHROOM_STYLES) {
-      rooms.push(new BathroomTemplate(style));
+    const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
+
+    for (let i = 0; i < BATHROOM_STYLES.length; i++) {
+      rooms.push(
+        new TransformedRoomTemplate(
+          new BathroomTemplate(BATHROOM_STYLES[i]),
+          shuffledOrientations[i % shuffledOrientations.length]
+        )
+      );
+      break;
     }
 
     return rooms;

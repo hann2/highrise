@@ -1,9 +1,8 @@
 import Entity from "../../../core/entity/Entity";
-import { V } from "../../../core/Vector";
-import Decoration from "../../environment/Decoration";
+import { V, V2d } from "../../../core/Vector";
+import { CELL_WIDTH } from "../../constants";
 import Necromancer from "../../enemies/necromancer/Necromancer";
-import TiledFloor, { Tiles } from "../../environment/TiledFloor";
-import { PointLight } from "../../lighting-and-vision/PointLight";
+import Decoration from "../../environment/Decoration";
 import {
   redCarpetBottom,
   redCarpetCenter,
@@ -21,8 +20,16 @@ import {
   rug,
 } from "../../environment/decorations/decorations";
 import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
-import { CELL_WIDTH } from "../level-generation/levelGeneration";
-import { CellTransformer } from "./ElementTransformer";
+import TiledFloor, { Tiles } from "../../environment/TiledFloor";
+import { PointLight } from "../../lighting-and-vision/PointLight";
+import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
+import {
+  AngleTransformer,
+  DimensionsTransformer,
+  PositionTransformer,
+  VectorTransformer,
+  WallTransformer,
+} from "./ElementTransformer";
 import {
   doubleResolution,
   fillFloorWithBorders,
@@ -30,6 +37,7 @@ import {
   insetBorders,
 } from "./floorUtils";
 import RoomTemplate from "./RoomTemplate";
+import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
 const directionalCarpet: DirectionalSprite = {
   baseSprites: {
@@ -51,26 +59,43 @@ const directionalCarpet: DirectionalSprite = {
   },
 };
 
-export default class NecromancerArena extends RoomTemplate {
-  constructor() {
-    super(V(6, 4), [
-      [V(-1, 1), true],
-      [V(5, 1), true],
-    ]);
+const DIMENSIONS = V(6, 4);
+const DOORS: WallID[] = [
+  [V(-1, 1), true],
+  [V(5, 1), true],
+];
+
+export default class NecromancerArena implements RoomTemplate {
+  getOccupiedCells(): V2d[] {
+    return defaultOccupiedCells(DIMENSIONS, DOORS);
+  }
+
+  generateWalls(): WallBuilder[] {
+    return defaultWalls(DIMENSIONS, DOORS);
+  }
+
+  generateDoors(): DoorBuilder[] {
+    return defaultDoors(DOORS);
   }
 
   generateFloorMask(): FloorMask {
     const lowResolutionFloorMask: FloorMask = [];
-    for (let i = 0; i < this.dimensions.x; i++) {
+    for (let i = 0; i < DIMENSIONS.x; i++) {
       lowResolutionFloorMask[i] = [];
-      for (let j = 0; j < this.dimensions.y; j++) {
+      for (let j = 0; j < DIMENSIONS.y; j++) {
         lowResolutionFloorMask[i][j] = true;
       }
     }
     return doubleResolution(doubleResolution(lowResolutionFloorMask));
   }
 
-  generateEntities(transformCell: CellTransformer): Entity[] {
+  generateEntities(
+    roomToWorldPosition: PositionTransformer,
+    roomToWorldVector: VectorTransformer,
+    roomToWorldAngle: AngleTransformer,
+    roomToLevelWall: WallTransformer,
+    roomToWorldDimensions: DimensionsTransformer
+  ): Entity[] {
     const entities: Entity[] = [];
 
     const carpetScale = redCarpetUpperLeft.heightMeters / CELL_WIDTH;
@@ -84,23 +109,23 @@ export default class NecromancerArena extends RoomTemplate {
     const tileScale = V(carpetScale * CELL_WIDTH, carpetScale * CELL_WIDTH);
 
     entities.push(
-      new TiledFloor(transformCell(V(-0.5, -0.5)), tileScale, mainTiles)
+      new TiledFloor(roomToWorldPosition(V(-0.5, -0.5)), tileScale, mainTiles)
     );
 
     entities.push(
       new Necromancer(
-        transformCell(V(2.5, 2)),
-        transformCell(V(-0.5, -0.5)),
-        this.dimensions.mul(CELL_WIDTH)
+        roomToWorldPosition(V(2.5, 2)),
+        roomToWorldPosition(V(-0.5, -0.5)),
+        roomToWorldDimensions(DIMENSIONS)
       )
     );
-    entities.push(new Decoration(transformCell(V(2.5, 2)), rug));
+    entities.push(new Decoration(roomToWorldPosition(V(2.5, 2)), rug));
 
     entities.push(
       new PointLight({
         radius: 10,
         shadowsEnabled: true,
-        position: transformCell(V(1, 1.5)),
+        position: roomToWorldPosition(V(1, 1.5)),
       })
     );
 
@@ -108,7 +133,7 @@ export default class NecromancerArena extends RoomTemplate {
       new PointLight({
         radius: 10,
         shadowsEnabled: true,
-        position: transformCell(V(4, 1.5)),
+        position: roomToWorldPosition(V(4, 1.5)),
       })
     );
 

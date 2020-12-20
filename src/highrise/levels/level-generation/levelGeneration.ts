@@ -7,13 +7,11 @@ import LevelTemplate from "../level-templates/LevelTemplate";
 import LobbyLevel from "../level-templates/LobbyLevel";
 import MaintenanceLevel from "../level-templates/MaintenanceLevel";
 import ShopLevel from "../level-templates/ShopLevel";
+import CellGrid from "./CellGrid";
 import { generateLevelEntities } from "./entityPlacement";
 
-export const LEVEL_SIZE = 14;
-export const CELL_WIDTH = 2;
-
 export function chooseTemplate(level: number): LevelTemplate {
-  return new MaintenanceLevel(level);
+  return new BathroomLevel(level);
   switch (level) {
     case 1:
       return new LobbyLevel(level);
@@ -34,6 +32,8 @@ export const generateLevel = (
   levelTemplate: LevelTemplate,
   seed: number = rInteger(0, 2 ** 32)
 ): Level => {
+  seed = 517289942;
   console.log("Generating level with seed " + seed);
-  return { entities: generateLevelEntities(levelTemplate, seed) };
+  const cellGrid = new CellGrid();
+  return { entities: generateLevelEntities(cellGrid, levelTemplate, seed) };
 };

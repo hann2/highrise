@@ -3,10 +3,11 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import Game from "../../../core/Game";
 import { choose } from "../../../core/util/Random";
-import { V } from "../../../core/Vector";
+import { V, V2d } from "../../../core/Vector";
 import { Layer } from "../../config/layers";
 import { getCurrentLevelNumber } from "../../controllers/LevelController";
 import { cementFloor } from "../../environment/decorations/decorations";
+import RepeatingFloor from "../../environment/RepeatingFloor";
 import SpawnLocation from "../../environment/SpawnLocation";
 import WeaponPickup from "../../environment/WeaponPickup";
 import { PointLight } from "../../lighting-and-vision/PointLight";
@@ -14,25 +15,44 @@ import Gun from "../../weapons/guns/Gun";
 import { AK47 } from "../../weapons/guns/gun-stats/AK-47";
 import { AR15 } from "../../weapons/guns/gun-stats/AR-15";
 import { DoubleBarrelShotgun } from "../../weapons/guns/gun-stats/DoubleBarrelShotgun";
-import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
-import { Glock } from "../../weapons/guns/gun-stats/Glock";
-import { GUNS } from "../../weapons/guns/gun-stats/gunStats";
 import { Magnum } from "../../weapons/guns/gun-stats/Magnum";
 import { P90 } from "../../weapons/guns/gun-stats/P90";
 import { PumpShotgun } from "../../weapons/guns/gun-stats/PumpShotgun";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
-import { AngleTransformer, CellTransformer } from "./ElementTransformer";
+import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
+import {
+  AngleTransformer,
+  DimensionsTransformer,
+  PositionTransformer,
+  VectorTransformer,
+  WallTransformer,
+} from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
+import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
-export default class SpawnRoom extends RoomTemplate {
-  constructor() {
-    super(V(3, 3), [[V(2, 0), true]], cementFloor);
+const DIMENSIONS = V(3, 3);
+const DOORS: WallID[] = [[V(2, 0), true]];
+
+export default class SpawnRoom implements RoomTemplate {
+  getOccupiedCells(): V2d[] {
+    return defaultOccupiedCells(DIMENSIONS, DOORS);
+  }
+
+  generateWalls(): WallBuilder[] {
+    return defaultWalls(DIMENSIONS, DOORS);
+  }
+
+  generateDoors(): DoorBuilder[] {
+    return defaultDoors(DOORS);
   }
 
   generateEntities(
-    transformCell: CellTransformer,
-    transformAngle: AngleTransformer
+    roomToWorldPosition: PositionTransformer,
+    roomToWorldVector: VectorTransformer,
+    roomToWorldAngle: AngleTransformer,
+    roomToLevelWall: WallTransformer,
+    roomToWorldDimensions: DimensionsTransformer
   ): Entity[] {
     const entities: Entity[] = [];
 
@@ -41,34 +61,52 @@ export default class SpawnRoom extends RoomTemplate {
         radius: 6,
         intensity: 1.0,
         shadowsEnabled: true,
-        position: transformCell(V(1, 1)),
+        position: roomToWorldPosition(V(1, 1)),
       })
     );
 
-    entities.push(new SpawnLocation(transformCell(V(1, 2))));
-    entities.push(new SpawnLocation(transformCell(V(0, 1))));
-    entities.push(new SpawnLocation(transformCell(V(1, 1))));
-    entities.push(new SpawnLocation(transformCell(V(2, 1))));
+    entities.push(new SpawnLocation(roomToWorldPosition(V(1, 2))));
+    entities.push(new SpawnLocation(roomToWorldPosition(V(0, 1))));
+    entities.push(new SpawnLocation(roomToWorldPosition(V(1, 1))));
+    entities.push(new SpawnLocation(roomToWorldPosition(V(2, 1))));
 
     const meleeWeapon = new MeleeWeapon(choose(...MELEE_WEAPONS));
-    entities.push(new WeaponPickup(transformCell(V(2, 0)), meleeWeapon));
+    entities.push(new WeaponPickup(roomToWorldPosition(V(2, 0)), meleeWeapon));
 
-    entities.push(new WeaponPickup(transformCell(V(0, 0)), new Gun(AK47)));
-    entities.push(new WeaponPickup(transformCell(V(0, 1)), new Gun(P90)));
     entities.push(
-      new WeaponPickup(transformCell(V(0, 2)), new Gun(PumpShotgun))
+      new WeaponPickup(roomToWorldPosition(V(0, 0)), new Gun(AK47))
+    );
+    entities.push(new WeaponPickup(roomToWorldPosition(V(0, 1)), new Gun(P90)));
+    entities.push(
+      new WeaponPickup(roomToWorldPosition(V(0, 2)), new Gun(PumpShotgun))
     );
 
-    entities.push(new WeaponPickup(transformCell(V(2, 1)), new Gun(Glock)));
-    entities.push(new WeaponPickup(transformCell(V(2, 2)), new Gun(FiveSeven)));
-
-    entities.push(new WeaponPickup(transformCell(V(1, 0)), new Gun(AR15)));
-    entities.push(new WeaponPickup(transformCell(V(1, 1)), new Gun(Magnum)));
     entities.push(
-      new WeaponPickup(transformCell(V(1, 2)), new Gun(DoubleBarrelShotgun))
+      new WeaponPickup(roomToWorldPosition(V(1, 0)), new Gun(AR15))
+    );
+    entities.push(
+      new WeaponPickup(roomToWorldPosition(V(1, 1)), new Gun(Magnum))
+    );
+    entities.push(
+      new WeaponPickup(
+        roomToWorldPosition(V(1, 2)),
+        new Gun(DoubleBarrelShotgun)
+      )
     );
 
-    entities.push(new SpawnRoomFloor(transformCell(V(1, 1))));
+    entities.push(new SpawnRoomFloor(roomToWorldPosition(V(1, 1))));
+
+    const centerWorldCoords = roomToWorldPosition(
+      DIMENSIONS.sub(V(1, 1)).mul(0.5)
+    );
+    const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
+    entities.push(
+      new RepeatingFloor(
+        cementFloor,
+        centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
+        dimensionsWorldCoords
+      )
+    );
 
     return entities;
   }

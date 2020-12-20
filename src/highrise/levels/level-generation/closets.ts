@@ -1,6 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { choose, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { CELL_WIDTH, LEVEL_SIZE } from "../../constants";
 import Decoration from "../../environment/Decoration";
 import {
   bookcase1,
@@ -15,7 +16,8 @@ import RepeatingFloor from "../../environment/RepeatingFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
-import CellGrid, { CELL_WIDTH, Closet, LEVEL_SIZE } from "./CellGrid";
+import CellGrid, { Closet } from "./CellGrid";
+import { wallIDToDoorBuilder } from "./doors";
 
 export function generateClosets(cellGrid: CellGrid): Closet[] {
   const closets: Closet[] = [];
@@ -73,7 +75,7 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
       if (reverseHinge) {
         doorRestingDirection = doorRestingDirection.mul(-1);
       }
-      cellGrid.doors.push([cell, doorRestingDirection]);
+      cellGrid.doors.push(wallIDToDoorBuilder(doorWall, reverseHinge));
 
       cellGrid.cells[frontCell.x][frontCell.y].content = "empty";
       const backWall = CellGrid.getWallInDirection(
@@ -119,10 +121,10 @@ export function fillClosets(
         intensity: 0.5,
         color: 0xffffff,
         shadowsEnabled: true,
-        position: cellGrid.levelCoordToWorldCoord(location),
+        position: CellGrid.levelCoordToWorldCoord(location),
       })
     );
-    const entity = f(cellGrid.levelCoordToWorldCoord(location));
+    const entity = f(CellGrid.levelCoordToWorldCoord(location));
     if (entity instanceof Array) {
       entities.push(...entity);
     } else {
@@ -140,7 +142,7 @@ export function fillClosets(
       closet.backWallDirection.x === 1 || closet.backWallDirection.y === 1
         ? closet.backCell
         : closet.frontCell;
-    const upperLeftCorner = cellGrid.levelCoordToWorldCoord(
+    const upperLeftCorner = CellGrid.levelCoordToWorldCoord(
       upperLeftCell.sub(V(0.5, 0.5))
     );
     entities.push(
@@ -154,7 +156,7 @@ export function fillClosets(
     if (counter % 4 === 0) {
       entities.push(
         new Decoration(
-          cellGrid.levelCoordToWorldCoord(
+          CellGrid.levelCoordToWorldCoord(
             closet.backCell
               .add(closet.backWallDirection.mul(-0.2))
               .add(closet.backWallDirection.rotate90cw().mul(-0.15))
@@ -165,7 +167,7 @@ export function fillClosets(
     } else if (counter % 4 === 1) {
       entities.push(
         new Decoration(
-          cellGrid.levelCoordToWorldCoord(
+          CellGrid.levelCoordToWorldCoord(
             closet.backCell.add(closet.backWallDirection.mul(-0.2))
           ),
           choose(boxPile1, boxPile2),
@@ -175,7 +177,7 @@ export function fillClosets(
     } else if (counter % 4 === 2) {
       entities.push(
         new Decoration(
-          cellGrid.levelCoordToWorldCoord(
+          CellGrid.levelCoordToWorldCoord(
             closet.backCell.add(
               closet.backWallDirection
                 .mul(-0.25)
@@ -193,7 +195,7 @@ export function fillClosets(
     } else {
       entities.push(
         new Decoration(
-          cellGrid.levelCoordToWorldCoord(
+          CellGrid.levelCoordToWorldCoord(
             closet.backCell.add(closet.backWallDirection.mul(-0.22))
           ),
           choose(bookcase1, bookcase2),

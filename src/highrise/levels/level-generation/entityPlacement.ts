@@ -1,27 +1,24 @@
 import Entity from "../../../core/entity/Entity";
 import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { CELL_WIDTH, LEVEL_SIZE } from "../../constants";
 import Exit from "../../environment/Exit";
 import Wall from "../../environment/Wall";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { DIAGONAL_DIRECTIONS, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
-import CellGrid from "./CellGrid";
+import CellGrid, { WallID } from "./CellGrid";
 import { fillClosets, generateClosets } from "./closets";
 import { buildDoorEntity } from "./doors";
-import { CELL_WIDTH, LEVEL_SIZE } from "./levelGeneration";
 import { buildMaze, findExit } from "./mazeGeneration";
 import { fillNubbies } from "./nubbies";
 import { addRooms } from "./roomPlacement";
 
-const ZOMBIE_CONCENTRATION = 0.0;
-
 export function generateLevelEntities(
+  cellGrid: CellGrid,
   levelTemplate: LevelTemplate,
   seed: number = rInteger(0, 2 ** 32)
 ): Entity[] {
-  const cellGrid = new CellGrid();
-
   const outerWalls = addOuterWalls();
   const roomEntities = addRooms(cellGrid, levelTemplate, seed);
   buildMaze(cellGrid, seed);
@@ -30,7 +27,7 @@ export function generateLevelEntities(
     cellGrid,
     cellGrid.spawnLocation
   );
-  const exits = addExit(cellGrid, exitPoint, exitOpenDirection);
+  const exits = addExit(exitPoint, exitOpenDirection);
   cellGrid.closets = generateClosets(cellGrid);
   const {
     entities: closetEntities,
@@ -71,12 +68,8 @@ export function generateLevelEntities(
   return entities;
 }
 
-function addExit(
-  cellGrid: CellGrid,
-  exitPoint: V2d,
-  openDirection: V2d
-): Entity[] {
-  const exitWorldCoords = cellGrid.levelCoordToWorldCoord(exitPoint);
+function addExit(exitPoint: V2d, openDirection: V2d): Entity[] {
+  const exitWorldCoords = CellGrid.levelCoordToWorldCoord(exitPoint);
   return [
     new Exit(
       exitWorldCoords[0] - CELL_WIDTH / 2,
@@ -105,7 +98,7 @@ function findEnemyLocations(cellGrid: CellGrid): V2d[] {
       if (!cellGrid.cells[i][j].content) {
         cellGrid.cells[i][j].content = "zombie";
         for (const direction of DIAGONAL_DIRECTIONS) {
-          const p = cellGrid.levelCoordToWorldCoord(
+          const p = CellGrid.levelCoordToWorldCoord(
             V(i, j).add(Direction[direction].mul(0.25))
           );
           locations.push(p);
@@ -129,7 +122,7 @@ function addHallwayLights(cellGrid: CellGrid): Entity[] {
           new PointLight({
             radius: 5,
             intensity: 0.3,
-            position: cellGrid.levelCoordToWorldCoord(V(i, j)),
+            position: CellGrid.levelCoordToWorldCoord(V(i, j)),
           })
         );
       }
@@ -139,29 +132,33 @@ function addHallwayLights(cellGrid: CellGrid): Entity[] {
   return entities;
 }
 
+export function wallIDToEntity(wallID: WallID): Entity {
+  const [[i, j], right] = wallID;
+  const [x, y] = CellGrid.levelCoordToWorldCoord(V(i, j));
+  if (right) {
+    return new Wall(
+      [x + CELL_WIDTH / 2, y - CELL_WIDTH / 2],
+      [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2]
+    );
+  } else {
+    return new Wall(
+      [x - CELL_WIDTH / 2, y + CELL_WIDTH / 2],
+      [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2]
+    );
+  }
+}
+
 function addInnerWalls(cellGrid: CellGrid): Entity[] {
   const wallEntities = [];
   for (let i = 0; i < LEVEL_SIZE; i++) {
     for (let j = 0; j < LEVEL_SIZE; j++) {
-      const [x, y] = cellGrid.levelCoordToWorldCoord(V(i, j));
       if (cellGrid.cells[i][j].rightWall.exists) {
-        wallEntities.push(
-          new Wall(
-            [x + CELL_WIDTH / 2, y - CELL_WIDTH / 2],
-            [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2]
-          )
-        );
+        wallEntities.push(wallIDToEntity([V(i, j), true]));
       }
       if (cellGrid.cells[i][j].bottomWall.exists) {
-        wallEntities.push(
-          new Wall(
-            [x - CELL_WIDTH / 2, y + CELL_WIDTH / 2],
-            [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2]
-          )
-        );
+        wallEntities.push(wallIDToEntity([V(i, j), false]));
       }
     }
   }
-
   return wallEntities;
 }

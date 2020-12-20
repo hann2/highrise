@@ -67,6 +67,9 @@ import img_zombieTorso3 from "../../resources/images/zombies/zombie-torso-3.png"
 import { BodyTextures } from "./creature-stuff/BodySprite";
 import { EnemySounds } from "./enemies/base/EnemyVoice";
 
+export const LEVEL_SIZE = 14;
+export const CELL_WIDTH = 2;
+
 // Radius of a zombie in meters
 export const ZOMBIE_RADIUS = 0.35; // meters
 

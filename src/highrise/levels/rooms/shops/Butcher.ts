@@ -1,42 +1,78 @@
 import Entity from "../../../../core/entity/Entity";
-import { V } from "../../../../core/Vector";
+import { rCardinal } from "../../../../core/util/Random";
+import { V, V2d } from "../../../../core/Vector";
 import Decoration from "../../../environment/Decoration";
-import { PointLight } from "../../../lighting-and-vision/PointLight";
 import {
-  bathroomTilesFloor5,
   butcherStall,
   woodFloor4,
 } from "../../../environment/decorations/decorations";
-import { AngleTransformer, CellTransformer } from "../ElementTransformer";
+import RepeatingFloor from "../../../environment/RepeatingFloor";
+import { PointLight } from "../../../lighting-and-vision/PointLight";
+import {
+  DoorBuilder,
+  WallBuilder,
+  WallID,
+} from "../../level-generation/CellGrid";
+import {
+  AngleTransformer,
+  DimensionsTransformer,
+  PositionTransformer,
+  VectorTransformer,
+  WallTransformer,
+} from "../ElementTransformer";
 import RoomTemplate from "../RoomTemplate";
-import { rCardinal } from "../../../../core/util/Random";
+import { defaultDoors, defaultOccupiedCells, defaultWalls } from "../roomUtils";
 
-export default class Butcher extends RoomTemplate {
-  constructor() {
-    super(
-      V(3, 3),
-      [
-        [V(2, 1), true],
-        [V(1, 2), false],
-        [V(-1, 2), true],
-      ],
-      { ...woodFloor4, rotation: rCardinal() }
-    );
+const DIMENSIONS = V(3, 3);
+const DOORS: WallID[] = [
+  [V(2, 1), true],
+  [V(1, 2), false],
+  [V(-1, 2), true],
+];
+
+export default class Butcher implements RoomTemplate {
+  getOccupiedCells(): V2d[] {
+    return defaultOccupiedCells(DIMENSIONS, DOORS);
+  }
+
+  generateWalls(): WallBuilder[] {
+    return defaultWalls(DIMENSIONS, DOORS);
+  }
+
+  generateDoors(): DoorBuilder[] {
+    return defaultDoors(DOORS);
   }
 
   generateEntities(
-    transformCell: CellTransformer,
-    transformAngle: AngleTransformer
+    roomToWorldPosition: PositionTransformer,
+    roomToWorldVector: VectorTransformer,
+    roomToWorldAngle: AngleTransformer,
+    roomToLevelWall: WallTransformer,
+    roomToWorldDimensions: DimensionsTransformer
   ): Entity[] {
     const entities: Entity[] = [];
 
-    entities.push(new Decoration(transformCell(V(0.63, 0.28)), butcherStall));
+    entities.push(
+      new Decoration(roomToWorldPosition(V(0.63, 0.28)), butcherStall)
+    );
     entities.push(
       new PointLight({
         radius: 6,
         intensity: 0.6,
-        position: transformCell(V(1, 1)),
+        position: roomToWorldPosition(V(1, 1)),
       })
+    );
+
+    const centerWorldCoords = roomToWorldPosition(
+      DIMENSIONS.sub(V(1, 1)).mul(0.5)
+    );
+    const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
+    entities.push(
+      new RepeatingFloor(
+        { ...woodFloor4, rotation: rCardinal() },
+        centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
+        dimensionsWorldCoords
+      )
     );
 
     return entities;
