@@ -1,11 +1,6 @@
 import { PhasedAction } from "../utils/PhasedAction";
 
-export type AttackPhases =
-  | "windup"
-  | "attack"
-  | "winddown"
-  | "cooldown"
-  | "ready";
+export type AttackPhases = "windup" | "attack" | "winddown" | "cooldown";
 
 interface Options<Params extends unknown[] = []> {
   windupDuration?: number;

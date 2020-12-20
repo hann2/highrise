@@ -108,8 +108,8 @@ export class BaseEnemy extends Creature {
   }
 
   async attack() {
-    if (this.attackAction?.currentPhase?.name === "ready") {
-      await this.attackAction.do();
+    if (this.attackAction && !this.attackAction.isActive()) {
+      await this.attackAction!.do();
     }
   }
 
