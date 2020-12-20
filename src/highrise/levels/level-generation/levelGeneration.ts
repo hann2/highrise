@@ -11,7 +11,7 @@ import CellGrid from "./CellGrid";
 import { generateLevelEntities } from "./entityPlacement";
 
 export function chooseTemplate(level: number): LevelTemplate {
-  return new BathroomLevel(level);
+  return new MaintenanceLevel(level);
   switch (level) {
     case 1:
       return new LobbyLevel(level);
@@ -32,7 +32,6 @@ export const generateLevel = (
   levelTemplate: LevelTemplate,
   seed: number = rInteger(0, 2 ** 32)
 ): Level => {
-  seed = 517289942;
   console.log("Generating level with seed " + seed);
   const cellGrid = new CellGrid();
   return { entities: generateLevelEntities(cellGrid, levelTemplate, seed) };

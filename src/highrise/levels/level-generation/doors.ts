@@ -79,17 +79,6 @@ export function buildDoorEntity(
   const minAngle = (ccwWallCount - 0.1) * -(Math.PI / 2);
   const maxAngle = (cwWallCount - 0.1) * (Math.PI / 2);
 
-  if (doorBuilder.wallID[0].x === 6 && doorBuilder.wallID[0].y === 0) {
-    console.log("YO!");
-    console.log(doorDirection);
-    console.log(wallsClockwiseFromHingePoint);
-    console.log(cwWallCount);
-    console.log(ccwWallCount);
-    console.log(doorDirection.angle);
-    console.log(minAngle);
-    console.log(maxAngle);
-  }
-
   return new Door(
     CellGrid.levelCoordToWorldCoord(hingePoint),
     CELL_WIDTH,
