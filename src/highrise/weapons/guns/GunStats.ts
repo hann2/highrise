@@ -1,20 +1,20 @@
-import snd_casingDropBoard1 from "../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
-import snd_dryFire1 from "../../../resources/audio/guns/misc/dry-fire-1.mp3";
-import snd_pistolCock1 from "../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
-import snd_pistol2Shot1 from "../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
-import snd_ar15Reload1 from "../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
-import snd_shotgunPump1 from "../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
-import img_pistolCasing from "../../../resources/images/shell-casings/pistol-casing.png";
-import img_glockHold from "../../../resources/images/weapons/glock-hold.png";
-import img_glockPickup from "../../../resources/images/weapons/glock-pickup.png";
-import { SoundName } from "../../core/resources/sounds";
-import { degToRad } from "../../core/util/MathUtil";
-import { BaseWeaponStats } from "./WeaponStats";
-
 // Stats that make a gun unique
+
+import snd_casingDropBoard1 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
+import snd_casingDropBoard2 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
+import snd_casingDropBoard3 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
+import snd_casingDropBoard4 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
+import snd_dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
+import snd_pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
+import snd_pistol2Shot1 from "../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
+import snd_ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
+import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
+import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
+import img_glockHold from "../../../../resources/images/weapons/glock-hold.png";
+import img_glockPickup from "../../../../resources/images/weapons/glock-pickup.png";
+import { SoundName } from "../../../core/resources/sounds";
+import { degToRad } from "../../../core/util/MathUtil";
+import { BaseWeaponStats } from "../WeaponStats";
 
 export interface GunStats extends BaseWeaponStats {
   // Maximum rounds per second
@@ -44,7 +44,15 @@ export interface GunStats extends BaseWeaponStats {
   readonly bulletSpread: number;
 
   // Whether the shells eject after each shot or on reload
-  ejectionType: EjectionType;
+  readonly ejectionType: EjectionType;
+
+  // Color of the laser sight, or none if this doesn't have one
+  readonly laserSightColor?: number;
+
+  // Angle delta on each shot
+  readonly recoilAmount: number;
+  // Percent of aim recovered per second I think
+  readonly recoilRecovery: number;
 
   // Sounds that play for various things
   readonly sounds: {
@@ -119,6 +127,12 @@ export const defaultGunStats: GunStats = {
   ejectionType: EjectionType.AUTOMATIC,
   bulletsPerShot: 1,
   bulletSpread: degToRad(0.5),
+
+  recoilAmount: degToRad(2),
+  recoilRecovery: 5,
+
+  // TODO: Remove this
+  laserSightColor: 0xffffff,
 
   size: [1, 1],
   muzzleLength: 0.5,

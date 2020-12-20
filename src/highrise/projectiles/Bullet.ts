@@ -1,5 +1,5 @@
 import { Ray, RaycastResult } from "p2";
-import { Graphics } from "pixi.js";
+import { BLEND_MODES, Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";

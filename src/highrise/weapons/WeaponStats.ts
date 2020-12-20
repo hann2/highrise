@@ -1,5 +1,5 @@
-import { GunStats } from "./GunStats";
-import { MeleeWeaponStats } from "./MeleeWeaponStats";
+import { GunStats } from "./guns/GunStats";
+import { MeleeWeaponStats } from "./melee/MeleeWeaponStats";
 
 // For extending
 export interface BaseWeaponStats {

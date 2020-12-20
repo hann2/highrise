@@ -20,7 +20,7 @@ import FleshImpact from "../../effects/FleshImpact";
 import Human from "../../human/Human";
 import Bullet from "../../projectiles/Bullet";
 import AimSpring from "../../utils/AimSpring";
-import SwingingWeapon from "../../weapons/SwingingWeapon";
+import SwingingWeapon from "../../weapons/melee/SwingingWeapon";
 import { makeSimpleEnemyBody } from "./enemyUtils";
 import EnemyVoice from "./EnemyVoice";
 

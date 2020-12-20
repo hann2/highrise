@@ -13,7 +13,7 @@ import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Layer } from "../config/layers";
 import { CollisionGroups } from "../config/CollisionGroups";
-import SwingingWeapon from "../weapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import Bullet from "../projectiles/Bullet";
 import Hittable from "./Hittable";
 import Interactable from "./Interactable";

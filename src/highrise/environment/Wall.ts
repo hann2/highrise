@@ -14,7 +14,7 @@ import { Layer } from "../config/layers";
 import { P2Materials } from "../config/PhysicsMaterials";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
-import SwingingWeapon from "../weapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import Hittable from "./Hittable";
 
 export default class Wall extends BaseEntity implements Entity, Hittable {

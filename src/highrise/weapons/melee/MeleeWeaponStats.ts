@@ -1,12 +1,12 @@
-import snd_fleshHit1 from "../../../resources/audio/impacts/flesh-hit-1.flac";
-import snd_fleshHit2 from "../../../resources/audio/impacts/flesh-hit-2.flac";
-import snd_fleshHit3 from "../../../resources/audio/impacts/flesh-hit-3.flac";
-import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
-import snd_swordShing1 from "../../../resources/audio/weapons/sword-shing-1.flac";
-import img_axe from "../../../resources/images/weapons/axe.png";
-import { SoundName } from "../../core/resources/sounds";
+import snd_fleshHit1 from "../../../../resources/audio/impacts/flesh-hit-1.flac";
+import snd_fleshHit2 from "../../../../resources/audio/impacts/flesh-hit-2.flac";
+import snd_fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
+import snd_pop1 from "../../../../resources/audio/misc/pop1.flac";
+import snd_swordShing1 from "../../../../resources/audio/weapons/sword-shing-1.flac";
+import img_axe from "../../../../resources/images/weapons/axe.png";
+import { SoundName } from "../../../core/resources/sounds";
 import { SwingAngles, SwingDurations } from "./SwingDescriptor";
-import { BaseWeaponStats } from "./WeaponStats";
+import { BaseWeaponStats } from "../WeaponStats";
 
 // Stats that make a melee weapon unique
 

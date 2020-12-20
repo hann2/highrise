@@ -17,13 +17,13 @@ import WeaponPickup from "../../environment/WeaponPickup";
 import Human from "../../human/Human";
 import SurvivorHumanController from "../../human/SurvivorHumanController";
 import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
-import Gun from "../../weapons/Gun";
-import { FiveSeven } from "../../weapons/guns/FiveSeven";
-import { Glock } from "../../weapons/guns/Glock";
-import { GUNS } from "../../weapons/guns/guns";
-import { M1911 } from "../../weapons/guns/M1911";
-import { MELEE_WEAPONS } from "../../weapons/melee-weapons/meleeWeapons";
-import MeleeWeapon from "../../weapons/MeleeWeapon";
+import Gun from "../../weapons/guns/Gun";
+import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
+import { Glock } from "../../weapons/guns/gun-stats/Glock";
+import { GUNS } from "../../weapons/guns/gun-stats/gunStats";
+import { M1911 } from "../../weapons/guns/gun-stats/M1911";
+import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
+import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
 import RoomTemplate from "../rooms/RoomTemplate";
 
 export default class LevelTemplate {

@@ -3,7 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { rBool } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { getNearestVisibleEnemy, testLineOfSight } from "../utils/visionUtils";
-import Gun from "../weapons/Gun";
+import Gun from "../weapons/guns/Gun";
 import Human from "./Human";
 
 const FOLLOW_DISTANCE = 2; // meters

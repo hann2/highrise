@@ -11,7 +11,7 @@ import { CollisionGroups } from "../config/CollisionGroups";
 import { Layer } from "../config/layers";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
-import SwingingWeapon from "../weapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import {
   DecorationInfo,
   getDecorationTexture,

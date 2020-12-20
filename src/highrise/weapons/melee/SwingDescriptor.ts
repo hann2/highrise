@@ -3,8 +3,8 @@ import {
   lerp,
   polarToVec,
   smootherStep,
-} from "../../core/util/MathUtil";
-import { V, V2d } from "../../core/Vector";
+} from "../../../core/util/MathUtil";
+import { V, V2d } from "../../../core/Vector";
 
 export enum SwingPhase {
   WindUp,

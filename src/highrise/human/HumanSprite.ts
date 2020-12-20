@@ -3,8 +3,9 @@ import { lerp, smoothStep, stepToward } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants";
 import { BodySprite } from "../creature-stuff/BodySprite";
-import Gun from "../weapons/Gun";
-import MeleeWeapon from "../weapons/MeleeWeapon";
+import { LaserSight } from "../effects/LaserSight";
+import Gun from "../weapons/guns/Gun";
+import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import Human from "./Human";
 
 const GUN_SCALE = 1 / 300;
@@ -17,6 +18,7 @@ export default class HumanSprite extends BodySprite {
   private _stanceOffset: V2d = V(0, 0);
 
   weaponSprite?: Sprite;
+  laserSight?: LaserSight;
 
   constructor(private human: Human) {
     super(human.character.textures, HUMAN_RADIUS);
@@ -139,6 +141,17 @@ export default class HumanSprite extends BodySprite {
       this.weaponSprite.anchor.set(0.5, 0.5);
       this.weaponSprite.position.set(...weapon.getCurrentHoldPosition());
       this.sprite.addChild(this.weaponSprite);
+
+      if (weapon.stats.laserSightColor) {
+        this.laserSight = this.addChild(
+          new LaserSight(
+            () => this.getMuzzlePosition(),
+            () => weapon.getCurrentHoldAngle() + this.sprite.rotation,
+            undefined,
+            weapon.stats.laserSightColor
+          )
+        );
+      }
     } else if (weapon instanceof MeleeWeapon) {
       const { handlePosition, textures, size } = weapon.stats;
       const { restAngle, restPosition } = weapon.swing;
@@ -152,10 +165,22 @@ export default class HumanSprite extends BodySprite {
     }
   }
 
+  getMuzzlePosition() {
+    const gun = this.human.weapon;
+    if (gun instanceof Gun) {
+      const localPosition = gun.getMuzzlePosition();
+      localPosition.angle += this.sprite.rotation;
+      return localPosition.iadd([this.sprite.x, this.sprite.y]);
+    }
+    return V(0, 0);
+  }
+
   onDropWeapon() {
     if (this.weaponSprite) {
       this.sprite.removeChild(this.weaponSprite);
       this.weaponSprite = undefined;
     }
+    this.laserSight?.destroy();
+    this.laserSight = undefined;
   }
 }

@@ -1,13 +1,12 @@
-import snd_shotgunCasingDrop1 from "../../../../resources/audio/guns/casing-drops/shotgun-casing-drop-1.mp3";
-import snd_dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
-import snd_shotgunLoadShell2 from "../../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
-import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
-import snd_shotgunShot2 from "../../../../resources/audio/guns/shotgun/shotgun-shot-2.mp3";
-import img_shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
-import img_ar15Hold from "../../../../resources/images/weapons/ar15-hold.png";
-import img_spas12Hold from "../../../../resources/images/weapons/spas12-hold.png";
-import img_spas12Pickup from "../../../../resources/images/weapons/spas12-pickup.png";
-import { degToRad } from "../../../core/util/MathUtil";
+import snd_shotgunCasingDrop1 from "../../../../../resources/audio/guns/casing-drops/shotgun-casing-drop-1.mp3";
+import snd_dryFire1 from "../../../../../resources/audio/guns/misc/dry-fire-1.mp3";
+import snd_shotgunLoadShell2 from "../../../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
+import snd_shotgunPump1 from "../../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
+import snd_shotgunShot2 from "../../../../../resources/audio/guns/shotgun/shotgun-shot-2.mp3";
+import img_shotgunCasing from "../../../../../resources/images/shell-casings/shotgun-casing.png";
+import img_spas12Hold from "../../../../../resources/images/weapons/spas12-hold.png";
+import img_spas12Pickup from "../../../../../resources/images/weapons/spas12-pickup.png";
+import { degToRad } from "../../../../core/util/MathUtil";
 import {
   defaultGunStats,
   FireMode,
@@ -36,6 +35,8 @@ export const SPAS12: GunStats = {
     shellCasing: img_shotgunCasing,
   },
   size: [1.1, 1.1],
+  recoilAmount: degToRad(7),
+  recoilRecovery: 2.2,
 
   leftHandPosition: [0.65, -0.03],
   rightHandPosition: [0.3, 0],

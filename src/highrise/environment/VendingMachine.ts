@@ -19,7 +19,7 @@ import { Layer } from "../config/layers";
 import WallImpact from "../effects/WallImpact";
 import Light from "../lighting-and-vision/Light";
 import Bullet from "../projectiles/Bullet";
-import SwingingWeapon from "../weapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import Hittable from "./Hittable";
 import Interactable from "./Interactable";
 

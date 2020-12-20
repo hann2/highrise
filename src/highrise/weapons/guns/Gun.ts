@@ -1,22 +1,22 @@
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity from "../../core/entity/Entity";
-import { SoundName } from "../../core/resources/sounds";
-import { PositionalSound } from "../../core/sound/PositionalSound";
+import BaseEntity from "../../../core/entity/BaseEntity";
+import Entity from "../../../core/entity/Entity";
+import { SoundName } from "../../../core/resources/sounds";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
 import {
   clamp,
   degToRad,
   lerp,
   polarToVec,
   smoothStep,
-} from "../../core/util/MathUtil";
-import { rNormal, rUniform } from "../../core/util/Random";
-import { V, V2d } from "../../core/Vector";
-import MuzzleFlash from "../effects/MuzzleFlash";
-import ShellCasing from "../effects/ShellCasing";
-import Human from "../human/Human";
-import Bullet from "../projectiles/Bullet";
-import { PhasedAction } from "../utils/PhasedAction";
-import { ShuffleRing } from "../utils/ShuffleRing";
+} from "../../../core/util/MathUtil";
+import { rNormal, rSign, rUniform } from "../../../core/util/Random";
+import { V, V2d } from "../../../core/Vector";
+import MuzzleFlash from "../../effects/MuzzleFlash";
+import ShellCasing from "../../effects/ShellCasing";
+import Human from "../../human/Human";
+import Bullet from "../../projectiles/Bullet";
+import { PhasedAction } from "../../utils/PhasedAction";
+import { ShuffleRing } from "../../utils/ShuffleRing";
 import {
   EjectionType,
   GunSoundName,
@@ -40,6 +40,8 @@ export default class Gun extends BaseEntity implements Entity {
   pumpAmount = 0;
   // How many shells we've fired that haven't been ejected yet
   shellsToEject = 0;
+
+  aimOffset = 0;
 
   constructor(stats: GunStats) {
     super();
@@ -99,6 +101,7 @@ export default class Gun extends BaseEntity implements Entity {
     return !this.isReloading && this.shootCooldown <= 0 && this.ammo > 0;
   }
 
+  // Pull the trigger and do whatever the gun will do when that happens
   pullTrigger(shooter: Human) {
     if (this.isReloading) {
       if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
@@ -106,10 +109,8 @@ export default class Gun extends BaseEntity implements Entity {
         this.playSound("reloadFinish", shooter.getPosition());
       }
     } else if (this.shootCooldown <= 0 && this.pumpAmount <= 0) {
-      const direction = shooter.getDirection();
-      const muzzlePosition = shooter
-        .getPosition()
-        .add(polarToVec(direction, this.stats.muzzleLength));
+      const direction = shooter.getDirection() + this.getCurrentHoldAngle();
+      const muzzlePosition = shooter.localToWorld(this.getMuzzlePosition());
 
       if (this.ammo > 0) {
         // Actually shoot
@@ -120,6 +121,7 @@ export default class Gun extends BaseEntity implements Entity {
     }
   }
 
+  // Called when actually shooting a bullet
   async onShoot(position: V2d, direction: number, shooter: Human) {
     // Actual shot
     this.makeProjectile(position, direction, shooter);
@@ -127,6 +129,7 @@ export default class Gun extends BaseEntity implements Entity {
     this.shootCooldown += 1.0 / this.stats.fireRate;
     this.ammo -= 1;
     this.shellsToEject += 1;
+    this.aimOffset += rSign() * this.stats.recoilAmount;
 
     // Various effects
     this.playSound("shoot", position);
@@ -238,6 +241,8 @@ export default class Gun extends BaseEntity implements Entity {
     if (this.shootCooldown > 0) {
       this.shootCooldown -= dt;
     }
+
+    this.aimOffset *= Math.exp(-dt * this.stats.recoilRecovery);
   }
 
   playSound(
@@ -247,7 +252,7 @@ export default class Gun extends BaseEntity implements Entity {
     const sound = this.sounds[soundClass].getNext();
     if (sound) {
       // TODO: We should really just edit the sound files to be balanced
-      const gain = soundClass === "shoot" ? 0.2 : 1.0;
+      const gain = soundClass === "shoot" ? 0.3 : 1.0;
       return this.game?.addEntity(
         new PositionalSound(sound, position, { gain })
       );
@@ -259,6 +264,7 @@ export default class Gun extends BaseEntity implements Entity {
     return clamp(this.shootCooldown / maxShootCooldown);
   }
 
+  // Returns local positions for where the hands should go
   getCurrentHandPositions(): [V2d, V2d] {
     const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
     const pumpOffset = -0.2 * this.pumpAmount;
@@ -271,6 +277,7 @@ export default class Gun extends BaseEntity implements Entity {
     ];
   }
 
+  // Returns local coordinates for the center of the gun sprite
   getCurrentHoldPosition(): V2d {
     if (this.isReloading) {
       return V(this.stats.holdPosition).imul(0.9);
@@ -292,8 +299,15 @@ export default class Gun extends BaseEntity implements Entity {
           return lerp(degToRad(-30), 0, t);
       }
     } else {
-      return 0;
+      return this.aimOffset;
     }
+  }
+
+  // Returns the local coordinates for the muzzle position
+  getMuzzlePosition(): V2d {
+    return this.getCurrentHoldPosition().iadd(
+      polarToVec(this.getCurrentHoldAngle(), this.stats.muzzleLength / 2)
+    );
   }
 }
 

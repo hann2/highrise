@@ -5,8 +5,8 @@ import { rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { Layer } from "../config/layers";
 import Human from "../human/Human";
-import Gun from "../weapons/Gun";
-import MeleeWeapon from "../weapons/MeleeWeapon";
+import Gun from "../weapons/guns/Gun";
+import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import Interactable from "./Interactable";
 
 export default class WeaponPickup extends BaseEntity {

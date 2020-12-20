@@ -3,8 +3,8 @@ import Entity from "../../core/entity/Entity";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { V } from "../../core/Vector";
-import Gun from "../weapons/Gun";
-import { FireMode } from "../weapons/GunStats";
+import Gun from "../weapons/guns/Gun";
+import { FireMode } from "../weapons/guns/GunStats";
 import Human from "./Human";
 
 // Maps keyboard/mouse/gamepad input to human actions

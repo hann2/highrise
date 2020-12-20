@@ -15,7 +15,7 @@ import { Layer } from "../config/layers";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
 import DoorSpring from "../utils/DoorSpring";
-import SwingingWeapon from "../weapons/SwingingWeapon";
+import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
