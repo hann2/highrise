@@ -2,6 +2,8 @@ import Entity from "../../../core/entity/Entity";
 import { hsvToRgb, rgbToHex } from "../../../core/util/ColorUtils";
 import { choose, rUniform, seededShuffle } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
+import Heavy from "../../enemies/heavy/Heavy";
+import Spitter from "../../enemies/spitter/Spitter";
 import Zombie from "../../enemies/zombie/Zombie";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import {
@@ -50,6 +52,11 @@ export default class LevelTemplate {
     for (let i = 0; i < 20; i++) {
       entities.push(new Zombie(shuffled[i]));
     }
+
+    entities.push(new Spitter(shuffled[20]));
+    entities.push(new Spitter(shuffled[21]));
+    entities.push(new Spitter(shuffled[22]));
+    entities.push(new Heavy(shuffled[23]));
 
     return entities;
   }

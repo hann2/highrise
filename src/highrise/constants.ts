@@ -1,7 +1,17 @@
 // This file exists to avoid circular dependencies causing imports to return as undefined
 // SO DON'T PUT ANY IMPORTS IN THIS FILE EXCEPT RESOURCES
 
-import snd_rachelZombie5 from "../../resources/audio/zombie/ rachel-zombie-5.flac";
+import snd_zombieBite1 from "../../resources/audio/impacts/zombie-bite-1.flac";
+import snd_zombieBite2 from "../../resources/audio/impacts/zombie-bite-2.flac";
+import snd_perryZombie1 from "../../resources/audio/zombie/perry-zombie-1.flac";
+import snd_perryZombie10 from "../../resources/audio/zombie/perry-zombie-10.flac";
+import snd_perryZombie2 from "../../resources/audio/zombie/perry-zombie-2.flac";
+import snd_perryZombie3 from "../../resources/audio/zombie/perry-zombie-3.flac";
+import snd_perryZombie4 from "../../resources/audio/zombie/perry-zombie-4.flac";
+import snd_perryZombie6 from "../../resources/audio/zombie/perry-zombie-6.flac";
+import snd_perryZombie7 from "../../resources/audio/zombie/perry-zombie-7.flac";
+import snd_perryZombie8 from "../../resources/audio/zombie/perry-zombie-8.flac";
+import snd_perryZombie9 from "../../resources/audio/zombie/perry-zombie-9.flac";
 import snd_rachelZombie1 from "../../resources/audio/zombie/rachel-zombie-1.flac";
 import snd_rachelZombie10 from "../../resources/audio/zombie/rachel-zombie-10.flac";
 import snd_rachelZombie11 from "../../resources/audio/zombie/rachel-zombie-11.flac";
@@ -10,6 +20,7 @@ import snd_rachelZombie13 from "../../resources/audio/zombie/rachel-zombie-13.fl
 import snd_rachelZombie2 from "../../resources/audio/zombie/rachel-zombie-2.flac";
 import snd_rachelZombie3 from "../../resources/audio/zombie/rachel-zombie-3.flac";
 import snd_rachelZombie4 from "../../resources/audio/zombie/rachel-zombie-4.flac";
+import snd_rachelZombie5 from "../../resources/audio/zombie/rachel-zombie-5.flac";
 import snd_rachelZombie6 from "../../resources/audio/zombie/rachel-zombie-6.flac";
 import snd_rachelZombie7 from "../../resources/audio/zombie/rachel-zombie-7.flac";
 import snd_rachelZombie8 from "../../resources/audio/zombie/rachel-zombie-8.flac";
@@ -118,10 +129,18 @@ export const CRAWLER_TEXTURES: BodyTextures[] = [
 
 export const RACHEL_ZOMBIE_SOUNDS: EnemySounds = {
   hit: [snd_rachelZombie5, snd_rachelZombie6, snd_rachelZombie13],
-  targetAquired: [snd_rachelZombie1, snd_rachelZombie8],
+  targetAquired: [snd_rachelZombie1, snd_rachelZombie8, snd_rachelZombie12],
   attack: [snd_rachelZombie4, snd_rachelZombie7, snd_rachelZombie10],
-  death: [snd_rachelZombie3, snd_rachelZombie9, snd_rachelZombie12],
+  death: [snd_rachelZombie3, snd_rachelZombie9],
   idle: [snd_rachelZombie2, snd_rachelZombie11],
+};
+
+export const PERRY_ZOMBIE_SOUNDS: EnemySounds = {
+  hit: [snd_perryZombie4, snd_perryZombie7],
+  targetAquired: [snd_perryZombie3],
+  attack: [snd_perryZombie10, snd_perryZombie2],
+  death: [snd_perryZombie1, snd_perryZombie9],
+  idle: [snd_perryZombie8, snd_perryZombie6],
 };
 
 export const SPITTER_SOUNDS: EnemySounds = {
@@ -131,5 +150,8 @@ export const SPITTER_SOUNDS: EnemySounds = {
 
 export const ENEMY_SOUNDS: EnemySounds[] = [
   RACHEL_ZOMBIE_SOUNDS,
+  PERRY_ZOMBIE_SOUNDS,
   SPITTER_SOUNDS,
 ];
+
+export const ZOMBIE_ATTACK_HIT_SOUNDS = [snd_zombieBite1, snd_zombieBite2];

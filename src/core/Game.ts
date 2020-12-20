@@ -277,7 +277,9 @@ export default class Game {
     for (; this.iterationsRemaining > 1.0; this.iterationsRemaining--) {
       this.tick(dt);
       if (!this.paused) {
-        this.world.step(dt);
+        this.world.step(dt / 2);
+        this.cleanupEntities();
+        this.world.step(dt / 2);
         this.cleanupEntities();
         this.contacts();
       }

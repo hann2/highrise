@@ -14,6 +14,7 @@ import { CollisionGroups } from "../config/CollisionGroups";
 import { Layer } from "../config/layers";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
+import DoorSpring from "../utils/DoorSpring";
 import SwingingWeapon from "../weapons/SwingingWeapon";
 import Hittable from "./Hittable";
 
@@ -45,7 +46,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.sprite.layerName = Layer.WORLD_FRONT;
 
     this.body = new Body({
-      mass: 1.5,
+      mass: 1.0,
       position: hingePoint,
     });
 
@@ -58,18 +59,21 @@ export default class Door extends BaseEntity implements Entity, Hittable {
       CollisionGroups.Furniture;
     this.body.addShape(shape, [length / 2, 0], Math.PI / 2);
     this.body.angle = restingAngle;
-    this.body.angularDamping = 1.0;
   }
 
   onAdd(game: Game) {
     const constraint = new RevoluteConstraint(game.ground, this.body, {
       worldPivot: this.hingePoint,
     });
-    constraint.setLimits(
-      this.restingAngle + this.minAngle,
-      this.restingAngle + this.maxAngle
-    );
     this.constraints = [constraint];
+    this.springs = [
+      new DoorSpring(
+        game.ground,
+        this.body,
+        this.restingAngle + this.minAngle,
+        this.restingAngle + this.maxAngle
+      ),
+    ];
   }
 
   onRender() {
@@ -80,7 +84,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.body.applyImpulse(
-      bullet.velocity.mul(bullet.mass * 0.7),
+      bullet.velocity.mul(bullet.mass * 0.5),
       position.sub(this.body.position)
     );
 

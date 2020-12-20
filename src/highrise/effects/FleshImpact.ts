@@ -47,7 +47,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
       sprite.rotation = rUniform(0, Math.PI * 2);
       this.sprite.addChild(sprite);
       this.particles.push({
-        color: darken(0xff0000, rUniform(0, 0.2)),
+        color: darken(0xff0000, rUniform(0.1, 0.35)),
         position: V(0, 0),
         radius: rUniform(0.1, 0.1 * amount),
         sprite,

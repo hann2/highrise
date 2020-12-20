@@ -4,22 +4,27 @@ import Entity from "../../../core/entity/Entity";
 import CustomWorld from "../../../core/physics/CustomWorld";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants";
 import { CollisionGroups } from "../../config/CollisionGroups";
+import Human, { isHuman } from "../../human/Human";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import { testLineOfSight } from "../../utils/visionUtils";
-import Human, { isHuman } from "../../human/Human";
-import Zombie from "./Zombie";
+import { BaseEnemy } from "./Enemy";
 
 const NORMAL_SPEED = 1.0;
 const SHAMBLE_SPEED = 0.2;
 
-export default class ZombieController extends BaseEntity implements Entity {
+export default class SimpleEnemyController
+  extends BaseEntity
+  implements Entity {
   target?: Human;
   moveTarget?: V2d;
   objective?: "SHAMBLE" | "CLOSE_IN" | "SEARCH" | "ATTACK";
 
-  constructor(public zombie: Zombie) {
+  constructor(
+    public enemy: BaseEnemy,
+    private attackRange: number,
+    private bodySize: number
+  ) {
     super();
   }
 
@@ -30,7 +35,7 @@ export default class ZombieController extends BaseEntity implements Entity {
           if (this.target!.isDestroyed) {
             this.objective = "SEARCH";
           } else {
-            this.zombie.attack();
+            this.enemy.attack();
           }
         } else if (this.targetInVision()) {
           this.moveTarget = this.target!.getPosition();
@@ -43,7 +48,7 @@ export default class ZombieController extends BaseEntity implements Entity {
         // May be too aggressive to check vision every tick while in SEARCH
         const newTarget = this.anyoneInVision();
         if (newTarget) {
-          this.zombie.voice.speak("targetAquired");
+          this.enemy.voice.speak("targetAquired");
           this.objective = "CLOSE_IN";
           this.target = newTarget;
           this.moveTarget = newTarget.getPosition();
@@ -94,23 +99,23 @@ export default class ZombieController extends BaseEntity implements Entity {
   }
 
   inAttackRange(human: Human): boolean {
-    const direction = human.getPosition().sub(this.zombie.body.position);
-    return direction.magnitude < ZOMBIE_RADIUS + HUMAN_RADIUS;
+    const direction = human.getPosition().sub(this.enemy.body.position);
+    return direction.magnitude < this.attackRange;
   }
 
   targetInVision(): boolean {
-    return !!this.target && testLineOfSight(this.zombie, this.target);
+    return !!this.target && testLineOfSight(this.enemy, this.target);
   }
 
   inVision(human: Human): boolean {
-    return testLineOfSight(this.zombie, human);
+    return testLineOfSight(this.enemy, human);
   }
 
   atMoveTarget() {
     return (
       !!this.moveTarget &&
-      this.zombie.getPosition().sub(this.moveTarget).magnitude <
-        1.2 * ZOMBIE_RADIUS
+      this.enemy.getPosition().sub(this.moveTarget).magnitude <
+        1.2 * this.bodySize
     );
   }
 
@@ -119,8 +124,8 @@ export default class ZombieController extends BaseEntity implements Entity {
 
     const ray = new Ray({
       mode: Ray.CLOSEST,
-      from: this.zombie.getPosition(),
-      to: this.zombie.getPosition().add(shamblingDirection.mul(100)),
+      from: this.enemy.getPosition(),
+      to: this.enemy.getPosition().add(shamblingDirection.mul(100)),
       skipBackfaces: true,
       collisionMask: CollisionGroups.Walls,
     });
@@ -133,7 +138,7 @@ export default class ZombieController extends BaseEntity implements Entity {
     this.objective = "SHAMBLE";
 
     if (rBool(0.01)) {
-      this.zombie.voice.speak("idle");
+      this.enemy.voice.speak("idle");
     }
   }
 
@@ -141,10 +146,10 @@ export default class ZombieController extends BaseEntity implements Entity {
     if (!this.moveTarget) {
       return;
     }
-    const direction = this.moveTarget.sub(this.zombie.body.position);
+    const direction = this.moveTarget.sub(this.enemy.body.position);
     direction.magnitude = speed;
-    this.zombie.setTargetDirection(direction.angle);
-    this.zombie.walk(direction);
+    this.enemy.setTargetDirection(direction.angle);
+    this.enemy.walk(direction);
   }
 
   // Searches the map for the nearest human in range that is visible
@@ -156,10 +161,7 @@ export default class ZombieController extends BaseEntity implements Entity {
     let nearestDistance: number = maxDistance;
 
     for (const human of humans) {
-      const distance = vec2.dist(
-        human.body.position,
-        this.zombie.body.position
-      );
+      const distance = vec2.dist(human.body.position, this.enemy.body.position);
       if (distance < nearestDistance) {
         if (this.inVision(human)) {
           nearestDistance = distance;

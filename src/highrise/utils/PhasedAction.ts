@@ -50,7 +50,6 @@ export class PhasedAction<
   private async doPhase(phase: Phase<PhaseName, Params>, ...params: Params) {
     this.currentPhase = phase;
 
-    console.log("doing phase", phase.name, phase.duration);
     this.phasePercent = 0;
     phase.startAction?.(...params);
 

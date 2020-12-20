@@ -20,7 +20,7 @@ export default class BloodSplat extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.FLOOR_DECALS;
     this.sprite.position.set(x, y);
     this.sprite.rotation = rUniform(0, Math.PI / 2);
-    this.sprite.tint = darken(0xff0000, rUniform(0, 0.3));
+    this.sprite.tint = darken(0xff0000, rUniform(0.1, 0.4));
   }
 
   async onAdd() {

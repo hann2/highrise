@@ -24,16 +24,15 @@ import SwingingWeapon from "../../weapons/SwingingWeapon";
 import { makeSimpleEnemyBody } from "./enemyUtils";
 import EnemyVoice from "./EnemyVoice";
 
-const FRICTION = 0.1; // Walking friction
-
 export class BaseEnemy extends Creature {
   hp: number = 100;
   aimSpring!: AimSpring;
   body: Body & WithOwner;
   stunnedTimer: number = 0;
-  voice: EnemyVoice;
+  voice!: EnemyVoice;
   attackAction?: PhasedAction<AttackPhases, any>;
   walkSpeed: number = 0.4;
+  walkFriction: number = 0.1;
 
   get isStunned() {
     return this.stunnedTimer > 0;
@@ -80,8 +79,16 @@ export class BaseEnemy extends Creature {
     super();
 
     this.body = this.makeBody(position);
-    this.voice = this.makeVoice();
     this.attackAction = this.makeAttackAction();
+    if (this.attackAction != undefined) {
+      this.addChild(this.attackAction);
+    }
+  }
+
+  onAdd(game: Game) {
+    this.voice = this.addChild(this.makeVoice());
+    this.aimSpring = new AimSpring(game.ground, this.body);
+    this.springs = [this.aimSpring];
   }
 
   makeBody(position: V2d): Body {
@@ -113,42 +120,41 @@ export class BaseEnemy extends Creature {
     }
   }
 
-  onAdd(game: Game) {
-    this.aimSpring = new AimSpring(game.ground, this.body);
-    this.springs = [this.aimSpring];
-  }
-
   onTick(dt: number) {
     if (this.stunnedTimer > 0) {
       this.stunnedTimer -= dt;
     }
 
-    const friction = V(this.body.velocity).mul(-FRICTION);
+    // TODO: This isn't right at all. It should at least use dt
+    const friction = V(this.body.velocity).mul(-this.walkFriction);
     this.body.applyImpulse(friction);
   }
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
 
-    const impulse = bullet.velocity.mul(bullet.mass * 3);
+    const knockback = bullet.velocity.mul(bullet.mass * 30);
     const relativePos = position.sub(this.body.position);
-    this.body.applyImpulse(impulse, relativePos);
+    this.knockback(knockback, relativePos);
 
-    this.game?.addEntities([
+    this.game?.addEntity(
       new PositionalSound(
         choose(snd_fleshHit1, snd_fleshHit2, snd_fleshHit3),
         position
-      ),
-      new FleshImpact(position, bullet.damage / 10, normal),
-    ]);
+      )
+    );
+
+    this.makeBlood(position, bullet.damage, normal);
 
     if (this.hp <= 0) {
       this.die(bullet.shooter);
+    } else {
+      this.voice.speak("hit");
     }
   }
 
-  knockback(direction: number, amount: number = 1) {
-    this.body.applyImpulse(polarToVec(direction, amount * 0.1));
+  knockback(impulse: [number, number], relativePos?: [number, number]) {
+    this.body.applyImpulse([impulse[0] * 0.1, impulse[1] * 0.1], relativePos);
   }
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d) {
@@ -158,7 +164,9 @@ export class BaseEnemy extends Creature {
     // Knockback on the windup or the swing
     if (knockbackAmount) {
       this.stun((knockbackAmount / 25) * rNormal(1, 0.2));
-      this.knockback(this.getPosition().sub(position).angle, knockbackAmount);
+      this.knockback(
+        this.getPosition().sub(position).inormalize(knockbackAmount)
+      );
     }
 
     if (damageAmount) {
@@ -171,12 +179,18 @@ export class BaseEnemy extends Creature {
         this.game?.addEntity(new PositionalSound(soundName, position));
       }
 
-      this.voice.speak("hit");
+      this.makeBlood(position, damageAmount);
     }
 
     if (this.hp <= 0) {
       this.die(swingingWeapon.holder);
+    } else {
+      this.voice.speak("hit");
     }
+  }
+
+  makeBlood(position: V2d, damage: number, normal?: V2d) {
+    this.game?.addEntity(new FleshImpact(position, damage / 10, normal));
   }
 
   stun(duration: number) {
@@ -198,7 +212,7 @@ export class BaseEnemy extends Creature {
 
   onDie() {
     this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
-    this.voice.speak("death");
+    this.voice.speak("death", true);
   }
 }
 

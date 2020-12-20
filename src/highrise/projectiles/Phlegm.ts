@@ -125,7 +125,7 @@ export default class Phlegm extends BaseEntity implements Entity {
         hit.inflictDamage(this.damage);
       }
       this.game?.addEntity(new PositionalSound(getSplatSound(), this.position));
-      this.game?.addEntity(new GooImpact(hitPosition, 1, hitNormal, 0.7));
+      this.game?.addEntity(new GooImpact(hitPosition, 3, hitNormal, 0.7));
       this.destroy();
     } else {
       this.position.iaddScaled(this.velocity, dt);

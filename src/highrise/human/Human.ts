@@ -1,5 +1,15 @@
 import { Body, Circle } from "p2";
-import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
+import snd_cabbageHit1 from "../../../resources/audio/food/individual/cabbage-hit-1.flac";
+import snd_cabbageHit10 from "../../../resources/audio/food/individual/cabbage-hit-10.flac";
+import snd_cabbageHit11 from "../../../resources/audio/food/individual/cabbage-hit-11.flac";
+import snd_cabbageHit2 from "../../../resources/audio/food/individual/cabbage-hit-2.flac";
+import snd_cabbageHit3 from "../../../resources/audio/food/individual/cabbage-hit-3.flac";
+import snd_cabbageHit4 from "../../../resources/audio/food/individual/cabbage-hit-4.flac";
+import snd_cabbageHit5 from "../../../resources/audio/food/individual/cabbage-hit-5.flac";
+import snd_cabbageHit6 from "../../../resources/audio/food/individual/cabbage-hit-6.flac";
+import snd_cabbageHit7 from "../../../resources/audio/food/individual/cabbage-hit-7.flac";
+import snd_cabbageHit8 from "../../../resources/audio/food/individual/cabbage-hit-8.flac";
+import snd_swordSwoosh1 from "../../../resources/audio/weapons/sword-swoosh-1.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import type Game from "../../core/Game";
@@ -23,6 +33,7 @@ import Interactable, { isInteractable } from "../environment/Interactable";
 import WeaponPickup from "../environment/WeaponPickup";
 import { PointLight } from "../lighting-and-vision/PointLight";
 import { PhasedAction } from "../utils/PhasedAction";
+import { ShuffleRing } from "../utils/ShuffleRing";
 import Gun from "../weapons/Gun";
 import MeleeWeapon from "../weapons/MeleeWeapon";
 import Flashlight from "./Flashlight";
@@ -37,11 +48,26 @@ const MAX_HEALTH = 100;
 
 export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
-export const PUSH_KNOCKBACK = 150; // newtons?
+export const PUSH_KNOCKBACK = 110; // newtons?
 export const PUSH_STUN = 0.75; // seconds
 export const PUSH_COOLDOWN = 0.1; // seconds
 
 export const GLOWSTICK_COOLDOWN = 1.0; // seconds
+
+export const PUSH_SOUNDS = [
+  snd_cabbageHit1,
+  snd_cabbageHit2,
+  snd_cabbageHit3,
+  snd_cabbageHit4,
+  snd_cabbageHit5,
+  snd_cabbageHit6,
+  snd_cabbageHit7,
+  snd_cabbageHit8,
+  snd_cabbageHit10,
+  snd_cabbageHit11,
+];
+
+const pushSoundRing = new ShuffleRing(PUSH_SOUNDS);
 
 export default class Human extends BaseEntity implements Entity {
   body: Body;
@@ -181,7 +207,7 @@ export default class Human extends BaseEntity implements Entity {
   }
 
   // Inflict damage on the human
-  inflictDamage(amount: number) {
+  async inflictDamage(amount: number) {
     this.hp -= amount;
 
     this.game?.addEntity(new FleshImpact(this.getPosition(), 1));
@@ -189,8 +215,10 @@ export default class Human extends BaseEntity implements Entity {
     if (this.hp <= 0) {
       this.die();
     } else if (this.hp < 30) {
+      await this.wait(0.2);
       this.voice.speak("nearDeath", true);
     } else {
+      await this.wait(0.2);
       this.voice.speak("hurt");
     }
   }
@@ -224,7 +252,9 @@ export default class Human extends BaseEntity implements Entity {
       name: "push",
       duration: 0.05,
       startAction: () => {
-        this.game?.addEntity(new PositionalSound(snd_pop1, this.getPosition()));
+        this.game?.addEntity(
+          new PositionalSound(snd_swordSwoosh1, this.getPosition())
+        );
         const enemies = this.game!.entities.getByFilter(isEnemy);
         for (const enemy of enemies) {
           const relPosition = enemy.getPosition().isub(this.getPosition());
@@ -238,9 +268,15 @@ export default class Human extends BaseEntity implements Entity {
           if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
             const amount =
               PUSH_KNOCKBACK - 0.5 * PUSH_KNOCKBACK * (distance / PUSH_RANGE);
-            enemy.knockback(relPosition.angle, amount);
+            enemy.knockback(relPosition.inormalize().imul(amount));
             enemy.stun(PUSH_STUN * rNormal(1, 0.2));
             enemy.voice.speak("hit");
+            this.game?.addEntity(
+              new PositionalSound(pushSoundRing.getNext(), this.getPosition(), {
+                gain: amount / PUSH_KNOCKBACK,
+                speed: rNormal(1, 0.05),
+              })
+            );
           }
         }
       },

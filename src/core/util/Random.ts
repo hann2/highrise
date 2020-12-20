@@ -73,13 +73,11 @@ export function take<T>(options: T[]): T {
 
 /** Put an array into a random order and return the array. */
 export function shuffle<T>(a: T[]): T[] {
-  let i, j, temp;
+  let i, j;
   i = a.length;
   while (--i > 0) {
     j = rInteger(0, i + 1);
-    temp = a[j];
-    a[j] = a[i];
-    a[i] = temp;
+    [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
 }

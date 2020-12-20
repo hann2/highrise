@@ -6,8 +6,7 @@ import { createAttackAction } from "../../creature-stuff/AttackAction";
 import { BodyTextures } from "../../creature-stuff/BodySprite";
 import { BaseEnemy as BaseEnemy } from "../base/Enemy";
 import { getHumansInRange } from "../base/enemyUtils";
-import Zombie from "../zombie/Zombie";
-import ZombieController from "../zombie/ZombieController";
+import SimpleEnemyController from "../base/SimpleEnemyController";
 import CrawlerSprite from "./CrawlerSprite";
 
 const SPEED = 0.1;
@@ -29,35 +28,32 @@ export default class Crawler extends BaseEnemy {
 
     this.body.angle = angle;
 
-    // TODO: This is sketchy:
-    this.addChild(new ZombieController((this as any) as Zombie));
+    this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, ZOMBIE_RADIUS));
     this.addChild(new CrawlerSprite(this, textures));
   }
 
   makeAttackAction() {
-    return this.addChild(
-      createAttackAction({
-        windupDuration: 0.2,
-        attackDuration: 0.1,
-        windDownDuration: 0.1,
-        cooldownDuration: 0.5,
-        onWindupStart: () => {
-          this.voice.speak("attack");
-        },
-        onAttack: () => {
-          if (this.game) {
-            for (const human of getHumansInRange(
-              this.game,
-              this.body.position,
-              this.body.angle,
-              ATTACK_RANGE,
-              ATTACK_ANGLE_RANGE
-            )) {
-              human.inflictDamage(rInteger(10, 15));
-            }
+    return createAttackAction({
+      windupDuration: 0.2,
+      attackDuration: 0.1,
+      windDownDuration: 0.1,
+      cooldownDuration: 0.5,
+      onWindupStart: () => {
+        this.voice.speak("attack");
+      },
+      onAttack: () => {
+        if (this.game) {
+          for (const human of getHumansInRange(
+            this.game,
+            this.body.position,
+            this.body.angle,
+            ATTACK_RANGE,
+            ATTACK_ANGLE_RANGE
+          )) {
+            human.inflictDamage(rInteger(10, 15));
           }
-        },
-      })
-    );
+        }
+      },
+    });
   }
 }

@@ -1,7 +1,8 @@
 import { vec2 } from "p2";
 import { clamp, smoothStep } from "../../../core/util/MathUtil";
-import { choose } from "../../../core/util/Random";
+import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { Layer } from "../../config/layers";
 import { CRAWLER_TEXTURES, ZOMBIE_RADIUS } from "../../constants";
 import { BodySprite } from "../../creature-stuff/BodySprite";
 import { lerpOffsets } from "../base/enemyUtils";
@@ -16,14 +17,17 @@ const attackEndPositions: [V2d, V2d] = [V(0.4, 0.12), V(0.4, -0.12)];
 const cooldownPositions: [V2d, V2d] = [V(0.25, 0.1), V(0.25, -0.1)];
 
 export default class CrawlereSprite extends BodySprite {
-  wigglePhase: number = 0;
+  wigglePhase: number = rUniform(0, Math.PI * 2);
+  wiggleSpeed: number = rNormal(WIGGLE_SPEED, WIGGLE_SPEED / 5);
 
   constructor(
     private crawler: Crawler,
     textures = choose(...CRAWLER_TEXTURES)
   ) {
     super(textures, ZOMBIE_RADIUS * 0.9);
+
     this.torsoSprite.anchor.set(0.9, 0.5);
+    this.sprite.layerName = Layer.CRAWLERS;
   }
 
   getPosition() {
@@ -78,7 +82,7 @@ export default class CrawlereSprite extends BodySprite {
   onTick(dt: number) {
     if (!this.crawler.isStunned) {
       const moveSpeed = clamp(vec2.length(this.crawler.body.velocity));
-      this.wigglePhase += moveSpeed * WIGGLE_SPEED * dt;
+      this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;
     }
   }
 }

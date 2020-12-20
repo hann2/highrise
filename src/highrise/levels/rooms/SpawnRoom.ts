@@ -4,18 +4,19 @@ import Entity, { GameSprite } from "../../../core/entity/Entity";
 import Game from "../../../core/Game";
 import { choose } from "../../../core/util/Random";
 import { V } from "../../../core/Vector";
+import { Layer } from "../../config/layers";
 import { getCurrentLevelNumber } from "../../controllers/LevelController";
+import { cementFloor } from "../../environment/decorations/decorations";
 import SpawnLocation from "../../environment/SpawnLocation";
 import WeaponPickup from "../../environment/WeaponPickup";
-import { Layer } from "../../config/layers";
 import { PointLight } from "../../lighting-and-vision/PointLight";
-import { cementFloor } from "../../environment/decorations/decorations";
 import Gun from "../../weapons/Gun";
-import { GUNS } from "../../weapons/guns/guns";
 import { AK47 } from "../../weapons/guns/AK-47";
 import { AR15 } from "../../weapons/guns/AR-15";
-import { DesertEagle } from "../../weapons/guns/DesertEagle";
 import { DoubleBarrelShotgun } from "../../weapons/guns/DoubleBarrelShotgun";
+import { FiveSeven } from "../../weapons/guns/FiveSeven";
+import { Glock } from "../../weapons/guns/Glock";
+import { GUNS } from "../../weapons/guns/guns";
 import { Magnum } from "../../weapons/guns/Magnum";
 import { P90 } from "../../weapons/guns/P90";
 import { PumpShotgun } from "../../weapons/guns/PumpShotgun";
@@ -49,8 +50,6 @@ export default class SpawnRoom extends RoomTemplate {
     entities.push(new SpawnLocation(transformCell(V(1, 1))));
     entities.push(new SpawnLocation(transformCell(V(2, 1))));
 
-    const gun = new Gun(choose(...GUNS));
-
     const meleeWeapon = new MeleeWeapon(choose(...MELEE_WEAPONS));
     entities.push(new WeaponPickup(transformCell(V(2, 0)), meleeWeapon));
 
@@ -59,6 +58,9 @@ export default class SpawnRoom extends RoomTemplate {
     entities.push(
       new WeaponPickup(transformCell(V(0, 2)), new Gun(PumpShotgun))
     );
+
+    entities.push(new WeaponPickup(transformCell(V(2, 1)), new Gun(Glock)));
+    entities.push(new WeaponPickup(transformCell(V(2, 2)), new Gun(FiveSeven)));
 
     entities.push(new WeaponPickup(transformCell(V(1, 0)), new Gun(AR15)));
     entities.push(new WeaponPickup(transformCell(V(1, 1)), new Gun(Magnum)));

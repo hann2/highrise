@@ -1,6 +1,3 @@
-import snd_spitterSpit1 from "../../../../resources/audio/zombie/spitter-spit-1.flac";
-import snd_spitterSpit2 from "../../../../resources/audio/zombie/spitter-spit-2.flac";
-import snd_spitterSpit3 from "../../../../resources/audio/zombie/spitter-spit-3.flac";
 import { rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { SPITTER_SOUNDS } from "../../constants";
@@ -8,7 +5,7 @@ import { createAttackAction } from "../../creature-stuff/AttackAction";
 import GooImpact from "../../effects/GooImpact";
 import Phlegm from "../../projectiles/Phlegm";
 import { BaseEnemy } from "../base/Enemy";
-import EnemyVoice, { EnemySounds } from "../base/EnemyVoice";
+import EnemyVoice from "../base/EnemyVoice";
 import SpitterController from "./SpitterController";
 import SpitterSprite from "./SpitterSprite";
 
@@ -35,9 +32,10 @@ export default class Spitter extends BaseEnemy {
 
     this.addChild(new SpitterController(this));
     this.addChild(new SpitterSprite(this));
-    this.voice = this.addChild(
-      new EnemyVoice(() => this.getPosition(), SPITTER_SOUNDS)
-    );
+  }
+
+  makeVoice() {
+    return new EnemyVoice(() => this.getPosition(), SPITTER_SOUNDS);
   }
 
   makeAttackAction() {
@@ -78,8 +76,12 @@ export default class Spitter extends BaseEnemy {
     this.body.applyImpulse(friction);
   }
 
+  makeBlood(position: V2d, damage: number, normal?: V2d) {
+    this.game?.addEntity(new GooImpact(position, damage / 10, normal));
+  }
+
   onDie() {
-    super.onDie;
+    super.onDie();
     this.game?.addEntity(new GooImpact(this.getPosition(), 5));
     this.voice.speak("death");
   }

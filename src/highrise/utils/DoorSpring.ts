@@ -9,19 +9,31 @@ export default class DoorSpring extends RotationalSpring {
     private maxRotation: number
   ) {
     super(bodyA, bodyB, {
-      damping: 1,
-      stiffness: 10,
+      damping: 5,
+      stiffness: 300,
     });
+
+    this.minRotation = normalizeAngle(minRotation);
+    this.maxRotation = normalizeAngle(maxRotation);
   }
   applyForce() {
     const bodyA = this.bodyA;
     const bodyB = this.bodyB;
-    const relativeBodyAngle = normalizeAngle(bodyB.angle - bodyA.angle);
-    const angleDisplacement = angleDelta(this.restAngle, relativeBodyAngle);
+    const relativeBodyAngle = bodyB.angle - bodyA.angle;
+
+    let angleDisplacement = 0;
+    if (relativeBodyAngle < this.minRotation) {
+      angleDisplacement = relativeBodyAngle - this.minRotation;
+    } else if (relativeBodyAngle > this.maxRotation) {
+      angleDisplacement = relativeBodyAngle - this.maxRotation;
+    }
+
     const relativeVelocity = bodyB.angularVelocity - bodyA.angularVelocity;
 
-    var torque =
-      -this.stiffness * angleDisplacement - this.damping * relativeVelocity;
+    const springyPart = -this.stiffness * angleDisplacement;
+    const dampyPart =
+      -this.damping * relativeVelocity * (angleDisplacement == 0 ? 1 : 10);
+    var torque = springyPart + dampyPart;
 
     bodyA.angularForce -= torque;
     bodyB.angularForce += torque;

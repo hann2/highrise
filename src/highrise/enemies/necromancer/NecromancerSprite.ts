@@ -3,8 +3,7 @@ import img_necromancer from "../../../../resources/images/zombies/necromancer.pn
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { Layer } from "../../config/layers";
-import { ZOMBIE_RADIUS } from "../../constants";
-import Necromancer from "./Necromancer";
+import Necromancer, { NECROMANCER_RADIUS } from "./Necromancer";
 
 interface BodySprites {
   standing: Sprite;
@@ -35,7 +34,7 @@ export default class NecromancerSprite extends BaseEntity implements Entity {
 
     for (const bodySprite of Object.values(this.bodySprites)) {
       bodySprite.anchor.set(0.5, 0.5);
-      bodySprite.scale.set((2 * ZOMBIE_RADIUS) / bodySprite.height);
+      bodySprite.scale.set((2 * NECROMANCER_RADIUS) / bodySprite.height);
       this.sprite.addChild(bodySprite);
     }
   }

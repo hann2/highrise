@@ -52,19 +52,17 @@ export default class VendingMachine
 
     this.lightSprite = Sprite.from(glowUrl);
     this.lightSprite.anchor.set(0.5, 0.5);
-    this.lightSprite.position.set(...position);
+    // this.lightSprite.position.set(...position);
     this.lightSprite.blendMode = BLEND_MODES.ADD;
     this.lightSprite.width = 1.5;
     this.lightSprite.height = 1.5;
     this.lightSprite.rotation = rotation;
 
-    // const light = new Light();
-    // light.lightSprite = this.lightSprite;
-    // this.addChild(light);
+    const light = new Light(this.lightSprite, false, 2);
+    light.setPosition(position.add([0.25, 0.25])); // WTF, why?
+    this.addChild(light);
 
-    (this.lightSprite as GameSprite).layerName = Layer.EMISSIVES;
-
-    this.sprites = [this.machineSprite, this.lightSprite];
+    this.sprites = [this.machineSprite];
 
     this.body = new Body({
       position: position.clone(),

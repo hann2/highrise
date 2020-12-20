@@ -7,9 +7,10 @@ import Human, { isHuman } from "../../human/Human";
 
 export function makeSimpleEnemyBody(
   position: [number, number],
-  radius: number
+  radius: number,
+  mass: number = 1
 ) {
-  const body = new Body({ mass: 1, position: position });
+  const body = new Body({ mass, position });
   const shape = new Circle({ radius });
   shape.collisionGroup = CollisionGroups.Zombies;
   shape.collisionMask = CollisionGroups.All;

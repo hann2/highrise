@@ -2,6 +2,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
+import { rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 
@@ -44,7 +45,9 @@ export default class EnemyVoice extends BaseEntity implements Entity {
       const sound = this.sounds[soundClass].getNext();
       if (sound) {
         this.currentSound = this.game?.addEntity(
-          new PositionalSound(sound, this.getPosition())
+          new PositionalSound(sound, this.getPosition(), {
+            speed: rNormal(1.0, 0.05),
+          })
         );
       }
     }
