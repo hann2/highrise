@@ -15,6 +15,7 @@ import { MUSIC_URLS } from "../controllers/MusicController";
 import { GLOWSTICK_SOUNDS } from "../effects/GlowStick";
 import { SPLAT_SOUNDS } from "../effects/Splat";
 import { PUSH_SOUNDS } from "../human/Human";
+import { GUNS } from "../weapons/guns/gun-stats/gunStats";
 import { WEAPONS } from "../weapons/weapons";
 
 export function getSoundsToPreload(): string[] {
@@ -39,6 +40,7 @@ export function getSoundsToPreload(): string[] {
     ...MUSIC_URLS,
 
     ...WEAPONS.map((w) => Object.values(w.sounds).flat()).flat(),
+    ...GUNS.map((g) => g.bulletStats.dropSounds).flat(),
     ...CHARACTERS.map((c) => Object.values(c.sounds).flat()).flat(),
     ...ENEMY_SOUNDS.map((z) => Object.values(z).flat()).flat(),
   ]);

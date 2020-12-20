@@ -7,6 +7,7 @@ import img_shotgunCasing from "../../../../../resources/images/shell-casings/sho
 import img_spas12Hold from "../../../../../resources/images/weapons/spas12-hold.png";
 import img_spas12Pickup from "../../../../../resources/images/weapons/spas12-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
+import { TwelveGuageBuckshot } from "../BulletStats";
 import {
   defaultGunStats,
   FireMode,
@@ -19,10 +20,8 @@ export const SPAS12: GunStats = {
 
   name: "SPAS12",
   fireRate: 8,
-  bulletDamage: 30,
-  bulletsPerShot: 9,
+  bulletStats: TwelveGuageBuckshot,
   bulletSpread: degToRad(7),
-  muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   fireMode: FireMode.SEMI_AUTO,
   reloadInsertTime: 0.4,
@@ -54,6 +53,5 @@ export const SPAS12: GunStats = {
     reloadInsert: [snd_shotgunLoadShell2],
     reloadFinish: [snd_shotgunPump1],
     pump: [snd_shotgunPump1],
-    shellDrop: [snd_shotgunCasingDrop1],
   },
 };

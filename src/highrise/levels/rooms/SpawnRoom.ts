@@ -17,7 +17,7 @@ import { DoubleBarrelShotgun } from "../../weapons/guns/gun-stats/DoubleBarrelSh
 import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
 import { Glock } from "../../weapons/guns/gun-stats/Glock";
 import { GUNS } from "../../weapons/guns/gun-stats/gunStats";
-import { Magnum } from "../../weapons/guns/gun-stats/Magnum";
+import { Revolver } from "../../weapons/guns/gun-stats/Revolver";
 import { P90 } from "../../weapons/guns/gun-stats/P90";
 import { PumpShotgun } from "../../weapons/guns/gun-stats/PumpShotgun";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
@@ -63,7 +63,7 @@ export default class SpawnRoom extends RoomTemplate {
     entities.push(new WeaponPickup(transformCell(V(2, 2)), new Gun(FiveSeven)));
 
     entities.push(new WeaponPickup(transformCell(V(1, 0)), new Gun(AR15)));
-    entities.push(new WeaponPickup(transformCell(V(1, 1)), new Gun(Magnum)));
+    entities.push(new WeaponPickup(transformCell(V(1, 1)), new Gun(Revolver)));
     entities.push(
       new WeaponPickup(transformCell(V(1, 2)), new Gun(DoubleBarrelShotgun))
     );

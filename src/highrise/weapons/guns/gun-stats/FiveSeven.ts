@@ -1,7 +1,3 @@
-import snd_casingDropBoard1 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire2 from "../../../../../resources/audio/guns/misc/dry-fire-2.mp3";
 import snd_m1911Reload1 from "../../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
 import snd_pistolCock1 from "../../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
@@ -10,6 +6,7 @@ import img_pistolCasing from "../../../../../resources/images/shell-casings/pist
 import img_fiveSevenHold from "../../../../../resources/images/weapons/five-seven-hold.png";
 import img_fiveSevenPickup from "../../../../../resources/images/weapons/five-seven-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
+import { NineMil } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const FiveSeven: GunStats = {
@@ -17,8 +14,7 @@ export const FiveSeven: GunStats = {
 
   name: "Five Seven",
   fireRate: 20,
-  bulletDamage: 25,
-  muzzleVelocity: 60,
+  bulletStats: NineMil,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 0.8,
   ammoCapacity: 20,
@@ -47,11 +43,5 @@ export const FiveSeven: GunStats = {
     empty: [snd_dryFire2],
     pickup: [snd_pistolCock1],
     reload: [snd_m1911Reload1],
-    shellDrop: [
-      snd_casingDropBoard1,
-      snd_casingDropBoard2,
-      snd_casingDropBoard3,
-      snd_casingDropBoard4,
-    ],
   },
 };

@@ -133,7 +133,7 @@ export class BaseEnemy extends Creature {
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
 
-    const knockback = bullet.velocity.mul(bullet.mass * 30);
+    const knockback = bullet.velocity.mul(bullet.stats.mass * 30);
     const relativePos = position.sub(this.body.position);
     this.knockback(knockback, relativePos);
 

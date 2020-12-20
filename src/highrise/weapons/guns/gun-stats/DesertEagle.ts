@@ -1,7 +1,3 @@
-import snd_casingDropBoard1 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire2 from "../../../../../resources/audio/guns/misc/dry-fire-2.mp3";
 import snd_deagleShot1 from "../../../../../resources/audio/guns/pistol/deagle-shot-1.mp3";
 import snd_deagleShot2 from "../../../../../resources/audio/guns/pistol/deagle-shot-2.mp3";
@@ -11,6 +7,7 @@ import img_rifleCasing from "../../../../../resources/images/shell-casings/rifle
 import img_desertEagleHold from "../../../../../resources/images/weapons/desert-eagle-hold.png";
 import img_desertEaglePickup from "../../../../../resources/images/weapons/desert-eagle-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
+import { Magnum } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 
 export const DesertEagle: GunStats = {
@@ -18,8 +15,7 @@ export const DesertEagle: GunStats = {
 
   name: "Desert Eagle",
   fireRate: 10,
-  bulletDamage: 50,
-  muzzleVelocity: 60,
+  bulletStats: Magnum,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 0.8,
   ammoCapacity: 7,
@@ -46,11 +42,5 @@ export const DesertEagle: GunStats = {
     empty: [snd_dryFire2],
     pickup: [snd_pistolCock1],
     reload: [snd_m1911Reload1],
-    shellDrop: [
-      snd_casingDropBoard1,
-      snd_casingDropBoard2,
-      snd_casingDropBoard3,
-      snd_casingDropBoard4,
-    ],
   },
 };

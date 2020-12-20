@@ -1,7 +1,3 @@
-import snd_casingDropBoard1 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire3 from "../../../../../resources/audio/guns/misc/dry-fire-3.mp3";
 import snd_magazineLoad1 from "../../../../../resources/audio/guns/misc/magazine-load-1.mp3";
 import snd_pistol2Shot1 from "../../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
@@ -11,6 +7,7 @@ import img_pistolCasing from "../../../../../resources/images/shell-casings/pist
 import img_p90Hold from "../../../../../resources/images/weapons/p90-hold.png";
 import img_p90Pickup from "../../../../../resources/images/weapons/p90-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
+import { NineMil } from "../BulletStats";
 import {
   defaultGunStats,
   FireMode,
@@ -23,11 +20,10 @@ export const P90: GunStats = {
 
   name: "P90",
   fireRate: 15,
-  bulletDamage: 30,
-  muzzleVelocity: 150,
+  bulletStats: NineMil,
   fireMode: FireMode.FULL_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
-  reloadInsertTime: 2.2,
+  reloadInsertTime: 2.0,
   ammoCapacity: 50,
 
   textures: {
@@ -38,7 +34,7 @@ export const P90: GunStats = {
   },
   size: [1.0, 1.0],
 
-  laserSightColor: 0xff0000,
+  laserSightColor: 0x00ffff,
   recoilAmount: degToRad(2.5),
   recoilRecovery: 6,
 
@@ -55,11 +51,5 @@ export const P90: GunStats = {
     empty: [snd_dryFire3],
     pickup: [snd_magazineLoad1],
     reload: [snd_ar15Reload1, snd_ar15ReloadEmpty],
-    shellDrop: [
-      snd_casingDropBoard1,
-      snd_casingDropBoard2,
-      snd_casingDropBoard3,
-      snd_casingDropBoard4,
-    ],
   },
 };

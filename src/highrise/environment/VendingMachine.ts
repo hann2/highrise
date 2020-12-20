@@ -35,6 +35,7 @@ export default class VendingMachine
   dead = false;
   machineSprite: Sprite;
   lightSprite: Sprite;
+  light: Light;
   hp = rInteger(40, 60);
 
   constructor(position: V2d, rotation: number) {
@@ -58,9 +59,9 @@ export default class VendingMachine
     this.lightSprite.height = 1.5;
     this.lightSprite.rotation = rotation;
 
-    const light = new Light(this.lightSprite, false, 2);
-    light.setPosition(position.add([0.25, 0.25])); // WTF, why?
-    this.addChild(light);
+    this.light = new Light(this.lightSprite, false, 2);
+    this.light.setPosition(position.add([0.25, 0.25])); // WTF, why?
+    this.addChild(this.light);
 
     this.sprites = [this.machineSprite];
 
@@ -94,12 +95,15 @@ export default class VendingMachine
       for (let i = 0; i < rInteger(2, 4); i++) {
         await this.wait(rUniform(0.04, 0.1), undefined, "flicker");
         this.lightSprite.alpha = 0;
+        this.light.dirty = true;
         await this.wait(rUniform(0.04, 0.1), undefined, "flicker");
         this.lightSprite.alpha = 1;
+        this.light.dirty = true;
       }
 
       await this.wait(0.2, (dt, t) => {
         this.lightSprite.alpha = 1 - t;
+        this.light.dirty = true;
       });
 
       this.lightSprite.visible = false;

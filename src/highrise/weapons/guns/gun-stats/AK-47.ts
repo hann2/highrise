@@ -1,7 +1,3 @@
-import snd_casingDropBoard1 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire3 from "../../../../../resources/audio/guns/misc/dry-fire-3.mp3";
 import snd_magazineLoad1 from "../../../../../resources/audio/guns/misc/magazine-load-1.mp3";
 import snd_ar15Reload1 from "../../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
@@ -11,6 +7,7 @@ import img_rifleCasing from "../../../../../resources/images/shell-casings/rifle
 import img_ak47Hold from "../../../../../resources/images/weapons/ak-47-hold.png";
 import img_ak47Pickup from "../../../../../resources/images/weapons/ak47-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
+import { SevenSixTwo } from "../BulletStats";
 import {
   defaultGunStats,
   FireMode,
@@ -23,8 +20,7 @@ export const AK47: GunStats = {
 
   name: "AK-47",
   fireRate: 9,
-  bulletDamage: 50,
-  muzzleVelocity: 120,
+  bulletStats: SevenSixTwo,
   fireMode: FireMode.FULL_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 1.8,
@@ -54,11 +50,5 @@ export const AK47: GunStats = {
     empty: [snd_dryFire3],
     pickup: [snd_magazineLoad1],
     reload: [snd_ar15Reload1, snd_ar15ReloadEmpty],
-    shellDrop: [
-      snd_casingDropBoard1,
-      snd_casingDropBoard2,
-      snd_casingDropBoard3,
-      snd_casingDropBoard4,
-    ],
   },
 };

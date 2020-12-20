@@ -4,11 +4,10 @@ import snd_shotgunLoadShell2 from "../../../../../resources/audio/guns/shotgun/s
 import snd_shotgunPump1 from "../../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
 import snd_shotgunShot1 from "../../../../../resources/audio/guns/shotgun/shotgun-shot-1.mp3";
 import img_shotgunCasing from "../../../../../resources/images/shell-casings/shotgun-casing.png";
-import img_ak47Hold from "../../../../../resources/images/weapons/ak-47-hold.png";
-import img_ar15Hold from "../../../../../resources/images/weapons/ar15-hold.png";
 import img_doubleBarrelShotgunHold from "../../../../../resources/images/weapons/double-barrel-shotgun-hold.png";
 import img_doubleBarrelShotgunPickup from "../../../../../resources/images/weapons/double-barrel-shotgun-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
+import { TwelveGuageBuckshot } from "../BulletStats";
 import {
   defaultGunStats,
   EjectionType,
@@ -22,10 +21,8 @@ export const DoubleBarrelShotgun: GunStats = {
 
   name: "Sawn Off Shotgun",
   fireRate: 10,
-  bulletDamage: 20,
-  bulletsPerShot: 15,
+  bulletStats: TwelveGuageBuckshot,
   bulletSpread: degToRad(20),
-  muzzleVelocity: 55,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   fireMode: FireMode.SEMI_AUTO,
   ejectionType: EjectionType.RELOAD,
@@ -43,7 +40,7 @@ export const DoubleBarrelShotgun: GunStats = {
   recoilAmount: degToRad(10),
   recoilRecovery: 3,
 
-  leftHandPosition: [0.45, -0.03],
+  leftHandPosition: [0.52, -0.03],
   rightHandPosition: [0.3, 0],
   holdPosition: [0.4, 0],
   stanceAngle: degToRad(35),
@@ -55,6 +52,5 @@ export const DoubleBarrelShotgun: GunStats = {
     empty: [snd_dryFire1],
     pickup: [snd_shotgunPump1],
     reload: [snd_shotgunLoadShell2],
-    shellDrop: [snd_shotgunCasingDrop1],
   },
 };

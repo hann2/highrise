@@ -30,7 +30,7 @@ export class LaserSight extends BaseEntity implements Entity {
 
     for (const dot of [this.startDot, this.endDot]) {
       this.sprite.addChild(dot);
-      dot.width = dot.height = 0.4;
+      dot.width = dot.height = 0.2;
       dot.blendMode = BLEND_MODES.ADD;
       dot.tint = this.color;
       dot.alpha = 0.7;
@@ -52,7 +52,7 @@ export class LaserSight extends BaseEntity implements Entity {
 
   onRender() {
     this.sprite.clear();
-    this.sprite.lineStyle(0.01, this.color, 0.3);
+    this.sprite.lineStyle(0.01, this.color, 0.2);
 
     const from = this.getEmitterPosition();
     const to = from.add(polarToVec(this.getAngle(), this.maxDistance));

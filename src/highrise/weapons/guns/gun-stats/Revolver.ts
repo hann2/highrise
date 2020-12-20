@@ -1,7 +1,3 @@
-import snd_casingDropBoard1 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_revolverDryFire from "../../../../../resources/audio/guns/revolver/revolver-dry-fire.flac";
 import snd_revolverInsertShell1 from "../../../../../resources/audio/guns/revolver/revolver-insert-shell-1.flac";
 import snd_revolverInsertShell2 from "../../../../../resources/audio/guns/revolver/revolver-insert-shell-2.flac";
@@ -14,6 +10,7 @@ import img_pistolCasing from "../../../../../resources/images/shell-casings/pist
 import img_magnumHold from "../../../../../resources/images/weapons/magnum-hold.png";
 import img_magnumPickup from "../../../../../resources/images/weapons/magnum-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
+import { Magnum } from "../BulletStats";
 import {
   defaultGunStats,
   EjectionType,
@@ -21,13 +18,12 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 
-export const Magnum: GunStats = {
+export const Revolver: GunStats = {
   ...defaultGunStats,
 
-  name: ".357 Magnum",
+  name: "S&W Revolver",
   fireRate: 10,
-  bulletDamage: 55,
-  muzzleVelocity: 60,
+  bulletStats: Magnum,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   ejectionType: EjectionType.RELOAD,
   reloadInsertTime: 0.28,
@@ -61,11 +57,5 @@ export const Magnum: GunStats = {
       snd_revolverInsertShell3,
     ],
     reloadFinish: [snd_revolverReloadFinish],
-    shellDrop: [
-      snd_casingDropBoard1,
-      snd_casingDropBoard2,
-      snd_casingDropBoard3,
-      snd_casingDropBoard4,
-    ],
   },
 };

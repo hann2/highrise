@@ -1,7 +1,3 @@
-import snd_casingDropBoard1 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire3 from "../../../../../resources/audio/guns/misc/dry-fire-3.mp3";
 import snd_magazineLoad1 from "../../../../../resources/audio/guns/misc/magazine-load-1.mp3";
 import snd_ar15Reload1 from "../../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
@@ -13,6 +9,7 @@ import img_rifleCasing from "../../../../../resources/images/shell-casings/rifle
 import img_ar15Pickup from "../../../../../resources/images/weapons/ar-15-pickup.png";
 import img_ar15Hold from "../../../../../resources/images/weapons/ar15-hold.png";
 import { degToRad } from "../../../../core/util/MathUtil";
+import { FiveFiveSix } from "../BulletStats";
 import {
   defaultGunStats,
   FireMode,
@@ -25,8 +22,7 @@ export const AR15: GunStats = {
 
   name: "AR-15",
   fireRate: 12,
-  bulletDamage: 45,
-  muzzleVelocity: 120,
+  bulletStats: FiveFiveSix,
   fireMode: FireMode.SEMI_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 1.5,
@@ -57,11 +53,5 @@ export const AR15: GunStats = {
     empty: [snd_dryFire3],
     pickup: [snd_magazineLoad1],
     reload: [snd_ar15Reload1, snd_ar15ReloadEmpty],
-    shellDrop: [
-      snd_casingDropBoard1,
-      snd_casingDropBoard2,
-      snd_casingDropBoard3,
-      snd_casingDropBoard4,
-    ],
   },
 };

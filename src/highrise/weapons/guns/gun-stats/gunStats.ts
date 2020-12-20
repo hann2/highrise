@@ -6,7 +6,7 @@ import { DoubleBarrelShotgun } from "./DoubleBarrelShotgun";
 import { FiveSeven } from "./FiveSeven";
 import { Glock } from "./Glock";
 import { M1911 } from "./M1911";
-import { Magnum } from "./Magnum";
+import { Revolver } from "./Revolver";
 import { P90 } from "./P90";
 import { PumpShotgun } from "./PumpShotgun";
 import { SPAS12 } from "./SPAS12";
@@ -20,18 +20,18 @@ export const GUNS: Array<GunStats> = [
   FiveSeven,
   Glock,
   M1911,
-  Magnum,
+  Revolver,
   P90,
   PumpShotgun,
   SPAS12,
 ];
 
-export const PISTOLS = [M1911, Glock, FiveSeven, Magnum, DesertEagle];
+export const PISTOLS = [M1911, Glock, FiveSeven, Revolver, DesertEagle];
 export const SHOTGUNS = [DoubleBarrelShotgun, PumpShotgun, SPAS12];
 export const RIFLES = [AR15, AK47, P90];
 
 export const GUN_TIERS = [
-  [M1911, Glock, Magnum, FiveSeven],
+  [M1911, Glock, Revolver, FiveSeven],
   [DesertEagle, AR15, DoubleBarrelShotgun],
   [PumpShotgun],
   [AK47, SPAS12, P90],

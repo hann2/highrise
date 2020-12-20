@@ -1,9 +1,5 @@
 // Stats that make a gun unique
 
-import snd_casingDropBoard1 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
 import snd_dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
 import snd_pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
 import snd_pistol2Shot1 from "../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
@@ -15,14 +11,11 @@ import img_glockPickup from "../../../../resources/images/weapons/glock-pickup.p
 import { SoundName } from "../../../core/resources/sounds";
 import { degToRad } from "../../../core/util/MathUtil";
 import { BaseWeaponStats } from "../WeaponStats";
+import { BulletStats, defaultBulletStats } from "./BulletStats";
 
 export interface GunStats extends BaseWeaponStats {
   // Maximum rounds per second
   readonly fireRate: number;
-  // meters/second of bullet when fired
-  readonly muzzleVelocity: number;
-  // base damage the bullet does
-  readonly bulletDamage: number;
   // Distance from the shooter that the bullet is created
   readonly muzzleLength: number;
   // Full Auto, Semi Auto, Pump, Burst ...
@@ -38,8 +31,8 @@ export interface GunStats extends BaseWeaponStats {
   // Seconds to finish a reload.
   readonly reloadEndTime: number;
 
-  // The number of bullets per round fired
-  readonly bulletsPerShot: number;
+  // The type of bullet this uses
+  readonly bulletStats: BulletStats;
   // The maximum spread of bullets fired
   readonly bulletSpread: number;
 
@@ -63,7 +56,6 @@ export interface GunStats extends BaseWeaponStats {
     readonly reloadInsert: SoundName[];
     readonly reloadFinish: SoundName[];
     readonly pump: SoundName[];
-    readonly shellDrop: SoundName[];
   };
 
   readonly textures: {
@@ -116,8 +108,6 @@ export enum ReloadingStyle {
 export const defaultGunStats: GunStats = {
   name: "Gun",
   fireRate: 1.0,
-  muzzleVelocity: 80,
-  bulletDamage: 40,
   fireMode: FireMode.SEMI_AUTO,
   ammoCapacity: 10,
   reloadStartTime: 0.1,
@@ -125,8 +115,9 @@ export const defaultGunStats: GunStats = {
   reloadEndTime: 0.1,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   ejectionType: EjectionType.AUTOMATIC,
-  bulletsPerShot: 1,
   bulletSpread: degToRad(0.5),
+
+  bulletStats: defaultBulletStats,
 
   recoilAmount: degToRad(2),
   recoilRecovery: 5,
@@ -153,11 +144,5 @@ export const defaultGunStats: GunStats = {
     reloadInsert: [],
     reloadFinish: [],
     pump: [snd_shotgunPump1],
-    shellDrop: [
-      snd_casingDropBoard1,
-      snd_casingDropBoard2,
-      snd_casingDropBoard3,
-      snd_casingDropBoard4,
-    ],
   },
 };

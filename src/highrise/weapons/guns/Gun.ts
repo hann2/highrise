@@ -153,10 +153,10 @@ export default class Gun extends BaseEntity implements Entity {
       "pump"
     );
 
-    await this.wait(0.05, undefined, "pump");
     if (this.shellsToEject > 0) {
       this.makeShellCasing(shooter);
     }
+    await this.wait(0.05, undefined, "pump");
 
     await this.wait(
       0.13,
@@ -189,13 +189,13 @@ export default class Gun extends BaseEntity implements Entity {
         velocity,
         shooterDirection,
         this.stats.textures.shellCasing,
-        this.stats.sounds.shellDrop
+        this.stats.bulletStats.dropSounds
       )
     );
   }
 
   makeProjectile(position: V2d, direction: number, shooter: Human) {
-    for (let i = 0; i < this.stats.bulletsPerShot; i++) {
+    for (let i = 0; i < this.stats.bulletStats.bulletsPerShot; i++) {
       const spread = rUniform(
         -this.stats.bulletSpread / 2,
         this.stats.bulletSpread / 2
@@ -204,8 +204,7 @@ export default class Gun extends BaseEntity implements Entity {
         new Bullet(
           position.clone(),
           direction + spread,
-          this.stats.muzzleVelocity * rUniform(0.9, 1.1),
-          this.stats.bulletDamage,
+          this.stats.bulletStats,
           shooter
         )
       );

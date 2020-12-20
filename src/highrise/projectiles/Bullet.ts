@@ -1,14 +1,15 @@
 import { Ray, RaycastResult } from "p2";
-import { BLEND_MODES, Graphics } from "pixi.js";
+import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
-import { Layer } from "../config/layers";
-import Light from "../lighting-and-vision/Light";
 import { CollisionGroups } from "../config/CollisionGroups";
+import { Layer } from "../config/layers";
 import Hittable, { isHittable } from "../environment/Hittable";
 import Human from "../human/Human";
+import Light from "../lighting-and-vision/Light";
+import { BulletStats } from "../weapons/guns/BulletStats";
 
 export const BULLET_RADIUS = 0.05; // meters
 const MAX_LIFESPAN = 3.0; // seconds
@@ -28,14 +29,12 @@ export default class Bullet extends BaseEntity implements Entity {
   constructor(
     public position: V2d,
     direction: number,
-    speed: number = 50,
-    public damage: number = 40,
-    public readonly shooter?: Human,
-    public mass: number = 0.01 // kg?
+    public stats: BulletStats,
+    public readonly shooter?: Human
   ) {
     super();
 
-    this.velocity = polarToVec(direction, speed);
+    this.velocity = polarToVec(direction, stats.muzzleVelocity);
     this.ray = new Ray({
       from: position.clone(), // to be set later
       to: V(0, 0),
@@ -56,6 +55,12 @@ export default class Bullet extends BaseEntity implements Entity {
     this.light.lightSprite.addChild(this.lightGraphics);
 
     this.renderPosition = position.clone();
+  }
+
+  get damage(): number {
+    return (
+      this.stats.damage * (this.velocity.magnitude / this.stats.muzzleVelocity)
+    );
   }
 
   async onAdd() {

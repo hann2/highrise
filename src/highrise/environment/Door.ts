@@ -84,7 +84,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.body.applyImpulse(
-      bullet.velocity.mul(bullet.mass * 0.5),
+      bullet.velocity.mul(bullet.stats.mass * 0.5),
       position.sub(this.body.position)
     );
 
