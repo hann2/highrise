@@ -252,13 +252,13 @@ export default class Game {
   }
 
   /** Remove all non-persistent entities. I think this is kinda sketchy. */
-  clearScene() {
+  clearScene(persistenceThreshold = 0) {
     for (const entity of this.entities) {
       if (
-        entity.game &&
-        !this.entitiesToRemove.has(entity) &&
-        !entity.persistent &&
-        !entity.parent
+        entity.game && // Not already destroyed
+        !this.entitiesToRemove.has(entity) && // not already about to be destroyed
+        entity.persistenceLevel <= persistenceThreshold &&
+        !entity.parent // We only wanna deal with top-level things, let parents handle the rest
       ) {
         entity.destroy();
       }

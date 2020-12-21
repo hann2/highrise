@@ -4,11 +4,13 @@ import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import FPSMeter from "../../core/util/FPSMeter";
 import { lerp } from "../../core/util/MathUtil";
-import VisionController from "../lighting-and-vision/vision";
+import { Persistence } from "../constants/constants";
+import { isHuman } from "../human/Human";
+import VisionController from "../lighting-and-vision/VisionController";
 
 // Put stuff in here that we want to disable on actual release
 export default class CheatController extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = Persistence.Permanent;
 
   constructor() {
     super();
@@ -26,6 +28,11 @@ export default class CheatController extends BaseEntity implements Entity {
           (e): e is VisionController => e instanceof VisionController
         )) {
           visionController.sprite.visible = !visionController.sprite.visible;
+        }
+        break;
+      case "KeyH":
+        for (const human of this.game!.entities.getByFilter(isHuman)) {
+          human.heal(100);
         }
         break;
       case "Backslash":

@@ -2,7 +2,7 @@ import img_chainLinkFence from "../../../../resources/images/environment/chain-l
 import Entity from "../../../core/entity/Entity";
 import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH, LEVEL_SIZE } from "../../constants";
+import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 import Exit from "../../environment/Exit";
 import Wall from "../../environment/Wall";
 import { PointLight } from "../../lighting-and-vision/PointLight";

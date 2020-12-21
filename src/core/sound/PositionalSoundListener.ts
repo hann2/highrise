@@ -11,7 +11,7 @@ export default class PositionalSoundListener
   extends BaseEntity
   implements Entity {
   id = "positional_sound_listener";
-  persistent = true;
+  persistenceLevel = 100;
   onTick() {}
 
   onAdd(game: Game) {

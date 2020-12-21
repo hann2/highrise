@@ -1,7 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH } from "../../constants";
+import { CELL_WIDTH } from "../../constants/constants";
 import Heavy from "../../enemies/heavy/Heavy";
 import Decoration from "../../environment/Decoration";
 import {

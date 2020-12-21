@@ -2,7 +2,7 @@ import {
   CRAWLER_TEXTURES,
   RACHEL_ZOMBIE_SOUNDS,
   ZOMBIE_TEXTURES,
-} from "../../constants";
+} from "../../constants/constants";
 import { BodyTextures } from "../../creature-stuff/BodySprite";
 import { EnemySounds } from "../base/EnemyVoice";
 

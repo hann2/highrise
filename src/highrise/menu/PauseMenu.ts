@@ -5,12 +5,14 @@ import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { Layer } from "../config/layers";
+import { Persistence } from "../constants/constants";
 import ClickableText from "./ClickableText";
 import FeedbackButton from "./FeedbackButton";
 import MuteButton from "./MuteButton";
 
+// Shows the menu when paused, invisible otherwise
 export default class PauseMenu extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = Persistence.Game;
   pausable = false;
   sprite: Sprite & GameSprite;
   feedbackButton: FeedbackButton;
@@ -66,7 +68,6 @@ export default class PauseMenu extends BaseEntity implements Entity {
 
   handlers = {
     resize: () => this.positionText(),
-    gameOver: () => this.destroy(),
   };
 
   onAdd(game: Game) {

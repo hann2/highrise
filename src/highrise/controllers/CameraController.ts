@@ -3,12 +3,17 @@ import Entity from "../../core/entity/Entity";
 import { Camera2d } from "../../core/graphics/Camera2d";
 import PositionalSoundListener from "../../core/sound/PositionalSoundListener";
 import { V } from "../../core/Vector";
+import { Persistence } from "../constants/constants";
 import PartyManager from "../environment/PartyManager";
+import Human from "../human/Human";
 
 export default class CameraController extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = Persistence.Game;
 
-  constructor(private camera: Camera2d) {
+  constructor(
+    private camera: Camera2d,
+    private getPlayer: () => Human | undefined
+  ) {
     super();
   }
 
@@ -39,11 +44,6 @@ export default class CameraController extends BaseEntity implements Entity {
     return this.game!.entities.getById(
       "positional_sound_listener"
     ) as PositionalSoundListener;
-  }
-
-  getPlayer() {
-    return (this.game!.entities.getById("party_manager") as PartyManager)
-      ?.leader;
   }
 
   onInputDeviceChange(usingGamepad: boolean) {

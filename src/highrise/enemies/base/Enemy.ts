@@ -9,7 +9,7 @@ import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { normalizeAngle, polarToVec } from "../../../core/util/MathUtil";
 import { choose, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { RACHEL_ZOMBIE_SOUNDS } from "../../constants";
+import { RACHEL_ZOMBIE_SOUNDS } from "../../constants/constants";
 import {
   AttackPhases,
   createAttackAction,

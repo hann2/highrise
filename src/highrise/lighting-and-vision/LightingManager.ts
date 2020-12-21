@@ -5,12 +5,13 @@ import { rgbToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
 import { V } from "../../core/Vector";
 import { Layer } from "../config/layers";
+import { Persistence } from "../constants/constants";
 import { AmbientLight } from "./AmbientLight";
 import Light from "./Light";
 
 export default class LightingManager extends BaseEntity implements Entity {
   id = "lighting_manager";
-  persistent = true;
+  persistenceLevel = Persistence.Game;
 
   texture!: RenderTexture;
   sprite!: Sprite & GameSprite;

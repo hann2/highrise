@@ -2,7 +2,7 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH, LEVEL_SIZE } from "../../constants";
+import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
 import RoomTemplate from "../rooms/RoomTemplate";

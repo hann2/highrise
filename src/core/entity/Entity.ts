@@ -30,7 +30,7 @@ export default interface Entity
   readonly tags?: ReadonlyArray<string>;
 
   /** If true, this entity doesn't get cleaned up when the scene is cleared */
-  readonly persistent: boolean;
+  readonly persistenceLevel: number;
 
   /** True if this entity will stop updating when the game is paused. */
   readonly pausable: boolean;

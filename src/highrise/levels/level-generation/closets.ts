@@ -1,7 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { choose, seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH, LEVEL_SIZE } from "../../constants";
+import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 import Decoration from "../../environment/Decoration";
 import {
   bookcase1,

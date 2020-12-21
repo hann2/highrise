@@ -14,7 +14,7 @@ import img_heavy from "../../../resources/images/zombies/heavy.png";
 import img_necromancer from "../../../resources/images/zombies/necromancer.png";
 import img_spitter from "../../../resources/images/zombies/spitter.png";
 import { CHARACTERS } from "../characters/Character";
-import { CRAWLER_TEXTURES, ZOMBIE_TEXTURES } from "../constants";
+import { CRAWLER_TEXTURES, ZOMBIE_TEXTURES } from "../constants/constants";
 import { GLOWSTICK_TEXTURES } from "../effects/GlowStick";
 import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
 import { SPLATS_AND_BLOBS_TEXTURES } from "../effects/Splat";

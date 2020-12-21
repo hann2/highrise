@@ -2,7 +2,7 @@ import BaseEntity from "../entity/BaseEntity";
 import Entity from "../entity/Entity";
 
 export default class ResizeListener extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = 100;
 
   onAdd() {
     window.addEventListener("resize", this.onResize);

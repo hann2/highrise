@@ -1,7 +1,7 @@
 import { Sprite } from "pixi.js";
 import { lerp, smoothStep, stepToward } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
-import { HUMAN_RADIUS } from "../constants";
+import { HUMAN_RADIUS } from "../constants/constants";
 import { BodySprite } from "../creature-stuff/BodySprite";
 import { LaserSight } from "../effects/LaserSight";
 import Gun from "../weapons/guns/Gun";

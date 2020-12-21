@@ -7,7 +7,7 @@ import {
 } from "../../../core/util/MathUtil";
 import { rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { ZOMBIE_RADIUS } from "../../constants";
+import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { BodySprite } from "../../creature-stuff/BodySprite";
 import { lerpOffsets } from "../base/enemyUtils";
 import Zombie from "./Zombie";

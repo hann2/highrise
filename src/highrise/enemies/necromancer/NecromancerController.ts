@@ -2,7 +2,7 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { ZOMBIE_RADIUS } from "../../constants";
+import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { Direction, opposite } from "../../utils/directions";
 import Human, { isHuman } from "../../human/Human";
 import Necromancer from "./Necromancer";

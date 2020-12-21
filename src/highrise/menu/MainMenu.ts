@@ -6,15 +6,16 @@ import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { clamp, smoothStep } from "../../core/util/MathUtil";
 import { Layer } from "../config/layers";
+import { Persistence } from "../constants/constants";
 import ClickableText from "./ClickableText";
-import CreditsScreen from "./Credits";
+import CreditsScreen from "./CreditsScreen";
 import FeedbackButton from "./FeedbackButton";
 
 const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 2.2;
 
 let firstTime = true;
 export default class MainMenu extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = Persistence.Floor;
   pausable = false;
   sprite: Sprite & GameSprite;
 
@@ -41,7 +42,7 @@ export default class MainMenu extends BaseEntity implements Entity {
 
     this.startText = new Text("Press Enter To Start", {
       align: "center",
-      fill: "#fff",
+      fill: "white",
       fontFamily: "Capture It",
       fontSize: 64,
     });
@@ -65,10 +66,6 @@ export default class MainMenu extends BaseEntity implements Entity {
 
   handlers = {
     resize: () => this.positionText(),
-    newGame: () => {
-      console.log("should destroy mainmenu");
-      this.destroy();
-    },
   };
 
   async onAdd(game: Game) {
@@ -135,6 +132,7 @@ export default class MainMenu extends BaseEntity implements Entity {
         this.feedbackButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));
       });
       this.game?.dispatch({ type: "newGame" });
+      this.destroy();
     }
   }
 

@@ -1,6 +1,6 @@
 import img_chainLinkFence from "../../../../resources/images/environment/chain-link-fence.png";
 import Entity from "../../../core/entity/Entity";
-import { CELL_WIDTH } from "../../constants";
+import { CELL_WIDTH } from "../../constants/constants";
 import Door from "../../environment/Door";
 import { Direction } from "../../utils/directions";
 import CellGrid, { DoorBuilder, WallID } from "./CellGrid";

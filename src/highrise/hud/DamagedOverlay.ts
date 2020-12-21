@@ -2,19 +2,19 @@ import { Container, Graphics, Sprite } from "pixi.js";
 import img_healthOverlay from "../../../resources/images/effects/health-overlay.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { lerp, smoothStep } from "../../core/util/MathUtil";
+import { smoothStep } from "../../core/util/MathUtil";
 import { Layer } from "../config/layers";
-import { getPartyLeader } from "../environment/PartyManager";
+import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
 
 const FLASH_ALPHA = 0.4;
 
 export class DamagedOverlay extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = Persistence.Game;
   sprite: Container & GameSprite;
   baseline!: Sprite;
 
-  constructor() {
+  constructor(private getPlayer: () => Human | undefined) {
     super();
 
     this.sprite = new Container();
@@ -40,20 +40,20 @@ export class DamagedOverlay extends BaseEntity implements Entity {
     },
 
     humanInjured: ({ human, amount }: { human: Human; amount: number }) => {
-      if (human === getPartyLeader(this.game!)) {
+      if (human === this.getPlayer()) {
         this.flash(0xff0000, 0, 0.4);
       }
     },
 
     humanHealed: ({ human, amount }: { human: Human; amount: number }) => {
-      if (human === getPartyLeader(this.game!)) {
+      if (human === this.getPlayer()) {
         this.flash(0x00ff00, 0.0, 0.8);
       }
     },
   };
 
   onRender() {
-    const human = getPartyLeader(this.game!);
+    const human = this.getPlayer();
     if (human && !human.isDestroyed) {
       this.updateBaseline(human.hp / human.maxHp);
     } else {

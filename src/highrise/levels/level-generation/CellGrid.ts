@@ -1,5 +1,5 @@
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH, LEVEL_SIZE } from "../../constants";
+import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 
 export interface Closet {
   backCell: V2d;

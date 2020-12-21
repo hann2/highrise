@@ -3,7 +3,7 @@ import img_spitter from "../../../../resources/images/zombies/spitter.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { Layer } from "../../config/layers";
-import { ZOMBIE_RADIUS } from "../../constants";
+import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import Spitter from "./Spitter";
 

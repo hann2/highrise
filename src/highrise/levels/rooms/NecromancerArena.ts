@@ -1,6 +1,6 @@
 import Entity from "../../../core/entity/Entity";
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH } from "../../constants";
+import { CELL_WIDTH } from "../../constants/constants";
 import Necromancer from "../../enemies/necromancer/Necromancer";
 import Decoration from "../../environment/Decoration";
 import {

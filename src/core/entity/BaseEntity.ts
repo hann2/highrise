@@ -1,4 +1,4 @@
-import p2, { Constraint, Spring, Ray, RaycastResult } from "p2";
+import p2, { Constraint, Spring } from "p2";
 import Game from "../Game";
 import { clamp } from "../util/MathUtil";
 import { V, V2d } from "../Vector";
@@ -17,7 +17,7 @@ export default abstract class BaseEntity implements Entity {
   handlers: CustomHandlersMap = {};
   parent?: Entity;
   pausable: boolean = true;
-  persistent: boolean = false;
+  persistenceLevel: number = 0;
   springs?: Spring[];
   id?: string;
   sprite?: GameSprite;
@@ -101,7 +101,27 @@ export default abstract class BaseEntity implements Entity {
   ): Promise<void> {
     return new Promise((resolve) => {
       const timer = new Timer(delay, () => resolve(), onTick, timerId);
-      timer.persistent = this.persistent;
+      timer.persistenceLevel = this.persistenceLevel;
+      this.addChild(timer);
+    });
+  }
+
+  /**
+   * Wait until a condition is filled. Probably not great to use, but seems kinda cool too.
+   */
+  waitUntil(predicate: () => boolean, timerId?: string): Promise<void> {
+    return new Promise((resolve) => {
+      const timer = new Timer(
+        Infinity,
+        () => resolve(),
+        () => {
+          if (predicate()) {
+            timer.timeRemaining = 0;
+          }
+        },
+        timerId
+      );
+      timer.persistenceLevel = this.persistenceLevel;
       this.addChild(timer);
     });
   }

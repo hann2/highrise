@@ -2,12 +2,13 @@ import snd_bassGrooveLoop1 from "../../../resources/audio/music/bass-groove-loop
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { SoundInstance } from "../../core/sound/SoundInstance";
+import { Persistence } from "../constants/constants";
 
 export const MUSIC_URLS = [snd_bassGrooveLoop1];
 const MUSIC_VOLUME = 0.7;
 
 export default class MusicController extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = Persistence.Permanent;
   soundInstance: SoundInstance;
 
   constructor() {
@@ -18,10 +19,10 @@ export default class MusicController extends BaseEntity implements Entity {
         continuous: true,
         gain: 0.0,
         reactToSlowMo: false,
+        persistenceLevel: Persistence.Permanent,
+        pauseable: false,
       })
     );
-    this.soundInstance.pausable = false;
-    this.soundInstance.persistent = true;
   }
 
   async onAdd() {

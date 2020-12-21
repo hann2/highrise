@@ -5,7 +5,7 @@ import Game from "../Game";
 
 const SMOOTHING = 0.95;
 export default class FPSMeter extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = 100;
   lastUpdate: number;
   averageDuration: number = 0;
   slowFrameCount: number = 0;

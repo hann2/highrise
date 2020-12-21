@@ -5,7 +5,7 @@ import CustomWorld from "../../../core/physics/CustomWorld";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CollisionGroups } from "../../config/CollisionGroups";
-import { ZOMBIE_RADIUS } from "../../constants";
+import { ZOMBIE_RADIUS } from "../../constants/constants";
 import Human, { isHuman } from "../../human/Human";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import { testLineOfSight } from "../../utils/visionUtils";

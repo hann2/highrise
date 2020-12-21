@@ -1,7 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { LEVEL_SIZE } from "../../constants";
+import { LEVEL_SIZE } from "../../constants/constants";
 import Decoration from "../../environment/Decoration";
 import { waterCooler } from "../../environment/decorations/decorations";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";

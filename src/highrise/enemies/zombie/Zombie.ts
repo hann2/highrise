@@ -6,7 +6,7 @@ import {
   HUMAN_RADIUS,
   ZOMBIE_ATTACK_HIT_SOUNDS,
   ZOMBIE_RADIUS,
-} from "../../constants";
+} from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 import { BaseEnemy } from "../base/Enemy";

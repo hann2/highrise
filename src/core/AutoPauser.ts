@@ -6,7 +6,7 @@ import Entity from "./entity/Entity";
 /** Pauses and unpauses the game when visibility is lost. */
 export default class AutoPauser extends BaseEntity implements Entity {
   pausable = false;
-  persistent = true;
+  persistenceLevel = 100;
 
   autoPaused: boolean = false;
 

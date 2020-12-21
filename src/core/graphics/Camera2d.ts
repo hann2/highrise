@@ -9,7 +9,7 @@ import { V2d, V } from "../Vector";
 //  Controls the viewport.
 export class Camera2d extends BaseEntity implements Entity {
   tags = ["camera"];
-  persistent = true;
+  persistenceLevel = 100;
 
   renderer: GameRenderer2d;
   position: V2d;

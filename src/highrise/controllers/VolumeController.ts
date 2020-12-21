@@ -3,13 +3,14 @@ import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
 import { clamp } from "../../core/util/MathUtil";
+import { Persistence } from "../constants/constants";
 
 export const VOLUME_CONTROLLER_ID = "volume_controller";
 
 export default class VolumeController extends BaseEntity implements Entity {
   id = VOLUME_CONTROLLER_ID;
   pausable = false;
-  persistent = true;
+  persistenceLevel = Persistence.Permanent;
 
   private _muted!: boolean;
   private _volume!: number;

@@ -1,7 +1,7 @@
 import { degToRad } from "../../../core/util/MathUtil";
 import { rInteger, rNormal, rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
-import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants";
+import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import { BodyTextures } from "../../creature-stuff/BodySprite";
 import { BaseEnemy as BaseEnemy } from "../base/Enemy";

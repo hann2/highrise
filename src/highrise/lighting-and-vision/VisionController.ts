@@ -3,18 +3,19 @@ import img_visionFog from "../../../resources/images/lights/vision-fog.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { V } from "../../core/Vector";
-import { getPartyLeader } from "../environment/PartyManager";
 import { Layer } from "../config/layers";
+import { Persistence } from "../constants/constants";
+import Human from "../human/Human";
 import { Shadows } from "./Shadows";
 
 export const MAX_VISION = 10; // meters
 export default class VisionController extends BaseEntity implements Entity {
-  persistent = true;
+  persistenceLevel = Persistence.Game;
 
   shadows: Shadows;
   sprite: Sprite & GameSprite;
 
-  constructor() {
+  constructor(private getPlayer: () => Human | undefined) {
     super();
 
     this.shadows = this.addChild(new Shadows(V(0, 0), MAX_VISION, true));
@@ -41,16 +42,10 @@ export default class VisionController extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.VISION;
   }
 
-  handlers = {
-    newGame: () => {
-      this.destroy();
-    },
-  };
-
   onRender() {
-    const leader = getPartyLeader(this.game!);
-    if (leader) {
-      const position = leader.getPosition();
+    const player = this.getPlayer();
+    if (player) {
+      const position = player.getPosition();
       this.sprite.position.set(...position);
       this.shadows.setPosition(position);
       this.shadows.forceUpdate();

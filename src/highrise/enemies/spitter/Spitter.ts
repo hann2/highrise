@@ -1,6 +1,6 @@
 import { rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { SPITTER_SOUNDS } from "../../constants";
+import { SPITTER_SOUNDS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import GooImpact from "../../effects/GooImpact";
 import Phlegm from "../../projectiles/Phlegm";

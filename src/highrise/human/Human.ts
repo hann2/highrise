@@ -25,7 +25,7 @@ import { rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Character, randomCharacter } from "../characters/Character";
 import { CollisionGroups } from "../config/CollisionGroups";
-import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants";
+import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants/constants";
 import FleshImpact from "../effects/FleshImpact";
 import GlowStick from "../effects/GlowStick";
 import { LaserSight } from "../effects/LaserSight";

@@ -11,6 +11,8 @@ export interface SoundOptions {
   continuous?: boolean;
   randomStart?: boolean;
   reactToSlowMo?: boolean;
+  persistenceLevel?: number;
+  pauseable?: boolean;
 }
 
 /**
@@ -83,6 +85,8 @@ export class SoundInstance extends BaseEntity implements Entity {
     this.speed = options.speed ?? 1.0;
     this.continuous = options.continuous ?? false;
     this.reactToSlowMo = options.reactToSlowMo ?? true;
+    this.persistenceLevel = options.persistenceLevel ?? 0;
+    this.pausable = options.pauseable ?? true;
 
     if (!hasSoundBuffer(soundName)) {
       throw new Error(`Unloaded Sound ${soundName}`);

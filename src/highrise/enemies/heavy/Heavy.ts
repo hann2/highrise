@@ -7,7 +7,7 @@ import {
   PERRY_ZOMBIE_SOUNDS,
   ZOMBIE_ATTACK_HIT_SOUNDS,
   ZOMBIE_RADIUS,
-} from "../../constants";
+} from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import FleshImpact from "../../effects/FleshImpact";
 import { ShuffleRing } from "../../utils/ShuffleRing";

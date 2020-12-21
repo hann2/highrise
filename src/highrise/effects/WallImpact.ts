@@ -50,8 +50,6 @@ export default class WallImpact extends BaseEntity implements Entity {
   }
 
   onRender() {
-    this.sprite.clear();
-
     for (const { position, color, radius, alpha, sprite } of this.particles) {
       sprite.position.set(...position);
       sprite.tint = color;
