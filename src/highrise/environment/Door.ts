@@ -1,6 +1,5 @@
 import { Body, Box, RevoluteConstraint } from "p2";
-import { Graphics, Sprite } from "pixi.js";
-import snd_takeshiTaunt1 from "../../../resources/audio/characters/takeshi/takeshi-taunt-1.flac";
+import { Sprite } from "pixi.js";
 import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import img_door1 from "../../../resources/images/environment/doors/door-1.png";
@@ -9,7 +8,6 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { polarToVec } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../config/CollisionGroups";
@@ -62,6 +60,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
       CollisionGroups.CastsShadow;
     if (blocksVision) {
       shape.collisionGroup |= CollisionGroups.CastsShadow;
+      shape.collisionMask ^= CollisionGroups.Projectiles;
       this.tags = ["cast_shadow"];
     } else {
       this.tags = [];
