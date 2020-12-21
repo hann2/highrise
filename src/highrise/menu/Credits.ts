@@ -13,7 +13,7 @@ Simon Baumgardt-Wellander
 
 #VOICE ACTORS
 Andy—Andy Moreland
-Chad, Demitri, Shadowlord66—Michael Wiktorek
+Chad—Wiktorek
 Cindy—Lawlfrats
 Clarice, Kyle—Marisa DeNicolo-Hann
 Clyde—Philip Hann
@@ -38,6 +38,7 @@ With thanks to—
 Fesliyan Studios
 The Free Firearm Sound Library
 Aturax Audio (aturaxaudio.com)
+Alchemia Audio (alchemiaaudio.com)
 
 
 #ART
