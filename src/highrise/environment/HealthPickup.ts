@@ -1,12 +1,12 @@
-import { Body } from "p2";
 import { Sprite } from "pixi.js";
-import img_healthPack from "../../../resources/images/health_pack.png";
+import img_healthKit from "../../../resources/images/health-kit.png";
 import BaseEntity from "../../core/entity/BaseEntity";
+import { GameSprite } from "../../core/entity/Entity";
+import { rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
+import { Layer } from "../config/layers";
 import Human from "../human/Human";
 import Interactable from "./Interactable";
-import { GameSprite } from "../../core/entity/Entity";
-import { Layer } from "../config/layers";
 
 export default class HealthPickup extends BaseEntity {
   sprite: Sprite & GameSprite;
@@ -16,16 +16,12 @@ export default class HealthPickup extends BaseEntity {
 
     this.addChild(new Interactable(position, this.onInteract.bind(this)));
 
-    this.sprite = Sprite.from(img_healthPack);
+    this.sprite = Sprite.from(img_healthKit);
     this.sprite.scale.set(0.7 / this.sprite.width);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(...position);
+    this.sprite.rotation = rUniform(0, Math.PI * 2);
     this.sprite.layerName = Layer.ITEMS;
-
-    this.body = new Body({
-      mass: 0,
-      position: position,
-    });
   }
 
   onInteract(human: Human) {
