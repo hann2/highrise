@@ -23,11 +23,10 @@ import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
 
-export const DOOR_SPRITES = [img_door1, img_door2];
+export const DEFAULT_DOOR_SPRITES = [img_door1, img_door2];
 
 export default class Door extends BaseEntity implements Entity, Hittable {
-  tags = ["cast_shadow"];
-
+  tags: string[];
   sprite: Sprite & GameSprite;
   body: Body;
 
@@ -37,7 +36,8 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     private restingAngle: number,
     private minAngle: number,
     private maxAngle: number,
-    imageName: string = choose(...DOOR_SPRITES)
+    blocksVision: boolean = true,
+    imageName: string = choose(...DEFAULT_DOOR_SPRITES)
   ) {
     super();
     this.hingePoint = hingePoint;
@@ -54,12 +54,18 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     });
 
     const shape = new Box({ width: DOOR_THICKNESS / 2, height: length });
-    shape.collisionGroup = CollisionGroups.Walls | CollisionGroups.CastsShadow;
+    shape.collisionGroup = CollisionGroups.Walls;
     shape.collisionMask =
       CollisionGroups.All ^
       CollisionGroups.Walls ^
-      CollisionGroups.CastsShadow ^
-      CollisionGroups.Furniture;
+      CollisionGroups.Furniture ^
+      CollisionGroups.CastsShadow;
+    if (blocksVision) {
+      shape.collisionGroup |= CollisionGroups.CastsShadow;
+      this.tags = ["cast_shadow"];
+    } else {
+      this.tags = [];
+    }
     this.body.addShape(shape, [length / 2, 0], Math.PI / 2);
     this.body.angle = restingAngle;
 

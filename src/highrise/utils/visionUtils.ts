@@ -2,9 +2,9 @@ import { Ray, RaycastResult } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Game from "../../core/Game";
 import CustomWorld from "../../core/physics/CustomWorld";
+import { CollisionGroups } from "../config/CollisionGroups";
 import { BaseEnemy, isEnemy } from "../enemies/base/Enemy";
 import Human from "../human/Human";
-import { CollisionGroups } from "../config/CollisionGroups";
 
 // Returns true if there is an unobstructed line-of-sight from the looker to the target
 export function testLineOfSight(
@@ -16,7 +16,7 @@ export function testLineOfSight(
     from: looker.getPosition(),
     to: target.getPosition(),
     skipBackfaces: true,
-    collisionMask: CollisionGroups.Walls,
+    collisionMask: CollisionGroups.CastsShadow,
   });
   const result = new RaycastResult();
   (looker.game!.world as CustomWorld).raycast(result, ray, true);

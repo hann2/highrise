@@ -25,7 +25,8 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     [x2, y2]: [number, number],
     width: number = 0.15,
     private color: number = 0x999999,
-    castShadow: boolean = true
+    blocksVision: boolean = true,
+    imageName: string = img_wall1
   ) {
     super();
 
@@ -35,7 +36,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
     const angle = V(x2 - x1, y2 - y1).angle + Math.PI / 2;
 
-    const drawWidth = width * 5; // Make the wall wider so we can see it in the shadows
+    const drawWidth = width * (blocksVision ? 5 : 1); // Make the wall wider so we can see it in the shadows
     const drawHeight = length + width; // add in width to make things line up nicely
 
     // TODO: AO Breaks on outside corners
@@ -48,7 +49,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     aoSprite.position.set(x, y);
     aoSprite.rotation = angle + Math.PI / 2;
 
-    const wallSprite = Sprite.from(img_wall1);
+    const wallSprite = Sprite.from(imageName);
     (wallSprite as GameSprite).layerName = Layer.WALLS;
     wallSprite.anchor.set(0.5, 0.5);
     wallSprite.width = drawHeight;
@@ -66,14 +67,16 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     });
 
     const shape = new Box({ width: width, height: length });
-    shape.collisionGroup = CollisionGroups.Walls | CollisionGroups.CastsShadow;
+    shape.collisionGroup = CollisionGroups.Walls;
     shape.collisionMask = CollisionGroups.All;
     shape.material = P2Materials.wall;
     this.body.addShape(shape);
 
-    if (castShadow) {
-      shape.collisionMask |= CollisionGroups.CastsShadow;
+    if (blocksVision) {
+      shape.collisionGroup |= CollisionGroups.CastsShadow;
       this.tags.push("cast_shadow");
+    } else {
+      shape.collisionMask ^= CollisionGroups.Projectiles;
     }
   }
 

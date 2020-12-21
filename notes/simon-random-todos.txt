@@ -13,7 +13,7 @@ Sprites to Fix in order of amount they bother me most:
 Other gameplay things that bother me
 - We get a bunch of the same sound playing on top of each other with zombies
 - Melee weapons don't feel great
-- It's hard to know your current health
+- Fullscreen
 
 Polish things to add:
 - Laser sight

@@ -38,7 +38,6 @@ import CellGrid, {
   WallBuilder,
   WallID,
 } from "../level-generation/CellGrid";
-import { wallIDToEntity } from "../level-generation/entityPlacement";
 import {
   AngleTransformer,
   DimensionsTransformer,
@@ -107,7 +106,23 @@ export default class LobbyRoomTemplate implements RoomTemplate {
   }
 
   generateWalls(): WallBuilder[] {
-    return defaultWalls(DIMENSIONS, DOORS);
+    const walls = defaultWalls(DIMENSIONS, DOORS);
+
+    // We are adding some walls twice.  probably ok?
+    for (const e of ELEVATORS) {
+      for (const direction of CARDINAL_DIRECTIONS) {
+        if (direction !== e.openDirection) {
+          walls.push({
+            exists: true,
+            destructible: false,
+            id: CellGrid.getWallInDirection(e.cell, Direction[direction]),
+            chainLink: false,
+          });
+        }
+      }
+    }
+
+    return walls;
   }
 
   generateDoors(): DoorBuilder[] {
@@ -191,18 +206,6 @@ export default class LobbyRoomTemplate implements RoomTemplate {
           true
         )
       );
-
-      for (const direction of CARDINAL_DIRECTIONS) {
-        if (direction !== e.openDirection) {
-          entities.push(
-            wallIDToEntity(
-              roomToLevelWall(
-                CellGrid.getWallInDirection(e.cell, Direction[direction])
-              )
-            )
-          );
-        }
-      }
     });
 
     entities.push(new Decoration(roomToWorldPosition(V(2.5, 5)), rug));

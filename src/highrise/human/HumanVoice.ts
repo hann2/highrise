@@ -3,7 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { CharacterSoundClass, CharacterSounds } from "../characters/Character";
-import SpeakingCircle from "../hud/SpeakingCircle";
+import SpeakingCircle from "../effects/SpeakingCircle";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import Human from "./Human";
 

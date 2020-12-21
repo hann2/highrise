@@ -16,7 +16,7 @@ import {
   WallTransformer,
 } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
-import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
+import { defaultDoors, defaultOccupiedCells } from "./roomUtils";
 
 const DIMENSIONS = V(3, 3);
 const DOORS: WallID[] = [
@@ -32,11 +32,44 @@ export default class LightSwitchRoomTemplate implements RoomTemplate {
   }
 
   generateWalls(): WallBuilder[] {
-    return defaultWalls(DIMENSIONS, DOORS);
+    const walls: WallBuilder[] = [];
+    for (let i = 0; i < DIMENSIONS.x; i += 2 /* skip door column */) {
+      // top
+      walls.push({
+        id: [V(i, -1), false],
+        exists: true,
+        destructible: false,
+        chainLink: true,
+      });
+      // bottom
+      walls.push({
+        id: [V(i, DIMENSIONS.y - 1), false],
+        exists: true,
+        destructible: false,
+        chainLink: true,
+      });
+    }
+    for (let j = 0; j < DIMENSIONS.y; j++) {
+      // left
+      walls.push({
+        id: [V(-1, j), true],
+        exists: true,
+        destructible: false,
+        chainLink: false,
+      });
+      // right
+      walls.push({
+        id: [V(DIMENSIONS.x - 1, j), true],
+        exists: true,
+        destructible: false,
+        chainLink: true,
+      });
+    }
+    return walls;
   }
 
   generateDoors(): DoorBuilder[] {
-    return defaultDoors(DOORS);
+    return defaultDoors(DOORS).map((d) => ({ ...d, chainLink: true }));
   }
 
   generateEntities(

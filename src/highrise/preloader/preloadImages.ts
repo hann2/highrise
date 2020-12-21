@@ -18,7 +18,7 @@ import { GLOWSTICK_TEXTURES } from "../effects/GlowStick";
 import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
 import { SPLATS_AND_BLOBS_TEXTURES } from "../effects/Splat";
 import * as DecorationSprites from "../environment/decorations/decorations";
-import { DOOR_SPRITES } from "../environment/Door";
+import { DEFAULT_DOOR_SPRITES } from "../environment/Door";
 import { VENDING_MACHINES } from "../environment/VendingMachine";
 import { WEAPONS } from "../weapons/weapons";
 
@@ -45,7 +45,7 @@ export function getImagesToPreload(): Set<string> {
     ...ZOMBIE_TEXTURES.map((z) => Object.values(z)).flat(),
     ...CRAWLER_TEXTURES.map((z) => Object.values(z)).flat(),
     ...SPLATS_AND_BLOBS_TEXTURES,
-    ...DOOR_SPRITES,
+    ...DEFAULT_DOOR_SPRITES,
     ...GLOWSTICK_TEXTURES,
     ...MUZZLE_FLASH_URLS,
     ...VENDING_MACHINES.flat(),
