@@ -24,7 +24,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     [x1, y1]: [number, number],
     [x2, y2]: [number, number],
     width: number = 0.15,
-    color: number = 0x999999,
+    private color: number = 0x999999,
     castShadow: boolean = true
   ) {
     super();
@@ -84,7 +84,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
       new PositionalSound(choose(snd_wallHit3, snd_wallHit4), position, {
         speed: rNormal(1, 0.08),
       }),
-      new WallImpact(position, normal),
+      new WallImpact(position, normal, this.color),
     ]);
   }
 }

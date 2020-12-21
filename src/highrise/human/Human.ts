@@ -73,6 +73,7 @@ const pushSoundRing = new ShuffleRing(PUSH_SOUNDS);
 export default class Human extends BaseEntity implements Entity {
   body: Body;
   tags = ["human"];
+  maxHp: number = MAX_HEALTH;
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
   light?: PointLight;
@@ -116,7 +117,7 @@ export default class Human extends BaseEntity implements Entity {
   // Move the human along a specified vector
   walk(direction: V2d) {
     let speed = SPEED;
-    const healthPercent = this.hp / MAX_HEALTH;
+    const healthPercent = this.hp / this.maxHp;
     if (healthPercent < 0.3) {
       speed = HURT_SPEED;
     }
@@ -212,6 +213,7 @@ export default class Human extends BaseEntity implements Entity {
     this.hp -= amount;
 
     this.game?.addEntity(new FleshImpact(this.getPosition(), 1));
+    this.game?.dispatch({ type: "humanInjured", human: this, amount });
 
     if (this.hp <= 0) {
       this.die();
@@ -237,11 +239,8 @@ export default class Human extends BaseEntity implements Entity {
 
   heal(amount: number) {
     this.voice.speak("pickupHealth");
-
-    this.hp += amount;
-    if (this.hp > MAX_HEALTH) {
-      this.hp = MAX_HEALTH;
-    }
+    this.hp = Math.min(this.hp + amount, this.maxHp);
+    this.game?.dispatch({ type: "humanHealed", human: this, amount });
   }
 
   pushAction = new PhasedAction([

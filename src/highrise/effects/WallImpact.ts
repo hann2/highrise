@@ -3,8 +3,9 @@ import impactParticle from "../../../resources/images/effects/impact-particle.pn
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
-import { rUniform } from "../../core/util/Random";
+import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import { BLOB_TEXTURES } from "./Splat";
 
 const FRICTION = 5.0;
 export default class WallImpact extends BaseEntity implements Entity {
@@ -20,14 +21,15 @@ export default class WallImpact extends BaseEntity implements Entity {
     this.particles = [];
 
     for (let i = 0; i < 10; i++) {
-      const particleSprite = Sprite.from(impactParticle);
+      const particleSprite = Sprite.from(choose(...BLOB_TEXTURES));
       particleSprite.blendMode = BLEND_MODES.ADD;
+      particleSprite.rotation = rUniform(0, Math.PI * 2);
       this.sprite.addChild(particleSprite);
       this.particles.push({
         position: V(0, 0),
         velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
         color: color,
-        radius: rUniform(0.04, 0.08),
+        radius: rUniform(0.1, 0.4) ** 2,
         alpha: rUniform(0.5, 1.0),
         sprite: particleSprite,
       });

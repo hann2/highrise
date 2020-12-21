@@ -66,12 +66,12 @@ export const oldPlankFloor2: DecorationInfo = {
 
 export const carpetFloor1: DecorationInfo = {
   imageName: img_industrialCarpet001,
-  heightMeters: 4,
+  heightMeters: 2,
 };
 
 export const carpetFloor2: DecorationInfo = {
   imageName: img_industrialCarpet002,
-  heightMeters: 4,
+  heightMeters: 2,
 };
 
 export const tilesFloor1: DecorationInfo = {

@@ -19,7 +19,7 @@ export const P90: GunStats = {
   ...defaultGunStats,
 
   name: "P90",
-  fireRate: 15,
+  fireRate: 16,
   bulletStats: NineMil,
   fireMode: FireMode.FULL_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,

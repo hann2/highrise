@@ -83,7 +83,7 @@ export default class Phlegm extends BaseEntity implements Entity {
     this.sprites = [this.mainSprite, this.glowSprite];
 
     this.light = this.addChild(
-      new PointLight({ radius: 1, shadowsEnabled: false, position })
+      new PointLight({ radius: 1, shadowsEnabled: false, position, color })
     );
 
     this.renderPosition = position.clone();

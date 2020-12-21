@@ -7,14 +7,13 @@ Sprites to Fix in order of amount they bother me most:
 - Lobby chairs
 - lobby tables
 - piano
-- health pack (sorry Philip)
 - Chad (I feel like his lines just aren't very distinct)
 
 
 Other gameplay things that bother me
 - We get a bunch of the same sound playing on top of each other with zombies
 - Melee weapons don't feel great
-- Doors are hard to recognize
+- It's hard to know your current health
 
 Polish things to add:
 - Laser sight
