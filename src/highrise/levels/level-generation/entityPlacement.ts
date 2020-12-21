@@ -1,3 +1,4 @@
+import img_fence from "../../../../resources/images/environment/fence.png";
 import Entity from "../../../core/entity/Entity";
 import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
@@ -7,7 +8,7 @@ import Wall from "../../environment/Wall";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { DIAGONAL_DIRECTIONS, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
-import CellGrid, { WallID } from "./CellGrid";
+import CellGrid, { WallBuilder } from "./CellGrid";
 import { fillClosets, generateClosets } from "./closets";
 import { buildDoorEntity } from "./doors";
 import { buildMaze, findExit } from "./mazeGeneration";
@@ -132,18 +133,26 @@ function addHallwayLights(cellGrid: CellGrid): Entity[] {
   return entities;
 }
 
-export function wallIDToEntity(wallID: WallID): Entity {
-  const [[i, j], right] = wallID;
+export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
+  const [[i, j], right] = wallBuilder.id;
   const [x, y] = CellGrid.levelCoordToWorldCoord(V(i, j));
   if (right) {
     return new Wall(
       [x + CELL_WIDTH / 2, y - CELL_WIDTH / 2],
-      [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2]
+      [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2],
+      0.15,
+      0x999999,
+      !wallBuilder.chainLink,
+      wallBuilder.chainLink ? img_fence : undefined
     );
   } else {
     return new Wall(
       [x - CELL_WIDTH / 2, y + CELL_WIDTH / 2],
-      [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2]
+      [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2],
+      0.15,
+      0x999999,
+      !wallBuilder.chainLink,
+      wallBuilder.chainLink ? img_fence : undefined
     );
   }
 }
@@ -153,10 +162,10 @@ function addInnerWalls(cellGrid: CellGrid): Entity[] {
   for (let i = 0; i < LEVEL_SIZE; i++) {
     for (let j = 0; j < LEVEL_SIZE; j++) {
       if (cellGrid.cells[i][j].rightWall.exists) {
-        wallEntities.push(wallIDToEntity([V(i, j), true]));
+        wallEntities.push(wallBuilderToEntity(cellGrid.cells[i][j].rightWall));
       }
       if (cellGrid.cells[i][j].bottomWall.exists) {
-        wallEntities.push(wallIDToEntity([V(i, j), false]));
+        wallEntities.push(wallBuilderToEntity(cellGrid.cells[i][j].bottomWall));
       }
     }
   }

@@ -1,3 +1,4 @@
+import img_fence from "../../../../resources/images/environment/fence.png";
 import Entity from "../../../core/entity/Entity";
 import { CELL_WIDTH } from "../../constants";
 import Door from "../../environment/Door";
@@ -84,6 +85,8 @@ export function buildDoorEntity(
     CELL_WIDTH,
     doorDirection.angle,
     minAngle,
-    maxAngle
+    maxAngle,
+    !doorBuilder.chainLink,
+    doorBuilder.chainLink ? img_fence : undefined
   );
 }
