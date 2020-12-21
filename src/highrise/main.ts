@@ -14,6 +14,7 @@ import LevelController from "./controllers/LevelController";
 import MusicController from "./controllers/MusicController";
 import VolumeController from "./controllers/VolumeController";
 import PartyManager from "./environment/PartyManager";
+import { DamagedOverlay } from "./hud/DamagedOverlay";
 import { isHuman } from "./human/Human";
 import LightingManager from "./lighting-and-vision/LightingManager";
 import MainMenu from "./menu/MainMenu";
@@ -63,6 +64,7 @@ export async function main() {
   game.addEntity(new CameraController(game.camera));
   game.addEntity(new PositionalSoundListener());
   game.addEntity(new LightingManager());
+  game.addEntity(new DamagedOverlay());
   game.addEntity(new MainMenu());
 
   if (process.env.NODE_ENV === "development") {

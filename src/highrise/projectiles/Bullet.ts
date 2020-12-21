@@ -139,13 +139,13 @@ export default class Bullet extends BaseEntity implements Entity {
 
     this.sprite
       .clear()
-      .lineStyle(0.03, 0xffaa00, 0.6)
+      .lineStyle(0.03, this.stats.color, 0.6)
       .moveTo(0, 0)
       .lineTo(endPoint[0], endPoint[1]);
 
     this.lightGraphics
       .clear()
-      .lineStyle(0.2, 0xffaa00, 1.0)
+      .lineStyle(0.2, this.stats.color, 1.0)
       .moveTo(0, 0)
       .lineTo(endPoint[0], endPoint[1]);
 

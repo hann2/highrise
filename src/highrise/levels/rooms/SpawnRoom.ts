@@ -141,6 +141,7 @@ class SpawnRoomFloor extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.FLOOR_DECALS;
   }
 
+  // TODO: This is hacky. Rooms should be able to tell what floor they're on
   onAdd(game: Game) {
     const level = getCurrentLevelNumber(game);
     this.sprite.text = `Level ${level}`;

@@ -15,6 +15,7 @@ export enum SwingPhase {
 export type SwingDurations = [windup: number, swing: number, winddown: number];
 export type SwingAngles = [rest: number, start: number, end: number];
 
+// All of the stats related to how a weapon swings.
 export class SwingDescriptor {
   constructor(
     public swingDurations: SwingDurations = [0.2, 0.6, 0.2],

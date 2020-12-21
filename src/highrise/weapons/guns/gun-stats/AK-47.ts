@@ -19,7 +19,7 @@ export const AK47: GunStats = {
   ...defaultGunStats,
 
   name: "AK-47",
-  fireRate: 9,
+  fireRate: 10,
   bulletStats: SevenSixTwo,
   fireMode: FireMode.FULL_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,

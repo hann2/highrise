@@ -1,3 +1,4 @@
+import img_healthOverlay from "../../../resources/images/effects/health-overlay.png";
 import img_impactParticle from "../../../resources/images/effects/impact-particle.png";
 import img_fence from "../../../resources/images/environment/fence.png";
 import img_woodenFloor from "../../../resources/images/environment/floor/wooden-floor.png";
@@ -23,8 +24,9 @@ import { WEAPONS } from "../weapons/weapons";
 
 // Returns the list of all
 export function getImagesToPreload(): Set<string> {
+  // use a set to make sure we don't include stuff multiple times
   const imageUrls = new Set([
-    // use a set to make sure we don't include stuff multiple times
+    img_healthOverlay,
     img_crawler,
     img_healthKit,
     img_impactParticle,

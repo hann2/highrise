@@ -95,7 +95,7 @@ export const SevenSixTwo: BulletStats = {
 export const TwelveGuageBuckshot: BulletStats = {
   ...defaultBulletStats,
   damage: 20,
-  mass: 0.016,
+  mass: 0.003,
   muzzleVelocity: 55,
   bulletsPerShot: 9,
   dropTexture: img_shotgunCasing,

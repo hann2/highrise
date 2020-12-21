@@ -17,7 +17,7 @@ export default class HealthPickup extends BaseEntity {
     this.addChild(new Interactable(position, this.onInteract.bind(this)));
 
     this.sprite = Sprite.from(img_healthKit);
-    this.sprite.scale.set(0.7 / this.sprite.width);
+    this.sprite.scale.set(0.45 / this.sprite.width);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(...position);
     this.sprite.rotation = rUniform(0, Math.PI * 2);
