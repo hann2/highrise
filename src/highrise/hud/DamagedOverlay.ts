@@ -48,13 +48,14 @@ export class DamagedOverlay extends BaseEntity implements Entity {
 
     humanHealed: ({ human, amount }: { human: Human; amount: number }) => {
       if (human === getPartyLeader(this.game!)) {
-        this.flash(0x00ff00, 0.1, 0.4);
+        this.flash(0x00ff00, 0.0, 0.8);
+        this.updateBaseline(human.hp / human.maxHp);
       }
     },
   };
 
   updateBaseline(healthPercent: number) {
-    this.baseline.alpha = healthPercent;
+    this.baseline.alpha = 1.0 - healthPercent;
   }
 
   makeOverlay(color: number = 0xff0000): Graphics {
