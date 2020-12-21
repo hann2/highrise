@@ -41,6 +41,7 @@ export default class GooImpact extends BaseEntity implements Entity {
 
     const emissiveContainer = new Container();
     (emissiveContainer as GameSprite).layerName = Layer.EMISSIVES;
+    emissiveContainer.alpha = 0.3;
     emissiveContainer.position.set(...position);
 
     this.sprites = [mainContainer, emissiveContainer];
