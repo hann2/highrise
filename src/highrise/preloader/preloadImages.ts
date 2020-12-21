@@ -1,5 +1,6 @@
 import img_healthOverlay from "../../../resources/images/effects/health-overlay.png";
 import img_impactParticle from "../../../resources/images/effects/impact-particle.png";
+import img_chainLinkFence from "../../../resources/images/environment/chain-link-fence.png";
 import img_fence from "../../../resources/images/environment/fence.png";
 import img_woodenFloor from "../../../resources/images/environment/floor/wooden-floor.png";
 import img_transformer from "../../../resources/images/environment/maintenance/transformer.png";
@@ -26,20 +27,20 @@ import { WEAPONS } from "../weapons/weapons";
 export function getImagesToPreload(): Set<string> {
   // use a set to make sure we don't include stuff multiple times
   const imageUrls = new Set([
-    img_healthOverlay,
-    img_crawler,
+    img_chainLinkFence,
+    img_fence,
     img_healthKit,
+    img_healthOverlay,
+    img_heavy,
     img_impactParticle,
+    img_necromancer,
     img_pointLight,
     img_solidCircle,
+    img_spitter,
+    img_transformer,
     img_wall1,
     img_wallAo1,
     img_woodenFloor,
-    img_heavy,
-    img_spitter,
-    img_necromancer,
-    img_transformer,
-    img_fence,
 
     ...Object.values(DecorationSprites).map((sprite) => sprite.imageName),
     ...ZOMBIE_TEXTURES.map((z) => Object.values(z)).flat(),

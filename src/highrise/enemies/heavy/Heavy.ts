@@ -9,6 +9,7 @@ import {
   ZOMBIE_RADIUS,
 } from "../../constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
+import FleshImpact from "../../effects/FleshImpact";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange, makeSimpleEnemyBody } from "../base/enemyUtils";
@@ -46,6 +47,11 @@ export default class Heavy extends BaseEnemy {
 
   makeVoice() {
     return new EnemyVoice(() => this.getPosition(), PERRY_ZOMBIE_SOUNDS);
+  }
+
+  onDie() {
+    this.game?.addEntity(new FleshImpact(this.getPosition(), 9));
+    this.voice.speak("death", true);
   }
 
   makeAttackAction() {

@@ -1,4 +1,4 @@
-import img_fence from "../../../../resources/images/environment/fence.png";
+import img_chainLinkFence from "../../../../resources/images/environment/chain-link-fence.png";
 import Entity from "../../../core/entity/Entity";
 import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
@@ -143,7 +143,7 @@ export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
       0.15,
       0x999999,
       !wallBuilder.chainLink,
-      wallBuilder.chainLink ? img_fence : undefined
+      wallBuilder.chainLink ? img_chainLinkFence : undefined
     );
   } else {
     return new Wall(
@@ -152,7 +152,7 @@ export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
       0.15,
       0x999999,
       !wallBuilder.chainLink,
-      wallBuilder.chainLink ? img_fence : undefined
+      wallBuilder.chainLink ? img_chainLinkFence : undefined
     );
   }
 }

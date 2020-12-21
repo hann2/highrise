@@ -1,7 +1,7 @@
 import { Body, Box } from "p2";
 import { BLEND_MODES, Sprite } from "pixi.js";
-import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
-import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
+import snd_vendingMachineHit1 from "../../../resources/audio/impacts/vending-machine-hit-1.flac";
+import snd_vendingMachineHit2 from "../../../resources/audio/impacts/vending-machine-hit-2.flac";
 import quarterDrop1 from "../../../resources/audio/misc/quarter-drop-1.flac";
 import img_vendingMachine1 from "../../../resources/images/environment/vending-machines/vending-machine-1.png";
 import img_vendingMachine2 from "../../../resources/images/environment/vending-machines/vending-machine-2.png";
@@ -28,6 +28,12 @@ export const VENDING_MACHINES = [
   [img_vendingMachine2, img_vendingMachineGlow2],
   [img_vendingMachine3, img_vendingMachineGlow3],
 ];
+
+export const VENDING_MACHINE_HIT_SOUNDS = [
+  snd_vendingMachineHit1,
+  snd_vendingMachineHit2,
+];
+
 export default class VendingMachine
   extends BaseEntity
   implements Entity, Hittable {
@@ -54,7 +60,7 @@ export default class VendingMachine
     this.lightSprite = Sprite.from(glowUrl);
     this.lightSprite.anchor.set(0.5, 0.5);
     // this.lightSprite.position.set(...position);
-    this.lightSprite.blendMode = BLEND_MODES.ADD;
+    this.lightSprite.blendMode = BLEND_MODES.NORMAL;
     this.lightSprite.width = 1.5;
     this.lightSprite.height = 1.5;
     this.lightSprite.rotation = rotation;
@@ -117,7 +123,7 @@ export default class VendingMachine
     this.hp -= swingingWeapon.getDamage();
 
     this.game!.addEntities([
-      new PositionalSound(choose(snd_wallHit2), position),
+      new PositionalSound(choose(...VENDING_MACHINE_HIT_SOUNDS), position),
       new WallImpact(position),
     ]);
 
@@ -130,8 +136,8 @@ export default class VendingMachine
     this.hp -= bullet.damage;
 
     this.game!.addEntities([
-      new PositionalSound(choose(snd_wallHit3), position),
-      new WallImpact(position, normal),
+      new PositionalSound(choose(...VENDING_MACHINE_HIT_SOUNDS), position),
+      new WallImpact(position, normal, 0x444444),
     ]);
 
     if (this.hp <= 0 && !this.dead) {

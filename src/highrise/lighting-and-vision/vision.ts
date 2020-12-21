@@ -47,10 +47,6 @@ export default class VisionController extends BaseEntity implements Entity {
     },
   };
 
-  onAdd() {
-    console.log("new vision controller");
-  }
-
   onRender() {
     const leader = getPartyLeader(this.game!);
     if (leader) {

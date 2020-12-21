@@ -19,7 +19,7 @@ const ATTACK_TIME = 0.1; // Time in animation from doing starting actual attack 
 const WINDDOWN_TIME = 0.6; // Time in animation from doing damage to end of attack
 const COOLDOWN_TIME = 0.8; // Time after windown before starting another attack
 
-const PHLEGM_SPEED = 8; // Meters / second
+const PHLEGM_SPEED = 12; // Meters / second
 const DAMAGE = 20;
 
 export default class Spitter extends BaseEnemy {

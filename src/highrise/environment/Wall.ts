@@ -2,6 +2,7 @@ import { Body, Box, vec2 } from "p2";
 import { BLEND_MODES, Sprite } from "pixi.js";
 import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
 import snd_wallHit4 from "../../../resources/audio/impacts/wall-hit-4.flac";
+import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
 import img_wall1 from "../../../resources/images/environment/wall-1.png";
 import img_wallAo1 from "../../../resources/images/environment/wall-ao-1.png";
 import BaseEntity from "../../core/entity/BaseEntity";
@@ -49,6 +50,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     aoSprite.position.set(x, y);
     aoSprite.rotation = angle + Math.PI / 2;
 
+    // TODO: Tile wall sprite rather than just stretch it
     const wallSprite = Sprite.from(imageName);
     (wallSprite as GameSprite).layerName = Layer.WALLS;
     wallSprite.anchor.set(0.5, 0.5);
@@ -84,7 +86,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.game!.addEntities([
-      new PositionalSound(choose(snd_wallHit3, snd_wallHit4), position, {
+      new PositionalSound(choose(snd_wallHit3), position, {
         speed: rNormal(1, 0.08),
       }),
       new WallImpact(position, normal, this.color),

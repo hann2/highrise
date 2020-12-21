@@ -12,7 +12,7 @@ export class DoorFrame extends BaseEntity implements Entity {
 
     const frameSprite = new Graphics();
     frameSprite
-      .beginFill(0xcccccc)
+      .beginFill(0x999999)
       .drawRect(0, -h / 2, w, h)
       .drawRect(length - w, -h / 2, w, h)
       .endFill();

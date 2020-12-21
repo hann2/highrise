@@ -54,7 +54,7 @@ export default class SwingingWeapon extends BaseEntity {
       height: size[1],
     });
     shape.collisionGroup = CollisionGroups.Projectiles;
-    shape.collisionMask = CollisionGroups.Zombies;
+    shape.collisionMask = CollisionGroups.Zombies | CollisionGroups.Walls;
     this.body.addShape(shape);
   }
 

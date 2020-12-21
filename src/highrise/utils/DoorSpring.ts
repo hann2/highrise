@@ -13,8 +13,8 @@ export default class DoorSpring extends RotationalSpring {
       stiffness: 300,
     });
 
-    this.minRotation = normalizeAngle(minRotation);
-    this.maxRotation = normalizeAngle(maxRotation);
+    this.minRotation = minRotation;
+    this.maxRotation = maxRotation;
   }
   applyForce() {
     const bodyA = this.bodyA;
