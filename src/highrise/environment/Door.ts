@@ -1,4 +1,4 @@
-import { Body, Box, RevoluteConstraint } from "p2";
+import { Body, Box, RevoluteConstraint, TupleDictionary } from "p2";
 import { Sprite } from "pixi.js";
 import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
@@ -102,5 +102,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
       new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position),
       new WallImpact(position, normal),
     ]);
+
+    return true;
   }
 }

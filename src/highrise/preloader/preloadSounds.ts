@@ -14,7 +14,8 @@ import { ENEMY_SOUNDS, ZOMBIE_ATTACK_HIT_SOUNDS } from "../constants/constants";
 import { MUSIC_URLS } from "../controllers/MusicController";
 import { GLOWSTICK_SOUNDS } from "../effects/GlowStick";
 import { SPLAT_SOUNDS } from "../effects/Splat";
-import { VENDING_MACHINE_HIT_SOUNDS } from "../environment/VendingMachine";
+import { PIANO_HIT_SOUNDS } from "../environment/furniture-plus/Piano";
+import { VENDING_MACHINE_HIT_SOUNDS } from "../environment/furniture-plus/VendingMachine";
 import { PUSH_SOUNDS } from "../human/Human";
 import { GUNS } from "../weapons/guns/gun-stats/gunStats";
 import { WEAPONS } from "../weapons/weapons";
@@ -34,6 +35,7 @@ export function getSoundsToPreload(): string[] {
     snd_wallHit3,
     snd_wallHit4,
 
+    ...PIANO_HIT_SOUNDS,
     ...VENDING_MACHINE_HIT_SOUNDS,
     ...ZOMBIE_ATTACK_HIT_SOUNDS,
     ...PUSH_SOUNDS,

@@ -1,17 +1,16 @@
 import Entity from "../../../core/entity/Entity";
+import { degToRad } from "../../../core/util/MathUtil";
 import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CELL_WIDTH } from "../../constants/constants";
 import Heavy from "../../enemies/heavy/Heavy";
 import Decoration from "../../environment/Decoration";
 import {
-  chairRight,
-  chairUp,
-  coffeeTable,
   endTable1,
   endTable2,
+  fancyChair1,
+  fancyCoffeeTable1,
   lobbyDesk,
-  piano,
   redCarpetBottom,
   redCarpetCenter,
   redCarpetInnerBottomLeft,
@@ -29,6 +28,7 @@ import {
 } from "../../environment/decorations/decorations";
 import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
 import ElevatorDoor from "../../environment/ElevatorDoor";
+import { Piano } from "../../environment/furniture-plus/Piano";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
@@ -208,24 +208,38 @@ export default class LobbyRoomTemplate implements RoomTemplate {
       );
     });
 
-    entities.push(new Decoration(roomToWorldPosition(V(2.5, 5)), rug));
-    entities.push(new Heavy(roomToWorldPosition(V(2.5, 3)))); // Hello my name is Bob, the wifi password is BAIINNNNSS!
-    entities.push(new Decoration(roomToWorldPosition(V(2.5, 3.5)), lobbyDesk));
-    entities.push(new Decoration(roomToWorldPosition(V(-0.15, 5)), chairRight));
     entities.push(
-      new Decoration(roomToWorldPosition(V(-0.15, 5.47)), chairRight)
+      new Decoration(roomToWorldPosition(V(2.5, 4.5)), rug, degToRad(90))
     );
-    entities.push(new Decoration(roomToWorldPosition(V(0.35, 6)), chairUp));
-    entities.push(new Decoration(roomToWorldPosition(V(0.85, 6)), chairUp));
+    entities.push(new Heavy(roomToWorldPosition(V(2.5, 3)))); // Hello my name is Bob, the wifi password is BRAIINNNNSS!
+    entities.push(new Decoration(roomToWorldPosition(V(2.5, 3.5)), lobbyDesk));
     entities.push(
       new Decoration(
-        roomToWorldPosition(V(-0.15, 6.15)),
+        roomToWorldPosition(V(-0.15, 5)),
+        fancyChair1,
+        degToRad(90)
+      )
+    );
+    entities.push(
+      new Decoration(
+        roomToWorldPosition(V(-0.15, 5.47)),
+        fancyChair1,
+        degToRad(90)
+      )
+    );
+    entities.push(new Decoration(roomToWorldPosition(V(0.35, 6)), fancyChair1));
+    entities.push(new Decoration(roomToWorldPosition(V(0.85, 6)), fancyChair1));
+    entities.push(
+      new Decoration(
+        roomToWorldPosition(V(-0.15, 6)),
         choose(endTable1, endTable2)
       )
     );
-    entities.push(new Decoration(roomToWorldPosition(V(0.6, 5)), coffeeTable));
+    entities.push(
+      new Decoration(roomToWorldPosition(V(0.6, 5)), fancyCoffeeTable1)
+    );
 
-    entities.push(new Decoration(roomToWorldPosition(V(4.5, 5.5)), piano));
+    entities.push(new Piano(roomToWorldPosition(V(4.2, 5.15)), degToRad(-35)));
 
     entities.push(
       new OverheadLight(roomToWorldPosition(V(1, 1)), { radius: 10 })

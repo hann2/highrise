@@ -69,4 +69,12 @@ export async function main() {
   }
 
   game.dispatch({ type: "goToMainMenu" });
+
+  const element = game.renderer.pixiRenderer.view;
+
+  const makeFullScreen = () => {
+    element.requestFullscreen();
+    element.removeEventListener("click", makeFullScreen);
+  };
+  element.addEventListener("click", makeFullScreen);
 }

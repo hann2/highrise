@@ -1,37 +1,21 @@
-import img_furniture from "../../../../resources/images/environment/furniture.png";
 import img_fancyFurniture from "../../../../resources/images/environment/fancy-furniture.png";
-import img_market from "../../../../resources/images/environment/market.png";
+import img_fancyRug1 from "../../../../resources/images/environment/fancy-rug-1.png";
+import img_furniture from "../../../../resources/images/environment/furniture.png";
+import img_fancyChair1 from "../../../../resources/images/environment/furniture/fancy-chair-1.png";
+import img_fancyEndTable1 from "../../../../resources/images/environment/furniture/fancy-end-table-1.png";
+import img_fancyEndTable2 from "../../../../resources/images/environment/furniture/fancy-end-table-2.png";
+import img_fancyTable1 from "../../../../resources/images/environment/furniture/fancy-table-1.png";
+import img_fancyTable2 from "../../../../resources/images/environment/furniture/fancy-table-2.png";
+import img_lobbyDesk1 from "../../../../resources/images/environment/furniture/lobby-desk-1.png";
+import img_piano from "../../../../resources/images/environment/furniture/piano.png";
 import { V } from "../../../core/Vector";
 import { DecorationInfo } from "./DecorationInfo";
 
 export const lobbyDesk: DecorationInfo = {
-  imageName: img_market,
-  sheetInfo: { offset: V(97, 84), dimensions: V(143, 49) },
-  heightMeters: 1.2,
-};
-
-export const chairRight: DecorationInfo = {
-  imageName: img_fancyFurniture,
-  sheetInfo: { offset: V(485, 24), dimensions: V(38, 60) },
-  heightMeters: 1.8,
-};
-
-export const chairUp: DecorationInfo = {
-  imageName: img_fancyFurniture,
-  sheetInfo: { offset: V(438, 24), dimensions: V(38, 60) },
-  heightMeters: 1.8,
-};
-
-export const endTable1: DecorationInfo = {
-  imageName: img_fancyFurniture,
-  sheetInfo: { offset: V(52, 8), dimensions: V(38, 40) },
+  imageName: img_lobbyDesk1,
   heightMeters: 1.3,
-};
-
-export const endTable2: DecorationInfo = {
-  imageName: img_fancyFurniture,
-  sheetInfo: { offset: V(150, 5), dimensions: V(36, 43) },
-  heightMeters: 1.3,
+  isSolid: true,
+  bodyInset: [0.35, 0.35],
 };
 
 export const lamp: DecorationInfo = {
@@ -53,13 +37,47 @@ export const column: DecorationInfo = {
 };
 
 export const rug: DecorationInfo = {
-  imageName: img_fancyFurniture,
-  sheetInfo: { offset: V(528, 432), dimensions: V(144, 96) },
-  heightMeters: 3,
+  imageName: img_fancyRug1,
+  heightMeters: 3.3,
+};
+
+export const fancyChair1: DecorationInfo = {
+  imageName: img_fancyChair1,
+  heightMeters: 1.2,
+  isSolid: true,
+  bodyInset: [0.4, 0.4],
+};
+
+export const fancyCoffeeTable1: DecorationInfo = {
+  imageName: img_fancyTable1,
+  heightMeters: 2,
+  isSolid: true,
+  bodyInset: [0.02, 0.02],
+};
+
+export const fancyCoffeeTable2: DecorationInfo = {
+  imageName: img_fancyTable2,
+  heightMeters: 2,
+  isSolid: true,
+  bodyInset: [0.02, 0.02],
 };
 
 export const piano: DecorationInfo = {
-  imageName: img_fancyFurniture,
-  sheetInfo: { offset: V(24, 408), dimensions: V(116, 96) },
-  heightMeters: 2.5,
+  imageName: img_piano,
+  heightMeters: 3,
+  isSolid: true,
+  isHittable: true,
+  bodyInset: [0.3, 0.3],
+};
+
+export const endTable1: DecorationInfo = {
+  imageName: img_fancyEndTable1,
+  heightMeters: 0.8,
+  isSolid: true,
+};
+
+export const endTable2: DecorationInfo = {
+  imageName: img_fancyEndTable2,
+  heightMeters: 0.8,
+  isSolid: true,
 };

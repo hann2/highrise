@@ -5,7 +5,7 @@ import { LEVEL_SIZE } from "../../constants/constants";
 import Decoration from "../../environment/Decoration";
 import { waterCooler } from "../../environment/decorations/decorations";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
-import VendingMachine from "../../environment/VendingMachine";
+import VendingMachine from "../../environment/furniture-plus/VendingMachine";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import CellGrid from "./CellGrid";
 

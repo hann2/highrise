@@ -20,7 +20,7 @@ import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
 import { SPLATS_AND_BLOBS_TEXTURES } from "../effects/Splat";
 import * as DecorationSprites from "../environment/decorations/decorations";
 import { DEFAULT_DOOR_SPRITES } from "../environment/Door";
-import { VENDING_MACHINES } from "../environment/VendingMachine";
+import { VENDING_MACHINES } from "../environment/furniture-plus/VendingMachine";
 import { WEAPONS } from "../weapons/weapons";
 
 // Returns the list of all

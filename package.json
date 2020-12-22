@@ -7,8 +7,8 @@
   "scripts": {
     "start": "parcel src/index.html",
     "build": "parcel build src/index.html",
-    "now": "now",
-    "now-prod": "now --prod",
+    "deploy": "vercel",
+    "deploy-prod": "vercel --prod",
     "tsc": "tsc --noEmit",
     "tsc-watch": "tsc --noEmit --watch",
     "generate-asset-types": "./generate-asset-types.js -d ./resources; ./generate-asset-types.js -d ./src",
@@ -37,6 +37,7 @@
     "patch-package": "^6.2.2",
     "prettier": "^2.2.1",
     "typescript": "^4.1.2",
+    "vercel": "^21.0.1",
     "yargs": "^16.1.1"
   }
 }

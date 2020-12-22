@@ -20,6 +20,7 @@ import Hittable from "./Hittable";
 
 export default class Decoration extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
+  decorationBody?: DecorationBody;
 
   constructor(
     position: V2d,
@@ -43,12 +44,13 @@ export default class Decoration extends BaseEntity implements Entity {
     if (decorationInfo.isSolid) {
       const { width, height } = this.sprite;
       const [widthInset, heightInset] = decorationInfo.bodyInset ?? [0, 0];
-      this.addChild(
+      this.decorationBody = this.addChild(
         new DecorationBody(
           position,
           angle,
           width - widthInset,
-          height - heightInset
+          height - heightInset,
+          decorationInfo.isHittable
         )
       );
     }
@@ -56,7 +58,13 @@ export default class Decoration extends BaseEntity implements Entity {
 }
 
 class DecorationBody extends BaseEntity implements Entity, Hittable {
-  constructor(position: V2d, angle: number = 0, width: number, height: number) {
+  constructor(
+    position: V2d,
+    angle: number,
+    width: number,
+    height: number,
+    hittable: boolean = false
+  ) {
     super();
 
     this.body = new Body({
@@ -69,6 +77,10 @@ class DecorationBody extends BaseEntity implements Entity, Hittable {
     shape.collisionGroup = CollisionGroups.Furniture;
     shape.collisionMask = CollisionGroups.All;
     this.body.addShape(shape, [0, 0], 0);
+
+    if (hittable) {
+      shape.collisionGroup |= CollisionGroups.Walls;
+    }
   }
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
@@ -78,5 +90,7 @@ class DecorationBody extends BaseEntity implements Entity, Hittable {
       new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position),
       new WallImpact(position, normal),
     ]);
+
+    return true;
   }
 }

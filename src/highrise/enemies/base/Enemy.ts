@@ -23,8 +23,9 @@ import AimSpring from "../../utils/AimSpring";
 import SwingingWeapon from "../../weapons/melee/SwingingWeapon";
 import { makeSimpleEnemyBody } from "./enemyUtils";
 import EnemyVoice from "./EnemyVoice";
+import Hittable from "../../environment/Hittable";
 
-export class BaseEnemy extends Creature {
+export class BaseEnemy extends Creature implements Hittable {
   hp: number = 100;
   aimSpring!: AimSpring;
   body: Body & WithOwner;
@@ -151,6 +152,8 @@ export class BaseEnemy extends Creature {
     } else {
       this.voice.speak("hit");
     }
+
+    return true;
   }
 
   knockback(impulse: [number, number], relativePos?: [number, number]) {

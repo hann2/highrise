@@ -82,12 +82,17 @@ export default class Bullet extends BaseEntity implements Entity {
 
     if (hitResult) {
       const { hitPosition, hitNormal, hit } = hitResult;
-      this.hitPosition = hitPosition;
-      hit.onBulletHit(this, this.hitPosition, hitNormal);
-      this.destroy();
-    } else {
-      this.position.iaddScaled(this.velocity, dt);
+      hitPosition;
+      const shouldHit = hit.onBulletHit(this, hitPosition, hitNormal);
+
+      if (shouldHit) {
+        this.hitPosition = hitPosition;
+        this.destroy();
+        return;
+      }
     }
+
+    this.position.iaddScaled(this.velocity, dt);
   }
 
   checkForCollision(

@@ -91,5 +91,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
       }),
       new WallImpact(position, normal, this.color),
     ]);
+
+    return true;
   }
 }

@@ -32,6 +32,7 @@ export interface DecorationInfo {
   heightMeters: number; // height of object in world space (meters)
   sheetInfo?: SheetInfo; // how to get the decoration from the sprite sheet
   isSolid?: boolean; // whether or not this blocks movement
+  isHittable?: boolean; // whether or not this blocks movement
   bodyInset?: [number, number]; // meters to inset the body from the outside of the image
   rotation?: number; // radians to rotate the texture
 }

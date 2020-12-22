@@ -77,7 +77,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
   }
 
   onInputDeviceChange(usingGamepad: boolean) {
-    const buttonName = usingGamepad ? "START" : "ESC";
+    const buttonName = usingGamepad ? "START" : "P";
     this.resumeText.text = `Press ${buttonName} to resume`;
   }
 
@@ -112,7 +112,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
   }
 
   onKeyDown(key: KeyCode) {
-    if (key === "Escape") {
+    if (key === "KeyP") {
       this.game?.togglePause();
     }
   }

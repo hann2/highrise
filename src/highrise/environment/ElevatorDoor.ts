@@ -93,6 +93,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
     this.game!.addEntity(
       new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position)
     );
+    return true;
   }
 }
 

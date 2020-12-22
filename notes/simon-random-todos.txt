@@ -3,20 +3,18 @@
 
 Sprites to Fix in order of amount they bother me most:
 
+- Sack
 - Shop tables
-- Lobby chairs
-- lobby tables
-- piano
 - Chad (I feel like his lines just aren't very distinct)
 
 
 Other gameplay things that bother me
 - We get a bunch of the same sound playing on top of each other with zombies
 - Melee weapons don't feel great
-- Fullscreen
+- Human collision detection doesn't match sprite
+- Can't navigate menus with controller
 
 Polish things to add:
-- Laser sight
 - Highlight interactable objects, especially ones in range
 - Sort character new level lines by things they say on the first level or when they're alone or something
 
