@@ -8,7 +8,7 @@ import TransformedRoomTemplate, {
 } from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
 import LevelTemplate from "./LevelTemplate";
-import { makeBathroomPair } from "./levelTemplateHelpers";
+import { makeBathroomPair } from "./helpers/levelTemplateHelpers";
 
 // A level on which there is an electrical generator
 export default class GeneratorLevel extends LevelTemplate {

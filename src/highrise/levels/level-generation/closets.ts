@@ -1,17 +1,7 @@
 import Entity from "../../../core/entity/Entity";
-import { choose, seededShuffle } from "../../../core/util/Random";
+import { seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
-import Decoration from "../../environment/Decoration";
-import {
-  bookcase1,
-  bookcase2,
-  boxPile1,
-  boxPile2,
-  boxShelf1,
-  boxShelf2,
-  sack,
-} from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
@@ -104,11 +94,11 @@ export function fillClosets(
 ): { entities: Entity[]; potentialEnemyLocations: V2d[] } {
   const shuffledClosets: Closet[] = seededShuffle(cellGrid.closets, seed);
 
-  let counter = 0;
+  let closetIndex = 0;
   const entities: Entity[] = [];
   const consumeLocation = (f: (l: V2d) => Entity | Entity[]) => {
-    const closet = shuffledClosets[counter];
-    counter += 1;
+    const closet = shuffledClosets[closetIndex];
+    closetIndex += 1;
     if (!closet) {
       console.warn("Not enough closets in map for all pickups!");
       return;
@@ -147,69 +137,20 @@ export function fillClosets(
     );
     entities.push(
       new RepeatingFloor(
-        levelTemplate.getClosetFloor(),
+        levelTemplate.getClosetFloor(closetIndex),
         upperLeftCorner,
         dimensions
       )
     );
 
-    if (counter % 4 === 0) {
-      entities.push(
-        new Decoration(
-          CellGrid.levelCoordToWorldCoord(
-            closet.backCell
-              .add(closet.backWallDirection.mul(-0.2))
-              .add(closet.backWallDirection.rotate90cw().mul(-0.15))
-          ),
-          sack
-        )
-      );
-    } else if (counter % 4 === 1) {
-      entities.push(
-        new Decoration(
-          CellGrid.levelCoordToWorldCoord(
-            closet.backCell.add(closet.backWallDirection.mul(-0.2))
-          ),
-          choose(boxPile1, boxPile2),
-          closet.backWallDirection.angle + Math.PI
-        )
-      );
-    } else if (counter % 4 === 2) {
-      entities.push(
-        new Decoration(
-          CellGrid.levelCoordToWorldCoord(
-            closet.backCell.add(
-              closet.backWallDirection
-                .mul(-0.25)
-                .add(
-                  closet.backWallDirection
-                    .rotate90cw()
-                    .mul(choose(-0.1, 0, 0.1))
-                )
-            )
-          ),
-          choose(boxShelf1, boxShelf2),
-          closet.backWallDirection.angle + Math.PI
-        )
-      );
-    } else {
-      entities.push(
-        new Decoration(
-          CellGrid.levelCoordToWorldCoord(
-            closet.backCell.add(closet.backWallDirection.mul(-0.22))
-          ),
-          choose(bookcase1, bookcase2),
-          closet.backWallDirection.angle + Math.PI
-        )
-      );
-    }
+    entities.push(...levelTemplate.getClosetDecorations(closetIndex, closet));
   };
 
   levelTemplate.getPickups().forEach(consumeLocation);
 
   const potentialEnemyLocations: V2d[] = [];
 
-  for (let i = counter; i < shuffledClosets.length; i++) {
+  for (let i = closetIndex; i < shuffledClosets.length; i++) {
     consumeLocation((l: V2d) => {
       potentialEnemyLocations.push(l);
       return [];

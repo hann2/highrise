@@ -4,10 +4,7 @@ import img_boxPile1 from "../../../../resources/images/environment/box-pile-1.pn
 import img_boxPile2 from "../../../../resources/images/environment/box-pile-2.png";
 import img_boxShelf1 from "../../../../resources/images/environment/box-shelf-1.png";
 import img_boxShelf2 from "../../../../resources/images/environment/box-shelf-2.png";
-import img_fencesLights from "../../../../resources/images/environment/fences-lights.png";
-import img_market from "../../../../resources/images/environment/market.png";
 import img_waterCooler from "../../../../resources/images/environment/water-cooler.png";
-import { V } from "../../../core/Vector";
 import { DecorationInfo } from "./DecorationInfo";
 
 export const bookcase1: DecorationInfo = {
@@ -53,10 +50,4 @@ export const boxShelf2: DecorationInfo = {
   heightMeters: 1.5,
   isSolid: true,
   bodyInset: [0.2, 0.2],
-};
-
-export const sack: DecorationInfo = {
-  imageName: img_market,
-  sheetInfo: { offset: V(337, 724), dimensions: V(47, 41) },
-  heightMeters: 0.8,
 };

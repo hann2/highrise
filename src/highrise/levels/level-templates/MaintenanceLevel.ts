@@ -19,7 +19,8 @@ import TransformedRoomTemplate, {
 } from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
 import LevelTemplate from "./LevelTemplate";
-import { makeBathroomPair } from "./levelTemplateHelpers";
+import { makeBathroomPair } from "./helpers/levelTemplateHelpers";
+import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 
 export default class MaintenanceLevel extends LevelTemplate {
   subFloor: DecorationInfo;
@@ -69,6 +70,10 @@ export default class MaintenanceLevel extends LevelTemplate {
     );
 
     return rooms;
+  }
+
+  getAmbientLight() {
+    return new AmbientLight(0x000000);
   }
 
   getClosetFloor(): DecorationInfo {

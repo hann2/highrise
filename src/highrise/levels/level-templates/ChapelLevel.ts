@@ -9,7 +9,7 @@ import TransformedRoomTemplate, {
 } from "../rooms/TransformedRoomTemplate";
 import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
 import LevelTemplate from "./LevelTemplate";
-import { makeBathroomPair } from "./levelTemplateHelpers";
+import { makeBathroomPair } from "./helpers/levelTemplateHelpers";
 
 export default class ChapelLevel extends LevelTemplate {
   chooseRoomTemplates(seed: number): RoomTemplate[] {

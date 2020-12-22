@@ -24,19 +24,29 @@ import { GUNS } from "../../weapons/guns/gun-stats/gunStats";
 import { M1911 } from "../../weapons/guns/gun-stats/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
+import { Closet } from "../level-generation/CellGrid";
 import RoomTemplate from "../rooms/RoomTemplate";
+import { closetDecorators } from "./helpers/closetHelpers";
 
 export default class LevelTemplate {
   constructor(public levelIndex: number) {}
 
+  // Returns a list of the rooms we want to try to fit on this floor
   chooseRoomTemplates(seed: number): RoomTemplate[] {
     return [];
   }
 
-  getClosetFloor(): DecorationInfo {
+  // Returns the type of floor used for closets
+  getClosetFloor(closetIndex: number): DecorationInfo {
     return cementFloor;
   }
 
+  // Returns a list of entities to put in a closet
+  getClosetDecorations(counter: number, closet: Closet): Entity[] {
+    return closetDecorators[counter % closetDecorators.length](closet);
+  }
+
+  // Creates the base floor entity for this level
   makeSubfloor(size: [number, number]): Entity {
     const color = rgbToHex(hsvToRgb({ h: rUniform(0, 1), s: 0.4, v: 0.8 }));
     const decorationInfo = choose(carpetFloor1, carpetFloor2);
@@ -45,6 +55,7 @@ export default class LevelTemplate {
     return floor;
   }
 
+  // Puts enemies at the places they might go
   generateEnemies(locations: V2d[], seed: number): Entity[] {
     const entities: Entity[] = [];
     const shuffled = seededShuffle(locations, seed);

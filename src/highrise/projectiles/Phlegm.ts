@@ -17,6 +17,7 @@ import { PointLight } from "../lighting-and-vision/PointLight";
 
 export const PHLEGM_RADIUS = 0.1; // meters
 const MAX_LIFESPAN = 3.0; // seconds
+const FRICTION = 0.12; // Something
 
 export default class Phlegm extends BaseEntity implements Entity {
   light: PointLight;
@@ -101,7 +102,7 @@ export default class Phlegm extends BaseEntity implements Entity {
       return;
     }
 
-    this.velocity.imul(Math.exp(-dt * 0.1));
+    this.velocity.imul(Math.exp(-dt * FRICTION));
 
     this.zVelocity += -9.8 * dt;
     this.z = clampUp(this.z + this.zVelocity * dt);
