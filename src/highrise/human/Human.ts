@@ -291,8 +291,12 @@ export default class Human extends BaseEntity implements Entity {
     },
   ]);
 
+  canPush() {
+    return !this.pushAction.isActive();
+  }
+
   push() {
-    if (!this.pushAction.isActive()) {
+    if (this.canPush()) {
       this.pushAction.do();
     }
   }

@@ -37,9 +37,7 @@ export default class PartyManager extends BaseEntity implements Entity {
       console.log("add to party");
       this.partyMembers.push(human);
       survivorController?.destroy();
-      this.game!.addEntity(
-        new AllyHumanController(human, () => this.leader, human !== this.leader)
-      );
+      this.game!.addEntity(new AllyHumanController(human, () => this.leader));
 
       human.persistenceLevel = Persistence.Game;
 
@@ -104,10 +102,6 @@ export default class PartyManager extends BaseEntity implements Entity {
       throw new Error("Leader must be in the party");
     }
     this.leader = leader;
-
-    for (const allyController of this.getAllyControllers()) {
-      allyController.enabled = allyController.human != leader;
-    }
   }
 }
 
