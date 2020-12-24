@@ -49,7 +49,6 @@ export default class MaintenanceLevel extends LevelTemplate {
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
     rooms.push(...makeBathroomPair(seed));
-    rooms.push(new NecromancerArena());
     rooms.push(
       new TransformedRoomTemplate(
         new LightSwitchRoomTemplate(this.roomFloor),

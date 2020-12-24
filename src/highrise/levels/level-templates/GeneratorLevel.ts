@@ -16,7 +16,6 @@ export default class GeneratorLevel extends LevelTemplate {
     const rooms: RoomTemplate[] = [];
 
     const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
-    rooms.push(new NecromancerArena());
     rooms.push(...makeBathroomPair(seed));
     rooms.push(
       new TransformedRoomTemplate(

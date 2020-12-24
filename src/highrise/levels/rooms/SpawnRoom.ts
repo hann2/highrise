@@ -1,25 +1,17 @@
 import { BLEND_MODES, Text } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../../core/entity/Entity";
-import Game from "../../../core/Game";
-import { choose } from "../../../core/util/Random";
+import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { Layer } from "../../config/layers";
-import { getCurrentLevelNumber } from "../../controllers/LevelController";
 import { cementFloor } from "../../environment/decorations/decorations";
+import HealthPickup from "../../environment/HealthPickup";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import SpawnLocation from "../../environment/SpawnLocation";
 import WeaponPickup from "../../environment/WeaponPickup";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import Gun from "../../weapons/guns/Gun";
-import { AK47 } from "../../weapons/guns/gun-stats/AK-47";
-import { AR15 } from "../../weapons/guns/gun-stats/AR-15";
-import { DoubleBarrelShotgun } from "../../weapons/guns/gun-stats/DoubleBarrelShotgun";
-import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
-import { Glock } from "../../weapons/guns/gun-stats/Glock";
-import { P90 } from "../../weapons/guns/gun-stats/P90";
-import { PumpShotgun } from "../../weapons/guns/gun-stats/PumpShotgun";
-import { Revolver } from "../../weapons/guns/gun-stats/Revolver";
+import { GUN_TIERS } from "../../weapons/guns/gun-stats/gunStats";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
@@ -37,6 +29,8 @@ const DIMENSIONS = V(3, 3);
 const DOORS: WallID[] = [[V(2, 0), true]];
 
 export default class SpawnRoom implements RoomTemplate {
+  constructor(private levelIndex: number) {}
+
   getOccupiedCells(): V2d[] {
     return defaultOccupiedCells(DIMENSIONS, DOORS);
   }
@@ -72,39 +66,46 @@ export default class SpawnRoom implements RoomTemplate {
     entities.push(new SpawnLocation(roomToWorldPosition(V(1, 1))));
     entities.push(new SpawnLocation(roomToWorldPosition(V(2, 1))));
 
-    const meleeWeapon = new MeleeWeapon(choose(...MELEE_WEAPONS));
-    entities.push(new WeaponPickup(roomToWorldPosition(V(2, 0)), meleeWeapon));
-
+    let starterWeapon = rBool(0.5)
+      ? new MeleeWeapon(choose(...MELEE_WEAPONS))
+      : new Gun(choose(...GUN_TIERS[0]));
     entities.push(
-      new WeaponPickup(roomToWorldPosition(V(0, 0)), new Gun(AK47))
-    );
-    entities.push(new WeaponPickup(roomToWorldPosition(V(0, 1)), new Gun(P90)));
-    entities.push(
-      new WeaponPickup(roomToWorldPosition(V(0, 2)), new Gun(PumpShotgun))
+      new WeaponPickup(roomToWorldPosition(V(1, 0.25)), starterWeapon)
     );
 
-    entities.push(
-      new WeaponPickup(roomToWorldPosition(V(2, 1)), new Gun(Glock))
-    );
-    entities.push(
-      new WeaponPickup(roomToWorldPosition(V(2, 2)), new Gun(FiveSeven))
-    );
+    // Better guns on future levels
+    switch (this.levelIndex) {
+      case 1:
+        // Only starter
+        break;
+      case 2:
+        new WeaponPickup(
+          roomToWorldPosition(V(2, 0.25)),
+          new Gun(choose(...GUN_TIERS[1]))
+        );
+        break;
+      case 3:
+      case 4:
+        new WeaponPickup(
+          roomToWorldPosition(V(2, 0.25)),
+          new Gun(choose(...GUN_TIERS[2]))
+        );
+        break;
+      case 5:
+        new WeaponPickup(
+          roomToWorldPosition(V(2, 0.25)),
+          new Gun(choose(...GUN_TIERS[3]))
+        );
+      default:
+    }
+
+    if (this.levelIndex > 1) {
+      new HealthPickup(roomToWorldPosition(V(0.75, 1.25)));
+    }
 
     entities.push(
-      new WeaponPickup(roomToWorldPosition(V(1, 0)), new Gun(AR15))
+      new SpawnRoomFloorPaint(roomToWorldPosition(V(1, 1)), this.levelIndex)
     );
-    entities.push(
-      new WeaponPickup(roomToWorldPosition(V(1, 1)), new Gun(Revolver))
-    );
-
-    entities.push(
-      new WeaponPickup(
-        roomToWorldPosition(V(1, 2)),
-        new Gun(DoubleBarrelShotgun)
-      )
-    );
-
-    entities.push(new SpawnRoomFloor(roomToWorldPosition(V(1, 1))));
 
     const centerWorldCoords = roomToWorldPosition(
       DIMENSIONS.sub(V(1, 1)).mul(0.5)
@@ -122,13 +123,14 @@ export default class SpawnRoom implements RoomTemplate {
   }
 }
 
-class SpawnRoomFloor extends BaseEntity implements Entity {
+// The text on the ground that says what level it is
+class SpawnRoomFloorPaint extends BaseEntity implements Entity {
   sprite: Text & GameSprite;
 
-  constructor([x, y]: [number, number]) {
+  constructor([x, y]: [number, number], levelIndex: number) {
     super();
 
-    this.sprite = new Text(``, {
+    this.sprite = new Text(`Level ${levelIndex}`, {
       fontSize: 64,
       fontFamily: "Capture It",
       fill: "red",
@@ -139,11 +141,5 @@ class SpawnRoomFloor extends BaseEntity implements Entity {
     this.sprite.scale.set(1 / 64);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.layerName = Layer.FLOOR_DECALS;
-  }
-
-  // TODO: This is hacky. Rooms should be able to tell what floor they're on
-  onAdd(game: Game) {
-    const level = getCurrentLevelNumber(game);
-    this.sprite.text = `Level ${level}`;
   }
 }

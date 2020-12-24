@@ -21,7 +21,12 @@ export function generateLevelEntities(
   seed: number = rInteger(0, 2 ** 32)
 ): Entity[] {
   const outerWalls = addOuterWalls();
-  const roomEntities = addRooms(cellGrid, levelTemplate, seed);
+  const roomEntities = addRooms(
+    cellGrid,
+    levelTemplate,
+    seed,
+    levelTemplate.levelIndex
+  );
   buildMaze(cellGrid, seed);
   const innerWalls = addInnerWalls(cellGrid);
   const [exitPoint, exitOpenDirection] = findExit(

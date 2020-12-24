@@ -198,11 +198,12 @@ function addRoom(
 export function addRooms(
   cellGrid: CellGrid,
   levelTemplate: LevelTemplate,
-  seed: number
+  seed: number,
+  levelIndex: number
 ): Entity[] {
   const spawnEntities = addRoom(
     cellGrid,
-    new SpawnRoom(),
+    new SpawnRoom(levelIndex),
     seed,
     cellGrid.spawnLocation
   );

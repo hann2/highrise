@@ -12,7 +12,7 @@ import Interactable from "./Interactable";
 export default class WeaponPickup extends BaseEntity {
   sprite: Sprite & GameSprite;
 
-  constructor(position: V2d, private weapon: Gun | MeleeWeapon) {
+  constructor(position: V2d, public weapon: Gun | MeleeWeapon) {
     super();
 
     this.addChild(weapon, true); // Take ownership of the gun. This is a little weird

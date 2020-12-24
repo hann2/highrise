@@ -20,7 +20,7 @@ import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import Gun from "../../weapons/guns/Gun";
 import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
 import { Glock } from "../../weapons/guns/gun-stats/Glock";
-import { GUNS } from "../../weapons/guns/gun-stats/gunStats";
+import { GUNS, GUN_TIERS } from "../../weapons/guns/gun-stats/gunStats";
 import { M1911 } from "../../weapons/guns/gun-stats/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
@@ -28,6 +28,7 @@ import { Closet } from "../level-generation/CellGrid";
 import RoomTemplate from "../rooms/RoomTemplate";
 import { closetDecorators } from "./helpers/closetHelpers";
 
+type PickupMaker = (location: V2d) => Entity | Entity[];
 export default class LevelTemplate {
   constructor(public levelIndex: number) {}
 
@@ -76,16 +77,34 @@ export default class LevelTemplate {
     return new AmbientLight(0x060606);
   }
 
-  getPickups(): ((location: V2d) => Entity | Entity[])[] {
-    return [
+  getPickups() {
+    const pickups: PickupMaker[] = [
       (l) => new HealthPickup(l),
-      (l) => new WeaponPickup(l, new Gun(choose(...GUNS))),
+      (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[0]))),
       (l) => new WeaponPickup(l, new MeleeWeapon(choose(...MELEE_WEAPONS))),
       (l) => {
-        const surv = new Human(l);
-        surv.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
-        return [surv, new SurvivorHumanController(surv)];
+        const survivor = new Human(l);
+        survivor.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
+        return [survivor, new SurvivorHumanController(survivor)];
       },
     ];
+
+    if (this.levelIndex >= 2) {
+      pickups.push(
+        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[1])))
+      );
+    }
+    if (this.levelIndex >= 4) {
+      pickups.push(
+        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[2])))
+      );
+    }
+    if (this.levelIndex >= 5) {
+      pickups.push(
+        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[3])))
+      );
+    }
+
+    return pickups;
   }
 }

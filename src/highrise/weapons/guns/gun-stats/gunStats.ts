@@ -10,6 +10,7 @@ import { Revolver } from "./Revolver";
 import { P90 } from "./P90";
 import { PumpShotgun } from "./PumpShotgun";
 import { SPAS12 } from "./SPAS12";
+import Gun from "../Gun";
 
 // A list of all the guns
 export const GUNS: Array<GunStats> = [
@@ -36,3 +37,12 @@ export const GUN_TIERS = [
   [PumpShotgun],
   [AK47, SPAS12, P90],
 ];
+
+export function getGunTier(gun: Gun): number {
+  for (let i = 0; i < GUN_TIERS.length; i++) {
+    if (GUN_TIERS[i].includes(gun.stats)) {
+      return i;
+    }
+  }
+  return -1;
+}
