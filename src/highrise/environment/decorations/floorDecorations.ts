@@ -15,6 +15,11 @@ import img_oldPlankFlooring2 from "../../../../resources/images/environment/floo
 import img_steelFloor from "../../../../resources/images/environment/floor/steel-floor.png";
 import img_tileFloor1 from "../../../../resources/images/environment/floor/tile-floor-1.png";
 import img_tileFloor10 from "../../../../resources/images/environment/floor/tile-floor-10.jpg";
+import img_tileFloor11 from "../../../../resources/images/environment/floor/tile-floor-11.jpg";
+import img_tileFloor12 from "../../../../resources/images/environment/floor/tile-floor-12.jpg";
+import img_tileFloor13 from "../../../../resources/images/environment/floor/tile-floor-13.jpg";
+import img_tileFloor14 from "../../../../resources/images/environment/floor/tile-floor-14.jpg";
+import img_tileFloor15 from "../../../../resources/images/environment/floor/tile-floor-15.jpg";
 import img_tileFloor2 from "../../../../resources/images/environment/floor/tile-floor-2.png";
 import img_tileFloor3 from "../../../../resources/images/environment/floor/tile-floor-3.png";
 import img_tileFloor4 from "../../../../resources/images/environment/floor/tile-floor-4.png";
@@ -46,12 +51,12 @@ export const woodFloor2: DecorationInfo = {
 
 export const woodFloor3: DecorationInfo = {
   imageName: img_woodFloor3,
-  heightMeters: 4,
+  heightMeters: 3.6,
 };
 
 export const woodFloor4: DecorationInfo = {
   imageName: img_woodFloor3,
-  heightMeters: 4,
+  heightMeters: 3.6,
 };
 
 export const oldPlankFloor1: DecorationInfo = {
@@ -121,6 +126,31 @@ export const tilesFloor9: DecorationInfo = {
 
 export const tilesFloor10: DecorationInfo = {
   imageName: img_tileFloor10,
+  heightMeters: 4.0,
+};
+
+export const tilesFloor11: DecorationInfo = {
+  imageName: img_tileFloor11,
+  heightMeters: 5.0,
+};
+
+export const tilesFloor12: DecorationInfo = {
+  imageName: img_tileFloor12,
+  heightMeters: 1.1,
+};
+
+export const tilesFloor13: DecorationInfo = {
+  imageName: img_tileFloor13,
+  heightMeters: 3.0,
+};
+
+export const tilesFloor14: DecorationInfo = {
+  imageName: img_tileFloor14,
+  heightMeters: 2.75,
+};
+
+export const tilesFloor15: DecorationInfo = {
+  imageName: img_tileFloor15,
   heightMeters: 3.0,
 };
 

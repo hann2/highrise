@@ -11,6 +11,7 @@ import CellGrid from "./CellGrid";
 import { generateLevelEntities } from "./entityPlacement";
 
 export function chooseTemplate(level: number): LevelTemplate {
+  return new ShopLevel(level);
   switch (level) {
     case 1:
       return new LobbyLevel(level);

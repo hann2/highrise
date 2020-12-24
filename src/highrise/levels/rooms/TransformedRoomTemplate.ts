@@ -23,6 +23,22 @@ export const POSSIBLE_ORIENTATIONS: Matrix[] = [
   new Matrix(0, -1, -1, 0),
 ];
 
+// Orientations that are rotated but not reflected
+export const ROTATED_ORIENTATIONS: Matrix[] = [
+  new Matrix(1, 0, 0, 1),
+  new Matrix(-1, 0, 0, -1),
+  new Matrix(0, 1, -1, 0),
+  new Matrix(0, -1, 1, 0),
+];
+
+// Orientations that are reflected and also possibly rotated
+export const FLIPPED_ORIENTATIONS: Matrix[] = [
+  new Matrix(-1, 0, 0, 1),
+  new Matrix(0, -1, -1, 0),
+  new Matrix(0, 1, 1, 0),
+  new Matrix(1, 0, 0, -1),
+];
+
 export default class TransformedRoomTemplate implements RoomTemplate {
   base: RoomTemplate;
   transformer: ElementTransformer;

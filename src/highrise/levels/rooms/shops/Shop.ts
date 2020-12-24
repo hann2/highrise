@@ -1,11 +1,23 @@
 import Entity from "../../../../core/entity/Entity";
+import { rgbToHex, hsvToRgb } from "../../../../core/util/ColorUtils";
+import { choose, rCardinal, rUniform } from "../../../../core/util/Random";
 import { V, V2d } from "../../../../core/Vector";
 import Decoration from "../../../environment/Decoration";
+import { DecorationInfo } from "../../../environment/decorations/DecorationInfo";
 import {
-  bathroomTilesFloor5,
-  jewelryStall,
-  shelfEmpty,
-  shelfJars,
+  bathroomTilesFloor2,
+  carpetFloor1,
+  carpetFloor2,
+  counter1,
+  counter2,
+  counter3,
+  shopShelf1,
+  tilesFloor13,
+  tilesFloor14,
+  woodFloor1,
+  woodFloor2,
+  woodFloor3,
+  woodFloor4,
 } from "../../../environment/decorations/decorations";
 import RepeatingFloor from "../../../environment/RepeatingFloor";
 import { PointLight } from "../../../lighting-and-vision/PointLight";
@@ -31,7 +43,21 @@ const DOORS: WallID[] = [
   [V(-1, 2), true],
 ];
 
-export default class Jeweler implements RoomTemplate {
+const FLOOR_CHOICES = [
+  carpetFloor1,
+  carpetFloor2,
+  woodFloor1,
+  woodFloor2,
+  woodFloor3,
+  woodFloor4,
+  bathroomTilesFloor2,
+  tilesFloor13,
+  tilesFloor14,
+];
+
+export default class Shop implements RoomTemplate {
+  constructor(private outsideFloor: DecorationInfo) {}
+
   getOccupiedCells(): V2d[] {
     return defaultOccupiedCells(DIMENSIONS, DOORS);
   }
@@ -53,15 +79,30 @@ export default class Jeweler implements RoomTemplate {
   ): Entity[] {
     const entities: Entity[] = [];
 
+    const counter = choose(counter1, counter2, counter3);
     entities.push(
-      new Decoration(roomToWorldPosition(V(0.28, 0.28)), jewelryStall)
+      new Decoration(
+        roomToWorldPosition(V(0.5, 0.25)),
+        counter,
+        roomToWorldAngle(0)
+      )
+    );
+
+    entities.push(
+      new Decoration(
+        roomToWorldPosition(V(0.5, 1.7)),
+        shopShelf1,
+        roomToWorldAngle(0)
+      )
     );
     entities.push(
-      new Decoration(roomToWorldPosition(V(1.4, -0.15)), shelfEmpty)
+      new Decoration(
+        roomToWorldPosition(V(1.5, 1.7)),
+        shopShelf1,
+        roomToWorldAngle(0)
+      )
     );
-    entities.push(
-      new Decoration(roomToWorldPosition(V(2.1, -0.15)), shelfJars)
-    );
+
     entities.push(
       new PointLight({
         radius: 6,
@@ -73,13 +114,31 @@ export default class Jeweler implements RoomTemplate {
       DIMENSIONS.sub(V(1, 1)).mul(0.5)
     );
     const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
-    entities.push(
-      new RepeatingFloor(
-        bathroomTilesFloor5,
-        centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
-        dimensionsWorldCoords
-      )
+
+    const floorInfo = {
+      ...choose(
+        ...FLOOR_CHOICES.filter(
+          (f) => f.imageName != this.outsideFloor.imageName
+        )
+      ),
+      rotation: rCardinal(),
+    };
+
+    const floor = new RepeatingFloor(
+      floorInfo,
+      centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
+      dimensionsWorldCoords
     );
+    if (
+      floorInfo.imageName == carpetFloor1.imageName ||
+      floorInfo.imageName == carpetFloor2.imageName
+    ) {
+      floor.sprite.tint = rgbToHex(
+        hsvToRgb({ h: rUniform(0, 1), s: 0.6, v: 0.7 })
+      );
+    }
+
+    entities.push(floor);
 
     return entities;
   }

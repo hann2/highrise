@@ -2,6 +2,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { rBool } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
+import { Persistence } from "../constants/constants";
 import { getNearestVisibleEnemy, testLineOfSight } from "../utils/visionUtils";
 import Gun from "../weapons/guns/Gun";
 import Human from "./Human";
@@ -11,6 +12,7 @@ const MAX_SHOOT_DISTANCE = 10; // meters
 // Controller for a human that is in the party
 export default class AllyHumanController extends BaseEntity implements Entity {
   tags = ["ally_controller"];
+  persistenceLevel = Persistence.Game;
 
   lastSeenPositionOfLeader?: V2d;
 

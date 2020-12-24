@@ -26,7 +26,9 @@ export default class Decoration extends BaseEntity implements Entity {
     position: V2d,
     decorationInfo: DecorationInfo,
     angle: number = 0,
-    layerName?: Layer
+    layerName?: Layer,
+    flipX: boolean = false,
+    flipY: boolean = false
   ) {
     super();
 
@@ -40,6 +42,13 @@ export default class Decoration extends BaseEntity implements Entity {
     this.sprite.position.set(...position);
     const scale = decorationInfo.heightMeters / texture.height;
     this.sprite.scale.set(scale);
+
+    if (flipX) {
+      this.sprite.scale.x *= -1;
+    }
+    if (flipY) {
+      this.sprite.scale.y *= -1;
+    }
 
     if (decorationInfo.isSolid) {
       const { width, height } = this.sprite;

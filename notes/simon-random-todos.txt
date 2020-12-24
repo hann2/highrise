@@ -3,12 +3,12 @@
 
 Sprites to Fix in order of amount they bother me most:
 
-- Sack
 - Shop tables
 - Chad (I feel like his lines just aren't very distinct)
 
 
 Other gameplay things that bother me
+- AI Breaks on new level
 - We get a bunch of the same sound playing on top of each other with zombies
 - Melee weapons don't feel great
 - Human collision detection doesn't match sprite
@@ -21,7 +21,7 @@ Polish things to add:
 
 Ally AI Ideas
 - Make AI a state machine
-- Run away when zombies are too close
+- Push zombies when they're too close
 - Pick up better guns when they see them
 - Call out health packs when they see them
 
@@ -36,7 +36,5 @@ Ideas for performance improvements
 
 Code cleanliness things that bug me
 - Lots of duplicated code in:
-  - Enemies
   - Projectiles
   - Flesh/Goo/Blood/Impact stuff
-- We need more fine-grained control over entity persistence
