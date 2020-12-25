@@ -10,6 +10,7 @@ import { DustyRusty } from "./DustyRusty";
 import { Kyle } from "./Kyle";
 import { LuckyJack } from "./LuckyJack";
 import { Nancy } from "./Nancy";
+import { Santa } from "./Santa";
 import { Simon } from "./Simon";
 import { Takeshi } from "./Takeshi";
 import { Wendy } from "./Wendy";
@@ -51,6 +52,7 @@ export const CHARACTERS = [
   Kyle,
   LuckyJack,
   Nancy,
+  Santa,
   Simon,
   Takeshi,
   Wendy,
