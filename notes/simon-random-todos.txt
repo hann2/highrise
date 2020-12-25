@@ -1,16 +1,18 @@
 
 
 
-Sprites to Fix in order of amount they bother me most:
+Critical Features For Release
+- A victory level
+- 
 
-- Chad (I feel like his lines just aren't very distinct)
 
-
-Other gameplay things that bother me
+Misc gameplay things that bother me
 - We get a bunch of the same sound playing on top of each other with zombies
 - Melee weapons don't feel great
 - Human collision detection doesn't match sprite
 - Can't navigate menus with controller
+- Necromancer movement is borked
+
 
 Polish things to add:
 - Highlight interactable objects, especially ones in range
@@ -19,9 +21,6 @@ Polish things to add:
 
 Ally AI Ideas
 - Make AI a state machine
-- Push zombies when they're too close
-- Pick up better guns when they see them
-- Call out health packs when they see them
 
 
 Ideas for performance improvements

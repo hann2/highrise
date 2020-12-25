@@ -2,14 +2,15 @@ import Entity from "../../../core/entity/Entity";
 import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { LEVEL_SIZE } from "../../constants/constants";
-import Decoration from "../../environment/Decoration";
-import { waterCooler } from "../../environment/decorations/decorations";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
-import VendingMachine from "../../environment/furniture-plus/VendingMachine";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
+import LevelTemplate from "../level-templates/LevelTemplate";
 import CellGrid from "./CellGrid";
 
-export function fillNubbies(cellGrid: CellGrid): Entity[] {
+export function fillNubbies(
+  cellGrid: CellGrid,
+  levelTemplate: LevelTemplate
+): Entity[] {
   const entities: Entity[] = [];
 
   for (let i = 0; i < LEVEL_SIZE; i++) {
@@ -38,34 +39,9 @@ export function fillNubbies(cellGrid: CellGrid): Entity[] {
         cellGrid.cells[i][j].content = content;
         const wallDirection = openDirection!;
 
-        if (rBool(0.5)) {
-          entities.push(
-            new OverheadLight(CellGrid.levelCoordToWorldCoord(cell), {
-              intensity: 0.2,
-            })
-          );
-        }
-
-        if (content === "vending") {
-          // Fill with vending machine
-          const machinePosition = cell.sub(wallDirection.mul(0.1));
-
-          entities.push(
-            new VendingMachine(
-              CellGrid.levelCoordToWorldCoord(machinePosition),
-              wallDirection.angle + Math.PI / 2
-            )
-          );
-        } else if (content === "water-cooler") {
-          const machinePosition = cell.sub(wallDirection.mul(0.13));
-          entities.push(
-            new Decoration(
-              CellGrid.levelCoordToWorldCoord(machinePosition),
-              waterCooler,
-              wallDirection.angle
-            )
-          );
-        }
+        entities.push(
+          ...levelTemplate.getNubbyDecorations(cell, wallDirection)
+        );
       }
     }
   }

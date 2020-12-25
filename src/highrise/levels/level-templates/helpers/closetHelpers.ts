@@ -13,7 +13,7 @@ import CellGrid, { Closet } from "../../level-generation/CellGrid";
 
 type ClosetDecorator = (closet: Closet) => Entity[];
 
-export const closetDecorators: Array<ClosetDecorator> = [
+export const CLOSET_DECORATORS: Array<ClosetDecorator> = [
   (closet) => [
     new Decoration(
       CellGrid.levelCoordToWorldCoord(

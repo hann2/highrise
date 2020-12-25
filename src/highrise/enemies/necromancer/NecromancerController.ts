@@ -95,7 +95,7 @@ export default class NecromancerController
         this.objective = "ATTACK";
         break;
       case "ATTACK":
-        this.necromancer.attack();
+        this.necromancer.fireDeathOrb();
         this.objective = "SURROUND";
         break;
       case "SURROUND":

@@ -1,14 +1,20 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { rBool } from "../../core/util/Random";
+import { rBool, rUniform } from "../../core/util/Random";
+import { BaseEnemy } from "../enemies/base/Enemy";
+import Interactable from "../environment/Interactable";
 import { getNearestVisibleEnemy } from "../utils/visionUtils";
 import Gun from "../weapons/guns/Gun";
+import { FireMode } from "../weapons/guns/GunStats";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
-import { BaseEnemy } from "../enemies/base/Enemy";
-import Human from "./Human";
-import Interactable from "../environment/Interactable";
+import Human, { PUSH_RANGE } from "./Human";
 
 const MAX_ATTACK_DISTANCE = 10; // meters
+
+const MIN_TRIGGER_COOLDOWN = 0.0;
+const MAX_TRIGGER_COOLDOWN = 0.4;
+const AVG_BURST_AMOUNT = 6;
+
 // Controller for a human that is waiting to be found
 export default class SurvivorHumanController
   extends BaseEntity
@@ -22,6 +28,7 @@ export default class SurvivorHumanController
 
   // The interaction target to make this human follow the player
   interactable: Interactable;
+  triggerOnCooldown: boolean = false;
 
   constructor(human: Human) {
     super();
@@ -71,11 +78,29 @@ export default class SurvivorHumanController
         .getPosition()
         .isub(this.human.getPosition());
 
-      this.human.setDirection(displacement.angle);
+      const direction = displacement.angle;
+      const distance = displacement.magnitude;
+
+      this.human.setDirection(direction);
+
+      if (distance < PUSH_RANGE && this.human.canPush()) {
+        this.human.push();
+      }
 
       if (weapon instanceof Gun) {
-        if (weapon.canShoot() && rBool(0.4)) {
+        if (weapon.canShoot() && !this.triggerOnCooldown) {
           this.human.useWeapon();
+          if (
+            weapon.stats.fireMode != FireMode.FULL_AUTO ||
+            rBool(1 / AVG_BURST_AMOUNT)
+          ) {
+            this.triggerOnCooldown = true;
+            this.wait(
+              rUniform(MIN_TRIGGER_COOLDOWN, MAX_TRIGGER_COOLDOWN)
+            ).then(() => {
+              this.triggerOnCooldown = false;
+            });
+          }
         }
       } else if (weapon instanceof MeleeWeapon) {
         const maxReach = weapon.stats.size[1] + weapon.swing.maxExtension;

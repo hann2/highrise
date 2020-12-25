@@ -13,19 +13,22 @@ import NecromancerSprite from "./NecromancerSprite";
 
 export const NECROMANCER_RADIUS = 0.5;
 
-const SPEED = 40;
+const SPEED = 12;
 const HEALTH = 2000;
 
 const WINDUP_TIME = 1; // Time in animation from beginning of attack to doing damage
 const WINDDOWN_TIME = 0.2; // Time in animation from doing damage to end of attack
 const COOLDOWN_TIME = 3; // Time after windown before starting another attack
+const MAX_MINIONS = 8; // Maximum number of zombies to have at once
 
 type AbilityName = keyof Necromancer["abilities"];
 
 export default class Necromancer extends BaseEnemy {
   hp: number = HEALTH;
-  walkSpeed: number = rNormal(SPEED, SPEED / 5);
+  walkSpeed: number = SPEED;
   walkFriction: number = 0.3;
+
+  minions: BaseEnemy[] = [];
 
   constructor(
     position: V2d,
@@ -101,6 +104,11 @@ export default class Necromancer extends BaseEnemy {
     }
   }
 
+  getMinionCount(): number {
+    this.minions = this.minions.filter((minion) => !minion.isDestroyed);
+    return this.minions.length;
+  }
+
   // TODO: I'm not sure that this refactoring was actually beneficial. It seems like it might be more limiting
   // than what was here before without much benefit
 
@@ -126,18 +134,19 @@ export default class Necromancer extends BaseEnemy {
       cooldownDuration: COOLDOWN_TIME,
 
       onAttack: (direction: V2d = polarToVec(rUniform(0, 2 * Math.PI), 1)) => {
-        const nZombies = 5;
+        const nZombies = Math.min();
         const separation = Math.PI / 5;
         const angles: number[] = [];
         for (let i = 0; i < nZombies; i++) {
           angles.push(normalizeAngle(separation * (i - nZombies / 2)));
         }
 
-        this.game!.addEntities(
-          angles.map(
-            (a) => new Zombie(this.getPosition().add(direction.rotate(a)))
-          )
-        );
+        const zombies = angles
+          .map((angle) => this.getPosition().add(direction.rotate(angle)))
+          .map((position) => new Zombie(position));
+
+        this.minions.push(...zombies);
+        this.game!.addEntities(zombies);
       },
     }),
 
@@ -158,9 +167,11 @@ export default class Necromancer extends BaseEnemy {
           );
         }
 
-        this.game!.addEntities(
-          angles.map((a) => new Crawler(targetPosition.add(polarToVec(a, 2))))
-        );
+        const crawlers = angles
+          .map((angle) => targetPosition.add(polarToVec(angle, 2)))
+          .map((position) => new Crawler(position));
+        this.minions.push(...crawlers);
+        this.game!.addEntities(crawlers);
       },
     }),
   };

@@ -5,9 +5,9 @@ import { clamp } from "../util/MathUtil";
 import { V, V2d } from "../Vector";
 import { SoundInstance, SoundOptions } from "./SoundInstance";
 
-const FALL_OFF = 0.025; // dB / meter or something
-const MAX_SPREAD = 0.95; // maximum pan (0-1)
-const SPREAD_DISTANCE = 10; // meters
+const FALL_OFF = 0.035; // dB / meter or something
+const MAX_SPREAD = 0.99; // maximum pan (0-1)
+const SPREAD_DISTANCE = 10; // meters to the maximum spread
 
 /**
  * Represents a currently playing sound.

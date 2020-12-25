@@ -16,7 +16,7 @@ import Human, { PUSH_RANGE } from "./Human";
 const FOLLOW_DISTANCE = 2; // meters
 const MAX_SHOOT_DISTANCE = 10; // meters
 
-const MIN_TRIGGER_COOLDOWN = 0.1;
+const MIN_TRIGGER_COOLDOWN = 0.0;
 const MAX_TRIGGER_COOLDOWN = 0.4;
 const AVG_BURST_AMOUNT = 6;
 
@@ -33,58 +33,67 @@ export default class AllyHumanController extends BaseEntity implements Entity {
   }
 
   onTick() {
+    const human = this.human;
+    const leader = this.getLeader();
     // If our human dies/gets removed, we shouldn't be here anymore
-    if (!this.human.game) {
+    if (!human.game) {
       this.destroy();
       return;
     }
 
-    if (this.human === this.leader) {
+    if (human === leader) {
       return;
     }
 
-    const weapon = this.human.weapon;
+    const weapon = human.weapon;
 
     // pick stuff up if possible
-    const nearestInteractable = this.human.getNearbyInteractables()[0];
+    const nearestInteractable = human.getNearbyInteractables()[0];
     if (nearestInteractable) {
       if (nearestInteractable.parent instanceof HealthPickup) {
-        if (this.human.hp < this.human.maxHp) {
-          this.human.interactWithNearest();
+        if (leader.hp < human.hp) {
+          // make sure leader gets healing priority
+          human.voice.speak("lookHere");
+        } else if (human.hp < human.maxHp) {
+          human.interactWithNearest();
         }
       } else if (nearestInteractable.parent instanceof WeaponPickup) {
-        if (shouldSwapWeapon(weapon, nearestInteractable.parent.weapon)) {
-          this.human.interactWithNearest();
+        const otherWeapon = nearestInteractable.parent.weapon;
+        if (weaponIsMoreDesirable(leader.weapon, otherWeapon)) {
+          // Make sure player gets gun priority
+          human.voice.speak("lookHere");
+        } else if (weaponIsMoreDesirable(weapon, otherWeapon)) {
+          human.interactWithNearest();
         }
       }
     }
 
     const nearestVisibleZombie = getNearestVisibleEnemy(
       this.game!,
-      this.human,
+      human,
       MAX_SHOOT_DISTANCE
     );
 
     if (weapon instanceof Gun && weapon.ammo === 0 && !weapon.isReloading) {
-      this.human.reload();
+      human.reload();
     }
 
     if (nearestVisibleZombie) {
       const displacement = nearestVisibleZombie
         .getPosition()
-        .isub(this.human.getPosition());
+        .isub(human.getPosition());
       const direction = displacement.angle;
       const distance = displacement.magnitude;
 
-      this.human.setDirection(direction);
+      human.setDirection(direction);
 
-      if (distance < PUSH_RANGE && this.human.canPush()) {
-        this.human.push();
+      if (distance < PUSH_RANGE && human.canPush()) {
+        human.push();
       }
 
       if (weapon instanceof Gun) {
         if (weapon.canShoot() && !this.triggerOnCooldown) {
-          this.human.useWeapon();
+          human.useWeapon();
           if (
             weapon.stats.fireMode != FireMode.FULL_AUTO ||
             rBool(1 / AVG_BURST_AMOUNT)
@@ -98,30 +107,26 @@ export default class AllyHumanController extends BaseEntity implements Entity {
           }
         }
       } else {
-        this.human.useWeapon();
+        human.useWeapon();
       }
-    } else if (this.leader) {
-      if (testLineOfSight(this.human, this.leader)) {
-        this.lastSeenPositionOfLeader = this.leader.getPosition();
+    } else if (leader) {
+      if (testLineOfSight(human, leader)) {
+        this.lastSeenPositionOfLeader = leader.getPosition();
         const direction = this.lastSeenPositionOfLeader.sub(
-          this.human.getPosition()
+          human.getPosition()
         );
-        this.human.setDirection(direction.angle);
+        human.setDirection(direction.angle);
         const distance = direction.magnitude;
         if (distance > FOLLOW_DISTANCE) {
-          this.human.walk(direction.inormalize());
+          human.walk(direction.inormalize());
         }
       } else if (this.lastSeenPositionOfLeader) {
         const direction = this.lastSeenPositionOfLeader.sub(
-          this.human.getPosition()
+          human.getPosition()
         );
-        this.human.walk(direction.inormalize());
+        human.walk(direction.inormalize());
       }
     }
-  }
-
-  get leader() {
-    return this.getLeader();
   }
 }
 
@@ -129,7 +134,7 @@ export function isAllyController(e: Entity): e is AllyHumanController {
   return e instanceof AllyHumanController;
 }
 
-function shouldSwapWeapon(
+function weaponIsMoreDesirable(
   currentWeapon: Weapon | undefined,
   otherWeapon: Weapon
 ): boolean {

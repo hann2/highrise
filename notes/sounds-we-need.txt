@@ -5,6 +5,5 @@ Menu Sounds?
  - Click on menu items
 
 Enemy Sounds
- - Spitter
  - Necromancer
  - 

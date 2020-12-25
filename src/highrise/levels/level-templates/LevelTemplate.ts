@@ -1,6 +1,11 @@
 import Entity from "../../../core/entity/Entity";
 import { hsvToRgb, rgbToHex } from "../../../core/util/ColorUtils";
-import { choose, rUniform, seededShuffle } from "../../../core/util/Random";
+import {
+  choose,
+  rBool,
+  rUniform,
+  seededShuffle,
+} from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import Heavy from "../../enemies/heavy/Heavy";
 import Spitter from "../../enemies/spitter/Spitter";
@@ -12,6 +17,7 @@ import {
   cementFloor,
 } from "../../environment/decorations/decorations";
 import HealthPickup from "../../environment/HealthPickup";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import WeaponPickup from "../../environment/WeaponPickup";
 import Human from "../../human/Human";
@@ -20,13 +26,14 @@ import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import Gun from "../../weapons/guns/Gun";
 import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
 import { Glock } from "../../weapons/guns/gun-stats/Glock";
-import { GUNS, GUN_TIERS } from "../../weapons/guns/gun-stats/gunStats";
+import { GUN_TIERS } from "../../weapons/guns/gun-stats/gunStats";
 import { M1911 } from "../../weapons/guns/gun-stats/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
-import { Closet } from "../level-generation/CellGrid";
+import CellGrid, { Closet } from "../level-generation/CellGrid";
 import RoomTemplate from "../rooms/RoomTemplate";
-import { closetDecorators } from "./helpers/closetHelpers";
+import { CLOSET_DECORATORS } from "./helpers/closetHelpers";
+import { NUBBY_DECORATORS } from "./helpers/nubbyHelpers";
 
 type PickupMaker = (location: V2d) => Entity | Entity[];
 export default class LevelTemplate {
@@ -43,8 +50,26 @@ export default class LevelTemplate {
   }
 
   // Returns a list of entities to put in a closet
-  getClosetDecorations(counter: number, closet: Closet): Entity[] {
-    return closetDecorators[counter % closetDecorators.length](closet);
+  getClosetDecorations(closetIndex: number, closet: Closet): Entity[] {
+    return CLOSET_DECORATORS[closetIndex % CLOSET_DECORATORS.length](closet);
+  }
+
+  getNubbyDecorations(cell: V2d, wallDirection: V2d): Entity[] {
+    const entities = [];
+
+    if (rBool(0.5)) {
+      entities.push(
+        new OverheadLight(CellGrid.levelCoordToWorldCoord(cell), {
+          intensity: 0.2,
+        })
+      );
+    }
+
+    if (rBool(0.8)) {
+      entities.push(...choose(...NUBBY_DECORATORS)(cell, wallDirection));
+    }
+
+    return entities;
   }
 
   // Creates the base floor entity for this level

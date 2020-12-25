@@ -70,7 +70,7 @@ export default class SpawnRoom implements RoomTemplate {
       ? new MeleeWeapon(choose(...MELEE_WEAPONS))
       : new Gun(choose(...GUN_TIERS[0]));
     entities.push(
-      new WeaponPickup(roomToWorldPosition(V(1, 0.25)), starterWeapon)
+      new WeaponPickup(roomToWorldPosition(V(0.5, 0.25)), starterWeapon)
     );
 
     // Better guns on future levels
@@ -79,28 +79,41 @@ export default class SpawnRoom implements RoomTemplate {
         // Only starter
         break;
       case 2:
-        new WeaponPickup(
-          roomToWorldPosition(V(2, 0.25)),
-          new Gun(choose(...GUN_TIERS[1]))
+        entities.push(
+          new WeaponPickup(
+            roomToWorldPosition(V(1.5, 0.25)),
+            new Gun(choose(...GUN_TIERS[1]))
+          )
         );
         break;
       case 3:
+        entities.push(
+          new WeaponPickup(
+            roomToWorldPosition(V(1.5, 0.25)),
+            new Gun(choose(...GUN_TIERS[1], ...GUN_TIERS[2]))
+          )
+        );
+        break;
       case 4:
-        new WeaponPickup(
-          roomToWorldPosition(V(2, 0.25)),
-          new Gun(choose(...GUN_TIERS[2]))
+        entities.push(
+          new WeaponPickup(
+            roomToWorldPosition(V(1.5, 0.25)),
+            new Gun(choose(...GUN_TIERS[2]))
+          )
         );
         break;
       case 5:
-        new WeaponPickup(
-          roomToWorldPosition(V(2, 0.25)),
-          new Gun(choose(...GUN_TIERS[3]))
+        entities.push(
+          new WeaponPickup(
+            roomToWorldPosition(V(1.5, 0.25)),
+            new Gun(choose(...GUN_TIERS[3]))
+          )
         );
       default:
     }
 
     if (this.levelIndex > 1) {
-      new HealthPickup(roomToWorldPosition(V(0.75, 1.25)));
+      entities.push(new HealthPickup(roomToWorldPosition(V(0.75, 1.25))));
     }
 
     entities.push(

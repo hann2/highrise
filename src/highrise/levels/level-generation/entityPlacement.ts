@@ -39,7 +39,7 @@ export function generateLevelEntities(
     entities: closetEntities,
     potentialEnemyLocations: potentialClosetEnemyLocations,
   } = fillClosets(cellGrid, levelTemplate, seed);
-  const nubbyEntities = fillNubbies(cellGrid);
+  const nubbyEntities = fillNubbies(cellGrid, levelTemplate);
   const hallwayLights = addHallwayLights(cellGrid);
   const hallwayEnemyLocations = findEnemyLocations(cellGrid);
   const doors = cellGrid.doors.map((d) => buildDoorEntity(cellGrid, d));
