@@ -9,7 +9,7 @@ import EnemyVoice from "../base/EnemyVoice";
 import SpitterController from "./SpitterController";
 import SpitterSprite from "./SpitterSprite";
 
-const SPEED = 0.3;
+const SPEED = 0.175;
 const HEALTH = 100;
 
 const FRICTION = 0.1;

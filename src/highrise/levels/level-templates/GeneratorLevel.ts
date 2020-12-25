@@ -19,7 +19,7 @@ export default class GeneratorLevel extends LevelTemplate {
     rooms.push(...makeBathroomPair(seed));
     rooms.push(
       new TransformedRoomTemplate(
-        new ZombieRoomTemplate(),
+        new ZombieRoomTemplate(this.levelIndex),
         shuffledOrientations[2]
       )
     );

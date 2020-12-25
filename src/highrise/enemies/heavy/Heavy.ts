@@ -17,7 +17,7 @@ import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import HeavySprite from "./HeavySprite";
 
-const SPEED = 0.2;
+const SPEED = 0.175;
 export const HEAVY_RADIUS = ZOMBIE_RADIUS * 1.5;
 const HEALTH = 1000;
 const ATTACK_RANGE = HUMAN_RADIUS + HEAVY_RADIUS + 0.3;

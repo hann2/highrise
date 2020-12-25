@@ -17,7 +17,7 @@ import Crawler from "../crawler/Crawler";
 import ZombieSprite from "./ZombieSprite";
 import { ZombieVariant, ZOMBIE_VARIANTS } from "./ZombieVariants";
 
-const SPEED = 0.4;
+const SPEED = 0.2;
 
 const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;
 const ATTACK_ANGLE_RANGE = degToRad(90);

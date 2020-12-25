@@ -42,7 +42,7 @@ import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
 
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
-const SPEED = 3.5; // arbitrary units
+const SPEED = 2.0; // arbitrary units
 const HURT_SPEED = 3.0; // Speed while hurt
 const FRICTION = 0.4; // arbitrary units
 const MAX_HEALTH = 100;

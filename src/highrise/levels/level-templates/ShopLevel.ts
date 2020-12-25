@@ -56,6 +56,6 @@ export default class ShopLevel extends LevelTemplate {
   }
 
   getAmbientLight(): AmbientLight {
-    return new AmbientLight(0x444444);
+    return new AmbientLight(0x777777);
   }
 }

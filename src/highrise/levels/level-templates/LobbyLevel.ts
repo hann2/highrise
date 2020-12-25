@@ -18,7 +18,7 @@ export default class LobbyLevel extends LevelTemplate {
     rooms.push(...makeBathroomPair(seed));
     rooms.push(
       new TransformedRoomTemplate(
-        new ZombieRoomTemplate(),
+        new ZombieRoomTemplate(this.levelIndex),
         shuffledOrientations[2]
       )
     );
@@ -27,6 +27,6 @@ export default class LobbyLevel extends LevelTemplate {
   }
 
   getAmbientLight(): AmbientLight {
-    return new AmbientLight(0x060606);
+    return new AmbientLight(0x777777);
   }
 }

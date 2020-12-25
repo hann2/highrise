@@ -63,7 +63,7 @@ export default class MaintenanceLevel extends LevelTemplate {
     );
     rooms.push(
       new TransformedRoomTemplate(
-        new ZombieRoomTemplate(),
+        new ZombieRoomTemplate(this.levelIndex),
         shuffledOrientations[2]
       )
     );

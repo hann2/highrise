@@ -20,6 +20,8 @@ const DOORS: WallID[] = [
 ];
 
 export default class ZombieRoomTemplate implements RoomTemplate {
+  constructor(private levelIndex: number) {}
+
   getOccupiedCells(): V2d[] {
     return defaultOccupiedCells(DIMENSIONS, DOORS);
   }
@@ -40,13 +42,24 @@ export default class ZombieRoomTemplate implements RoomTemplate {
     roomToWorldDimensions: DimensionsTransformer
   ): Entity[] {
     const entities: Entity[] = [];
+
     for (let i = 0; i < DIMENSIONS.x; i++) {
       for (let j = 0; j < DIMENSIONS.y; j++) {
         const p = V(i, j);
-        entities.push(new Zombie(roomToWorldPosition(p.add(V(0.25, 0.25)))));
-        entities.push(new Zombie(roomToWorldPosition(p.add(V(-0.25, 0.25)))));
-        entities.push(new Zombie(roomToWorldPosition(p.add(V(0.25, -0.25)))));
-        entities.push(new Zombie(roomToWorldPosition(p.add(V(-0.25, -0.25)))));
+        if (this.levelIndex > 1) {
+          entities.push(new Zombie(roomToWorldPosition(p.add(V(0.25, 0.25)))));
+        }
+        if (this.levelIndex > 2) {
+          entities.push(new Zombie(roomToWorldPosition(p.add(V(-0.25, 0.25)))));
+        }
+        if (this.levelIndex > 3) {
+          entities.push(new Zombie(roomToWorldPosition(p.add(V(0.25, -0.25)))));
+        }
+        if (this.levelIndex > 4) {
+          entities.push(
+            new Zombie(roomToWorldPosition(p.add(V(-0.25, -0.25))))
+          );
+        }
       }
     }
     entities.push(
