@@ -86,14 +86,18 @@ export default class LevelTemplate {
     const entities: Entity[] = [];
     const shuffled = seededShuffle(locations, seed);
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 10 + this.levelIndex * 4; i++) {
       entities.push(new Zombie(shuffled[i]));
     }
 
-    entities.push(new Spitter(shuffled[20]));
-    entities.push(new Spitter(shuffled[21]));
-    entities.push(new Spitter(shuffled[22]));
-    entities.push(new Heavy(shuffled[23]));
+    if (this.levelIndex > 2) {
+      entities.push(new Spitter(shuffled[20]));
+      entities.push(new Spitter(shuffled[21]));
+    }
+    if (this.levelIndex > 3) {
+      entities.push(new Spitter(shuffled[22]));
+      entities.push(new Heavy(shuffled[23]));
+    }
 
     return entities;
   }

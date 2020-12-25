@@ -35,3 +35,10 @@ Code cleanliness things that bug me
 - Lots of duplicated code in:
   - Projectiles
   - Flesh/Goo/Blood/Impact stuff
+
+
+Notes From Eric
+- Too hard at first
+- Too dark to figure out what's going on
+- Too fast paced
+- AI gets stuck on furniture
