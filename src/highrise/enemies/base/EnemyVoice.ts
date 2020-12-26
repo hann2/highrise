@@ -4,6 +4,7 @@ import { SoundName } from "../../../core/resources/sounds";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
+import SpeakingCircle from "../../hud/SpeakingCircle";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 
 type EnemySoundRings = {
@@ -21,11 +22,16 @@ export interface EnemySounds {
 export default class EnemyVoice extends BaseEntity implements Entity {
   currentSound?: PositionalSound;
   sounds: EnemySoundRings;
+  speakingCircle: SpeakingCircle;
 
   constructor(public getPosition: () => V2d, sounds: EnemySounds) {
     super();
 
     this.sounds = makeSoundRings(sounds);
+
+    this.speakingCircle = this.addChild(
+      new SpeakingCircle(getPosition, 0xaa0000)
+    );
   }
 
   onTick(dt: number) {
@@ -34,6 +40,8 @@ export default class EnemyVoice extends BaseEntity implements Entity {
     if (this.currentSound?.isDestroyed) {
       this.currentSound = undefined;
     }
+
+    this.speakingCircle.active = Boolean(this.currentSound);
   }
 
   speak(soundClass: keyof EnemySounds, interrupt: boolean = false) {

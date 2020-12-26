@@ -3,7 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { SoundName } from "../../core/resources/sounds";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { CharacterSoundClass, CharacterSounds } from "../characters/Character";
-import SpeakingCircle from "../effects/SpeakingCircle";
+import SpeakingCircle from "../hud/SpeakingCircle";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import Human from "./Human";
 
@@ -17,7 +17,9 @@ export default class HumanVoice extends BaseEntity implements Entity {
 
     this.sounds = makeSoundRings(human.character.sounds);
 
-    this.speakingCircle = this.addChild(new SpeakingCircle(human));
+    this.speakingCircle = this.addChild(
+      new SpeakingCircle(() => human.getPosition())
+    );
   }
 
   onTick() {
