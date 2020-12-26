@@ -142,4 +142,17 @@ export default class LevelTemplate {
 
     return pickups;
   }
+
+  generateHallwayLight(positionLevelCoords: V2d): OverheadLight | undefined {
+    const [i, j] = positionLevelCoords;
+    if ((i + j) % 2 == 0 && rBool(0.95)) {
+      return new OverheadLight(
+        CellGrid.levelCoordToWorldCoord(positionLevelCoords),
+        {
+          radius: 5,
+          intensity: 0.3,
+        }
+      );
+    }
+  }
 }

@@ -1,6 +1,6 @@
 import img_chainLinkFence from "../../../../resources/images/environment/chain-link-fence.png";
 import Entity from "../../../core/entity/Entity";
-import { rBool, rInteger } from "../../../core/util/Random";
+import { rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 import Exit from "../../environment/Exit";
@@ -40,7 +40,7 @@ export function generateLevelEntities(
     potentialEnemyLocations: potentialClosetEnemyLocations,
   } = fillClosets(cellGrid, levelTemplate, seed);
   const nubbyEntities = fillNubbies(cellGrid, levelTemplate);
-  const hallwayLights = addHallwayLights(cellGrid);
+  const hallwayLights = addHallwayLights(cellGrid, levelTemplate);
   const hallwayEnemyLocations = findEnemyLocations(cellGrid);
   const doors = cellGrid.doors.map((d) => buildDoorEntity(cellGrid, d));
 
@@ -115,7 +115,10 @@ function findEnemyLocations(cellGrid: CellGrid): V2d[] {
   return locations;
 }
 
-function addHallwayLights(cellGrid: CellGrid): Entity[] {
+function addHallwayLights(
+  cellGrid: CellGrid,
+  levelTemplate: LevelTemplate
+): Entity[] {
   const entities: Entity[] = [];
 
   for (let i = 0; i < LEVEL_SIZE; i++) {
@@ -123,12 +126,9 @@ function addHallwayLights(cellGrid: CellGrid): Entity[] {
       if (cellGrid.cells[i][j].content) {
         continue;
       }
-      if ((i + j) % 2 == 0 && rBool(0.95)) {
-        entities.push(
-          new OverheadLight(CellGrid.levelCoordToWorldCoord(V(i, j)), {
-            intensity: 0.3,
-          })
-        );
+      const l = levelTemplate.generateHallwayLight(V(i, j));
+      if (l) {
+        entities.push(l);
       }
     }
   }
