@@ -1,4 +1,5 @@
 import { choose, seededShuffle, shuffle } from "../../../core/util/Random";
+import { V2d } from "../../../core/Vector";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import {
   carpetFloor1,
@@ -10,17 +11,18 @@ import {
   steelFloor4,
   steelFloor5,
 } from "../../environment/decorations/decorations";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
+import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
+import CellGrid from "../level-generation/CellGrid";
+import HoldingRoom from "../rooms/HoldingRoom";
 import LightSwitchRoomTemplate from "../rooms/LightSwitchRoomTemplate";
-import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
 import TransformedRoomTemplate, {
   POSSIBLE_ORIENTATIONS,
 } from "../rooms/TransformedRoomTemplate";
-import ZombieRoomTemplate from "../rooms/ZombieRoomTemplate";
-import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./helpers/levelTemplateHelpers";
-import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
+import LevelTemplate from "./LevelTemplate";
 
 export default class MaintenanceLevel extends LevelTemplate {
   subFloor: DecorationInfo;
@@ -57,14 +59,20 @@ export default class MaintenanceLevel extends LevelTemplate {
     );
     rooms.push(
       new TransformedRoomTemplate(
-        new LightSwitchRoomTemplate(this.roomFloor),
+        new HoldingRoom(this.roomFloor),
         shuffledOrientations[1]
       )
     );
     rooms.push(
       new TransformedRoomTemplate(
-        new ZombieRoomTemplate(this.levelIndex),
+        new HoldingRoom(this.roomFloor),
         shuffledOrientations[2]
+      )
+    );
+    rooms.push(
+      new TransformedRoomTemplate(
+        new HoldingRoom(this.roomFloor),
+        shuffledOrientations[3]
       )
     );
 
@@ -81,5 +89,16 @@ export default class MaintenanceLevel extends LevelTemplate {
 
   makeSubfloor(size: [number, number]) {
     return new RepeatingFloor(this.subFloor, [0, 0], size);
+  }
+
+  generateHallwayLight(positionLevelCoords: V2d): OverheadLight | undefined {
+    return new OverheadLight(
+      CellGrid.levelCoordToWorldCoord(positionLevelCoords),
+      {
+        radius: 5,
+        intensity: 0.7,
+      },
+      false
+    );
   }
 }

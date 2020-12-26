@@ -4,6 +4,8 @@ import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Decoration from "../../environment/Decoration";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
+import { LightSwitch } from "../../environment/lighting/LightSwitch";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import { SparkGenerator } from "../../environment/lighting/SparkGenerator";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
@@ -100,6 +102,49 @@ export default class LightSwitchRoomTemplate implements RoomTemplate {
       )
     );
     entities.push(new SparkGenerator(roomToWorldPosition(V(1, 1))));
+    entities.push(
+      new LightSwitch(roomToWorldPosition(V(-0.4, 1)), roomToWorldAngle(0))
+    );
+    entities.push(
+      new OverheadLight(
+        roomToWorldPosition(V(0.5, 0.5)),
+        {
+          radius: 5,
+          intensity: 0.7,
+        },
+        false
+      )
+    );
+    entities.push(
+      new OverheadLight(
+        roomToWorldPosition(V(1.5, 0.5)),
+        {
+          radius: 5,
+          intensity: 0.7,
+        },
+        false
+      )
+    );
+    entities.push(
+      new OverheadLight(
+        roomToWorldPosition(V(0.5, 1.5)),
+        {
+          radius: 5,
+          intensity: 0.7,
+        },
+        false
+      )
+    );
+    entities.push(
+      new OverheadLight(
+        roomToWorldPosition(V(1.5, 1.5)),
+        {
+          radius: 5,
+          intensity: 0.7,
+        },
+        false
+      )
+    );
     return entities;
   }
 }

@@ -1,6 +1,9 @@
 import snd_elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
 import snd_elevatorDoorClose from "../../../resources/audio/environment/elevator-door-close.flac";
 import snd_elevatorDoorOpen from "../../../resources/audio/environment/elevator-door-open.flac";
+import snd_heavySwitch from "../../../resources/audio/environment/heavy-switch.flac";
+import snd_lightsClickOn from "../../../resources/audio/environment/lights-click-on.flac";
+import snd_powerOn from "../../../resources/audio/environment/power-on.flac";
 import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
@@ -34,6 +37,9 @@ export function getSoundsToPreload(): string[] {
     snd_wallHit2,
     snd_wallHit3,
     snd_wallHit4,
+    snd_heavySwitch,
+    snd_lightsClickOn,
+    snd_powerOn,
 
     ...PIANO_HIT_SOUNDS,
     ...VENDING_MACHINE_HIT_SOUNDS,
