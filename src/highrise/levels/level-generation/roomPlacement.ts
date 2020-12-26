@@ -157,13 +157,10 @@ function addRoom(
   for (const wallBuilder of wallsLevelCoords) {
     // If your chain link fence is on the edge of the level, its going to be a
     //    normal wall.  Is that ok?  Maybe those rooms could specify a constraint that those walls can't be at edge of level
-    const [[i, j], right] = wallBuilder.id;
-    if (right && (i === LEVEL_SIZE - 1 || i === -1)) {
-      continue;
-    } else if (!right && (j === LEVEL_SIZE - 1 || j === -1)) {
-      continue;
+    if (cellGrid.isDestructible(wallBuilder.id)) {
+      const [[i, j], right] = wallBuilder.id;
+      cellGrid.cells[i][j][right ? "rightWall" : "bottomWall"] = wallBuilder;
     }
-    cellGrid.cells[i][j][right ? "rightWall" : "bottomWall"] = wallBuilder;
   }
 
   const doorsLevelCoordinates: DoorBuilder[] = template

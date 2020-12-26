@@ -42,7 +42,7 @@ export default class Heavy extends BaseEnemy {
   }
 
   makeBody(position: [number, number]) {
-    return makeSimpleEnemyBody(position, HEAVY_RADIUS, 4);
+    return makeSimpleEnemyBody(position, HEAVY_RADIUS, 12);
   }
 
   makeVoice() {
