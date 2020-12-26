@@ -12,7 +12,6 @@
     "tsc": "tsc --noEmit",
     "tsc-watch": "tsc --noEmit --watch",
     "generate-asset-types": "./generate-asset-types.js -d ./resources; ./generate-asset-types.js -d ./src",
-    "analyze": "",
     "postinstall": "patch-package",
     "prettier": "prettier --write src"
   },
@@ -33,7 +32,6 @@
     "glslify-bundle": "^5.1.1",
     "glslify-deps": "^1.3.2",
     "parcel-bundler": "^1.12.4",
-    "parcel-plugin-bundle-visualiser": "^1.2.0",
     "patch-package": "^6.2.2",
     "prettier": "^2.2.1",
     "typescript": "^4.1.2",

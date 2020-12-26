@@ -42,3 +42,4 @@ Notes From Eric
 - Too dark to figure out what's going on
 - Too fast paced
 - AI gets stuck on furniture
+- Annoying to not know how much ammo you have
