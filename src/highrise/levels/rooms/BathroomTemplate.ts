@@ -26,9 +26,9 @@ import {
   toilet4,
   toilet5,
 } from "../../environment/decorations/decorations";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import Wall from "../../environment/Wall";
-import { PointLight } from "../../lighting-and-vision/PointLight";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
 import {
   AngleTransformer,
@@ -193,21 +193,17 @@ export default class BathroomTemplate implements RoomTemplate {
     }
 
     entities.push(
-      new PointLight({
+      new OverheadLight(roomToWorldPosition(V(0.35, 1.75)), {
         radius: 7,
         intensity: 0.8,
         color: 0xfafaff,
-        shadowsEnabled: true,
-        position: roomToWorldPosition(V(0.35, 1.75)),
       })
     );
     entities.push(
-      new PointLight({
+      new OverheadLight(roomToWorldPosition(V(0.35, 0.75)), {
         radius: 7,
         intensity: 0.8,
         color: 0xfafaff,
-        shadowsEnabled: true,
-        position: roomToWorldPosition(V(0.35, 0.75)),
       })
     );
     const centerWorldCoords = roomToWorldPosition(

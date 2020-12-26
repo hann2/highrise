@@ -2,6 +2,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { Persistence } from "../constants/constants";
 import PartyManager from "../environment/PartyManager";
+import { AmmoOverlay } from "../hud/AmmoOverlay";
 import { DamagedOverlay } from "../hud/DamagedOverlay";
 import PlayerHumanController from "../human/PlayerHumanController";
 import LightingManager from "../lighting-and-vision/LightingManager";
@@ -38,6 +39,7 @@ export class GameController extends BaseEntity implements Entity {
       game.addEntity(new PlayerHumanController(getPlayer));
       game.addEntity(new VisionController(getPlayer));
       game.addEntity(new DamagedOverlay(getPlayer));
+      game.addEntity(new AmmoOverlay(getPlayer));
       game.addEntity(new LightingManager());
       game.addEntity(new PauseMenu());
     },

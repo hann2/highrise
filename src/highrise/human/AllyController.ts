@@ -22,11 +22,12 @@ const AVG_BURST_AMOUNT = 6;
 
 // Controller for a human that is in the party
 export default class AllyHumanController extends BaseEntity implements Entity {
-  tags = ["ally_controller"];
   persistenceLevel = Persistence.Game;
 
   triggerOnCooldown: boolean = false;
   lastSeenPositionOfLeader?: V2d;
+
+  pickupsCalledOut = new Set<Entity>();
 
   constructor(public human: Human, public getLeader: () => Human) {
     super();
@@ -53,7 +54,10 @@ export default class AllyHumanController extends BaseEntity implements Entity {
       if (nearestInteractable.parent instanceof HealthPickup) {
         if (leader.hp < human.hp) {
           // make sure leader gets healing priority
-          human.voice.speak("lookHere");
+          if (!this.pickupsCalledOut.has(nearestInteractable)) {
+            human.voice.speak("lookHere");
+            this.pickupsCalledOut.add(nearestInteractable);
+          }
         } else if (human.hp < human.maxHp) {
           human.interactWithNearest();
         }
@@ -61,7 +65,10 @@ export default class AllyHumanController extends BaseEntity implements Entity {
         const otherWeapon = nearestInteractable.parent.weapon;
         if (weaponIsMoreDesirable(leader.weapon, otherWeapon)) {
           // Make sure player gets gun priority
-          human.voice.speak("lookHere");
+          if (!this.pickupsCalledOut.has(nearestInteractable)) {
+            human.voice.speak("lookHere");
+            this.pickupsCalledOut.add(nearestInteractable);
+          }
         } else if (weaponIsMoreDesirable(weapon, otherWeapon)) {
           human.interactWithNearest();
         }

@@ -3,7 +3,7 @@
 
 Critical Features For Release
 - A victory level
-- 
+- Something that tells you the controls
 
 
 Misc gameplay things that bother me
@@ -12,6 +12,7 @@ Misc gameplay things that bother me
 - Human collision detection doesn't match sprite
 - Can't navigate menus with controller
 - Necromancer movement is borked
+- You shouldn't have to interact with the exit
 
 
 Polish things to add:
@@ -38,8 +39,8 @@ Code cleanliness things that bug me
 
 
 Notes From Eric
-- Too hard at first
-- Too dark to figure out what's going on
-- Too fast paced
 - AI gets stuck on furniture
 - Annoying to not know how much ammo you have
+- Survivors are too good of shots
+- Now it's too easy
+- Health indicator makes it too hard to see

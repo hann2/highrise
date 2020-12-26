@@ -76,7 +76,6 @@ export default class Human extends BaseEntity implements Entity {
   maxHp: number = MAX_HEALTH;
   hp: number = MAX_HEALTH;
   weapon?: Gun | MeleeWeapon;
-  light?: PointLight;
   humanSprite: HumanSprite;
   voice: HumanVoice;
 

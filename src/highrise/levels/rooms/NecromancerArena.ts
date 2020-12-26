@@ -20,8 +20,8 @@ import {
   rug,
 } from "../../environment/decorations/decorations";
 import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
-import { PointLight } from "../../lighting-and-vision/PointLight";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
 import {
   AngleTransformer,
@@ -122,19 +122,8 @@ export default class NecromancerArena implements RoomTemplate {
     entities.push(new Decoration(roomToWorldPosition(V(2.5, 2)), rug));
 
     entities.push(
-      new PointLight({
-        radius: 10,
-        shadowsEnabled: true,
-        position: roomToWorldPosition(V(1, 1.5)),
-      })
-    );
-
-    entities.push(
-      new PointLight({
-        radius: 10,
-        shadowsEnabled: true,
-        position: roomToWorldPosition(V(4, 1.5)),
-      })
+      new OverheadLight(roomToWorldPosition(V(1, 1.5)), { radius: 10 }),
+      new OverheadLight(roomToWorldPosition(V(4, 1.5)), { radius: 10 })
     );
 
     return entities;

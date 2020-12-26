@@ -13,7 +13,6 @@ import { P2Materials } from "../config/PhysicsMaterials";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
 const SIZE = 0.03; // meters wide
-const SPEED = 4; // average meters / second
 const MAX_SPIN = Math.PI * 20;
 
 const MIN_BOUNCE_SPEED = 1.0; // meters / second

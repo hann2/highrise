@@ -7,6 +7,7 @@ export interface PointLightOptions {
   intensity?: number;
   color?: number;
   shadowsEnabled?: boolean;
+  softShadows?: boolean;
   position?: [number, number];
 }
 
@@ -16,9 +17,10 @@ export class PointLight extends Light {
     intensity = 1.0,
     color = 0xffffff,
     shadowsEnabled = true,
+    softShadows = false,
     position,
   }: PointLightOptions) {
-    super(Sprite.from(img_pointLight), shadowsEnabled);
+    super(Sprite.from(img_pointLight), shadowsEnabled, radius, softShadows);
     this.lightSprite.anchor.set(0.5, 0.5);
     this.lightSprite.blendMode = BLEND_MODES.ADD;
 

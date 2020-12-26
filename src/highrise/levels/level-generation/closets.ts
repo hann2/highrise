@@ -2,8 +2,8 @@ import Entity from "../../../core/entity/Entity";
 import { seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
-import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
 import CellGrid, { Closet } from "./CellGrid";
@@ -106,12 +106,9 @@ export function fillClosets(
     cellGrid.cells[closet.backCell[0]][closet.backCell[1]].content = "pickup";
     const location = closet.backCell.add(closet.backWallDirection.mul(0.5));
     entities.push(
-      new PointLight({
+      new OverheadLight(CellGrid.levelCoordToWorldCoord(location), {
         radius: CELL_WIDTH * 3,
         intensity: 0.5,
-        color: 0xffffff,
-        shadowsEnabled: true,
-        position: CellGrid.levelCoordToWorldCoord(location),
       })
     );
     const entity = f(CellGrid.levelCoordToWorldCoord(location));

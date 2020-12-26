@@ -1,5 +1,5 @@
 import Entity from "../../../../core/entity/Entity";
-import { rgbToHex, hsvToRgb } from "../../../../core/util/ColorUtils";
+import { hsvToRgb, rgbToHex } from "../../../../core/util/ColorUtils";
 import { choose, rCardinal, rUniform } from "../../../../core/util/Random";
 import { V, V2d } from "../../../../core/Vector";
 import Decoration from "../../../environment/Decoration";
@@ -19,8 +19,8 @@ import {
   woodFloor3,
   woodFloor4,
 } from "../../../environment/decorations/decorations";
+import { OverheadLight } from "../../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../../environment/RepeatingFloor";
-import { PointLight } from "../../../lighting-and-vision/PointLight";
 import {
   DoorBuilder,
   WallBuilder,
@@ -104,10 +104,9 @@ export default class Shop implements RoomTemplate {
     );
 
     entities.push(
-      new PointLight({
+      new OverheadLight(roomToWorldPosition(V(1, 1)), {
         radius: 6,
         intensity: 0.6,
-        position: roomToWorldPosition(V(1, 1)),
       })
     );
     const centerWorldCoords = roomToWorldPosition(

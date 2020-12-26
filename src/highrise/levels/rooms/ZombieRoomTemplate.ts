@@ -1,7 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { V, V2d } from "../../../core/Vector";
 import Zombie from "../../enemies/zombie/Zombie";
-import { PointLight } from "../../lighting-and-vision/PointLight";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
 import {
   AngleTransformer,
@@ -63,19 +63,17 @@ export default class ZombieRoomTemplate implements RoomTemplate {
       }
     }
     entities.push(
-      new PointLight({
+      new OverheadLight(roomToWorldPosition(V(0.5, 0.5)), {
         radius: 4,
         intensity: 0.8,
         color: 0xb0e0e6,
-        position: roomToWorldPosition(V(0.5, 0.5)),
       })
     );
     entities.push(
-      new PointLight({
+      new OverheadLight(roomToWorldPosition(V(1.5, 0.5)), {
         radius: 4,
         intensity: 0.8,
         color: 0xb0e0e6,
-        position: roomToWorldPosition(V(1.5, 0.5)),
       })
     );
     return entities;

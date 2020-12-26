@@ -16,9 +16,9 @@ type EntityWithOnRender = Entity & { onRender: Function };
 export const hasOnRender = (e: Entity): e is EntityWithOnRender =>
   Boolean(e.onRender);
 
-type EntityWithOnRender2 = Entity & { onRender2: Function };
-export const hasOnRender2 = (e: Entity): e is EntityWithOnRender2 =>
-  Boolean(e.onRender2);
+type EntityWithOnLateRender = Entity & { onLateRender: Function };
+export const hasOnLateRender = (e: Entity): e is EntityWithOnLateRender =>
+  Boolean(e.onLateRender);
 
 type EntityWithOnTick = Entity & { onTick: Function };
 export const hasOnTick = (e: Entity): e is EntityWithOnTick =>

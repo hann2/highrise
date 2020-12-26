@@ -7,6 +7,7 @@ import {
   seededShuffle,
 } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
+import Crawler from "../../enemies/crawler/Crawler";
 import Heavy from "../../enemies/heavy/Heavy";
 import Spitter from "../../enemies/spitter/Spitter";
 import Zombie from "../../enemies/zombie/Zombie";
@@ -86,8 +87,13 @@ export default class LevelTemplate {
     const entities: Entity[] = [];
     const shuffled = seededShuffle(locations, seed);
 
-    for (let i = 0; i < 10 + this.levelIndex * 4; i++) {
-      entities.push(new Zombie(shuffled[i]));
+    const numZombies = 20 + this.levelIndex * 10;
+    for (let i = 0; i < numZombies; i++) {
+      if (rBool(0.75)) {
+        entities.push(new Zombie(shuffled[i]));
+      } else {
+        entities.push(new Crawler(shuffled[i]));
+      }
     }
 
     if (this.levelIndex > 2) {

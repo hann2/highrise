@@ -1,3 +1,4 @@
+import * as Pixi from "pixi.js";
 import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
 import img_visionFog from "../../../resources/images/lights/vision-fog.png";
 import BaseEntity from "../../core/entity/BaseEntity";
@@ -9,6 +10,8 @@ import Human from "../human/Human";
 import { Shadows } from "./Shadows";
 
 export const MAX_VISION = 10; // meters
+const BLUR_ENABLED = true;
+
 export default class VisionController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
 
@@ -40,6 +43,10 @@ export default class VisionController extends BaseEntity implements Entity {
     this.sprite.addChild(fog);
     this.sprite.addChild(distanceShadows);
     this.sprite.layerName = Layer.VISION;
+
+    if (BLUR_ENABLED) {
+      this.shadows.graphics.filters = [new Pixi.filters.BlurFilter(8)];
+    }
   }
 
   onRender() {

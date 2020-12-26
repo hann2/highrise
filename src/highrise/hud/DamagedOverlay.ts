@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite } from "pixi.js";
+import { BLEND_MODES, Container, Graphics, Sprite } from "pixi.js";
 import img_healthOverlay from "../../../resources/images/effects/health-overlay.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
@@ -24,6 +24,7 @@ export class DamagedOverlay extends BaseEntity implements Entity {
   onAdd() {
     this.baseline = Sprite.from(img_healthOverlay);
     this.baseline.alpha = 0;
+    this.baseline.blendMode = BLEND_MODES.ADD;
     this.sprite.addChild(this.baseline);
     this.resize();
   }

@@ -4,8 +4,8 @@ import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 import Exit from "../../environment/Exit";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import Wall from "../../environment/Wall";
-import { PointLight } from "../../lighting-and-vision/PointLight";
 import { DIAGONAL_DIRECTIONS, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
 import CellGrid, { WallBuilder } from "./CellGrid";
@@ -125,10 +125,8 @@ function addHallwayLights(cellGrid: CellGrid): Entity[] {
       }
       if ((i + j) % 2 == 0 && rBool(0.95)) {
         entities.push(
-          new PointLight({
-            radius: 5,
+          new OverheadLight(CellGrid.levelCoordToWorldCoord(V(i, j)), {
             intensity: 0.3,
-            position: CellGrid.levelCoordToWorldCoord(V(i, j)),
           })
         );
       }

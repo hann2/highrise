@@ -31,7 +31,6 @@ import ElevatorDoor from "../../environment/ElevatorDoor";
 import { Piano } from "../../environment/furniture-plus/Piano";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
-import { PointLight } from "../../lighting-and-vision/PointLight";
 import { CARDINAL_DIRECTIONS, Direction } from "../../utils/directions";
 import CellGrid, {
   DoorBuilder,
@@ -183,13 +182,7 @@ export default class LobbyRoomTemplate implements RoomTemplate {
         )
       );
 
-      entities.push(
-        new PointLight({
-          radius: 5,
-          shadowsEnabled: true,
-          position: roomToWorldPosition(e.cell),
-        })
-      );
+      entities.push(new OverheadLight(roomToWorldPosition(e.cell)));
 
       const doorDimensionsLevelCoords = V(0.25 / CELL_WIDTH, 1);
       const doorDimensionsWorldCoords = doorDimensionsLevelCoords.mul(

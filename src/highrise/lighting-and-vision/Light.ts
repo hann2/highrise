@@ -1,3 +1,4 @@
+import * as Pixi from "pixi.js";
 import { BLEND_MODES, Container, Matrix, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -18,7 +19,8 @@ export default class Light extends BaseEntity implements Entity {
   constructor(
     public lightSprite: Sprite = new Sprite(),
     public shadowsEnabled: boolean = false,
-    public shadowRadius: number = 1
+    public shadowRadius: number = 1,
+    public softShadows: boolean = false
   ) {
     super();
 
@@ -91,6 +93,10 @@ export default class Light extends BaseEntity implements Entity {
       const { x, y } = this.lightSprite.position;
       this.shadows = this.addChild(new Shadows(V(x, y), this.shadowRadius));
       this.container.addChild(this.shadows.graphics);
+
+      if (this.softShadows) {
+        this.shadows.graphics.filters = [new Pixi.filters.BlurFilter(1)];
+      }
     }
   }
 

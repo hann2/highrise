@@ -6,7 +6,7 @@ import {
   hasBody,
   hasOnPause,
   hasOnRender,
-  hasOnRender2,
+  hasOnLateRender,
   hasOnTick,
   hasOnUnpause,
 } from "./EntityFilter";
@@ -28,7 +28,7 @@ export default class EntityList implements Iterable<Entity> {
     this.addFilter(hasAfterPhysics);
     this.addFilter(hasBeforeTick);
     this.addFilter(hasOnRender);
-    this.addFilter(hasOnRender2);
+    this.addFilter(hasOnLateRender);
     this.addFilter(hasOnTick);
     this.addFilter(hasOnPause);
     this.addFilter(hasOnUnpause);
@@ -44,8 +44,8 @@ export default class EntityList implements Iterable<Entity> {
   get withOnRender() {
     return this.getByFilter(hasOnRender);
   }
-  get withOnRender2() {
-    return this.getByFilter(hasOnRender2);
+  get withOnLateRender() {
+    return this.getByFilter(hasOnLateRender);
   }
   get withOnTick() {
     return this.getByFilter(hasOnTick);

@@ -370,9 +370,9 @@ export default class Game {
         console.warn(`entity doesn't have game`);
       }
     }
-    for (const entity of this.entities.withOnRender2) {
+    for (const entity of this.entities.withOnLateRender) {
       if (entity.game) {
-        entity.onRender2(this.renderTimestep);
+        entity.onLateRender(this.renderTimestep);
       }
     }
     // this.renderer2d?.render();

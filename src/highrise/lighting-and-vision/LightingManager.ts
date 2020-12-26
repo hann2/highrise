@@ -114,7 +114,7 @@ export default class LightingManager extends BaseEntity implements Entity {
   }
 
   // Use render 2 so that it happens after everyone else has rendered and all their light positions and stuff are updated
-  onRender2() {
+  onLateRender() {
     const matrix = this.game!.camera.getMatrix();
     // const inverseMatrix = matrix.clone().invert();
     this.lightContainer.transform.setFromMatrix(matrix);

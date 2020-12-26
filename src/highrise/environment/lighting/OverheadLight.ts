@@ -18,6 +18,7 @@ export class OverheadLight extends BaseEntity implements Entity {
         radius: 5,
         intensity: 0.9,
         shadowsEnabled: true,
+        softShadows: true,
         color: 0xffffff,
         ...options,
       })

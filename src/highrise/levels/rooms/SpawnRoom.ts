@@ -6,10 +6,10 @@ import { V, V2d } from "../../../core/Vector";
 import { Layer } from "../../config/layers";
 import { cementFloor } from "../../environment/decorations/decorations";
 import HealthPickup from "../../environment/HealthPickup";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import SpawnLocation from "../../environment/SpawnLocation";
 import WeaponPickup from "../../environment/WeaponPickup";
-import { PointLight } from "../../lighting-and-vision/PointLight";
 import Gun from "../../weapons/guns/Gun";
 import { GUN_TIERS } from "../../weapons/guns/gun-stats/gunStats";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
@@ -53,11 +53,9 @@ export default class SpawnRoom implements RoomTemplate {
     const entities: Entity[] = [];
 
     entities.push(
-      new PointLight({
+      new OverheadLight(roomToWorldPosition(V(1, 1)), {
         radius: 6,
         intensity: 1.0,
-        shadowsEnabled: true,
-        position: roomToWorldPosition(V(1, 1)),
       })
     );
 
