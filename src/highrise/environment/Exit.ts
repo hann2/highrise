@@ -8,6 +8,7 @@ import { CollisionGroups } from "../config/CollisionGroups";
 import { Layer } from "../config/layers";
 import Interactable from "./Interactable";
 import { OverheadLight } from "./lighting/OverheadLight";
+import { getPartyLeader } from "./PartyManager";
 
 export default class Exit extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
@@ -44,12 +45,12 @@ export default class Exit extends BaseEntity implements Entity {
     shape.collisionMask = CollisionGroups.Humans;
     this.body.addShape(shape, [0, 0], 0);
 
-    this.addChild(
-      new Interactable(position, () => {
-        this.game!.dispatch({ type: "levelComplete" });
-      })
-    );
-
     this.addChild(new OverheadLight(position));
+  }
+
+  onBeginContact(other: Entity) {
+    if (other === getPartyLeader(this.game)) {
+      this.game!.dispatch({ type: "levelComplete" });
+    }
   }
 }
