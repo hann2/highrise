@@ -1,3 +1,4 @@
+import snd_chainFence from "../../../../resources/audio/environment/chain-fence.flac";
 import img_chainLinkFence from "../../../../resources/images/environment/chain-link-fence.png";
 import Entity from "../../../core/entity/Entity";
 import { rInteger } from "../../../core/util/Random";
@@ -145,7 +146,8 @@ export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
       0.15,
       0x999999,
       !wallBuilder.chainLink,
-      wallBuilder.chainLink ? img_chainLinkFence : undefined
+      wallBuilder.chainLink ? img_chainLinkFence : undefined,
+      wallBuilder.chainLink ? snd_chainFence : undefined
     );
   } else {
     return new Wall(
@@ -154,7 +156,8 @@ export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
       0.15,
       0x999999,
       !wallBuilder.chainLink,
-      wallBuilder.chainLink ? img_chainLinkFence : undefined
+      wallBuilder.chainLink ? img_chainLinkFence : undefined,
+      wallBuilder.chainLink ? snd_chainFence : undefined
     );
   }
 }

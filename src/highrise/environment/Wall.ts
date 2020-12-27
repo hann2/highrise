@@ -1,8 +1,6 @@
 import { Body, Box, vec2 } from "p2";
 import { BLEND_MODES, Sprite } from "pixi.js";
 import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
-import snd_wallHit4 from "../../../resources/audio/impacts/wall-hit-4.flac";
-import snd_pop1 from "../../../resources/audio/misc/pop1.flac";
 import img_wall1 from "../../../resources/images/environment/wall-1.png";
 import img_wallAo1 from "../../../resources/images/environment/wall-ao-1.png";
 import BaseEntity from "../../core/entity/BaseEntity";
@@ -27,7 +25,8 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     width: number = 0.15,
     private color: number = 0x999999,
     blocksVision: boolean = true,
-    imageName: string = img_wall1
+    imageName: string = img_wall1,
+    private collisionSoundName?: string
   ) {
     super();
 
@@ -93,5 +92,13 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     ]);
 
     return true;
+  }
+
+  onBeginContact() {
+    if (this.collisionSoundName) {
+      this.addChild(
+        new PositionalSound(this.collisionSoundName, this.getPosition())
+      );
+    }
   }
 }
