@@ -14,7 +14,7 @@ import { Weapon } from "../weapons/weapons";
 import Human, { PUSH_RANGE } from "./Human";
 
 const FOLLOW_DISTANCE = 2; // meters
-const MAX_SHOOT_DISTANCE = 10; // meters
+const MAX_SHOOT_DISTANCE = 6; // meters
 
 const MIN_TRIGGER_COOLDOWN = 0.0;
 const MAX_TRIGGER_COOLDOWN = 0.4;

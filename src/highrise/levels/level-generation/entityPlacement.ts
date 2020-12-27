@@ -160,6 +160,7 @@ export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
 }
 
 function addInnerWalls(cellGrid: CellGrid): Entity[] {
+  // TODO: Consolidate adjacent walls
   const wallEntities = [];
   for (let i = 0; i < LEVEL_SIZE; i++) {
     for (let j = 0; j < LEVEL_SIZE; j++) {
