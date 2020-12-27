@@ -47,9 +47,7 @@ export class Spark extends BaseEntity implements Entity {
     this.position.iaddScaled(this.velocity, dt);
   }
 
-  afterPhysics() {
-    const dt = this.game!.renderTimestep;
-
+  onRender(dt: number) {
     const endPoint = this.velocity.mul(dt);
 
     this.sprite

@@ -8,6 +8,7 @@ import EntityList from "./EntityList";
 import { GameRenderer2d } from "./graphics/GameRenderer2d";
 import { IOManager } from "./io/IO";
 import CustomWorld from "./physics/CustomWorld";
+import { clamp } from "./util/MathUtil";
 
 interface GameOptions {
   audio?: AudioContext;
@@ -15,6 +16,9 @@ interface GameOptions {
   framerate?: number;
   world?: World | CustomWorld;
 }
+
+const MAX_TICK_SIZE = 1 / 10; // seconds
+const MIN_TICK_SIZE = 0; // seconds
 
 /**
  * Top Level control structure
@@ -103,24 +107,9 @@ export default class Game {
     this.addEntity(this.renderer.camera);
   }
 
-  /** The current intended time between renders in game seconds */
-  get renderTimestep(): number {
-    return (1 / this.framerate) * this.slowMo;
-  }
-
   /** The intended time between renders in real-world seconds */
   get trueRenderTimestep(): number {
     return 1 / this.framerate;
-  }
-
-  /** The intended time between ticks in game seconds */
-  get tickTimestep(): number {
-    return this.renderTimestep / this.tickIterations;
-  }
-
-  /** The intended time between ticks in real-world seconds */
-  get trueTickTimestep(): number {
-    return this.trueRenderTimestep / this.tickIterations;
   }
 
   /** Total amount of game time elapsed since starting */
@@ -270,23 +259,27 @@ export default class Game {
   private loop(time: number): void {
     window.requestAnimationFrame((t) => this.loop(t));
     this.framenumber += 1;
+
+    const dt =
+      clamp((time - this.lastFrameTime) / 1000, MIN_TICK_SIZE, MAX_TICK_SIZE) *
+      this.slowMo;
     this.lastFrameTime = time;
 
-    const dt = this.tickTimestep;
-    this.iterationsRemaining += this.tickIterations * this.slowMo;
+    const tickDt = dt / this.tickIterations;
+    this.iterationsRemaining += this.tickIterations;
     for (; this.iterationsRemaining > 1.0; this.iterationsRemaining--) {
-      this.tick(dt);
+      this.tick(tickDt);
       if (!this.paused) {
-        this.world.step(dt / 2);
+        this.world.step(tickDt / 2);
         this.cleanupEntities();
-        this.world.step(dt / 2);
+        this.world.step(tickDt / 2);
         this.cleanupEntities();
         this.contacts();
       }
     }
     this.afterPhysics();
 
-    this.render();
+    this.render(dt);
   }
 
   /** Actually remove all the entities slated for removal from the game. */
@@ -361,18 +354,18 @@ export default class Game {
   }
 
   /** Called before actually rendering. */
-  private render() {
+  private render(dt: number) {
     this.cleanupEntities();
     for (const entity of this.entities.withOnRender) {
       if (entity.game) {
-        entity.onRender(this.renderTimestep);
+        entity.onRender(dt);
       } else {
         console.warn(`entity doesn't have game`);
       }
     }
     for (const entity of this.entities.withOnLateRender) {
       if (entity.game) {
-        entity.onLateRender(this.renderTimestep);
+        entity.onLateRender(dt);
       }
     }
     // this.renderer2d?.render();

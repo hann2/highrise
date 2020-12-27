@@ -124,7 +124,7 @@ export default class Human extends BaseEntity implements Entity {
   }
 
   // Have the human face a specific angle
-  setDirection(angle: number, dt: number = this.game!.tickTimestep) {
+  setDirection(angle: number, dt: number) {
     const angleDiff = angleDelta(this.body.angle, angle);
     const turnAmount = clamp(angleDiff, -MAX_ROTATION * dt, MAX_ROTATION * dt);
     this.body.angle += turnAmount;

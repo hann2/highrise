@@ -81,7 +81,7 @@ export default class SurvivorHumanController
       const direction = displacement.angle;
       const distance = displacement.magnitude;
 
-      this.human.setDirection(direction);
+      this.human.setDirection(direction, dt);
 
       if (distance < PUSH_RANGE && this.human.canPush()) {
         this.human.push();

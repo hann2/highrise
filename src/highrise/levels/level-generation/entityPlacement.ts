@@ -163,7 +163,6 @@ export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
 }
 
 function addInnerWalls(cellGrid: CellGrid): Entity[] {
-  // TODO: Consolidate adjacent walls
   const wallEntities = [];
 
   // Vertical Walls
@@ -192,7 +191,8 @@ function addInnerWalls(cellGrid: CellGrid): Entity[] {
             0.15,
             0x999999,
             !isChainLink,
-            isChainLink ? img_chainLinkFence : undefined
+            isChainLink ? img_chainLinkFence : undefined,
+            isChainLink ? snd_chainFence : undefined
           )
         );
       }
@@ -225,22 +225,13 @@ function addInnerWalls(cellGrid: CellGrid): Entity[] {
             0.15,
             0x999999,
             !isChainLink,
-            isChainLink ? img_chainLinkFence : undefined
+            isChainLink ? img_chainLinkFence : undefined,
+            isChainLink ? snd_chainFence : undefined
           )
         );
       }
     }
   }
 
-  // for (let i = 0; i < LEVEL_SIZE; i++) {
-  //   for (let j = 0; j < LEVEL_SIZE; j++) {
-  //     if (cellGrid.cells[i][j].rightWall.exists) {
-  //       wallEntities.push(wallBuilderToEntity(cellGrid.cells[i][j].rightWall));
-  //     }
-  //     if (cellGrid.cells[i][j].bottomWall.exists) {
-  //       wallEntities.push(wallBuilderToEntity(cellGrid.cells[i][j].bottomWall));
-  //     }
-  //   }
-  // }
   return wallEntities;
 }

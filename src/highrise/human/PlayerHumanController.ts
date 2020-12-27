@@ -64,7 +64,7 @@ export default class PlayerHumanController
     }
   }
 
-  onTick() {
+  onTick(dt: number) {
     if (this.human.isDestroyed) {
       this.destroy();
       return;
@@ -87,12 +87,12 @@ export default class PlayerHumanController
       const direction = io.getStick("right");
       if (direction.magnitude > 0.1) {
         // account for dead zone
-        this.human.setDirection(direction.angle);
+        this.human.setDirection(direction.angle, dt);
       }
     } else {
       const mousePosition = this.game!.camera.toWorld(io.mousePosition);
       const mouseDirection = mousePosition.sub(this.human.getPosition()).angle;
-      this.human.setDirection(mouseDirection);
+      this.human.setDirection(mouseDirection, dt);
     }
 
     // Moving

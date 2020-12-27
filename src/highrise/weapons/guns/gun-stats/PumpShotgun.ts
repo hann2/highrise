@@ -23,7 +23,7 @@ export const PumpShotgun: GunStats = {
   bulletSpread: degToRad(9),
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   ejectionType: EjectionType.PUMP,
-  reloadInsertTime: 0.5,
+  reloadInsertTime: 0.4,
   ammoCapacity: 7,
 
   textures: {

@@ -33,7 +33,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
     super();
   }
 
-  onTick() {
+  onTick(dt: number) {
     const human = this.human;
     const leader = this.getLeader();
     // If our human dies/gets removed, we shouldn't be here anymore
@@ -92,7 +92,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
       const direction = displacement.angle;
       const distance = displacement.magnitude;
 
-      human.setDirection(direction);
+      human.setDirection(direction, dt);
 
       if (distance < PUSH_RANGE && human.canPush()) {
         human.push();
@@ -122,7 +122,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
         const direction = this.lastSeenPositionOfLeader.sub(
           human.getPosition()
         );
-        human.setDirection(direction.angle);
+        human.setDirection(direction.angle, dt);
         const distance = direction.magnitude;
         if (distance > FOLLOW_DISTANCE) {
           human.walk(direction.inormalize());

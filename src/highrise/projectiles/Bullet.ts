@@ -137,9 +137,7 @@ export default class Bullet extends BaseEntity implements Entity {
     }
   }
 
-  afterPhysics() {
-    const dt = this.game!.renderTimestep;
-
+  onRender(dt: number) {
     const endPoint = this.getRenderEndPoint(dt);
 
     this.sprite
