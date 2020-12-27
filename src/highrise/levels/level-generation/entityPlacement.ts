@@ -4,7 +4,6 @@ import { rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 import Exit from "../../environment/Exit";
-import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import Wall from "../../environment/Wall";
 import { DIAGONAL_DIRECTIONS, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
@@ -21,12 +20,11 @@ export function generateLevelEntities(
   seed: number = rInteger(0, 2 ** 32)
 ): Entity[] {
   const outerWalls = addOuterWalls();
-  const roomEntities = addRooms(
-    cellGrid,
-    levelTemplate,
-    seed,
-    levelTemplate.levelIndex
-  );
+  const {
+    entities: roomEntities,
+    enemyPositions: roomEnemyPositions,
+    itemPositions: roomItemPositions,
+  } = addRooms(cellGrid, levelTemplate, seed, levelTemplate.levelIndex);
   buildMaze(cellGrid, seed);
   const innerWalls = addInnerWalls(cellGrid);
   const [exitPoint, exitOpenDirection] = findExit(
@@ -37,7 +35,7 @@ export function generateLevelEntities(
   cellGrid.closets = generateClosets(cellGrid);
   const {
     entities: closetEntities,
-    potentialEnemyLocations: potentialClosetEnemyLocations,
+    potentialEnemyLocations: closetEnemyLocations,
   } = fillClosets(cellGrid, levelTemplate, seed);
   const nubbyEntities = fillNubbies(cellGrid, levelTemplate);
   const hallwayLights = addHallwayLights(cellGrid, levelTemplate);
@@ -45,7 +43,8 @@ export function generateLevelEntities(
   const doors = cellGrid.doors.map((d) => buildDoorEntity(cellGrid, d));
 
   const potentialEnemyLocations = [
-    ...potentialClosetEnemyLocations,
+    ...roomEnemyPositions,
+    ...closetEnemyLocations,
     ...hallwayEnemyLocations,
   ];
 

@@ -23,13 +23,7 @@ import { DirectionalSprite } from "../../environment/decorations/DirectionalSpri
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
-import {
-  AngleTransformer,
-  DimensionsTransformer,
-  PositionTransformer,
-  VectorTransformer,
-  WallTransformer,
-} from "./ElementTransformer";
+import { RoomTransformer } from "./ElementTransformer";
 import {
   doubleResolution,
   fillFloorWithBorders,
@@ -89,13 +83,10 @@ export default class NecromancerArena implements RoomTemplate {
     return doubleResolution(doubleResolution(lowResolutionFloorMask));
   }
 
-  generateEntities(
-    roomToWorldPosition: PositionTransformer,
-    roomToWorldVector: VectorTransformer,
-    roomToWorldAngle: AngleTransformer,
-    roomToLevelWall: WallTransformer,
-    roomToWorldDimensions: DimensionsTransformer
-  ): Entity[] {
+  generateEntities({
+    roomToWorldPosition,
+    roomToWorldDimensions,
+  }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
 
     const carpetScale = redCarpetUpperLeft.heightMeters / CELL_WIDTH;

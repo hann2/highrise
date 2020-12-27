@@ -1,13 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { V2d } from "../../../core/Vector";
 import { DoorBuilder, WallBuilder } from "../level-generation/CellGrid";
-import {
-  AngleTransformer,
-  DimensionsTransformer,
-  PositionTransformer,
-  VectorTransformer,
-  WallTransformer,
-} from "./ElementTransformer";
+import { RoomTransformer } from "./ElementTransformer";
 
 export default interface RoomTemplate {
   // In room coordinates
@@ -20,11 +14,8 @@ export default interface RoomTemplate {
   generateDoors(): DoorBuilder[];
 
   // You do not need to create entities for doors and walls returned by generateWalls/generateDoors
-  generateEntities(
-    roomToWorldPosition: PositionTransformer,
-    roomToWorldVector: VectorTransformer,
-    roomToWorldAngle: AngleTransformer,
-    roomToLevelWall: WallTransformer,
-    roomToWorldDimensions: DimensionsTransformer
-  ): Entity[];
+  generateEntities(transformer: RoomTransformer): Entity[];
+
+  getEnemyPositions?(transformer: RoomTransformer): V2d[];
+  getItemPositions?(transformer: RoomTransformer): V2d[];
 }

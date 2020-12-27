@@ -1,15 +1,8 @@
 import Entity from "../../../core/entity/Entity";
 import { V, V2d } from "../../../core/Vector";
-import Zombie from "../../enemies/zombie/Zombie";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
-import {
-  AngleTransformer,
-  DimensionsTransformer,
-  PositionTransformer,
-  VectorTransformer,
-  WallTransformer,
-} from "./ElementTransformer";
+import { RoomTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
@@ -34,34 +27,8 @@ export default class ZombieRoomTemplate implements RoomTemplate {
     return defaultDoors(DOORS);
   }
 
-  generateEntities(
-    roomToWorldPosition: PositionTransformer,
-    roomToWorldVector: VectorTransformer,
-    roomToWorldAngle: AngleTransformer,
-    roomToLevelWall: WallTransformer,
-    roomToWorldDimensions: DimensionsTransformer
-  ): Entity[] {
+  generateEntities({ roomToWorldPosition }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
-
-    for (let i = 0; i < DIMENSIONS.x; i++) {
-      for (let j = 0; j < DIMENSIONS.y; j++) {
-        const p = V(i, j);
-        if (this.levelIndex > 1) {
-          entities.push(new Zombie(roomToWorldPosition(p.add(V(0.25, 0.25)))));
-        }
-        if (this.levelIndex > 2) {
-          entities.push(new Zombie(roomToWorldPosition(p.add(V(-0.25, 0.25)))));
-        }
-        if (this.levelIndex > 3) {
-          entities.push(new Zombie(roomToWorldPosition(p.add(V(0.25, -0.25)))));
-        }
-        if (this.levelIndex > 4) {
-          entities.push(
-            new Zombie(roomToWorldPosition(p.add(V(-0.25, -0.25))))
-          );
-        }
-      }
-    }
     entities.push(
       new OverheadLight(roomToWorldPosition(V(0.5, 0.5)), {
         radius: 4,
@@ -77,5 +44,19 @@ export default class ZombieRoomTemplate implements RoomTemplate {
       })
     );
     return entities;
+  }
+
+  getEnemyPositions({ roomToWorldPosition }: RoomTransformer): V2d[] {
+    const positions: V2d[] = [];
+    for (let i = 0; i < DIMENSIONS.x; i++) {
+      for (let j = 0; j < DIMENSIONS.y; j++) {
+        const p = V(i, j);
+        positions.push(roomToWorldPosition(p.add(V(0.25, 0.25))));
+        positions.push(roomToWorldPosition(p.add(V(-0.25, 0.25))));
+        positions.push(roomToWorldPosition(p.add(V(0.25, -0.25))));
+        positions.push(roomToWorldPosition(p.add(V(-0.25, -0.25))));
+      }
+    }
+    return positions;
   }
 }

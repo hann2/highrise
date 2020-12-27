@@ -9,6 +9,14 @@ export type DimensionsTransformer = (dimensions: V2d) => V2d;
 export type AngleTransformer = (angle: number) => number;
 export type WallTransformer = (wall: WallID) => WallID;
 
+export type RoomTransformer = {
+  roomToWorldPosition: PositionTransformer;
+  roomToWorldVector: VectorTransformer;
+  roomToWorldAngle: AngleTransformer;
+  roomToLevelWall: WallTransformer;
+  roomToWorldDimensions: DimensionsTransformer;
+};
+
 function pointToV2d(p: Point): V2d {
   return V(p.x, p.y);
 }

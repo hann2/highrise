@@ -8,7 +8,7 @@ import {
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import RoomTemplate from "../rooms/RoomTemplate";
-import Shop from "../rooms/shops/Shop";
+import Shop from "../rooms/Shop";
 import TransformedRoomTemplate, {
   ROTATED_ORIENTATIONS,
 } from "../rooms/TransformedRoomTemplate";
