@@ -9,7 +9,7 @@ import EnemyVoice from "../base/EnemyVoice";
 import SpitterController from "./SpitterController";
 import SpitterSprite from "./SpitterSprite";
 
-const SPEED = 0.175;
+const SPEED = 0.22;
 const HEALTH = 100;
 
 const FRICTION = 0.1;
@@ -25,7 +25,7 @@ const DAMAGE = 20;
 export default class Spitter extends BaseEnemy {
   tags = ["zombie"];
   hp: number = HEALTH;
-  speed: number = rNormal(SPEED, SPEED / 5);
+  walkSpeed: number = rNormal(SPEED, SPEED / 5);
 
   constructor(position: V2d, angle: number = rUniform(0, Math.PI * 2)) {
     super(position);

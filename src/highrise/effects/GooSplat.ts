@@ -10,6 +10,7 @@ import { getSplatPair } from "./Splat";
 const SCALE = 1.0 / 64;
 
 const COLOR = 0x00ff00;
+const GLOW_ALPHA = 0.1;
 
 export default class GooSplat extends BaseEntity implements Entity {
   sprites: (Sprite & GameSprite)[];
@@ -33,7 +34,7 @@ export default class GooSplat extends BaseEntity implements Entity {
     this.glowSprite = Sprite.from(glowTexture);
     (this.glowSprite as GameSprite).layerName = Layer.EMISSIVES;
     this.glowSprite.blendMode - BLEND_MODES.ADD;
-    this.glowSprite.alpha = 0.2;
+    this.glowSprite.alpha = GLOW_ALPHA;
     this.glowSprite.scale.set(size * SCALE);
     this.glowSprite.anchor.set(0.5, 0.5);
     this.glowSprite.position.set(x, y);
@@ -47,7 +48,7 @@ export default class GooSplat extends BaseEntity implements Entity {
     await this.wait(10, (_, t) => {
       const alpha = smoothStep(1.0 - t);
       this.mainSprite.alpha = alpha;
-      this.glowSprite.alpha = alpha * 0.2;
+      this.glowSprite.alpha = alpha * GLOW_ALPHA;
     });
     this.destroy();
   }

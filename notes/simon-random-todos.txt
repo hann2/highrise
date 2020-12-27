@@ -4,6 +4,8 @@
 Critical Features For Release
 - A victory level
 - Something that tells you the controls
+- Polished boss fight
+- Get all temp sounds replaced
 
 
 Misc gameplay things that bother me

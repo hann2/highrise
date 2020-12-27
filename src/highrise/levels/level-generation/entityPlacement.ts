@@ -162,15 +162,82 @@ export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
 function addInnerWalls(cellGrid: CellGrid): Entity[] {
   // TODO: Consolidate adjacent walls
   const wallEntities = [];
+
+  // Vertical Walls
   for (let i = 0; i < LEVEL_SIZE; i++) {
     for (let j = 0; j < LEVEL_SIZE; j++) {
       if (cellGrid.cells[i][j].rightWall.exists) {
-        wallEntities.push(wallBuilderToEntity(cellGrid.cells[i][j].rightWall));
-      }
-      if (cellGrid.cells[i][j].bottomWall.exists) {
-        wallEntities.push(wallBuilderToEntity(cellGrid.cells[i][j].bottomWall));
+        const start = j;
+        const isChainLink = cellGrid.cells[i][j].rightWall.chainLink;
+
+        // condition for continuing wall
+        while (cellGrid.cells[i][j + 1]?.rightWall?.exists) {
+          if (cellGrid.cells[i][j + 1].rightWall.chainLink !== isChainLink) {
+            break;
+          }
+          j++;
+        }
+
+        const [x1, y1] = CellGrid.levelCoordToWorldCoord(
+          V(i + 0.5, start - 0.5)
+        );
+        const [x2, y2] = CellGrid.levelCoordToWorldCoord(V(i + 0.5, j + 0.5));
+        wallEntities.push(
+          new Wall(
+            [x1, y1],
+            [x2, y2],
+            0.15,
+            0x999999,
+            !isChainLink,
+            isChainLink ? img_chainLinkFence : undefined
+          )
+        );
       }
     }
   }
+
+  // Horizontal Walls
+  for (let j = 0; j < LEVEL_SIZE; j++) {
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      if (cellGrid.cells[i][j].bottomWall.exists) {
+        const start = i;
+        const isChainLink = cellGrid.cells[i][j].bottomWall.chainLink;
+
+        // condition for continuing wall
+        while (cellGrid.cells[i + 1]?.[j]?.bottomWall?.exists) {
+          if (cellGrid.cells[i + 1][j].bottomWall.chainLink !== isChainLink) {
+            break;
+          }
+          i++;
+        }
+
+        const [x1, y1] = CellGrid.levelCoordToWorldCoord(
+          V(start - 0.5, j + 0.5)
+        );
+        const [x2, y2] = CellGrid.levelCoordToWorldCoord(V(i + 0.5, j + 0.5));
+        wallEntities.push(
+          new Wall(
+            [x1, y1],
+            [x2, y2],
+            0.15,
+            0x999999,
+            !isChainLink,
+            isChainLink ? img_chainLinkFence : undefined
+          )
+        );
+      }
+    }
+  }
+
+  // for (let i = 0; i < LEVEL_SIZE; i++) {
+  //   for (let j = 0; j < LEVEL_SIZE; j++) {
+  //     if (cellGrid.cells[i][j].rightWall.exists) {
+  //       wallEntities.push(wallBuilderToEntity(cellGrid.cells[i][j].rightWall));
+  //     }
+  //     if (cellGrid.cells[i][j].bottomWall.exists) {
+  //       wallEntities.push(wallBuilderToEntity(cellGrid.cells[i][j].bottomWall));
+  //     }
+  //   }
+  // }
   return wallEntities;
 }

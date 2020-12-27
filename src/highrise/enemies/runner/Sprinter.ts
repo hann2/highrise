@@ -10,19 +10,17 @@ import {
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 import { BaseEnemy } from "../base/Enemy";
-import { getHumansInRange } from "../base/enemyUtils";
+import { getHumansInRange, makeSimpleEnemyBody } from "../base/enemyUtils";
 import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import Crawler from "../crawler/Crawler";
-import ZombieSprite from "./ZombieSprite";
-import { ZombieVariant, ZOMBIE_VARIANTS } from "./ZombieVariants";
+import { ZombieVariant, ZOMBIE_VARIANTS } from "../zombie/ZombieVariants";
+import SprinterSprite from "./SprinterSprite";
 
-const SPEED = 0.3;
+const SPEED = 0.6;
+const HEALTH = 60;
 
-const WINDUP = 0.14; // seconds
-const ATTACK_DURATION = 0.1; // seconds
-const WINDDOWN = 0.12; // seconds
-const COOLDOWN = 0.12; // seconds
+export const RUNNER_RADIUS = ZOMBIE_RADIUS * 0.8;
 
 const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;
 const ATTACK_ANGLE_RANGE = degToRad(90);
@@ -30,8 +28,9 @@ const CRAWLER_CHANCE = 0.35; // Chance to turn into a crawler on death
 
 const hitSoundRing = new ShuffleRing(ZOMBIE_ATTACK_HIT_SOUNDS);
 
-export default class Zombie extends BaseEnemy {
+export default class Sprinter extends BaseEnemy {
   tags = ["zombie"];
+  hp: number = rNormal(HEALTH, HEALTH / 5);
   walkSpeed: number = rNormal(SPEED, SPEED / 5);
 
   constructor(
@@ -41,19 +40,23 @@ export default class Zombie extends BaseEnemy {
     super(position);
 
     this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, ZOMBIE_RADIUS));
-    this.addChild(new ZombieSprite(this));
+    this.addChild(new SprinterSprite(this));
   }
 
   makeVoice() {
     return new EnemyVoice(() => this.getPosition(), this.zombieVariant.sounds);
   }
 
+  makeBody(position: [number, number]) {
+    return makeSimpleEnemyBody(position, RUNNER_RADIUS, 0.8);
+  }
+
   makeAttackAction() {
     return createAttackAction({
-      windupDuration: WINDUP,
-      attackDuration: ATTACK_DURATION,
-      windDownDuration: WINDDOWN,
-      cooldownDuration: COOLDOWN,
+      windupDuration: 0.16,
+      attackDuration: 0.1,
+      windDownDuration: 0.1,
+      cooldownDuration: 0.5,
       onWindupStart: () => {
         this.voice.speak("attack");
       },

@@ -9,6 +9,7 @@ import {
 import { V2d } from "../../../core/Vector";
 import Crawler from "../../enemies/crawler/Crawler";
 import Heavy from "../../enemies/heavy/Heavy";
+import Sprinter from "../../enemies/runner/Sprinter";
 import Spitter from "../../enemies/spitter/Spitter";
 import Zombie from "../../enemies/zombie/Zombie";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
@@ -85,24 +86,38 @@ export default class LevelTemplate {
   // Puts enemies at the places they might go
   generateEnemies(locations: V2d[], seed: number): Entity[] {
     const entities: Entity[] = [];
-    const shuffled = seededShuffle(locations, seed);
+    const shuffled = [...seededShuffle(locations, seed)];
+
+    function nextLocation() {
+      const result = shuffled.pop();
+      if (!result) {
+        throw new Error("Not enough room for all the enemies");
+      }
+      return result;
+    }
 
     const numZombies = 20 + this.levelIndex * 10;
-    for (let i = 0; i < numZombies; i++) {
+    for (let i = 0; i < numZombies && shuffled.length > 0; i++) {
       if (rBool(0.75)) {
-        entities.push(new Zombie(shuffled[i]));
+        entities.push(new Zombie(nextLocation()));
       } else {
-        entities.push(new Crawler(shuffled[i]));
+        entities.push(new Crawler(nextLocation()));
       }
     }
 
+    if (this.levelIndex > 1) {
+      const numSprinters = 5;
+      for (let i = 0; i < numSprinters; i++) {
+        entities.push(new Sprinter(nextLocation()));
+      }
+    }
     if (this.levelIndex > 2) {
-      entities.push(new Spitter(shuffled[20]));
-      entities.push(new Spitter(shuffled[21]));
+      entities.push(new Spitter(nextLocation()));
+      entities.push(new Spitter(nextLocation()));
     }
     if (this.levelIndex > 3) {
-      entities.push(new Spitter(shuffled[22]));
-      entities.push(new Heavy(shuffled[23]));
+      entities.push(new Spitter(nextLocation()));
+      entities.push(new Heavy(nextLocation()));
     }
 
     return entities;
