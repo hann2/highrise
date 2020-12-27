@@ -3,17 +3,20 @@ import Entity from "../../core/entity/Entity";
 import { rBool, rUniform } from "../../core/util/Random";
 import { BaseEnemy } from "../enemies/base/Enemy";
 import Interactable from "../environment/Interactable";
-import { getNearestVisibleEnemy } from "../utils/visionUtils";
+import { getPartyLeader } from "../environment/PartyManager";
+import { getNearestVisibleEnemy, testLineOfSight } from "../utils/visionUtils";
 import Gun from "../weapons/guns/Gun";
 import { FireMode } from "../weapons/guns/GunStats";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
-import Human, { PUSH_RANGE } from "./Human";
+import Human, { isHuman, PUSH_RANGE } from "./Human";
 
 const MAX_ATTACK_DISTANCE = 10; // meters
 
 const MIN_TRIGGER_COOLDOWN = 0.0;
 const MAX_TRIGGER_COOLDOWN = 0.4;
 const AVG_BURST_AMOUNT = 6;
+
+const JOIN_DISTANCE = 2; // meters
 
 // Controller for a human that is waiting to be found
 export default class SurvivorHumanController
@@ -27,21 +30,19 @@ export default class SurvivorHumanController
   target?: BaseEnemy;
 
   // The interaction target to make this human follow the player
-  interactable: Interactable;
   triggerOnCooldown: boolean = false;
 
   constructor(human: Human) {
     super();
     this.human = human;
-    this.interactable = this.addChild(
-      new Interactable(this.human.getPosition(), (interacter) => {
-        this.game?.dispatch({
-          type: "addToParty",
-          human: this.human,
-          survivorController: this,
-        });
-      })
-    );
+  }
+
+  joinParty() {
+    this.game?.dispatch({
+      type: "addToParty",
+      human: this.human,
+      survivorController: this,
+    });
   }
 
   scanForTargets() {
@@ -52,10 +53,31 @@ export default class SurvivorHumanController
     );
   }
 
+  canSeeLeader() {
+    // TODO: This is hacky
+    const leader = getPartyLeader(this.game);
+
+    if (!leader) {
+      return false;
+    }
+
+    const distance = this.human.getPosition().isub(leader.body.position)
+      .magnitude;
+
+    if (distance < JOIN_DISTANCE && testLineOfSight(this.human, leader)) {
+      return true;
+    }
+  }
+
   onTick(dt: number) {
     // If our human dies/gets removed, we shouldn't be here anymore
     if (!this.human.game) {
       this.destroy();
+      return;
+    }
+
+    if (this.canSeeLeader()) {
+      this.joinParty();
       return;
     }
 
@@ -109,7 +131,5 @@ export default class SurvivorHumanController
         }
       }
     }
-
-    this.interactable.position = this.human.getPosition();
   }
 }

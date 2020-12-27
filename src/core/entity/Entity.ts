@@ -16,7 +16,7 @@ export default interface Entity
     EntityPhysics,
     IOEventHandler {
   /** The game this entity belongs to. This should only be set by the Game. */
-  game: Game | null;
+  game: Game | undefined;
 
   id?: string;
 

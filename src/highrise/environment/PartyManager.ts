@@ -105,10 +105,10 @@ export default class PartyManager extends BaseEntity implements Entity {
   }
 }
 
-export function getPartyManager(game: Game): PartyManager | undefined {
-  return game.entities.getById("party_manager") as PartyManager;
+export function getPartyManager(game?: Game): PartyManager | undefined {
+  return game?.entities.getById("party_manager") as PartyManager;
 }
 
-export function getPartyLeader(game: Game): Human | undefined {
+export function getPartyLeader(game?: Game): Human | undefined {
   return getPartyManager(game)?.leader;
 }

@@ -13,7 +13,7 @@ export default abstract class BaseEntity implements Entity {
   body?: p2.Body;
   children: Entity[] = [];
   constraints?: Constraint[];
-  game: Game | null = null;
+  game: Game | undefined = undefined;
   handlers: CustomHandlersMap = {};
   parent?: Entity;
   pausable: boolean = true;

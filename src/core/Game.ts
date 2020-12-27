@@ -231,7 +231,7 @@ export default class Game {
    * This is because there are times when it's not safe to remove an entity, like in the middle of a physics step.
    */
   removeEntity(entity: Entity) {
-    entity.game = null;
+    entity.game = undefined;
     if (this.world.stepping) {
       this.entitiesToRemove.add(entity);
     } else {
@@ -291,7 +291,7 @@ export default class Game {
   }
 
   private cleanupEntity(entity: Entity) {
-    entity.game = null; // This should be done by `removeEntity`, but better safe than sorry
+    entity.game = undefined; // This should be done by `removeEntity`, but better safe than sorry
     this.entities.remove(entity);
     this.io.removeHandler(entity);
 
