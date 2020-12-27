@@ -15,19 +15,23 @@ export default class GameOverScreen extends BaseEntity implements Entity {
   titleText: Text;
   background: Graphics;
 
-  constructor() {
+  constructor(victory: boolean) {
     super();
+
+    const text = victory ? "You Win" : "You Lose";
+    const backgroundColor = victory ? 0xffffff : 0x660000;
+    const textColor = victory ? 0x000000 : 0x000000;
 
     this.sprite = new Sprite();
     this.sprite.layerName = Layer.MENU;
 
     this.background = new Graphics();
-    this.background.beginFill(0x660000).drawRect(0, 0, 1, 1).endFill();
+    this.background.beginFill(backgroundColor).drawRect(0, 0, 1, 1).endFill();
     this.sprite.addChild(this.background);
 
-    this.titleText = new Text("Game Over", {
+    this.titleText = new Text(text, {
       align: "center",
-      fill: "black",
+      fill: textColor,
       fontFamily: "Capture It",
       fontSize: 128,
     });

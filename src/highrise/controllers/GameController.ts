@@ -44,11 +44,11 @@ export class GameController extends BaseEntity implements Entity {
       game.addEntity(new PauseMenu());
     },
 
-    gameOver: async () => {
+    gameOver: async ({ victory }: { victory: boolean }) => {
       console.log("game over");
       const game = this.game!;
 
-      const gameOverScreen = game.addEntity(new GameOverScreen());
+      const gameOverScreen = game.addEntity(new GameOverScreen(victory));
       await this.waitUntil(() => gameOverScreen.sprite.alpha > 0.99);
       game.clearScene(Persistence.Game);
       await this.waitUntil(() => gameOverScreen.isDestroyed);

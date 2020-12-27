@@ -1,22 +1,17 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
-import { PositionalSound } from "../../core/sound/PositionalSound";
 import { Persistence } from "../constants/constants";
 import FadeEffect from "../effects/FadeEffect";
 import PartyManager from "../environment/PartyManager";
-import AllyHumanController from "../human/AllyController";
-import Human from "../human/Human";
-import PlayerHumanController from "../human/PlayerHumanController";
 import { Level } from "../levels/Level";
 import {
   chooseTemplate,
   generateLevel,
 } from "../levels/level-generation/levelGeneration";
-import MainMenu from "../menu/MainMenu";
-import PauseMenu from "../menu/PauseMenu";
 
 const LEVEL_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
+const MAX_LEVEL = 5;
 
 // High level control flow for levels and the party
 export default class LevelController extends BaseEntity implements Entity {
@@ -48,8 +43,13 @@ export default class LevelController extends BaseEntity implements Entity {
 
       await this.wait(fadeOutTime);
       this.game?.clearScene(Persistence.Floor);
-      const level = generateLevel(chooseTemplate(this.currentLevel));
-      this.game?.dispatch({ type: "startLevel", level });
+
+      if (this.currentLevel <= MAX_LEVEL) {
+        const level = generateLevel(chooseTemplate(this.currentLevel));
+        this.game?.dispatch({ type: "startLevel", level });
+      } else {
+        this.game?.dispatch({ type: "gameOver", victory: true });
+      }
     },
 
     // We just started a new level
@@ -59,7 +59,7 @@ export default class LevelController extends BaseEntity implements Entity {
 
     // The whole party is dead
     partyDead: async () => {
-      this.game?.dispatch({ type: "gameOver" });
+      this.game?.dispatch({ type: "gameOver", victory: false });
     },
   };
 

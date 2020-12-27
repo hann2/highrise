@@ -54,7 +54,6 @@ export default class SurvivorHumanController
   }
 
   canSeeLeader() {
-    // TODO: This is hacky
     const leader = getPartyLeader(this.game);
 
     if (!leader) {

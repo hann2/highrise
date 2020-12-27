@@ -2,7 +2,7 @@
 
 
 Critical Features For Release
-- A victory level
+- A victory screen
 - Something that tells you the controls
 - Polished boss fight
 - Get all temp sounds replaced
@@ -14,7 +14,6 @@ Misc gameplay things that bother me
 - Human collision detection doesn't match sprite
 - Can't navigate menus with controller
 - Necromancer movement is borked
-- You shouldn't have to interact with the exit
 
 
 Polish things to add:
