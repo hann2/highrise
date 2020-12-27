@@ -1,3 +1,4 @@
+import snd_chainFence from "../../../resources/audio/environment/chain-fence.flac";
 import snd_elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
 import snd_elevatorDoorClose from "../../../resources/audio/environment/elevator-door-close.flac";
 import snd_elevatorDoorOpen from "../../../resources/audio/environment/elevator-door-open.flac";
@@ -40,6 +41,7 @@ export function getSoundsToPreload(): string[] {
     snd_heavySwitch,
     snd_lightsClickOn,
     snd_powerOn,
+    snd_chainFence,
 
     ...PIANO_HIT_SOUNDS,
     ...VENDING_MACHINE_HIT_SOUNDS,
