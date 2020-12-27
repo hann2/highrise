@@ -26,7 +26,12 @@ export interface MeleeWeaponStats extends BaseWeaponStats {
   windDownKnockbackAmount: number;
 
   // Anchor point of the texture when holding/swinging
-  handlePosition: [number, number];
+  pivotPosition: [number, number];
+
+  // Offset from the pivot point
+  leftHandOffset: [number, number];
+  // Offset from the pivot point
+  rightHandOffset: [number, number];
 
   swing: {
     durations?: SwingDurations;
@@ -73,7 +78,9 @@ export const defaultMeleeWeapon: MeleeWeaponStats = {
   swing: {},
 
   size: [0.2, 1],
-  handlePosition: [0.5, 0.9],
+  pivotPosition: [0.5, 0.9],
+  leftHandOffset: [0, 0],
+  rightHandOffset: [0, 0],
 
   textures: {
     pickup: img_axe,

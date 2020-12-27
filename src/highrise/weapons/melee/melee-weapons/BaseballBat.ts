@@ -16,11 +16,11 @@ export const BaseballBat: MeleeWeaponStats = {
   name: "Baseball Bat",
 
   damage: 50,
-  knockbackAmount: 80,
-  windUpKnockbackAmount: 20,
+  knockbackAmount: 140,
+  windUpKnockbackAmount: 60,
 
   size: [0.2, 1],
-  handlePosition: [0.5, 0.9],
+  pivotPosition: [0.5, 0.9],
 
   swing: {
     durations: [0.1, 0.18, 0.2],

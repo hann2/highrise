@@ -19,7 +19,7 @@ export const Axe: MeleeWeaponStats = {
   windUpKnockbackAmount: 50,
 
   size: [0.2, 1],
-  handlePosition: [0.5, 0.85],
+  pivotPosition: [0.5, 0.85],
 
   swing: {
     durations: [0.25, 0.2, 0.2],

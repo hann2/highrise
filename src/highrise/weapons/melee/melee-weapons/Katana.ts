@@ -16,11 +16,13 @@ export const Katana: MeleeWeaponStats = {
   name: "Katana",
 
   damage: 50,
-  knockbackAmount: 20,
   windDownDamage: 30,
+  windUpKnockbackAmount: 20,
+  knockbackAmount: 50,
+  windDownKnockbackAmount: 45,
 
   size: [0.2, 1],
-  handlePosition: [0.5, 0.85],
+  pivotPosition: [0.5, 0.85],
 
   swing: {
     durations: [0.08, 0.17, 0.2],

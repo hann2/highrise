@@ -6,7 +6,7 @@ import type Entity from "../../../core/entity/Entity";
 import type { WithOwner } from "../../../core/entity/Entity";
 import Game from "../../../core/Game";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
-import { normalizeAngle, polarToVec } from "../../../core/util/MathUtil";
+import { clamp, normalizeAngle } from "../../../core/util/MathUtil";
 import { choose, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { RACHEL_ZOMBIE_SOUNDS } from "../../constants/constants";
@@ -15,15 +15,15 @@ import {
   createAttackAction,
 } from "../../creature-stuff/AttackAction";
 import { Creature } from "../../creature-stuff/Creature";
-import { PhasedAction } from "../../utils/PhasedAction";
 import FleshImpact from "../../effects/FleshImpact";
+import Hittable from "../../environment/Hittable";
 import Human from "../../human/Human";
 import Bullet from "../../projectiles/Bullet";
 import AimSpring from "../../utils/AimSpring";
+import { PhasedAction } from "../../utils/PhasedAction";
 import SwingingWeapon from "../../weapons/melee/SwingingWeapon";
 import { makeSimpleEnemyBody } from "./enemyUtils";
 import EnemyVoice from "./EnemyVoice";
-import Hittable from "../../environment/Hittable";
 
 export class BaseEnemy extends Creature implements Hittable {
   hp: number = 100;
@@ -166,9 +166,9 @@ export class BaseEnemy extends Creature implements Hittable {
 
     // Knockback on the windup or the swing
     if (knockbackAmount) {
-      this.stun((knockbackAmount / 25) * rNormal(1, 0.2));
+      this.stun(clamp((knockbackAmount / 175) * rNormal(1, 0.2), 0, 1));
       this.knockback(
-        this.getPosition().sub(position).inormalize(knockbackAmount)
+        this.getPosition().sub(position).inormalize().imul(knockbackAmount)
       );
     }
 

@@ -291,7 +291,9 @@ export default class Human extends BaseEntity implements Entity {
   ]);
 
   canPush() {
-    return !this.pushAction.isActive();
+    const isPushing = this.pushAction.isActive();
+    const isSwinging = !!(this.weapon as Partial<MeleeWeapon>).currentSwing;
+    return !isPushing && !isSwinging;
   }
 
   push() {

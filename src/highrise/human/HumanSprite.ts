@@ -53,10 +53,13 @@ export default class HumanSprite extends BodySprite {
 
     const weapon = this.human.weapon;
     if (weapon && this.weaponSprite) {
+      const pushOffset = this.getPushOffset();
       if (weapon instanceof MeleeWeapon) {
         this.weaponSprite.visible = weapon.currentCooldown <= 0;
+        this.weaponSprite.position.set(
+          ...V(weapon.swing.restPosition).iadd([pushOffset, 0])
+        );
       } else {
-        const pushOffset = this.getPushOffset();
         this.weaponSprite.position.set(
           ...weapon.getCurrentHoldPosition().iadd([pushOffset, 0])
         );
@@ -153,12 +156,12 @@ export default class HumanSprite extends BodySprite {
         );
       }
     } else if (weapon instanceof MeleeWeapon) {
-      const { handlePosition, textures, size } = weapon.stats;
+      const { pivotPosition, textures, size } = weapon.stats;
       const { restAngle, restPosition } = weapon.swing;
 
       this.weaponSprite = Sprite.from(textures.hold);
       this.weaponSprite.scale.set(size[1] / this.weaponSprite.height);
-      this.weaponSprite.anchor.set(...handlePosition);
+      this.weaponSprite.anchor.set(...pivotPosition);
       this.weaponSprite.rotation = Math.PI / 2 + restAngle;
       this.weaponSprite.position.set(...restPosition);
       this.sprite.addChild(this.weaponSprite);

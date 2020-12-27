@@ -9,6 +9,8 @@ import { Layer } from "../../config/layers";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import MeleeWeapon from "./MeleeWeapon";
 import { SwingPhase } from "./SwingDescriptor";
+import { lerp } from "../../../core/util/MathUtil";
+import { off } from "process";
 
 // A utility class for dealing with the timings of a swing
 
@@ -29,23 +31,12 @@ export default class SwingingWeapon extends BaseEntity {
     this.weapon = weapon;
     this.holder = holder;
 
-    const { size, handlePosition, textures } = this.weapon.stats;
+    const { size, pivotPosition: handlePosition, textures } = this.weapon.stats;
 
     this.sprite = Sprite.from(textures.attack);
     this.sprite.scale.set(size[1] / this.sprite.height);
     this.sprite.anchor.set(...handlePosition);
     this.sprite.layerName = Layer.WEAPONS;
-
-    const hitbox = new Graphics();
-    this.sprite.addChild(hitbox);
-    hitbox.beginFill(0x00ff00);
-    hitbox.drawRect(
-      0,
-      0,
-      size[0] * this.sprite.height,
-      size[1] * this.sprite.height
-    );
-    hitbox.endFill();
 
     this.body = new Body({ collisionResponse: false });
     this.body.type = Body.DYNAMIC; // Cuz it moves
@@ -55,7 +46,12 @@ export default class SwingingWeapon extends BaseEntity {
     });
     shape.collisionGroup = CollisionGroups.Projectiles;
     shape.collisionMask = CollisionGroups.Zombies | CollisionGroups.Walls;
-    this.body.addShape(shape);
+    // figured through trial and error
+    const offset: [number, number] = [
+      lerp(-size[1] / 2, size[1] / 2, handlePosition[1]),
+      lerp(-size[0] / 2, size[0] / 2, handlePosition[0]),
+    ];
+    this.body.addShape(shape, offset);
   }
 
   async onAdd() {
