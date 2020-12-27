@@ -21,7 +21,7 @@ import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
 
-export const DEFAULT_DOOR_SPRITES = [img_door1, img_door2];
+export const DEFAULT_DOOR_SPRITES = [img_door1];
 
 export default class Door extends BaseEntity implements Entity, Hittable {
   tags: string[];

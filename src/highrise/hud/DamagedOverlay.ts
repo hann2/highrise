@@ -24,7 +24,6 @@ export class DamagedOverlay extends BaseEntity implements Entity {
   onAdd() {
     this.baseline = Sprite.from(img_healthOverlay);
     this.baseline.alpha = 0;
-    this.baseline.blendMode = BLEND_MODES.ADD;
     this.sprite.addChild(this.baseline);
     this.resize();
   }

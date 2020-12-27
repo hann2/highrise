@@ -1,9 +1,9 @@
-import Entity from "../../../../core/entity/Entity";
-import { hsvToRgb, rgbToHex } from "../../../../core/util/ColorUtils";
-import { choose, rCardinal, rUniform } from "../../../../core/util/Random";
-import { V, V2d } from "../../../../core/Vector";
-import Decoration from "../../../environment/Decoration";
-import { DecorationInfo } from "../../../environment/decorations/DecorationInfo";
+import Entity from "../../../core/entity/Entity";
+import { hsvToRgb, rgbToHex } from "../../../core/util/ColorUtils";
+import { choose, rCardinal, rUniform } from "../../../core/util/Random";
+import { V, V2d } from "../../../core/Vector";
+import Decoration from "../../environment/Decoration";
+import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import {
   bathroomTilesFloor2,
   carpetFloor1,
@@ -18,23 +18,20 @@ import {
   woodFloor2,
   woodFloor3,
   woodFloor4,
-} from "../../../environment/decorations/decorations";
-import { OverheadLight } from "../../../environment/lighting/OverheadLight";
-import RepeatingFloor from "../../../environment/RepeatingFloor";
-import {
-  DoorBuilder,
-  WallBuilder,
-  WallID,
-} from "../../level-generation/CellGrid";
+} from "../../environment/decorations/decorations";
+import { OverheadLight } from "../../environment/lighting/OverheadLight";
+import RepeatingFloor from "../../environment/RepeatingFloor";
+import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
 import {
   AngleTransformer,
   DimensionsTransformer,
   PositionTransformer,
+  RoomTransformer,
   VectorTransformer,
   WallTransformer,
-} from "../ElementTransformer";
-import RoomTemplate from "../RoomTemplate";
-import { defaultDoors, defaultOccupiedCells, defaultWalls } from "../roomUtils";
+} from "./ElementTransformer";
+import RoomTemplate from "./RoomTemplate";
+import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
 const DIMENSIONS = V(3, 3);
 const DOORS: WallID[] = [
@@ -70,13 +67,11 @@ export default class Shop implements RoomTemplate {
     return defaultDoors(DOORS);
   }
 
-  generateEntities(
-    roomToWorldPosition: PositionTransformer,
-    roomToWorldVector: VectorTransformer,
-    roomToWorldAngle: AngleTransformer,
-    roomToLevelWall: WallTransformer,
-    roomToWorldDimensions: DimensionsTransformer
-  ): Entity[] {
+  generateEntities({
+    roomToWorldPosition,
+    roomToWorldAngle,
+    roomToWorldDimensions,
+  }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
 
     const counter = choose(counter1, counter2, counter3);
@@ -140,5 +135,19 @@ export default class Shop implements RoomTemplate {
     entities.push(floor);
 
     return entities;
+  }
+
+  getEnemyPositions({ roomToWorldPosition }: RoomTransformer): V2d[] {
+    const positions: V2d[] = [];
+    for (let i = 0; i < DIMENSIONS.x; i++) {
+      for (let j = 0; j < DIMENSIONS.y; j++) {
+        const p = V(i, j);
+        positions.push(roomToWorldPosition(p.add(V(0.25, 0.25))));
+        positions.push(roomToWorldPosition(p.add(V(-0.25, 0.25))));
+        positions.push(roomToWorldPosition(p.add(V(0.25, -0.25))));
+        positions.push(roomToWorldPosition(p.add(V(-0.25, -0.25))));
+      }
+    }
+    return positions;
   }
 }

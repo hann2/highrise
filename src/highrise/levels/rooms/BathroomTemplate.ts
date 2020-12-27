@@ -30,13 +30,7 @@ import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import Wall from "../../environment/Wall";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
-import {
-  AngleTransformer,
-  DimensionsTransformer,
-  PositionTransformer,
-  VectorTransformer,
-  WallTransformer,
-} from "./ElementTransformer";
+import { RoomTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
@@ -143,13 +137,11 @@ export default class BathroomTemplate implements RoomTemplate {
     return defaultDoors(DOORS);
   }
 
-  generateEntities(
-    roomToWorldPosition: PositionTransformer,
-    roomToWorldVector: VectorTransformer,
-    roomToWorldAngle: AngleTransformer,
-    roomToLevelWall: WallTransformer,
-    roomToWorldDimensions: DimensionsTransformer
-  ): Entity[] {
+  generateEntities({
+    roomToWorldPosition,
+    roomToWorldAngle,
+    roomToWorldDimensions,
+  }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
 
     const doorOpenDirection = roomToWorldAngle(0);
@@ -219,5 +211,19 @@ export default class BathroomTemplate implements RoomTemplate {
     );
 
     return entities;
+  }
+
+  getEnemyPositions({ roomToWorldPosition }: RoomTransformer): V2d[] {
+    const positions: V2d[] = [];
+    for (let i = 0; i < DIMENSIONS.x; i++) {
+      for (let j = 0; j < DIMENSIONS.y; j++) {
+        const p = V(i, j);
+        positions.push(roomToWorldPosition(p.add(V(0.25, 0.25))));
+        positions.push(roomToWorldPosition(p.add(V(-0.25, 0.25))));
+        positions.push(roomToWorldPosition(p.add(V(0.25, -0.25))));
+        positions.push(roomToWorldPosition(p.add(V(-0.25, -0.25))));
+      }
+    }
+    return positions;
   }
 }

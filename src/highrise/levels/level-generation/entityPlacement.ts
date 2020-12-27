@@ -21,12 +21,11 @@ export function generateLevelEntities(
   seed: number = rInteger(0, 2 ** 32)
 ): Entity[] {
   const outerWalls = addOuterWalls();
-  const roomEntities = addRooms(
-    cellGrid,
-    levelTemplate,
-    seed,
-    levelTemplate.levelIndex
-  );
+  const {
+    entities: roomEntities,
+    enemyPositions: roomEnemyPositions,
+    itemPositions: roomItemPositions,
+  } = addRooms(cellGrid, levelTemplate, seed, levelTemplate.levelIndex);
   buildMaze(cellGrid, seed);
   const innerWalls = addInnerWalls(cellGrid);
   const [exitPoint, exitOpenDirection] = findExit(
@@ -37,7 +36,7 @@ export function generateLevelEntities(
   cellGrid.closets = generateClosets(cellGrid);
   const {
     entities: closetEntities,
-    potentialEnemyLocations: potentialClosetEnemyLocations,
+    potentialEnemyLocations: closetEnemyLocations,
   } = fillClosets(cellGrid, levelTemplate, seed);
   const nubbyEntities = fillNubbies(cellGrid, levelTemplate);
   const hallwayLights = addHallwayLights(cellGrid, levelTemplate);
@@ -45,7 +44,8 @@ export function generateLevelEntities(
   const doors = cellGrid.doors.map((d) => buildDoorEntity(cellGrid, d));
 
   const potentialEnemyLocations = [
-    ...potentialClosetEnemyLocations,
+    ...roomEnemyPositions,
+    ...closetEnemyLocations,
     ...hallwayEnemyLocations,
   ];
 
@@ -163,6 +163,7 @@ export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
 }
 
 function addInnerWalls(cellGrid: CellGrid): Entity[] {
+  // TODO: Consolidate adjacent walls
   const wallEntities = [];
   for (let i = 0; i < LEVEL_SIZE; i++) {
     for (let j = 0; j < LEVEL_SIZE; j++) {

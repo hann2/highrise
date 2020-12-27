@@ -6,13 +6,7 @@ import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
-import {
-  AngleTransformer,
-  DimensionsTransformer,
-  PositionTransformer,
-  VectorTransformer,
-  WallTransformer,
-} from "./ElementTransformer";
+import { RoomTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
@@ -37,13 +31,10 @@ export default class HoldingRoom implements RoomTemplate {
     return defaultDoors(DOORS).map((d) => ({ ...d, chainLink: true }));
   }
 
-  generateEntities(
-    roomToWorldPosition: PositionTransformer,
-    roomToWorldVector: VectorTransformer,
-    roomToWorldAngle: AngleTransformer,
-    roomToLevelWall: WallTransformer,
-    roomToWorldDimensions: DimensionsTransformer
-  ): Entity[] {
+  generateEntities({
+    roomToWorldPosition,
+    roomToWorldDimensions,
+  }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
     const centerWorldCoords = roomToWorldPosition(
       DIMENSIONS.sub(V(1, 1)).mul(0.5)

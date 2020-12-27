@@ -2,13 +2,7 @@ import { Matrix } from "pixi.js";
 import Entity from "../../../core/entity/Entity";
 import { V2d } from "../../../core/Vector";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
-import ElementTransformer, {
-  AngleTransformer,
-  DimensionsTransformer,
-  PositionTransformer,
-  VectorTransformer,
-  WallTransformer,
-} from "./ElementTransformer";
+import ElementTransformer, { RoomTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 
 // List of all possible reflections/rotations
@@ -77,20 +71,25 @@ export default class TransformedRoomTemplate implements RoomTemplate {
     });
   }
 
-  generateEntities(
-    roomToWorldPosition: PositionTransformer,
-    roomToWorldVector: VectorTransformer,
-    roomToWorldAngle: AngleTransformer,
-    roomToLevelWall: WallTransformer,
-    roomToWorldDimensions: DimensionsTransformer
-  ): Entity[] {
+  generateEntities({
+    roomToWorldPosition,
+    roomToWorldVector,
+    roomToWorldAngle,
+    roomToLevelWall,
+    roomToWorldDimensions,
+  }: RoomTransformer): Entity[] {
     const transformer = this.transformer;
-    return this.base.generateEntities(
-      (p: V2d) => roomToWorldPosition(transformer.transformPosition(p)),
-      (v: V2d) => roomToWorldVector(transformer.transformVector(v)),
-      (a: number) => roomToWorldAngle(transformer.transformAngle(a)),
-      (w: WallID) => roomToLevelWall(transformer.transformWall(w)),
-      (d: V2d) => roomToWorldDimensions(transformer.transformDimensions(d))
-    );
+    return this.base.generateEntities({
+      roomToWorldPosition: (p: V2d) =>
+        roomToWorldPosition(transformer.transformPosition(p)),
+      roomToWorldVector: (v: V2d) =>
+        roomToWorldVector(transformer.transformVector(v)),
+      roomToWorldAngle: (a: number) =>
+        roomToWorldAngle(transformer.transformAngle(a)),
+      roomToLevelWall: (w: WallID) =>
+        roomToLevelWall(transformer.transformWall(w)),
+      roomToWorldDimensions: (d: V2d) =>
+        roomToWorldDimensions(transformer.transformDimensions(d)),
+    });
   }
 }

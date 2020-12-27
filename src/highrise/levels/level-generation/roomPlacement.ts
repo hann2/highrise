@@ -5,6 +5,7 @@ import { V, V2d } from "../../../core/Vector";
 import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
+import { RoomTransformer } from "../rooms/ElementTransformer";
 import RoomTemplate from "../rooms/RoomTemplate";
 import SpawnRoom from "../rooms/SpawnRoom";
 import CellGrid, { DoorBuilder, WallBuilder, WallID } from "./CellGrid";
@@ -106,7 +107,7 @@ function addRoom(
   template: RoomTemplate,
   seed: number,
   locationOverride?: V2d
-): Entity[] {
+): AddedRoomInfo {
   const wallsRoomCoordinates: WallBuilder[] = template.generateWalls();
   const occupiedCellsRoomCoordinates: V2d[] = template.getOccupiedCells();
   const wallIDsRoomCoordinates = wallsRoomCoordinates.map((w) => w.id);
@@ -125,7 +126,7 @@ function addRoom(
       console.warn(
         "Couldn't find a spot for room " + template.constructor.name + "!"
       );
-      return [];
+      return { entities: [], enemyPositions: [], itemPositions: [] };
     }
   }
   const location = maybeLocation!;
@@ -178,18 +179,24 @@ function addRoom(
     cellGrid.doors.push(doorBuilder);
   }
 
-  return template.generateEntities(
-    // roomToWorldPosition: PositionTransformer
-    (p) => CellGrid.levelCoordToWorldCoord(p.add(location)),
+  const transformer: RoomTransformer = {
+    roomToWorldPosition: (p) =>
+      CellGrid.levelCoordToWorldCoord(p.add(location)),
     // roomToWorldVector: VectorTransformer
-    (v) => v.mul(CELL_WIDTH),
+    roomToWorldVector: (v) => v.mul(CELL_WIDTH),
     // roomToWorldAngle: AngleTransformer
-    identity,
+    roomToWorldAngle: identity,
     // roomToLevelWall: WallTransformer
-    ([p, r]) => [p.add(location), r],
+    roomToLevelWall: ([p, r]) => [p.add(location), r],
     // roomToWorldDimensions: DimensionsTransformer
-    (d) => d.mul(CELL_WIDTH)
-  );
+    roomToWorldDimensions: (d) => d.mul(CELL_WIDTH),
+  };
+
+  return {
+    entities: template.generateEntities(transformer),
+    enemyPositions: template.getEnemyPositions?.(transformer) ?? [],
+    itemPositions: template.getItemPositions?.(transformer) ?? [],
+  };
 }
 
 export function addRooms(
@@ -197,16 +204,24 @@ export function addRooms(
   levelTemplate: LevelTemplate,
   seed: number,
   levelIndex: number
-): Entity[] {
-  const spawnEntities = addRoom(
-    cellGrid,
-    new SpawnRoom(levelIndex),
-    seed,
-    cellGrid.spawnLocation
+): AddedRoomInfo {
+  const roomInfos: AddedRoomInfo[] = [];
+  roomInfos.push(
+    addRoom(cellGrid, new SpawnRoom(levelIndex), seed, cellGrid.spawnLocation)
   );
-  const allRoomEntities = levelTemplate
-    .chooseRoomTemplates(seed)
-    .flatMap((t) => addRoom(cellGrid, t, seed));
+  for (const roomTemplate of levelTemplate.chooseRoomTemplates(seed)) {
+    roomInfos.push(addRoom(cellGrid, roomTemplate, seed));
+  }
 
-  return [...allRoomEntities, ...spawnEntities];
+  return {
+    entities: roomInfos.flatMap((roomInfo) => roomInfo.entities),
+    enemyPositions: roomInfos.flatMap((roomInfo) => roomInfo.enemyPositions),
+    itemPositions: roomInfos.flatMap((roomInfo) => roomInfo.itemPositions),
+  };
 }
+
+type AddedRoomInfo = {
+  entities: Entity[];
+  enemyPositions: V2d[];
+  itemPositions: V2d[];
+};
