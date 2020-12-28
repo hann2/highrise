@@ -21,9 +21,6 @@ Polish things to add:
 - Sort character new level lines by things they say on the first level or when they're alone or something
 
 
-Ally AI Ideas
-- Make AI a state machine
-
 
 Ideas for performance improvements
 - Separate custom broadphase system for shadows

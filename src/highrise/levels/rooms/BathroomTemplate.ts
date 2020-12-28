@@ -29,6 +29,7 @@ import {
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import Wall from "../../environment/Wall";
+import { BathroomWall, WallType } from "../../environment/WallTypes";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
 import { RoomTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
@@ -160,11 +161,12 @@ export default class BathroomTemplate implements RoomTemplate {
       entities.push(new Decoration(p, sprite, angle));
     }
 
+    const wallType: WallType = { ...BathroomWall, color: wallColor };
     for (const wallY of [0.33, 1, 1.66]) {
       const start = roomToWorldPosition(V(0.7, wallY));
       const end = roomToWorldPosition(V(1.5, wallY));
 
-      entities.push(new Wall(start, end, 0.05, wallColor, false));
+      entities.push(new Wall(start, end, wallType));
     }
 
     if (isSinkGroup) {

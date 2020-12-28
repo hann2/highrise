@@ -11,6 +11,7 @@ import {
   fancyChair1,
   fancyCoffeeTable1,
   lobbyDesk,
+  piano,
   redCarpetBottom,
   redCarpetCenter,
   redCarpetInnerBottomLeft,
@@ -28,7 +29,6 @@ import {
 } from "../../environment/decorations/decorations";
 import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
 import ElevatorDoor from "../../environment/ElevatorDoor";
-import { Piano } from "../../environment/furniture-plus/Piano";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import TiledFloor, { Tiles } from "../../environment/TiledFloor";
 import { CARDINAL_DIRECTIONS, Direction } from "../../utils/directions";
@@ -220,7 +220,9 @@ export default class LobbyRoomTemplate implements RoomTemplate {
       new Decoration(roomToWorldPosition(V(0.6, 5)), fancyCoffeeTable1)
     );
 
-    entities.push(new Piano(roomToWorldPosition(V(4.2, 5.15)), degToRad(-35)));
+    entities.push(
+      new Decoration(roomToWorldPosition(V(4.2, 5.15)), piano, degToRad(-35))
+    );
 
     entities.push(
       new OverheadLight(roomToWorldPosition(V(1, 1)), { radius: 10 })

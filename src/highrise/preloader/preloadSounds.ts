@@ -18,11 +18,12 @@ import { ENEMY_SOUNDS, ZOMBIE_ATTACK_HIT_SOUNDS } from "../constants/constants";
 import { MUSIC_URLS } from "../controllers/MusicController";
 import { GLOWSTICK_SOUNDS } from "../effects/GlowStick";
 import { SPLAT_SOUNDS } from "../effects/Splat";
-import { PIANO_HIT_SOUNDS } from "../environment/furniture-plus/Piano";
 import { VENDING_MACHINE_HIT_SOUNDS } from "../environment/furniture-plus/VendingMachine";
 import { PUSH_SOUNDS } from "../human/Human";
 import { GUNS } from "../weapons/guns/gun-stats/gunStats";
 import { WEAPONS } from "../weapons/weapons";
+import * as DECORATION_INFOS from "../environment/decorations/decorations";
+import { WALL_TYPES } from "../environment/WallTypes";
 
 export function getSoundsToPreload(): string[] {
   const urls = new Set<string>([
@@ -41,9 +42,10 @@ export function getSoundsToPreload(): string[] {
     snd_heavySwitch,
     snd_lightsClickOn,
     snd_powerOn,
-    snd_chainFence,
 
-    ...PIANO_HIT_SOUNDS,
+    ...WALL_TYPES.flatMap((wallType) => wallType.collisionSounds ?? []),
+    ...WALL_TYPES.flatMap((wallType) => wallType.impactSounds ?? []),
+    ...Object.values(DECORATION_INFOS).flatMap((info) => info.hitSounds ?? []),
     ...VENDING_MACHINE_HIT_SOUNDS,
     ...ZOMBIE_ATTACK_HIT_SOUNDS,
     ...PUSH_SOUNDS,
@@ -51,10 +53,12 @@ export function getSoundsToPreload(): string[] {
     ...GLOWSTICK_SOUNDS,
     ...MUSIC_URLS,
 
-    ...WEAPONS.map((w) => Object.values(w.sounds).flat()).flat(),
-    ...GUNS.map((g) => g.bulletStats.dropSounds).flat(),
-    ...CHARACTERS.map((c) => Object.values(c.sounds).flat()).flat(),
-    ...ENEMY_SOUNDS.map((z) => Object.values(z).flat()).flat(),
+    ...WEAPONS.flatMap((weapon) => Object.values(weapon.sounds).flat()),
+    ...GUNS.flatMap((gun) => gun.bulletStats.dropSounds),
+    ...CHARACTERS.flatMap((character) =>
+      Object.values(character.sounds).flat()
+    ),
+    ...ENEMY_SOUNDS.flatMap((enemySounds) => Object.values(enemySounds).flat()),
   ]);
 
   return Array.from(urls);

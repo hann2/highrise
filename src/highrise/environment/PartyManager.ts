@@ -2,6 +2,8 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { choose, rBool } from "../../core/util/Random";
+import { V } from "../../core/Vector";
+import { DustyRusty } from "../characters/DustyRusty";
 import { Persistence } from "../constants/constants";
 import AllyHumanController, { isAllyController } from "../human/AllyController";
 import Human from "../human/Human";
@@ -25,7 +27,7 @@ export default class PartyManager extends BaseEntity implements Entity {
     game.entities.addFilter(isAllyController);
 
     this.partyMembers = [];
-    this.leader = game.addEntity(new Human());
+    this.leader = game.addEntity(new Human(V(0, 0), DustyRusty));
     this.handlers.addToParty({ human: this.leader });
   }
 

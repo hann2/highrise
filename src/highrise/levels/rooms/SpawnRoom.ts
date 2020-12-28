@@ -4,7 +4,8 @@ import Entity, { GameSprite } from "../../../core/entity/Entity";
 import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { Layer } from "../../config/layers";
-import { cementFloor } from "../../environment/decorations/decorations";
+import Decoration from "../../environment/Decoration";
+import { cementFloor, piano } from "../../environment/decorations/decorations";
 import HealthPickup from "../../environment/HealthPickup";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
@@ -55,7 +56,7 @@ export default class SpawnRoom implements RoomTemplate {
     entities.push(new SpawnLocation(roomToWorldPosition(V(1, 1))));
     entities.push(new SpawnLocation(roomToWorldPosition(V(2, 1))));
 
-    let starterWeapon = rBool(10.5)
+    let starterWeapon = rBool(0.5)
       ? new MeleeWeapon(choose(...MELEE_WEAPONS))
       : new Gun(choose(...GUN_TIERS[0]));
     entities.push(

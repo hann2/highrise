@@ -24,7 +24,7 @@ export const SPAS12: GunStats = {
   bulletSpread: degToRad(7),
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   fireMode: FireMode.SEMI_AUTO,
-  reloadInsertTime: 0.4,
+  reloadInsertTime: 0.35,
   ammoCapacity: 8,
 
   textures: {

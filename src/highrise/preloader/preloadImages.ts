@@ -18,7 +18,7 @@ import { CRAWLER_TEXTURES, ZOMBIE_TEXTURES } from "../constants/constants";
 import { GLOWSTICK_TEXTURES } from "../effects/GlowStick";
 import { MUZZLE_FLASH_URLS } from "../effects/MuzzleFlash";
 import { SPLATS_AND_BLOBS_TEXTURES } from "../effects/Splat";
-import * as DecorationSprites from "../environment/decorations/decorations";
+import * as DECORATION_INFOS from "../environment/decorations/decorations";
 import { DEFAULT_DOOR_SPRITES } from "../environment/Door";
 import { VENDING_MACHINES } from "../environment/furniture-plus/VendingMachine";
 import { WEAPONS } from "../weapons/weapons";
@@ -42,17 +42,17 @@ export function getImagesToPreload(): Set<string> {
     img_wallAo1,
     img_woodenFloor,
 
-    ...Object.values(DecorationSprites).map((sprite) => sprite.imageName),
-    ...ZOMBIE_TEXTURES.map((z) => Object.values(z)).flat(),
-    ...CRAWLER_TEXTURES.map((z) => Object.values(z)).flat(),
+    ...Object.values(DECORATION_INFOS).map((sprite) => sprite.imageName),
+    ...ZOMBIE_TEXTURES.flatMap((z) => Object.values(z)),
+    ...CRAWLER_TEXTURES.flatMap((z) => Object.values(z)),
     ...SPLATS_AND_BLOBS_TEXTURES,
     ...DEFAULT_DOOR_SPRITES,
     ...GLOWSTICK_TEXTURES,
     ...MUZZLE_FLASH_URLS,
     ...VENDING_MACHINES.flat(),
 
-    ...CHARACTERS.map((c) => Object.values(c.textures)).flat(),
-    ...WEAPONS.map((weapon) => Object.values(weapon.textures)).flat(),
+    ...CHARACTERS.flatMap((c) => Object.values(c.textures)),
+    ...WEAPONS.flatMap((weapon) => Object.values(weapon.textures)),
   ]);
 
   // Just in case this sneaks in there somehow, make sure we don't load it

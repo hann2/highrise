@@ -1,7 +1,6 @@
 import { Body, Box } from "p2";
 import { Sprite } from "pixi.js";
-import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
+import snd_wallHit4 from "../../../resources/audio/impacts/wall-hit-4.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
@@ -16,15 +15,15 @@ import {
   DecorationInfo,
   getDecorationTexture,
 } from "./decorations/DecorationInfo";
-import Hittable from "./Hittable";
+
+export const DEFAULT_HIT_SOUNDS = [snd_wallHit4];
 
 export default class Decoration extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
-  decorationBody?: DecorationBody;
 
   constructor(
     position: V2d,
-    decorationInfo: DecorationInfo,
+    private decorationInfo: DecorationInfo,
     angle: number = 0,
     layerName?: Layer,
     flipX: boolean = false,
@@ -51,55 +50,63 @@ export default class Decoration extends BaseEntity implements Entity {
     }
 
     if (decorationInfo.isSolid) {
-      const { width, height } = this.sprite;
+      this.body = new Body({
+        mass: 0,
+        position,
+        angle: angle,
+      });
+
       const [widthInset, heightInset] = decorationInfo.bodyInset ?? [0, 0];
-      this.decorationBody = this.addChild(
-        new DecorationBody(
-          position,
-          angle,
-          width - widthInset,
-          height - heightInset,
-          decorationInfo.isHittable
-        )
-      );
-    }
-  }
-}
+      const width = this.sprite.width - widthInset;
+      const height = this.sprite.height - heightInset;
 
-class DecorationBody extends BaseEntity implements Entity, Hittable {
-  constructor(
-    position: V2d,
-    angle: number,
-    width: number,
-    height: number,
-    hittable: boolean = false
-  ) {
-    super();
+      if (decorationInfo.corners) {
+        const points = decorationInfo.corners.map((point): [number, number] => [
+          point[0] * width * 0.5 * (flipX ? -1 : 1),
+          point[1] * height * 0.5 * (flipY ? -1 : 1),
+        ]);
+        if (flipX != flipX) {
+          // one axis is flipped but not both
+          points.reverse();
+        }
+        console.log(points);
+        this.body.fromPolygon(points, {
+          optimalDecomp: true,
+          removeCollinearPoints: false,
+          skipSimpleCheck: false,
+        });
+      } else {
+        const shape = new Box({ width, height });
 
-    this.body = new Body({
-      mass: 0,
-      position,
-      angle: angle,
-    });
+        this.body.addShape(shape, [0, 0], 0);
+      }
 
-    const shape = new Box({ width, height });
-    shape.collisionGroup = CollisionGroups.Furniture;
-    shape.collisionMask = CollisionGroups.All;
-    this.body.addShape(shape, [0, 0], 0);
+      for (const shape of this.body.shapes) {
+        shape.collisionGroup = CollisionGroups.Furniture;
+        shape.collisionMask = CollisionGroups.All;
 
-    if (hittable) {
-      shape.collisionGroup |= CollisionGroups.Walls;
+        if (decorationInfo.isHittable) {
+          shape.collisionGroup |= CollisionGroups.Walls;
+        }
+      }
     }
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
+  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {
+    if (this.decorationInfo.isHittable) {
+      const sounds = this.decorationInfo.hitSounds ?? DEFAULT_HIT_SOUNDS;
+      this.game?.addEntity(new PositionalSound(choose(...sounds), position));
+    }
+  }
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
-    this.game!.addEntities([
-      new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position),
-      new WallImpact(position, normal),
-    ]);
+    if (this.decorationInfo.isHittable) {
+      const sounds = this.decorationInfo.hitSounds ?? DEFAULT_HIT_SOUNDS;
+      this.game!.addEntity(new PositionalSound(choose(...sounds), position));
+      this.game!.addEntity(new WallImpact(position, normal));
 
-    return true;
+      return true;
+    }
+    return false;
   }
 }

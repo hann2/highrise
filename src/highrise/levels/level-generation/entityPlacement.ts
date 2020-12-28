@@ -1,16 +1,14 @@
-import snd_chainFence from "../../../../resources/audio/environment/chain-fence.flac";
-import img_chainLinkFence from "../../../../resources/images/environment/chain-link-fence.png";
 import Entity from "../../../core/entity/Entity";
 import { rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
 import Exit from "../../environment/Exit";
-import Wall from "../../environment/Wall";
 import { DIAGONAL_DIRECTIONS, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
-import CellGrid, { WallBuilder } from "./CellGrid";
+import CellGrid from "./CellGrid";
 import { fillClosets, generateClosets } from "./closets";
 import { buildDoorEntity } from "./doors";
+import { addInnerWalls, addOuterWalls } from "./generateWalls";
 import { buildMaze, findExit } from "./mazeGeneration";
 import { fillNubbies } from "./nubbies";
 import { addRooms } from "./roomPlacement";
@@ -87,16 +85,6 @@ function addExit(exitPoint: V2d, openDirection: V2d): Entity[] {
   ];
 }
 
-function addOuterWalls(): Entity[] {
-  const max = CELL_WIDTH * LEVEL_SIZE;
-  return [
-    new Wall([0, 0], [max, 0]),
-    new Wall([0, 0], [0, max]),
-    new Wall([max, 0], [max, max]),
-    new Wall([0, max], [max, max]),
-  ];
-}
-
 function findEnemyLocations(cellGrid: CellGrid): V2d[] {
   const locations: V2d[] = [];
   for (let i = 0; i < LEVEL_SIZE; i++) {
@@ -134,104 +122,4 @@ function addHallwayLights(
   }
 
   return entities;
-}
-
-export function wallBuilderToEntity(wallBuilder: WallBuilder): Entity {
-  const [[i, j], right] = wallBuilder.id;
-  const [x, y] = CellGrid.levelCoordToWorldCoord(V(i, j));
-  if (right) {
-    return new Wall(
-      [x + CELL_WIDTH / 2, y - CELL_WIDTH / 2],
-      [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2],
-      0.15,
-      0x999999,
-      !wallBuilder.chainLink,
-      wallBuilder.chainLink ? img_chainLinkFence : undefined,
-      wallBuilder.chainLink ? snd_chainFence : undefined
-    );
-  } else {
-    return new Wall(
-      [x - CELL_WIDTH / 2, y + CELL_WIDTH / 2],
-      [x + CELL_WIDTH / 2, y + CELL_WIDTH / 2],
-      0.15,
-      0x999999,
-      !wallBuilder.chainLink,
-      wallBuilder.chainLink ? img_chainLinkFence : undefined,
-      wallBuilder.chainLink ? snd_chainFence : undefined
-    );
-  }
-}
-
-function addInnerWalls(cellGrid: CellGrid): Entity[] {
-  const wallEntities = [];
-
-  // Vertical Walls
-  for (let i = 0; i < LEVEL_SIZE; i++) {
-    for (let j = 0; j < LEVEL_SIZE; j++) {
-      if (cellGrid.cells[i][j].rightWall.exists) {
-        const start = j;
-        const isChainLink = cellGrid.cells[i][j].rightWall.chainLink;
-
-        // condition for continuing wall
-        while (cellGrid.cells[i][j + 1]?.rightWall?.exists) {
-          if (cellGrid.cells[i][j + 1].rightWall.chainLink !== isChainLink) {
-            break;
-          }
-          j++;
-        }
-
-        const [x1, y1] = CellGrid.levelCoordToWorldCoord(
-          V(i + 0.5, start - 0.5)
-        );
-        const [x2, y2] = CellGrid.levelCoordToWorldCoord(V(i + 0.5, j + 0.5));
-        wallEntities.push(
-          new Wall(
-            [x1, y1],
-            [x2, y2],
-            0.15,
-            0x999999,
-            !isChainLink,
-            isChainLink ? img_chainLinkFence : undefined,
-            isChainLink ? snd_chainFence : undefined
-          )
-        );
-      }
-    }
-  }
-
-  // Horizontal Walls
-  for (let j = 0; j < LEVEL_SIZE; j++) {
-    for (let i = 0; i < LEVEL_SIZE; i++) {
-      if (cellGrid.cells[i][j].bottomWall.exists) {
-        const start = i;
-        const isChainLink = cellGrid.cells[i][j].bottomWall.chainLink;
-
-        // condition for continuing wall
-        while (cellGrid.cells[i + 1]?.[j]?.bottomWall?.exists) {
-          if (cellGrid.cells[i + 1][j].bottomWall.chainLink !== isChainLink) {
-            break;
-          }
-          i++;
-        }
-
-        const [x1, y1] = CellGrid.levelCoordToWorldCoord(
-          V(start - 0.5, j + 0.5)
-        );
-        const [x2, y2] = CellGrid.levelCoordToWorldCoord(V(i + 0.5, j + 0.5));
-        wallEntities.push(
-          new Wall(
-            [x1, y1],
-            [x2, y2],
-            0.15,
-            0x999999,
-            !isChainLink,
-            isChainLink ? img_chainLinkFence : undefined,
-            isChainLink ? snd_chainFence : undefined
-          )
-        );
-      }
-    }
-  }
-
-  return wallEntities;
 }

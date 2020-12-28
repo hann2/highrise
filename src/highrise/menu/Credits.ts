@@ -39,6 +39,7 @@ Fesliyan Studios
 The Free Firearm Sound Library
 Aturax Audio (aturaxaudio.com)
 Alchemia Audio (alchemiaaudio.com)
+Richard Humphreys (https://www.takomamedia.com/)
 
 
 #ART

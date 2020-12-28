@@ -1,4 +1,5 @@
 import { BaseTexture, Rectangle, Texture } from "pixi.js";
+import { SoundName } from "../../../core/resources/sounds";
 import { V2d } from "../../../core/Vector";
 
 /**
@@ -35,6 +36,8 @@ export interface DecorationInfo {
   isHittable?: boolean; // whether or not this blocks movement
   bodyInset?: [number, number]; // meters to inset the body from the outside of the image
   rotation?: number; // radians to rotate the texture
+  corners?: [number, number][]; // corners for the physics body. Otherwise uses a square
+  hitSounds?: SoundName[]; // Sounds to make when hit
 }
 
 const textureCache = new Map<string, Texture>();

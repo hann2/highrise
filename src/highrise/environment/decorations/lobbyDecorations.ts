@@ -1,3 +1,5 @@
+import snd_pianoHit1 from "../../../../resources/audio/impacts/piano-hit-1.flac";
+import snd_pianoHit2 from "../../../../resources/audio/impacts/piano-hit-2.flac";
 import img_fancyFurniture from "../../../../resources/images/environment/fancy-furniture.png";
 import img_fancyRug1 from "../../../../resources/images/environment/fancy-rug-1.png";
 import img_furniture from "../../../../resources/images/environment/furniture.png";
@@ -67,7 +69,24 @@ export const piano: DecorationInfo = {
   heightMeters: 3,
   isSolid: true,
   isHittable: true,
-  bodyInset: [0.3, 0.3],
+  bodyInset: [0.6, 0.6],
+
+  corners: [
+    [-1, -0.6],
+    [-0.5, -1],
+    [-0.3, -0.9],
+    [0.1, -0.7],
+    [0.2, -0.4],
+    [1, -0.2],
+    [1, 0.6],
+    [0.6, 0.6],
+    [0.6, 1],
+    [-0.6, 1],
+    [-0.6, 0.6],
+    [-1, 0.6],
+  ],
+
+  hitSounds: [snd_pianoHit1, snd_pianoHit2],
 };
 
 export const endTable1: DecorationInfo = {
