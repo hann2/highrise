@@ -1,6 +1,7 @@
 import { BLEND_MODES, Graphics, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import Game from "../../core/Game";
 import { rgbToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
 import { V } from "../../core/Vector";
@@ -26,28 +27,31 @@ export default class LightingManager extends BaseEntity implements Entity {
     return this.game!.renderer.pixiRenderer;
   }
 
-  handlers = {
-    resize: () => {
-      const { width, height, resolution } = this.renderer;
-      this.texture.resize(width / resolution, height / resolution);
-      this.drawDarkness();
-    },
-  };
+  onResize([width, height]: [number, number]) {
+    this.texture.resize(width, height);
+    this.drawDarkness();
 
-  onAdd() {
-    const { width, height, resolution } = this.renderer;
+    // For some reason this needs to happen
+    for (const light of this.lights) {
+      light.dirty = true;
+      light.bakeIfNeeded();
+    }
+  }
+
+  onAdd(game: Game) {
+    const [width, height] = game.renderer.getSize();
     this.texture = RenderTexture.create({
-      width: width / resolution,
-      height: height / resolution,
-      resolution: resolution / 2,
+      width: width,
+      height: height,
+      resolution: game.renderer.pixiRenderer.resolution,
     });
+
+    this.drawDarkness();
 
     this.sprite = new Sprite(this.texture);
     this.sprite.layerName = Layer.LIGHTING;
     this.sprite.blendMode = BLEND_MODES.MULTIPLY;
     this.sprite.anchor.set(0, 0);
-
-    this.drawDarkness();
 
     this.lightContainer.blendMode = BLEND_MODES.ADD;
   }
@@ -113,7 +117,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     );
   }
 
-  // Use render 2 so that it happens after everyone else has rendered and all their light positions and stuff are updated
+  // Use late render so that it happens after everyone else has rendered and all their light positions and stuff are updated
   onLateRender() {
     const matrix = this.game!.camera.getMatrix();
     // const inverseMatrix = matrix.clone().invert();

@@ -8,6 +8,7 @@ import { Layer } from "../config/layers";
 import { Persistence } from "../constants/constants";
 import ClickableText from "./ClickableText";
 import FeedbackButton from "./FeedbackButton";
+import GraphicsButton from "./GraphicsButton";
 import MuteButton from "./MuteButton";
 
 // Shows the menu when paused, invisible otherwise
@@ -20,6 +21,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
   mainMenuButton: ClickableText;
   resumeText: Text;
   muteButton: ClickableText;
+  graphicsButton: GraphicsButton;
 
   constructor() {
     super();
@@ -64,16 +66,12 @@ export default class PauseMenu extends BaseEntity implements Entity {
     this.feedbackButton = this.addChild(new FeedbackButton());
 
     this.muteButton = this.addChild(new MuteButton());
-  }
 
-  handlers = {
-    resize: () => this.positionText(),
-  };
+    this.graphicsButton = this.addChild(new GraphicsButton());
+  }
 
   onAdd(game: Game) {
     this.setVisibility(game.paused);
-    this.positionText();
-    this.onInputDeviceChange(game.io.usingGamepad);
   }
 
   onInputDeviceChange(usingGamepad: boolean) {
@@ -81,14 +79,14 @@ export default class PauseMenu extends BaseEntity implements Entity {
     this.resumeText.text = `Press ${buttonName} to resume`;
   }
 
-  positionText() {
-    const [width, height] = this.game!.renderer.getSize();
+  onResize([width, height]: [number, number]) {
     this.pausedText.position.set(width / 2, height / 2);
     this.resumeText.position.set(width / 2, height / 2);
 
     this.mainMenuButton.sprite.position.set(10, 10);
     this.feedbackButton.sprite.position.set(10, 50);
     this.muteButton.sprite.position.set(10, 90);
+    this.graphicsButton.sprite.position.set(10, 130);
   }
 
   setVisibility(visible: boolean) {
@@ -97,10 +95,12 @@ export default class PauseMenu extends BaseEntity implements Entity {
     this.mainMenuButton.sprite.visible = visible;
     this.feedbackButton.sprite.visible = visible;
     this.muteButton.sprite.visible = visible;
+    this.graphicsButton.sprite.visible = visible;
 
     this.mainMenuButton.sprite.interactive = visible;
     this.feedbackButton.sprite.interactive = visible;
     this.muteButton.sprite.interactive = visible;
+    this.graphicsButton.sprite.interactive = visible;
   }
 
   onPause() {

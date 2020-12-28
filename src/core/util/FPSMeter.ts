@@ -23,7 +23,7 @@ export default class FPSMeter extends BaseEntity implements Entity {
   }
 
   onAdd(game: Game) {
-    this.averageDuration = game.trueRenderTimestep;
+    this.averageDuration = 1 / 60;
   }
 
   onRender() {

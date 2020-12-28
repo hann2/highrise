@@ -72,16 +72,11 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     }
   }
 
-  handlers = {
-    resize: () => this.centerText(),
-  };
-
   onAdd(game: Game) {
-    this.centerText();
     this.sprite.y = game.renderer.getHeight();
   }
 
-  centerText() {
+  onResize() {
     this.sprite.x = this.game!.renderer.getWidth() / 2;
   }
 

@@ -15,7 +15,7 @@ export class GameRenderer2d {
   stage: Pixi.Container;
   camera: Camera2d;
 
-  constructor() {
+  constructor(private onResize?: ([width, height]: [number, number]) => void) {
     Pixi.settings.RESOLUTION = window.devicePixelRatio || 1;
     Pixi.utils.skipHello();
     this.pixiRenderer = new Pixi.Renderer({
@@ -31,9 +31,9 @@ export class GameRenderer2d {
     this.stage = new Pixi.Container();
     this.camera = new Camera2d(this);
 
-    window.addEventListener("resize", () => this.handleResize());
-
     this.createLayer(this.defaultLayer, new LayerInfo());
+
+    window.addEventListener("resize", () => this.handleResize());
   }
 
   private getLayerInfo(layerName: string) {
@@ -61,8 +61,25 @@ export class GameRenderer2d {
     return V(this.getWidth(), this.getHeight());
   }
 
+  setResolution(resolution: number) {
+    const view = this.pixiRenderer.view;
+    this.pixiRenderer.destroy();
+    this.pixiRenderer = new Pixi.Renderer({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      antialias: false,
+      autoDensity: true,
+      resolution,
+      view,
+    });
+    PIXI.settings.RESOLUTION = resolution;
+
+    this.handleResize();
+  }
+
   handleResize() {
     this.pixiRenderer.resize(window.innerWidth, window.innerHeight);
+    this.onResize?.(this.getSize());
   }
 
   hideCursor() {
@@ -100,8 +117,19 @@ export class GameRenderer2d {
     this.spriteCount -= 1;
   }
 
-  addFilter(filter: Pixi.Filter, layerName: string): void {
+  addLayerFilter(filter: Pixi.Filter, layerName: string): void {
     const layer = this.getLayerInfo(layerName).container;
     layer.filters = [...layer.filters!, filter];
+  }
+
+  addStageFilter(filter: Pixi.Filter): void {
+    this.stage.filters ??= [];
+    this.stage.filters.push(filter);
+  }
+
+  removeStageFilter(filterToRemove: Pixi.Filter): void {
+    this.stage.filters = (this.stage.filters ?? []).filter(
+      (filter) => filter != filterToRemove
+    );
   }
 }

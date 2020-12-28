@@ -11,7 +11,11 @@ import CellGrid, { WallID } from "./CellGrid";
  *
  * It makes a pretty good maze.
  */
-export function buildMaze(cellGrid: CellGrid, seed: number) {
+export function buildMaze(
+  cellGrid: CellGrid,
+  seed: number,
+  maziness: number = 1
+) {
   type UpTree = (number[] | null)[][];
 
   const upTree: UpTree = [];

@@ -31,7 +31,7 @@ export class OverheadLight extends BaseEntity implements Entity {
   onLightSwitchEvent(lightPosition: V2d) {
     const delta = lightPosition.sub(this.position);
     const infiniteNorm = Math.max(Math.abs(delta.x), Math.abs(delta.y));
-    const delayTime = infiniteNorm * 0.5;
+    const delayTime = infiniteNorm * 0.4;
     this.wait(delayTime).then(() => this.turnLightOn());
   }
 

@@ -82,8 +82,8 @@ export class Camera2d extends BaseEntity implements Entity {
 
   // Move the camera toward being centered on a position, with a target velocity
   smoothCenter([x, y]: V2d, [vx, vy]: V2d = V([0, 0]), smooth: number = 0.9) {
-    const dx = (x - this.x) * this.game!.framerate;
-    const dy = (y - this.y) * this.game!.framerate;
+    const dx = (x - this.x) / this.game!.averageFrameDuration;
+    const dy = (y - this.y) / this.game!.averageFrameDuration;
     this.smoothSetVelocity(V([vx + dx, vy + dy]), smooth);
   }
 

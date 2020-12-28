@@ -50,8 +50,8 @@ export const SolidWall: WallType = {
 export const BathroomWall: WallType = {
   blocksBullets: true,
   blocksMovement: true,
-  blocksVision: true,
-  castsShadow: true,
+  blocksVision: false,
+  castsShadow: false,
 
   impactSounds: [snd_wallHit3],
   color: 0x999999,

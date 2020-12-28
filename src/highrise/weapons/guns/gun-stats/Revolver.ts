@@ -26,7 +26,7 @@ export const Revolver: GunStats = {
   bulletStats: Magnum,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   ejectionType: EjectionType.RELOAD,
-  reloadInsertTime: 0.28,
+  reloadInsertTime: 0.22,
   ammoCapacity: 6,
 
   textures: {

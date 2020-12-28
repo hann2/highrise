@@ -27,4 +27,6 @@ export default interface GameEventHandler {
   onUnpause?(): void;
   /** Called after being destroyed */
   onDestroy?(game: Game): void;
+  /** Called when the renderer is resized or recreated for some reason */
+  onResize?(size: [number, number]): void;
 }

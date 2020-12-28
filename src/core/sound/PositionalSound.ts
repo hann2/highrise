@@ -1,13 +1,17 @@
 import Entity from "../entity/Entity";
 import Game from "../Game";
 import { SoundName } from "../resources/sounds";
-import { clamp } from "../util/MathUtil";
+import { clamp, lerp } from "../util/MathUtil";
 import { V, V2d } from "../Vector";
 import { SoundInstance, SoundOptions } from "./SoundInstance";
 
-const FALL_OFF = 0.035; // dB / meter or something
 const MAX_SPREAD = 0.99; // maximum pan (0-1)
-const SPREAD_DISTANCE = 10; // meters to the maximum spread
+const SPREAD_DISTANCE = 7.5; // meters to the maximum spread
+const FALL_OFF_DISTANCE = 12; // meters to the maximum spread
+
+export interface PositionalSoundOptions extends SoundOptions {
+  maxDistance?: number;
+}
 
 /**
  * Represents a currently playing sound.
@@ -16,6 +20,8 @@ export class PositionalSound extends SoundInstance implements Entity {
   private _distanceGain: number = 1.0;
   private distanceGainNode!: GainNode;
   private listenerPosition: V2d = V(0, 0);
+
+  private maxDistance;
 
   set distanceGain(value: number) {
     if (!this.game) {
@@ -28,9 +34,10 @@ export class PositionalSound extends SoundInstance implements Entity {
   constructor(
     soundName: SoundName,
     private position: V2d = V(0, 0),
-    options: SoundOptions = {}
+    options: PositionalSoundOptions = {}
   ) {
     super(soundName, options);
+    this.maxDistance = options.maxDistance ?? FALL_OFF_DISTANCE;
     this.tags.push("positional_sound");
     this.setPosition(position);
   }
@@ -62,7 +69,7 @@ export class PositionalSound extends SoundInstance implements Entity {
     const theta = relativePosition.angle;
     this.pan =
       Math.cos(theta) * MAX_SPREAD * clamp(distance / SPREAD_DISTANCE) ** 2;
-    const gain = 1.0 / (1.0 + distance * FALL_OFF);
+    const gain = clamp(lerp(1, 0, distance / this.maxDistance));
     this.distanceGain = gain;
   }
 }

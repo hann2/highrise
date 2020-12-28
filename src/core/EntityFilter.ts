@@ -28,6 +28,10 @@ type EntityWithOnPause = Entity & { onPause: Function };
 export const hasOnPause = (e: Entity): e is EntityWithOnPause =>
   Boolean(e.onPause);
 
+type EntityWithOnResize = Entity & { onResize: Function };
+export const hasOnResize = (e: Entity): e is EntityWithOnResize =>
+  Boolean(e.onResize);
+
 type EntityWithOnUnpause = Entity & { onUnpause: Function };
 export const hasOnUnpause = (e: Entity): e is EntityWithOnUnpause =>
   Boolean(e.onUnpause);

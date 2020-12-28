@@ -39,12 +39,7 @@ export default class GameOverScreen extends BaseEntity implements Entity {
     this.sprite.addChild(this.titleText);
   }
 
-  handlers = {
-    resize: () => this.onResize(),
-  };
-
   async onAdd() {
-    this.onResize();
     this.sprite.alpha = 0;
     await this.wait(FADE_IN_TIME, (dt, t) => {
       this.sprite.alpha = t;
@@ -58,8 +53,7 @@ export default class GameOverScreen extends BaseEntity implements Entity {
     this.destroy();
   }
 
-  onResize() {
-    const [width, height] = this.game?.renderer.getSize()!;
+  onResize([width, height]: [number, number]) {
     this.titleText.position.set(width / 2, height / 2);
     this.background.width = width;
     this.background.height = height;

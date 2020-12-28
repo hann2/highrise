@@ -34,11 +34,6 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     this.sprite.addChild(this.bulletSpriteContainer);
   }
 
-  onAdd(game: Game) {
-    this.handlers.resize();
-    this.onInputDeviceChange(game.io.usingGamepad);
-  }
-
   onInputDeviceChange(usingGamepad: boolean) {
     if (usingGamepad) {
       this.reloadText.text = "Press X To Reload";
@@ -47,13 +42,10 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     }
   }
 
-  handlers = {
-    resize: () => {
-      const [width, height] = this.game!.renderer.getSize();
-      this.reloadText.position.set(width - 10, height - 10);
-      this.bulletSpriteContainer.position.set(width - 10, height - 10);
-    },
-  };
+  onResize([width, height]: [number, number]) {
+    this.reloadText.position.set(width - 10, height - 10);
+    this.bulletSpriteContainer.position.set(width - 10, height - 10);
+  }
 
   onNewWeapon(weapon: Weapon | undefined) {
     this.lastWeapon = weapon;

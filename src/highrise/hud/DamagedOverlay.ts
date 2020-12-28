@@ -1,44 +1,41 @@
-import { BLEND_MODES, Container, Graphics, Sprite } from "pixi.js";
-import img_healthOverlay from "../../../resources/images/effects/health-overlay.png";
+import * as Pixi from "pixi.js";
+import { Container, Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
-import { smoothStep } from "../../core/util/MathUtil";
+import Game from "../../core/Game";
+import { clamp, smoothStep } from "../../core/util/MathUtil";
 import { Layer } from "../config/layers";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
+import frag_damageFilter from "./damage-filter.frag";
 
 const FLASH_ALPHA = 0.4;
 
 export class DamagedOverlay extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
   sprite: Container & GameSprite;
-  baseline!: Sprite;
+  colorFilter: Pixi.Filter;
 
   constructor(private getPlayer: () => Human | undefined) {
     super();
 
     this.sprite = new Container();
     this.sprite.layerName = Layer.HUD;
+
+    this.colorFilter = new Pixi.Filter(undefined, frag_damageFilter, {
+      healthPercent: 1.0,
+    });
   }
 
-  onAdd() {
-    this.baseline = Sprite.from(img_healthOverlay);
-    this.baseline.alpha = 0;
-    this.sprite.addChild(this.baseline);
-    this.resize();
+  onAdd(game: Game) {
+    game.renderer.addStageFilter(this.colorFilter);
   }
 
-  resize() {
-    const [width, height] = this.game!.renderer.getSize();
-    this.baseline.width = width;
-    this.baseline.height = height;
+  onDestroy(game: Game) {
+    game.renderer.removeStageFilter(this.colorFilter);
   }
 
   handlers = {
-    resize: () => {
-      this.resize();
-    },
-
     humanInjured: ({ human, amount }: { human: Human; amount: number }) => {
       if (human === this.getPlayer()) {
         this.flash(0xff0000, 0, 0.4);
@@ -57,12 +54,12 @@ export class DamagedOverlay extends BaseEntity implements Entity {
     if (human && !human.isDestroyed) {
       this.updateBaseline(human.hp / human.maxHp);
     } else {
-      this.updateBaseline(1.0);
+      this.updateBaseline(0.0);
     }
   }
 
   updateBaseline(healthPercent: number) {
-    this.baseline.alpha = 1.0 - healthPercent;
+    this.colorFilter.uniforms.healthPercent = healthPercent;
   }
 
   makeOverlay(color: number = 0xff0000): Graphics {

@@ -1,9 +1,10 @@
 import img_transformer from "../../../../resources/images/environment/maintenance/transformer.png";
 import Entity from "../../../core/entity/Entity";
-import { choose } from "../../../core/util/Random";
+import { choose, rCardinal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Decoration from "../../environment/Decoration";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
+import { transformer } from "../../environment/decorations/maintenanceDecorations";
 import { LightSwitch } from "../../environment/lighting/LightSwitch";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import { SparkGenerator } from "../../environment/lighting/SparkGenerator";
@@ -75,12 +76,7 @@ export default class LightSwitchRoomTemplate implements RoomTemplate {
   }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
     entities.push(
-      new Decoration(roomToWorldPosition(V(1, 1)), {
-        imageName: img_transformer,
-        heightMeters: 2,
-        isSolid: true,
-        rotation: choose(...CARDINAL_DIRECTIONS_VALUES).angle,
-      })
+      new Decoration(roomToWorldPosition(V(1, 1)), transformer, rCardinal())
     );
     const centerWorldCoords = roomToWorldPosition(
       DIMENSIONS.sub(V(1, 1)).mul(0.5)

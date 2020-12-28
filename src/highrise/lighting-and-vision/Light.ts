@@ -95,7 +95,10 @@ export default class Light extends BaseEntity implements Entity {
       this.container.addChild(this.shadows.graphics);
 
       if (this.softShadows) {
-        this.shadows.graphics.filters = [new Pixi.filters.BlurFilter(1)];
+        // TODO: Make soft shadows work
+        // const blurFilter = new Pixi.filters.BlurFilter(0, 1);
+        // blurFilter.repeatEdgePixels = true;
+        // this.shadows.graphics.filters = [blurFilter];
       }
     }
   }
@@ -104,8 +107,8 @@ export default class Light extends BaseEntity implements Entity {
     this.dirty = true;
     this.shadowsEnabled = false;
     if (this.shadows) {
-      this.shadows?.destroy();
       this.container.removeChild(this.shadows.graphics);
+      this.shadows?.destroy();
       this.shadows = undefined;
     }
   }

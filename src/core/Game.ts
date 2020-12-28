@@ -8,7 +8,7 @@ import EntityList from "./EntityList";
 import { GameRenderer2d } from "./graphics/GameRenderer2d";
 import { IOManager } from "./io/IO";
 import CustomWorld from "./physics/CustomWorld";
-import { clamp } from "./util/MathUtil";
+import { clamp, lerp } from "./util/MathUtil";
 
 interface GameOptions {
   audio?: AudioContext;
@@ -16,9 +16,6 @@ interface GameOptions {
   framerate?: number;
   world?: World | CustomWorld;
 }
-
-const MAX_TICK_SIZE = 1 / 10; // seconds
-const MIN_TICK_SIZE = 0; // seconds
 
 /**
  * Top Level control structure
@@ -45,8 +42,6 @@ export default class Game {
   masterGain: GainNode;
   /** Readonly. Whether or not the game is paused */
   paused: boolean = false;
-  /** Target number of frames per second */
-  framerate: number;
   /** Readonly. Number of frames that have gone by */
   framenumber: number = 0;
   /** Readonly. Number of ticks that have gone by */
@@ -55,6 +50,11 @@ export default class Game {
   lastFrameTime: number = window.performance.now();
   /** Number of ticks that happen per frame */
   tickIterations: number;
+
+  /** Total amount of game time that has elapsed */
+  elapsedTime: number = 0;
+
+  averageFrameDuration = 1 / 60;
 
   get camera() {
     return this.renderer.camera;
@@ -85,12 +85,11 @@ export default class Game {
     this.entities = new EntityList();
     this.entitiesToRemove = new Set();
 
-    this.renderer = new GameRenderer2d();
+    this.renderer = new GameRenderer2d(this.onResize.bind(this));
 
     this.io = new IOManager(this.renderer.pixiRenderer.view);
 
     this.tickIterations = tickIterations;
-    this.framerate = framerate;
     // this.world = new World({ gravity: [0, 0] });
     this.world = world ?? new CustomWorld({ gravity: [0, 0] });
     this.world.on("beginContact", this.beginContact, null);
@@ -107,16 +106,6 @@ export default class Game {
     this.addEntity(this.renderer.camera);
   }
 
-  /** The intended time between renders in real-world seconds */
-  get trueRenderTimestep(): number {
-    return 1 / this.framerate;
-  }
-
-  /** Total amount of game time elapsed since starting */
-  get elapsedTime(): number {
-    return this.ticknumber / (this.framerate * this.tickIterations);
-  }
-
   /** Start the event loop for the game. */
   start(): void {
     window.requestAnimationFrame(() => this.loop(this.lastFrameTime));
@@ -128,6 +117,12 @@ export default class Game {
       this.unpause();
     } else {
       this.pause();
+    }
+  }
+
+  onResize(size: [number, number]) {
+    for (const entity of this.entities.withOnResize) {
+      entity.onResize(size);
     }
   }
 
@@ -202,6 +197,10 @@ export default class Game {
       }
     }
 
+    if (entity.onResize) {
+      entity.onResize(this.renderer.getSize());
+    }
+
     if (entity.children) {
       for (const child of entity.children) {
         if (!child.game) {
@@ -260,12 +259,24 @@ export default class Game {
     window.requestAnimationFrame((t) => this.loop(t));
     this.framenumber += 1;
 
-    const dt =
-      clamp((time - this.lastFrameTime) / 1000, MIN_TICK_SIZE, MAX_TICK_SIZE) *
-      this.slowMo;
+    const lastFrameDuration = (time - this.lastFrameTime) / 1000;
     this.lastFrameTime = time;
 
-    const tickDt = dt / this.tickIterations;
+    // Keep a rolling average
+    if (0 < lastFrameDuration && lastFrameDuration < 0.3) {
+      // Ignore weird durations because they're probably flukes from the user
+      // changing to a different tab/window or loading a new level or something
+      this.averageFrameDuration = lerp(
+        this.averageFrameDuration,
+        lastFrameDuration,
+        0.05
+      );
+    }
+
+    const renderDt = this.averageFrameDuration;
+    this.elapsedTime += renderDt;
+
+    const tickDt = (renderDt / this.tickIterations) * this.slowMo;
     this.iterationsRemaining += this.tickIterations;
     for (; this.iterationsRemaining > 1.0; this.iterationsRemaining--) {
       this.tick(tickDt);
@@ -279,7 +290,7 @@ export default class Game {
     }
     this.afterPhysics();
 
-    this.render(dt);
+    this.render(renderDt);
   }
 
   /** Actually remove all the entities slated for removal from the game. */

@@ -3,14 +3,18 @@ import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
 import img_visionFog from "../../../resources/images/lights/vision-fog.png";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity, { GameSprite } from "../../core/entity/Entity";
+import Game from "../../core/Game";
 import { V } from "../../core/Vector";
 import { Layer } from "../config/layers";
 import { Persistence } from "../constants/constants";
+import {
+  getCurrentGraphicsQuality,
+  GraphicsQuality,
+} from "../controllers/GraphicsQualityController";
 import Human from "../human/Human";
 import { Shadows } from "./Shadows";
 
 export const MAX_VISION = 10; // meters
-const BLUR_ENABLED = true;
 
 export default class VisionController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -43,11 +47,36 @@ export default class VisionController extends BaseEntity implements Entity {
     this.sprite.addChild(fog);
     this.sprite.addChild(distanceShadows);
     this.sprite.layerName = Layer.VISION;
-
-    if (BLUR_ENABLED) {
-      this.shadows.graphics.filters = [new Pixi.filters.BlurFilter(8)];
-    }
   }
+
+  onAdd(game: Game) {
+    this.handlers.graphicsQualityChanged({
+      quality: getCurrentGraphicsQuality(game),
+    });
+  }
+
+  handlers = {
+    graphicsQualityChanged: ({ quality }: { quality: GraphicsQuality }) => {
+      switch (quality) {
+        case GraphicsQuality.Low: {
+          this.shadows.graphics.filters = [];
+          break;
+        }
+        case GraphicsQuality.Medium: {
+          const blurFilter = new Pixi.filters.BlurFilter(4, 1);
+          blurFilter.repeatEdgePixels = true;
+          this.shadows.graphics.filters = [blurFilter];
+          break;
+        }
+        case GraphicsQuality.High: {
+          const blurFilter = new Pixi.filters.BlurFilter(8, 4);
+          blurFilter.repeatEdgePixels = true;
+          this.shadows.graphics.filters = [blurFilter];
+          break;
+        }
+      }
+    },
+  };
 
   onRender() {
     const player = this.getPlayer();

@@ -20,7 +20,7 @@ export function addInnerWalls(cellGrid: CellGrid): Entity[] {
   const wallEntities = [];
 
   // Vertical Walls
-  for (let i = 0; i < LEVEL_SIZE; i++) {
+  for (let i = 0; i < LEVEL_SIZE - 1; i++) {
     for (let j = 0; j < LEVEL_SIZE; j++) {
       if (cellGrid.cells[i][j].rightWall.exists) {
         const startJ = j;
@@ -45,7 +45,7 @@ export function addInnerWalls(cellGrid: CellGrid): Entity[] {
   }
 
   // Horizontal Walls
-  for (let j = 0; j < LEVEL_SIZE; j++) {
+  for (let j = 0; j < LEVEL_SIZE - 1; j++) {
     for (let i = 0; i < LEVEL_SIZE; i++) {
       if (cellGrid.cells[i][j].bottomWall.exists) {
         const startI = i;

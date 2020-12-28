@@ -115,6 +115,9 @@ export class IOManager {
 
   addHandler(handler: IOEventHandler): void {
     this.handlers.add(handler);
+    if (handler.onInputDeviceChange) {
+      handler.onInputDeviceChange(this.usingGamepad);
+    }
   }
 
   removeHandler(handler: IOEventHandler): void {

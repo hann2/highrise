@@ -64,14 +64,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     (this.feedbackButton.sprite as Text).style.align = "right";
   }
 
-  handlers = {
-    resize: () => this.positionText(),
-  };
-
   async onAdd(game: Game) {
-    this.positionText();
-    this.onInputDeviceChange(game.io.usingGamepad);
-
     this.titleText.alpha = 0;
     this.startText.alpha = 0;
     this.creditsButton.sprite.alpha = 0;
@@ -86,8 +79,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     firstTime = false;
   }
 
-  positionText() {
-    const [width, height] = this.game?.renderer.getSize()!;
+  onResize([width, height]: [number, number]) {
     this.titleText.position.set(width / 2, height / 2);
     this.startText.position.set(width / 2, height / 2);
     this.creditsButton.sprite.position.set(width - 10, height - 50);
