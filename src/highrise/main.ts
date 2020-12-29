@@ -6,7 +6,7 @@ import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import FPSMeter from "../core/util/FPSMeter";
 import { initLayers, Layer } from "./config/layers";
 import { initContactMaterials } from "./config/PhysicsMaterials";
-import { CELL_WIDTH, LEVEL_SIZE } from "./constants/constants";
+import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "./constants/constants";
 import CheatController from "./controllers/CheatController";
 import { GameController } from "./controllers/GameController";
 import { GraphicsQualityController } from "./controllers/GraphicsQualityController";
@@ -29,9 +29,9 @@ export async function main() {
     world: new CustomWorld({
       gravity: [0, 0],
       broadphase: new SpatialHashingBroadphase(
-        CELL_WIDTH / 2,
-        LEVEL_SIZE * 2,
-        LEVEL_SIZE * 2
+        CELL_SIZE / 2,
+        DEFAULT_LEVEL_SIZE * 2,
+        DEFAULT_LEVEL_SIZE * 2
       ),
     }),
   });

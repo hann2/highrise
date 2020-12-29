@@ -7,6 +7,7 @@ import {
   seededShuffle,
 } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
+import { DEFAULT_LEVEL_SIZE } from "../../constants/constants";
 import Crawler from "../../enemies/crawler/Crawler";
 import Heavy from "../../enemies/heavy/Heavy";
 import Sprinter from "../../enemies/runner/Sprinter";
@@ -40,6 +41,10 @@ import { NUBBY_DECORATORS } from "./helpers/nubbyHelpers";
 type PickupMaker = (location: V2d) => Entity | Entity[];
 export default class LevelTemplate {
   constructor(public levelIndex: number) {}
+
+  getSize(): [number, number] {
+    return [DEFAULT_LEVEL_SIZE, DEFAULT_LEVEL_SIZE];
+  }
 
   // Returns a list of the rooms we want to try to fit on this floor
   chooseRoomTemplates(seed: number): RoomTemplate[] {
@@ -127,7 +132,7 @@ export default class LevelTemplate {
     return new AmbientLight(0x060606);
   }
 
-  getPickups() {
+  getPickups(): PickupMaker[] {
     const pickups: PickupMaker[] = [
       (l) => new HealthPickup(l),
       (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[0]))),

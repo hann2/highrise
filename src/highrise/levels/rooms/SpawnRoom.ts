@@ -56,12 +56,14 @@ export default class SpawnRoom implements RoomTemplate {
     entities.push(new SpawnLocation(roomToWorldPosition(V(1, 1))));
     entities.push(new SpawnLocation(roomToWorldPosition(V(2, 1))));
 
-    let starterWeapon = rBool(0.5)
-      ? new MeleeWeapon(choose(...MELEE_WEAPONS))
-      : new Gun(choose(...GUN_TIERS[0]));
-    entities.push(
-      new WeaponPickup(roomToWorldPosition(V(0.5, 0.25)), starterWeapon)
-    );
+    if (this.levelIndex > 0) {
+      let starterWeapon = rBool(0.5)
+        ? new MeleeWeapon(choose(...MELEE_WEAPONS))
+        : new Gun(choose(...GUN_TIERS[0]));
+      entities.push(
+        new WeaponPickup(roomToWorldPosition(V(0.5, 0.25)), starterWeapon)
+      );
+    }
 
     // Better guns on future levels
     switch (this.levelIndex) {
@@ -133,8 +135,10 @@ class SpawnRoomFloorPaint extends BaseEntity implements Entity {
   constructor([x, y]: [number, number], levelIndex: number) {
     super();
 
-    this.sprite = new Text(`Level ${levelIndex}`, {
-      fontSize: 64,
+    const isTutorial = levelIndex < 1;
+    const text = isTutorial ? "WASD = ↑←↓→" : `Level ${levelIndex}`;
+    this.sprite = new Text(text, {
+      fontSize: isTutorial ? 32 : 64,
       fontFamily: "Capture It",
       fill: "red",
       align: "center",

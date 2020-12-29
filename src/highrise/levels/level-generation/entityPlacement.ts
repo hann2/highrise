@@ -1,7 +1,7 @@
 import Entity from "../../../core/entity/Entity";
 import { rInteger } from "../../../core/util/Random";
-import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
+import { V2d } from "../../../core/Vector";
+import { CELL_SIZE } from "../../constants/constants";
 import Exit from "../../environment/Exit";
 import { DIAGONAL_DIRECTIONS, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
@@ -18,7 +18,7 @@ export function generateLevelEntities(
   levelTemplate: LevelTemplate,
   seed: number = rInteger(0, 2 ** 32)
 ): Entity[] {
-  const outerWalls = addOuterWalls();
+  const outerWalls = addOuterWalls([cellGrid.width, cellGrid.height]);
   const {
     entities: roomEntities,
     enemyPositions: roomEnemyPositions,
@@ -50,8 +50,8 @@ export function generateLevelEntities(
   const enemies = levelTemplate.generateEnemies(potentialEnemyLocations, seed);
 
   const subFloor = levelTemplate.makeSubfloor([
-    LEVEL_SIZE * CELL_WIDTH,
-    LEVEL_SIZE * CELL_WIDTH,
+    cellGrid.width * CELL_SIZE,
+    cellGrid.height * CELL_SIZE,
   ]);
   const ambientLight = levelTemplate.getAmbientLight();
 
@@ -76,10 +76,10 @@ function addExit(exitPoint: V2d, openDirection: V2d): Entity[] {
   const exitWorldCoords = CellGrid.levelCoordToWorldCoord(exitPoint);
   return [
     new Exit(
-      exitWorldCoords[0] - CELL_WIDTH / 2,
-      exitWorldCoords[1] - CELL_WIDTH / 2,
-      exitWorldCoords[0] + CELL_WIDTH / 2,
-      exitWorldCoords[1] + CELL_WIDTH / 2,
+      exitWorldCoords[0] - CELL_SIZE / 2,
+      exitWorldCoords[1] - CELL_SIZE / 2,
+      exitWorldCoords[0] + CELL_SIZE / 2,
+      exitWorldCoords[1] + CELL_SIZE / 2,
       openDirection!.angle + Math.PI
     ),
   ];
@@ -87,16 +87,14 @@ function addExit(exitPoint: V2d, openDirection: V2d): Entity[] {
 
 function findEnemyLocations(cellGrid: CellGrid): V2d[] {
   const locations: V2d[] = [];
-  for (let i = 0; i < LEVEL_SIZE; i++) {
-    for (let j = 0; j < LEVEL_SIZE; j++) {
-      if (!cellGrid.cells[i][j].content) {
-        cellGrid.cells[i][j].content = "zombie";
-        for (const direction of DIAGONAL_DIRECTIONS) {
-          const p = CellGrid.levelCoordToWorldCoord(
-            V(i, j).add(Direction[direction].mul(0.25))
-          );
-          locations.push(p);
-        }
+  for (const cell of cellGrid.getCells()) {
+    if (!cell.content) {
+      cell.content = "zombie";
+      for (const direction of DIAGONAL_DIRECTIONS) {
+        const p = CellGrid.levelCoordToWorldCoord(
+          cell.position.add(Direction[direction].mul(0.25))
+        );
+        locations.push(p);
       }
     }
   }
@@ -109,15 +107,13 @@ function addHallwayLights(
 ): Entity[] {
   const entities: Entity[] = [];
 
-  for (let i = 0; i < LEVEL_SIZE; i++) {
-    for (let j = 0; j < LEVEL_SIZE; j++) {
-      if (cellGrid.cells[i][j].content) {
-        continue;
-      }
-      const l = levelTemplate.generateHallwayLight(V(i, j));
-      if (l) {
-        entities.push(l);
-      }
+  for (const cell of cellGrid.getCells()) {
+    if (cell.content) {
+      continue;
+    }
+    const l = levelTemplate.generateHallwayLight(cell.position);
+    if (l) {
+      entities.push(l);
     }
   }
 

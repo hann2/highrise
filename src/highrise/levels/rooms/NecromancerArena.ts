@@ -1,6 +1,6 @@
 import Entity from "../../../core/entity/Entity";
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH } from "../../constants/constants";
+import { CELL_SIZE } from "../../constants/constants";
 import Necromancer from "../../enemies/necromancer/Necromancer";
 import Decoration from "../../environment/Decoration";
 import {
@@ -89,7 +89,7 @@ export default class NecromancerArena implements RoomTemplate {
   }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
 
-    const carpetScale = redCarpetUpperLeft.heightMeters / CELL_WIDTH;
+    const carpetScale = redCarpetUpperLeft.heightMeters / CELL_SIZE;
     const floorMask = this.generateFloorMask();
 
     const mainTiles: Tiles = insetBorders(
@@ -97,7 +97,7 @@ export default class NecromancerArena implements RoomTemplate {
       directionalCarpet
     );
 
-    const tileScale = V(carpetScale * CELL_WIDTH, carpetScale * CELL_WIDTH);
+    const tileScale = V(carpetScale * CELL_SIZE, carpetScale * CELL_SIZE);
 
     entities.push(
       new TiledFloor(roomToWorldPosition(V(-0.5, -0.5)), tileScale, mainTiles)

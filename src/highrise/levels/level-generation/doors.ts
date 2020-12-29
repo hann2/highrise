@@ -1,6 +1,6 @@
 import img_chainLinkFence from "../../../../resources/images/environment/chain-link-fence.png";
 import Entity from "../../../core/entity/Entity";
-import { CELL_WIDTH } from "../../constants/constants";
+import { CELL_SIZE } from "../../constants/constants";
 import Door from "../../environment/Door";
 import { Direction } from "../../utils/directions";
 import CellGrid, { DoorBuilder, WallID } from "./CellGrid";
@@ -82,7 +82,7 @@ export function buildDoorEntity(
 
   return new Door(
     CellGrid.levelCoordToWorldCoord(hingePoint),
-    CELL_WIDTH,
+    CELL_SIZE,
     doorDirection.angle,
     minAngle,
     maxAngle,

@@ -13,7 +13,7 @@ import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import { Weapon } from "../weapons/weapons";
 import Human, { PUSH_RANGE } from "./Human";
 
-const FOLLOW_DISTANCE = 2; // meters
+const FOLLOW_DISTANCE = 1.5; // meters
 const MAX_SHOOT_DISTANCE = 6; // meters
 
 const MIN_TRIGGER_COOLDOWN = 0.0;

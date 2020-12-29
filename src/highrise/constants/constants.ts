@@ -67,8 +67,8 @@ import img_zombieTorso3 from "../../../resources/images/zombies/zombie-torso-3.p
 import { BodyTextures } from "../creature-stuff/BodySprite";
 import { EnemySounds } from "../enemies/base/EnemyVoice";
 
-export const LEVEL_SIZE = 14;
-export const CELL_WIDTH = 2;
+export const DEFAULT_LEVEL_SIZE = 14; // number of rows/columns
+export const CELL_SIZE = 2;
 
 // How long an entity will stick around
 export enum Persistence {

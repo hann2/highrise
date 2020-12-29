@@ -2,7 +2,7 @@ import Entity from "../../../core/entity/Entity";
 import { identity } from "../../../core/util/FunctionalUtils";
 import { seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
+import { CELL_SIZE } from "../../constants/constants";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
 import { RoomTransformer } from "../rooms/ElementTransformer";
@@ -12,8 +12,8 @@ import CellGrid, { DoorBuilder, WallBuilder, WallID } from "./CellGrid";
 
 function isEligibleCell(cellGrid: CellGrid, [x, y]: V2d): boolean {
   return (
-    x < LEVEL_SIZE &&
-    y < LEVEL_SIZE &&
+    x < cellGrid.width &&
+    y < cellGrid.height &&
     x >= 0 &&
     y >= 0 &&
     !cellGrid.cells[x][y].content
@@ -32,7 +32,7 @@ function doesRoomCutoffPartOfMap(
 
   let seenCount = 0;
   const seen: boolean[][] = [];
-  for (let i = 0; i < LEVEL_SIZE; i++) {
+  for (let i = 0; i < cellGrid.width; i++) {
     seen[i] = [];
   }
 
@@ -59,7 +59,7 @@ function doesRoomCutoffPartOfMap(
     }
   }
 
-  return seenCount === LEVEL_SIZE * LEVEL_SIZE;
+  return seenCount === cellGrid.width * cellGrid.height;
 }
 
 function isEligibleRoom(
@@ -80,12 +80,7 @@ function findEligibleLocation(
   wallIDsRoomCoords: WallID[],
   occupiedCellsRoomCoords: V2d[]
 ): V2d | undefined {
-  const allLocations = [];
-  for (let i = 0; i < LEVEL_SIZE; i++) {
-    for (let j = 0; j < LEVEL_SIZE; j++) {
-      allLocations.push(V(i, j));
-    }
-  }
+  const allLocations = [...cellGrid.getPositions()].map(V);
   const shuffledLocations = seededShuffle(allLocations, seed);
   for (const location of shuffledLocations) {
     const wallIDsLevelCoords = wallIDsRoomCoords.map((w) =>
@@ -183,13 +178,13 @@ function addRoom(
     roomToWorldPosition: (p) =>
       CellGrid.levelCoordToWorldCoord(p.add(location)),
     // roomToWorldVector: VectorTransformer
-    roomToWorldVector: (v) => v.mul(CELL_WIDTH),
+    roomToWorldVector: (v) => v.mul(CELL_SIZE),
     // roomToWorldAngle: AngleTransformer
     roomToWorldAngle: identity,
     // roomToLevelWall: WallTransformer
     roomToLevelWall: ([p, r]) => [p.add(location), r],
     // roomToWorldDimensions: DimensionsTransformer
-    roomToWorldDimensions: (d) => d.mul(CELL_WIDTH),
+    roomToWorldDimensions: (d) => d.mul(CELL_SIZE),
   };
 
   return {

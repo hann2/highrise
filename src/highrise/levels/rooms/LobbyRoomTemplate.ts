@@ -2,7 +2,7 @@ import Entity from "../../../core/entity/Entity";
 import { degToRad } from "../../../core/util/MathUtil";
 import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH } from "../../constants/constants";
+import { CELL_SIZE } from "../../constants/constants";
 import Heavy from "../../enemies/heavy/Heavy";
 import Decoration from "../../environment/Decoration";
 import {
@@ -139,7 +139,7 @@ export default class LobbyRoomTemplate implements RoomTemplate {
   generateEntities({ roomToWorldPosition }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
 
-    const carpetScale = redCarpetUpperLeft.heightMeters / CELL_WIDTH;
+    const carpetScale = redCarpetUpperLeft.heightMeters / CELL_SIZE;
     const floorMask = this.generateFloorMask();
 
     const mainTiles: Tiles = insetBorders(
@@ -155,7 +155,7 @@ export default class LobbyRoomTemplate implements RoomTemplate {
       directionalCarpet
     );
 
-    const tileScale = V(carpetScale * CELL_WIDTH, carpetScale * CELL_WIDTH);
+    const tileScale = V(carpetScale * CELL_SIZE, carpetScale * CELL_SIZE);
 
     entities.push(
       new TiledFloor(roomToWorldPosition(V(-0.5, -0.5)), tileScale, mainTiles)
@@ -172,9 +172,9 @@ export default class LobbyRoomTemplate implements RoomTemplate {
 
       entities.push(new OverheadLight(roomToWorldPosition(e.cell)));
 
-      const doorDimensionsLevelCoords = V(0.25 / CELL_WIDTH, 1);
+      const doorDimensionsLevelCoords = V(0.25 / CELL_SIZE, 1);
       const doorDimensionsWorldCoords = doorDimensionsLevelCoords.mul(
-        CELL_WIDTH
+        CELL_SIZE
       );
       const doorUpperLeftCorner = e.cell
         .add(Direction[e.openDirection].mul(0.5))

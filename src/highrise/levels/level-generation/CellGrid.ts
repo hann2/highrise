@@ -1,5 +1,5 @@
 import { V, V2d } from "../../../core/Vector";
-import { CELL_WIDTH, LEVEL_SIZE } from "../../constants/constants";
+import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "../../constants/constants";
 
 export interface Closet {
   backCell: V2d;
@@ -22,6 +22,8 @@ export interface WallBuilder {
   chainLink: boolean;
 }
 interface CellBuilder {
+  /** Column and Row index that this cell is in */
+  readonly position: V2d;
   content?: string;
   rightWall: WallBuilder;
   bottomWall: WallBuilder;
@@ -33,29 +35,53 @@ export default class CellGrid {
   doors: DoorBuilder[] = [];
   spawnLocation: V2d;
 
-  constructor() {
+  constructor(width: number, height: number) {
     // Can be changed easily.  Represents upper left corner of spawn room.  If you change
     // this make sure to leave space for the dimensions of the room and allow the door to open!
     this.spawnLocation = V(0, 0);
 
-    for (let i = 0; i < LEVEL_SIZE; i++) {
+    for (let i = 0; i < width; i++) {
       this.cells[i] = [];
-      for (let j = 0; j < LEVEL_SIZE; j++) {
+      for (let j = 0; j < height; j++) {
         this.cells[i][j] = {
+          position: V(i, j),
           rightWall: {
             id: [V(i, j), true],
             exists: true,
-            destructible: i < LEVEL_SIZE - 1,
+            destructible: i < width - 1,
             chainLink: false,
           },
           bottomWall: {
             id: [V(i, j), false],
             exists: true,
-            destructible: j < LEVEL_SIZE - 1,
+            destructible: j < height - 1,
             chainLink: false,
           },
         };
       }
+    }
+  }
+
+  get width() {
+    return this.cells.length;
+  }
+
+  get height() {
+    return this.cells[0].length;
+  }
+
+  /** Iterates through all the valid positions in the grid */
+  *getPositions(): Iterable<[number, number]> {
+    for (let i = 0; i < this.width; i++) {
+      for (let j = 0; j < this.height; j++) {
+        yield [i, j];
+      }
+    }
+  }
+
+  *getCells(): Iterable<CellBuilder> {
+    for (const [i, j] of this.getPositions()) {
+      yield this.cells[i][j];
     }
   }
 
@@ -83,7 +109,7 @@ export default class CellGrid {
 
   isExisting(id: WallID) {
     const [[i, j], right] = id;
-    if (i < 0 || j < 0 || i >= LEVEL_SIZE || j >= LEVEL_SIZE) {
+    if (i < 0 || j < 0 || i >= this.width || j >= this.height) {
       return true;
     }
     return this.cells[i][j][right ? "rightWall" : "bottomWall"].exists;
@@ -120,32 +146,35 @@ export default class CellGrid {
   }
 
   static levelCoordToWorldCoord(coord: V2d): V2d {
-    const firstCellCenter = CELL_WIDTH / 2;
-    return coord.mul(CELL_WIDTH).add(V(firstCellCenter, firstCellCenter));
+    const firstCellCenter = CELL_SIZE / 2;
+    return coord.mul(CELL_SIZE).add(V(firstCellCenter, firstCellCenter));
   }
 
-  addIndestructibleBox(upperRightCorner: V2d, dimensions: V2d) {
+  addIndestructibleBox(
+    upperRightCorner: V2d,
+    [width, height]: [number, number]
+  ) {
     if (upperRightCorner.y > 0) {
-      for (let i = 0; i < dimensions.x; i++) {
+      for (let i = 0; i < width; i++) {
         this.markIndestructible([upperRightCorner.add([i, -1]), false]);
       }
     }
     if (upperRightCorner.x > 0) {
-      for (let j = 0; j < dimensions.y; j++) {
+      for (let j = 0; j < height; j++) {
         this.markIndestructible([upperRightCorner.add([-1, j]), true]);
       }
     }
-    for (let i = 0; i < dimensions[0]; i++) {
-      for (let j = 0; j < dimensions[1]; j++) {
+    for (let i = 0; i < width; i++) {
+      for (let j = 0; j < height; j++) {
         const [x, y] = upperRightCorner.add([i, j]);
         const cell = this.cells[x][y];
         cell.content = "empty";
-        if (i === dimensions[0] - 1) {
+        if (i === width - 1) {
           this.markIndestructible([V(x, y), true]);
         } else {
           this.destroyWall([V(x, y), true]);
         }
-        if (j === dimensions[1] - 1) {
+        if (j === height - 1) {
           this.markIndestructible([V(x, y), false]);
         } else {
           this.destroyWall([V(x, y), false]);
