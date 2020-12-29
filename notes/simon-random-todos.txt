@@ -2,8 +2,6 @@
 
 
 Critical Features For Release
-- A victory screen
-- Something that tells you the controls
 - Polished boss fight
 - Get all temp sounds replaced
 
