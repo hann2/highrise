@@ -134,7 +134,7 @@ export default class Necromancer extends BaseEnemy {
       cooldownDuration: COOLDOWN_TIME,
 
       onAttack: (direction: V2d = polarToVec(rUniform(0, 2 * Math.PI), 1)) => {
-        const nZombies = Math.min();
+        const nZombies = 5; // TODO: Limit number of minions
         const separation = Math.PI / 5;
         const angles: number[] = [];
         for (let i = 0; i < nZombies; i++) {

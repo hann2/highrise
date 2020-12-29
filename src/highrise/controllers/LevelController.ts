@@ -21,7 +21,7 @@ export default class LevelController extends BaseEntity implements Entity {
 
   async onAdd() {
     this.currentLevel =
-      localStorage.getItem("tutorialComplete") != "true" ? 0 : 1;
+      localStorage.getItem("tutorialComplete") != "true" ? 0 : 5;
     const level = generateLevel(chooseTemplate(this.currentLevel));
 
     await this.wait(0.0); // so that this happens async (why does that matter?)
