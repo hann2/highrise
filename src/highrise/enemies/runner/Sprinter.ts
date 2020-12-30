@@ -14,7 +14,7 @@ import { getHumansInRange, makeSimpleEnemyBody } from "../base/enemyUtils";
 import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import Crawler from "../crawler/Crawler";
-import { ZombieVariant, ZOMBIE_VARIANTS } from "../zombie/ZombieVariants";
+import { SPRINTER_VARIANTS, ZombieVariant } from "../zombie/ZombieVariants";
 import SprinterSprite from "./SprinterSprite";
 
 const SPEED = 0.6;
@@ -35,7 +35,7 @@ export default class Sprinter extends BaseEnemy {
 
   constructor(
     position: V2d,
-    public zombieVariant: ZombieVariant = choose(...ZOMBIE_VARIANTS)
+    public zombieVariant: ZombieVariant = choose(...SPRINTER_VARIANTS)
   ) {
     super(position);
 

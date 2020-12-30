@@ -19,10 +19,12 @@ export function rUniform(min: number, max: number): number {
   return (max - min) * r() + min;
 }
 
+/** A random angle in radians */
 export function rDirection(): number {
   return rUniform(0, Math.PI * 2);
 }
 
+/** One of the four cardinal directions, in radians */
 export function rCardinal(): number {
   return choose(0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2);
 }

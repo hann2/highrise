@@ -3,6 +3,42 @@
 
 import snd_zombieBite1 from "../../../resources/audio/impacts/zombie-bite-1.flac";
 import snd_zombieBite2 from "../../../resources/audio/impacts/zombie-bite-2.flac";
+import snd_kevinZombie1 from "../../../resources/audio/zombie/kevin-zombie-1.flac";
+import snd_kevinZombie10 from "../../../resources/audio/zombie/kevin-zombie-10.flac";
+import snd_kevinZombie11 from "../../../resources/audio/zombie/kevin-zombie-11.flac";
+import snd_kevinZombie12 from "../../../resources/audio/zombie/kevin-zombie-12.flac";
+import snd_kevinZombie13 from "../../../resources/audio/zombie/kevin-zombie-13.flac";
+import snd_kevinZombie14 from "../../../resources/audio/zombie/kevin-zombie-14.flac";
+import snd_kevinZombie15 from "../../../resources/audio/zombie/kevin-zombie-15.flac";
+import snd_kevinZombie17 from "../../../resources/audio/zombie/kevin-zombie-17.flac";
+import snd_kevinZombie18 from "../../../resources/audio/zombie/kevin-zombie-18.flac";
+import snd_kevinZombie19 from "../../../resources/audio/zombie/kevin-zombie-19.flac";
+import snd_kevinZombie2 from "../../../resources/audio/zombie/kevin-zombie-2.flac";
+import snd_kevinZombie20 from "../../../resources/audio/zombie/kevin-zombie-20.flac";
+import snd_kevinZombie21 from "../../../resources/audio/zombie/kevin-zombie-21.flac";
+import snd_kevinZombie23 from "../../../resources/audio/zombie/kevin-zombie-23.flac";
+import snd_kevinZombie24 from "../../../resources/audio/zombie/kevin-zombie-24.flac";
+import snd_kevinZombie25 from "../../../resources/audio/zombie/kevin-zombie-25.flac";
+import snd_kevinZombie26 from "../../../resources/audio/zombie/kevin-zombie-26.flac";
+import snd_kevinZombie27 from "../../../resources/audio/zombie/kevin-zombie-27.flac";
+import snd_kevinZombie28 from "../../../resources/audio/zombie/kevin-zombie-28.flac";
+import snd_kevinZombie29 from "../../../resources/audio/zombie/kevin-zombie-29.flac";
+import snd_kevinZombie3 from "../../../resources/audio/zombie/kevin-zombie-3.flac";
+import snd_kevinZombie30 from "../../../resources/audio/zombie/kevin-zombie-30.flac";
+import snd_kevinZombie31 from "../../../resources/audio/zombie/kevin-zombie-31.flac";
+import snd_kevinZombie32 from "../../../resources/audio/zombie/kevin-zombie-32.flac";
+import snd_kevinZombie33 from "../../../resources/audio/zombie/kevin-zombie-33.flac";
+import snd_kevinZombie34 from "../../../resources/audio/zombie/kevin-zombie-34.flac";
+import snd_kevinZombie35 from "../../../resources/audio/zombie/kevin-zombie-35.flac";
+import snd_kevinZombie36 from "../../../resources/audio/zombie/kevin-zombie-36.flac";
+import snd_kevinZombie37 from "../../../resources/audio/zombie/kevin-zombie-37.flac";
+import snd_kevinZombie38 from "../../../resources/audio/zombie/kevin-zombie-38.flac";
+import snd_kevinZombie39 from "../../../resources/audio/zombie/kevin-zombie-39.flac";
+import snd_kevinZombie4 from "../../../resources/audio/zombie/kevin-zombie-4.flac";
+import snd_kevinZombie5 from "../../../resources/audio/zombie/kevin-zombie-5.flac";
+import snd_kevinZombie7 from "../../../resources/audio/zombie/kevin-zombie-7.flac";
+import snd_kevinZombie8 from "../../../resources/audio/zombie/kevin-zombie-8.flac";
+import snd_kevinZombie9 from "../../../resources/audio/zombie/kevin-zombie-9.flac";
 import snd_perryZombie1 from "../../../resources/audio/zombie/perry-zombie-1.flac";
 import snd_perryZombie10 from "../../../resources/audio/zombie/perry-zombie-10.flac";
 import snd_perryZombie2 from "../../../resources/audio/zombie/perry-zombie-2.flac";
@@ -146,6 +182,54 @@ export const RACHEL_ZOMBIE_SOUNDS: EnemySounds = {
   idle: [snd_rachelZombie2, snd_rachelZombie11],
 };
 
+export const KEVIN_ZOMBIE_SOUNDS: EnemySounds = {
+  hit: [
+    snd_kevinZombie4,
+    snd_kevinZombie5,
+    snd_kevinZombie12,
+    snd_kevinZombie13,
+    snd_kevinZombie14,
+    snd_kevinZombie15,
+    snd_kevinZombie18,
+    snd_kevinZombie19,
+    snd_kevinZombie23,
+    snd_kevinZombie26,
+    snd_kevinZombie29,
+    snd_kevinZombie34,
+    snd_kevinZombie36,
+  ],
+  targetAquired: [
+    snd_kevinZombie1,
+    snd_kevinZombie7,
+    snd_kevinZombie9,
+    snd_kevinZombie20,
+    snd_kevinZombie37,
+    snd_kevinZombie39,
+  ],
+  attack: [
+    snd_kevinZombie2,
+    snd_kevinZombie3,
+    snd_kevinZombie8,
+    snd_kevinZombie10,
+    snd_kevinZombie11,
+    snd_kevinZombie17,
+    snd_kevinZombie24,
+    snd_kevinZombie25,
+    snd_kevinZombie38,
+  ],
+  death: [
+    snd_kevinZombie21,
+    snd_kevinZombie27,
+    snd_kevinZombie28,
+    snd_kevinZombie30,
+    snd_kevinZombie31,
+    snd_kevinZombie32,
+    snd_kevinZombie33,
+    snd_kevinZombie35,
+  ],
+  idle: [],
+};
+
 export const PERRY_ZOMBIE_SOUNDS: EnemySounds = {
   hit: [snd_perryZombie4, snd_perryZombie7],
   targetAquired: [snd_perryZombie3],
@@ -161,6 +245,7 @@ export const SPITTER_SOUNDS: EnemySounds = {
 
 export const ENEMY_SOUNDS: EnemySounds[] = [
   RACHEL_ZOMBIE_SOUNDS,
+  KEVIN_ZOMBIE_SOUNDS,
   PERRY_ZOMBIE_SOUNDS,
   SPITTER_SOUNDS,
 ];

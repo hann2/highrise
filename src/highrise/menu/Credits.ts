@@ -14,7 +14,7 @@ Simon Baumgardt-Wellander
 #VOICE ACTORS
 Andy—Andy Moreland
 Chad—Wiktorek
-Cindy—Lawlfrats
+Cindy, Zombies—Lawlfrats
 Clarice, Kyle—Marisa DeNicolo-Hann
 Clyde—Philip Hann
 Dusty Rusty—@ICREATENOVELTY
@@ -22,6 +22,7 @@ Lucky Jack—Cole Graham
 Simon—Simon Baumgardt-Wellander
 Takeshi—Rory Jackson
 Wendy—Wendy Vang
+Zombies—Kevin Kalb @sixsevenkevin
 
 
 #MUSIC

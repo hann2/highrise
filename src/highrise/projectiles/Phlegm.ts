@@ -14,17 +14,16 @@ import { getBlobPair, getSplatSound } from "../effects/Splat";
 import Spitter from "../enemies/spitter/Spitter";
 import Human from "../human/Human";
 import { PointLight } from "../lighting-and-vision/PointLight";
+import { Projectile } from "./Projectile";
 
 export const PHLEGM_RADIUS = 0.1; // meters
 const MAX_LIFESPAN = 3.0; // seconds
 const FRICTION = 0.12; // Something
 
-export default class Phlegm extends BaseEntity implements Entity {
+export default class Phlegm extends Projectile implements Entity {
   light: PointLight;
-  private ray: Ray;
   private raycastResult = new RaycastResult();
 
-  velocity: V2d;
   spin: number;
   renderPosition: V2d;
   hitPosition?: V2d;
@@ -34,31 +33,18 @@ export default class Phlegm extends BaseEntity implements Entity {
   glowSprite: Sprite;
 
   constructor(
-    public position: V2d,
+    position: V2d,
     direction: number,
     speed: number = 8,
     public damage: number = 15,
     public readonly shooter?: Spitter,
     public mass: number = 0.25
   ) {
-    super();
+    super(position, polarToVec(direction, speed));
 
-    this.velocity = polarToVec(direction, speed);
     this.spin = rSign() * rUniform(5, 20);
     this.z = 1;
     this.zVelocity = rUniform(1, 5);
-
-    this.ray = new Ray({
-      from: position.clone(), // to be set later
-      to: V(0, 0),
-      mode: Ray.ALL,
-      collisionGroup: CollisionGroups.Projectiles,
-      collisionMask:
-        CollisionGroups.All ^
-        CollisionGroups.Zombies ^
-        CollisionGroups.Furniture,
-      checkCollisionResponse: true,
-    });
 
     const color = 0x00ff00;
 

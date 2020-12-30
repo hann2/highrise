@@ -10,42 +10,28 @@ import Hittable, { isHittable } from "../environment/Hittable";
 import Human from "../human/Human";
 import Light from "../lighting-and-vision/Light";
 import { BulletStats } from "../weapons/guns/BulletStats";
+import { Projectile } from "./Projectile";
 
 export const BULLET_RADIUS = 0.05; // meters
 const MAX_LIFESPAN = 3.0; // seconds
 
-export default class Bullet extends BaseEntity implements Entity {
+export default class Bullet extends Projectile implements Entity {
   sprite: Graphics & GameSprite;
   light: Light;
   lightGraphics: Graphics;
-  velocity: V2d;
 
-  private ray: Ray;
   private raycastResult = new RaycastResult();
 
   renderPosition: V2d;
   hitPosition?: V2d;
 
   constructor(
-    public position: V2d,
+    position: V2d,
     direction: number,
     public stats: BulletStats,
     public readonly shooter?: Human
   ) {
-    super();
-
-    this.velocity = polarToVec(direction, stats.muzzleVelocity);
-    this.ray = new Ray({
-      from: position.clone(), // to be set later
-      to: V(0, 0),
-      mode: Ray.ALL,
-      collisionGroup: CollisionGroups.Projectiles,
-      collisionMask:
-        CollisionGroups.All ^
-        CollisionGroups.Humans ^
-        CollisionGroups.Furniture,
-      checkCollisionResponse: true,
-    });
+    super(position, polarToVec(direction, stats.muzzleVelocity));
 
     this.sprite = new Graphics();
     this.sprite.layerName = Layer.WEAPONS;

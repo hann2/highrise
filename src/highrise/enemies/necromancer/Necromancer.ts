@@ -1,15 +1,15 @@
 import Game from "../../../core/Game";
 import { normalizeAngle, polarToVec } from "../../../core/util/MathUtil";
-import { rNormal, rUniform } from "../../../core/util/Random";
+import { rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import DeathOrb from "../../projectiles/DeathOrb";
 import { BaseEnemy } from "../base/Enemy";
 import { makeSimpleEnemyBody } from "../base/enemyUtils";
-import Crawler from "../crawler/Crawler";
 import Zombie from "../zombie/Zombie";
 import NecromancerController from "./NecromancerController";
 import NecromancerSprite from "./NecromancerSprite";
+import { ZombieEgg } from "./ZombieEgg";
 
 export const NECROMANCER_RADIUS = 0.5;
 
@@ -141,16 +141,15 @@ export default class Necromancer extends BaseEnemy {
           angles.push(normalizeAngle(separation * (i - nZombies / 2)));
         }
 
-        const zombies = angles
+        const eggs = angles
           .map((angle) => this.getPosition().add(direction.rotate(angle)))
-          .map((position) => new Zombie(position));
+          .map((position) => new ZombieEgg(this.getPosition(), position));
 
-        this.minions.push(...zombies);
-        this.game!.addEntities(zombies);
+        this.game!.addEntities(eggs);
       },
     }),
 
-    //
+    // Throws zombie eggs at an enemy
     surround: createAttackAction({
       windupDuration: WINDUP_TIME,
       attackDuration: 0,
@@ -167,11 +166,11 @@ export default class Necromancer extends BaseEnemy {
           );
         }
 
-        const crawlers = angles
+        const eggs = angles
           .map((angle) => targetPosition.add(polarToVec(angle, 2)))
-          .map((position) => new Crawler(position));
-        this.minions.push(...crawlers);
-        this.game!.addEntities(crawlers);
+          .map((target) => new ZombieEgg(this.getPosition(), target));
+
+        this.game!.addEntities(eggs);
       },
     }),
   };

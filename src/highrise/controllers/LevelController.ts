@@ -13,6 +13,8 @@ import {
 const LEVEL_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
 const MAX_LEVEL = 5;
 
+const FORCE_TUTORIAL = true;
+
 // High level control flow for levels and the party
 export default class LevelController extends BaseEntity implements Entity {
   id = "level_controller";
@@ -21,7 +23,9 @@ export default class LevelController extends BaseEntity implements Entity {
 
   async onAdd() {
     this.currentLevel =
-      localStorage.getItem("tutorialComplete") != "true" ? 0 : 5;
+      localStorage.getItem("tutorialComplete") != "true" || FORCE_TUTORIAL
+        ? 0
+        : 1;
     const level = generateLevel(chooseTemplate(this.currentLevel));
 
     await this.wait(0.0); // so that this happens async (why does that matter?)
