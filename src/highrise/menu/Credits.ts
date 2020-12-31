@@ -13,16 +13,19 @@ Simon Baumgardt-Wellander
 
 #VOICE ACTORS
 Andy—Andy Moreland
-Chad—Wiktorek
-Cindy, Zombies—Lawlfrats
+Chad—Michael Wiktorek
+Cindy—Lawlfrats
 Clarice, Kyle—Marisa DeNicolo-Hann
 Clyde—Philip Hann
 Dusty Rusty—@ICREATENOVELTY
+John Johnson—Jeff Wellander
 Lucky Jack—Cole Graham
+Santa—Ted Wellander
 Simon—Simon Baumgardt-Wellander
 Takeshi—Rory Jackson
 Wendy—Wendy Vang
 Zombies—Kevin Kalb @sixsevenkevin
+—Lawlfrats
 
 
 #MUSIC
@@ -65,5 +68,5 @@ Starder
 
 
 No zombies were harmed in the making of this game.
-Some celery, walnuts, potatoes, and a lemon were though.
+Some celery, walnuts, potatoes, a lemon, and an overripe melon were though.
 `;
