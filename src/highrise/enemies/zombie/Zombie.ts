@@ -17,7 +17,7 @@ import Crawler from "../crawler/Crawler";
 import ZombieSprite from "./ZombieSprite";
 import { ZombieVariant, ZOMBIE_VARIANTS } from "./ZombieVariants";
 
-const SPEED = 0.3;
+const SPEED = 3.8;
 
 const WINDUP = 0.14; // seconds
 const ATTACK_DURATION = 0.1; // seconds
@@ -32,13 +32,14 @@ const hitSoundRing = new ShuffleRing(ZOMBIE_ATTACK_HIT_SOUNDS);
 
 export default class Zombie extends BaseEnemy {
   tags = ["zombie"];
-  walkSpeed: number = rNormal(SPEED, SPEED / 5);
 
   constructor(
     position: V2d,
     public zombieVariant: ZombieVariant = choose(...ZOMBIE_VARIANTS)
   ) {
     super(position);
+
+    this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
 
     this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, ZOMBIE_RADIUS));
     this.addChild(new ZombieSprite(this));

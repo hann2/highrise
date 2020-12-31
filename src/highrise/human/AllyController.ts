@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { clamp } from "../../core/util/MathUtil";
 import { rBool, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
@@ -8,7 +9,7 @@ import WeaponPickup from "../environment/WeaponPickup";
 import { getNearestVisibleEnemy, testLineOfSight } from "../utils/visionUtils";
 import Gun from "../weapons/guns/Gun";
 import { getGunTier } from "../weapons/guns/gun-stats/gunStats";
-import { FireMode } from "../weapons/guns/GunStats";
+import { FireMode, ReloadingStyle } from "../weapons/guns/GunStats";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import { Weapon } from "../weapons/weapons";
 import Human, { PUSH_RANGE } from "./Human";
@@ -81,7 +82,14 @@ export default class AllyHumanController extends BaseEntity implements Entity {
       MAX_SHOOT_DISTANCE
     );
 
-    if (weapon instanceof Gun && weapon.ammo === 0 && !weapon.isReloading) {
+    if (
+      weapon instanceof Gun &&
+      !weapon.isReloading &&
+      (weapon.ammo === 0 ||
+        (weapon.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL &&
+          weapon.ammo < weapon.stats.ammoCapacity &&
+          !nearestVisibleZombie))
+    ) {
       human.reload();
     }
 
@@ -124,14 +132,15 @@ export default class AllyHumanController extends BaseEntity implements Entity {
         );
         human.setDirection(direction.angle, dt);
         const distance = direction.magnitude;
-        if (distance > FOLLOW_DISTANCE) {
-          human.walk(direction.inormalize());
-        }
+        human.walkSpring.walkTowards(
+          direction.angle,
+          clamp(distance - FOLLOW_DISTANCE, 0.0, 1.0)
+        );
       } else if (this.lastSeenPositionOfLeader) {
         const direction = this.lastSeenPositionOfLeader.sub(
           human.getPosition()
         );
-        human.walk(direction.inormalize());
+        human.walkSpring.walkTowards(direction.angle, 1.0);
       }
     }
   }

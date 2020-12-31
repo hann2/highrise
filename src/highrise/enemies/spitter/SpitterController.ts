@@ -140,9 +140,8 @@ export default class SpitterController extends BaseEntity implements Entity {
       return;
     }
     const direction = this.moveTarget.sub(this.spitter.body.position);
-    direction.magnitude = speed;
     this.spitter.setTargetDirection(direction.angle);
-    this.spitter.walk(direction);
+    this.spitter.walkSpring.walkTowards(direction.angle, speed);
   }
 
   // Searches the map for the nearest human in range that is visible

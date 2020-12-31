@@ -25,6 +25,8 @@ export enum Layer {
   WEAPONS = "world_weapons",
   // Walls n stuff
   WALLS = "walls",
+  // Like bullet holes
+  WALL_DECALS = "wall_decals",
   // Layer where crawlers are
   CRAWLERS = "crawlers",
   // Stuff at the human's level

@@ -3,7 +3,7 @@ export const CollisionGroups = {
   Walls: 0b1,
   Furniture: 0b10,
   Humans: 0b100,
-  Zombies: 0b1000,
+  Enemies: 0b1000,
   Projectiles: 0b10000,
   Sensors: 0b100000,
   CastsShadow: 0b1000000,

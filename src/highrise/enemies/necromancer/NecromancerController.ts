@@ -1,6 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { rInteger } from "../../../core/util/Random";
+import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { Direction, opposite } from "../../utils/directions";
@@ -77,13 +77,13 @@ export default class NecromancerController
       return;
     }
 
-    if (this.necromancer.getAttackPhase() !== "ready") {
-      return;
-    }
-
     this.necromancer.setTargetDirection(
       enemies[0].getPosition().isub(this.necromancer.getPosition()).angle
     );
+
+    if (this.necromancer.getAttackPhase() !== "ready") {
+      return;
+    }
 
     switch (this.objective) {
       case "DEFEND":
@@ -95,7 +95,11 @@ export default class NecromancerController
         this.objective = "ATTACK";
         break;
       case "ATTACK":
-        this.necromancer.fireDeathOrb();
+        if (rBool(0.5)) {
+          this.necromancer.firePhlegm();
+        } else {
+          this.necromancer.fireDeathOrb();
+        }
         this.objective = "SURROUND";
         break;
       case "SURROUND":
@@ -133,9 +137,8 @@ export default class NecromancerController
       return;
     }
     const direction = this.moveTarget.sub(this.necromancer.body.position);
-    direction.magnitude = speed;
     this.necromancer.setTargetDirection(direction.angle);
-    this.necromancer.walk(direction);
+    this.necromancer.walkSpring.walkTowards(direction.angle, speed);
   }
 
   getEnemiesInArena(): Human[] {

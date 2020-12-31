@@ -1,29 +1,19 @@
-import { Ray, RaycastResult } from "p2";
 import { Graphics } from "pixi.js";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
+import Entity, { GameSprite } from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
-import { V, V2d } from "../../core/Vector";
+import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { Layer } from "../config/layers";
-import Hittable, { isHittable } from "../environment/Hittable";
+import { isHittable } from "../environment/Hittable";
 import Human from "../human/Human";
 import Light from "../lighting-and-vision/Light";
 import { BulletStats } from "../weapons/guns/BulletStats";
-import { Projectile } from "./Projectile";
-
-export const BULLET_RADIUS = 0.05; // meters
-const MAX_LIFESPAN = 3.0; // seconds
+import { HitResult, Projectile } from "./Projectile";
 
 export default class Bullet extends Projectile implements Entity {
   sprite: Graphics & GameSprite;
   light: Light;
   lightGraphics: Graphics;
-
-  private raycastResult = new RaycastResult();
-
-  renderPosition: V2d;
-  hitPosition?: V2d;
 
   constructor(
     position: V2d,
@@ -43,79 +33,29 @@ export default class Bullet extends Projectile implements Entity {
     this.renderPosition = position.clone();
   }
 
+  makeCollisionMask() {
+    return (
+      CollisionGroups.All ^ CollisionGroups.Humans ^ CollisionGroups.Furniture
+    );
+  }
+
   get damage(): number {
     return (
       this.stats.damage * (this.velocity.magnitude / this.stats.muzzleVelocity)
     );
   }
 
-  async onAdd() {
-    // Make sure we don't have any infinitely living bullets around
-    await this.wait(MAX_LIFESPAN, undefined, "life_timer");
-    this.destroy();
-  }
-
-  onTick(dt: number) {
-    if (this.hitPosition) {
-      this.destroy();
-      return;
+  onHit({ hitPosition, hitNormal, hit }: HitResult) {
+    if (isHittable(hit)) {
+      return hit.onBulletHit(this, hitPosition, hitNormal);
     }
 
-    // Every frame we want to render the bullet starting from where we started checking
-    this.renderPosition.set(this.position);
-
-    const hitResult = this.checkForCollision(dt);
-
-    if (hitResult) {
-      const { hitPosition, hitNormal, hit } = hitResult;
-      hitPosition;
-      const shouldHit = hit.onBulletHit(this, hitPosition, hitNormal);
-
-      if (shouldHit) {
-        this.hitPosition = hitPosition;
-        this.destroy();
-        return;
-      }
-    }
-
-    this.position.iaddScaled(this.velocity, dt);
+    console.log("isn't hittable", hit);
+    return false;
   }
 
-  checkForCollision(
-    dt: number
-  ): { hit: Hittable; hitNormal: V2d; hitPosition: V2d } | undefined {
-    this.raycastResult.reset();
-    this.ray.to = this.position.addScaled(this.velocity, dt);
-    this.ray.update();
-
-    let hitFraction = Infinity;
-    let hit: Hittable | undefined;
-    let hitNormal: V2d;
-    this.ray.callback = ({ fraction, body, normal }) => {
-      const owner = (body as WithOwner).owner;
-      if (fraction < hitFraction && isHittable(owner)) {
-        hitFraction = fraction;
-        hit = owner;
-        // To keep at most one allocation
-        if (hitNormal) {
-          hitNormal.set(normal);
-        } else {
-          hitNormal = V(normal);
-        }
-      }
-    };
-
-    this.game!.world.raycast(this.raycastResult, this.ray);
-
-    if (hit) {
-      const hitPosition = V(this.ray.from).ilerp(this.ray.to, hitFraction);
-      return { hit, hitNormal: hitNormal!, hitPosition };
-    } else {
-      return undefined;
-    }
-  }
-
-  getRenderEndPoint(dt: number) {
+  // In local coordinates, the end point to render
+  getRelativeEndPoint(dt: number) {
     if (this.hitPosition) {
       return this.hitPosition.sub(this.renderPosition);
     } else {
@@ -124,7 +64,7 @@ export default class Bullet extends Projectile implements Entity {
   }
 
   onRender(dt: number) {
-    const endPoint = this.getRenderEndPoint(dt);
+    const endPoint = this.getRelativeEndPoint(dt);
 
     this.sprite
       .clear()

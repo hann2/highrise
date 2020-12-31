@@ -1,11 +1,9 @@
-import { Ray, RaycastResult } from "p2";
 import { BLEND_MODES, Sprite } from "pixi.js";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
+import Entity, { GameSprite } from "../../core/entity/Entity";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rSign, rUniform } from "../../core/util/Random";
-import { V, V2d } from "../../core/Vector";
+import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { Layer } from "../config/layers";
 import GooImpact from "../effects/GooImpact";
@@ -14,19 +12,14 @@ import { getBlobPair, getSplatSound } from "../effects/Splat";
 import Spitter from "../enemies/spitter/Spitter";
 import Human from "../human/Human";
 import { PointLight } from "../lighting-and-vision/PointLight";
-import { Projectile } from "./Projectile";
+import { HitResult, Projectile } from "./Projectile";
 
 export const PHLEGM_RADIUS = 0.1; // meters
-const MAX_LIFESPAN = 3.0; // seconds
 const FRICTION = 0.12; // Something
 
 export default class Phlegm extends Projectile implements Entity {
   light: PointLight;
-  private raycastResult = new RaycastResult();
-
   spin: number;
-  renderPosition: V2d;
-  hitPosition?: V2d;
   z: number;
   zVelocity: number;
   mainSprite: Sprite;
@@ -76,20 +69,13 @@ export default class Phlegm extends Projectile implements Entity {
     this.renderPosition = position.clone();
   }
 
-  async onAdd() {
-    // Make sure we don't have any infinitely living bullets around
-    await this.wait(MAX_LIFESPAN, undefined, "life_timer");
-    this.destroy();
+  makeCollisionMask() {
+    return (
+      CollisionGroups.All ^ CollisionGroups.Enemies ^ CollisionGroups.Furniture
+    );
   }
 
   onTick(dt: number) {
-    if (this.hitPosition) {
-      this.destroy();
-      return;
-    }
-
-    this.velocity.imul(Math.exp(-dt * FRICTION));
-
     this.zVelocity += -9.8 * dt;
     this.z = clampUp(this.z + this.zVelocity * dt);
 
@@ -100,57 +86,17 @@ export default class Phlegm extends Projectile implements Entity {
       return;
     }
 
-    // Every frame we want to render the bullet starting from where we started checking
-    this.renderPosition.set(this.position);
-
-    const hitResult = this.checkForCollision(dt);
-
-    if (hitResult) {
-      const { hitPosition, hitNormal, hit } = hitResult;
-      this.hitPosition = hitPosition;
-      if (hit instanceof Human) {
-        hit.inflictDamage(this.damage);
-      }
-      this.game?.addEntity(new PositionalSound(getSplatSound(), this.position));
-      this.game?.addEntity(new GooImpact(hitPosition, 3, hitNormal, 0.7));
-      this.destroy();
-    } else {
-      this.position.iaddScaled(this.velocity, dt);
-    }
+    super.onTick(dt);
   }
 
-  checkForCollision(
-    dt: number
-  ): { hit: Entity; hitNormal: V2d; hitPosition: V2d } | undefined {
-    this.raycastResult.reset();
-    this.ray.to = this.position.addScaled(this.velocity, dt);
-    this.ray.update();
-
-    let hitFraction = Infinity;
-    let hit: Entity | undefined;
-    let hitNormal: V2d;
-    this.ray.callback = ({ fraction, body, normal }) => {
-      const owner = (body as WithOwner).owner;
-      if (fraction < hitFraction) {
-        hitFraction = fraction;
-        hit = owner;
-        // To keep at most one allocation
-        if (hitNormal) {
-          hitNormal.set(normal);
-        } else {
-          hitNormal = V(normal);
-        }
-      }
-    };
-
-    this.game!.world.raycast(this.raycastResult, this.ray);
-
-    if (hit) {
-      const hitPosition = V(this.ray.from).ilerp(this.ray.to, hitFraction);
-      return { hit, hitNormal: hitNormal!, hitPosition };
-    } else {
-      return undefined;
+  onHit({ hit, hitPosition, hitNormal }: HitResult) {
+    if (hit instanceof Human) {
+      hit.inflictDamage(this.damage);
     }
+    this.game?.addEntity(new PositionalSound(getSplatSound(), this.position));
+    this.game?.addEntity(new GooImpact(hitPosition, 3, hitNormal, 0.7));
+
+    return true;
   }
 
   onRender(dt: number) {

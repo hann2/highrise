@@ -1,9 +1,12 @@
 import Game from "../../../core/Game";
+import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { normalizeAngle, polarToVec } from "../../../core/util/MathUtil";
-import { rUniform } from "../../../core/util/Random";
+import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
+import { SPITTER_SOUNDS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import DeathOrb from "../../projectiles/DeathOrb";
+import Phlegm from "../../projectiles/Phlegm";
 import { BaseEnemy } from "../base/Enemy";
 import { makeSimpleEnemyBody } from "../base/enemyUtils";
 import Zombie from "../zombie/Zombie";
@@ -13,7 +16,7 @@ import { ZombieEgg } from "./ZombieEgg";
 
 export const NECROMANCER_RADIUS = 0.5;
 
-const SPEED = 12;
+const SPEED = 4;
 const HEALTH = 2000;
 
 const WINDUP_TIME = 1; // Time in animation from beginning of attack to doing damage
@@ -25,9 +28,6 @@ type AbilityName = keyof Necromancer["abilities"];
 
 export default class Necromancer extends BaseEnemy {
   hp: number = HEALTH;
-  walkSpeed: number = SPEED;
-  walkFriction: number = 0.3;
-
   minions: BaseEnemy[] = [];
 
   constructor(
@@ -36,6 +36,8 @@ export default class Necromancer extends BaseEnemy {
     public arenaDimensions: V2d
   ) {
     super(position);
+
+    this.walkSpring.speed = SPEED;
 
     this.addChild(new NecromancerController(this));
     this.addChild(new NecromancerSprite(this));
@@ -46,7 +48,7 @@ export default class Necromancer extends BaseEnemy {
   }
 
   makeBody(position: V2d) {
-    const body = makeSimpleEnemyBody(position, NECROMANCER_RADIUS, 10);
+    const body = makeSimpleEnemyBody(position, NECROMANCER_RADIUS, 40);
     body.damping = 10;
     return body;
   }
@@ -58,11 +60,6 @@ export default class Necromancer extends BaseEnemy {
     this.aimSpring.damping = 5;
   }
 
-  // Make the necromancer have less knockback
-  knockback(impulse: [number, number], relativePos?: [number, number]) {
-    super.knockback([impulse[0] * 0.1, impulse[1] * 0.1], relativePos);
-  }
-
   // Override this because we do something more complicatd than a single attack
   makeAttackAction() {
     return undefined;
@@ -71,6 +68,14 @@ export default class Necromancer extends BaseEnemy {
   async fireDeathOrb() {
     if (this.getAttackPhase() === "ready") {
       const ability = this.abilities.fireDeathOrb;
+      this.attackAction = ability;
+      ability.do();
+    }
+  }
+
+  async firePhlegm() {
+    if (this.getAttackPhase() === "ready") {
+      const ability = this.abilities.firePhlegm;
       this.attackAction = ability;
       ability.do();
     }
@@ -116,13 +121,35 @@ export default class Necromancer extends BaseEnemy {
   abilities = {
     // A basic attack, launches a projectile at the target
     fireDeathOrb: createAttackAction({
-      windupDuration: WINDUP_TIME,
+      windupDuration: WINDUP_TIME * 0.7,
       attackDuration: 0,
-      windDownDuration: WINDDOWN_TIME,
-      cooldownDuration: COOLDOWN_TIME,
+      windDownDuration: WINDDOWN_TIME * 0.8,
+      cooldownDuration: COOLDOWN_TIME * 0.8,
 
       onAttack: () => {
         this.addChild(new DeathOrb(this.getPosition(), this.body.angle));
+
+        const sound = choose(...SPITTER_SOUNDS.attack);
+        this.game?.addEntity(new PositionalSound(sound, this.getPosition()));
+      },
+    }),
+
+    // A basic attack, launches a few projectiles at the target
+    firePhlegm: createAttackAction({
+      windupDuration: WINDUP_TIME,
+      attackDuration: 1.0,
+      windDownDuration: WINDDOWN_TIME,
+      cooldownDuration: COOLDOWN_TIME,
+
+      onAttack: async () => {
+        for (let i = 0; i < 5; i++) {
+          this.addChild(
+            new Phlegm(this.getPosition(), this.body.angle + rNormal(0, 0.3))
+          );
+          const sound = choose(...SPITTER_SOUNDS.attack);
+          this.game?.addEntity(new PositionalSound(sound, this.getPosition()));
+          await this.wait(0.1);
+        }
       },
     }),
 
@@ -143,7 +170,9 @@ export default class Necromancer extends BaseEnemy {
 
         const eggs = angles
           .map((angle) => this.getPosition().add(direction.rotate(angle)))
-          .map((position) => new ZombieEgg(this.getPosition(), position));
+          .map(
+            (position) => new ZombieEgg(this.getPosition(), position, "zombie")
+          );
 
         this.game!.addEntities(eggs);
       },
@@ -168,7 +197,9 @@ export default class Necromancer extends BaseEnemy {
 
         const eggs = angles
           .map((angle) => targetPosition.add(polarToVec(angle, 2)))
-          .map((target) => new ZombieEgg(this.getPosition(), target));
+          .map(
+            (target) => new ZombieEgg(this.getPosition(), target, "crawler")
+          );
 
         this.game!.addEntities(eggs);
       },

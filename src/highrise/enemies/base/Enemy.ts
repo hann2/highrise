@@ -8,13 +8,14 @@ import Game from "../../../core/Game";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { clamp, normalizeAngle } from "../../../core/util/MathUtil";
 import { choose, rNormal } from "../../../core/util/Random";
-import { V, V2d } from "../../../core/Vector";
+import { V2d } from "../../../core/Vector";
 import { RACHEL_ZOMBIE_SOUNDS } from "../../constants/constants";
 import {
   AttackPhases,
   createAttackAction,
 } from "../../creature-stuff/AttackAction";
 import { Creature } from "../../creature-stuff/Creature";
+import { WalkSpring } from "../../creature-stuff/WalkSpring";
 import FleshImpact from "../../effects/FleshImpact";
 import Hittable from "../../environment/Hittable";
 import Human from "../../human/Human";
@@ -28,12 +29,11 @@ import EnemyVoice from "./EnemyVoice";
 export class BaseEnemy extends Creature implements Hittable {
   hp: number = 100;
   aimSpring!: AimSpring;
+  walkSpring: WalkSpring;
   body: Body & WithOwner;
   stunnedTimer: number = 0;
   voice!: EnemyVoice;
   attackAction?: PhasedAction<AttackPhases, any>;
-  walkSpeed: number = 0.4;
-  walkFriction: number = 0.1;
 
   get isStunned() {
     return this.stunnedTimer > 0;
@@ -66,16 +66,6 @@ export class BaseEnemy extends Creature implements Hittable {
     );
   }
 
-  getWalkSpeed() {
-    return this.walkSpeed;
-  }
-
-  walk(direction: V2d) {
-    if (this.canWalk()) {
-      this.body.applyImpulse(direction.mul(this.getWalkSpeed()));
-    }
-  }
-
   constructor(position: V2d) {
     super();
 
@@ -84,6 +74,7 @@ export class BaseEnemy extends Creature implements Hittable {
     if (this.attackAction != undefined) {
       this.addChild(this.attackAction);
     }
+    this.walkSpring = this.addChild(new WalkSpring(this.body));
   }
 
   onAdd(game: Game) {
@@ -125,10 +116,6 @@ export class BaseEnemy extends Creature implements Hittable {
     if (this.stunnedTimer > 0) {
       this.stunnedTimer -= dt;
     }
-
-    // TODO: This isn't right at all. It should at least use dt
-    const friction = V(this.body.velocity).mul(-this.walkFriction);
-    this.body.applyImpulse(friction);
   }
 
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {

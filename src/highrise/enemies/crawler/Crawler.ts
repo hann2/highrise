@@ -9,7 +9,7 @@ import { getHumansInRange } from "../base/enemyUtils";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import CrawlerSprite from "./CrawlerSprite";
 
-const SPEED = 0.1;
+const SPEED = 1.0;
 
 const ATTACK_RANGE = ZOMBIE_RADIUS + HUMAN_RADIUS + 0.1;
 const ATTACK_ANGLE_RANGE = degToRad(90);
@@ -17,7 +17,6 @@ const ATTACK_ANGLE_RANGE = degToRad(90);
 export default class Crawler extends BaseEnemy {
   tags = ["zombie", "crawler"];
   hp: number = rInteger(50, 80);
-  walkSpeed: number = rNormal(SPEED, SPEED / 5);
 
   constructor(
     position: V2d,
@@ -27,6 +26,7 @@ export default class Crawler extends BaseEnemy {
     super(position);
 
     this.body.angle = angle;
+    this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
 
     this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, ZOMBIE_RADIUS));
     this.addChild(new CrawlerSprite(this, textures));

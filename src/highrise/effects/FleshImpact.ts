@@ -49,7 +49,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
       this.particles.push({
         color: darken(0xff0000, rUniform(0.1, 0.35)),
         position: V(0, 0),
-        radius: rUniform(0.1, 0.1 * amount),
+        radius: rUniform(0.1, 0.1 + 0.03 * amount),
         sprite,
         velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
         z: rUniform(height * 0.3, height * 1.5),
@@ -84,7 +84,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
     for (const { position, color, radius, sprite, z } of this.particles) {
       sprite.position.set(...position);
       sprite.tint = color;
-      sprite.scale.set((radius * (1.0 + z)) / sprite.texture.width);
+      sprite.scale.set((radius * (1.0 + z * 0.4)) / sprite.texture.width);
     }
   }
 

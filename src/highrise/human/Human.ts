@@ -26,13 +26,12 @@ import { V, V2d } from "../../core/Vector";
 import { Character, randomCharacter } from "../characters/Character";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants/constants";
+import { WalkSpring } from "../creature-stuff/WalkSpring";
 import FleshImpact from "../effects/FleshImpact";
 import GlowStick from "../effects/GlowStick";
-import { LaserSight } from "../effects/LaserSight";
 import { isEnemy } from "../enemies/base/Enemy";
 import Interactable, { isInteractable } from "../environment/Interactable";
 import WeaponPickup from "../environment/WeaponPickup";
-import { PointLight } from "../lighting-and-vision/PointLight";
 import { PhasedAction } from "../utils/PhasedAction";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import Gun from "../weapons/guns/Gun";
@@ -42,9 +41,8 @@ import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
 
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
-const SPEED = 2.0; // arbitrary units
+const SPEED = 5.0; // meters / second
 const HURT_SPEED = 3.0; // Speed while hurt
-const FRICTION = 0.4; // arbitrary units
 const MAX_HEALTH = 100;
 
 export const PUSH_RANGE = 0.8; // meters
@@ -78,6 +76,7 @@ export default class Human extends BaseEntity implements Entity {
   weapon?: Gun | MeleeWeapon;
   humanSprite: HumanSprite;
   voice: HumanVoice;
+  walkSpring: WalkSpring;
 
   constructor(
     position: V2d = V(0, 0),
@@ -90,7 +89,7 @@ export default class Human extends BaseEntity implements Entity {
     this.addChild(new Flashlight(this));
 
     this.body = new Body({
-      mass: 1,
+      mass: 0.5,
       position: position.clone(),
       fixedRotation: true,
     });
@@ -102,25 +101,20 @@ export default class Human extends BaseEntity implements Entity {
 
     this.addChild(this.glowstickAction);
     this.addChild(this.pushAction);
+    this.walkSpring = this.addChild(new WalkSpring(this.body, SPEED, 80));
   }
 
   onAdd(game: Game) {
     game.entities.addFilter(isEnemy);
   }
 
-  onTick(dt: number) {
-    const friction = V(this.body.velocity).mul(-FRICTION);
-    this.body.applyImpulse(friction);
-  }
-
-  // Move the human along a specified vector
-  walk(direction: V2d) {
-    let speed = SPEED;
+  onTick() {
     const healthPercent = this.hp / this.maxHp;
     if (healthPercent < 0.3) {
-      speed = HURT_SPEED;
+      this.walkSpring.speed = HURT_SPEED;
+    } else {
+      this.walkSpring.speed = SPEED;
     }
-    this.body.applyImpulse(direction.mul(speed));
   }
 
   // Have the human face a specific angle

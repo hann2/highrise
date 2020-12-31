@@ -10,7 +10,7 @@ import { V2d } from "../../../core/Vector";
 import { DEFAULT_LEVEL_SIZE } from "../../constants/constants";
 import Crawler from "../../enemies/crawler/Crawler";
 import Heavy from "../../enemies/heavy/Heavy";
-import Sprinter from "../../enemies/runner/Sprinter";
+import Sprinter from "../../enemies/sprinter/Sprinter";
 import Spitter from "../../enemies/spitter/Spitter";
 import Zombie from "../../enemies/zombie/Zombie";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
@@ -77,6 +77,10 @@ export default class LevelTemplate {
     }
 
     return entities;
+  }
+
+  getMaziness(): number {
+    return 1.0;
   }
 
   // Creates the base floor entity for this level

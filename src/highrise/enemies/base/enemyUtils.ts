@@ -12,7 +12,7 @@ export function makeSimpleEnemyBody(
 ) {
   const body = new Body({ mass, position });
   const shape = new Circle({ radius });
-  shape.collisionGroup = CollisionGroups.Zombies;
+  shape.collisionGroup = CollisionGroups.Enemies;
   shape.collisionMask = CollisionGroups.All;
   body.addShape(shape);
   return body;

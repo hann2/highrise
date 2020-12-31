@@ -27,7 +27,7 @@ export default class PartyManager extends BaseEntity implements Entity {
     game.entities.addFilter(isAllyController);
 
     this.partyMembers = [];
-    this.leader = game.addEntity(new Human(V(0, 0), DustyRusty));
+    this.leader = game.addEntity(new Human());
     this.handlers.addToParty({ human: this.leader });
   }
 

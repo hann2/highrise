@@ -24,7 +24,7 @@ export function generateLevelEntities(
     enemyPositions: roomEnemyPositions,
     itemPositions: roomItemPositions,
   } = addRooms(cellGrid, levelTemplate, seed, levelTemplate.levelIndex);
-  buildMaze(cellGrid, seed);
+  buildMaze(cellGrid, seed, levelTemplate.getMaziness());
   const innerWalls = addInnerWalls(cellGrid);
   const [exitPoint, exitOpenDirection] = findExit(
     cellGrid,

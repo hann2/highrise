@@ -25,10 +25,11 @@ const DAMAGE = 20;
 export default class Spitter extends BaseEnemy {
   tags = ["zombie"];
   hp: number = HEALTH;
-  walkSpeed: number = rNormal(SPEED, SPEED / 5);
 
   constructor(position: V2d, angle: number = rUniform(0, Math.PI * 2)) {
     super(position);
+
+    this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
 
     this.addChild(new SpitterController(this));
     this.addChild(new SpitterSprite(this));

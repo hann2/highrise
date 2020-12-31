@@ -10,6 +10,7 @@ import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../config/CollisionGroups";
 import { Layer } from "../config/layers";
 import { P2Materials } from "../config/PhysicsMaterials";
+import BulletHole from "../effects/BulletHole";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
 import SwingingWeapon from "../weapons/melee/SwingingWeapon";
@@ -93,11 +94,12 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     }
 
     this.game?.addEntity(new WallImpact(position, normal, this.type.color));
+    this.game?.addEntity(new BulletHole(position));
 
     return true;
   }
 
-  onBeginContact() {
+  onBeginContact(other: Entity) {
     const sounds = this.type.collisionSounds;
     if (sounds) {
       this.addChild(new PositionalSound(choose(...sounds), this.getPosition()));

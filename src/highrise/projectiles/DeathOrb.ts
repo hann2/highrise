@@ -39,7 +39,7 @@ export default class DeathOrb extends BaseEntity implements Entity {
       to: V(0, 0),
       mode: Ray.ALL,
       collisionGroup: CollisionGroups.Projectiles,
-      collisionMask: CollisionGroups.All ^ CollisionGroups.Zombies,
+      collisionMask: CollisionGroups.All ^ CollisionGroups.Enemies,
       checkCollisionResponse: true,
     });
 

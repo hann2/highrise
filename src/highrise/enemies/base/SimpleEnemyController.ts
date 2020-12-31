@@ -147,9 +147,8 @@ export default class SimpleEnemyController
       return;
     }
     const direction = this.moveTarget.sub(this.enemy.body.position);
-    direction.magnitude = speed;
     this.enemy.setTargetDirection(direction.angle);
-    this.enemy.walk(direction);
+    this.enemy.walkSpring.walkTowards(direction.angle, speed);
   }
 
   // Searches the map for the nearest human in range that is visible

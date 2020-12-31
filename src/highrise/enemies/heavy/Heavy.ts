@@ -17,19 +17,19 @@ import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import HeavySprite from "./HeavySprite";
 
-const SPEED = 0.175;
+const SPEED = 4.2;
 export const HEAVY_RADIUS = ZOMBIE_RADIUS * 1.5;
 const HEALTH = 1000;
 const ATTACK_RANGE = HUMAN_RADIUS + HEAVY_RADIUS + 0.3;
 
 const hitSoundRing = new ShuffleRing(ZOMBIE_ATTACK_HIT_SOUNDS);
 export default class Heavy extends BaseEnemy {
-  walkSpeed: number = rNormal(SPEED, SPEED / 10);
   hp = rNormal(HEALTH, HEALTH / 10);
-  stunnedTimer = 0;
 
   constructor(position: V2d, angle: number = rUniform(0, Math.PI * 2)) {
     super(position);
+
+    this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
 
     this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, HEAVY_RADIUS));
     this.addChild(new HeavySprite(this));

@@ -116,6 +116,6 @@ export default class PlayerHumanController
       direction.magnitude = 1;
     }
 
-    this.human.walk(direction);
+    this.human.walkSpring.walkTowards(direction.angle, direction.magnitude);
   }
 }

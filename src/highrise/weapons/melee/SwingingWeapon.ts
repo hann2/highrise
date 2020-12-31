@@ -42,10 +42,10 @@ export default class SwingingWeapon extends BaseEntity {
     this.body.type = Body.DYNAMIC; // Cuz it moves
     const shape = new Box({
       width: size[0],
-      height: size[1],
+      height: size[1] * 1.1,
     });
     shape.collisionGroup = CollisionGroups.Projectiles;
-    shape.collisionMask = CollisionGroups.Zombies | CollisionGroups.Walls;
+    shape.collisionMask = CollisionGroups.Enemies | CollisionGroups.Walls;
     // figured through trial and error
     const offset: [number, number] = [
       lerp(-size[1] / 2, size[1] / 2, handlePosition[1]),
@@ -65,7 +65,7 @@ export default class SwingingWeapon extends BaseEntity {
   onRender() {
     const [position, angle] = this.getWeaponPositionAndAngle();
     this.sprite.position.set(...position);
-    this.sprite.rotation = angle;
+    this.sprite.rotation = angle + Math.PI / 2; // Why?
   }
 
   getKnockback() {
@@ -120,7 +120,7 @@ export default class SwingingWeapon extends BaseEntity {
     const worldPosition = this.holder.localToWorld(localPosition);
 
     // The angle to draw the weapon sprite at
-    const worldAngle = Math.PI / 2 + localAngle + this.holder.getDirection();
+    const worldAngle = localAngle + this.holder.getDirection();
     return [worldPosition, worldAngle];
   }
 

@@ -40,13 +40,17 @@ export function buildMaze(
   };
 
   const destroyWall = (id: WallID) => {
-    const [cell1, isRight] = id;
-    const cell2 = isRight ? cell1.add(V(1, 0)) : cell1.add(V(0, 1));
-    const root1 = getRoot(cell1);
-    const root2 = getRoot(cell2);
+    if (maziness === 1) {
+      const [cell1, isRight] = id;
+      const cell2 = isRight ? cell1.add(V(1, 0)) : cell1.add(V(0, 1));
+      const root1 = getRoot(cell1);
+      const root2 = getRoot(cell2);
 
-    if (root1[0] !== root2[0] || root1[1] !== root2[1]) {
-      upTree[root1[0]][root1[1]] = root2;
+      if (root1[0] !== root2[0] || root1[1] !== root2[1]) {
+        upTree[root1[0]][root1[1]] = root2;
+        cellGrid.destroyWall(id);
+      }
+    } else if (cellGrid.getWallBuilder(id).destructible) {
       cellGrid.destroyWall(id);
     }
   };

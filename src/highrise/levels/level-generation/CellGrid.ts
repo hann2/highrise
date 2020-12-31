@@ -1,5 +1,6 @@
 import { V, V2d } from "../../../core/Vector";
 import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "../../constants/constants";
+import Wall from "../../environment/Wall";
 
 export interface Closet {
   backCell: V2d;
@@ -85,10 +86,15 @@ export default class CellGrid {
     }
   }
 
-  destroyWall(id: WallID) {
+  getWallBuilder(id: WallID) {
     const [[i, j], right] = id;
-    this.cells[i][j][right ? "rightWall" : "bottomWall"].exists = false;
-    this.cells[i][j][right ? "rightWall" : "bottomWall"].destructible = true;
+    return this.cells[i][j][right ? "rightWall" : "bottomWall"];
+  }
+
+  destroyWall(id: WallID) {
+    const wallBuilder = this.getWallBuilder(id);
+    wallBuilder.exists = false;
+    wallBuilder.destructible = true;
   }
 
   undestroyWall(id: WallID) {

@@ -13,7 +13,7 @@ import {
 const LEVEL_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
 const MAX_LEVEL = 5;
 
-const FORCE_TUTORIAL = true;
+const FORCE_TUTORIAL = process.env.NODE_ENV === "development" && false;
 
 // High level control flow for levels and the party
 export default class LevelController extends BaseEntity implements Entity {
