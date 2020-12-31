@@ -1,10 +1,6 @@
-import snd_chainFence from "../../../resources/audio/environment/chain-fence.flac";
 import snd_elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
 import snd_elevatorDoorClose from "../../../resources/audio/environment/elevator-door-close.flac";
 import snd_elevatorDoorOpen from "../../../resources/audio/environment/elevator-door-open.flac";
-import snd_heavySwitch from "../../../resources/audio/environment/heavy-switch.flac";
-import snd_lightsClickOn from "../../../resources/audio/environment/lights-click-on.flac";
-import snd_powerOn from "../../../resources/audio/environment/power-on.flac";
 import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
 import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
@@ -18,12 +14,13 @@ import { ENEMY_SOUNDS, ZOMBIE_ATTACK_HIT_SOUNDS } from "../constants/constants";
 import { MUSIC_URLS } from "../controllers/MusicController";
 import { GLOWSTICK_SOUNDS } from "../effects/GlowStick";
 import { SPLAT_SOUNDS } from "../effects/Splat";
+import * as DECORATION_INFOS from "../environment/decorations/decorations";
 import { VENDING_MACHINE_HIT_SOUNDS } from "../environment/furniture-plus/VendingMachine";
+import { MACHINE_SOUNDS } from "../environment/lighting/LightSwitch";
+import { WALL_TYPES } from "../environment/WallTypes";
 import { PUSH_SOUNDS } from "../human/Human";
 import { GUNS } from "../weapons/guns/gun-stats/gunStats";
 import { WEAPONS } from "../weapons/weapons";
-import * as DECORATION_INFOS from "../environment/decorations/decorations";
-import { WALL_TYPES } from "../environment/WallTypes";
 
 export function getSoundsToPreload(): string[] {
   const urls = new Set<string>([
@@ -39,10 +36,8 @@ export function getSoundsToPreload(): string[] {
     snd_wallHit2,
     snd_wallHit3,
     snd_wallHit4,
-    snd_heavySwitch,
-    snd_lightsClickOn,
-    snd_powerOn,
 
+    ...MACHINE_SOUNDS,
     ...WALL_TYPES.flatMap((wallType) => wallType.collisionSounds ?? []),
     ...WALL_TYPES.flatMap((wallType) => wallType.impactSounds ?? []),
     ...Object.values(DECORATION_INFOS).flatMap((info) => info.hitSounds ?? []),

@@ -1,4 +1,4 @@
-import snd_lightsClickOn from "../../../../resources/audio/environment/lights-click-on.flac";
+import snd_lightPowerOn1 from "../../../../resources/audio/environment/light-power-on-1.wav";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
@@ -38,7 +38,7 @@ export class OverheadLight extends BaseEntity implements Entity {
   turnLightOn() {
     this.addLight();
     this.addChild(
-      new PositionalSound(snd_lightsClickOn, this.position, { gain: 0.1 })
+      new PositionalSound(snd_lightPowerOn1, this.position, { gain: 0.1 })
     );
   }
 

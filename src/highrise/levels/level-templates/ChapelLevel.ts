@@ -35,12 +35,4 @@ export default class ChapelLevel extends LevelTemplate {
   getAmbientLight(): AmbientLight {
     return new AmbientLight(0x222227);
   }
-
-  generateEnemies() {
-    return [];
-  }
-
-  getMaziness() {
-    return 0;
-  }
 }

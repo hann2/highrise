@@ -6,7 +6,6 @@ import { V, V2d } from "../Vector";
 import { SoundInstance, SoundOptions } from "./SoundInstance";
 
 const MAX_SPREAD = 0.99; // maximum pan (0-1)
-const SPREAD_DISTANCE = 7.5; // meters to the maximum spread
 const FALL_OFF_DISTANCE = 12; // meters to the maximum spread
 
 export interface PositionalSoundOptions extends SoundOptions {
@@ -68,7 +67,9 @@ export class PositionalSound extends SoundInstance implements Entity {
     const distance = relativePosition.magnitude;
     const theta = relativePosition.angle;
     this.pan =
-      Math.cos(theta) * MAX_SPREAD * clamp(distance / SPREAD_DISTANCE) ** 2;
+      Math.cos(theta) *
+      MAX_SPREAD *
+      clamp((distance / this.maxDistance) * 0.6) ** 2;
     const gain = clamp(lerp(1, 0, distance / this.maxDistance));
     this.distanceGain = gain;
   }

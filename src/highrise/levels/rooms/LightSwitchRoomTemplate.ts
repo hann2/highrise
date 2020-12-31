@@ -1,6 +1,5 @@
-import img_transformer from "../../../../resources/images/environment/maintenance/transformer.png";
 import Entity from "../../../core/entity/Entity";
-import { choose, rCardinal } from "../../../core/util/Random";
+import { rCardinal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Decoration from "../../environment/Decoration";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
@@ -9,7 +8,6 @@ import { LightSwitch } from "../../environment/lighting/LightSwitch";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import { SparkGenerator } from "../../environment/lighting/SparkGenerator";
 import RepeatingFloor from "../../environment/RepeatingFloor";
-import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
 import { RoomTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
