@@ -35,12 +35,6 @@ export default class CheatController extends BaseEntity implements Entity {
           human.heal(100);
         }
         break;
-      case "Backslash":
-        for (const fpsMeter of this.game!.entities.getByFilter(
-          (e): e is FPSMeter => e instanceof FPSMeter
-        )) {
-          fpsMeter.sprite.visible = !fpsMeter.sprite.visible;
-        }
     }
   }
 

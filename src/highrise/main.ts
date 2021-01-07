@@ -8,6 +8,7 @@ import { initLayers, Layer } from "./config/layers";
 import { initContactMaterials } from "./config/PhysicsMaterials";
 import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "./constants/constants";
 import CheatController from "./controllers/CheatController";
+import { FPSMeterController } from "./controllers/FPSMeterController";
 import { GameController } from "./controllers/GameController";
 import { GraphicsQualityController } from "./controllers/GraphicsQualityController";
 import MusicController from "./controllers/MusicController";
@@ -56,9 +57,10 @@ export async function main() {
   game.addEntity(new PositionalSoundListener());
   game.addEntity(new GraphicsQualityController());
   game.addEntity(new GameController());
+  game.addEntity(new FPSMeter(Layer.MENU));
+  game.addEntity(new FPSMeterController());
 
   if (process.env.NODE_ENV === "development") {
-    game.addEntity(new FPSMeter(Layer.MENU));
     game.addEntity(new CheatController());
   }
 

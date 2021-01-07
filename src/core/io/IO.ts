@@ -267,9 +267,6 @@ export class IOManager {
   //  Return the value of a button.
   getButton(button: ControllerButton): number {
     const gamepad = navigator.getGamepads()[0];
-    if (gamepad) {
-      return gamepad.buttons[button].value;
-    }
-    return 0;
+    return gamepad?.buttons[button]?.value ?? 0;
   }
 }
