@@ -25,6 +25,7 @@ export class DamagedOverlay extends BaseEntity implements Entity {
     this.colorFilter = new Pixi.Filter(undefined, frag_damageFilter, {
       healthPercent: 1.0,
     });
+    this.colorFilter.resolution = 2;
   }
 
   onAdd(game: Game) {

@@ -13,7 +13,7 @@ void main(void){
   vec3 color = originalColor.rgb;
 
   float luminence = dot(originalColor.rgb, grayMagic);
-  vec3 faded = vec3(1.2 * luminence, luminence, luminence) * 0.85;
+  vec3 faded = vec3(luminence, luminence, luminence) * 0.85;
 
   float amount = 1.0 - 1.5 * healthPercent;
   vec2 uv = vTextureCoord.xy * inputSize.xy / outputFrame.zw;

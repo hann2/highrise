@@ -30,7 +30,7 @@ export type GraphicsQualtiyEvent = {
 
 const DEFAULT_QUALITY = GraphicsQuality.Medium;
 
-const MAX_RESOLUTION = window.devicePixelRatio || 1;
+export const MAX_RESOLUTION = window.devicePixelRatio || 1;
 
 export class GraphicsQualityController extends BaseEntity implements Entity {
   id = "graphicsQualityController";
@@ -103,4 +103,17 @@ export function getCurrentGraphicsQuality(game: Game): GraphicsQuality {
     "graphicsQualityController"
   ) as GraphicsQualityController;
   return controller.currentQuality;
+}
+
+export function getResolutionForGraphicsQuality(
+  quality: GraphicsQuality
+): number {
+  switch (quality) {
+    case GraphicsQuality.Low:
+      return MAX_RESOLUTION / 2;
+    case GraphicsQuality.Medium:
+      return MAX_RESOLUTION;
+    case GraphicsQuality.High:
+      return MAX_RESOLUTION;
+  }
 }
