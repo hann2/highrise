@@ -3,8 +3,11 @@ import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
 import FPSMeter from "../../core/util/FPSMeter";
+import { Persistence } from "../constants/constants";
 
 export class FPSMeterController extends BaseEntity implements Entity {
+  persistenceLevel = Persistence.Permanent;
+
   constructor() {
     super();
   }

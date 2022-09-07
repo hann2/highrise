@@ -2,7 +2,6 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
-import FPSMeter from "../../core/util/FPSMeter";
 import { lerp } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
 import { isHuman } from "../human/Human";
