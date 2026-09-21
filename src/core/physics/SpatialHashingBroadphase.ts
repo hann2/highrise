@@ -20,7 +20,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     private width: number = 24,
     private height: number = 24
   ) {
-    super(CUSTOM_BROADPHASE_TYPE);
+    super(CUSTOM_BROADPHASE_TYPE as any);
 
     for (let i = 0; i < width * height; i++) {
       this.partitions.push(new Set());

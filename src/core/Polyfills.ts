@@ -1,16 +1,15 @@
 // @ts-nocheck
 /*
  * Attach all sorts of hacky stuff to the global state.
+ * This happens as a side effect of importing this module so that it can be
+ * guaranteed to run before other modules are evaluated.
  */
 
 import * as PIXI from "pixi.js";
-import "regenerator-runtime/runtime";
 
-export async function polyfill() {
-  // (window as any).P2_ARRAY_TYPE = Array;
-  if (!window.AudioContext && window.webkitAudioContext) {
-    window.AudioContext = window.webkitAudioContext;
-  }
-
-  window.PIXI = PIXI;
+if (!window.AudioContext && window.webkitAudioContext) {
+  window.AudioContext = window.webkitAudioContext;
 }
+
+// pixi-tilemap expects this to exist
+window.PIXI = PIXI;

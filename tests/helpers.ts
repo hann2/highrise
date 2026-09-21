@@ -26,7 +26,7 @@ export async function loadGame(page: Page, seed: number) {
   await page.waitForFunction(
     () => window.DEBUG.game!.entities.getById("main_menu") != null,
     null,
-    { timeout: 120000 }
+    { timeout: 120000 },
   );
 }
 
@@ -42,14 +42,14 @@ export async function startGame(page: Page) {
       );
     },
     null,
-    { timeout: 30000 }
+    { timeout: 30000 },
   );
 }
 
 export async function getLeaderPosition(page: Page): Promise<[number, number]> {
   return page.evaluate(() => {
     const partyManager = window.DEBUG.game!.entities.getById(
-      "party_manager"
+      "party_manager",
     ) as any;
     const [x, y] = partyManager.leader.body.position;
     return [x, y] as [number, number];
@@ -60,7 +60,7 @@ export async function getLevelNumber(page: Page): Promise<number> {
   return page.evaluate(
     () =>
       (window.DEBUG.game!.entities.getById("level_controller") as any)
-        .currentLevel
+        .currentLevel,
   );
 }
 

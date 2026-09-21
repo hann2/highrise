@@ -1,4 +1,5 @@
 import BaseEntity from "../../core/entity/BaseEntity";
+import { reseedIfSeeded } from "../../core/util/Random";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { Persistence } from "../constants/constants";
@@ -26,7 +27,7 @@ export default class LevelController extends BaseEntity implements Entity {
       localStorage.getItem("tutorialComplete") != "true" || FORCE_TUTORIAL
         ? 0
         : 1;
-    const level = generateLevel(chooseTemplate(this.currentLevel));
+    const level = this.generateLevel();
 
     await this.wait(0.0); // so that this happens async (why does that matter?)
 
@@ -46,14 +47,14 @@ export default class LevelController extends BaseEntity implements Entity {
       const fadeHoldTime = LEVEL_FADE_TIME / 2;
       const fadeInTime = LEVEL_FADE_TIME;
       this.game?.addEntity(
-        new FadeEffect(fadeOutTime, fadeHoldTime, fadeInTime)
+        new FadeEffect(fadeOutTime, fadeHoldTime, fadeInTime),
       );
 
       await this.wait(fadeOutTime);
       this.game?.clearScene(Persistence.Floor);
 
       if (this.currentLevel <= MAX_LEVEL) {
-        const level = generateLevel(chooseTemplate(this.currentLevel));
+        const level = this.generateLevel();
         this.game?.dispatch({ type: "startLevel", level });
       } else {
         this.game?.dispatch({ type: "gameOver", victory: true });
@@ -70,6 +71,12 @@ export default class LevelController extends BaseEntity implements Entity {
       this.game?.dispatch({ type: "gameOver", victory: false });
     },
   };
+
+  generateLevel(): Level {
+    // So that seeded runs get the same levels no matter what happened before
+    reseedIfSeeded(this.currentLevel);
+    return generateLevel(chooseTemplate(this.currentLevel));
+  }
 
   getPartyMembers() {
     return (this.game!.entities.getById("party_manager") as PartyManager)

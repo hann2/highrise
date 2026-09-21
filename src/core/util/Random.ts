@@ -8,8 +8,29 @@ import { mod } from "./MathUtil";
 // with a seeded generator to make things reproducible (e.g. for tests).
 let r: () => number = Math.random;
 
-/** Make all the functions in this file deterministic. Seed should be an integer. */
+let baseSeed: number | undefined = undefined;
+
+/**
+ * Make all the functions in this file deterministic. Seed should be an integer.
+ */
 export function seedRandom(seed: number): void {
+  baseSeed = seed;
+  reseed(seed);
+}
+
+/**
+ * If a seed has been provided, restart the random sequence from a seed derived
+ * from the original seed and `offset`. Useful for making something reproducible
+ * even when an unpredictable amount of randomness was consumed before it.
+ * Does nothing if seedRandom() was never called.
+ */
+export function reseedIfSeeded(offset: number): void {
+  if (baseSeed != undefined) {
+    reseed(baseSeed + offset);
+  }
+}
+
+function reseed(seed: number): void {
   // mulberry32
   let a = seed | 0;
   r = () => {

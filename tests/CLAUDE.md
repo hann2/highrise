@@ -10,6 +10,7 @@ Both start their own dev server on port 3456, so they can run while `npm start` 
 ## How tests drive the game
 
 - `?seed=123` in the URL seeds `core/util/Random.ts`, making level generation reproducible.
+- Levels are reseeded with `seed + levelNumber` right before generation, so the wall/room layout of every level is reproducible regardless of what happened earlier in the run. Known limitation: a few decorations/vending machines still differ between runs with the same seed (cause not yet tracked down). The smoke test logs a wall-layout fingerprint for comparing runs.
 - `window.DEBUG.game` exposes the `Game`. Tests find things with `entities.getById(...)` (`main_menu`, `party_manager`, `level_controller`) and `entities.getTagged(...)` (`human`, `zombie`).
 - Dev-only cheat keys from `CheatController` are used for flow control: `KeyL` completes the level, `KeyV` toggles the vision mask.
 - Any `pageerror` or `console.error` fails the test. Don't log errors for non-error conditions.

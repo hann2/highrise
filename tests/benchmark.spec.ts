@@ -82,7 +82,7 @@ test("benchmark: seeded level frame times", async ({ page }) => {
   fs.mkdirSync("tests/output", { recursive: true });
   fs.writeFileSync(
     "tests/output/benchmark.json",
-    JSON.stringify(result, null, 2) + "\n"
+    JSON.stringify(result, null, 2) + "\n",
   );
   console.log(JSON.stringify(result, null, 2));
   expectNoIssues(issues);

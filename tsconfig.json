@@ -1,14 +1,24 @@
 {
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "isolatedModules": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "lib": [
-      "es2019",
+      "ES2023",
       "dom"
     ],
     "noEmit": true,
-    "target": "ES5",
-    "downlevelIteration": true,
+    "skipLibCheck": true,
     "strict": true,
-    "skipLibCheck": true
-  }
+    "target": "ES2022",
+    "useDefineForClassFields": false
+  },
+  "include": [
+    "src",
+    "tests",
+    "resources",
+    "playwright.config.ts"
+  ]
 }

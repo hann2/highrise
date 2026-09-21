@@ -92,15 +92,32 @@ test("game boots, plays, and changes levels without errors", async ({
       );
     },
     null,
-    { timeout: 15000 }
+    { timeout: 15000 },
   );
   expect(
     await page.evaluate(
-      () => window.DEBUG.game!.entities.getTagged("human").length
-    )
+      () => window.DEBUG.game!.entities.getTagged("human").length,
+    ),
   ).toBeGreaterThan(0);
   await page.waitForTimeout(2500);
   await page.screenshot({ path: "tests/output/level-2-start.png" });
+
+  // Seeded levels should be reproducible. Not asserted on because any change
+  // to level generation legitimately changes it, but handy when comparing runs.
+  const fingerprint = await page.evaluate(() => {
+    let sum = 0;
+    for (const body of window.DEBUG.game!.world.bodies as any[]) {
+      // Only walls, because decoration placement isn't fully reproducible yet
+      if (body.owner?.constructor?.name === "Wall") {
+        for (const shape of body.shapes) {
+          sum += (body.position[0] + shape.position[0]) * 3;
+          sum += (body.position[1] + shape.position[1]) * 7;
+        }
+      }
+    }
+    return Math.round(sum);
+  });
+  console.log(`level 2 fingerprint: ${fingerprint}`);
 
   // --- Zoomed out overview with the vision mask off (KeyV is a dev cheat) ---
   // Mostly useful as a visual reference for level generation and lighting.
