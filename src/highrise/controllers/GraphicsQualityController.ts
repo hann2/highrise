@@ -52,7 +52,7 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
 
   setGraphicsQuality(quality: GraphicsQuality) {
     this.currentQuality = quality;
-    this.game?.dispatch({ type: "graphicsQualityChanged", quality });
+    this.game?.dispatch("graphicsQualityChanged", { quality });
     localStorage.setItem("graphicsQuality", quality);
   }
 
@@ -66,7 +66,7 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
     }
   }
 
-  onKeyDown(key: KeyCode) {
+  onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyO") {
       this.nextGraphicsQuality();
     }
@@ -74,28 +74,26 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
 
   nextQuality() {}
 
-  handlers = {
-    toggleGraphicsQuality: () => {
-      this.nextGraphicsQuality();
-    },
+  onToggleGraphicsQuality() {
+    this.nextGraphicsQuality();
+  }
 
-    graphicsQualityChanged: ({ quality }: { quality: GraphicsQuality }) => {
-      const game = this.game;
-      if (game) {
-        switch (quality) {
-          case GraphicsQuality.Low:
-            game.renderer.setResolution(MAX_RESOLUTION / 2);
-            break;
-          case GraphicsQuality.Medium:
-            game.renderer.setResolution(MAX_RESOLUTION);
-            break;
-          case GraphicsQuality.High:
-            game.renderer.setResolution(MAX_RESOLUTION);
-            break;
-        }
+  onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
+    const game = this.game;
+    if (game) {
+      switch (quality) {
+        case GraphicsQuality.Low:
+          game.renderer.setResolution(MAX_RESOLUTION / 2);
+          break;
+        case GraphicsQuality.Medium:
+          game.renderer.setResolution(MAX_RESOLUTION);
+          break;
+        case GraphicsQuality.High:
+          game.renderer.setResolution(MAX_RESOLUTION);
+          break;
       }
-    },
-  };
+    }
+  }
 }
 
 export function getCurrentGraphicsQuality(game: Game): GraphicsQuality {

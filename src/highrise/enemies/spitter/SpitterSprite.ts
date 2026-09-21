@@ -1,8 +1,8 @@
-import { Sprite } from "pixi.js";
-import img_spitter from "../../../../resources/images/zombies/spitter.png";
+import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../../core/entity/Entity";
-import { Layer } from "../../config/layers";
+import Entity from "../../../core/entity/Entity";
+import { GameSprite } from "../../../core/entity/GameSprite";
+import { Layer } from "../../../config/layers";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import Spitter from "./Spitter";
@@ -15,7 +15,7 @@ interface BodySprites {
   winddown: Sprite;
 }
 export default class SpitterSprite extends BaseEntity implements Entity {
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
 
   bodySprites: BodySprites;
   glow: PointLight;
@@ -23,16 +23,15 @@ export default class SpitterSprite extends BaseEntity implements Entity {
   constructor(public spitter: Spitter) {
     super();
 
-    this.sprite = new Sprite();
+    this.sprite = new Container();
     this.sprite.layerName = Layer.WORLD;
-    this.sprite.anchor.set(0.5, 0.5);
 
     this.bodySprites = {
-      standing: Sprite.from(img_spitter),
-      stunned: Sprite.from(img_spitter),
-      walking: Sprite.from(img_spitter),
-      windup: Sprite.from(img_spitter),
-      winddown: Sprite.from(img_spitter),
+      standing: Sprite.from("spitter"),
+      stunned: Sprite.from("spitter"),
+      walking: Sprite.from("spitter"),
+      windup: Sprite.from("spitter"),
+      winddown: Sprite.from("spitter"),
     };
 
     for (const bodySprite of Object.values(this.bodySprites)) {

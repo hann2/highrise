@@ -15,11 +15,11 @@ export default class CheatController extends BaseEntity implements Entity {
     super();
   }
 
-  onKeyDown(key: KeyCode) {
+  onKeyDown({ key }: { key: KeyCode }) {
     switch (key) {
       case "KeyL":
         console.log("dispatching levelComplete");
-        this.game!.dispatch({ type: "levelComplete" });
+        this.game!.dispatch("levelComplete", undefined);
         break;
       case "KeyV":
         console.log("Toggling vision");
@@ -43,7 +43,7 @@ export default class CheatController extends BaseEntity implements Entity {
       const t = io.getButton(ControllerButton.LT);
       this.game!.slowMo = lerp(1.0, 0.5, t);
     } else {
-      this.game!.slowMo = io.keyIsDown("ShiftLeft") ? 0.2 : 1.0;
+      this.game!.slowMo = io.isKeyDown("ShiftLeft") ? 0.2 : 1.0;
     }
   }
 }

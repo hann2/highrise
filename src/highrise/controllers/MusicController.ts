@@ -1,10 +1,9 @@
-import snd_bassGrooveLoop1 from "../../../resources/audio/music/bass-groove-loop-1.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { SoundInstance } from "../../core/sound/SoundInstance";
 import { Persistence } from "../constants/constants";
 
-export const MUSIC_URLS = [snd_bassGrooveLoop1];
+export const MUSIC_URLS = ["bassGrooveLoop1"];
 const MUSIC_VOLUME = 0.7;
 
 export default class MusicController extends BaseEntity implements Entity {
@@ -15,7 +14,7 @@ export default class MusicController extends BaseEntity implements Entity {
     super();
 
     this.soundInstance = this.addChild(
-      new SoundInstance(snd_bassGrooveLoop1, {
+      new SoundInstance("bassGrooveLoop1", {
         continuous: true,
         gain: 0.0,
         reactToSlowMo: false,

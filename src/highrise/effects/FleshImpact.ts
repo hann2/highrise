@@ -1,12 +1,13 @@
 import { BLEND_MODES, Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import BloodSplat from "./BloodSplat";
 import { BLOB_TEXTURES, getSplatSound } from "./Splat";
 
@@ -42,7 +43,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
 
     for (let i = 0; i < amount; i++) {
       const sprite = Sprite.from(choose(...BLOB_TEXTURES));
-      sprite.blendMode = BLEND_MODES.NORMAL;
+      sprite.blendMode = "normal";
       sprite.anchor.set(0.5, 0.5);
       sprite.rotation = rUniform(0, Math.PI * 2);
       this.sprite.addChild(sprite);

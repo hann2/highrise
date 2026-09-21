@@ -1,5 +1,4 @@
-import { AABB, Body, Broadphase, SAPBroadphase, World, Ray } from "p2";
-import Grid from "../util/Grid";
+import { AABB, Body, Broadphase, Ray, SAPBroadphase, Shape, World } from "p2";
 import { mod } from "../util/MathUtil";
 
 const CUSTOM_BROADPHASE_TYPE = 3;
@@ -7,7 +6,13 @@ const HUGE_LIMIT = 200;
 const DEFAULT_CELL_SIZE = 6;
 const HUGE: number[] = [];
 
+/**
+ * A spatial hashing broadphase collision detection system that divides
+ * space into uniform grid cells. Provides efficient collision pair detection
+ * by only checking bodies within the same cells.
+ */
 export default class SpatialHashingBroadphase extends SAPBroadphase {
+  particleBodies: Set<Body> = new Set();
   dynamicBodies: Set<Body> = new Set();
   kinematicBodies: Set<Body> = new Set();
   hugeBodies: Set<Body> = new Set();
@@ -15,9 +20,16 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
 
   bodiesAdded: boolean = false;
 
+  debugData = {
+    numCollisions: 0,
+  };
+
   constructor(
+    // width/height of cell in meters
     private cellSize: number = DEFAULT_CELL_SIZE,
+    // number of cells wide
     private width: number = 24,
+    // number of cells tall
     private height: number = 24,
   ) {
     super(CUSTOM_BROADPHASE_TYPE as any);
@@ -57,7 +69,11 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
 
   onAddBody(body: Body) {
     if (body.type === Body.DYNAMIC) {
-      this.dynamicBodies.add(body);
+      if (isParticleBody(body)) {
+        this.particleBodies.add(body);
+      } else {
+        this.dynamicBodies.add(body);
+      }
     } else if (body.type === Body.KINEMATIC) {
       this.kinematicBodies.add(body);
     } else {
@@ -68,6 +84,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
   onRemoveBody(body: Body) {
     if (body.type === Body.DYNAMIC) {
       this.dynamicBodies.delete(body);
+      this.particleBodies.delete(body);
     } else if (body.type === Body.KINEMATIC) {
       this.kinematicBodies.delete(body);
     } else {
@@ -104,6 +121,9 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     for (const dBody of this.dynamicBodies) {
       this.addBodyToHash(dBody);
     }
+    for (const pBody of this.particleBodies) {
+      this.addBodyToHash(pBody);
+    }
   }
 
   removeExtraBodies() {
@@ -112,6 +132,9 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     }
     for (const dBody of this.dynamicBodies) {
       this.removeBodyFromHash(dBody);
+    }
+    for (const pBody of this.particleBodies) {
+      this.removeBodyFromHash(pBody);
     }
   }
 
@@ -125,6 +148,20 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
 
     for (const dBody of this.dynamicBodies) {
       this.addBodyToHash(dBody);
+    }
+
+    //
+    for (const pBody of this.particleBodies) {
+      for (const other of this.aabbQuery(
+        world,
+        pBody.getAABB(),
+        undefined,
+        false,
+      )) {
+        if (Broadphase.canCollide(pBody, other)) {
+          result.push(pBody, other);
+        }
+      }
     }
 
     for (const dBody of this.dynamicBodies) {
@@ -145,6 +182,8 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     for (const kBody of this.kinematicBodies) {
       this.removeBodyFromHash(kBody);
     }
+
+    this.debugData.numCollisions = result.length;
 
     return result;
   }
@@ -265,4 +304,17 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
 
     return result;
   }
+}
+
+// Returns true if this is a dynamic body with no non-particle shapes
+function isParticleBody(body: Body): boolean {
+  if (body.type !== Body.DYNAMIC) {
+    return false;
+  }
+  for (const shape of body.shapes) {
+    if (shape.type !== Shape.PARTICLE) {
+      return false;
+    }
+  }
+  return true;
 }

@@ -1,84 +1,111 @@
 import * as Pixi from "pixi.js";
-import { GameSprite } from "../entity/Entity";
+import { LAYERS, LayerName } from "../../config/layers";
 import { V, V2d } from "../Vector";
+import { GameSprite } from "../entity/GameSprite";
 import { Camera2d } from "./Camera2d";
 import { LayerInfo } from "./LayerInfo";
 
-// The thing that renders stuff to the screen. Mostly for handling layers.
-export class GameRenderer2d {
-  layerInfos: Map<string, LayerInfo> = new Map();
-  private cursor: CSSStyleDeclaration["cursor"] = "none";
-  defaultLayer: string = "_default";
-  spriteCount: number = 0;
+/** Options for the GameRenderer2d constructor */
+export interface GameRenderer2dOptions extends Partial<Pixi.RendererOptions> {}
 
-  pixiRenderer: Pixi.Renderer;
-  stage: Pixi.Container;
+/** The thing that renders stuff to the screen. Mostly for handling layers.
+ * TODO: Document GameRenderer2d better
+ */
+export class GameRenderer2d {
+  // TODO: Do we really need to store this ourselves? Can't we just set it on the canvas?
+  private cursor: CSSStyleDeclaration["cursor"] = "none";
+
+  /** The number of sprites currently managed by this renderer. Mostly useful for debugging. */
+  public get spriteCount() {
+    return this._spriteCount;
+  }
+  private set spriteCount(value) {
+    this._spriteCount = value;
+  }
+  private _spriteCount: number = 0;
+
+  /** TODO: Document renderer.app */
+  app: Pixi.Application;
+
+  /** TODO: Document renderer.camera */
   camera: Camera2d;
 
-  constructor(private onResize?: ([width, height]: [number, number]) => void) {
-    Pixi.settings.RESOLUTION = window.devicePixelRatio || 1;
-    Pixi.utils.skipHello();
-    this.pixiRenderer = new Pixi.Renderer({
-      width: window.innerWidth,
-      height: window.innerHeight,
-      antialias: false,
-      autoDensity: true,
-      resolution: Pixi.settings.RESOLUTION,
-    });
-    document.body.appendChild(this.pixiRenderer.view);
+  /** TODO: Document renderer.stage */
+  get stage(): Pixi.Container {
+    return this.app.stage;
+  }
+
+  /** TODO: Document renderer.canvas */
+  get canvas(): HTMLCanvasElement {
+    return this.app.renderer.canvas;
+  }
+
+  /** TODO: Document renderer constructor */
+  constructor(
+    private layerInfos: Record<LayerName, LayerInfo>,
+    private defaultLayerName: LayerName,
+    private onResize?: ([width, height]: [number, number]) => void,
+  ) {
+    this.app = new Pixi.Application();
     this.showCursor();
+    this.camera = new Camera2d(this, V(0, 0));
 
-    this.stage = new Pixi.Container();
-    this.camera = new Camera2d(this);
-
-    this.createLayer(this.defaultLayer, new LayerInfo());
+    for (const layerInfo of Object.values(LAYERS)) {
+      this.app.stage.addChild(layerInfo.container);
+    }
 
     window.addEventListener("resize", () => this.handleResize());
   }
 
-  private getLayerInfo(layerName: string) {
-    const layerInfo = this.layerInfos.get(layerName);
-    if (!layerInfo) {
-      throw new Error(`Cannot find layer: ${layerName}`);
-    }
-    return layerInfo;
+  async init(pixiOptions: GameRenderer2dOptions = {}) {
+    await this.app
+      .init({
+        resizeTo: window,
+        autoDensity: true,
+        antialias: true,
+        ...pixiOptions,
+      })
+      .then(() => {
+        document.body.appendChild(this.canvas);
+      });
   }
 
-  createLayer(name: string, layerInfo: LayerInfo) {
-    this.layerInfos.set(name, layerInfo);
-    this.stage.addChild(layerInfo.container);
+  /** TODO: Document request fullscreen */
+  requestFullscreen() {
+    const makeFullScreen = () => {
+      this.canvas.requestFullscreen();
+      this.canvas.removeEventListener("click", makeFullScreen);
+    };
+    this.canvas.addEventListener("click", makeFullScreen);
   }
 
+  /**
+   * Gets the effective height of the renderer viewport in logical pixels.
+   */
   getHeight(): number {
-    return this.pixiRenderer.height / this.pixiRenderer.resolution;
+    return this.app.renderer.height / this.app.renderer.resolution;
   }
 
+  /**
+   * Gets the effective width of the renderer viewport in logical pixels.
+   */
   getWidth(): number {
-    return this.pixiRenderer.width / this.pixiRenderer.resolution;
+    return this.app.renderer.width / this.app.renderer.resolution;
   }
 
   getSize(): V2d {
     return V(this.getWidth(), this.getHeight());
   }
 
+  /** Change the number of device pixels rendered per logical pixel. */
   setResolution(resolution: number) {
-    const view = this.pixiRenderer.view;
-    this.pixiRenderer.destroy();
-    this.pixiRenderer = new Pixi.Renderer({
-      width: window.innerWidth,
-      height: window.innerHeight,
-      antialias: false,
-      autoDensity: true,
-      resolution,
-      view,
-    });
-    PIXI.settings.RESOLUTION = resolution;
-
+    this.app.renderer.resolution = resolution;
     this.handleResize();
   }
 
   handleResize() {
-    this.pixiRenderer.resize(window.innerWidth, window.innerHeight);
+    this.app.resizeTo = window;
+    this.app.resize();
     this.onResize?.(this.getSize());
   }
 
@@ -96,40 +123,55 @@ export class GameRenderer2d {
 
   // Render the current frame.
   render() {
-    for (const layerInfo of this.layerInfos.values()) {
+    for (const layerInfo of Object.values(this.layerInfos)) {
       this.camera.updateLayer(layerInfo);
     }
-    this.pixiRenderer.render(this.stage);
-    this.pixiRenderer.view.style.cursor = this.cursor;
+    this.app.render();
+    if (this.app.renderer.view.canvas.style) {
+      this.app.renderer.view.canvas.style.cursor = this.cursor;
+    }
   }
 
   addSprite(sprite: GameSprite): GameSprite {
-    const layerName = sprite.layerName ?? this.defaultLayer;
-    this.getLayerInfo(layerName).container.addChild(sprite);
+    const layerName = sprite.layerName ?? this.defaultLayerName;
+    this.layerInfos[layerName].container.addChild(sprite);
     this.spriteCount += 1;
     return sprite;
   }
 
   // Remove a child from a specific layer.
   removeSprite(sprite: GameSprite): void {
-    const layerName = sprite.layerName ?? this.defaultLayer;
-    this.getLayerInfo(layerName).container.removeChild(sprite);
+    const layerName = sprite.layerName ?? this.defaultLayerName;
+    this.layerInfos[layerName].container.removeChild(sprite);
     this.spriteCount -= 1;
   }
 
-  addLayerFilter(filter: Pixi.Filter, layerName: string): void {
-    const layer = this.getLayerInfo(layerName).container;
-    layer.filters = [...layer.filters!, filter];
+  /**
+   * Adds a visual filter effect to a specific rendering layer.
+   * @param filter - Pixi filter to apply to the layer
+   * @param layerName - Name of the layer to apply the filter to
+   */
+  addLayerFilter(filter: Pixi.Filter, layerName: LayerName): void {
+    const container = this.layerInfos[layerName].container;
+    container.filters = [...getFilters(container), filter];
   }
 
   addStageFilter(filter: Pixi.Filter): void {
-    this.stage.filters ??= [];
-    this.stage.filters.push(filter);
+    this.stage.filters = [...getFilters(this.stage), filter];
   }
 
   removeStageFilter(filterToRemove: Pixi.Filter): void {
-    this.stage.filters = (this.stage.filters ?? []).filter(
+    this.stage.filters = getFilters(this.stage).filter(
       (filter) => filter != filterToRemove,
     );
   }
+}
+
+/** Pixi lets filters be a single filter, a list, or nothing. This always gives a list. */
+function getFilters(container: Pixi.Container): readonly Pixi.Filter[] {
+  const filters = container.filters;
+  if (!filters) {
+    return [];
+  }
+  return filters instanceof Array ? filters : [filters];
 }

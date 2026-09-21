@@ -1,7 +1,7 @@
 import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
-import impactParticle from "../../../resources/images/effects/impact-particle.png";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
@@ -16,13 +16,13 @@ export default class WallImpact extends BaseEntity implements Entity {
     super();
 
     this.sprite = new Graphics();
-    this.sprite.blendMode = BLEND_MODES.ADD;
+    this.sprite.blendMode = "add";
     this.sprite.position.set(...position);
     this.particles = [];
 
     for (let i = 0; i < 10; i++) {
       const particleSprite = Sprite.from(choose(...BLOB_TEXTURES));
-      particleSprite.blendMode = BLEND_MODES.ADD;
+      particleSprite.blendMode = "add";
       particleSprite.rotation = rUniform(0, Math.PI * 2);
       this.sprite.addChild(particleSprite);
       this.particles.push({

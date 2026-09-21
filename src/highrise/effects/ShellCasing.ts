@@ -1,15 +1,16 @@
 import { Body, Capsule, vec2 } from "p2";
-import { Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
-import { SoundName } from "../../core/resources/sounds";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
+import { SoundName } from "../../../resources/resources";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { clamp, degToRad, polarToVec } from "../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layer } from "../config/layers";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { P2Materials } from "../config/PhysicsMaterials";
+import { Layer } from "../../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { P2Materials } from "../../config/PhysicsMaterials";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
 const SIZE = 0.03; // meters wide
@@ -27,7 +28,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
   body: Body;
   z: number;
   zVelocity: number;
-  bounceSounds: ShuffleRing<string>;
+  bounceSounds: ShuffleRing<SoundName>;
 
   constructor(
     private position: V2d,

@@ -1,32 +1,24 @@
 import { Body, Capsule, vec2 } from "p2";
-import { Sprite } from "pixi.js";
-import snd_glowStickCrack1 from "../../../resources/audio/misc/glow-stick-crack-1.flac";
-import snd_glowStickDrop1 from "../../../resources/audio/misc/glow-stick-drop-1.flac";
-import snd_glowStickDrop2 from "../../../resources/audio/misc/glow-stick-drop-2.flac";
-import img_glowStick1 from "../../../resources/images/effects/glow-stick-1.png";
-import img_glowStick2 from "../../../resources/images/effects/glow-stick-2.png";
-import img_glowStick3 from "../../../resources/images/effects/glow-stick-3.png";
+import { SoundName } from "../../../resources/resources";
+import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { hslToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { Layer } from "../config/layers";
-import { P2Materials } from "../config/PhysicsMaterials";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
+import { P2Materials } from "../../config/PhysicsMaterials";
 import { PointLight } from "../lighting-and-vision/PointLight";
 
-export const GLOWSTICK_TEXTURES = [
-  img_glowStick1,
-  img_glowStick2,
-  img_glowStick3,
-];
+export const GLOWSTICK_TEXTURES = ["glowStick1", "glowStick2", "glowStick3"];
 
-const DROP_SOUNDS = [snd_glowStickDrop1, snd_glowStickDrop2];
-const CRACK_SOUNDS = [snd_glowStickCrack1];
-export const GLOWSTICK_SOUNDS = [...DROP_SOUNDS, ...CRACK_SOUNDS];
+const DROP_SOUNDS: SoundName[] = ["glowStickDrop1", "glowStickDrop2"];
+const CRACK_SOUNDS: SoundName[] = ["glowStickCrack1"];
+export const GLOWSTICK_SOUNDS: SoundName[] = [...DROP_SOUNDS, ...CRACK_SOUNDS];
 
 const SIZE = [0.3, 0.08];
 const SPRITE_LENGTH = 0.45;
@@ -110,7 +102,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     this.game?.addEntity(new PositionalSound(sound, position, { gain }));
   }
 
-  afterPhysics() {
+  onAfterPhysics() {
     this.light.setPosition(this.body.position);
     this.sprite.position.set(...this.body.position);
     this.sprite.rotation = this.body.angle;

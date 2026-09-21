@@ -4,43 +4,40 @@
   "description": "A zombie shooter",
   "repository": "github:hann2/highrise",
   "scripts": {
-    "start": "rm -rf .parcel-cache && npm run dev-server",
+    "start": "rm -rf .parcel-cache && concurrently -n assets,server \"npm run watch-manifest\" \"npm run dev-server\"",
     "build": "parcel build src/index.html",
     "deploy": "npx vercel",
     "deploy-prod": "npx vercel --prod",
     "tsc": "tsc --noEmit",
     "tsc-watch": "tsc --noEmit --watch",
-    "generate-asset-types": "./generate-asset-types.js -d ./resources; ./generate-asset-types.js -d ./src",
-    "postinstall": "patch-package",
     "prettier": "prettier --write src",
     "dev-server": "parcel --no-hmr src/index.html",
     "test": "playwright test",
-    "benchmark": "BENCHMARK=1 playwright test"
+    "benchmark": "BENCHMARK=1 playwright test",
+    "generate-manifest": "tsx ./bin/generate-manifest.ts",
+    "watch-manifest": "tsx ./bin/generate-manifest.ts watch"
   },
   "author": "Philip Hann, Simon Baumgardt-Wellander",
   "license": "MIT",
   "dependencies": {
-    "@types/css-font-loading-module": "0.0.4",
+    "@pixi/tilemap": "^5.0.2",
     "@types/p2": "^0.7.45",
-    "fontfaceobserver": "^2.3.0",
     "p2": "^0.7.1",
-    "pixi-tilemap": "^2.1.4",
-    "pixi.js": "^5.3.3"
+    "pixi.js": "^8.21.0"
   },
   "devDependencies": {
-    "@parcel/config-default": "^2.16.4",
     "@parcel/transformer-glsl": "^2.16.4",
-    "@parcel/transformer-raw": "^2.16.4",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.13.6",
-    "camelcase": "^6.2.0",
+    "camelcase": "^8.0.0",
+    "chokidar": "^4.0.3",
+    "concurrently": "^10.0.5",
+    "glob": "^11.1.0",
     "parcel": "^2.16.4",
-    "patch-package": "^8.0.1",
     "prettier": "^3.9.8",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
-    "url": "^0.11.4",
-    "yargs": "^16.1.1"
+    "url": "^0.11.4"
   },
   "browserslist": "last 2 Chrome versions, last 2 Firefox versions, last 2 Safari versions"
 }

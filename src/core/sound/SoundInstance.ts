@@ -1,7 +1,9 @@
+import { SoundName } from "../../../resources/resources";
 import BaseEntity from "../entity/BaseEntity";
 import Entity from "../entity/Entity";
 import Game from "../Game";
-import { getSoundBuffer, hasSoundBuffer, SoundName } from "../resources/sounds";
+import { getSoundBuffer, hasSoundBuffer } from "../resources/sounds";
+import { clamp } from "../util/MathUtil";
 import { rUniform } from "../util/Random";
 
 export interface SoundOptions {
@@ -13,6 +15,7 @@ export interface SoundOptions {
   reactToSlowMo?: boolean;
   persistenceLevel?: number;
   pauseable?: boolean;
+  outnode?: () => AudioNode;
 }
 
 /**
@@ -25,7 +28,7 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   private sourceNode!: AudioBufferSourceNode;
   private panNode!: StereoPannerNode;
-  private gainNode!: GainNode;
+  public gainNode!: GainNode;
   private _speed: number = 1.0;
 
   private elapsed: number = 0;
@@ -97,8 +100,13 @@ export class SoundInstance extends BaseEntity implements Entity {
     });
   }
 
-  onAdd(game: Game) {
-    this.makeChain(game).connect(game.masterGain);
+  onAdd({ game }: { game: Game }) {
+    const chain = this.makeChain(game);
+    if (this.options.outnode) {
+      chain.connect(this.options.outnode());
+    } else {
+      chain.connect(game.masterGain);
+    }
 
     this.sourceNode.onended = () => {
       if (!this.paused) {
@@ -114,6 +122,7 @@ export class SoundInstance extends BaseEntity implements Entity {
     this.sourceNode.start(startTime);
   }
 
+  /** Creates the  */
   makeChain({ audio, slowMo }: Game): AudioNode {
     this.sourceNode = audio.createBufferSource();
     this.sourceNode.buffer = getSoundBuffer(this.soundName)!;
@@ -194,7 +203,10 @@ export class SoundInstance extends BaseEntity implements Entity {
     newNode.loop = this.sourceNode.loop;
     this.sourceNode = newNode;
     this.sourceNode.connect(this.panNode);
-    this.sourceNode.start(this.game!.audio.currentTime, startTime);
+    this.sourceNode.start(
+      this.game!.audio.currentTime,
+      clamp(startTime, 0, this.sourceNode.buffer!.duration),
+    );
   }
 
   jumpToRandom() {

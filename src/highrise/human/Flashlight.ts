@@ -19,7 +19,7 @@ export default class Flashlight extends BaseEntity implements Entity {
     // );
   }
 
-  afterPhysics() {
+  onAfterPhysics() {
     const { position, angle } = this.human.body;
     this.pointLight?.setPosition(position);
     this.directinoalLight?.setPosition(position);

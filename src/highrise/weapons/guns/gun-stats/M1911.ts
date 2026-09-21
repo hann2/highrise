@@ -1,10 +1,3 @@
-import snd_m1911DryFire from "../../../../../resources/audio/guns/pistol/m1911-dry-fire.flac";
-import snd_m1911Pickup from "../../../../../resources/audio/guns/pistol/M1911-pickup.flac";
-import snd_m1911Reload1 from "../../../../../resources/audio/guns/pistol/m1911-reload-1.flac";
-import snd_pistol2Shot1 from "../../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
-import img_pistolCasing from "../../../../../resources/images/shell-casings/pistol-casing.png";
-import img_glockHold from "../../../../../resources/images/weapons/glock-hold.png";
-import img_glockPickup from "../../../../../resources/images/weapons/glock-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
 import { FourtyFive } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
@@ -21,9 +14,9 @@ export const M1911: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_glockPickup,
-    holding: img_glockHold,
-    shellCasing: img_pistolCasing,
+    pickup: "glockPickup",
+    holding: "glockHold",
+    shellCasing: "pistolCasing",
   },
   size: [0.45, 0.45],
 
@@ -37,9 +30,9 @@ export const M1911: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [snd_pistol2Shot1],
-    empty: [snd_m1911DryFire],
-    pickup: [snd_m1911Pickup],
-    reload: [snd_m1911Reload1],
+    shoot: ["pistol2Shot1"],
+    empty: ["m1911DryFire"],
+    pickup: ["m1911Pickup"],
+    reload: ["m1911Reload1"],
   },
 };

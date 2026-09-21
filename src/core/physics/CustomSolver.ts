@@ -25,6 +25,11 @@ interface BodyExtended extends Body {
   resetConstraintVelocity: () => void;
 }
 
+/**
+ * A custom constraint solver extending p2.js GSSolver with optimized
+ * equation solving for physics constraints and contact resolution.
+ * Provides enhanced performance for the game engine's physics simulation.
+ */
 export default class CustomSolver extends GSSolver {
   equations!: EquationExtended[];
   world!: CustomWorld;

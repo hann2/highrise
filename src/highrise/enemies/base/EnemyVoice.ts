@@ -1,6 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { SoundName } from "../../../core/resources/sounds";
+import { SoundName } from "../../../../resources/resources";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";

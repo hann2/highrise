@@ -1,9 +1,10 @@
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { clamp } from "../../core/util/MathUtil";
 import Human from "../human/Human";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { V2d } from "../../core/Vector";
 
 const RESOLUTION = 8; // To draw the circle with more triangles
@@ -46,8 +47,8 @@ export default class SpeakingCircle extends BaseEntity implements Entity {
       const r = RADIUS + Math.sin(this.phase) * CONTRACT_AMOUNT;
 
       this.sprite
-        .lineStyle(0.1 * RESOLUTION, this.color, 0.5)
-        .drawCircle(0, 0, r * RESOLUTION);
+        .circle(0, 0, r * RESOLUTION)
+        .stroke({ width: 0.1 * RESOLUTION, color: this.color, alpha: 0.5 });
     } else {
       this.phase = START_PHASE; // So we always start at the same place
     }

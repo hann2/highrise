@@ -1,12 +1,4 @@
-import snd_casingDropBoard1 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-1.flac";
-import snd_casingDropBoard2 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-2.flac";
-import snd_casingDropBoard3 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-3.flac";
-import snd_casingDropBoard4 from "../../../../resources/audio/guns/casing-drops/casing-drop-board-4.flac";
-import snd_shotgunCasingDrop1 from "../../../../resources/audio/guns/casing-drops/shotgun-casing-drop-1.mp3";
-import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
-import img_rifleCasing from "../../../../resources/images/shell-casings/rifle-casing.png";
-import img_shotgunCasing from "../../../../resources/images/shell-casings/shotgun-casing.png";
-import { SoundName } from "../../../core/resources/sounds";
+import { SoundName } from "../../../../resources/resources";
 
 export interface BulletStats {
   // Amount of damage done to enemies
@@ -33,12 +25,12 @@ export const defaultBulletStats: BulletStats = {
   bulletsPerShot: 1,
 
   dropSounds: [
-    snd_casingDropBoard1,
-    snd_casingDropBoard2,
-    snd_casingDropBoard3,
-    snd_casingDropBoard4,
+    "casingDropBoard1",
+    "casingDropBoard2",
+    "casingDropBoard3",
+    "casingDropBoard4",
   ],
-  dropTexture: img_pistolCasing,
+  dropTexture: "pistolCasing",
 };
 
 // 9mm pistol round
@@ -50,13 +42,13 @@ export const NineMil: BulletStats = {
   muzzleVelocity: 60,
 
   dropSounds: [
-    snd_casingDropBoard1,
-    snd_casingDropBoard2,
-    snd_casingDropBoard3,
-    snd_casingDropBoard4,
+    "casingDropBoard1",
+    "casingDropBoard2",
+    "casingDropBoard3",
+    "casingDropBoard4",
   ],
 
-  dropTexture: img_pistolCasing,
+  dropTexture: "pistolCasing",
 };
 
 // .45 caliber pistol round
@@ -79,7 +71,7 @@ export const FiveFiveSix: BulletStats = {
   damage: 45,
   mass: 0.01,
   muzzleVelocity: 120,
-  dropTexture: img_rifleCasing,
+  dropTexture: "rifleCasing",
 };
 
 // 7.62mm rifle round for AK-47
@@ -88,7 +80,7 @@ export const SevenSixTwo: BulletStats = {
   damage: 50,
   mass: 0.016,
   muzzleVelocity: 120,
-  dropTexture: img_rifleCasing,
+  dropTexture: "rifleCasing",
 };
 
 // 12ga shotgun shell with 9 buckshot pellets
@@ -98,6 +90,6 @@ export const TwelveGuageBuckshot: BulletStats = {
   mass: 0.003,
   muzzleVelocity: 55,
   bulletsPerShot: 9,
-  dropTexture: img_shotgunCasing,
-  dropSounds: [snd_shotgunCasingDrop1],
+  dropTexture: "shotgunCasing",
+  dropSounds: ["shotgunCasingDrop1"],
 };

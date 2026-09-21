@@ -1,5 +1,4 @@
-import * as Pixi from "pixi.js";
-import { Graphics } from "pixi.js";
+import { BlurFilter, Graphics } from "pixi.js";
 import { degToRad } from "../../core/util/MathUtil";
 import Light from "./Light";
 
@@ -19,9 +18,9 @@ export class DirectionalLight extends Light {
 
     // TODO: Use a shader I think, instead of graphics and filter
     this.graphics = new Graphics();
-    this.lightSprite.addChild(this.graphics);
+    this.container.addChild(this.graphics);
 
-    this.graphics.filters = [new Pixi.filters.BlurFilter(2)];
+    this.graphics.filters = [new BlurFilter({ strength: 2 })];
     this.redraw();
   }
 
@@ -47,17 +46,17 @@ export class DirectionalLight extends Light {
     const theta = this.spread / 2;
     const length = this.length;
 
-    this.graphics.clear();
-    this.graphics.beginFill(0xffffff);
-    this.graphics.moveTo(0, 0);
-    this.graphics.lineTo(Math.cos(theta) * length, Math.sin(theta) * length);
-    this.graphics.lineTo(Math.cos(-theta) * length, Math.sin(-theta) * length);
-    this.graphics.lineTo(0, 0);
-    this.graphics.endFill();
+    this.graphics
+      .clear()
+      .moveTo(0, 0)
+      .lineTo(Math.cos(theta) * length, Math.sin(theta) * length)
+      .lineTo(Math.cos(-theta) * length, Math.sin(-theta) * length)
+      .lineTo(0, 0)
+      .fill(0xffffff);
   }
 
   setDirection(angle: number) {
-    this.lightSprite.rotation = angle;
+    this.graphics.rotation = angle;
   }
 
   getShadowRadius() {

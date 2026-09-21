@@ -1,39 +1,42 @@
-import FilterList, { Filter } from "./FilterList";
+import FilterSet, { Filter } from "./FilterSet";
 
-export class FilterListMap<T> {
-  private _lists = new Map<Filter<T, any>, FilterList<T, any>>();
+/**
+ * A collection that maps filters to sets of items that pass those filters.
+ * Automatically maintains filtered sets as items are added or removed,
+ * providing fast access to subsets without repeated filtering operations.
+ */
+export class FilterMultiMap<T> {
+  private sets = new Map<Filter<T, any>, FilterSet<T, any>>();
 
   addFilter<T2 extends T>(filter: Filter<T, T2>, all: Iterable<T> = []) {
-    if (!this._lists.has(filter)) {
-      const list = new FilterList(filter);
+    if (!this.sets.has(filter)) {
+      const set = new FilterSet(filter);
 
       for (const item of all) {
-        list.addIfValid(item);
+        set.addIfValid(item);
       }
 
-      this._lists.set(filter, list);
+      this.sets.set(filter, set);
     }
   }
 
   removeFilter(filter: Filter<T, any>) {
-    this._lists.delete(filter);
+    this.sets.delete(filter);
   }
 
   addItem(item: T) {
-    for (const list of this._lists.values()) {
+    for (const list of this.sets.values()) {
       list.addIfValid(item);
     }
   }
 
   removeItem(item: T) {
-    for (const list of this._lists.values()) {
+    for (const list of this.sets.values()) {
       list.remove(item);
     }
   }
 
-  getFilterList<T2 extends T>(
-    filter: Filter<T, T2>,
-  ): FilterList<T, T2> | undefined {
-    return this._lists.get(filter);
+  getItems<T2 extends T>(filter: Filter<T, T2>): FilterSet<T, T2> | undefined {
+    return this.sets.get(filter);
   }
 }

@@ -1,28 +1,29 @@
-import { Container, DisplayObject, Text } from "pixi.js";
+import { Text } from "pixi.js";
+import { LayerName } from "../../config/layers";
 import BaseEntity from "../entity/BaseEntity";
-import Entity, { GameSprite } from "../entity/Entity";
-import Game from "../Game";
+import Entity from "../entity/Entity";
+import { GameSprite } from "../entity/GameSprite";
 
 const SMOOTHING = 0.95;
+
+/** Shows some performance stats in the corner of the screen. */
 export default class FPSMeter extends BaseEntity implements Entity {
   persistenceLevel = 100;
   lastUpdate: number;
   averageDuration: number = 0;
-  slowFrameCount: number = 0;
   sprite: Text & GameSprite;
 
-  constructor(layerName?: string) {
+  constructor(layerName?: LayerName) {
     super();
     this.lastUpdate = performance.now();
-    this.sprite = new Text("", {
-      fontSize: 12,
-      fill: "white",
-      align: "left",
+    this.sprite = new Text({
+      text: "",
+      style: { fontSize: 12, fill: "white", align: "left" },
     });
     this.sprite.layerName = layerName;
   }
 
-  onAdd(game: Game) {
+  onAdd() {
     this.averageDuration = 1 / 60;
   }
 
@@ -41,7 +42,7 @@ export default class FPSMeter extends BaseEntity implements Entity {
       fps: Math.ceil(1000 / this.averageDuration),
       bodyCount: this.game?.world.bodies.length ?? 0,
       entityCount: this.game?.entities.all.size ?? 0,
-      spriteCount: getSpriteCount(this.game!.renderer.stage),
+      spriteCount: this.game?.renderer.spriteCount ?? 0,
     };
   }
 
@@ -49,14 +50,4 @@ export default class FPSMeter extends BaseEntity implements Entity {
     const { fps, bodyCount, entityCount, spriteCount } = this.getStats();
     return `fps: ${fps} | bodies: ${bodyCount} | entities: ${entityCount} | sprites ${spriteCount}`;
   }
-}
-
-function getSpriteCount(root: DisplayObject): number {
-  let total = 1;
-
-  for (const child of (root as Container).children ?? []) {
-    total += getSpriteCount(child);
-  }
-
-  return total;
 }

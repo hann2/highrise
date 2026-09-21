@@ -1,11 +1,3 @@
-import snd_dryFire3 from "../../../../../resources/audio/guns/misc/dry-fire-3.mp3";
-import snd_magazineLoad1 from "../../../../../resources/audio/guns/misc/magazine-load-1.mp3";
-import snd_ar15Reload1 from "../../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
-import snd_ar15ReloadEmpty from "../../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
-import snd_rifle2Shot1 from "../../../../../resources/audio/guns/rifle/rifle2-shot-1.mp3";
-import img_rifleCasing from "../../../../../resources/images/shell-casings/rifle-casing.png";
-import img_ak47Hold from "../../../../../resources/images/weapons/ak-47-hold.png";
-import img_ak47Pickup from "../../../../../resources/images/weapons/ak47-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
 import { SevenSixTwo } from "../BulletStats";
 import {
@@ -28,9 +20,9 @@ export const AK47: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_ak47Pickup,
-    holding: img_ak47Hold,
-    shellCasing: img_rifleCasing,
+    pickup: "ak47Pickup",
+    holding: "ak47Hold",
+    shellCasing: "rifleCasing",
   },
   size: [1.4, 1.4],
 
@@ -46,9 +38,9 @@ export const AK47: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [snd_rifle2Shot1],
-    empty: [snd_dryFire3],
-    pickup: [snd_magazineLoad1],
-    reload: [snd_ar15Reload1, snd_ar15ReloadEmpty],
+    shoot: ["rifle2Shot1"],
+    empty: ["dryFire3"],
+    pickup: ["magazineLoad1"],
+    reload: ["ar15Reload1", "ar15ReloadEmpty"],
   },
 };

@@ -1,4 +1,5 @@
-import { getSoundBuffer, SoundName } from "../resources/sounds";
+import { SoundName } from "../../../resources/resources";
+import { getSoundBuffer } from "../resources/sounds";
 
 // Useful for having multiple overlapping sounds not start in sync
 export function startAtRandomOffset(source: AudioBufferSourceNode): void {

@@ -1,8 +1,11 @@
-import { Sprite, Text } from "pixi.js";
+import { Container, Sprite, Text } from "pixi.js";
+import { fontName } from "../../core/resources/resourceUtils";
+import { V2d } from "../../core/Vector";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
@@ -10,31 +13,34 @@ import { Weapon } from "../weapons/weapons";
 
 export class AmmoOverlay extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
   reloadText: Text;
-  bulletSpriteContainer: Sprite;
+  bulletSpriteContainer: Container;
   private lastWeapon: Weapon | undefined = undefined;
 
   constructor(public getHuman: () => Human) {
     super();
 
-    this.sprite = new Sprite();
+    this.sprite = new Container();
     this.sprite.layerName = Layer.HUD;
 
-    this.reloadText = new Text("Press R To Reload", {
-      align: "right",
-      fill: "red",
-      fontFamily: "Comfortaa",
-      fontSize: 16,
+    this.reloadText = new Text({
+      text: "Press R To Reload",
+      style: {
+        align: "right",
+        fill: "red",
+        fontFamily: fontName("comfortaa"),
+        fontSize: 16,
+      },
     });
     this.reloadText.anchor.set(1, 1);
     this.sprite.addChild(this.reloadText);
 
-    this.bulletSpriteContainer = new Sprite();
+    this.bulletSpriteContainer = new Container();
     this.sprite.addChild(this.bulletSpriteContainer);
   }
 
-  onInputDeviceChange(usingGamepad: boolean) {
+  onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     if (usingGamepad) {
       this.reloadText.text = "Press X To Reload";
     } else {
@@ -42,7 +48,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     }
   }
 
-  onResize([width, height]: [number, number]) {
+  onResize({ size: [width, height] }: { size: V2d }) {
     this.reloadText.position.set(width - 10, height - 10);
     this.bulletSpriteContainer.position.set(width - 10, height - 10);
   }

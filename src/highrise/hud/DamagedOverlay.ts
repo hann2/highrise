@@ -1,10 +1,17 @@
-import * as Pixi from "pixi.js";
-import { Container, Graphics } from "pixi.js";
+import {
+  Container,
+  defaultFilterVert,
+  Filter,
+  GlProgram,
+  Graphics,
+  UniformGroup,
+} from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { clamp, smoothStep } from "../../core/util/MathUtil";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
 import frag_damageFilter from "./damage-filter.frag";
@@ -14,7 +21,10 @@ const FLASH_ALPHA = 0.4;
 export class DamagedOverlay extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
   sprite: Container & GameSprite;
-  colorFilter: Pixi.Filter;
+  colorFilter: Filter;
+  private uniforms = new UniformGroup({
+    uHealthPercent: { value: 1.0, type: "f32" },
+  });
 
   constructor(private getPlayer: () => Human | undefined) {
     super();
@@ -22,33 +32,39 @@ export class DamagedOverlay extends BaseEntity implements Entity {
     this.sprite = new Container();
     this.sprite.layerName = Layer.HUD;
 
-    this.colorFilter = new Pixi.Filter(undefined, frag_damageFilter, {
-      healthPercent: 1.0,
+    // Desaturates the screen as the player gets closer to death
+    this.colorFilter = new Filter({
+      glProgram: GlProgram.from({
+        vertex: defaultFilterVert,
+        fragment: frag_damageFilter,
+        name: "damage-filter",
+      }),
+      resources: { damageUniforms: this.uniforms },
+      // This has to match the renderer's resolution. Filters nested inside
+      // of this one (like the blur on vision shadows) render nothing otherwise.
+      resolution: "inherit",
     });
-    this.colorFilter.resolution = 2;
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     game.renderer.addStageFilter(this.colorFilter);
   }
 
-  onDestroy(game: Game) {
+  onDestroy({ game }: { game: Game }) {
     game.renderer.removeStageFilter(this.colorFilter);
   }
 
-  handlers = {
-    humanInjured: ({ human, amount }: { human: Human; amount: number }) => {
-      if (human === this.getPlayer()) {
-        this.flash(0xff0000, 0, 0.4);
-      }
-    },
+  onHumanInjured({ human, amount }: { human: Human; amount: number }) {
+    if (human === this.getPlayer()) {
+      this.flash(0xff0000, 0, 0.4);
+    }
+  }
 
-    humanHealed: ({ human, amount }: { human: Human; amount: number }) => {
-      if (human === this.getPlayer()) {
-        this.flash(0x00ff00, 0.0, 0.8);
-      }
-    },
-  };
+  onHumanHealed({ human, amount }: { human: Human; amount: number }) {
+    if (human === this.getPlayer()) {
+      this.flash(0x00ff00, 0.0, 0.8);
+    }
+  }
 
   onRender() {
     const human = this.getPlayer();
@@ -60,16 +76,12 @@ export class DamagedOverlay extends BaseEntity implements Entity {
   }
 
   updateBaseline(healthPercent: number) {
-    this.colorFilter.uniforms.healthPercent = healthPercent;
+    this.uniforms.uniforms.uHealthPercent = healthPercent;
   }
 
   makeOverlay(color: number = 0xff0000): Graphics {
     const [width, height] = this.game!.renderer.getSize();
-    return new Graphics()
-      .clear()
-      .beginFill(color)
-      .drawRect(0, 0, width, height)
-      .endFill();
+    return new Graphics().rect(0, 0, width, height).fill(color);
   }
 
   async flash(

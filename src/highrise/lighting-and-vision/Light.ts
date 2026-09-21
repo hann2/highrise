@@ -1,5 +1,4 @@
-import * as Pixi from "pixi.js";
-import { BLEND_MODES, Container, Matrix, RenderTexture, Sprite } from "pixi.js";
+import { Container, Matrix, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V } from "../../core/Vector";
@@ -33,9 +32,9 @@ export default class Light extends BaseEntity implements Entity {
       height: this.lightSprite.height,
       resolution: RESOLUTION,
     });
-    this.bakedSprite = Sprite.from(this.bakedTexture);
+    this.bakedSprite = new Sprite(this.bakedTexture);
     this.bakedSprite.anchor.set(0.5, 0.5);
-    this.bakedSprite.blendMode = BLEND_MODES.ADD;
+    this.bakedSprite.blendMode = "add";
 
     if (this.shadowsEnabled) {
       this.enableShadows();
@@ -55,11 +54,7 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   resizeBakedTexture() {
-    this.bakedTexture.resize(
-      this.lightSprite.width,
-      this.lightSprite.height,
-      true,
-    );
+    this.bakedTexture.resize(this.lightSprite.width, this.lightSprite.height);
   }
 
   get needsBaking(): boolean {
@@ -75,12 +70,12 @@ export default class Light extends BaseEntity implements Entity {
         this.lightSprite.width * 0.5,
         this.lightSprite.height * 0.5,
       );
-      this.game?.renderer.pixiRenderer.render(
-        this.container,
-        this.bakedTexture,
-        true,
+      this.game?.renderer.app.renderer.render({
+        container: this.container,
+        target: this.bakedTexture,
+        clear: true,
         transform,
-      );
+      });
 
       this.dirty = false;
     }
@@ -94,12 +89,7 @@ export default class Light extends BaseEntity implements Entity {
       this.shadows = this.addChild(new Shadows(V(x, y), this.shadowRadius));
       this.container.addChild(this.shadows.graphics);
 
-      if (this.softShadows) {
-        // TODO: Make soft shadows work
-        // const blurFilter = new Pixi.filters.BlurFilter(0, 1);
-        // blurFilter.repeatEdgePixels = true;
-        // this.shadows.graphics.filters = [blurFilter];
-      }
+      // TODO: Make soft shadows work (this.softShadows)
     }
   }
 

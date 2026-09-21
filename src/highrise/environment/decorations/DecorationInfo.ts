@@ -1,5 +1,5 @@
-import { BaseTexture, Rectangle, Texture } from "pixi.js";
-import { SoundName } from "../../../core/resources/sounds";
+import { Rectangle, Texture } from "pixi.js";
+import { SoundName } from "../../../../resources/resources";
 import { V2d } from "../../../core/Vector";
 
 /**
@@ -53,10 +53,10 @@ export function getDecorationTexture(decorationInfo: DecorationInfo): Texture {
   if (decorationInfo.sheetInfo) {
     const { offset, dimensions } = decorationInfo.sheetInfo;
     const baseTexture = getOrMakeTexture(decorationInfo.imageName);
-    return new Texture(
-      baseTexture as any as BaseTexture,
-      new Rectangle(...offset, ...dimensions),
-    );
+    return new Texture({
+      source: baseTexture.source,
+      frame: new Rectangle(...offset, ...dimensions),
+    });
   } else {
     return getOrMakeTexture(decorationInfo.imageName);
   }

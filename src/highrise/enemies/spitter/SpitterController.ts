@@ -4,7 +4,7 @@ import Entity from "../../../core/entity/Entity";
 import CustomWorld from "../../../core/physics/CustomWorld";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
+import { CollisionGroups } from "../../../config/CollisionGroups";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import Human, { isHuman } from "../../human/Human";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";

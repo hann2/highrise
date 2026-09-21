@@ -1,10 +1,11 @@
 import { BLEND_MODES, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { darken } from "../../core/util/ColorUtils";
 import { smoothStep } from "../../core/util/MathUtil";
 import { rUniform } from "../../core/util/Random";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { getSplatPair } from "./Splat";
 
 const SCALE = 1.0 / 64;
@@ -33,7 +34,7 @@ export default class GooSplat extends BaseEntity implements Entity {
 
     this.glowSprite = Sprite.from(glowTexture);
     (this.glowSprite as GameSprite).layerName = Layer.EMISSIVES;
-    this.glowSprite.blendMode - BLEND_MODES.ADD;
+    this.glowSprite.blendMode = "add";
     this.glowSprite.alpha = GLOW_ALPHA;
     this.glowSprite.scale.set(size * SCALE);
     this.glowSprite.anchor.set(0.5, 0.5);

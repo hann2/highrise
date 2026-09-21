@@ -1,27 +1,36 @@
-export type SoundName = string;
+import { SoundName } from "../../../resources/resources";
 
 // Stores all loaded buffers
-const buffers: Map<string, AudioBuffer> = new Map();
+const buffers: Map<SoundName, AudioBuffer> = new Map();
 
 // Whether or not a buffer has been loaded for a url
-export function hasSoundBuffer(url: string): boolean {
-  return buffers.has(url);
+export function hasSoundBuffer(name: SoundName): boolean {
+  return buffers.has(name);
 }
 
 // Get the buffer loaded for a url or throw if none has been loaded
-export function getSoundBuffer(url: string): AudioBuffer {
-  const buffer = buffers.get(url);
+export function getSoundBuffer(name: SoundName): AudioBuffer {
+  const buffer = buffers.get(name);
   if (!buffer) {
-    throw new Error(`Audio Buffer not loaded: ${url}`);
+    throw new Error(`Audio Buffer not loaded: ${name}`);
   }
   return buffer;
+}
+
+export function getSoundDuration(name: SoundName): number {
+  return buffers.get(name)?.duration ?? -1;
+}
+
+export function soundIsLoaded(name: SoundName) {
+  return buffers.get(name) != undefined;
 }
 
 // Keeps track of filesizes, for figuring out how to optimize our asset loading
 const fileSizes = new Map<string, number>();
 
+/** Returns the total number of bytes we have loaded for all our audio files. */
 export function getTotalSoundBytes() {
-  return [...fileSizes.values()].reduce((sum, current) => sum + current);
+  return [...fileSizes.values()].reduce((sum, current) => sum + current, 0);
 }
 
 export function getBiggestSounds() {
@@ -38,6 +47,7 @@ export function getSoundFileSize(url: SoundName): number {
 }
 
 export async function loadSound(
+  name: SoundName,
   url: string,
   audioContext: AudioContext,
 ): Promise<AudioBuffer> {
@@ -49,15 +59,7 @@ export async function loadSound(
     })
     .then((data) => audioContext.decodeAudioData(data))
     .then((buffer) => {
-      buffers.set(url, buffer);
+      buffers.set(name, buffer);
       return buffer;
     });
-}
-
-export function getSoundDuration(soundName: SoundName): number {
-  return buffers.get(soundName)?.duration ?? -1;
-}
-
-export function soundIsLoaded(name: SoundName) {
-  return buffers.get(name) != undefined;
 }

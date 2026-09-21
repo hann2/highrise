@@ -1,9 +1,9 @@
 import { Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import { GameSprite } from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { rSign, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";

@@ -1,21 +1,14 @@
 import { Body, Box } from "p2";
+import { SoundName } from "../../../../resources/resources";
 import { BLEND_MODES, Sprite } from "pixi.js";
-import snd_vendingMachineHit1 from "../../../../resources/audio/impacts/vending-machine-hit-1.flac";
-import snd_vendingMachineHit2 from "../../../../resources/audio/impacts/vending-machine-hit-2.flac";
-import quarterDrop1 from "../../../../resources/audio/misc/quarter-drop-1.flac";
-import img_vendingMachine1 from "../../../../resources/images/environment/vending-machines/vending-machine-1.png";
-import img_vendingMachine2 from "../../../../resources/images/environment/vending-machines/vending-machine-2.png";
-import img_vendingMachine3 from "../../../../resources/images/environment/vending-machines/vending-machine-3.png";
-import img_vendingMachineGlow1 from "../../../../resources/images/environment/vending-machines/vending-machine-glow-1.png";
-import img_vendingMachineGlow2 from "../../../../resources/images/environment/vending-machines/vending-machine-glow-2.png";
-import img_vendingMachineGlow3 from "../../../../resources/images/environment/vending-machines/vending-machine-glow-3.png";
 import BaseEntity from "../../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../../core/entity/Entity";
+import Entity from "../../../core/entity/Entity";
+import { GameSprite } from "../../../core/entity/GameSprite";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { choose, rInteger, rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
-import { Layer } from "../../config/layers";
+import { CollisionGroups } from "../../../config/CollisionGroups";
+import { Layer } from "../../../config/layers";
 import WallImpact from "../../effects/WallImpact";
 import Light from "../../lighting-and-vision/Light";
 import Bullet from "../../projectiles/Bullet";
@@ -24,14 +17,14 @@ import Hittable from "../Hittable";
 import Interactable from "../Interactable";
 
 export const VENDING_MACHINES = [
-  [img_vendingMachine1, img_vendingMachineGlow1],
-  [img_vendingMachine2, img_vendingMachineGlow2],
-  [img_vendingMachine3, img_vendingMachineGlow3],
+  ["vendingMachine1", "vendingMachineGlow1"],
+  ["vendingMachine2", "vendingMachineGlow2"],
+  ["vendingMachine3", "vendingMachineGlow3"],
 ];
 
-export const VENDING_MACHINE_HIT_SOUNDS = [
-  snd_vendingMachineHit1,
-  snd_vendingMachineHit2,
+export const VENDING_MACHINE_HIT_SOUNDS: SoundName[] = [
+  "vendingMachineHit1",
+  "vendingMachineHit2",
 ];
 
 export default class VendingMachine
@@ -61,7 +54,7 @@ export default class VendingMachine
     this.lightSprite = Sprite.from(glowUrl);
     this.lightSprite.anchor.set(0.5, 0.5);
     // this.lightSprite.position.set(...position);
-    this.lightSprite.blendMode = BLEND_MODES.NORMAL;
+    this.lightSprite.blendMode = "normal";
     this.lightSprite.width = 1.5;
     this.lightSprite.height = 1.5;
     this.lightSprite.rotation = rotation;
@@ -88,7 +81,7 @@ export default class VendingMachine
       new Interactable(
         position,
         () => {
-          this.game?.addEntity(new PositionalSound(quarterDrop1, position));
+          this.game?.addEntity(new PositionalSound("quarterDrop1", position));
         },
         1.2,
       ),
@@ -123,10 +116,10 @@ export default class VendingMachine
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {
     this.hp -= swingingWeapon.getDamage();
 
-    this.game!.addEntities([
+    this.game!.addEntities(
       new PositionalSound(choose(...VENDING_MACHINE_HIT_SOUNDS), position),
       new WallImpact(position),
-    ]);
+    );
 
     if (this.hp <= 0 && !this.dead) {
       this.die();
@@ -136,10 +129,10 @@ export default class VendingMachine
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
 
-    this.game!.addEntities([
+    this.game!.addEntities(
       new PositionalSound(choose(...VENDING_MACHINE_HIT_SOUNDS), position),
       new WallImpact(position, normal, 0x444444),
-    ]);
+    );
 
     if (this.hp <= 0 && !this.dead) {
       this.die();

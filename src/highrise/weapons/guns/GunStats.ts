@@ -1,14 +1,6 @@
 // Stats that make a gun unique
 
-import snd_dryFire1 from "../../../../resources/audio/guns/misc/dry-fire-1.mp3";
-import snd_pistolCock1 from "../../../../resources/audio/guns/pistol/pistol-cock-1.mp3";
-import snd_pistol2Shot1 from "../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
-import snd_ar15Reload1 from "../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
-import snd_shotgunPump1 from "../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
-import img_pistolCasing from "../../../../resources/images/shell-casings/pistol-casing.png";
-import img_glockHold from "../../../../resources/images/weapons/glock-hold.png";
-import img_glockPickup from "../../../../resources/images/weapons/glock-pickup.png";
-import { SoundName } from "../../../core/resources/sounds";
+import { SoundName } from "../../../../resources/resources";
 import { degToRad } from "../../../core/util/MathUtil";
 import { BaseWeaponStats } from "../WeaponStats";
 import { BulletStats, defaultBulletStats } from "./BulletStats";
@@ -131,18 +123,18 @@ export const defaultGunStats: GunStats = {
   stanceOffset: [0, 0],
 
   textures: {
-    pickup: img_glockPickup,
-    holding: img_glockHold,
-    shellCasing: img_pistolCasing,
+    pickup: "glockPickup",
+    holding: "glockHold",
+    shellCasing: "pistolCasing",
   },
 
   sounds: {
-    shoot: [snd_pistol2Shot1],
-    empty: [snd_dryFire1],
-    pickup: [snd_pistolCock1],
-    reload: [snd_ar15Reload1],
+    shoot: ["pistol2Shot1"],
+    empty: ["dryFire1"],
+    pickup: ["pistolCock1"],
+    reload: ["ar15Reload1"],
     reloadInsert: [],
     reloadFinish: [],
-    pump: [snd_shotgunPump1],
+    pump: ["shotgunPump1"],
   },
 };

@@ -1,4 +1,4 @@
-import IOEventHandler from "../entity/IOEventHandler";
+import IOEventHandler from "../entity/IoEvents";
 import {
   hasOnButtonDown,
   hasOnButtonUp,
@@ -12,22 +12,27 @@ import {
   hasOnRightDown,
   hasOnRightUp,
 } from "../EntityFilter";
-import FilterList from "../util/FilterList";
+import FilterSet from "../util/FilterSet";
+/**
+ * Manages collections of IO event handlers with optimized filtering.
+ * Maintains separate filtered sets for different input event types
+ * to enable efficient event dispatching without checking every handler.
+ */
 export default class IOHandlerList implements Iterable<IOEventHandler> {
   all = new Set<IOEventHandler>();
 
   filtered = {
-    onButtonDown: new FilterList(hasOnButtonDown),
-    onButtonUp: new FilterList(hasOnButtonUp),
-    onClick: new FilterList(hasOnClick),
-    onKeyDown: new FilterList(hasOnKeyDown),
-    onKeyUp: new FilterList(hasOnKeyUp),
-    onMouseDown: new FilterList(hasOnMouseDown),
-    onMouseUp: new FilterList(hasOnMouseUp),
-    onRightClick: new FilterList(hasOnRightClick),
-    onRightDown: new FilterList(hasOnRightDown),
-    onRightUp: new FilterList(hasOnRightUp),
-    onInputDeviceChange: new FilterList(hasOnInputDeviceChange),
+    onButtonDown: new FilterSet(hasOnButtonDown),
+    onButtonUp: new FilterSet(hasOnButtonUp),
+    onClick: new FilterSet(hasOnClick),
+    onKeyDown: new FilterSet(hasOnKeyDown),
+    onKeyUp: new FilterSet(hasOnKeyUp),
+    onMouseDown: new FilterSet(hasOnMouseDown),
+    onMouseUp: new FilterSet(hasOnMouseUp),
+    onRightClick: new FilterSet(hasOnRightClick),
+    onRightDown: new FilterSet(hasOnRightDown),
+    onRightUp: new FilterSet(hasOnRightUp),
+    onInputDeviceChange: new FilterSet(hasOnInputDeviceChange),
   };
 
   add(handler: IOEventHandler) {

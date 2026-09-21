@@ -1,73 +1,33 @@
-import Entity from "./entity/Entity";
-import {
-  EntityFilter,
-  hasAfterPhysics,
-  hasBeforeTick,
-  hasBody,
-  hasOnPause,
-  hasOnRender,
-  hasOnLateRender,
-  hasOnTick,
-  hasOnUnpause,
-  hasOnResize,
-} from "./EntityFilter";
-import { FilterListMap } from "./util/FilterListMap";
-import ListMap from "./util/ListMap";
+import Entity, { GameEventHandler, GameEventName } from "./entity/Entity";
+import { handlerNameToEventName } from "./entity/EventHandler";
+import { EntityFilter, hasBody } from "./EntityFilter";
+import { FilterMultiMap } from "./util/FilterListMap";
+import MultiMap from "./util/ListMap";
 
 /**
  * Keeps track of entities. Has lots of useful indexes.
  */
 export default class EntityList implements Iterable<Entity> {
+  /** Maps entity ids to entities */
   private idToEntity = new Map<string, Entity>();
-  private tagged = new ListMap<string, Entity>();
-  private handlers = new ListMap<string, Entity>();
-  private filters = new FilterListMap<Entity>();
-
+  /** Maps tags to entities */
+  private tagged = new MultiMap<string, Entity>();
+  /** Maps event types to entities that handle them */
+  private handlers = new MultiMap<GameEventName, Entity>();
+  /** Maps filters to entities that pass them */
+  private filters = new FilterMultiMap<Entity>();
+  /** All entities */
   all = new Set<Entity>();
 
   constructor() {
-    this.addFilter(hasAfterPhysics);
-    this.addFilter(hasBeforeTick);
-    this.addFilter(hasOnRender);
-    this.addFilter(hasOnLateRender);
-    this.addFilter(hasOnTick);
-    this.addFilter(hasOnPause);
-    this.addFilter(hasOnUnpause);
-    this.addFilter(hasOnResize);
     this.addFilter(hasBody);
   }
 
-  get withAfterPhysics() {
-    return this.getByFilter(hasAfterPhysics);
-  }
-  get withBeforeTick() {
-    return this.getByFilter(hasBeforeTick);
-  }
-  get withOnRender() {
-    return this.getByFilter(hasOnRender);
-  }
-  get withOnLateRender() {
-    return this.getByFilter(hasOnLateRender);
-  }
-  get withOnTick() {
-    return this.getByFilter(hasOnTick);
-  }
-  get withOnPause() {
-    return this.getByFilter(hasOnPause);
-  }
-  get withOnUnpause() {
-    return this.getByFilter(hasOnUnpause);
-  }
-  get withOnResize() {
-    return this.getByFilter(hasOnResize);
-  }
   get withBody() {
     return this.getByFilter(hasBody);
   }
 
-  /**
-   * Adds an entity to this list and all sublists and does all the bookkeeping
-   */
+  /** Adds an entity to this list and all sublists and does all the bookkeeping */
   add(entity: Entity) {
     this.all.add(entity);
 
@@ -79,9 +39,9 @@ export default class EntityList implements Iterable<Entity> {
       }
     }
 
-    if (entity.handlers) {
-      for (const handler of Object.keys(entity.handlers)) {
-        this.handlers.add(handler, entity);
+    for (const methodName of getAllMethods(entity)) {
+      if (methodName.startsWith("on")) {
+        this.handlers.add(handlerNameToEventName(methodName), entity);
       }
     }
 
@@ -93,9 +53,7 @@ export default class EntityList implements Iterable<Entity> {
     }
   }
 
-  /**
-   * Removes an entity from this list and all the sublists and does some bookkeeping
-   */
+  /** Removes an entity from this list and all the sublists and does some bookkeeping */
   remove(entity: Entity) {
     this.all.delete(entity);
 
@@ -107,9 +65,9 @@ export default class EntityList implements Iterable<Entity> {
       }
     }
 
-    if (entity.handlers) {
-      for (const handler of Object.keys(entity.handlers)) {
-        this.handlers.remove(handler, entity);
+    for (const methodName of getAllMethods(entity)) {
+      if (methodName.startsWith("on")) {
+        this.handlers.remove(handlerNameToEventName(methodName), entity);
       }
     }
 
@@ -118,9 +76,7 @@ export default class EntityList implements Iterable<Entity> {
     }
   }
 
-  /**
-   * Get the entity with the given id.
-   */
+  /** Get the entity with the given id. */
   getById(id: string) {
     return this.idToEntity.get(id);
   }
@@ -159,26 +115,32 @@ export default class EntityList implements Iterable<Entity> {
   }
 
   /**
-   * Removes a filter.
+   * Removes a filter that was added with addFilter().
    */
   removeFilter<T extends Entity>(filter: EntityFilter<T>): void {
     this.filters.removeFilter(filter);
   }
 
   /**
-   * Return all the entities that pass a type guard
-   * Then we could replace the hardCoded filters with something nicer
+   * Return all the entities that pass a type guard.
+   * Pair with addFilter() to make this fast.
    */
-  getByFilter<T extends Entity>(filter: EntityFilter<T>): Iterable<T> {
-    const result = this.filters.getFilterList(filter);
+  getByFilter<T extends Entity>(
+    filter: EntityFilter<T>,
+  ): Iterable<T> & { readonly length: number } {
+    const result = this.filters.getItems(filter);
     return result ?? [...this.all].filter(filter);
   }
 
   /**
-   * Get all entities that handle a specific event type
+   * Get all entities that handle a specific event type.
    */
-  getHandlers(eventType: string): ReadonlyArray<Entity> {
-    return this.handlers.get(eventType);
+  getHandlers(
+    eventType: GameEventName,
+  ): ReadonlyArray<Entity & GameEventHandler<GameEventName>> {
+    return this.handlers.get(eventType) as ReadonlyArray<
+      Entity & GameEventHandler<GameEventName>
+    >;
   }
 
   /**
@@ -187,4 +149,32 @@ export default class EntityList implements Iterable<Entity> {
   [Symbol.iterator]() {
     return this.all[Symbol.iterator]();
   }
+}
+
+function getAllMethods(entity: object): string[] {
+  const methods: string[] = [];
+  let current = entity;
+
+  // Traverse up the prototype chain
+  while (
+    current !== null &&
+    current !== undefined &&
+    current !== Object.prototype
+  ) {
+    // Get own property names of the current object
+    const propertyNames = Object.getOwnPropertyNames(current);
+
+    // Filter out non-function properties and already added methods
+    for (const name of propertyNames as [keyof typeof current]) {
+      // Access on entity and not currentObject because we're looking at prototypes
+      if (typeof entity[name] === "function" && !methods.includes(name)) {
+        methods.push(name);
+      }
+    }
+
+    // Move up the prototype chain
+    current = Object.getPrototypeOf(current);
+  }
+
+  return methods;
 }

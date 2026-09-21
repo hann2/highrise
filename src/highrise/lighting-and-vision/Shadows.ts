@@ -1,7 +1,8 @@
 import { AABB, Body, vec2 } from "p2";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { WithOwner } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { WithOwner } from "../../core/entity/WithOwner";
 import CustomWorld from "../../core/physics/CustomWorld";
 import { V2d } from "../../core/Vector";
 import { getShapeCorners } from "./shapeUtils";
@@ -24,7 +25,7 @@ export class Shadows extends BaseEntity implements Entity {
   ) {
     super();
     this.graphics = new Graphics();
-    // this.graphics.blendMode = BLEND_MODES.MULTIPLY;
+    // this.graphics.blendMode = "multiply";
   }
 
   setPosition(position: V2d) {
@@ -50,7 +51,7 @@ export class Shadows extends BaseEntity implements Entity {
 
     for (const corners of shadows) {
       if (corners.length) {
-        this.graphics.beginFill(0x000000).drawPolygon(corners.flat()).endFill();
+        this.graphics.poly(corners.flat()).fill(0x000000);
       }
     }
 

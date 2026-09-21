@@ -21,38 +21,36 @@ export class GameController extends BaseEntity implements Entity {
     super();
   }
 
-  handlers = {
-    goToMainMenu: () => {
-      console.log("go to main menu");
-      const game = this.game!;
-      game.clearScene(Persistence.Menu);
-      game.addEntity(new MainMenu());
-    },
+  onGoToMainMenu() {
+    console.log("go to main menu");
+    const game = this.game!;
+    game.clearScene(Persistence.Menu);
+    game.addEntity(new MainMenu());
+  }
 
-    newGame: () => {
-      console.log("new game");
-      const game = this.game!;
-      const partyManager = game.addEntity(new PartyManager());
-      const getPlayer = () => partyManager.leader;
-      game.addEntity(new LevelController());
-      game.addEntity(new CameraController(game.camera, getPlayer));
-      game.addEntity(new PlayerHumanController(getPlayer));
-      game.addEntity(new VisionController(getPlayer));
-      game.addEntity(new DamagedOverlay(getPlayer));
-      game.addEntity(new AmmoOverlay(getPlayer));
-      game.addEntity(new LightingManager());
-      game.addEntity(new PauseMenu());
-    },
+  onNewGame() {
+    console.log("new game");
+    const game = this.game!;
+    const partyManager = game.addEntity(new PartyManager());
+    const getPlayer = () => partyManager.leader;
+    game.addEntity(new LevelController());
+    game.addEntity(new CameraController(game.camera, getPlayer));
+    game.addEntity(new PlayerHumanController(getPlayer));
+    game.addEntity(new VisionController(getPlayer));
+    game.addEntity(new DamagedOverlay(getPlayer));
+    game.addEntity(new AmmoOverlay(getPlayer));
+    game.addEntity(new LightingManager());
+    game.addEntity(new PauseMenu());
+  }
 
-    gameOver: async ({ victory }: { victory: boolean }) => {
-      console.log("game over");
-      const game = this.game!;
+  async onGameOver({ victory }: { victory: boolean }) {
+    console.log("game over");
+    const game = this.game!;
 
-      const gameOverScreen = game.addEntity(new GameOverScreen(victory));
-      await this.waitUntil(() => gameOverScreen.sprite.alpha > 0.99);
-      game.clearScene(Persistence.Game);
-      await this.waitUntil(() => gameOverScreen.isDestroyed);
-      game.dispatch({ type: "goToMainMenu" });
-    },
-  };
+    const gameOverScreen = game.addEntity(new GameOverScreen(victory));
+    await this.waitUntil(() => gameOverScreen.sprite.alpha > 0.99);
+    game.clearScene(Persistence.Game);
+    await this.waitUntil(() => gameOverScreen.isDestroyed);
+    game.dispatch("goToMainMenu", undefined);
+  }
 }

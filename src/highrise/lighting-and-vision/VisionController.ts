@@ -1,11 +1,10 @@
-import * as Pixi from "pixi.js";
-import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
-import img_visionFog from "../../../resources/images/lights/vision-fog.png";
+import { BlurFilter, Container, Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { V } from "../../core/Vector";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 import {
   getCurrentGraphicsQuality,
@@ -20,63 +19,59 @@ export default class VisionController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
 
   shadows: Shadows;
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
 
   constructor(private getPlayer: () => Human | undefined) {
     super();
 
     this.shadows = this.addChild(new Shadows(V(0, 0), MAX_VISION, true));
 
-    const fog = Sprite.from(img_visionFog);
-    fog.blendMode = BLEND_MODES.MULTIPLY;
+    const fog = Sprite.from("visionFog");
+    fog.blendMode = "multiply";
     fog.width = MAX_VISION * 2;
     fog.height = MAX_VISION * 2;
     fog.anchor.set(0.5);
 
     const distanceShadows = new Graphics();
     distanceShadows
-      .beginFill(0x000000)
-      .drawRect(-100, -100, 200, 200)
-      .beginHole()
-      .drawRect(-MAX_VISION, -MAX_VISION, 2 * MAX_VISION, 2 * MAX_VISION)
-      .endHole()
-      .endFill();
+      .rect(-100, -100, 200, 200)
+      .fill(0x000000)
+      .rect(-MAX_VISION, -MAX_VISION, 2 * MAX_VISION, 2 * MAX_VISION)
+      .cut();
 
-    this.sprite = new Sprite();
+    this.sprite = new Container();
     this.sprite.addChild(this.shadows.graphics);
     this.sprite.addChild(fog);
     this.sprite.addChild(distanceShadows);
     this.sprite.layerName = Layer.VISION;
   }
 
-  onAdd(game: Game) {
-    this.handlers.graphicsQualityChanged({
+  onAdd({ game }: { game: Game }) {
+    this.onGraphicsQualityChanged({
       quality: getCurrentGraphicsQuality(game),
     });
   }
 
-  handlers = {
-    graphicsQualityChanged: ({ quality }: { quality: GraphicsQuality }) => {
-      switch (quality) {
-        case GraphicsQuality.Low: {
-          this.shadows.graphics.filters = [];
-          break;
-        }
-        case GraphicsQuality.Medium: {
-          const blurFilter = new Pixi.filters.BlurFilter(4, 1);
-          blurFilter.repeatEdgePixels = true;
-          this.shadows.graphics.filters = [blurFilter];
-          break;
-        }
-        case GraphicsQuality.High: {
-          const blurFilter = new Pixi.filters.BlurFilter(8, 4);
-          blurFilter.repeatEdgePixels = true;
-          this.shadows.graphics.filters = [blurFilter];
-          break;
-        }
+  onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
+    switch (quality) {
+      case GraphicsQuality.Low: {
+        this.shadows.graphics.filters = [];
+        break;
       }
-    },
-  };
+      case GraphicsQuality.Medium: {
+        const blurFilter = new BlurFilter({ strength: 4, quality: 1 });
+        blurFilter.repeatEdgePixels = true;
+        this.shadows.graphics.filters = [blurFilter];
+        break;
+      }
+      case GraphicsQuality.High: {
+        const blurFilter = new BlurFilter({ strength: 8, quality: 4 });
+        blurFilter.repeatEdgePixels = true;
+        this.shadows.graphics.filters = [blurFilter];
+        break;
+      }
+    }
+  }
 
   onRender() {
     const player = this.getPlayer();

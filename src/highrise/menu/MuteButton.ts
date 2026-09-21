@@ -5,11 +5,11 @@ import ClickableText from "./ClickableText";
 export default class MuteButton extends ClickableText {
   constructor() {
     super("Mute", () => {
-      this.game?.dispatch({ type: "toggleMute" });
+      this.game?.dispatch("toggleMute", undefined);
     });
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     this.updateText(getVolumeController(game).muted);
   }
 
@@ -17,9 +17,7 @@ export default class MuteButton extends ClickableText {
     this.sprite.text = muted ? "Unmute" : "Mute";
   }
 
-  handlers = {
-    muteChanged: ({ muted }: { muted: boolean }) => {
-      this.updateText(muted);
-    },
-  };
+  onMuteChanged({ muted }: { muted: boolean }) {
+    this.updateText(muted);
+  }
 }

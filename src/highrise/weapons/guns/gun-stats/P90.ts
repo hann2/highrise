@@ -1,11 +1,3 @@
-import snd_dryFire3 from "../../../../../resources/audio/guns/misc/dry-fire-3.mp3";
-import snd_magazineLoad1 from "../../../../../resources/audio/guns/misc/magazine-load-1.mp3";
-import snd_pistol2Shot1 from "../../../../../resources/audio/guns/pistol/pistol2-shot-1.mp3";
-import snd_ar15Reload1 from "../../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
-import snd_ar15ReloadEmpty from "../../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
-import img_pistolCasing from "../../../../../resources/images/shell-casings/pistol-casing.png";
-import img_p90Hold from "../../../../../resources/images/weapons/p90-hold.png";
-import img_p90Pickup from "../../../../../resources/images/weapons/p90-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
 import { NineMil } from "../BulletStats";
 import {
@@ -28,9 +20,9 @@ export const P90: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_p90Pickup,
-    holding: img_p90Hold,
-    shellCasing: img_pistolCasing,
+    pickup: "p90Pickup",
+    holding: "p90Hold",
+    shellCasing: "pistolCasing",
   },
   size: [1.0, 1.0],
 
@@ -47,9 +39,9 @@ export const P90: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [snd_pistol2Shot1],
-    empty: [snd_dryFire3],
-    pickup: [snd_magazineLoad1],
-    reload: [snd_ar15Reload1, snd_ar15ReloadEmpty],
+    shoot: ["pistol2Shot1"],
+    empty: ["dryFire3"],
+    pickup: ["magazineLoad1"],
+    reload: ["ar15Reload1", "ar15ReloadEmpty"],
   },
 };

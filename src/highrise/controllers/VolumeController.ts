@@ -38,8 +38,7 @@ export default class VolumeController extends BaseEntity implements Entity {
     if (this.game) {
       this.game!.masterGain.gain.value = muted ? 0 : this.volume;
       localStorage.setItem("muted", muted ? "true" : "false");
-      this.game!.dispatch({
-        type: "muteChanged",
+      this.game!.dispatch("muteChanged", {
         muted: this._muted,
         volume: this._volume,
       });
@@ -55,8 +54,7 @@ export default class VolumeController extends BaseEntity implements Entity {
       this._volume = clamp(value);
       localStorage.setItem("volume", String(value));
       if (this.game) {
-        this.game!.dispatch({
-          type: "volumeChanged",
+        this.game!.dispatch("volumeChanged", {
           muted: this._muted,
           volume: this._volume,
         });
@@ -64,27 +62,25 @@ export default class VolumeController extends BaseEntity implements Entity {
     }
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     const gain = this._muted ? 0 : this._volume;
     game.masterGain.gain.value = gain;
   }
 
-  handlers = {
-    mute: () => {
-      this.muted = true;
-    },
-    unMute: () => {
-      this.muted = false;
-    },
-    toggleMute: () => {
-      this.muted = !this._muted;
-    },
-    setVolume: ({ volume }: { volume: number }) => {
-      this.volume = volume;
-    },
-  };
+  onMute() {
+    this.muted = true;
+  }
+  onUnMute() {
+    this.muted = false;
+  }
+  onToggleMute() {
+    this.muted = !this._muted;
+  }
+  onSetVolume({ volume }: { volume: number }) {
+    this.volume = volume;
+  }
 
-  onKeyDown(key: KeyCode) {
+  onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyM") {
       this.muted = !this._muted;
     }

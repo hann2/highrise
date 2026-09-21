@@ -1,8 +1,9 @@
 import { Ray, RaycastResult } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { WithOwner } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { WithOwner } from "../../core/entity/WithOwner";
 import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
+import { CollisionGroups } from "../../config/CollisionGroups";
 
 const MAX_LIFESPAN = 3.0; // seconds
 

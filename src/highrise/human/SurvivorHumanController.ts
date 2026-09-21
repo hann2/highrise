@@ -39,8 +39,7 @@ export default class SurvivorHumanController
   }
 
   joinParty() {
-    this.game?.dispatch({
-      type: "addToParty",
+    this.game?.dispatch("addToParty", {
       human: this.human,
       survivorController: this,
     });

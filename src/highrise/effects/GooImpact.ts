@@ -1,12 +1,13 @@
 import { BLEND_MODES, Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import GooSplat from "./GooSplat";
 import { getBlobPair, getSplatSound } from "./Splat";
 
@@ -52,13 +53,13 @@ export default class GooImpact extends BaseEntity implements Entity {
       const [texture, glowTexture] = getBlobPair();
 
       const sprite = Sprite.from(texture);
-      sprite.blendMode = BLEND_MODES.ADD;
+      sprite.blendMode = "add";
       sprite.anchor.set(0.5, 0.5);
       sprite.rotation = rUniform(0, Math.PI * 2);
       sprite.addChild(sprite);
 
       const glowSprite = Sprite.from(glowTexture);
-      glowSprite.blendMode = BLEND_MODES.ADD;
+      glowSprite.blendMode = "add";
       glowSprite.anchor.set(0.5, 0.5);
       glowSprite.rotation = sprite.rotation;
       emissiveContainer.addChild(glowSprite);

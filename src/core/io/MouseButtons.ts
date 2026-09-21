@@ -1,3 +1,5 @@
-export const LEFT = 0;
-export const MIDDLE = 1;
-export const RIGHT = 2;
+export const MouseButtons = {
+  LEFT: 0,
+  MIDDLE: 1,
+  RIGHT: 2,
+} as const;

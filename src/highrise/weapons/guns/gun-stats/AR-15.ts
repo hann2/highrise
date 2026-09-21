@@ -1,13 +1,3 @@
-import snd_dryFire3 from "../../../../../resources/audio/guns/misc/dry-fire-3.mp3";
-import snd_magazineLoad1 from "../../../../../resources/audio/guns/misc/magazine-load-1.mp3";
-import snd_ar15Reload1 from "../../../../../resources/audio/guns/rifle/ar-15-reload-1.flac";
-import snd_ar15ReloadEmpty from "../../../../../resources/audio/guns/rifle/ar-15-reload-empty.flac";
-import snd_rifleShot1 from "../../../../../resources/audio/guns/rifle/rifle-shot-1.mp3";
-import snd_rifleShot2 from "../../../../../resources/audio/guns/rifle/rifle-shot-2.mp3";
-import snd_rifleShot3 from "../../../../../resources/audio/guns/rifle/rifle-shot-3.mp3";
-import img_rifleCasing from "../../../../../resources/images/shell-casings/rifle-casing.png";
-import img_ar15Pickup from "../../../../../resources/images/weapons/ar-15-pickup.png";
-import img_ar15Hold from "../../../../../resources/images/weapons/ar15-hold.png";
 import { degToRad } from "../../../../core/util/MathUtil";
 import { FiveFiveSix } from "../BulletStats";
 import {
@@ -30,9 +20,9 @@ export const AR15: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_ar15Pickup,
-    holding: img_ar15Hold,
-    shellCasing: img_rifleCasing,
+    pickup: "ar15Pickup",
+    holding: "ar15Hold",
+    shellCasing: "rifleCasing",
   },
   size: [0.8, 0.4],
 
@@ -49,9 +39,9 @@ export const AR15: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [snd_rifleShot1, snd_rifleShot2, snd_rifleShot3],
-    empty: [snd_dryFire3],
-    pickup: [snd_magazineLoad1],
-    reload: [snd_ar15Reload1, snd_ar15ReloadEmpty],
+    shoot: ["rifleShot1", "rifleShot2", "rifleShot3"],
+    empty: ["dryFire3"],
+    pickup: ["magazineLoad1"],
+    reload: ["ar15Reload1", "ar15ReloadEmpty"],
   },
 };

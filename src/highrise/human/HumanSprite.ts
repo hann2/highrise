@@ -136,7 +136,7 @@ export default class HumanSprite extends BodySprite {
     }
   }
 
-  async onGiveWeapon(weapon: Gun | MeleeWeapon) {
+  async handleNewWeapon(weapon: Gun | MeleeWeapon) {
     if (weapon instanceof Gun) {
       const { textures, muzzleLength } = weapon.stats;
       this.weaponSprite = Sprite.from(textures.holding);

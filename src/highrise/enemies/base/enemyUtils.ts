@@ -2,7 +2,7 @@ import { Body, Circle } from "p2";
 import Game from "../../../core/Game";
 import { angleDelta } from "../../../core/util/MathUtil";
 import { V2d } from "../../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
+import { CollisionGroups } from "../../../config/CollisionGroups";
 import Human, { isHuman } from "../../human/Human";
 
 export function makeSimpleEnemyBody(

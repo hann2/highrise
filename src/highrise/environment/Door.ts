@@ -1,17 +1,14 @@
 import { Body, Box, RevoluteConstraint } from "p2";
 import { Sprite } from "pixi.js";
-import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
-import img_door1 from "../../../resources/images/environment/doors/door-1.png";
-import img_door2 from "../../../resources/images/environment/doors/door-2.png";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { Layer } from "../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
 import DoorSpring from "../utils/DoorSpring";
@@ -21,7 +18,7 @@ import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
 
-export const DEFAULT_DOOR_SPRITES = [img_door1];
+export const DEFAULT_DOOR_SPRITES = ["door1"];
 
 export default class Door extends BaseEntity implements Entity, Hittable {
   tags: string[];
@@ -71,7 +68,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.addChild(new DoorFrame(hingePoint, restingAngle, length));
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     const constraint = new RevoluteConstraint(game.ground, this.body, {
       worldPivot: this.hingePoint,
     });
@@ -98,10 +95,10 @@ export default class Door extends BaseEntity implements Entity, Hittable {
       position.sub(this.body.position),
     );
 
-    this.game!.addEntities([
-      new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position),
+    this.game!.addEntities(
+      new PositionalSound(choose("wallHit1", "wallHit2"), position),
       new WallImpact(position, normal),
-    ]);
+    );
 
     return true;
   }

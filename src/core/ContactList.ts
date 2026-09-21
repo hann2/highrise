@@ -1,5 +1,5 @@
 import p2 from "p2";
-import { WithOwner } from "./entity/Entity";
+import { WithOwner } from "./entity/WithOwner";
 
 export interface ContactInfo {
   bodyA: p2.Body & WithOwner;
@@ -12,6 +12,11 @@ export interface ContactInfoWithEquations extends ContactInfo {
   contactEquations: p2.ContactEquation[];
 }
 
+/**
+ * Manages a list of active physics contacts between bodies and shapes.
+ * Tracks the beginning and end of collisions to maintain a current list
+ * of ongoing contacts for collision handling.
+ */
 export default class ContactList {
   private contacts: ContactInfoWithEquations[] = [];
 

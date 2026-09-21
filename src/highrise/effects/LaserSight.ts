@@ -1,12 +1,12 @@
 import { Ray, RaycastResult } from "p2";
 import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
-import img_impactParticle from "../../../resources/images/effects/impact-particle.png";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { Layer } from "../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 
 export class LaserSight extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite = new Graphics();
@@ -23,15 +23,15 @@ export class LaserSight extends BaseEntity implements Entity {
     super();
 
     this.sprite.layerName = Layer.EMISSIVES;
-    this.sprite.blendMode = BLEND_MODES.ADD;
+    this.sprite.blendMode = "add";
 
-    this.startDot = Sprite.from(img_impactParticle);
-    this.endDot = Sprite.from(img_impactParticle);
+    this.startDot = Sprite.from("impactParticle");
+    this.endDot = Sprite.from("impactParticle");
 
     for (const dot of [this.startDot, this.endDot]) {
       this.sprite.addChild(dot);
       dot.width = dot.height = 0.2;
-      dot.blendMode = BLEND_MODES.ADD;
+      dot.blendMode = "add";
       dot.tint = this.color;
       dot.alpha = 0.7;
       dot.anchor.set(0.5);
@@ -52,7 +52,6 @@ export class LaserSight extends BaseEntity implements Entity {
 
   onRender() {
     this.sprite.clear();
-    this.sprite.lineStyle(0.01, this.color, 0.2);
 
     const from = this.getEmitterPosition();
     const to = from.add(polarToVec(this.getAngle(), this.maxDistance));
@@ -77,7 +76,9 @@ export class LaserSight extends BaseEntity implements Entity {
       end[1] = to[1];
     }
 
-    this.sprite.moveTo(from[0], from[1]);
-    this.sprite.lineTo(end[0], end[1]);
+    this.sprite
+      .moveTo(from[0], from[1])
+      .lineTo(end[0], end[1])
+      .stroke({ width: 0.01, color: this.color, alpha: 0.2 });
   }
 }

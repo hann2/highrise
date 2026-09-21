@@ -1,11 +1,11 @@
 import { Body, Box } from "p2";
 import { Sprite } from "pixi.js";
-import img_stairs from "../../../resources/images/environment/stairs.png";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { V } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { Layer } from "../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import Interactable from "./Interactable";
 import { OverheadLight } from "./lighting/OverheadLight";
 import { getPartyLeader } from "./PartyManager";
@@ -25,7 +25,7 @@ export default class Exit extends BaseEntity implements Entity {
     const w = Math.abs(x2 - x1);
     const h = Math.abs(y2 - y1);
 
-    this.sprite = Sprite.from(img_stairs);
+    this.sprite = Sprite.from("stairs");
     this.sprite.layerName = Layer.DECORATIONS;
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(x1 + w / 2, y1 + h / 2);
@@ -48,9 +48,9 @@ export default class Exit extends BaseEntity implements Entity {
     this.addChild(new OverheadLight(position));
   }
 
-  onBeginContact(other: Entity) {
+  onBeginContact({ other }: { other?: Entity }) {
     if (other === getPartyLeader(this.game)) {
-      this.game!.dispatch({ type: "levelComplete" });
+      this.game!.dispatch("levelComplete", undefined);
     }
   }
 }

@@ -1,8 +1,8 @@
-import { Sprite } from "pixi.js";
-import img_necromancer from "../../../../resources/images/zombies/necromancer.png";
+import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../../core/entity/Entity";
-import { Layer } from "../../config/layers";
+import Entity from "../../../core/entity/Entity";
+import { GameSprite } from "../../../core/entity/GameSprite";
+import { Layer } from "../../../config/layers";
 import Necromancer, { NECROMANCER_RADIUS } from "./Necromancer";
 
 interface BodySprites {
@@ -13,23 +13,22 @@ interface BodySprites {
   winddown: Sprite;
 }
 export default class NecromancerSprite extends BaseEntity implements Entity {
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
 
   bodySprites: BodySprites;
 
   constructor(public necromancer: Necromancer) {
     super();
 
-    this.sprite = new Sprite();
+    this.sprite = new Container();
     this.sprite.layerName = Layer.WORLD;
-    this.sprite.anchor.set(0.5, 0.5);
 
     this.bodySprites = {
-      standing: Sprite.from(img_necromancer),
-      stunned: Sprite.from(img_necromancer),
-      walking: Sprite.from(img_necromancer),
-      windup: Sprite.from(img_necromancer),
-      winddown: Sprite.from(img_necromancer),
+      standing: Sprite.from("necromancer"),
+      stunned: Sprite.from("necromancer"),
+      walking: Sprite.from("necromancer"),
+      windup: Sprite.from("necromancer"),
+      winddown: Sprite.from("necromancer"),
     };
 
     for (const bodySprite of Object.values(this.bodySprites)) {

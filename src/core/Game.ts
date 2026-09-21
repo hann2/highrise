@@ -1,19 +1,25 @@
 import p2, { World } from "p2";
+import { DEFAULT_LAYER, LAYERS } from "../config/layers";
 import ContactList, {
   ContactInfo,
   ContactInfoWithEquations,
 } from "./ContactList";
-import Entity, { WithOwner } from "./entity/Entity";
 import EntityList from "./EntityList";
-import { GameRenderer2d } from "./graphics/GameRenderer2d";
+import { V } from "./Vector";
+import Entity, { GameEventMap } from "./entity/Entity";
+import { eventHandlerName } from "./entity/EventHandler";
+import { WithOwner } from "./entity/WithOwner";
+import {
+  GameRenderer2d,
+  GameRenderer2dOptions,
+} from "./graphics/GameRenderer2d";
 import { IOManager } from "./io/IO";
 import CustomWorld from "./physics/CustomWorld";
-import { clamp, lerp } from "./util/MathUtil";
+import { lerp } from "./util/MathUtil";
 
 interface GameOptions {
   audio?: AudioContext;
-  tickIterations?: number;
-  framerate?: number;
+  ticksPerSecond?: number;
   world?: World | CustomWorld;
 }
 
@@ -22,24 +28,30 @@ interface GameOptions {
  */
 export default class Game {
   /** Keeps track of entities in lots of useful ways */
-  entities: EntityList;
+  readonly entities: EntityList;
   /** Keeps track of entities that are ready to be removed */
-  entitiesToRemove: Set<Entity>;
-
-  renderer: GameRenderer2d;
-
+  readonly entitiesToRemove: Set<Entity>;
+  /** TODO: Document game.renderer */
+  readonly renderer: GameRenderer2d;
   /** Manages keyboard/mouse/gamepad state and events. */
-  io: IOManager;
+  private _io!: IOManager;
+  get io(): IOManager {
+    return this._io;
+  }
+  private set io(value: IOManager) {
+    this._io = value;
+  }
+
   /** The top level container for physics. */
-  world: p2.World;
+  readonly world: p2.World;
   /** Keep track of currently occuring collisions */
-  contactList: ContactList;
+  readonly contactList: ContactList;
   /** A static physics body positioned at [0,0] with no shapes. Useful for constraints/springs */
-  ground: p2.Body;
+  readonly ground: p2.Body;
   /** The audio context that is connected to the output */
-  audio: AudioContext;
+  readonly audio: AudioContext;
   /** Volume control for all sound output by the game. */
-  masterGain: GainNode;
+  readonly masterGain: GainNode;
   /** Readonly. Whether or not the game is paused */
   paused: boolean = false;
   /** Readonly. Number of frames that have gone by */
@@ -48,16 +60,25 @@ export default class Game {
   ticknumber: number = 0;
   /** The timestamp when the last frame started */
   lastFrameTime: number = window.performance.now();
-  /** Number of ticks that happen per frame */
-  tickIterations: number;
+  /** Number of ticks that happen per frame at regular speed */
+  readonly ticksPerSecond: number;
+  /** Number of seconds to simulate per tick */
+  readonly tickDuration: number;
 
   /** Total amount of game time that has elapsed */
   elapsedTime: number = 0;
-
+  /** Total amount of game time that has elapsed while not paused */
+  elapsedUnpausedTime: number = 0;
+  /** Keep track of how long each frame is taking on average */
   averageFrameDuration = 1 / 60;
 
+  /** TODO: Document game.camera */
   get camera() {
     return this.renderer.camera;
+  }
+
+  get averageDt() {
+    return this.slowMo / (this.averageFrameDuration * this.ticksPerSecond);
   }
 
   private _slowMo: number = 1.0;
@@ -69,27 +90,26 @@ export default class Game {
   set slowMo(value: number) {
     if (value != this._slowMo) {
       this._slowMo = value;
-      this.dispatch({ type: "slowMoChanged", slowMo: this._slowMo });
+      this.dispatch("slowMoChanged", { slowMo: this._slowMo });
     }
   }
 
   /**
    * Create a new Game.
+   * NOTE: You must call .init() before actually using the game.
    */
-  constructor({
-    audio,
-    tickIterations = 5,
-    framerate = 60,
-    world,
-  }: GameOptions) {
+  constructor({ audio, ticksPerSecond = 120, world }: GameOptions = {}) {
     this.entities = new EntityList();
     this.entitiesToRemove = new Set();
 
-    this.renderer = new GameRenderer2d(this.onResize.bind(this));
+    this.renderer = new GameRenderer2d(
+      LAYERS,
+      DEFAULT_LAYER,
+      this.onResize.bind(this),
+    );
 
-    this.io = new IOManager(this.renderer.pixiRenderer.view);
-
-    this.tickIterations = tickIterations;
+    this.ticksPerSecond = ticksPerSecond;
+    this.tickDuration = 1.0 / this.ticksPerSecond;
     // this.world = new World({ gravity: [0, 0] });
     this.world = world ?? new CustomWorld({ gravity: [0, 0] });
     this.world.on("beginContact", this.beginContact, null);
@@ -102,12 +122,18 @@ export default class Game {
     this.audio = audio ?? new AudioContext();
     this.masterGain = this.audio.createGain();
     this.masterGain.connect(this.audio.destination);
-
-    this.addEntity(this.renderer.camera);
   }
 
   /** Start the event loop for the game. */
-  start(): void {
+  async init({
+    rendererOptions = {},
+  }: {
+    rendererOptions?: GameRenderer2dOptions;
+  } = {}) {
+    await this.renderer.init(rendererOptions);
+    this.io = new IOManager(this.renderer.canvas);
+    this.addEntity(this.renderer.camera);
+
     window.requestAnimationFrame(() => this.loop(this.lastFrameTime));
   }
 
@@ -120,38 +146,40 @@ export default class Game {
     }
   }
 
+  /** TODO: Document onResize */
   onResize(size: [number, number]) {
-    for (const entity of this.entities.withOnResize) {
-      entity.onResize(size);
-    }
+    this.dispatch("resize", { size: V(size) });
   }
 
   /**
    * Pauses the game. This stops physics from running, calls onPause()
    * handlers, and stops updating `pausable` entities.
-   **/
+   */
   pause() {
     if (!this.paused) {
       this.paused = true;
-      for (const entity of this.entities.withOnPause) {
-        entity.onPause!();
-      }
+      this.dispatch("pause", undefined);
     }
   }
 
   /** Resumes the game and calls onUnpause() handlers. */
   unpause() {
     this.paused = false;
-    for (const entity of this.entities.withOnUnpause) {
-      entity.onUnpause!();
-    }
+    this.dispatch("unpause", undefined);
   }
 
-  /** Dispatch a custom event. */
-  dispatch<T extends { type: string }>(event: T) {
-    const type: string = event.type;
-    for (const entity of this.entities.getHandlers(type)) {
-      entity.handlers![type](event);
+  /** Dispatch an event. */
+  dispatch<EventName extends keyof GameEventMap>(
+    eventName: EventName,
+    data: GameEventMap[EventName],
+    respectPause = true,
+  ) {
+    const effectivelyPaused = respectPause && this.paused;
+    for (const entity of this.entities.getHandlers(eventName)) {
+      if (entity.game && !(effectivelyPaused && entity.pausable)) {
+        const functionName = eventHandlerName(eventName);
+        entity[functionName](data);
+      }
     }
   }
 
@@ -159,7 +187,12 @@ export default class Game {
   addEntity = <T extends Entity>(entity: T): T => {
     entity.game = this;
     if (entity.onAdd) {
-      entity.onAdd(this);
+      entity.onAdd({ game: this });
+    }
+
+    // If the entity was destroyed during it's onAdd, we shouldn't add it
+    if (!entity.game) {
+      return entity;
     }
 
     this.entities.add(entity);
@@ -198,7 +231,7 @@ export default class Game {
     }
 
     if (entity.onResize) {
-      entity.onResize(this.renderer.getSize());
+      entity.onResize({ size: this.renderer.getSize() });
     }
 
     if (entity.children) {
@@ -209,15 +242,15 @@ export default class Game {
       }
     }
 
-    if (entity.afterAdded) {
-      entity.afterAdded(this);
+    if (entity.onAfterAdded) {
+      entity.onAfterAdded({ game: this });
     }
 
     return entity;
   };
 
   /** Shortcut for adding multiple entities. */
-  addEntities<T extends readonly Entity[]>(entities: T): T {
+  addEntities<T extends readonly Entity[]>(...entities: T): T {
     for (const entity of entities) {
       this.addEntity(entity);
     }
@@ -239,7 +272,18 @@ export default class Game {
     return entity;
   }
 
-  /** Remove all non-persistent entities. I think this is kinda sketchy. */
+  /**
+   * Removes all non-persistent entities from the game scene.
+   * Only removes top-level entities (those without parents) to avoid double-cleanup.
+   *
+   * @param persistenceThreshold - Entities with persistence level <= this value will be removed (default: 0)
+   * @example
+   * // Remove all level-specific entities (Persistence.Level)
+   * game.clearScene();
+   *
+   * // Remove level and game-specific entities (Persistence.Level and Persistence.Game)
+   * game.clearScene(Persistence.Game);
+   */
   clearScene(persistenceThreshold = 0) {
     for (const entity of this.entities) {
       if (
@@ -253,6 +297,7 @@ export default class Game {
     }
   }
 
+  private timeToSimulate = 0.0;
   private iterationsRemaining = 0.0;
   /** The main event loop. Run one frame of the game.  */
   private loop(time: number): void {
@@ -262,6 +307,7 @@ export default class Game {
     const lastFrameDuration = (time - this.lastFrameTime) / 1000;
     this.lastFrameTime = time;
 
+    // TODO: This honestly doesn't work great
     // Keep a rolling average
     if (0 < lastFrameDuration && lastFrameDuration < 0.3) {
       // Ignore weird durations because they're probably flukes from the user
@@ -273,24 +319,38 @@ export default class Game {
       );
     }
 
-    const renderDt = this.averageFrameDuration;
+    const renderDt = 1.0 / this.getScreenFps();
     this.elapsedTime += renderDt;
+    if (!this.paused) {
+      this.elapsedUnpausedTime += renderDt;
+    }
 
-    const tickDt = (renderDt / this.tickIterations) * this.slowMo;
-    this.iterationsRemaining += this.tickIterations;
-    for (; this.iterationsRemaining > 1.0; this.iterationsRemaining--) {
-      this.tick(tickDt);
+    this.slowTick(renderDt * this.slowMo);
+
+    this.timeToSimulate += renderDt * this.slowMo;
+    while (this.timeToSimulate >= this.tickDuration) {
+      this.timeToSimulate -= this.tickDuration;
+      this.tick(this.tickDuration);
       if (!this.paused) {
-        this.world.step(tickDt / 2);
-        this.cleanupEntities();
-        this.world.step(tickDt / 2);
+        const stepDt = this.tickDuration;
+        this.world.step(stepDt);
         this.cleanupEntities();
         this.contacts();
       }
     }
+
     this.afterPhysics();
 
     this.render(renderDt);
+  }
+
+  /**
+   * Calculates and returns the current screen frames per second based on average frame duration.
+   * @returns The current FPS rounded to the nearest integer
+   */
+  getScreenFps(): number {
+    const duration = this.averageFrameDuration;
+    return Math.round(1.0 / duration);
   }
 
   /** Actually remove all the entities slated for removal from the game. */
@@ -327,59 +387,43 @@ export default class Game {
 
     if (entity.sprite) {
       this.renderer.removeSprite(entity.sprite);
+      entity.sprite.destroy({ children: true });
     }
     if (entity.sprites) {
       for (const sprite of entity.sprites) {
         this.renderer.removeSprite(sprite);
+        sprite.destroy({ children: true });
       }
     }
 
     if (entity.onDestroy) {
-      entity.onDestroy(this);
+      entity.onDestroy({ game: this });
     }
   }
 
   /** Called before physics. */
   private tick(dt: number) {
     this.ticknumber += 1;
-    for (const entity of this.entities.withBeforeTick) {
-      if (entity.game && !(this.paused && entity.pausable)) {
-        entity.beforeTick();
-      }
-    }
-    for (const entity of this.entities.withOnTick) {
-      if (entity.game && !(this.paused && entity.pausable)) {
-        entity.onTick(dt);
-      }
-    }
+    this.dispatch("beforeTick", dt);
+    this.dispatch("tick", dt);
+  }
+
+  /** Called before normal ticks */
+  private slowTick(dt: number) {
+    this.dispatch("slowTick", dt);
   }
 
   /** Called after physics. */
   private afterPhysics() {
     this.cleanupEntities();
-    for (const entity of this.entities.withAfterPhysics) {
-      if (entity.game && !(this.paused && entity.pausable)) {
-        entity.afterPhysics();
-      }
-    }
+    this.dispatch("afterPhysics", undefined);
   }
 
   /** Called before actually rendering. */
   private render(dt: number) {
     this.cleanupEntities();
-    for (const entity of this.entities.withOnRender) {
-      if (entity.game) {
-        entity.onRender(dt);
-      } else {
-        console.warn(`entity doesn't have game`);
-      }
-    }
-    for (const entity of this.entities.withOnLateRender) {
-      if (entity.game) {
-        entity.onLateRender(dt);
-      }
-    }
-    // this.renderer2d?.render();
+    this.dispatch("render", dt);
+    this.dispatch("lateRender", dt);
     this.renderer.render();
   }
 
@@ -394,10 +438,20 @@ export default class Game {
     // If either owner has been removed from the game, we shouldn't do the contact
     if (!(ownerA && !ownerA.game) || (ownerB && !ownerB.game)) {
       if (ownerA?.onBeginContact) {
-        ownerA.onBeginContact(ownerB, shapeA, shapeB, contactEquations);
+        ownerA.onBeginContact({
+          other: ownerB,
+          thisShape: shapeA,
+          otherShape: shapeB,
+          contactEquations,
+        });
       }
       if (ownerB?.onBeginContact) {
-        ownerB.onBeginContact(ownerA, shapeB, shapeA, contactEquations);
+        ownerB.onBeginContact({
+          other: ownerA,
+          thisShape: shapeB,
+          otherShape: shapeA,
+          contactEquations,
+        });
       }
     }
   };
@@ -413,10 +467,18 @@ export default class Game {
     // If either owner has been removed from the game, we shouldn't do the contact
     if (!(ownerA && !ownerA.game) || (ownerB && !ownerB.game)) {
       if (ownerA?.onEndContact) {
-        ownerA.onEndContact(ownerB, shapeA, shapeB);
+        ownerA.onEndContact({
+          other: ownerB,
+          thisShape: shapeA,
+          otherShape: shapeB,
+        });
       }
       if (ownerB?.onEndContact) {
-        ownerB.onEndContact(ownerA, shapeB, shapeA);
+        ownerB.onEndContact({
+          other: ownerA,
+          thisShape: shapeB,
+          otherShape: shapeA,
+        });
       }
     }
   };
@@ -427,10 +489,20 @@ export default class Game {
       const ownerA = shapeA.owner || bodyA.owner;
       const ownerB = shapeB.owner || bodyB.owner;
       if (ownerA?.onContacting) {
-        ownerA.onContacting(ownerB, shapeA, shapeB, contactEquations);
+        ownerA.onContacting({
+          other: ownerB,
+          otherShape: shapeB,
+          thisShape: shapeA,
+          contactEquations,
+        });
       }
       if (ownerB?.onContacting) {
-        ownerB.onContacting(ownerA, shapeB, shapeA, contactEquations);
+        ownerB.onContacting({
+          other: ownerA,
+          otherShape: shapeA,
+          thisShape: shapeB,
+          contactEquations,
+        });
       }
     }
   }
@@ -446,10 +518,10 @@ export default class Game {
     // If either owner has been removed from the game, we shouldn't do the contact
     if (!(ownerA && !ownerA.game) || (ownerB && !ownerB.game)) {
       if (ownerA?.onImpact) {
-        ownerA.onImpact(ownerB);
+        ownerA.onImpact({ other: ownerB });
       }
       if (ownerB?.onImpact) {
-        ownerB.onImpact(ownerA);
+        ownerB.onImpact({ other: ownerA });
       }
     }
   };

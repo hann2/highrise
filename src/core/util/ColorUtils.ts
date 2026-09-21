@@ -66,13 +66,13 @@ export function colorLerp(from: number, to: number, percentTo: number): number {
   const rgbFrom = hexToRgb(from);
   const rgbTo = hexToRgb(to);
 
-  rgbFrom.r = Math.floor(rgbFrom.r * (1.0 - percentTo));
-  rgbFrom.g = Math.floor(rgbFrom.g * (1.0 - percentTo));
-  rgbFrom.b = Math.floor(rgbFrom.b * (1.0 - percentTo));
+  rgbFrom.r = Math.round(rgbFrom.r * (1.0 - percentTo));
+  rgbFrom.g = Math.round(rgbFrom.g * (1.0 - percentTo));
+  rgbFrom.b = Math.round(rgbFrom.b * (1.0 - percentTo));
 
-  rgbTo.r = Math.floor(rgbTo.r * percentTo);
-  rgbTo.g = Math.floor(rgbTo.g * percentTo);
-  rgbTo.b = Math.floor(rgbTo.b * percentTo);
+  rgbTo.r = Math.round(rgbTo.r * percentTo);
+  rgbTo.g = Math.round(rgbTo.g * percentTo);
+  rgbTo.b = Math.round(rgbTo.b * percentTo);
 
   return rgbToHex(rgbFrom) + rgbToHex(rgbTo);
 }

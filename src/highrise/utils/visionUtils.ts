@@ -2,7 +2,7 @@ import { Ray, RaycastResult } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Game from "../../core/Game";
 import CustomWorld from "../../core/physics/CustomWorld";
-import { CollisionGroups } from "../config/CollisionGroups";
+import { CollisionGroups } from "../../config/CollisionGroups";
 import { BaseEnemy, isEnemy } from "../enemies/base/Enemy";
 import Human from "../human/Human";
 

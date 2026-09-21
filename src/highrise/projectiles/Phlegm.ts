@@ -1,11 +1,12 @@
 import { BLEND_MODES, Sprite } from "pixi.js";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rSign, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { Layer } from "../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import GooImpact from "../effects/GooImpact";
 import GooSplat from "../effects/GooSplat";
 import { getBlobPair, getSplatSound } from "../effects/Splat";
@@ -52,7 +53,7 @@ export default class Phlegm extends Projectile implements Entity {
     (this.mainSprite as GameSprite).layerName = Layer.WEAPONS;
 
     this.glowSprite = Sprite.from(glowTexture);
-    this.glowSprite.blendMode = BLEND_MODES.ADD;
+    this.glowSprite.blendMode = "add";
     this.glowSprite.anchor.set(0.5);
     this.glowSprite.scale.set(scale);
     this.glowSprite.tint = color;

@@ -1,10 +1,13 @@
-import { Graphics, Sprite, Text } from "pixi.js";
+import { Container, Graphics, Sprite, Text } from "pixi.js";
+import { fontName } from "../../core/resources/resourceUtils";
+import { V2d } from "../../core/Vector";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 import ClickableText from "./ClickableText";
 import FeedbackButton from "./FeedbackButton";
@@ -15,7 +18,7 @@ import MuteButton from "./MuteButton";
 export default class PauseMenu extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
   pausable = false;
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
   feedbackButton: FeedbackButton;
   pausedText: Text;
   mainMenuButton: ClickableText;
@@ -26,31 +29,35 @@ export default class PauseMenu extends BaseEntity implements Entity {
   constructor() {
     super();
 
-    this.sprite = new Sprite();
+    this.sprite = new Container();
     this.sprite.layerName = Layer.MENU;
     this.sprite.visible = false;
 
     const background = new Graphics();
-    background.beginFill(0x111111, 0.5);
-    background.drawRect(0, 0, 10000, 10000);
-    background.endFill();
+    background.rect(0, 0, 10000, 10000).fill({ color: 0x111111, alpha: 0.5 });
     this.sprite.addChild(background);
 
-    this.pausedText = new Text("PAUSED", {
-      fontSize: 96,
-      fontFamily: "Capture It",
-      fill: "red",
-      align: "center",
+    this.pausedText = new Text({
+      text: "PAUSED",
+      style: {
+        fontSize: 96,
+        fontFamily: fontName("captureIt"),
+        fill: "red",
+        align: "center",
+      },
     });
     this.pausedText.anchor.set(0.5, 1);
     this.sprite.addChild(this.pausedText);
 
-    this.resumeText = new Text("", {
-      fontSize: 48,
+    this.resumeText = new Text({
+      text: "",
+      style: {
+        fontSize: 48,
 
-      fontFamily: "Capture It",
-      fill: "white",
-      align: "center",
+        fontFamily: fontName("captureIt"),
+        fill: "white",
+        align: "center",
+      },
     });
     this.resumeText.anchor.set(0.5, 0);
     this.sprite.addChild(this.resumeText);
@@ -58,7 +65,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
     this.mainMenuButton = this.addChild(
       new ClickableText("Main Menu", () => {
         this.game?.unpause();
-        this.game?.dispatch({ type: "gameOver" });
+        this.game?.dispatch("gameOver", { victory: false });
         this.destroy();
       }),
     );
@@ -70,16 +77,16 @@ export default class PauseMenu extends BaseEntity implements Entity {
     this.graphicsButton = this.addChild(new GraphicsButton());
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     this.setVisibility(game.paused);
   }
 
-  onInputDeviceChange(usingGamepad: boolean) {
+  onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     const buttonName = usingGamepad ? "START" : "P";
     this.resumeText.text = `Press ${buttonName} to resume`;
   }
 
-  onResize([width, height]: [number, number]) {
+  onResize({ size: [width, height] }: { size: V2d }) {
     this.pausedText.position.set(width / 2, height / 2);
     this.resumeText.position.set(width / 2, height / 2);
 
@@ -111,13 +118,13 @@ export default class PauseMenu extends BaseEntity implements Entity {
     this.setVisibility(false);
   }
 
-  onKeyDown(key: KeyCode) {
+  onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyP") {
       this.game?.togglePause();
     }
   }
 
-  onButtonDown(button: ControllerButton) {
+  onButtonDown({ button }: { button: ControllerButton }) {
     if (button === ControllerButton.START) {
       this.game?.togglePause();
     }

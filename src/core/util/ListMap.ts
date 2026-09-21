@@ -1,7 +1,8 @@
 /**
- * A map of lists. Automatically creates and removes
+ * A map of lists. Automatically creates and removes lists as needed.
+ * TODO: Consider using a Set instead of an Array for the values.
  */
-export default class ListMap<K, V> {
+export default class MultiMap<K, V> {
   private map: Map<K, V[]>;
 
   constructor() {
@@ -18,6 +19,10 @@ export default class ListMap<K, V> {
 
   get(key: K): ReadonlyArray<V> {
     return this.map.get(key) ?? [];
+  }
+
+  has(key: K, value: V): boolean {
+    return this.map.has(key) && this.map.get(key)!.includes(value);
   }
 
   remove(key: K, value: V): void {

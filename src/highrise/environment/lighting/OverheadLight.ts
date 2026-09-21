@@ -1,4 +1,3 @@
-import snd_lightPowerOn1 from "../../../../resources/audio/environment/light-power-on-1.wav";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
@@ -11,6 +10,8 @@ import {
 // This is basically a wrapper around point light, but it lets us select by
 // this type of light and do things with them in the future (e.g. power flicker, power surge)
 export class OverheadLight extends BaseEntity implements Entity {
+  private isOn: boolean = false;
+
   constructor(
     public position: V2d,
     public options: PointLightOptions = {},
@@ -20,29 +21,30 @@ export class OverheadLight extends BaseEntity implements Entity {
 
     if (startsOn) {
       this.addLight();
-    } else {
-      this.handlers = {
-        lightsOn: ({ position: lightPosition }) =>
-          this.onLightSwitchEvent(lightPosition),
-      };
     }
   }
 
-  onLightSwitchEvent(lightPosition: V2d) {
+  /** A light switch somewhere got flipped */
+  onLightsOn({ position: lightPosition }: { position: V2d }) {
+    if (this.isOn) {
+      return;
+    }
     const delta = lightPosition.sub(this.position);
     const infiniteNorm = Math.max(Math.abs(delta.x), Math.abs(delta.y));
     const delayTime = infiniteNorm * 0.4;
     this.wait(delayTime).then(() => this.turnLightOn());
+    this.isOn = true;
   }
 
   turnLightOn() {
     this.addLight();
     this.addChild(
-      new PositionalSound(snd_lightPowerOn1, this.position, { gain: 0.1 }),
+      new PositionalSound("lightPowerOn1", this.position, { gain: 0.1 }),
     );
   }
 
   addLight() {
+    this.isOn = true;
     this.addChild(
       new PointLight({
         position: this.position,

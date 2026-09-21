@@ -1,10 +1,10 @@
-import IOEventHandler from "../entity/IOEventHandler";
+import IOEventHandler from "../entity/IoEvents";
 import { clamp, clampUp } from "../util/MathUtil";
 import { V, V2d } from "../Vector";
 import { ControllerAxis, ControllerButton } from "./Gamepad";
 import IOHandlerList from "./IOHandlerList";
 import { KeyCode } from "./Keys";
-import * as MouseButtons from "./MouseButtons";
+import { MouseButtons } from "./MouseButtons";
 
 const GAMEPAD_POLLING_FREQUENCY = 250; // Hz
 
@@ -40,11 +40,11 @@ export class IOManager {
     };
     document.onkeyup = (e) => this.onKeyUp(e);
 
-    document.onvisibilitychange = (e) => {
+    document.onvisibilitychange = (event) => {
       for (const keyCode of this.keys.keys()) {
         this.keys.set(keyCode, false);
         for (const handler of this.handlers.filtered.onKeyUp) {
-          handler.onKeyUp(keyCode);
+          handler.onKeyUp({ key: keyCode });
         }
       }
     };
@@ -72,12 +72,8 @@ export class IOManager {
   }
 
   // True if the given key is currently pressed down
-  keyIsDown(key: KeyCode): boolean {
+  isKeyDown(key: KeyCode): boolean {
     return Boolean(this.keys.get(key));
-  }
-
-  anyKeyIsDown(keys: readonly KeyCode[]) {
-    return keys.some((key) => this.keyIsDown(key));
   }
 
   // Fire events for gamepad button presses.
@@ -86,15 +82,15 @@ export class IOManager {
     if (gamepad) {
       const buttons = gamepad.buttons.map((button) => button.pressed);
 
-      for (const [buttonIndex, button] of buttons.entries()) {
-        if (button && !this.lastButtons[buttonIndex]) {
+      for (const [button, isDown] of buttons.entries()) {
+        if (isDown && !this.lastButtons[button]) {
           this.setUsingGamepad(true);
           for (const handler of this.handlers.filtered.onButtonDown) {
-            handler.onButtonDown(buttonIndex);
+            handler.onButtonDown({ button });
           }
-        } else if (!button && this.lastButtons[buttonIndex]) {
+        } else if (!isDown && this.lastButtons[button]) {
           for (const handler of this.handlers.filtered.onButtonUp) {
-            handler.onButtonUp(buttonIndex);
+            handler.onButtonUp({ button });
           }
         }
       }
@@ -108,7 +104,7 @@ export class IOManager {
     if (this.usingGamepad != value) {
       this.usingGamepad = value;
       for (const handler of this.handlers.filtered.onInputDeviceChange) {
-        handler.onInputDeviceChange(this.usingGamepad);
+        handler.onInputDeviceChange({ usingGamepad: this.usingGamepad });
       }
     }
   }
@@ -116,7 +112,7 @@ export class IOManager {
   addHandler(handler: IOEventHandler): void {
     this.handlers.add(handler);
     if (handler.onInputDeviceChange) {
-      handler.onInputDeviceChange(this.usingGamepad);
+      handler.onInputDeviceChange({ usingGamepad: this.usingGamepad });
     }
   }
 
@@ -205,7 +201,7 @@ export class IOManager {
     this.keys.set(code, true);
     if (!wasPressed) {
       for (const handler of this.handlers.filtered.onKeyDown) {
-        handler.onKeyDown(code, event);
+        handler.onKeyDown({ key: code, event });
       }
     }
     if (this.shouldPreventDefault(event)) {
@@ -219,7 +215,7 @@ export class IOManager {
     const code = event.code as KeyCode;
     this.keys.set(code, false);
     for (const handler of this.handlers.filtered.onKeyUp) {
-      handler.onKeyUp(code, event);
+      handler.onKeyUp({ key: code, event });
     }
     if (this.shouldPreventDefault(event)) {
       event.preventDefault();
@@ -227,7 +223,10 @@ export class IOManager {
     }
   }
 
-  // Return the value of a gamepad axis.
+  /**
+   * Gets the current value of a gamepad axis (stick position).
+   * @returns Axis value normalized to range [-1, 1], or 0 if no gamepad connected
+   */
   getAxis(axis: ControllerAxis): number {
     switch (axis) {
       case ControllerAxis.LEFT_X:
@@ -268,5 +267,36 @@ export class IOManager {
   getButton(button: ControllerButton): number {
     const gamepad = navigator.getGamepads()[0];
     return gamepad?.buttons[button]?.value ?? 0;
+  }
+
+  /**
+   * Gets standardized movement input from WASD keys, arrow keys, or gamepad left stick.
+   * Combines keyboard and gamepad input with proper priority handling.
+   * @returns Movement vector with components clamped to [-1, 1] range
+   */
+  getMovementVector(): V2d {
+    const result = V(0, 0);
+
+    if (this.usingGamepad) {
+      result.iadd(this.getStick("left"));
+    }
+
+    if (this.isKeyDown("KeyW") || this.isKeyDown("ArrowUp")) {
+      result[1] -= 1;
+    }
+    if (this.isKeyDown("KeyD") || this.isKeyDown("ArrowRight")) {
+      result[0] += 1;
+    }
+    if (this.isKeyDown("KeyS") || this.isKeyDown("ArrowDown")) {
+      result[1] += 1;
+    }
+    if (this.isKeyDown("KeyA") || this.isKeyDown("ArrowLeft")) {
+      result[0] -= 1;
+    }
+
+    result[0] = clamp(result[0], -1, 1);
+    result[1] = clamp(result[1], -1, 1);
+
+    return result;
   }
 }

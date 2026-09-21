@@ -53,8 +53,8 @@ export default class Necromancer extends BaseEnemy {
     return body;
   }
 
-  onAdd(game: Game) {
-    super.onAdd(game);
+  onAdd({ game }: { game: Game }) {
+    super.onAdd({ game });
 
     this.aimSpring.stiffness = 50;
     this.aimSpring.damping = 5;
@@ -174,7 +174,7 @@ export default class Necromancer extends BaseEnemy {
             (position) => new ZombieEgg(this.getPosition(), position, "zombie"),
           );
 
-        this.game!.addEntities(eggs);
+        this.game!.addEntities(...eggs);
       },
     }),
 
@@ -201,7 +201,7 @@ export default class Necromancer extends BaseEnemy {
             (target) => new ZombieEgg(this.getPosition(), target, "crawler"),
           );
 
-        this.game!.addEntities(eggs);
+        this.game!.addEntities(...eggs);
       },
     }),
   };

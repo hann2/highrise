@@ -1,11 +1,3 @@
-import snd_shotgunCasingDrop1 from "../../../../../resources/audio/guns/casing-drops/shotgun-casing-drop-1.mp3";
-import snd_dryFire1 from "../../../../../resources/audio/guns/misc/dry-fire-1.mp3";
-import snd_shotgunLoadShell2 from "../../../../../resources/audio/guns/shotgun/shotgun-load-shell-2.flac";
-import snd_shotgunPump1 from "../../../../../resources/audio/guns/shotgun/shotgun-pump-1.mp3";
-import snd_shotgunShot1 from "../../../../../resources/audio/guns/shotgun/shotgun-shot-1.mp3";
-import img_shotgunCasing from "../../../../../resources/images/shell-casings/shotgun-casing.png";
-import img_doubleBarrelShotgunHold from "../../../../../resources/images/weapons/double-barrel-shotgun-hold.png";
-import img_doubleBarrelShotgunPickup from "../../../../../resources/images/weapons/double-barrel-shotgun-pickup.png";
 import { degToRad } from "../../../../core/util/MathUtil";
 import { TwelveGuageBuckshot } from "../BulletStats";
 import {
@@ -31,9 +23,9 @@ export const DoubleBarrelShotgun: GunStats = {
 
   textures: {
     ...defaultGunStats.textures,
-    pickup: img_doubleBarrelShotgunPickup,
-    holding: img_doubleBarrelShotgunHold,
-    shellCasing: img_shotgunCasing,
+    pickup: "doubleBarrelShotgunPickup",
+    holding: "doubleBarrelShotgunHold",
+    shellCasing: "shotgunCasing",
   },
   size: [1.1, 1.1],
 
@@ -48,9 +40,9 @@ export const DoubleBarrelShotgun: GunStats = {
 
   sounds: {
     ...defaultGunStats.sounds,
-    shoot: [snd_shotgunShot1],
-    empty: [snd_dryFire1],
-    pickup: [snd_shotgunPump1],
-    reload: [snd_shotgunLoadShell2],
+    shoot: ["shotgunShot1"],
+    empty: ["dryFire1"],
+    pickup: ["shotgunPump1"],
+    reload: ["shotgunLoadShell2"],
   },
 };

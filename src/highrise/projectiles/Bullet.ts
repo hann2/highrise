@@ -1,9 +1,10 @@
 import { Graphics } from "pixi.js";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { Layer } from "../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import { isHittable } from "../environment/Hittable";
 import Human from "../human/Human";
 import Light from "../lighting-and-vision/Light";
@@ -68,15 +69,15 @@ export default class Bullet extends Projectile implements Entity {
 
     this.sprite
       .clear()
-      .lineStyle(0.03, this.stats.color, 0.6)
       .moveTo(0, 0)
-      .lineTo(endPoint[0], endPoint[1]);
+      .lineTo(endPoint[0], endPoint[1])
+      .stroke({ width: 0.03, color: this.stats.color, alpha: 0.6 });
 
     this.lightGraphics
       .clear()
-      .lineStyle(0.2, this.stats.color, 1.0)
       .moveTo(0, 0)
-      .lineTo(endPoint[0], endPoint[1]);
+      .lineTo(endPoint[0], endPoint[1])
+      .stroke({ width: 0.2, color: this.stats.color, alpha: 1.0 });
 
     this.sprite.position.set(...this.renderPosition);
     this.light.lightSprite.position.set(...this.renderPosition);

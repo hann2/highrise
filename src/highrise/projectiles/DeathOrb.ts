@@ -1,12 +1,14 @@
 import { Ray, RaycastResult } from "p2";
 import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite, WithOwner } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
+import { WithOwner } from "../../core/entity/WithOwner";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { getBlobPair } from "../effects/Splat";
-import { Layer } from "../config/layers";
-import { CollisionGroups } from "../config/CollisionGroups";
+import { Layer } from "../../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
 import Human from "../human/Human";
 import Spitter from "../enemies/spitter/Spitter";
 
@@ -52,7 +54,7 @@ export default class DeathOrb extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.WEAPONS;
     const glow = Sprite.from(glowTexture);
     glow.tint = 0xff3333;
-    glow.blendMode = BLEND_MODES.ADD;
+    glow.blendMode = "add";
     glow.alpha = 0.3;
     this.sprite.addChild(glow);
 

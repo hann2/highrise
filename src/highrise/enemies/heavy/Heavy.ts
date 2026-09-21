@@ -35,8 +35,8 @@ export default class Heavy extends BaseEnemy {
     this.addChild(new HeavySprite(this));
   }
 
-  onAdd(game: Game) {
-    super.onAdd(game);
+  onAdd({ game }: { game: Game }) {
+    super.onAdd({ game });
     this.aimSpring.stiffness = 30;
     this.aimSpring.damping = 10;
   }

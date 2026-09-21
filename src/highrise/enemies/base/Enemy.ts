@@ -1,9 +1,6 @@
 import { Body } from "p2";
-import snd_fleshHit1 from "../../../../resources/audio/impacts/flesh-hit-1.flac";
-import snd_fleshHit2 from "../../../../resources/audio/impacts/flesh-hit-2.flac";
-import snd_fleshHit3 from "../../../../resources/audio/impacts/flesh-hit-3.flac";
 import type Entity from "../../../core/entity/Entity";
-import type { WithOwner } from "../../../core/entity/Entity";
+import type { WithOwner } from "../../../core/entity/WithOwner";
 import Game from "../../../core/Game";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { clamp, normalizeAngle } from "../../../core/util/MathUtil";
@@ -77,7 +74,7 @@ export class BaseEnemy extends Creature implements Hittable {
     this.walkSpring = this.addChild(new WalkSpring(this.body));
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     this.voice = this.addChild(this.makeVoice());
     this.aimSpring = new AimSpring(game.ground, this.body);
     this.springs = [this.aimSpring];
@@ -127,7 +124,7 @@ export class BaseEnemy extends Creature implements Hittable {
 
     this.game?.addEntity(
       new PositionalSound(
-        choose(snd_fleshHit1, snd_fleshHit2, snd_fleshHit3),
+        choose("fleshHit1", "fleshHit2", "fleshHit3"),
         position,
       ),
     );
@@ -195,7 +192,7 @@ export class BaseEnemy extends Creature implements Hittable {
   }
 
   die(killer?: Human) {
-    this.game?.dispatch({ type: "zombieDied", zombie: this, killer });
+    this.game?.dispatch("zombieDied", { zombie: this, killer });
     this.onDie();
     this.destroy();
   }

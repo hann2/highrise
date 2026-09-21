@@ -1,9 +1,11 @@
-import { Sprite, Text } from "pixi.js";
+import { Container, Sprite, Text } from "pixi.js";
+import { fontName } from "../../core/resources/resourceUtils";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { CREDITS_TEXT } from "./Credits";
 import MainMenu from "./MainMenu";
 
@@ -13,12 +15,12 @@ const LABEL_SIZE = 14;
 const HEADING_SIZE = 32;
 const LINE_SPACING = 8;
 export default class CreditsScreen extends BaseEntity implements Entity {
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
 
   constructor() {
     super();
 
-    this.sprite = new Sprite();
+    this.sprite = new Container();
     this.sprite.layerName = Layer.MENU;
 
     const lines = CREDITS_TEXT.split("\n");
@@ -32,19 +34,25 @@ export default class CreditsScreen extends BaseEntity implements Entity {
       const parts = line.split("—");
 
       if (parts.length == 2) {
-        const leftTextSprite = new Text(parts[0], {
-          fontSize: LABEL_SIZE,
-          fontFamily: "Comfortaa",
-          fill: "white",
-          align: "right",
-          fontWeight: isHeading ? "700" : "300",
+        const leftTextSprite = new Text({
+          text: parts[0],
+          style: {
+            fontSize: LABEL_SIZE,
+            fontFamily: fontName("comfortaa"),
+            fill: "white",
+            align: "right",
+            fontWeight: isHeading ? "700" : "300",
+          },
         });
-        const rightTextSprite = new Text(parts[1], {
-          fontSize: NAME_SIZE,
-          fontFamily: "Comfortaa",
-          fill: "white",
-          align: "left",
-          fontWeight: isHeading ? "700" : "300",
+        const rightTextSprite = new Text({
+          text: parts[1],
+          style: {
+            fontSize: NAME_SIZE,
+            fontFamily: fontName("comfortaa"),
+            fill: "white",
+            align: "left",
+            fontWeight: isHeading ? "700" : "300",
+          },
         });
         leftTextSprite.y = nextHeight;
         rightTextSprite.y = nextHeight;
@@ -57,12 +65,15 @@ export default class CreditsScreen extends BaseEntity implements Entity {
         this.sprite.addChild(rightTextSprite);
       } else if (parts.length == 1) {
         const fontSize = isHeading ? HEADING_SIZE : NAME_SIZE;
-        const textSprite = new Text(line, {
-          fontSize,
-          fontFamily: "Comfortaa",
-          fill: "white",
-          align: "center",
-          fontWeight: isHeading ? "700" : "300",
+        const textSprite = new Text({
+          text: line,
+          style: {
+            fontSize,
+            fontFamily: fontName("comfortaa"),
+            fill: "white",
+            align: "center",
+            fontWeight: isHeading ? "700" : "300",
+          },
         });
         textSprite.y = nextHeight;
         nextHeight += fontSize + LINE_SPACING;
@@ -72,7 +83,7 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     }
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     this.sprite.y = game.renderer.getHeight();
   }
 
@@ -80,7 +91,7 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     this.sprite.x = this.game!.renderer.getWidth() / 2;
   }
 
-  onKeyDown(key: KeyCode) {
+  onKeyDown({ key }: { key: KeyCode }) {
     switch (key) {
       case "Escape":
         this.backToMenu();
@@ -94,7 +105,7 @@ export default class CreditsScreen extends BaseEntity implements Entity {
 
   onRender() {
     let speed = SCROLL_SPEED;
-    if (this.game!.io.keyIsDown("Space")) {
+    if (this.game!.io.isKeyDown("Space")) {
       speed *= 10;
     }
     this.sprite!.y -= speed;

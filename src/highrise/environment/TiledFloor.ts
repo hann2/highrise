@@ -1,9 +1,9 @@
-import { CompositeRectTileLayer } from "pixi-tilemap";
+import { CompositeTilemap } from "@pixi/tilemap";
 import { Texture } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { V, V2d } from "../../core/Vector";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { DecorationInfo } from "./decorations/DecorationInfo";
 
 export type Tiles = ((DecorationInfo & {}) | undefined)[][];
@@ -14,9 +14,8 @@ export default class TiledFloor extends BaseEntity implements Entity {
 
     const exampleTile: DecorationInfo = this.getExampleTile(tiles);
     const scale = tileDimensions.x / exampleTile.sheetInfo!.dimensions.x;
-    const tileLayer = new CompositeRectTileLayer(0, [
-      Texture.from(exampleTile.imageName, {}),
-    ]);
+    const texture = Texture.from(exampleTile.imageName);
+    const tileLayer = new CompositeTilemap([texture.source]);
     tileLayer.scale.set(scale, scale);
 
     const [tileW, tileH] = tileDimensions;
@@ -35,15 +34,12 @@ export default class TiledFloor extends BaseEntity implements Entity {
           // Have to reverse the scale from above for these positions
           .mul(1 / scale);
 
-        tileLayer.addRect(
-          0,
-          offset.x,
-          offset.y,
-          childPosition.x,
-          childPosition.y,
-          dimensions.x,
-          dimensions.y,
-        );
+        tileLayer.tile(texture, childPosition.x, childPosition.y, {
+          u: offset.x,
+          v: offset.y,
+          tileWidth: dimensions.x,
+          tileHeight: dimensions.y,
+        });
       }
     }
 

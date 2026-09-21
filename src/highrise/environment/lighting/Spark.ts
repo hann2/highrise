@@ -1,9 +1,10 @@
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../../core/entity/Entity";
+import Entity from "../../../core/entity/Entity";
+import { GameSprite } from "../../../core/entity/GameSprite";
 import { rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
-import { Layer } from "../../config/layers";
+import { Layer } from "../../../config/layers";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 
 export class Spark extends BaseEntity implements Entity {
@@ -56,9 +57,9 @@ export class Spark extends BaseEntity implements Entity {
 
     this.sprite
       .clear()
-      .lineStyle(0.03, 0xffaa00, 0.6)
       .moveTo(0, 0)
-      .lineTo(endPoint[0], endPoint[1]);
+      .lineTo(endPoint[0], endPoint[1])
+      .stroke({ width: 0.03, color: 0xffaa00, alpha: 0.6 });
 
     this.sprite.position.set(...this.renderPosition);
     this.light.setPosition(this.renderPosition);

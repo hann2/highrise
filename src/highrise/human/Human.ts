@@ -1,15 +1,5 @@
 import { Body, Circle } from "p2";
-import snd_cabbageHit1 from "../../../resources/audio/food/individual/cabbage-hit-1.flac";
-import snd_cabbageHit10 from "../../../resources/audio/food/individual/cabbage-hit-10.flac";
-import snd_cabbageHit11 from "../../../resources/audio/food/individual/cabbage-hit-11.flac";
-import snd_cabbageHit2 from "../../../resources/audio/food/individual/cabbage-hit-2.flac";
-import snd_cabbageHit3 from "../../../resources/audio/food/individual/cabbage-hit-3.flac";
-import snd_cabbageHit4 from "../../../resources/audio/food/individual/cabbage-hit-4.flac";
-import snd_cabbageHit5 from "../../../resources/audio/food/individual/cabbage-hit-5.flac";
-import snd_cabbageHit6 from "../../../resources/audio/food/individual/cabbage-hit-6.flac";
-import snd_cabbageHit7 from "../../../resources/audio/food/individual/cabbage-hit-7.flac";
-import snd_cabbageHit8 from "../../../resources/audio/food/individual/cabbage-hit-8.flac";
-import snd_swordSwoosh1 from "../../../resources/audio/weapons/sword-swoosh-1.flac";
+import { SoundName } from "../../../resources/resources";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import type Game from "../../core/Game";
@@ -24,7 +14,7 @@ import {
 import { rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Character, randomCharacter } from "../characters/Character";
-import { CollisionGroups } from "../config/CollisionGroups";
+import { CollisionGroups } from "../../config/CollisionGroups";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants/constants";
 import { WalkSpring } from "../creature-stuff/WalkSpring";
 import FleshImpact from "../effects/FleshImpact";
@@ -53,17 +43,17 @@ export const PUSH_COOLDOWN = 0.1; // seconds
 
 export const GLOWSTICK_COOLDOWN = 1.0; // seconds
 
-export const PUSH_SOUNDS = [
-  snd_cabbageHit1,
-  snd_cabbageHit2,
-  snd_cabbageHit3,
-  snd_cabbageHit4,
-  snd_cabbageHit5,
-  snd_cabbageHit6,
-  snd_cabbageHit7,
-  snd_cabbageHit8,
-  snd_cabbageHit10,
-  snd_cabbageHit11,
+export const PUSH_SOUNDS: SoundName[] = [
+  "cabbageHit1",
+  "cabbageHit2",
+  "cabbageHit3",
+  "cabbageHit4",
+  "cabbageHit5",
+  "cabbageHit6",
+  "cabbageHit7",
+  "cabbageHit8",
+  "cabbageHit10",
+  "cabbageHit11",
 ];
 
 const pushSoundRing = new ShuffleRing(PUSH_SOUNDS);
@@ -104,7 +94,7 @@ export default class Human extends BaseEntity implements Entity {
     this.walkSpring = this.addChild(new WalkSpring(this.body, SPEED, 80));
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     game.entities.addFilter(isEnemy);
   }
 
@@ -153,9 +143,9 @@ export default class Human extends BaseEntity implements Entity {
     }
     this.weapon = weapon;
     this.addChild(weapon, true);
-    this.game?.dispatch({ type: "giveWeapon", human: this, weapon });
+    this.game?.dispatch("giveWeapon", { human: this, weapon });
     weapon.playSound("pickup", this.getPosition());
-    this.humanSprite.onGiveWeapon(weapon);
+    this.humanSprite.handleNewWeapon(weapon);
 
     if (shouldSpeak) {
       await this.wait(0.5);
@@ -206,7 +196,7 @@ export default class Human extends BaseEntity implements Entity {
     this.hp -= amount;
 
     this.game?.addEntity(new FleshImpact(this.getPosition(), 1));
-    this.game?.dispatch({ type: "humanInjured", human: this, amount });
+    this.game?.dispatch("humanInjured", { human: this, amount });
 
     if (this.hp <= 0) {
       this.die();
@@ -221,7 +211,7 @@ export default class Human extends BaseEntity implements Entity {
 
   die() {
     this.voice.speak("death", true);
-    this.game?.dispatch({ type: "humanDied", human: this });
+    this.game?.dispatch("humanDied", { human: this });
     this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
 
     if (this.weapon) {
@@ -233,7 +223,7 @@ export default class Human extends BaseEntity implements Entity {
   heal(amount: number) {
     this.voice.speak("pickupHealth");
     this.hp = Math.min(this.hp + amount, this.maxHp);
-    this.game?.dispatch({ type: "humanHealed", human: this, amount });
+    this.game?.dispatch("humanHealed", { human: this, amount });
   }
 
   pushAction = new PhasedAction([
@@ -246,7 +236,7 @@ export default class Human extends BaseEntity implements Entity {
       duration: 0.05,
       startAction: () => {
         this.game?.addEntity(
-          new PositionalSound(snd_swordSwoosh1, this.getPosition()),
+          new PositionalSound("swordSwoosh1", this.getPosition()),
         );
         const enemies = this.game!.entities.getByFilter(isEnemy);
         for (const enemy of enemies) {

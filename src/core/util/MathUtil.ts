@@ -30,6 +30,16 @@ export function lerp(a: number, b: number, t: number = 0.5): number {
   return (1 - t) * a + t * b;
 }
 
+export function lerpV2d(
+  a: [number, number],
+  b: [number, number],
+  t: number = 0.5,
+): V2d {
+  const x = lerp(a[0], b[0], t);
+  const y = lerp(a[1], b[1], t);
+  return V(x, y);
+}
+
 export function lerpOrSnap(
   a: number,
   b: number,
@@ -74,6 +84,12 @@ export function reflectXY(theta: number): number {
   return normalizeAngle(theta - Math.PI);
 }
 
+/**
+ * Converts polar coordinates (angle and radius) to a Cartesian vector.
+ * @param theta - Angle in radians (0 = east, π/2 = north)
+ * @param r - Radius/magnitude
+ * @returns V2d vector in Cartesian coordinates
+ */
 export function polarToVec(theta: number, r: number): V2d {
   return V(r * Math.cos(theta), r * Math.sin(theta));
 }

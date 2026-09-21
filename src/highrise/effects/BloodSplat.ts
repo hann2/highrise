@@ -1,9 +1,10 @@
 import { Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { darken } from "../../core/util/ColorUtils";
 import { choose, rUniform } from "../../core/util/Random";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { SPLAT_TEXTURES } from "./Splat";
 
 const SCALE = 1.0 / 64;

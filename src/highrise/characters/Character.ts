@@ -1,4 +1,4 @@
-import { SoundName } from "../../core/resources/sounds";
+import { SoundName } from "../../../resources/resources";
 import { BodyTextures } from "../creature-stuff/BodySprite";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import { Andy } from "./Andy";

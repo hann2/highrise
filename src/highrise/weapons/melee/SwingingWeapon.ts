@@ -1,12 +1,13 @@
 import { Body, Box } from "p2";
 import { Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../../core/entity/Entity";
+import Entity from "../../../core/entity/Entity";
+import { GameSprite } from "../../../core/entity/GameSprite";
 import { V2d } from "../../../core/Vector";
 import { isHittable } from "../../environment/Hittable";
 import Human from "../../human/Human";
-import { Layer } from "../../config/layers";
-import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../../config/layers";
+import { CollisionGroups } from "../../../config/CollisionGroups";
 import MeleeWeapon from "./MeleeWeapon";
 import { SwingPhase } from "./SwingDescriptor";
 import { lerp } from "../../../core/util/MathUtil";
@@ -124,7 +125,7 @@ export default class SwingingWeapon extends BaseEntity {
     return [worldPosition, worldAngle];
   }
 
-  onBeginContact(other: Entity, _: unknown, __: unknown) {
+  onBeginContact({ other }: { other?: Entity }) {
     if (other != this.holder && isHittable(other)) {
       other.onMeleeHit(this, this.getPosition());
     }

@@ -1,18 +1,14 @@
 import { Body, Box } from "p2";
 import { Graphics } from "pixi.js";
-import snd_elevatorDing from "../../../resources/audio/environment/elevator-ding.flac";
-import snd_elevatorDoorClose from "../../../resources/audio/environment/elevator-door-close.flac";
-import snd_elevatorDoorOpen from "../../../resources/audio/environment/elevator-door-open.flac";
-import snd_wallHit1 from "../../../resources/audio/impacts/wall-hit-1.flac";
-import snd_wallHit2 from "../../../resources/audio/impacts/wall-hit-2.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { smoothStep } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { Layer } from "../config/layers";
-import { CollisionGroups } from "../config/CollisionGroups";
+import { Layer } from "../../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
 import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import Bullet from "../projectiles/Bullet";
 import Hittable from "./Hittable";
@@ -78,9 +74,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
     );
 
     this.sprite.clear();
-    this.sprite.beginFill(0xff6666);
-    this.sprite.drawRect(0, 0, delta.x, delta.y);
-    this.sprite.endFill();
+    this.sprite.rect(0, 0, delta.x, delta.y).fill(0xff6666);
 
     this.body.position = this.staticCorner.add(delta.mul(0.5));
     this.doorShape.width = Math.abs(delta.x);
@@ -91,7 +85,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
-      new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position),
+      new PositionalSound(choose("wallHit1", "wallHit2"), position),
     );
     return true;
   }
@@ -155,11 +149,11 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
 
   async onInteract() {
     if (this.state === "STOPPED") {
-      this.game?.addEntity(new PositionalSound(snd_elevatorDing, this.center));
+      this.game?.addEntity(new PositionalSound("elevatorDing", this.center));
       const isClosing = this.openPerentage === 1;
       this.state = isClosing ? "CLOSING" : "OPENING";
       await this.wait(DING_TIME);
-      const sound = isClosing ? snd_elevatorDoorClose : snd_elevatorDoorOpen;
+      const sound = isClosing ? "elevatorDoorClose" : "elevatorDoorOpen";
       this.game?.addEntity(new PositionalSound(sound, this.center));
       await this.wait(isClosing ? CLOSE_TIME : OPEN_TIME, (dt, t) => {
         this.openPerentage = smoothStep(isClosing ? 1 - t : t);

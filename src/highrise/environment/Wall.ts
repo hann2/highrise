@@ -1,15 +1,14 @@
 import { Body, Box, vec2 } from "p2";
 import { BLEND_MODES, Sprite } from "pixi.js";
-import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
-import img_wallAo1 from "../../../resources/images/environment/wall-ao-1.png";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { Layer } from "../config/layers";
-import { P2Materials } from "../config/PhysicsMaterials";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
+import { P2Materials } from "../../config/PhysicsMaterials";
 import BulletHole from "../effects/BulletHole";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
@@ -36,9 +35,9 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     const drawHeight = length + type.spriteWidth / 3; // add in width to make things line up nicely
 
     // TODO: AO Breaks on outside corners
-    const aoSprite = Sprite.from(img_wallAo1);
+    const aoSprite = Sprite.from("wallAo1");
     (aoSprite as GameSprite).layerName = Layer.FLOOR_AO;
-    aoSprite.blendMode = BLEND_MODES.MULTIPLY;
+    aoSprite.blendMode = "multiply";
     aoSprite.anchor.set(0.5, 0.5);
     aoSprite.width = drawHeight;
     aoSprite.height = type.spriteWidth;
@@ -99,7 +98,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     return true;
   }
 
-  onBeginContact(other: Entity) {
+  onBeginContact({ other }: { other?: Entity }) {
     const sounds = this.type.collisionSounds;
     if (sounds) {
       this.addChild(new PositionalSound(choose(...sounds), this.getPosition()));

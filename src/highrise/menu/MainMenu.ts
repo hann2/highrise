@@ -1,11 +1,14 @@
-import { Sprite, Text } from "pixi.js";
+import { Container, Sprite, Text } from "pixi.js";
+import { fontName } from "../../core/resources/resourceUtils";
+import { V2d } from "../../core/Vector";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { clamp, smoothStep } from "../../core/util/MathUtil";
-import { Layer } from "../config/layers";
+import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 import ClickableText from "./ClickableText";
 import CreditsScreen from "./CreditsScreen";
@@ -18,7 +21,7 @@ export default class MainMenu extends BaseEntity implements Entity {
   id = "main_menu";
   persistenceLevel = Persistence.Floor;
   pausable = false;
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
 
   titleText: Text;
   startText: Text;
@@ -29,27 +32,33 @@ export default class MainMenu extends BaseEntity implements Entity {
   constructor() {
     super();
 
-    this.sprite = new Sprite();
+    this.sprite = new Container();
     this.sprite.layerName = Layer.MENU;
 
-    this.titleText = new Text("HIGHRISE", {
-      align: "center",
-      fill: "red",
-      fontFamily: "Capture It",
-      fontSize: 128,
+    this.titleText = new Text({
+      text: "HIGHRISE",
+      style: {
+        align: "center",
+        fill: "red",
+        fontFamily: fontName("captureIt"),
+        fontSize: 128,
+      },
     });
     this.titleText.anchor.set(0.5, 1.0);
     this.sprite.addChild(this.titleText);
 
-    this.startText = new Text("Press Enter To Start", {
-      align: "center",
-      fill: "white",
-      fontFamily: "Capture It",
-      fontSize: 64,
+    this.startText = new Text({
+      text: "Press Enter To Start",
+      style: {
+        align: "center",
+        fill: "white",
+        fontFamily: fontName("captureIt"),
+        fontSize: 64,
+      },
     });
     this.startText.anchor.set(0.5, 0.0);
     this.sprite.addChild(this.startText);
-    this.startText.interactive = true;
+    this.startText.eventMode = "static";
     this.startText.addListener("click", () => {
       this.startGame();
     });
@@ -65,7 +74,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     (this.feedbackButton.sprite as Text).style.align = "right";
   }
 
-  async onAdd(game: Game) {
+  async onAdd({ game }: { game: Game }) {
     this.titleText.alpha = 0;
     this.startText.alpha = 0;
     this.creditsButton.sprite.alpha = 0;
@@ -80,7 +89,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     firstTime = false;
   }
 
-  onResize([width, height]: [number, number]) {
+  onResize({ size: [width, height] }: { size: V2d }) {
     this.titleText.position.set(width / 2, height / 2);
     this.startText.position.set(width / 2, height / 2);
     this.creditsButton.sprite.position.set(width - 10, height - 50);
@@ -92,9 +101,9 @@ export default class MainMenu extends BaseEntity implements Entity {
       this.inTransition = true;
       await this.wait();
       this.game?.addEntity(new CreditsScreen());
-      this.startText.interactive = false;
-      this.creditsButton.sprite.interactive = false;
-      this.feedbackButton.sprite.interactive = false;
+      this.startText.eventMode = "none";
+      this.creditsButton.sprite.eventMode = "none";
+      this.feedbackButton.sprite.eventMode = "none";
       await this.wait(4.0, (dt, t) => {
         this.titleText.alpha = smoothStep(clamp(2.0 - 2 * t));
         this.startText.alpha = smoothStep(clamp(1.0 - 4 * t));
@@ -106,7 +115,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     }
   }
 
-  onInputDeviceChange(usingGamepad: boolean) {
+  onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     this.startText.text = usingGamepad
       ? "Press START to start"
       : "Press Enter to start";
@@ -115,21 +124,21 @@ export default class MainMenu extends BaseEntity implements Entity {
   async startGame() {
     if (!this.inTransition) {
       this.inTransition = true;
-      this.startText.interactive = false;
-      this.creditsButton.sprite.interactive = false;
-      this.feedbackButton.sprite.interactive = false;
+      this.startText.eventMode = "none";
+      this.creditsButton.sprite.eventMode = "none";
+      this.feedbackButton.sprite.eventMode = "none";
       await this.wait(FADE_OUT_TIME, (dt, t) => {
         this.titleText.alpha = smoothStep(clamp(1.5 - 1.5 * t));
         this.startText.alpha = smoothStep(clamp(1.0 - 4 * t));
         this.creditsButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));
         this.feedbackButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));
       });
-      this.game?.dispatch({ type: "newGame" });
+      this.game?.dispatch("newGame", undefined);
       this.destroy();
     }
   }
 
-  onKeyDown(key: KeyCode) {
+  onKeyDown({ key }: { key: KeyCode }) {
     if (key === "Enter") {
       this.startGame();
     } else if (key === "KeyC") {
@@ -137,7 +146,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     }
   }
 
-  onButtonDown(button: ControllerButton) {
+  onButtonDown({ button }: { button: ControllerButton }) {
     if (button === ControllerButton.START) {
       this.startGame();
     } else if (button === ControllerButton.BACK) {

@@ -31,46 +31,42 @@ export default class LevelController extends BaseEntity implements Entity {
 
     await this.wait(0.0); // so that this happens async (why does that matter?)
 
-    this.game?.dispatch({ type: "startLevel", level });
+    this.game?.dispatch("startLevel", { level });
     this.game?.addEntity(new FadeEffect(0, 0, 1.5 * LEVEL_FADE_TIME));
   }
 
-  handlers = {
-    // We just got to the exit
-    levelComplete: async () => {
-      if (this.currentLevel === 0) {
-        localStorage.setItem("tutorialComplete", "true");
-      }
-      this.currentLevel += 1;
+  // We just got to the exit
+  async onLevelComplete() {
+    if (this.currentLevel === 0) {
+      localStorage.setItem("tutorialComplete", "true");
+    }
+    this.currentLevel += 1;
 
-      const fadeOutTime = LEVEL_FADE_TIME;
-      const fadeHoldTime = LEVEL_FADE_TIME / 2;
-      const fadeInTime = LEVEL_FADE_TIME;
-      this.game?.addEntity(
-        new FadeEffect(fadeOutTime, fadeHoldTime, fadeInTime),
-      );
+    const fadeOutTime = LEVEL_FADE_TIME;
+    const fadeHoldTime = LEVEL_FADE_TIME / 2;
+    const fadeInTime = LEVEL_FADE_TIME;
+    this.game?.addEntity(new FadeEffect(fadeOutTime, fadeHoldTime, fadeInTime));
 
-      await this.wait(fadeOutTime);
-      this.game?.clearScene(Persistence.Floor);
+    await this.wait(fadeOutTime);
+    this.game?.clearScene(Persistence.Floor);
 
-      if (this.currentLevel <= MAX_LEVEL) {
-        const level = this.generateLevel();
-        this.game?.dispatch({ type: "startLevel", level });
-      } else {
-        this.game?.dispatch({ type: "gameOver", victory: true });
-      }
-    },
+    if (this.currentLevel <= MAX_LEVEL) {
+      const level = this.generateLevel();
+      this.game?.dispatch("startLevel", { level });
+    } else {
+      this.game?.dispatch("gameOver", { victory: true });
+    }
+  }
 
-    // We just started a new level
-    startLevel: ({ level }: { level: Level }) => {
-      this.game!.addEntities(level.entities);
-    },
+  // We just started a new level
+  onStartLevel({ level }: { level: Level }) {
+    this.game!.addEntities(...level.entities);
+  }
 
-    // The whole party is dead
-    partyDead: async () => {
-      this.game?.dispatch({ type: "gameOver", victory: false });
-    },
-  };
+  // The whole party is dead
+  async onPartyDead() {
+    this.game?.dispatch("gameOver", { victory: false });
+  }
 
   generateLevel(): Level {
     // So that seeded runs get the same levels no matter what happened before

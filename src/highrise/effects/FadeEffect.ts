@@ -1,7 +1,8 @@
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
-import { Layer } from "../config/layers";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
+import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 
 export default class FadeEffect extends BaseEntity implements Entity {
@@ -18,9 +19,7 @@ export default class FadeEffect extends BaseEntity implements Entity {
     super();
 
     const graphics = (this.sprite = new Graphics());
-    graphics.beginFill(color);
-    graphics.drawRect(-5000, -5000, 10000, 10000);
-    graphics.endFill();
+    graphics.rect(-5000, -5000, 10000, 10000).fill(color);
     graphics.alpha = 0;
 
     this.sprite.layerName = Layer.HUD;

@@ -1,7 +1,9 @@
 import { Text } from "pixi.js";
+import { fontName } from "../../core/resources/resourceUtils";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
-import { Layer } from "../config/layers";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
+import { Layer } from "../../config/layers";
 
 interface Options {
   inactiveColor?: string;
@@ -18,14 +20,17 @@ export default class ClickableText extends BaseEntity implements Entity {
   ) {
     super();
 
-    this.sprite = new Text(text, {
-      align: "left",
-      fill: inactiveColor,
-      fontFamily: "Capture It",
-      fontSize: 40,
+    this.sprite = new Text({
+      text: text,
+      style: {
+        align: "left",
+        fill: inactiveColor,
+        fontFamily: fontName("captureIt"),
+        fontSize: 40,
+      },
     });
     this.sprite.layerName = Layer.MENU;
-    this.sprite.interactive = true;
+    this.sprite.eventMode = "static";
     this.sprite.addListener("mouseover", () => {
       this.sprite.style.fill = activeColor;
     });

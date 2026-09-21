@@ -1,10 +1,4 @@
-import snd_chainLinkFence1 from "../../../resources/audio/environment/chain-link-fence-1.flac";
-import snd_chainLinkFence2 from "../../../resources/audio/environment/chain-link-fence-2.flac";
-import snd_chainLinkFence3 from "../../../resources/audio/environment/chain-link-fence-3.flac";
-import snd_wallHit3 from "../../../resources/audio/impacts/wall-hit-3.flac";
-import img_chainLinkFence from "../../../resources/images/environment/chain-link-fence.png";
-import img_wall1 from "../../../resources/images/environment/wall-1.png";
-import { SoundName } from "../../core/resources/sounds";
+import { SoundName } from "../../../resources/resources";
 
 export interface WallType {
   // Whether or not this stops bullets from going through
@@ -39,9 +33,9 @@ export const SolidWall: WallType = {
   blocksVision: true,
   castsShadow: true,
 
-  impactSounds: [snd_wallHit3],
+  impactSounds: ["wallHit3"],
   color: 0x999999,
-  imageUrl: img_wall1,
+  imageUrl: "wall1",
   collisionWidth: 0.15,
   spriteWidth: 0.75,
 };
@@ -53,9 +47,9 @@ export const BathroomWall: WallType = {
   blocksVision: false,
   castsShadow: false,
 
-  impactSounds: [snd_wallHit3],
+  impactSounds: ["wallHit3"],
   color: 0x999999,
-  imageUrl: img_wall1,
+  imageUrl: "wall1",
   collisionWidth: 0.1,
   spriteWidth: 0.3,
 };
@@ -67,13 +61,9 @@ export const ChainLinkFence: WallType = {
   blocksVision: false,
   castsShadow: false,
 
-  collisionSounds: [
-    snd_chainLinkFence1,
-    snd_chainLinkFence2,
-    snd_chainLinkFence3,
-  ],
+  collisionSounds: ["chainLinkFence1", "chainLinkFence2", "chainLinkFence3"],
   color: 0xffffff,
-  imageUrl: img_chainLinkFence,
+  imageUrl: "chainLinkFence",
   collisionWidth: 0.15,
   spriteWidth: 0.225,
 };

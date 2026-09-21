@@ -28,7 +28,7 @@ export default class PlayerHumanController
     this.human.useWeapon();
   }
 
-  onButtonDown(button: ControllerButton) {
+  onButtonDown({ button }: { button: ControllerButton }) {
     switch (button) {
       case ControllerButton.RT:
         this.human.useWeapon();
@@ -48,7 +48,7 @@ export default class PlayerHumanController
     }
   }
 
-  onKeyDown(key: KeyCode) {
+  onKeyDown({ key }: { key: KeyCode }) {
     switch (key) {
       case "KeyE":
         this.human.interactWithNearest();
@@ -98,16 +98,16 @@ export default class PlayerHumanController
 
     // Moving
     const direction = V(0, 0);
-    if (this.game?.io.keyIsDown("KeyW")) {
+    if (this.game?.io.isKeyDown("KeyW")) {
       direction[1] += -1;
     }
-    if (this.game?.io.keyIsDown("KeyS")) {
+    if (this.game?.io.isKeyDown("KeyS")) {
       direction[1] += 1;
     }
-    if (this.game?.io.keyIsDown("KeyA")) {
+    if (this.game?.io.isKeyDown("KeyA")) {
       direction[0] += -1;
     }
-    if (this.game?.io.keyIsDown("KeyD")) {
+    if (this.game?.io.isKeyDown("KeyD")) {
       direction[0] += 1;
     }
 

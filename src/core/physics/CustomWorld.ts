@@ -55,7 +55,7 @@ export default class CustomWorld extends World {
   dynamicBodies = new Set<Body>();
   kinematicBodies = new Set<Body>();
 
-  constructor(options: WorldOptions) {
+  constructor(options: WorldOptions = {}) {
     super({
       broadphase: new SpatialHashingBroadphase(),
       islandSplit: false,
@@ -347,9 +347,6 @@ export default class CustomWorld extends World {
   }
 
   stepIntegrate(dt: number) {
-    const bodies = this.bodies;
-    const Nbodies = this.bodies.length;
-
     // Step forward
     for (const body of this.kinematicBodies) {
       body.integrate(dt);

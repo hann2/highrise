@@ -1,16 +1,16 @@
 import type Entity from "./entity/Entity";
-import type { WithOwner } from "./entity/Entity";
-import type IOEventHandler from "./entity/IOEventHandler";
+import type IOEventHandler from "./entity/IoEvents";
+import type { WithOwner } from "./entity/WithOwner";
 
 export type EntityFilter<T extends Entity> = (e: Entity) => e is T;
 
 type EntityWithAfterPhysics = Entity & { afterPhysics: Function };
 export const hasAfterPhysics = (e: Entity): e is EntityWithAfterPhysics =>
-  Boolean(e.afterPhysics);
+  Boolean(e.onAfterPhysics);
 
 type EntityWithBeforeTick = Entity & { beforeTick: Function };
 export const hasBeforeTick = (e: Entity): e is EntityWithBeforeTick =>
-  Boolean(e.beforeTick);
+  Boolean(e.onBeforeTick);
 
 type EntityWithOnRender = Entity & { onRender: Function };
 export const hasOnRender = (e: Entity): e is EntityWithOnRender =>
@@ -23,6 +23,10 @@ export const hasOnLateRender = (e: Entity): e is EntityWithOnLateRender =>
 type EntityWithOnTick = Entity & { onTick: Function };
 export const hasOnTick = (e: Entity): e is EntityWithOnTick =>
   Boolean(e.onTick);
+
+type EntityWithOnSlowTick = Entity & { onSlowTick: Function };
+export const hasOnSlowTick = (e: Entity): e is EntityWithOnSlowTick =>
+  Boolean(e.onSlowTick);
 
 type EntityWithOnPause = Entity & { onPause: Function };
 export const hasOnPause = (e: Entity): e is EntityWithOnPause =>

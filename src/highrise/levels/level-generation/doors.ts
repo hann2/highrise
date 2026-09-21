@@ -1,4 +1,3 @@
-import img_chainLinkFence from "../../../../resources/images/environment/chain-link-fence.png";
 import Entity from "../../../core/entity/Entity";
 import { CELL_SIZE } from "../../constants/constants";
 import Door from "../../environment/Door";
@@ -87,6 +86,6 @@ export function buildDoorEntity(
     minAngle,
     maxAngle,
     !doorBuilder.chainLink,
-    doorBuilder.chainLink ? img_chainLinkFence : undefined,
+    doorBuilder.chainLink ? "chainLinkFence" : undefined,
   );
 }

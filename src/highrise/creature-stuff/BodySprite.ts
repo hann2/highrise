@@ -1,6 +1,7 @@
-import { Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 
@@ -15,7 +16,7 @@ export interface BodyTextures {
 
 // A body with arms that faces a direction
 export abstract class BodySprite extends BaseEntity implements Entity {
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
   torsoSprite: Sprite;
   headSprite: Sprite;
   leftArmSprite: Sprite;
@@ -30,8 +31,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   ) {
     super();
 
-    this.sprite = new Sprite();
-    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite = new Container();
 
     this.torsoSprite = Sprite.from(textures.torso);
     this.torsoSprite.anchor.set(0.5);

@@ -1,11 +1,12 @@
-import { BLEND_MODES, Graphics, RenderTexture, Sprite } from "pixi.js";
+import { Container, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { rgbToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
-import { V } from "../../core/Vector";
-import { Layer } from "../config/layers";
+import { V, V2d } from "../../core/Vector";
+import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 import { AmbientLight } from "./AmbientLight";
 import Light from "./Light";
@@ -16,20 +17,18 @@ export default class LightingManager extends BaseEntity implements Entity {
 
   texture!: RenderTexture;
   sprite!: Sprite & GameSprite;
-  lightContainer = new Sprite();
-  darkness: Graphics = new Graphics();
+  lightContainer = new Container();
 
   lights: Set<Light> = new Set();
   ambientLights: Set<AmbientLight> = new Set();
   ambientColor = 0;
 
   private get renderer() {
-    return this.game!.renderer.pixiRenderer;
+    return this.game!.renderer.app.renderer;
   }
 
-  onResize([width, height]: [number, number]) {
+  onResize({ size: [width, height] }: { size: V2d }) {
     this.texture.resize(width, height);
-    this.drawDarkness();
 
     // For some reason this needs to happen
     for (const light of this.lights) {
@@ -38,22 +37,18 @@ export default class LightingManager extends BaseEntity implements Entity {
     }
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     const [width, height] = game.renderer.getSize();
     this.texture = RenderTexture.create({
       width: width,
       height: height,
-      resolution: game.renderer.pixiRenderer.resolution,
+      resolution: game.renderer.app.renderer.resolution,
     });
-
-    this.drawDarkness();
 
     this.sprite = new Sprite(this.texture);
     this.sprite.layerName = Layer.LIGHTING;
-    this.sprite.blendMode = BLEND_MODES.MULTIPLY;
+    this.sprite.blendMode = "multiply";
     this.sprite.anchor.set(0, 0);
-
-    this.lightContainer.blendMode = BLEND_MODES.ADD;
   }
 
   addAmbientLight(light: AmbientLight) {
@@ -74,14 +69,6 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.lights.delete(light);
   }
 
-  drawDarkness() {
-    const { width, height } = this.texture;
-    this.darkness
-      .beginFill(this.ambientColor)
-      .drawRect(0, 0, width, height)
-      .endFill();
-  }
-
   updateAmbientColor() {
     let r = 0;
     let g = 0;
@@ -95,7 +82,6 @@ export default class LightingManager extends BaseEntity implements Entity {
     g = clamp(g, 0, 256);
     b = clamp(b, 0, 256);
     this.ambientColor = rgbToHex({ r, g, b });
-    this.drawDarkness();
   }
 
   // Decide whether or not to render a light
@@ -121,10 +107,7 @@ export default class LightingManager extends BaseEntity implements Entity {
   onLateRender() {
     const matrix = this.game!.camera.getMatrix();
     // const inverseMatrix = matrix.clone().invert();
-    this.lightContainer.transform.setFromMatrix(matrix);
-
-    // Clear everything
-    this.renderer.render(this.darkness, this.texture, true);
+    this.lightContainer.setFromMatrix(matrix);
 
     const camera = this.game!.camera;
     const [minX, minY] = camera.toWorld(V(0, 0));
@@ -138,8 +121,13 @@ export default class LightingManager extends BaseEntity implements Entity {
       }
     }
 
-    // Then render it all
-    this.renderer.render(this.lightContainer, this.texture, false);
+    // Then render it all on top of the ambient light
+    this.renderer.render({
+      container: this.lightContainer,
+      target: this.texture,
+      clear: true,
+      clearColor: this.ambientColor,
+    });
     this.lightContainer.removeChildren();
   }
 }

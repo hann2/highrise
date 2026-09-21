@@ -2,18 +2,17 @@ import Game from "../../core/Game";
 import {
   getCurrentGraphicsQuality,
   GraphicsQuality,
-  GraphicsQualtiyEvent,
 } from "../controllers/GraphicsQualityController";
 import ClickableText from "./ClickableText";
 
-export default class MuteButton extends ClickableText {
+export default class GraphicsButton extends ClickableText {
   constructor() {
     super("Graphics: ", () => {
-      this.game?.dispatch({ type: "toggleGraphicsQuality" });
+      this.game?.dispatch("toggleGraphicsQuality", undefined);
     });
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     this.updateText(getCurrentGraphicsQuality(game));
   }
 
@@ -21,9 +20,7 @@ export default class MuteButton extends ClickableText {
     this.sprite.text = `Graphics: ${quality}`;
   }
 
-  handlers = {
-    graphicsQualityChanged: ({ quality }: GraphicsQualtiyEvent) => {
-      this.updateText(quality);
-    },
-  };
+  onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
+    this.updateText(quality);
+  }
 }

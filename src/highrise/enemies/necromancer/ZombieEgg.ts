@@ -1,13 +1,7 @@
-import { Sprite } from "pixi.js";
-import img_blob4 from "../../../../resources/images/splats/blob-4.png";
-import img_crawler1 from "../../../../resources/images/zombies/crawler-1.png";
-import img_crawler2 from "../../../../resources/images/zombies/crawler-2.png";
-import img_crawler3 from "../../../../resources/images/zombies/crawler-3.png";
-import img_zombie1 from "../../../../resources/images/zombies/zombie-1.png";
-import img_zombie2 from "../../../../resources/images/zombies/zombie-2.png";
-import img_zombie3 from "../../../../resources/images/zombies/zombie-3.png";
+import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../../core/entity/Entity";
+import Entity from "../../../core/entity/Entity";
+import { GameSprite } from "../../../core/entity/GameSprite";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { darken } from "../../../core/util/ColorUtils";
 import { lerp, smoothStep } from "../../../core/util/MathUtil";
@@ -24,7 +18,7 @@ const SPEED = 15; // meters per second
 
 // TODO: Don't go through walls
 export class ZombieEgg extends BaseEntity implements Entity {
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
   eggSprite: Sprite;
   variant: number;
 
@@ -35,10 +29,10 @@ export class ZombieEgg extends BaseEntity implements Entity {
   ) {
     super();
 
-    this.sprite = new Sprite();
+    this.sprite = new Container();
     this.sprite.rotation = rDirection();
 
-    this.eggSprite = Sprite.from(img_blob4);
+    this.eggSprite = Sprite.from("blob4");
     this.eggSprite.scale.set(SIZE / this.eggSprite.texture.width);
     this.eggSprite.anchor.set(0.5);
     this.eggSprite.tint = darken(0x449922, rUniform(0.1, 0.5));
@@ -67,11 +61,11 @@ export class ZombieEgg extends BaseEntity implements Entity {
   makeCreatureSprite(): Sprite {
     switch (this.spawnType) {
       case "zombie": {
-        const choices = [img_zombie1, img_zombie2, img_zombie3];
+        const choices = ["zombie1", "zombie2", "zombie3"];
         return Sprite.from(choices[this.variant % choices.length]);
       }
       case "crawler": {
-        const choices = [img_crawler1, img_crawler2, img_crawler3];
+        const choices = ["crawler1", "crawler2", "crawler3"];
         return Sprite.from(choices[this.variant % choices.length]);
       }
     }

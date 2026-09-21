@@ -1,6 +1,6 @@
+import { SoundName } from "../../../resources/resources";
 import Entity from "../entity/Entity";
 import Game from "../Game";
-import { SoundName } from "../resources/sounds";
 import { clamp, lerp } from "../util/MathUtil";
 import { V, V2d } from "../Vector";
 import { SoundInstance, SoundOptions } from "./SoundInstance";
@@ -13,7 +13,9 @@ export interface PositionalSoundOptions extends SoundOptions {
 }
 
 /**
- * Represents a currently playing sound.
+ * A sound instance with 2D positional audio that automatically
+ * adjusts stereo panning and volume based on distance from listener.
+ * Extends SoundInstance with spatial audio capabilities for immersive sound.
  */
 export class PositionalSound extends SoundInstance implements Entity {
   private _distanceGain: number = 1.0;
@@ -49,6 +51,10 @@ export class PositionalSound extends SoundInstance implements Entity {
     return this.distanceGainNode;
   }
 
+  /**
+   * Updates the world position of this positional sound source.
+   * Automatically recalculates panning and distance attenuation.
+   */
   setPosition(position: V2d) {
     if (isNaN(position[0]) || isNaN(position[1])) {
       throw new Error(`invalid position: ${position}`);

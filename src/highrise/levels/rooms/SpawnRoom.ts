@@ -1,9 +1,11 @@
 import { BLEND_MODES, Text } from "pixi.js";
+import { fontName } from "../../../core/resources/resourceUtils";
 import BaseEntity from "../../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../../core/entity/Entity";
+import Entity from "../../../core/entity/Entity";
+import { GameSprite } from "../../../core/entity/GameSprite";
 import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { Layer } from "../../config/layers";
+import { Layer } from "../../../config/layers";
 import Decoration from "../../environment/Decoration";
 import { cementFloor, piano } from "../../environment/decorations/decorations";
 import HealthPickup from "../../environment/HealthPickup";
@@ -137,13 +139,16 @@ class SpawnRoomFloorPaint extends BaseEntity implements Entity {
 
     const isTutorial = levelIndex < 1;
     const text = isTutorial ? "WASD = ↑←↓→" : `Level ${levelIndex}`;
-    this.sprite = new Text(text, {
-      fontSize: isTutorial ? 32 : 64,
-      fontFamily: "Capture It",
-      fill: "red",
-      align: "center",
+    this.sprite = new Text({
+      text: text,
+      style: {
+        fontSize: isTutorial ? 32 : 64,
+        fontFamily: fontName("captureIt"),
+        fill: "red",
+        align: "center",
+      },
     });
-    this.sprite.blendMode = BLEND_MODES.MULTIPLY;
+    this.sprite.blendMode = "multiply";
     this.sprite.position.set(x, y);
     this.sprite.scale.set(1 / 64);
     this.sprite.anchor.set(0.5, 0.5);

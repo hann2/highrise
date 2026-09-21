@@ -1,9 +1,11 @@
 import { BLEND_MODES, Text } from "pixi.js";
+import { fontName } from "../../../core/resources/resourceUtils";
 import BaseEntity from "../../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../../core/entity/Entity";
+import Entity from "../../../core/entity/Entity";
+import { GameSprite } from "../../../core/entity/GameSprite";
 import { degToRad } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
-import { Layer } from "../../config/layers";
+import { Layer } from "../../../config/layers";
 import { CELL_SIZE } from "../../constants/constants";
 import Crawler from "../../enemies/crawler/Crawler";
 import Door from "../../environment/Door";
@@ -122,20 +124,23 @@ export class FloorPaint extends BaseEntity implements Entity {
   ) {
     super();
 
-    this.sprite = new Text("", {
-      fontSize: 32,
-      fontFamily: "Capture It",
-      fill: "red",
-      align: "center",
+    this.sprite = new Text({
+      text: "",
+      style: {
+        fontSize: 32,
+        fontFamily: fontName("captureIt"),
+        fill: "red",
+        align: "center",
+      },
     });
-    this.sprite.blendMode = BLEND_MODES.MULTIPLY;
+    this.sprite.blendMode = "multiply";
     this.sprite.position.set(x, y);
     this.sprite.scale.set(1 / 64);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.layerName = Layer.FLOOR_DECALS;
   }
 
-  onInputDeviceChange(usingGamepad: boolean) {
+  onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     this.sprite.text = this.getText(usingGamepad);
   }
 }

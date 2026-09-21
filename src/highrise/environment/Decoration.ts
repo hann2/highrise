@@ -1,13 +1,14 @@
 import { Body, Box } from "p2";
+import { SoundName } from "../../../resources/resources";
 import { Sprite } from "pixi.js";
-import snd_wallHit4 from "../../../resources/audio/impacts/wall-hit-4.flac";
 import BaseEntity from "../../core/entity/BaseEntity";
-import Entity, { GameSprite } from "../../core/entity/Entity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../config/CollisionGroups";
-import { Layer } from "../config/layers";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
 import SwingingWeapon from "../weapons/melee/SwingingWeapon";
@@ -16,7 +17,7 @@ import {
   getDecorationTexture,
 } from "./decorations/DecorationInfo";
 
-export const DEFAULT_HIT_SOUNDS = [snd_wallHit4];
+export const DEFAULT_HIT_SOUNDS: SoundName[] = ["wallHit4"];
 
 export default class Decoration extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;

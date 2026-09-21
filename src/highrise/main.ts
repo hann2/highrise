@@ -5,8 +5,8 @@ import SpatialHashingBroadphase from "../core/physics/SpatialHashingBroadphase";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import FPSMeter from "../core/util/FPSMeter";
 import { seedRandom } from "../core/util/Random";
-import { initLayers, Layer } from "./config/layers";
-import { initContactMaterials } from "./config/PhysicsMaterials";
+import { Layer } from "../config/layers";
+import { initContactMaterials } from "../config/PhysicsMaterials";
 import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "./constants/constants";
 import CheatController from "./controllers/CheatController";
 import { FPSMeterController } from "./controllers/FPSMeterController";
@@ -33,7 +33,7 @@ export async function main() {
   }
 
   const game = new Game({
-    tickIterations: 1,
+    ticksPerSecond: 60,
     world: new CustomWorld({
       gravity: [0, 0],
       broadphase: new SpatialHashingBroadphase(
@@ -44,11 +44,10 @@ export async function main() {
     }),
   });
   game.world.frictionGravity = 10;
-  initLayers(game);
   initContactMaterials(game);
 
   window.DEBUG = { game };
-  game.start();
+  await game.init();
 
   const preloader = game.addEntity(new Preloader());
   await preloader.waitTillLoaded();
@@ -71,13 +70,7 @@ export async function main() {
     game.addEntity(new CheatController());
   }
 
-  game.dispatch({ type: "goToMainMenu" });
+  game.dispatch("goToMainMenu", undefined);
 
-  const element = game.renderer.pixiRenderer.view;
-
-  const makeFullScreen = () => {
-    element.requestFullscreen();
-    element.removeEventListener("click", makeFullScreen);
-  };
-  element.addEventListener("click", makeFullScreen);
+  game.renderer.requestFullscreen();
 }

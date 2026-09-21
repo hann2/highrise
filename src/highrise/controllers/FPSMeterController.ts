@@ -12,7 +12,7 @@ export class FPSMeterController extends BaseEntity implements Entity {
     super();
   }
 
-  onAdd(game: Game) {
+  onAdd({ game }: { game: Game }) {
     for (const fpsMeter of game.entities.getByFilter(
       (e): e is FPSMeter => e instanceof FPSMeter,
     )) {
@@ -20,7 +20,7 @@ export class FPSMeterController extends BaseEntity implements Entity {
     }
   }
 
-  onKeyDown(key: KeyCode) {
+  onKeyDown({ key }: { key: KeyCode }) {
     if (key === "Backslash") {
       for (const fpsMeter of this.game!.entities.getByFilter(
         (e): e is FPSMeter => e instanceof FPSMeter,
