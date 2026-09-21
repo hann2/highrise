@@ -19,7 +19,10 @@ export default class SpeakingCircle extends BaseEntity implements Entity {
 
   phase = 0;
 
-  constructor(public getPosition: () => V2d, public color: number = 0xffff00) {
+  constructor(
+    public getPosition: () => V2d,
+    public color: number = 0xffff00,
+  ) {
     super();
 
     this.sprite = new Graphics();

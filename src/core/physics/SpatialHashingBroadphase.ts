@@ -18,7 +18,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
   constructor(
     private cellSize: number = DEFAULT_CELL_SIZE,
     private width: number = 24,
-    private height: number = 24
+    private height: number = 24,
   ) {
     super(CUSTOM_BROADPHASE_TYPE as any);
 
@@ -32,7 +32,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
 
     world.on("addBody", ({ body }: { body: Body }) => this.onAddBody(body));
     world.on("removeBody", ({ body }: { body: Body }) =>
-      this.onRemoveBody(body)
+      this.onRemoveBody(body),
     );
   }
 
@@ -134,7 +134,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
         world,
         dBody.getAABB(),
         undefined,
-        false
+        false,
       )) {
         if (Broadphase.canCollide(dBody, other)) {
           result.push(dBody, other);
@@ -187,7 +187,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
     _: World,
     aabb: AABB,
     result?: Body[],
-    shouldAddBodies: boolean = true
+    shouldAddBodies: boolean = true,
   ): Body[] {
     result = result ?? [];
 
@@ -239,7 +239,7 @@ export default class SpatialHashingBroadphase extends SAPBroadphase {
 
     let cellX = Math.floor(x1);
     let cellY = Math.floor(y1);
-    for (let ix = 0, iy = 0; ix < xSteps || iy < ySteps; ) {
+    for (let ix = 0, iy = 0; ix < xSteps || iy < ySteps;) {
       if ((0.5 + ix) / xSteps < (0.5 + iy) / ySteps) {
         // next step is horizontal
         cellX += signX;

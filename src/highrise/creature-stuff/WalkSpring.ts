@@ -11,7 +11,7 @@ export class WalkSpring extends BaseEntity implements Entity {
   constructor(
     public creatureBody: Body,
     public speed: number = 4, // meters / sec
-    public acceleration: number = 10 // meters / sec^2
+    public acceleration: number = 10, // meters / sec^2
   ) {
     super();
   }

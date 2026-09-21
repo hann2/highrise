@@ -8,7 +8,7 @@ import Human, { isHuman } from "../../human/Human";
 export function makeSimpleEnemyBody(
   position: [number, number],
   radius: number,
-  mass: number = 1
+  mass: number = 1,
 ) {
   const body = new Body({ mass, position });
   const shape = new Circle({ radius });
@@ -23,7 +23,7 @@ export function getHumansInRange(
   position: [number, number],
   angle: number,
   range: number = 1,
-  angleRange: number = Math.PI / 2
+  angleRange: number = Math.PI / 2,
 ): Human[] {
   const humans = [...game.entities.getByFilter(isHuman)];
   return humans.filter((human) => {
@@ -39,7 +39,7 @@ export function lerpOffsets(
   [leftBase, rightBase]: [V2d, V2d],
   [leftStart, rightStart]: [V2d, V2d],
   [leftEnd, rightEnd]: [V2d, V2d],
-  t: number
+  t: number,
 ): [V2d, V2d] {
   const leftOffset = leftStart.lerp(leftEnd, t);
   const rightOffset = rightStart.lerp(rightEnd, t);

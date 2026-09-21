@@ -269,7 +269,7 @@ export default class Game {
       this.averageFrameDuration = lerp(
         this.averageFrameDuration,
         lastFrameDuration,
-        0.05
+        0.05,
       );
     }
 

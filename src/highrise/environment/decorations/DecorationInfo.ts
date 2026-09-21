@@ -10,7 +10,7 @@ import { V2d } from "../../../core/Vector";
  */
 export const decorationRelativeTo = (
   partial: Omit<DecorationInfo, "heightMeters">,
-  decorationSprite: DecorationInfo
+  decorationSprite: DecorationInfo,
 ): DecorationInfo => {
   if (!partial.sheetInfo || !decorationSprite.sheetInfo) {
     throw new Error("You need dimensions ");
@@ -54,8 +54,8 @@ export function getDecorationTexture(decorationInfo: DecorationInfo): Texture {
     const { offset, dimensions } = decorationInfo.sheetInfo;
     const baseTexture = getOrMakeTexture(decorationInfo.imageName);
     return new Texture(
-      (baseTexture as any) as BaseTexture,
-      new Rectangle(...offset, ...dimensions)
+      baseTexture as any as BaseTexture,
+      new Rectangle(...offset, ...dimensions),
     );
   } else {
     return getOrMakeTexture(decorationInfo.imageName);

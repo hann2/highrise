@@ -104,7 +104,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number
+    maxY: number,
   ) {
     const { x, y } = light.bakedSprite.position;
     const { x: rx, y: ry, width, height } = light.bakedSprite.getLocalBounds();

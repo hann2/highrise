@@ -22,7 +22,7 @@ export default interface EntityPhysics {
     other?: Entity,
     thisShape?: Shape,
     otherShape?: Shape,
-    contactEquations?: ContactEquation[]
+    contactEquations?: ContactEquation[],
   ): void;
   /** Called when a physics contact ends */
   onEndContact?(other?: Entity, thisShape?: Shape, otherShape?: Shape): void;
@@ -31,7 +31,7 @@ export default interface EntityPhysics {
     other?: Entity,
     thisShape?: Shape,
     otherShape?: Shape,
-    contactEquations?: ContactEquation[]
+    contactEquations?: ContactEquation[],
   ): void;
   /** Called when a physics impact happens */
   onImpact?(other?: Entity): void;

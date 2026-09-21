@@ -24,7 +24,7 @@ export default class ContactList {
   endContact(contactInfo: ContactInfo) {
     if (shouldTrack(contactInfo)) {
       const index = this.contacts.findIndex((info) =>
-        contactsAreEqual(info, contactInfo)
+        contactsAreEqual(info, contactInfo),
       );
       this.contacts.splice(index, 1);
     }

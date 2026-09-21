@@ -20,7 +20,7 @@ export default class Light extends BaseEntity implements Entity {
     public lightSprite: Sprite = new Sprite(),
     public shadowsEnabled: boolean = false,
     public shadowRadius: number = 1,
-    public softShadows: boolean = false
+    public softShadows: boolean = false,
   ) {
     super();
 
@@ -44,7 +44,7 @@ export default class Light extends BaseEntity implements Entity {
 
   onAdd() {
     this.lightManager = this.game!.entities.getById(
-      "lighting_manager"
+      "lighting_manager",
     ) as LightingManager;
     this.lightManager.addLight(this);
   }
@@ -58,7 +58,7 @@ export default class Light extends BaseEntity implements Entity {
     this.bakedTexture.resize(
       this.lightSprite.width,
       this.lightSprite.height,
-      true
+      true,
     );
   }
 
@@ -73,13 +73,13 @@ export default class Light extends BaseEntity implements Entity {
       const transform = new Matrix();
       transform.translate(
         this.lightSprite.width * 0.5,
-        this.lightSprite.height * 0.5
+        this.lightSprite.height * 0.5,
       );
       this.game?.renderer.pixiRenderer.render(
         this.container,
         this.bakedTexture,
         true,
-        transform
+        transform,
       );
 
       this.dirty = false;

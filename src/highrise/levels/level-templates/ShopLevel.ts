@@ -34,8 +34,8 @@ export default class ShopLevel extends LevelTemplate {
       shops.push(
         new TransformedRoomTemplate(
           new Shop(this.subFloorInfo),
-          shuffledOrientations[i % shuffledOrientations.length]
-        )
+          shuffledOrientations[i % shuffledOrientations.length],
+        ),
       );
     }
 

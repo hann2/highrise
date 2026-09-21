@@ -15,7 +15,8 @@ const SHAMBLE_SPEED = 0.2;
 
 export default class SimpleEnemyController
   extends BaseEntity
-  implements Entity {
+  implements Entity
+{
   target?: Human;
   moveTarget?: V2d;
   objective?: "SHAMBLE" | "CLOSE_IN" | "SEARCH" | "ATTACK";
@@ -23,7 +24,7 @@ export default class SimpleEnemyController
   constructor(
     public enemy: BaseEnemy,
     private attackRange: number,
-    private bodySize: number
+    private bodySize: number,
   ) {
     super();
   }

@@ -21,7 +21,7 @@ export default class Crawler extends BaseEnemy {
   constructor(
     position: V2d,
     angle: number = rUniform(0, Math.PI * 2),
-    textures?: BodyTextures
+    textures?: BodyTextures,
   ) {
     super(position);
 
@@ -48,7 +48,7 @@ export default class Crawler extends BaseEnemy {
             this.body.position,
             this.body.angle,
             ATTACK_RANGE,
-            ATTACK_ANGLE_RANGE
+            ATTACK_ANGLE_RANGE,
           )) {
             human.inflictDamage(rInteger(10, 15));
           }

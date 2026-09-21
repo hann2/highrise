@@ -131,7 +131,7 @@ export default class LobbyRoomTemplate implements RoomTemplate {
       }
     }
     ELEVATORS.forEach(
-      (e) => (lowResolutionFloorMask[e.cell.x][e.cell.y] = false)
+      (e) => (lowResolutionFloorMask[e.cell.x][e.cell.y] = false),
     );
     return doubleResolution(doubleResolution(lowResolutionFloorMask));
   }
@@ -144,21 +144,21 @@ export default class LobbyRoomTemplate implements RoomTemplate {
 
     const mainTiles: Tiles = insetBorders(
       fillFloorWithBorders(floorMask, directionalCarpet),
-      directionalCarpet
+      directionalCarpet,
     );
 
     const elevatorTiles = insetBorders(
       fillFloorWithBorders(
         doubleResolution(doubleResolution([[true]])),
-        directionalCarpet
+        directionalCarpet,
       ),
-      directionalCarpet
+      directionalCarpet,
     );
 
     const tileScale = V(carpetScale * CELL_SIZE, carpetScale * CELL_SIZE);
 
     entities.push(
-      new TiledFloor(roomToWorldPosition(V(-0.5, -0.5)), tileScale, mainTiles)
+      new TiledFloor(roomToWorldPosition(V(-0.5, -0.5)), tileScale, mainTiles),
     );
 
     ELEVATORS.forEach((e) => {
@@ -166,16 +166,15 @@ export default class LobbyRoomTemplate implements RoomTemplate {
         new TiledFloor(
           roomToWorldPosition(e.cell.add(V(-0.5, -0.5))),
           tileScale,
-          elevatorTiles
-        )
+          elevatorTiles,
+        ),
       );
 
       entities.push(new OverheadLight(roomToWorldPosition(e.cell)));
 
       const doorDimensionsLevelCoords = V(0.25 / CELL_SIZE, 1);
-      const doorDimensionsWorldCoords = doorDimensionsLevelCoords.mul(
-        CELL_SIZE
-      );
+      const doorDimensionsWorldCoords =
+        doorDimensionsLevelCoords.mul(CELL_SIZE);
       const doorUpperLeftCorner = e.cell
         .add(Direction[e.openDirection].mul(0.5))
         .sub(doorDimensionsLevelCoords.mul(0.5));
@@ -184,13 +183,13 @@ export default class LobbyRoomTemplate implements RoomTemplate {
         new ElevatorDoor(
           roomToWorldPosition(doorUpperLeftCorner),
           doorDimensionsWorldCoords,
-          true
-        )
+          true,
+        ),
       );
     });
 
     entities.push(
-      new Decoration(roomToWorldPosition(V(2.5, 4.5)), rug, degToRad(90))
+      new Decoration(roomToWorldPosition(V(2.5, 4.5)), rug, degToRad(90)),
     );
     entities.push(new Heavy(roomToWorldPosition(V(2.5, 3)))); // Hello my name is Bob, the wifi password is BRAIINNNNSS!
     entities.push(new Decoration(roomToWorldPosition(V(2.5, 3.5)), lobbyDesk));
@@ -198,43 +197,43 @@ export default class LobbyRoomTemplate implements RoomTemplate {
       new Decoration(
         roomToWorldPosition(V(-0.15, 5)),
         fancyChair1,
-        degToRad(90)
-      )
+        degToRad(90),
+      ),
     );
     entities.push(
       new Decoration(
         roomToWorldPosition(V(-0.15, 5.47)),
         fancyChair1,
-        degToRad(90)
-      )
+        degToRad(90),
+      ),
     );
     entities.push(new Decoration(roomToWorldPosition(V(0.35, 6)), fancyChair1));
     entities.push(new Decoration(roomToWorldPosition(V(0.85, 6)), fancyChair1));
     entities.push(
       new Decoration(
         roomToWorldPosition(V(-0.15, 6)),
-        choose(endTable1, endTable2)
-      )
+        choose(endTable1, endTable2),
+      ),
     );
     entities.push(
-      new Decoration(roomToWorldPosition(V(0.6, 5)), fancyCoffeeTable1)
-    );
-
-    entities.push(
-      new Decoration(roomToWorldPosition(V(4.2, 5.15)), piano, degToRad(-35))
+      new Decoration(roomToWorldPosition(V(0.6, 5)), fancyCoffeeTable1),
     );
 
     entities.push(
-      new OverheadLight(roomToWorldPosition(V(1, 1)), { radius: 10 })
+      new Decoration(roomToWorldPosition(V(4.2, 5.15)), piano, degToRad(-35)),
+    );
+
+    entities.push(
+      new OverheadLight(roomToWorldPosition(V(1, 1)), { radius: 10 }),
     );
     entities.push(
-      new OverheadLight(roomToWorldPosition(V(4, 1)), { radius: 10 })
+      new OverheadLight(roomToWorldPosition(V(4, 1)), { radius: 10 }),
     );
     entities.push(
-      new OverheadLight(roomToWorldPosition(V(1, 4)), { radius: 10 })
+      new OverheadLight(roomToWorldPosition(V(1, 4)), { radius: 10 }),
     );
     entities.push(
-      new OverheadLight(roomToWorldPosition(V(4, 4)), { radius: 10 })
+      new OverheadLight(roomToWorldPosition(V(4, 4)), { radius: 10 }),
     );
 
     return entities;

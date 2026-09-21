@@ -136,7 +136,7 @@ export default class EntityList implements Iterable<Entity> {
       return [];
     }
     return this.getTagged(tags[0]).filter((e) =>
-      tags.every((t) => e.tags!.includes(t))
+      tags.every((t) => e.tags!.includes(t)),
     );
   }
 

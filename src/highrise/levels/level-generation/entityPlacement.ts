@@ -16,7 +16,7 @@ import { addRooms } from "./roomPlacement";
 export function generateLevelEntities(
   cellGrid: CellGrid,
   levelTemplate: LevelTemplate,
-  seed: number = rInteger(0, 2 ** 32)
+  seed: number = rInteger(0, 2 ** 32),
 ): Entity[] {
   const outerWalls = addOuterWalls([cellGrid.width, cellGrid.height]);
   const {
@@ -28,7 +28,7 @@ export function generateLevelEntities(
   const innerWalls = addInnerWalls(cellGrid);
   const [exitPoint, exitOpenDirection] = findExit(
     cellGrid,
-    cellGrid.spawnLocation
+    cellGrid.spawnLocation,
   );
   const exits = addExit(exitPoint, exitOpenDirection);
   cellGrid.closets = generateClosets(cellGrid);
@@ -80,7 +80,7 @@ function addExit(exitPoint: V2d, openDirection: V2d): Entity[] {
       exitWorldCoords[1] - CELL_SIZE / 2,
       exitWorldCoords[0] + CELL_SIZE / 2,
       exitWorldCoords[1] + CELL_SIZE / 2,
-      openDirection!.angle + Math.PI
+      openDirection!.angle + Math.PI,
     ),
   ];
 }
@@ -92,7 +92,7 @@ function findEnemyLocations(cellGrid: CellGrid): V2d[] {
       cell.content = "zombie";
       for (const direction of DIAGONAL_DIRECTIONS) {
         const p = CellGrid.levelCoordToWorldCoord(
-          cell.position.add(Direction[direction].mul(0.25))
+          cell.position.add(Direction[direction].mul(0.25)),
         );
         locations.push(p);
       }
@@ -103,7 +103,7 @@ function findEnemyLocations(cellGrid: CellGrid): V2d[] {
 
 function addHallwayLights(
   cellGrid: CellGrid,
-  levelTemplate: LevelTemplate
+  levelTemplate: LevelTemplate,
 ): Entity[] {
   const entities: Entity[] = [];
 

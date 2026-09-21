@@ -19,7 +19,7 @@ export default class Bullet extends Projectile implements Entity {
     position: V2d,
     direction: number,
     public stats: BulletStats,
-    public readonly shooter?: Human
+    public readonly shooter?: Human,
   ) {
     super(position, polarToVec(direction, stats.muzzleVelocity));
 

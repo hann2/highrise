@@ -34,14 +34,14 @@ export default class ZombieRoomTemplate implements RoomTemplate {
         radius: 4,
         intensity: 0.8,
         color: 0xb0e0e6,
-      })
+      }),
     );
     entities.push(
       new OverheadLight(roomToWorldPosition(V(1.5, 0.5)), {
         radius: 4,
         intensity: 0.8,
         color: 0xb0e0e6,
-      })
+      }),
     );
     return entities;
   }

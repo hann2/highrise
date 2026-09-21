@@ -42,7 +42,7 @@ export default class TiledFloor extends BaseEntity implements Entity {
           childPosition.x,
           childPosition.y,
           dimensions.x,
-          dimensions.y
+          dimensions.y,
         );
       }
     }

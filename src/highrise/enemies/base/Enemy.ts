@@ -102,7 +102,7 @@ export class BaseEnemy extends Creature implements Hittable {
           this.voice.speak("attack");
         },
         onAttack: () => {},
-      })
+      }),
     );
   }
 
@@ -128,8 +128,8 @@ export class BaseEnemy extends Creature implements Hittable {
     this.game?.addEntity(
       new PositionalSound(
         choose(snd_fleshHit1, snd_fleshHit2, snd_fleshHit3),
-        position
-      )
+        position,
+      ),
     );
 
     this.makeBlood(position, bullet.damage, normal);
@@ -155,7 +155,7 @@ export class BaseEnemy extends Creature implements Hittable {
     if (knockbackAmount) {
       this.stun(clamp((knockbackAmount / 175) * rNormal(1, 0.2), 0, 1));
       this.knockback(
-        this.getPosition().sub(position).inormalize().imul(knockbackAmount)
+        this.getPosition().sub(position).inormalize().imul(knockbackAmount),
       );
     }
 

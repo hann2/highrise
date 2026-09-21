@@ -27,7 +27,7 @@ export default class Decoration extends BaseEntity implements Entity {
     angle: number = 0,
     layerName?: Layer,
     flipX: boolean = false,
-    flipY: boolean = false
+    flipY: boolean = false,
   ) {
     super();
 

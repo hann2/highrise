@@ -79,7 +79,7 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   constructor(
     public readonly soundName: SoundName,
-    private options: SoundOptions = {}
+    private options: SoundOptions = {},
   ) {
     super();
     this.speed = options.speed ?? 1.0;

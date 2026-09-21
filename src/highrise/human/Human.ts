@@ -80,7 +80,7 @@ export default class Human extends BaseEntity implements Entity {
 
   constructor(
     position: V2d = V(0, 0),
-    public character: Character = randomCharacter()
+    public character: Character = randomCharacter(),
   ) {
     super();
 
@@ -180,12 +180,12 @@ export default class Human extends BaseEntity implements Entity {
         // .filter((i) => testLineOfSight(i, this)) // TODO: Fast vision test for interactables
         .filter(
           (i) =>
-            i.getPosition().sub(this.body.position).magnitude < i.maxDistance
+            i.getPosition().sub(this.body.position).magnitude < i.maxDistance,
         )
         .sort(
           (i1, i2) =>
             i1.getPosition().sub(this.body.position).magnitude -
-            i2.getPosition().sub(this.body.position).magnitude
+            i2.getPosition().sub(this.body.position).magnitude,
         )
     );
   }
@@ -246,16 +246,16 @@ export default class Human extends BaseEntity implements Entity {
       duration: 0.05,
       startAction: () => {
         this.game?.addEntity(
-          new PositionalSound(snd_swordSwoosh1, this.getPosition())
+          new PositionalSound(snd_swordSwoosh1, this.getPosition()),
         );
         const enemies = this.game!.entities.getByFilter(isEnemy);
         for (const enemy of enemies) {
           const relPosition = enemy.getPosition().isub(this.getPosition());
           const distance = clampUp(
-            relPosition.magnitude - HUMAN_RADIUS - ZOMBIE_RADIUS
+            relPosition.magnitude - HUMAN_RADIUS - ZOMBIE_RADIUS,
           );
           const theta = Math.abs(
-            angleDelta(relPosition.angle, this.body.angle)
+            angleDelta(relPosition.angle, this.body.angle),
           );
 
           if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
@@ -268,7 +268,7 @@ export default class Human extends BaseEntity implements Entity {
               new PositionalSound(pushSoundRing.getNext(), this.getPosition(), {
                 gain: amount / PUSH_KNOCKBACK,
                 speed: rNormal(1, 0.05),
-              })
+              }),
             );
           }
         }
@@ -310,9 +310,9 @@ export default class Human extends BaseEntity implements Entity {
           new GlowStick(
             this.getPosition(),
             polarToVec(this.getDirection(), rNormal(5, 1)).iadd(
-              this.body.velocity
-            )
-          )
+              this.body.velocity,
+            ),
+          ),
         );
       },
     },

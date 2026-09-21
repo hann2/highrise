@@ -64,7 +64,7 @@ export default class SprinterSprite extends BodySprite {
           shoulders,
           attackStartPositions,
           attackEndPositions,
-          t
+          t,
         );
       }
       case "winddown": {

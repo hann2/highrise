@@ -35,7 +35,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     private minAngle: number,
     private maxAngle: number,
     blocksVision: boolean = true,
-    imageName: string = choose(...DEFAULT_DOOR_SPRITES)
+    imageName: string = choose(...DEFAULT_DOOR_SPRITES),
   ) {
     super();
     this.hingePoint = hingePoint;
@@ -81,7 +81,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
         game.ground,
         this.body,
         this.restingAngle + this.minAngle,
-        this.restingAngle + this.maxAngle
+        this.restingAngle + this.maxAngle,
       ),
     ];
   }
@@ -95,7 +95,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
   onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
     this.body.applyImpulse(
       bullet.velocity.mul(bullet.stats.mass * 0.5),
-      position.sub(this.body.position)
+      position.sub(this.body.position),
     );
 
     this.game!.addEntities([

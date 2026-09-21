@@ -110,7 +110,7 @@ export default class SwingingWeapon extends BaseEntity {
   getWeaponPositionAndAngle(): [V2d, number] {
     // The location of the handle relative to the holder
     const localPosition = this.weapon.swing.getHandlePosition(
-      this.attackProgress
+      this.attackProgress,
     );
 
     // The angle of the weapon relative to the holder

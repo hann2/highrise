@@ -140,7 +140,10 @@ export default class GlowStick extends BaseEntity implements Entity {
 
 // A cheaper, non-moving effect
 class StaticGlowstick extends BaseEntity {
-  constructor(public sprite: Sprite & GameSprite, public light: PointLight) {
+  constructor(
+    public sprite: Sprite & GameSprite,
+    public light: PointLight,
+  ) {
     super();
 
     this.addChild(light, true); // steal it from the original

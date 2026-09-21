@@ -36,7 +36,8 @@ export const VENDING_MACHINE_HIT_SOUNDS = [
 
 export default class VendingMachine
   extends BaseEntity
-  implements Entity, Hittable {
+  implements Entity, Hittable
+{
   interactable?: Interactable;
   dead = false;
   machineSprite: Sprite;
@@ -89,8 +90,8 @@ export default class VendingMachine
         () => {
           this.game?.addEntity(new PositionalSound(quarterDrop1, position));
         },
-        1.2
-      )
+        1.2,
+      ),
     );
   }
 

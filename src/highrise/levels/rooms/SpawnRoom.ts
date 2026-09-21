@@ -48,7 +48,7 @@ export default class SpawnRoom implements RoomTemplate {
       new OverheadLight(roomToWorldPosition(V(1, 1)), {
         radius: 6,
         intensity: 1.0,
-      })
+      }),
     );
 
     entities.push(new SpawnLocation(roomToWorldPosition(V(1, 2))));
@@ -61,7 +61,7 @@ export default class SpawnRoom implements RoomTemplate {
         ? new MeleeWeapon(choose(...MELEE_WEAPONS))
         : new Gun(choose(...GUN_TIERS[0]));
       entities.push(
-        new WeaponPickup(roomToWorldPosition(V(0.5, 0.25)), starterWeapon)
+        new WeaponPickup(roomToWorldPosition(V(0.5, 0.25)), starterWeapon),
       );
     }
 
@@ -74,32 +74,32 @@ export default class SpawnRoom implements RoomTemplate {
         entities.push(
           new WeaponPickup(
             roomToWorldPosition(V(1.5, 0.25)),
-            new Gun(choose(...GUN_TIERS[1]))
-          )
+            new Gun(choose(...GUN_TIERS[1])),
+          ),
         );
         break;
       case 3:
         entities.push(
           new WeaponPickup(
             roomToWorldPosition(V(1.5, 0.25)),
-            new Gun(choose(...GUN_TIERS[1], ...GUN_TIERS[2]))
-          )
+            new Gun(choose(...GUN_TIERS[1], ...GUN_TIERS[2])),
+          ),
         );
         break;
       case 4:
         entities.push(
           new WeaponPickup(
             roomToWorldPosition(V(1.5, 0.25)),
-            new Gun(choose(...GUN_TIERS[2]))
-          )
+            new Gun(choose(...GUN_TIERS[2])),
+          ),
         );
         break;
       case 5:
         entities.push(
           new WeaponPickup(
             roomToWorldPosition(V(1.5, 0.25)),
-            new Gun(choose(...GUN_TIERS[3]))
-          )
+            new Gun(choose(...GUN_TIERS[3])),
+          ),
         );
       default:
     }
@@ -109,19 +109,19 @@ export default class SpawnRoom implements RoomTemplate {
     }
 
     entities.push(
-      new SpawnRoomFloorPaint(roomToWorldPosition(V(1, 1)), this.levelIndex)
+      new SpawnRoomFloorPaint(roomToWorldPosition(V(1, 1)), this.levelIndex),
     );
 
     const centerWorldCoords = roomToWorldPosition(
-      DIMENSIONS.sub(V(1, 1)).mul(0.5)
+      DIMENSIONS.sub(V(1, 1)).mul(0.5),
     );
     const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
     entities.push(
       new RepeatingFloor(
         cementFloor,
         centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
-        dimensionsWorldCoords
-      )
+        dimensionsWorldCoords,
+      ),
     );
 
     return entities;

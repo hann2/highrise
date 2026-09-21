@@ -144,7 +144,7 @@ export default class CellGrid {
   // Grid points are where walls intersect. Grid coordinate x & y values always end in .5
   static getWallInDirectionFromGridPoint(
     gridPoint: V2d,
-    direction: V2d
+    direction: V2d,
   ): WallID {
     const perpDirection = direction.rotate90cw();
     const cell = gridPoint.add(direction.add(perpDirection).mul(0.5));
@@ -158,7 +158,7 @@ export default class CellGrid {
 
   addIndestructibleBox(
     upperRightCorner: V2d,
-    [width, height]: [number, number]
+    [width, height]: [number, number],
   ) {
     if (upperRightCorner.y > 0) {
       for (let i = 0; i < width; i++) {

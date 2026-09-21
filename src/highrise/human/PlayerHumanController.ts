@@ -11,7 +11,8 @@ import Human from "./Human";
 // Maps keyboard/mouse/gamepad input to human actions
 export default class PlayerHumanController
   extends BaseEntity
-  implements Entity {
+  implements Entity
+{
   persistenceLevel = Persistence.Game;
   /** The human being controlled by the player */
 

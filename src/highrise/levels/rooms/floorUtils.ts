@@ -36,7 +36,7 @@ export function doubleResolution(original: FloorMask): FloorMask {
 export function fillTile(
   floorMask: FloorMask,
   directionalSprite: DirectionalSprite,
-  p: V2d
+  p: V2d,
 ): DecorationInfo | undefined {
   if (!isMasked(floorMask, p)) {
     return;
@@ -73,7 +73,7 @@ export function fillTile(
 
 export function fillFloorWithBorders(
   floorMask: FloorMask,
-  directionalSprite: DirectionalSprite
+  directionalSprite: DirectionalSprite,
 ): Tiles {
   const tiles: Tiles = [];
   for (let i = 0; i < floorMask.length; i++) {
@@ -88,7 +88,7 @@ export function fillFloorWithBorders(
 export function insetTile(
   originalSprite: DecorationInfo | undefined,
   directionalSprite: DirectionalSprite,
-  subDirection: keyof typeof Direction
+  subDirection: keyof typeof Direction,
 ): DecorationInfo | undefined {
   if (!originalSprite) {
     return;
@@ -126,9 +126,8 @@ export function insetTile(
     } else if (subDirection === opposite(originalDirection)) {
       return directionalSprite.baseSprites[originalDirection];
     } else {
-      const [horizontalComponent, verticalComponent] = decomposeDiagonal(
-        originalDirection
-      );
+      const [horizontalComponent, verticalComponent] =
+        decomposeDiagonal(originalDirection);
       if (subV.x === originalV.x) {
         return directionalSprite.baseSprites[opposite(horizontalComponent)];
       } else {
@@ -163,7 +162,7 @@ export function insetTile(
  */
 export function insetBorders(
   oldTiles: Tiles,
-  directionalSprite: DirectionalSprite
+  directionalSprite: DirectionalSprite,
 ): Tiles {
   const tiles: Tiles = [];
   for (let i = 0; i < oldTiles.length; i++) {
@@ -173,22 +172,22 @@ export function insetBorders(
       tiles[i * 2][j * 2] = insetTile(
         oldTiles[i][j],
         directionalSprite,
-        "LEFTUP"
+        "LEFTUP",
       );
       tiles[i * 2 + 1][j * 2] = insetTile(
         oldTiles[i][j],
         directionalSprite,
-        "RIGHTUP"
+        "RIGHTUP",
       );
       tiles[i * 2][j * 2 + 1] = insetTile(
         oldTiles[i][j],
         directionalSprite,
-        "LEFTDOWN"
+        "LEFTDOWN",
       );
       tiles[i * 2 + 1][j * 2 + 1] = insetTile(
         oldTiles[i][j],
         directionalSprite,
-        "RIGHTDOWN"
+        "RIGHTDOWN",
       );
     }
   }

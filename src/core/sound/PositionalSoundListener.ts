@@ -9,7 +9,8 @@ function isPositionalSound(e: Entity): e is PositionalSound {
 }
 export default class PositionalSoundListener
   extends BaseEntity
-  implements Entity {
+  implements Entity
+{
   id = "positional_sound_listener";
   persistenceLevel = 100;
   onTick() {}

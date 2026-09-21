@@ -31,7 +31,7 @@ export default class ElementTransformer {
     const transformedDimensions = this.transformVector(dimensions);
     return V(
       Math.abs(transformedDimensions.x),
-      Math.abs(transformedDimensions.y)
+      Math.abs(transformedDimensions.y),
     );
   }
 

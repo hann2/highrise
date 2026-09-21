@@ -70,7 +70,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
         shadowsEnabled: true,
         softShadows: true,
         position: [this.sprite.position.x, this.sprite.position.y],
-      })
+      }),
     );
   }
 

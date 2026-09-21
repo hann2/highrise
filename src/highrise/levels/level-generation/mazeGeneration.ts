@@ -14,7 +14,7 @@ import CellGrid, { WallID } from "./CellGrid";
 export function buildMaze(
   cellGrid: CellGrid,
   seed: number,
-  maziness: number = 1
+  maziness: number = 1,
 ) {
   type UpTree = (number[] | null)[][];
 

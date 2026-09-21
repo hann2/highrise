@@ -10,7 +10,7 @@ export function startAtRandomOffset(source: AudioBufferSourceNode): void {
 
 export function createLoopingSource(
   audioContext: AudioContext,
-  soundName: SoundName
+  soundName: SoundName,
 ): AudioBufferSourceNode {
   const source = audioContext.createBufferSource();
   source.buffer = getSoundBuffer(soundName);

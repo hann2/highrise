@@ -23,7 +23,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
   constructor(
     [x1, y1]: [number, number],
     [x2, y2]: [number, number],
-    private type: WallType = SolidWall
+    private type: WallType = SolidWall,
   ) {
     super();
 

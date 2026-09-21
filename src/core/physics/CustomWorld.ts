@@ -32,7 +32,7 @@ interface WorldPrivate extends World {
     xj: [number, number],
     aj: number,
     cm: ContactMaterial,
-    glen: number
+    glen: number,
   ) => void;
 }
 
@@ -242,7 +242,7 @@ export default class CustomWorld extends World {
             }
           }
 
-          ((this as unknown) as WorldPrivate).runNarrowphase(
+          (this as unknown as WorldPrivate).runNarrowphase(
             np,
             bi,
             si,
@@ -253,7 +253,7 @@ export default class CustomWorld extends World {
             xj,
             aj,
             cm,
-            this.frictionGravity
+            this.frictionGravity,
           );
         }
       }
@@ -368,7 +368,7 @@ export default class CustomWorld extends World {
     // Emit impact event
     if (
       this.emitImpactEvent &&
-      ((this as unknown) as WorldPrivate).has("impact")
+      (this as unknown as WorldPrivate).has("impact")
     ) {
       var ev = this.impactEvent;
       for (var i = 0; i !== np.contactEquations.length; i++) {
@@ -411,8 +411,7 @@ export default class CustomWorld extends World {
 
   stepCleanup() {
     // Remove bodies that are scheduled for removal
-    var bodiesToBeRemoved = ((this as unknown) as WorldPrivate)
-      .bodiesToBeRemoved;
+    var bodiesToBeRemoved = (this as unknown as WorldPrivate).bodiesToBeRemoved;
     for (var i = 0; i !== bodiesToBeRemoved.length; i++) {
       this.removeBody(bodiesToBeRemoved[i]);
     }

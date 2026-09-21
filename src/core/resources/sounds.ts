@@ -39,7 +39,7 @@ export function getSoundFileSize(url: SoundName): number {
 
 export async function loadSound(
   url: string,
-  audioContext: AudioContext
+  audioContext: AudioContext,
 ): Promise<AudioBuffer> {
   return fetch(url)
     .then((response) => {

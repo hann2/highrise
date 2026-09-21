@@ -8,7 +8,7 @@ import CellGrid, { DoorBuilder, WallID } from "./CellGrid";
 export function wallIDToDoorBuilder(
   wallID: WallID,
   reverseHinge: boolean = false,
-  chainLink: boolean = false
+  chainLink: boolean = false,
 ): DoorBuilder {
   const [cell, right] = wallID;
   let restingDirection = right ? Direction.DOWN : Direction.RIGHT;
@@ -31,7 +31,7 @@ export function wallIDToDoorBuilder(
 
 export function buildDoorEntity(
   cellGrid: CellGrid,
-  doorBuilder: DoorBuilder
+  doorBuilder: DoorBuilder,
 ): Entity {
   // Used to determine how far a door can swing before it will hit a wall.
   const countConsecutiveWallsThatExist = (walls: WallID[]) => {
@@ -56,14 +56,14 @@ export function buildDoorEntity(
   const hingePoint = doorBuilder.hingePoint;
 
   const dIndex = directionsClockwise.findIndex(
-    (dir) => dir.x === doorDirection.x && dir.y === doorDirection.y
+    (dir) => dir.x === doorDirection.x && dir.y === doorDirection.y,
   );
 
   const wallsClockwiseFromHingePoint: WallID[] = [];
   for (let i = 0; i < 3; i++) {
     const wall = CellGrid.getWallInDirectionFromGridPoint(
       hingePoint,
-      directionsClockwise[(i + dIndex + 1) % 4]
+      directionsClockwise[(i + dIndex + 1) % 4],
     );
     wallsClockwiseFromHingePoint.push(wall);
   }
@@ -72,10 +72,10 @@ export function buildDoorEntity(
     ...wallsClockwiseFromHingePoint,
   ].reverse();
   const ccwWallCount = countConsecutiveWallsThatExist(
-    wallsCounterClockwiseFromHingePoint
+    wallsCounterClockwiseFromHingePoint,
   );
   const cwWallCount = countConsecutiveWallsThatExist(
-    wallsClockwiseFromHingePoint
+    wallsClockwiseFromHingePoint,
   );
   const minAngle = (ccwWallCount - 0.1) * -(Math.PI / 2);
   const maxAngle = (cwWallCount - 0.1) * (Math.PI / 2);
@@ -87,6 +87,6 @@ export function buildDoorEntity(
     minAngle,
     maxAngle,
     !doorBuilder.chainLink,
-    doorBuilder.chainLink ? img_chainLinkFence : undefined
+    doorBuilder.chainLink ? img_chainLinkFence : undefined,
   );
 }

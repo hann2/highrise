@@ -12,9 +12,7 @@ export interface GameSprite extends DisplayObject, WithOwner {
  * A thing that responds to game events.
  */
 export default interface Entity
-  extends GameEventHandler,
-    EntityPhysics,
-    IOEventHandler {
+  extends GameEventHandler, EntityPhysics, IOEventHandler {
   /** The game this entity belongs to. This should only be set by the Game. */
   game: Game | undefined;
 

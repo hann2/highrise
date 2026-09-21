@@ -129,7 +129,7 @@ export class GameRenderer2d {
 
   removeStageFilter(filterToRemove: Pixi.Filter): void {
     this.stage.filters = (this.stage.filters ?? []).filter(
-      (filter) => filter != filterToRemove
+      (filter) => filter != filterToRemove,
     );
   }
 }

@@ -13,7 +13,7 @@ export const NUBBY_DECORATORS: NubbyDecorator[] = [
     return [
       new VendingMachine(
         CellGrid.levelCoordToWorldCoord(machinePosition),
-        wallDirection.angle + Math.PI / 2
+        wallDirection.angle + Math.PI / 2,
       ),
     ];
   },
@@ -23,7 +23,7 @@ export const NUBBY_DECORATORS: NubbyDecorator[] = [
       new Decoration(
         CellGrid.levelCoordToWorldCoord(machinePosition),
         waterCooler,
-        wallDirection.angle
+        wallDirection.angle,
       ),
     ];
   },

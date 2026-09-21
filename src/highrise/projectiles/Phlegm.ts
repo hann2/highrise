@@ -31,7 +31,7 @@ export default class Phlegm extends Projectile implements Entity {
     speed: number = 8,
     public damage: number = 15,
     public readonly shooter?: Spitter,
-    public mass: number = 0.25
+    public mass: number = 0.25,
   ) {
     super(position, polarToVec(direction, speed));
 
@@ -63,7 +63,7 @@ export default class Phlegm extends Projectile implements Entity {
     this.sprites = [this.mainSprite, this.glowSprite];
 
     this.light = this.addChild(
-      new PointLight({ radius: 1, shadowsEnabled: false, position, color })
+      new PointLight({ radius: 1, shadowsEnabled: false, position, color }),
     );
 
     this.renderPosition = position.clone();

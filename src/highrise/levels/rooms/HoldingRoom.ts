@@ -37,15 +37,15 @@ export default class HoldingRoom implements RoomTemplate {
   }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
     const centerWorldCoords = roomToWorldPosition(
-      DIMENSIONS.sub(V(1, 1)).mul(0.5)
+      DIMENSIONS.sub(V(1, 1)).mul(0.5),
     );
     const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
     entities.push(
       new RepeatingFloor(
         this.floor,
         centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
-        dimensionsWorldCoords
-      )
+        dimensionsWorldCoords,
+      ),
     );
     entities.push(new Zombie(roomToWorldPosition(V(0, 0))));
     entities.push(new Zombie(roomToWorldPosition(V(1, 0))));
@@ -59,8 +59,8 @@ export default class HoldingRoom implements RoomTemplate {
           radius: 5,
           intensity: 0.7,
         },
-        false
-      )
+        false,
+      ),
     );
     return entities;
   }

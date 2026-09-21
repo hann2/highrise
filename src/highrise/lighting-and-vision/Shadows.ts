@@ -20,7 +20,7 @@ export class Shadows extends BaseEntity implements Entity {
   constructor(
     private lightPos: V2d,
     private radius: number = 10,
-    private checkDynamicBodies = false
+    private checkDynamicBodies = false,
   ) {
     super();
     this.graphics = new Graphics();
@@ -95,12 +95,12 @@ export class Shadows extends BaseEntity implements Entity {
             // left breaking point
             shadowPoints.push(point);
             shadowPoints.push(
-              getDisplacedPoint(point, lightPos, shadowDistance)
+              getDisplacedPoint(point, lightPos, shadowDistance),
             );
           } else if (!previousEdge && nextEdge) {
             // right breaking point
             shadowPoints.push(
-              getDisplacedPoint(point, lightPos, shadowDistance)
+              getDisplacedPoint(point, lightPos, shadowDistance),
             );
             shadowPoints.push(point);
           } else if (previousEdge && nextEdge) {
@@ -109,7 +109,7 @@ export class Shadows extends BaseEntity implements Entity {
           } else {
             // back side
             shadowPoints.push(
-              getDisplacedPoint(point, lightPos, shadowDistance)
+              getDisplacedPoint(point, lightPos, shadowDistance),
             );
           }
         }
@@ -141,10 +141,10 @@ export class Shadows extends BaseEntity implements Entity {
           upperBound: center.add([this.radius, this.radius]),
         }),
         [],
-        this.checkDynamicBodies
+        this.checkDynamicBodies,
       )
       .filter((body: Body & WithOwner) =>
-        body.owner?.tags?.includes?.("cast_shadow")
+        body.owner?.tags?.includes?.("cast_shadow"),
       );
   }
 }
@@ -153,7 +153,7 @@ export class Shadows extends BaseEntity implements Entity {
 function getDisplacedPoint(
   point: [number, number],
   lightPos: [number, number],
-  distance: number
+  distance: number,
 ): [number, number] {
   const result = vec2.create();
   vec2.sub(result, point, lightPos);

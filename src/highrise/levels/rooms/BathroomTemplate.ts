@@ -191,25 +191,25 @@ export default class BathroomTemplate implements RoomTemplate {
         radius: 7,
         intensity: 0.8,
         color: 0xfafaff,
-      })
+      }),
     );
     entities.push(
       new OverheadLight(roomToWorldPosition(V(0.35, 0.75)), {
         radius: 7,
         intensity: 0.8,
         color: 0xfafaff,
-      })
+      }),
     );
     const centerWorldCoords = roomToWorldPosition(
-      DIMENSIONS.sub(V(1, 1)).mul(0.5)
+      DIMENSIONS.sub(V(1, 1)).mul(0.5),
     );
     const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
     entities.push(
       new RepeatingFloor(
         this.style.floor,
         centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
-        dimensionsWorldCoords
-      )
+        dimensionsWorldCoords,
+      ),
     );
 
     return entities;

@@ -21,7 +21,7 @@ export default class MusicController extends BaseEntity implements Entity {
         reactToSlowMo: false,
         persistenceLevel: Persistence.Permanent,
         pauseable: false,
-      })
+      }),
     );
   }
 
@@ -35,7 +35,7 @@ export default class MusicController extends BaseEntity implements Entity {
       (_, t) => {
         this.soundInstance.gain = t ** 2 * MUSIC_VOLUME;
       },
-      "fade"
+      "fade",
     );
     this.soundInstance.gain = MUSIC_VOLUME;
   }

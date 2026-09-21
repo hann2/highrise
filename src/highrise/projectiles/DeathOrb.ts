@@ -29,7 +29,7 @@ export default class DeathOrb extends BaseEntity implements Entity {
     speed: number = 15,
     public damage: number = 40,
     public readonly shooter?: Spitter,
-    public mass: number = 0.25
+    public mass: number = 0.25,
   ) {
     super();
 
@@ -89,7 +89,7 @@ export default class DeathOrb extends BaseEntity implements Entity {
   }
 
   checkForCollision(
-    dt: number
+    dt: number,
   ): { hit: Entity; hitNormal: V2d; hitPosition: V2d } | undefined {
     this.raycastResult.reset();
     this.ray.to = this.position.addScaled(this.velocity, dt);

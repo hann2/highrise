@@ -68,7 +68,7 @@ export default class LevelTemplate {
       entities.push(
         new OverheadLight(CellGrid.levelCoordToWorldCoord(cell), {
           intensity: 0.2,
-        })
+        }),
       );
     }
 
@@ -150,17 +150,17 @@ export default class LevelTemplate {
 
     if (this.levelIndex >= 2) {
       pickups.push(
-        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[1])))
+        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[1]))),
       );
     }
     if (this.levelIndex >= 4) {
       pickups.push(
-        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[2])))
+        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[2]))),
       );
     }
     if (this.levelIndex >= 5) {
       pickups.push(
-        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[3])))
+        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[3]))),
       );
     }
 
@@ -175,7 +175,7 @@ export default class LevelTemplate {
         {
           radius: 5,
           intensity: 0.3,
-        }
+        },
       );
     }
   }

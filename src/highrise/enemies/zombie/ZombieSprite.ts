@@ -63,7 +63,7 @@ export default class ZombieSprite extends BodySprite {
           shoulders,
           attackStartPositions,
           attackEndPositions,
-          t
+          t,
         );
       }
       case "winddown": {

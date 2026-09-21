@@ -56,8 +56,8 @@ export default class Spitter extends BaseEnemy {
               this.body.angle,
               PHLEGM_SPEED,
               DAMAGE,
-              this
-            )
+              this,
+            ),
           );
         }
       },

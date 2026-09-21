@@ -33,7 +33,7 @@ export class PositionalSound extends SoundInstance implements Entity {
   constructor(
     soundName: SoundName,
     private position: V2d = V(0, 0),
-    options: PositionalSoundOptions = {}
+    options: PositionalSoundOptions = {},
   ) {
     super(soundName, options);
     this.maxDistance = options.maxDistance ?? FALL_OFF_DISTANCE;

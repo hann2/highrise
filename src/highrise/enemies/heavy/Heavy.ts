@@ -69,14 +69,14 @@ export default class Heavy extends BaseEnemy {
             this.game,
             this.body.position,
             this.body.angle,
-            ATTACK_RANGE
+            ATTACK_RANGE,
           )) {
             human.inflictDamage(rInteger(30, 45));
 
             this.game?.addEntity(
               new PositionalSound(hitSoundRing.getNext(), this.getPosition(), {
                 speed: rNormal(0.75, 0.1),
-              })
+              }),
             );
           }
         }

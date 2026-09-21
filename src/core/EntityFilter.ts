@@ -44,12 +44,12 @@ type IOEventHandlerWithOnButtonDown = IOEventHandler & {
   onButtonDown: Function;
 };
 export const hasOnButtonDown = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnButtonDown => Boolean(e.onButtonDown);
 
 type IOEventHandlerWithOnButtonUp = IOEventHandler & { onButtonUp: Function };
 export const hasOnButtonUp = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnButtonUp => Boolean(e.onButtonUp);
 
 type IOEventHandlerWithOnClick = IOEventHandler & { onClick: Function };
@@ -58,7 +58,7 @@ export const hasOnClick = (e: IOEventHandler): e is IOEventHandlerWithOnClick =>
 
 type IOEventHandlerWithOnKeyDown = IOEventHandler & { onKeyDown: Function };
 export const hasOnKeyDown = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnKeyDown => Boolean(e.onKeyDown);
 
 type IOEventHandlerWithOnKeyUp = IOEventHandler & { onKeyUp: Function };
@@ -67,34 +67,34 @@ export const hasOnKeyUp = (e: IOEventHandler): e is IOEventHandlerWithOnKeyUp =>
 
 type IOEventHandlerWithOnMouseDown = IOEventHandler & { onMouseDown: Function };
 export const hasOnMouseDown = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnMouseDown => Boolean(e.onMouseDown);
 
 type IOEventHandlerWithOnMouseUp = IOEventHandler & { onMouseUp: Function };
 export const hasOnMouseUp = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnMouseUp => Boolean(e.onMouseUp);
 
 type IOEventHandlerWithOnRightClick = IOEventHandler & {
   onRightClick: Function;
 };
 export const hasOnRightClick = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnRightClick => Boolean(e.onRightClick);
 
 type IOEventHandlerWithOnRightDown = IOEventHandler & { onRightDown: Function };
 export const hasOnRightDown = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnRightDown => Boolean(e.onRightDown);
 
 type IOEventHandlerWithOnRightUp = IOEventHandler & { onRightUp: Function };
 export const hasOnRightUp = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnRightUp => Boolean(e.onRightUp);
 
 type IOEventHandlerWithOnInputDeviceChange = IOEventHandler & {
   onInputDeviceChange: Function;
 };
 export const hasOnInputDeviceChange = (
-  e: IOEventHandler
+  e: IOEventHandler,
 ): e is IOEventHandlerWithOnInputDeviceChange => Boolean(e.onInputDeviceChange);

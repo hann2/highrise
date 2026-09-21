@@ -14,7 +14,7 @@ export class OverheadLight extends BaseEntity implements Entity {
   constructor(
     public position: V2d,
     public options: PointLightOptions = {},
-    startsOn: boolean = true
+    startsOn: boolean = true,
   ) {
     super();
 
@@ -38,7 +38,7 @@ export class OverheadLight extends BaseEntity implements Entity {
   turnLightOn() {
     this.addLight();
     this.addChild(
-      new PositionalSound(snd_lightPowerOn1, this.position, { gain: 0.1 })
+      new PositionalSound(snd_lightPowerOn1, this.position, { gain: 0.1 }),
     );
   }
 
@@ -52,7 +52,7 @@ export class OverheadLight extends BaseEntity implements Entity {
         softShadows: true,
         color: 0xffffff,
         ...this.options,
-      })
+      }),
     );
   }
 }

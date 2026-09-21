@@ -49,7 +49,7 @@ export default class TutorialRoomTemplate implements RoomTemplate {
       }),
       new FloorPaint(
         toWorld(V(0.5, 1.5)),
-        (usingGamepad) => `${usingGamepad ? "LB" : "Q"} to throw\nglowstick`
+        (usingGamepad) => `${usingGamepad ? "LB" : "Q"} to throw\nglowstick`,
       ),
       new Wall(toWorld(V(1.5, 2.5)), toWorld(V(1.5, 0.5))),
       new Wall(toWorld(V(2.5, -0.5)), toWorld(V(2.5, 1.5))),
@@ -58,8 +58,8 @@ export default class TutorialRoomTemplate implements RoomTemplate {
         CELL_SIZE,
         degToRad(90),
         degToRad(-170),
-        degToRad(170)
-      )
+        degToRad(170),
+      ),
     );
 
     for (let i = 3; i < DIMENSIONS[0]; i++) {
@@ -72,9 +72,9 @@ export default class TutorialRoomTemplate implements RoomTemplate {
       new Wall(toWorld(V(4.5, 2.5)), toWorld(V(4.5, 0.5))),
       new FloorPaint(
         toWorld(V(3.5, 1.5)),
-        (usingGamepad) => `${usingGamepad ? "A" : "Space"} to\npush`
+        (usingGamepad) => `${usingGamepad ? "A" : "Space"} to\npush`,
       ),
-      new Crawler(toWorld(V(3.5, 0)))
+      new Crawler(toWorld(V(3.5, 0))),
     );
 
     // Gun room
@@ -82,27 +82,27 @@ export default class TutorialRoomTemplate implements RoomTemplate {
       new Wall(toWorld(V(7, 1.75)), toWorld(V(7, -0.5))),
       new FloorPaint(
         toWorld(V(5.75, 0.25)),
-        (usingGamepad) => `${usingGamepad ? "X" : "E"} to pick\nup weapon`
+        (usingGamepad) => `${usingGamepad ? "X" : "E"} to pick\nup weapon`,
       ),
       new WeaponPickup(toWorld(V(5.75, 1)), new Gun(M1911)),
       new FloorPaint(
         toWorld(V(5.75, 1.75)),
-        (usingGamepad) => `${usingGamepad ? "RT" : "Click"} to\nshoot`
-      )
+        (usingGamepad) => `${usingGamepad ? "RT" : "Click"} to\nshoot`,
+      ),
     );
 
     // Reload Room
     entities.push(
       new FloorPaint(
         toWorld(V(8.25, 1.75)),
-        (usingGamepad) => `${usingGamepad ? "X" : "R"} to\nreload`
+        (usingGamepad) => `${usingGamepad ? "X" : "R"} to\nreload`,
       ),
       new Crawler(toWorld(V(8, 0))),
       new Crawler(toWorld(V(8.5, 0))),
       new FloorPaint(
         toWorld(V(8.25, 0.25)),
-        () => `Find the stairs\nto advance`
-      )
+        () => `Find the stairs\nto advance`,
+      ),
     );
 
     return entities;
@@ -118,7 +118,7 @@ export class FloorPaint extends BaseEntity implements Entity {
 
   constructor(
     [x, y]: [number, number],
-    private getText: (usingGamepad: boolean) => string
+    private getText: (usingGamepad: boolean) => string,
   ) {
     super();
 

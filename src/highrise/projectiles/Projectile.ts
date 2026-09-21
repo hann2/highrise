@@ -13,7 +13,10 @@ export class Projectile extends BaseEntity implements Entity {
   hitPosition?: V2d;
   renderPosition: V2d;
 
-  constructor(public position: V2d, public velocity: V2d) {
+  constructor(
+    public position: V2d,
+    public velocity: V2d,
+  ) {
     super();
 
     this.ray = new Ray({

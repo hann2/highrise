@@ -38,7 +38,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
   constructor(
     staticCorner: V2d,
     oppositeCorner: V2d,
-    verticalMovement: boolean
+    verticalMovement: boolean,
   ) {
     super();
 
@@ -74,7 +74,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
   setOpenPercentage(openPercentage: number) {
     const delta = V(
       this.dimensions.x * (this.verticalMovement ? 1 : 1 - openPercentage),
-      this.dimensions.y * (this.verticalMovement ? 1 - openPercentage : 1)
+      this.dimensions.y * (this.verticalMovement ? 1 - openPercentage : 1),
     );
 
     this.sprite.clear();
@@ -91,7 +91,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
 
   onBulletHit(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
-      new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position)
+      new PositionalSound(choose(snd_wallHit1, snd_wallHit2), position),
     );
     return true;
   }
@@ -110,7 +110,7 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
   constructor(
     upperLeftCorner: V2d,
     dimensions: V2d,
-    verticalMovement: boolean
+    verticalMovement: boolean,
   ) {
     super();
 
@@ -122,23 +122,23 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
       this.topDoor = new HalfDoor(
         upperLeftCorner,
         upperLeftCorner.add(V(w, h / 2)),
-        verticalMovement
+        verticalMovement,
       );
       this.bottomDoor = new HalfDoor(
         upperLeftCorner.add(V(0, h)),
         upperLeftCorner.add(V(w, h / 2)),
-        verticalMovement
+        verticalMovement,
       );
     } else {
       this.topDoor = new HalfDoor(
         V(x - w / 2, y - h / 2),
         V(x, y + h / 2),
-        verticalMovement
+        verticalMovement,
       );
       this.bottomDoor = new HalfDoor(
         V(x + w / 2, y - h / 2),
         V(x, y + h / 2),
-        verticalMovement
+        verticalMovement,
       );
     }
 
@@ -148,8 +148,8 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
     this.addChild(
       new Interactable(
         upperLeftCorner.add(dimensions.mul(0.5)),
-        this.onInteract.bind(this)
-      )
+        this.onInteract.bind(this),
+      ),
     );
   }
 

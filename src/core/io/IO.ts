@@ -52,7 +52,7 @@ export class IOManager {
     // Because this is a polling not pushing interface
     window.setInterval(
       () => this.handleGamepads(),
-      1000 / GAMEPAD_POLLING_FREQUENCY
+      1000 / GAMEPAD_POLLING_FREQUENCY,
     );
   }
 
@@ -256,7 +256,7 @@ export class IOManager {
       }
       const gamepadRange = GAMEPAD_MAXIMUM - GAMEPAD_MINIMUM;
       axes.magnitude = clampUp(
-        (axes.magnitude - GAMEPAD_MINIMUM) / gamepadRange
+        (axes.magnitude - GAMEPAD_MINIMUM) / gamepadRange,
       );
       axes.x = clamp(axes.x, -1, 1);
       axes.y = clamp(axes.y, -1, 1);

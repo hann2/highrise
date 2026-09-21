@@ -24,7 +24,10 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   leftHandSprite: Sprite;
   rightHandSprite: Sprite;
 
-  constructor(private textures: BodyTextures, private radius: number) {
+  constructor(
+    private textures: BodyTextures,
+    private radius: number,
+  ) {
     super();
 
     this.sprite = new Sprite();

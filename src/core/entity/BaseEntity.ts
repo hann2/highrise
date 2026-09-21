@@ -97,7 +97,7 @@ export default abstract class BaseEntity implements Entity {
   wait(
     delay: number = 0,
     onTick?: (dt: number, t: number) => void,
-    timerId?: string
+    timerId?: string,
   ): Promise<void> {
     return new Promise((resolve) => {
       const timer = new Timer(delay, () => resolve(), onTick, timerId);
@@ -119,7 +119,7 @@ export default abstract class BaseEntity implements Entity {
             timer.timeRemaining = 0;
           }
         },
-        timerId
+        timerId,
       );
       timer.persistenceLevel = this.persistenceLevel;
       this.addChild(timer);
@@ -164,7 +164,7 @@ class Timer extends BaseEntity implements Entity {
     private delay: number,
     endEffect?: () => void,
     duringEffect?: (dt: number, t: number) => void,
-    public timerId?: string
+    public timerId?: string,
   ) {
     super();
     this.timeRemaining = delay;

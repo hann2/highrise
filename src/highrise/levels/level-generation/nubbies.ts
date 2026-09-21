@@ -7,7 +7,7 @@ import CellGrid from "./CellGrid";
 
 export function fillNubbies(
   cellGrid: CellGrid,
-  levelTemplate: LevelTemplate
+  levelTemplate: LevelTemplate,
 ): Entity[] {
   const entities: Entity[] = [];
 
@@ -36,7 +36,7 @@ export function fillNubbies(
       const wallDirection = openDirection!;
 
       entities.push(
-        ...levelTemplate.getNubbyDecorations(cell.position, wallDirection)
+        ...levelTemplate.getNubbyDecorations(cell.position, wallDirection),
       );
     }
   }

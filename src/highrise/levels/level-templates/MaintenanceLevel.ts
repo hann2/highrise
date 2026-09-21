@@ -54,26 +54,26 @@ export default class MaintenanceLevel extends LevelTemplate {
     rooms.push(
       new TransformedRoomTemplate(
         new LightSwitchRoomTemplate(this.roomFloor),
-        shuffledOrientations[0]
-      )
+        shuffledOrientations[0],
+      ),
     );
     rooms.push(
       new TransformedRoomTemplate(
         new HoldingRoom(this.roomFloor),
-        shuffledOrientations[1]
-      )
+        shuffledOrientations[1],
+      ),
     );
     rooms.push(
       new TransformedRoomTemplate(
         new HoldingRoom(this.roomFloor),
-        shuffledOrientations[2]
-      )
+        shuffledOrientations[2],
+      ),
     );
     rooms.push(
       new TransformedRoomTemplate(
         new HoldingRoom(this.roomFloor),
-        shuffledOrientations[3]
-      )
+        shuffledOrientations[3],
+      ),
     );
 
     return rooms;
@@ -98,7 +98,7 @@ export default class MaintenanceLevel extends LevelTemplate {
         radius: 5,
         intensity: 0.7,
       },
-      false
+      false,
     );
   }
 }

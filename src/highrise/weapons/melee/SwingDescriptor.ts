@@ -26,7 +26,7 @@ export class SwingDescriptor {
     // Handle position while resting
     public restPosition: [number, number] = [0, 0],
     // Handle position while swinging
-    public swingPosition: [number, number] = [0, 0]
+    public swingPosition: [number, number] = [0, 0],
   ) {}
 
   // Total duration of the swing in seconds

@@ -21,8 +21,8 @@ export default class ChapelLevel extends LevelTemplate {
     rooms.push(
       new TransformedRoomTemplate(
         new ZombieRoomTemplate(this.levelIndex),
-        shuffledOrientations[2]
-      )
+        shuffledOrientations[2],
+      ),
     );
 
     return rooms;

@@ -17,10 +17,10 @@ export const CLOSET_DECORATORS: Array<ClosetDecorator> = [
   (closet) => [
     new Decoration(
       CellGrid.levelCoordToWorldCoord(
-        closet.backCell.add(closet.backWallDirection.mul(-0.2))
+        closet.backCell.add(closet.backWallDirection.mul(-0.2)),
       ),
       choose(boxPile1, boxPile2),
-      closet.backWallDirection.angle + Math.PI
+      closet.backWallDirection.angle + Math.PI,
     ),
   ],
   (closet) => [
@@ -30,21 +30,21 @@ export const CLOSET_DECORATORS: Array<ClosetDecorator> = [
           closet.backWallDirection
             .mul(-0.25)
             .add(
-              closet.backWallDirection.rotate90cw().mul(choose(-0.1, 0, 0.1))
-            )
-        )
+              closet.backWallDirection.rotate90cw().mul(choose(-0.1, 0, 0.1)),
+            ),
+        ),
       ),
       choose(boxShelf1, boxShelf2),
-      closet.backWallDirection.angle + Math.PI
+      closet.backWallDirection.angle + Math.PI,
     ),
   ],
   (closet) => [
     new Decoration(
       CellGrid.levelCoordToWorldCoord(
-        closet.backCell.add(closet.backWallDirection.mul(-0.22))
+        closet.backCell.add(closet.backWallDirection.mul(-0.22)),
       ),
       choose(bookcase1, bookcase2),
-      closet.backWallDirection.angle + Math.PI
+      closet.backWallDirection.angle + Math.PI,
     ),
   ],
 ];

@@ -14,7 +14,7 @@ export default class ClickableText extends BaseEntity implements Entity {
   constructor(
     text: string,
     onSpriteClick: () => void,
-    { inactiveColor = "#dddddd", activeColor = "#ffffff" }: Options = {}
+    { inactiveColor = "#dddddd", activeColor = "#ffffff" }: Options = {},
   ) {
     super();
 

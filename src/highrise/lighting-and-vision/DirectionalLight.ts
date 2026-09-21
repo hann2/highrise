@@ -10,7 +10,7 @@ export class DirectionalLight extends Light {
     private _width: number = degToRad(30),
     intensity: number = 1.0,
     color: number = 0xffffff,
-    shadowsEnabled: boolean = true
+    shadowsEnabled: boolean = true,
   ) {
     super(undefined, shadowsEnabled);
 

@@ -18,7 +18,7 @@ export class LaserSight extends BaseEntity implements Entity {
     private getEmitterPosition: () => V2d,
     private getAngle: () => number,
     public maxDistance = 10,
-    public color: number = 0xff0000
+    public color: number = 0xff0000,
   ) {
     super();
 

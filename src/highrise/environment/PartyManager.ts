@@ -55,12 +55,12 @@ export default class PartyManager extends BaseEntity implements Entity {
 
     startLevel: async ({ level }: { level: Level }) => {
       const spawnLocations = level.entities.filter(
-        (entity): entity is SpawnLocation => entity instanceof SpawnLocation
+        (entity): entity is SpawnLocation => entity instanceof SpawnLocation,
       );
 
       this.partyMembers.forEach((partyMember, i) => {
         partyMember.setPosition(
-          spawnLocations[i % spawnLocations.length].position
+          spawnLocations[i % spawnLocations.length].position,
         );
       });
 

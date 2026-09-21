@@ -55,7 +55,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     });
 
     this.creditsButton = this.addChild(
-      new ClickableText("Credits", () => this.rollCredits())
+      new ClickableText("Credits", () => this.rollCredits()),
     );
     this.creditsButton.sprite.anchor.set(1, 1);
     (this.creditsButton.sprite as Text).style.align = "right";

@@ -100,13 +100,13 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
 
 export function getCurrentGraphicsQuality(game: Game): GraphicsQuality {
   const controller = game.entities.getById(
-    "graphicsQualityController"
+    "graphicsQualityController",
   ) as GraphicsQualityController;
   return controller.currentQuality;
 }
 
 export function getResolutionForGraphicsQuality(
-  quality: GraphicsQuality
+  quality: GraphicsQuality,
 ): number {
   switch (quality) {
     case GraphicsQuality.Low:

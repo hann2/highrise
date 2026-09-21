@@ -23,8 +23,8 @@ export default class BathroomLevel extends LevelTemplate {
       rooms.push(
         new TransformedRoomTemplate(
           new BathroomTemplate(BATHROOM_STYLES[i]),
-          shuffledOrientations[i % shuffledOrientations.length]
-        )
+          shuffledOrientations[i % shuffledOrientations.length],
+        ),
       );
       break;
     }

@@ -34,7 +34,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     velocity: V2d,
     private rotation: number,
     texture: string,
-    sounds: SoundName[]
+    sounds: SoundName[],
   ) {
     super();
 
@@ -78,7 +78,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
         const speed = rNormal(1, 0.05);
         const position = this.getPosition();
         this.game?.addEntity(
-          new PositionalSound(sound, position, { gain, speed })
+          new PositionalSound(sound, position, { gain, speed }),
         );
 
         this.zVelocity *= -BOUNCE_RESTITUTION;

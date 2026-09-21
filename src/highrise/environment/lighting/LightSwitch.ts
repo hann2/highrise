@@ -25,7 +25,10 @@ export class LightSwitch extends BaseEntity implements Entity {
   light: PointLight;
   on: boolean = false;
 
-  constructor(public position: V2d, public direction: number) {
+  constructor(
+    public position: V2d,
+    public direction: number,
+  ) {
     super();
 
     this.light = this.addChild(new PointLight({ position, color: 0xff0000 }));
@@ -38,7 +41,7 @@ export class LightSwitch extends BaseEntity implements Entity {
       corner.x,
       corner.y,
       SWITCH_BOX_DIMENSIONS.x,
-      SWITCH_BOX_DIMENSIONS.y
+      SWITCH_BOX_DIMENSIONS.y,
     );
     this.sprite.endFill();
     this.sprite.rotation = direction;
@@ -58,7 +61,7 @@ export class LightSwitch extends BaseEntity implements Entity {
         continuous: true,
         persistenceLevel: Persistence.Floor,
         gain: 0,
-      })
+      }),
     );
     this.game!.dispatch({ type: "lightsOn", position: this.position });
 

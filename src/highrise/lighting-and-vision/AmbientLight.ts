@@ -16,7 +16,7 @@ export class AmbientLight extends BaseEntity implements Entity {
 
   onAdd() {
     this.lightManager = this.game!.entities.getById(
-      "lighting_manager"
+      "lighting_manager",
     ) as LightingManager;
     this.lightManager.addAmbientLight(this);
   }

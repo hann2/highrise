@@ -26,7 +26,7 @@ export const CARDINAL_DIRECTIONS: (keyof typeof Direction)[] = [
 ];
 
 export const CARDINAL_DIRECTIONS_VALUES: V2d[] = CARDINAL_DIRECTIONS.map(
-  (d) => Direction[d]
+  (d) => Direction[d],
 );
 
 export function vectorToId(v1: V2d): keyof typeof Direction {
@@ -40,7 +40,7 @@ export function vectorToId(v1: V2d): keyof typeof Direction {
 }
 
 export function decomposeDiagonal(
-  direction: keyof typeof Direction
+  direction: keyof typeof Direction,
 ): (keyof typeof Direction)[] {
   const vec = Direction[direction];
   const xComponent = V(vec.x, 0);
@@ -49,7 +49,7 @@ export function decomposeDiagonal(
 }
 
 export function opposite(
-  direction: keyof typeof Direction
+  direction: keyof typeof Direction,
 ): keyof typeof Direction {
   const vec = Direction[direction];
   return vectorToId(vec.mul(-1));

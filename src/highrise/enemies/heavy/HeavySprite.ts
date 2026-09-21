@@ -63,7 +63,7 @@ export default class HeavySprite extends BodySprite {
           shoulders,
           attackStartPositions,
           attackEndPositions,
-          t
+          t,
         );
       }
       case "winddown": {

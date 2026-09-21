@@ -36,7 +36,7 @@ export default class Preloader extends BaseEntity implements Entity {
     getBiggestSounds()
       .slice(0, 10)
       .forEach(([url, size]) =>
-        console.log(url, "\n", `${(size / 1024).toFixed(1)}kB`)
+        console.log(url, "\n", `${(size / 1024).toFixed(1)}kB`),
       );
 
     console.groupEnd();
@@ -59,7 +59,7 @@ export default class Preloader extends BaseEntity implements Entity {
         document.fonts.add(await font.load());
         loaded += 1;
         element.innerText = `${loaded} / ${total}`;
-      })
+      }),
     );
   }
 
@@ -79,7 +79,7 @@ export default class Preloader extends BaseEntity implements Entity {
         }
         loaded += 1;
         element.innerText = `${loaded} / ${total}`;
-      })
+      }),
     );
   }
 
@@ -104,7 +104,7 @@ export default class Preloader extends BaseEntity implements Entity {
       console.warn(`Image failed to load`, image);
     });
     const completePromise = new Promise<void>((resolve) =>
-      loader.onComplete.add(() => resolve())
+      loader.onComplete.add(() => resolve()),
     );
 
     loader.load();

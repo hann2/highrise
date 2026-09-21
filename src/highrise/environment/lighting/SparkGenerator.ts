@@ -17,7 +17,7 @@ export class SparkGenerator extends BaseEntity implements Entity {
     public position: V2d,
     public radius: number = 8,
     public baseSparkFrequency: number = 100,
-    public period: number = 3
+    public period: number = 3,
   ) {
     super();
 
@@ -31,7 +31,7 @@ export class SparkGenerator extends BaseEntity implements Entity {
     const sparkFrequency =
       Math.max(
         0,
-        Math.sin((this.game!.elapsedTime * Math.PI * 2) / this.period)
+        Math.sin((this.game!.elapsedTime * Math.PI * 2) / this.period),
       ) * this.baseSparkFrequency;
 
     if (sparkFrequency !== 0) {
@@ -43,7 +43,7 @@ export class SparkGenerator extends BaseEntity implements Entity {
         const angle = rNormal(this.sparkAngle, this.sparkArc);
         const speed = rNormal(
           this.radius / (2 * sparkMaxLifetime),
-          this.radius / (6 * sparkMaxLifetime)
+          this.radius / (6 * sparkMaxLifetime),
         );
         const velocity = polarToVec(angle, speed);
         this.addChild(new Spark(this.position, velocity, sparkMaxLifetime));

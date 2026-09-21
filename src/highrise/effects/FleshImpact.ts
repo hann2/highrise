@@ -31,7 +31,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
     position: V2d,
     amount: number = 3,
     direction?: V2d,
-    height: number = 1.0
+    height: number = 1.0,
   ) {
     super();
 

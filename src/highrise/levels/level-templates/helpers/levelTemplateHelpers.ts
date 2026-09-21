@@ -9,7 +9,7 @@ import TransformedRoomTemplate, {
 // Generates two bathrooms with matching style and different orientations
 export function makeBathroomPair(
   seed: number,
-  possibleStyles = BATHROOM_STYLES
+  possibleStyles = BATHROOM_STYLES,
 ) {
   const bathroomStyle = choose(...possibleStyles);
   const shuffledOrientations = seededShuffle(POSSIBLE_ORIENTATIONS, seed);
@@ -17,11 +17,11 @@ export function makeBathroomPair(
   return [
     new TransformedRoomTemplate(
       new BathroomTemplate(bathroomStyle),
-      shuffledOrientations[0]
+      shuffledOrientations[0],
     ),
     new TransformedRoomTemplate(
       new BathroomTemplate(bathroomStyle),
-      shuffledOrientations[1]
+      shuffledOrientations[1],
     ),
   ];
 }

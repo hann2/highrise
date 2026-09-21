@@ -32,7 +32,7 @@ export class FilterListMap<T> {
   }
 
   getFilterList<T2 extends T>(
-    filter: Filter<T, T2>
+    filter: Filter<T, T2>,
   ): FilterList<T, T2> | undefined {
     return this._lists.get(filter);
   }

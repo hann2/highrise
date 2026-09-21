@@ -14,7 +14,11 @@ export class Spark extends BaseEntity implements Entity {
   position: V2d;
   renderPosition: V2d;
 
-  constructor(position: V2d, public velocity: V2d, maxLifetime: number = 0.8) {
+  constructor(
+    position: V2d,
+    public velocity: V2d,
+    maxLifetime: number = 0.8,
+  ) {
     super();
 
     this.lifetime = rNormal(maxLifetime / 2, maxLifetime / 6);
@@ -29,7 +33,7 @@ export class Spark extends BaseEntity implements Entity {
         intensity: 0.2,
         shadowsEnabled: true,
         color: 0xfffacd,
-      })
+      }),
     );
 
     this.position = position.clone();

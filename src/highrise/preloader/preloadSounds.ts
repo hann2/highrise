@@ -51,7 +51,7 @@ export function getSoundsToPreload(): string[] {
     ...WEAPONS.flatMap((weapon) => Object.values(weapon.sounds).flat()),
     ...GUNS.flatMap((gun) => gun.bulletStats.dropSounds),
     ...CHARACTERS.flatMap((character) =>
-      Object.values(character.sounds).flat()
+      Object.values(character.sounds).flat(),
     ),
     ...ENEMY_SOUNDS.flatMap((enemySounds) => Object.values(enemySounds).flat()),
   ]);

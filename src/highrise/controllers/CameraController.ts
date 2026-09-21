@@ -12,7 +12,7 @@ export default class CameraController extends BaseEntity implements Entity {
 
   constructor(
     private camera: Camera2d,
-    private getPlayer: () => Human | undefined
+    private getPlayer: () => Human | undefined,
   ) {
     super();
   }
@@ -41,7 +41,7 @@ export default class CameraController extends BaseEntity implements Entity {
 
   getListener(): PositionalSoundListener {
     return this.game!.entities.getById(
-      "positional_sound_listener"
+      "positional_sound_listener",
     ) as PositionalSoundListener;
   }
 

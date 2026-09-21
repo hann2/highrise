@@ -24,13 +24,16 @@ export default class EnemyVoice extends BaseEntity implements Entity {
   sounds: EnemySoundRings;
   speakingCircle: SpeakingCircle;
 
-  constructor(public getPosition: () => V2d, sounds: EnemySounds) {
+  constructor(
+    public getPosition: () => V2d,
+    sounds: EnemySounds,
+  ) {
     super();
 
     this.sounds = makeSoundRings(sounds);
 
     this.speakingCircle = this.addChild(
-      new SpeakingCircle(getPosition, 0xaa0000)
+      new SpeakingCircle(getPosition, 0xaa0000),
     );
   }
 
@@ -55,7 +58,7 @@ export default class EnemyVoice extends BaseEntity implements Entity {
         this.currentSound = this.game?.addEntity(
           new PositionalSound(sound, this.getPosition(), {
             speed: rNormal(1.0, 0.05),
-          })
+          }),
         );
       }
     }

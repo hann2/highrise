@@ -32,19 +32,19 @@ export default class HumanSprite extends BodySprite {
     this._stanceAngle = stepToward(
       this._stanceAngle,
       this.getTargetStanceAngle(),
-      dt * STANCE_ROTATE_SPEED
+      dt * STANCE_ROTATE_SPEED,
     );
 
     const targetStanceOffset = this.getTargetStanceOffset();
     this._stanceOffset[0] = stepToward(
       this._stanceOffset[0],
       targetStanceOffset[0],
-      dt * STANCE_ADJUST_SPEED
+      dt * STANCE_ADJUST_SPEED,
     );
     this._stanceOffset[1] = stepToward(
       this._stanceOffset[1],
       targetStanceOffset[1],
-      dt * STANCE_ADJUST_SPEED
+      dt * STANCE_ADJUST_SPEED,
     );
   }
 
@@ -57,11 +57,11 @@ export default class HumanSprite extends BodySprite {
       if (weapon instanceof MeleeWeapon) {
         this.weaponSprite.visible = weapon.currentCooldown <= 0;
         this.weaponSprite.position.set(
-          ...V(weapon.swing.restPosition).iadd([pushOffset, 0])
+          ...V(weapon.swing.restPosition).iadd([pushOffset, 0]),
         );
       } else {
         this.weaponSprite.position.set(
-          ...weapon.getCurrentHoldPosition().iadd([pushOffset, 0])
+          ...weapon.getCurrentHoldPosition().iadd([pushOffset, 0]),
         );
         this.weaponSprite.rotation = weapon.getCurrentHoldAngle() + pushOffset;
       }
@@ -151,8 +151,8 @@ export default class HumanSprite extends BodySprite {
             () => this.getMuzzlePosition(),
             () => weapon.getCurrentHoldAngle() + this.sprite.rotation,
             undefined,
-            weapon.stats.laserSightColor
-          )
+            weapon.stats.laserSightColor,
+          ),
         );
       }
     } else if (weapon instanceof MeleeWeapon) {

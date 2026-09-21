@@ -14,7 +14,8 @@ interface Zone {
 
 export default class NecromancerController
   extends BaseEntity
-  implements Entity {
+  implements Entity
+{
   moveTarget?: V2d;
   objective?: "FLEE" | "DEFEND" | "SURROUND" | "ATTACK";
   zones: Record<string, Zone>;
@@ -78,7 +79,7 @@ export default class NecromancerController
     }
 
     this.necromancer.setTargetDirection(
-      enemies[0].getPosition().isub(this.necromancer.getPosition()).angle
+      enemies[0].getPosition().isub(this.necromancer.getPosition()).angle,
     );
 
     if (this.necromancer.getAttackPhase() !== "ready") {
@@ -113,13 +114,13 @@ export default class NecromancerController
 
   flee(occupiedZones: string[]) {
     const unoccupiedZones = Object.keys(this.zones).filter(
-      (z) => !(z in occupiedZones)
+      (z) => !(z in occupiedZones),
     );
     const targetZoneId: string =
       unoccupiedZones[rInteger(0, unoccupiedZones.length)];
     const targetZone = this.zones[targetZoneId];
     this.moveTarget = targetZone.upperRightCorner.add(
-      targetZone.dimensions.mul(0.5)
+      targetZone.dimensions.mul(0.5),
     );
     this.objective = "FLEE";
   }

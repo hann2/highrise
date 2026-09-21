@@ -59,7 +59,7 @@ export function defaultWalls(dimensions: V2d, doors: WallID[]): WallBuilder[] {
     });
   }
   return walls.filter(
-    (w) => !doors.some((d) => CellGrid.wallIdsEqual(d, w.id))
+    (w) => !doors.some((d) => CellGrid.wallIdsEqual(d, w.id)),
   );
 }
 

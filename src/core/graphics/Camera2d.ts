@@ -23,7 +23,7 @@ export class Camera2d extends BaseEntity implements Entity {
     renderer: GameRenderer2d,
     position: V2d = V([0, 0]),
     z = 25.0,
-    angle = 0
+    angle = 0,
   ) {
     super();
     this.renderer = renderer;
@@ -101,7 +101,7 @@ export class Camera2d extends BaseEntity implements Entity {
   getViewportSize(): V2d {
     return V(
       this.renderer.pixiRenderer.width / this.renderer.pixiRenderer.resolution,
-      this.renderer.pixiRenderer.height / this.renderer.pixiRenderer.resolution
+      this.renderer.pixiRenderer.height / this.renderer.pixiRenderer.resolution,
     );
   }
 

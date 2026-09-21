@@ -9,11 +9,12 @@ interface Phase<name extends string, Params extends Array<unknown> = []> {
 }
 
 export class PhasedAction<
-    PhaseName extends string,
-    Params extends unknown[] = []
-  >
+  PhaseName extends string,
+  Params extends unknown[] = [],
+>
   extends BaseEntity
-  implements Entity {
+  implements Entity
+{
   currentPhase?: Phase<PhaseName, Params> = undefined;
   phasePercent: number = 0;
 
@@ -59,7 +60,7 @@ export class PhasedAction<
         (dt, t) => {
           this.phasePercent = t;
         },
-        phase.name
+        phase.name,
       );
     }
 

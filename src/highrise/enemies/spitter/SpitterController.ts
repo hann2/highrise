@@ -31,7 +31,7 @@ export default class SpitterController extends BaseEntity implements Entity {
             this.objective = "SEARCH";
           } else {
             this.spitter.setTargetDirection(
-              this.target!.getPosition().isub(this.spitter.body.position).angle
+              this.target!.getPosition().isub(this.spitter.body.position).angle,
             );
             this.spitter.attack();
           }
@@ -155,7 +155,7 @@ export default class SpitterController extends BaseEntity implements Entity {
     for (const human of humans) {
       const distance = vec2.dist(
         human.body.position,
-        this.spitter.body.position
+        this.spitter.body.position,
       );
       if (distance < nearestDistance) {
         if (this.inVision(human)) {

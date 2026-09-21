@@ -54,7 +54,7 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
 
     const doorWall = CellGrid.getWallInDirection(
       frontCell,
-      directionFromFrontCellToDoorWall
+      directionFromFrontCellToDoorWall,
     );
     const right = doorWall[1];
     let doorRestingDirection = right ? Direction.DOWN : Direction.RIGHT;
@@ -69,7 +69,7 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
     cellGrid.cells[frontCell.x][frontCell.y].content = "empty";
     const backWall = CellGrid.getWallInDirection(
       backCell,
-      openDirection.mul(-1)
+      openDirection.mul(-1),
     );
     const closet = {
       backCell,
@@ -88,7 +88,7 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
 export function fillClosets(
   cellGrid: CellGrid,
   levelTemplate: LevelTemplate,
-  seed: number
+  seed: number,
 ): { entities: Entity[]; potentialEnemyLocations: V2d[] } {
   const shuffledClosets: Closet[] = seededShuffle(cellGrid.closets, seed);
 
@@ -107,7 +107,7 @@ export function fillClosets(
       new OverheadLight(CellGrid.levelCoordToWorldCoord(location), {
         radius: CELL_SIZE * 3,
         intensity: 0.5,
-      })
+      }),
     );
     const entity = f(CellGrid.levelCoordToWorldCoord(location));
     if (entity instanceof Array) {
@@ -120,7 +120,7 @@ export function fillClosets(
       .add(
         closet.backWallDirection.y === 1 || closet.backWallDirection.y === -1
           ? V(0, 1)
-          : V(1, 0)
+          : V(1, 0),
       )
       .mul(CELL_SIZE);
     const upperLeftCell =
@@ -128,14 +128,14 @@ export function fillClosets(
         ? closet.backCell
         : closet.frontCell;
     const upperLeftCorner = CellGrid.levelCoordToWorldCoord(
-      upperLeftCell.sub(V(0.5, 0.5))
+      upperLeftCell.sub(V(0.5, 0.5)),
     );
     entities.push(
       new RepeatingFloor(
         levelTemplate.getClosetFloor(closetIndex),
         upperLeftCorner,
-        dimensions
-      )
+        dimensions,
+      ),
     );
 
     entities.push(...levelTemplate.getClosetDecorations(closetIndex, closet));

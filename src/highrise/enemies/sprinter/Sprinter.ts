@@ -33,7 +33,7 @@ export default class Sprinter extends BaseEnemy {
 
   constructor(
     position: V2d,
-    public zombieVariant: ZombieVariant = choose(...SPRINTER_VARIANTS)
+    public zombieVariant: ZombieVariant = choose(...SPRINTER_VARIANTS),
   ) {
     super(position);
 
@@ -67,13 +67,13 @@ export default class Sprinter extends BaseEnemy {
             this.body.position,
             this.body.angle,
             ATTACK_RANGE,
-            ATTACK_ANGLE_RANGE
+            ATTACK_ANGLE_RANGE,
           )) {
             human.inflictDamage(rInteger(10, 15));
             this.game?.addEntity(
               new PositionalSound(hitSoundRing.getNext(), this.getPosition(), {
                 speed: rNormal(1, 0.05),
-              })
+              }),
             );
           }
         }

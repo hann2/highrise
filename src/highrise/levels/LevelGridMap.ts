@@ -23,7 +23,11 @@ export default class LevelGridMap extends BaseEntity implements Entity {
    * @param height Number of cells tall
    * @param cellSize Width and Height of a cell in meters
    */
-  constructor(width: number, height: number, private cellSize: number) {
+  constructor(
+    width: number,
+    height: number,
+    private cellSize: number,
+  ) {
     super();
 
     for (let x = 0; x < width; x++) {

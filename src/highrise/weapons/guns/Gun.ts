@@ -88,7 +88,7 @@ export default class Gun extends BaseEntity implements Entity {
 
           endAction: () => {},
         },
-      ])
+      ]),
     );
   }
 
@@ -150,7 +150,7 @@ export default class Gun extends BaseEntity implements Entity {
       (dt, t) => {
         this.pumpAmount = t;
       },
-      "pump"
+      "pump",
     );
 
     if (this.shellsToEject > 0) {
@@ -163,7 +163,7 @@ export default class Gun extends BaseEntity implements Entity {
       (dt, t) => {
         this.pumpAmount = 1.0 - t;
       },
-      "pump"
+      "pump",
     );
     this.pumpAmount = 0;
   }
@@ -179,7 +179,7 @@ export default class Gun extends BaseEntity implements Entity {
     } else {
       velocity = polarToVec(
         rNormal(shooterDirection + Math.PI / 2, degToRad(20)),
-        4 * rNormal(1, 0.3)
+        4 * rNormal(1, 0.3),
       );
     }
 
@@ -189,8 +189,8 @@ export default class Gun extends BaseEntity implements Entity {
         velocity,
         shooterDirection,
         this.stats.textures.shellCasing,
-        this.stats.bulletStats.dropSounds
-      )
+        this.stats.bulletStats.dropSounds,
+      ),
     );
   }
 
@@ -198,15 +198,15 @@ export default class Gun extends BaseEntity implements Entity {
     for (let i = 0; i < this.stats.bulletStats.bulletsPerShot; i++) {
       const spread = rUniform(
         -this.stats.bulletSpread / 2,
-        this.stats.bulletSpread / 2
+        this.stats.bulletSpread / 2,
       );
       this.game?.addEntity(
         new Bullet(
           position.clone(),
           direction + spread,
           this.stats.bulletStats,
-          shooter
-        )
+          shooter,
+        ),
       );
     }
   }
@@ -246,14 +246,14 @@ export default class Gun extends BaseEntity implements Entity {
 
   playSound(
     soundClass: GunSoundName,
-    position: V2d
+    position: V2d,
   ): PositionalSound | undefined {
     const sound = this.sounds[soundClass].getNext();
     if (sound) {
       // TODO: We should really just edit the sound files to be balanced
       const gain = soundClass === "shoot" ? 0.3 : 1.0;
       return this.game?.addEntity(
-        new PositionalSound(sound, position, { gain })
+        new PositionalSound(sound, position, { gain }),
       );
     }
   }
@@ -305,7 +305,7 @@ export default class Gun extends BaseEntity implements Entity {
   // Returns the local coordinates for the muzzle position
   getMuzzlePosition(): V2d {
     return this.getCurrentHoldPosition().iadd(
-      polarToVec(this.getCurrentHoldAngle(), this.stats.muzzleLength / 2)
+      polarToVec(this.getCurrentHoldAngle(), this.stats.muzzleLength / 2),
     );
   }
 }
@@ -315,7 +315,7 @@ function makeSoundRings(sounds: GunSounds): GunSoundRings {
   const result = {} as any;
   for (const [gunSound, soundNames] of Object.entries(sounds)) {
     result[gunSound as GunSoundName] = new ShuffleRing(
-      (soundNames as SoundName[]) ?? []
+      (soundNames as SoundName[]) ?? [],
     );
   }
   return result;

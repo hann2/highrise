@@ -39,7 +39,7 @@ export async function main() {
       broadphase: new SpatialHashingBroadphase(
         CELL_SIZE / 2,
         DEFAULT_LEVEL_SIZE * 2,
-        DEFAULT_LEVEL_SIZE * 2
+        DEFAULT_LEVEL_SIZE * 2,
       ),
     }),
   });

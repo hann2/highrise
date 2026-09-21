@@ -60,7 +60,7 @@ export default class PauseMenu extends BaseEntity implements Entity {
         this.game?.unpause();
         this.game?.dispatch({ type: "gameOver" });
         this.destroy();
-      })
+      }),
     );
 
     this.feedbackButton = this.addChild(new FeedbackButton());

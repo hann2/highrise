@@ -79,41 +79,41 @@ export default class Shop implements RoomTemplate {
       new Decoration(
         roomToWorldPosition(V(0.5, 0.25)),
         counter,
-        roomToWorldAngle(0)
-      )
+        roomToWorldAngle(0),
+      ),
     );
 
     entities.push(
       new Decoration(
         roomToWorldPosition(V(0.5, 1.7)),
         shopShelf1,
-        roomToWorldAngle(0)
-      )
+        roomToWorldAngle(0),
+      ),
     );
     entities.push(
       new Decoration(
         roomToWorldPosition(V(1.5, 1.7)),
         shopShelf1,
-        roomToWorldAngle(0)
-      )
+        roomToWorldAngle(0),
+      ),
     );
 
     entities.push(
       new OverheadLight(roomToWorldPosition(V(1, 1)), {
         radius: 6,
         intensity: 0.6,
-      })
+      }),
     );
     const centerWorldCoords = roomToWorldPosition(
-      DIMENSIONS.sub(V(1, 1)).mul(0.5)
+      DIMENSIONS.sub(V(1, 1)).mul(0.5),
     );
     const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
 
     const floorInfo = {
       ...choose(
         ...FLOOR_CHOICES.filter(
-          (f) => f.imageName != this.outsideFloor.imageName
-        )
+          (f) => f.imageName != this.outsideFloor.imageName,
+        ),
       ),
       rotation: rCardinal(),
     };
@@ -121,14 +121,14 @@ export default class Shop implements RoomTemplate {
     const floor = new RepeatingFloor(
       floorInfo,
       centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
-      dimensionsWorldCoords
+      dimensionsWorldCoords,
     );
     if (
       floorInfo.imageName == carpetFloor1.imageName ||
       floorInfo.imageName == carpetFloor2.imageName
     ) {
       floor.sprite.tint = rgbToHex(
-        hsvToRgb({ h: rUniform(0, 1), s: 0.6, v: 0.7 })
+        hsvToRgb({ h: rUniform(0, 1), s: 0.6, v: 0.7 }),
       );
     }
 

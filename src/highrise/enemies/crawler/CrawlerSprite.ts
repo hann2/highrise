@@ -22,7 +22,7 @@ export default class CrawlereSprite extends BodySprite {
 
   constructor(
     private crawler: Crawler,
-    textures = choose(...CRAWLER_TEXTURES)
+    textures = choose(...CRAWLER_TEXTURES),
   ) {
     super(textures, ZOMBIE_RADIUS * 0.9);
 
@@ -60,7 +60,7 @@ export default class CrawlereSprite extends BodySprite {
           shoulders,
           attackStartPositions,
           attackEndPositions,
-          t
+          t,
         );
       }
       case "winddown": {

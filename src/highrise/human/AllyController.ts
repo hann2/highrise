@@ -30,7 +30,10 @@ export default class AllyHumanController extends BaseEntity implements Entity {
 
   pickupsCalledOut = new Set<Entity>();
 
-  constructor(public human: Human, public getLeader: () => Human) {
+  constructor(
+    public human: Human,
+    public getLeader: () => Human,
+  ) {
     super();
   }
 
@@ -79,7 +82,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
     const nearestVisibleZombie = getNearestVisibleEnemy(
       this.game!,
       human,
-      MAX_SHOOT_DISTANCE
+      MAX_SHOOT_DISTANCE,
     );
 
     if (
@@ -115,7 +118,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
           ) {
             this.triggerOnCooldown = true;
             this.wait(
-              rUniform(MIN_TRIGGER_COOLDOWN, MAX_TRIGGER_COOLDOWN)
+              rUniform(MIN_TRIGGER_COOLDOWN, MAX_TRIGGER_COOLDOWN),
             ).then(() => {
               this.triggerOnCooldown = false;
             });
@@ -128,17 +131,17 @@ export default class AllyHumanController extends BaseEntity implements Entity {
       if (testLineOfSight(human, leader)) {
         this.lastSeenPositionOfLeader = leader.getPosition();
         const direction = this.lastSeenPositionOfLeader.sub(
-          human.getPosition()
+          human.getPosition(),
         );
         human.setDirection(direction.angle, dt);
         const distance = direction.magnitude;
         human.walkSpring.walkTowards(
           direction.angle,
-          clamp(distance - FOLLOW_DISTANCE, 0.0, 1.0)
+          clamp(distance - FOLLOW_DISTANCE, 0.0, 1.0),
         );
       } else if (this.lastSeenPositionOfLeader) {
         const direction = this.lastSeenPositionOfLeader.sub(
-          human.getPosition()
+          human.getPosition(),
         );
         human.walkSpring.walkTowards(direction.angle, 1.0);
       }
@@ -152,7 +155,7 @@ export function isAllyController(e: Entity): e is AllyHumanController {
 
 function weaponIsMoreDesirable(
   currentWeapon: Weapon | undefined,
-  otherWeapon: Weapon
+  otherWeapon: Weapon,
 ): boolean {
   if (!currentWeapon) {
     // We should always pick up a weapon if we don't have one

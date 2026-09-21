@@ -32,7 +32,7 @@ export function chooseTemplate(level: number): LevelTemplate {
 
 export const generateLevel = (
   levelTemplate: LevelTemplate,
-  seed: number = rInteger(0, 2 ** 32)
+  seed: number = rInteger(0, 2 ** 32),
 ): Level => {
   console.log("Generating level with seed " + seed);
   const cellGrid = new CellGrid(...levelTemplate.getSize());

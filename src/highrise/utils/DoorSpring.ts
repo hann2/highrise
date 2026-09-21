@@ -6,7 +6,7 @@ export default class DoorSpring extends RotationalSpring {
     bodyA: Body,
     bodyB: Body,
     private minRotation: number,
-    private maxRotation: number
+    private maxRotation: number,
   ) {
     super(bodyA, bodyB, {
       damping: 5,

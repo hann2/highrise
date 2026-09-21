@@ -94,27 +94,27 @@ export default class NecromancerArena implements RoomTemplate {
 
     const mainTiles: Tiles = insetBorders(
       fillFloorWithBorders(floorMask, directionalCarpet),
-      directionalCarpet
+      directionalCarpet,
     );
 
     const tileScale = V(carpetScale * CELL_SIZE, carpetScale * CELL_SIZE);
 
     entities.push(
-      new TiledFloor(roomToWorldPosition(V(-0.5, -0.5)), tileScale, mainTiles)
+      new TiledFloor(roomToWorldPosition(V(-0.5, -0.5)), tileScale, mainTiles),
     );
 
     entities.push(
       new Necromancer(
         roomToWorldPosition(V(2.5, 2)),
         roomToWorldPosition(V(-0.5, -0.5)),
-        roomToWorldDimensions(DIMENSIONS)
-      )
+        roomToWorldDimensions(DIMENSIONS),
+      ),
     );
     entities.push(new Decoration(roomToWorldPosition(V(2.5, 2)), rug));
 
     entities.push(
       new OverheadLight(roomToWorldPosition(V(1, 1.5)), { radius: 10 }),
-      new OverheadLight(roomToWorldPosition(V(4, 1.5)), { radius: 10 })
+      new OverheadLight(roomToWorldPosition(V(4, 1.5)), { radius: 10 }),
     );
 
     return entities;

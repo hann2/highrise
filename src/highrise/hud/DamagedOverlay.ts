@@ -75,7 +75,7 @@ export class DamagedOverlay extends BaseEntity implements Entity {
   async flash(
     color: number,
     fadeInTime: number = 0,
-    fadeOutTime: number = 0.4
+    fadeOutTime: number = 0.4,
   ) {
     const graphics = this.makeOverlay(color);
     this.sprite.addChild(graphics);
@@ -87,7 +87,7 @@ export class DamagedOverlay extends BaseEntity implements Entity {
       (dt, t) => {
         graphics.alpha = smoothStep((1 - t) * FLASH_ALPHA);
       },
-      "flash"
+      "flash",
     );
     this.sprite.removeChild(graphics);
   }

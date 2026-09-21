@@ -9,7 +9,7 @@ import Human from "../human/Human";
 // Returns true if there is an unobstructed line-of-sight from the looker to the target
 export function testLineOfSight(
   looker: BaseEntity,
-  target: BaseEntity
+  target: BaseEntity,
 ): boolean {
   const ray = new Ray({
     mode: Ray.CLOSEST,
@@ -27,7 +27,7 @@ export function testLineOfSight(
 export function getNearestVisibleEnemy(
   game: Game,
   human: Human,
-  maxDistance: number = Infinity
+  maxDistance: number = Infinity,
 ): BaseEnemy | undefined {
   const enemies = game.entities.getByFilter(isEnemy);
 

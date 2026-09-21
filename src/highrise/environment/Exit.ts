@@ -18,7 +18,7 @@ export default class Exit extends BaseEntity implements Entity {
     y1: number,
     x2: number,
     y2: number,
-    direction: number
+    direction: number,
   ) {
     super();
 

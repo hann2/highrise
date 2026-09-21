@@ -33,7 +33,7 @@ export default class Necromancer extends BaseEnemy {
   constructor(
     position: V2d,
     public arenaUpperLeftCorner: V2d,
-    public arenaDimensions: V2d
+    public arenaDimensions: V2d,
   ) {
     super(position);
 
@@ -144,7 +144,7 @@ export default class Necromancer extends BaseEnemy {
       onAttack: async () => {
         for (let i = 0; i < 5; i++) {
           this.addChild(
-            new Phlegm(this.getPosition(), this.body.angle + rNormal(0, 0.3))
+            new Phlegm(this.getPosition(), this.body.angle + rNormal(0, 0.3)),
           );
           const sound = choose(...SPITTER_SOUNDS.attack);
           this.game?.addEntity(new PositionalSound(sound, this.getPosition()));
@@ -171,7 +171,7 @@ export default class Necromancer extends BaseEnemy {
         const eggs = angles
           .map((angle) => this.getPosition().add(direction.rotate(angle)))
           .map(
-            (position) => new ZombieEgg(this.getPosition(), position, "zombie")
+            (position) => new ZombieEgg(this.getPosition(), position, "zombie"),
           );
 
         this.game!.addEntities(eggs);
@@ -191,14 +191,14 @@ export default class Necromancer extends BaseEnemy {
         const startingAngle = rUniform(0, Math.PI * 2);
         for (let i = 0; i < nCrawlers; i++) {
           angles.push(
-            normalizeAngle(startingAngle + (i * Math.PI * 2) / nCrawlers)
+            normalizeAngle(startingAngle + (i * Math.PI * 2) / nCrawlers),
           );
         }
 
         const eggs = angles
           .map((angle) => targetPosition.add(polarToVec(angle, 2)))
           .map(
-            (target) => new ZombieEgg(this.getPosition(), target, "crawler")
+            (target) => new ZombieEgg(this.getPosition(), target, "crawler"),
           );
 
         this.game!.addEntities(eggs);

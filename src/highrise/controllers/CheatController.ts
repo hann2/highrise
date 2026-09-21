@@ -24,7 +24,7 @@ export default class CheatController extends BaseEntity implements Entity {
       case "KeyV":
         console.log("Toggling vision");
         for (const visionController of this.game!.entities.getByFilter(
-          (e): e is VisionController => e instanceof VisionController
+          (e): e is VisionController => e instanceof VisionController,
         )) {
           visionController.sprite.visible = !visionController.sprite.visible;
         }

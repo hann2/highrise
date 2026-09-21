@@ -13,7 +13,7 @@ export default class FadeEffect extends BaseEntity implements Entity {
     private outDuration = 1,
     private holdDuration = 0.5,
     private inDuration = 1,
-    color = 0x000000
+    color = 0x000000,
   ) {
     super();
 

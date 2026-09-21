@@ -26,7 +26,7 @@ function translateWallID(wallID: WallID, translation: V2d): WallID {
 
 function doesRoomCutoffPartOfMap(
   cellGrid: CellGrid,
-  potentialWallIDsLevelCoords: WallID[]
+  potentialWallIDsLevelCoords: WallID[],
 ): boolean {
   const startingPont = V(0, 0);
 
@@ -51,7 +51,7 @@ function doesRoomCutoffPartOfMap(
       if (
         cellGrid.isDestructible(potentialWall) &&
         !potentialWallIDsLevelCoords.some((roomWall: WallID) =>
-          CellGrid.wallIdsEqual(roomWall, potentialWall)
+          CellGrid.wallIdsEqual(roomWall, potentialWall),
         )
       ) {
         queue.push(p.add(direction));
@@ -65,12 +65,12 @@ function doesRoomCutoffPartOfMap(
 function isEligibleRoom(
   cellGrid: CellGrid,
   potentialWallIDsLevelCoords: WallID[],
-  occupiedCellsLevelCoords: V2d[]
+  occupiedCellsLevelCoords: V2d[],
 ): boolean {
   return occupiedCellsLevelCoords.every(
     (cell) =>
       isEligibleCell(cellGrid, cell) &&
-      doesRoomCutoffPartOfMap(cellGrid, potentialWallIDsLevelCoords)
+      doesRoomCutoffPartOfMap(cellGrid, potentialWallIDsLevelCoords),
   );
 }
 
@@ -78,16 +78,16 @@ function findEligibleLocation(
   cellGrid: CellGrid,
   seed: number,
   wallIDsRoomCoords: WallID[],
-  occupiedCellsRoomCoords: V2d[]
+  occupiedCellsRoomCoords: V2d[],
 ): V2d | undefined {
   const allLocations = [...cellGrid.getPositions()].map(V);
   const shuffledLocations = seededShuffle(allLocations, seed);
   for (const location of shuffledLocations) {
     const wallIDsLevelCoords = wallIDsRoomCoords.map((w) =>
-      translateWallID(w, location)
+      translateWallID(w, location),
     );
     const occupiedCellsLevelCoords = occupiedCellsRoomCoords.map((c) =>
-      c.add(location)
+      c.add(location),
     );
     if (
       isEligibleRoom(cellGrid, wallIDsLevelCoords, occupiedCellsLevelCoords)
@@ -101,7 +101,7 @@ function addRoom(
   cellGrid: CellGrid,
   template: RoomTemplate,
   seed: number,
-  locationOverride?: V2d
+  locationOverride?: V2d,
 ): AddedRoomInfo {
   const wallsRoomCoordinates: WallBuilder[] = template.generateWalls();
   const occupiedCellsRoomCoordinates: V2d[] = template.getOccupiedCells();
@@ -115,11 +115,11 @@ function addRoom(
       cellGrid,
       seed,
       wallIDsRoomCoordinates,
-      occupiedCellsRoomCoordinates
+      occupiedCellsRoomCoordinates,
     );
     if (!maybeLocation) {
       console.warn(
-        "Couldn't find a spot for room " + template.constructor.name + "!"
+        "Couldn't find a spot for room " + template.constructor.name + "!",
       );
       return { entities: [], enemyPositions: [], itemPositions: [] };
     }
@@ -133,7 +133,7 @@ function addRoom(
   });
 
   const occupiedCellsLevelCoords = occupiedCellsRoomCoordinates.map((c) =>
-    c.add(location)
+    c.add(location),
   );
   for (const cell of occupiedCellsLevelCoords) {
     const [i, j] = cell;
@@ -198,11 +198,11 @@ export function addRooms(
   cellGrid: CellGrid,
   levelTemplate: LevelTemplate,
   seed: number,
-  levelIndex: number
+  levelIndex: number,
 ): AddedRoomInfo {
   const roomInfos: AddedRoomInfo[] = [];
   roomInfos.push(
-    addRoom(cellGrid, new SpawnRoom(levelIndex), seed, cellGrid.spawnLocation)
+    addRoom(cellGrid, new SpawnRoom(levelIndex), seed, cellGrid.spawnLocation),
   );
   for (const roomTemplate of levelTemplate.chooseRoomTemplates(seed)) {
     roomInfos.push(addRoom(cellGrid, roomTemplate, seed));

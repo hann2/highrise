@@ -31,7 +31,7 @@ export class ZombieEgg extends BaseEntity implements Entity {
   constructor(
     public startPosition: V2d,
     public target: V2d,
-    public spawnType: "zombie" | "crawler"
+    public spawnType: "zombie" | "crawler",
   ) {
     super();
 
@@ -59,7 +59,7 @@ export class ZombieEgg extends BaseEntity implements Entity {
         const heightScale = 1.0 + Math.sin(t * Math.PI);
         this.sprite.scale.set(heightScale);
       },
-      "flying"
+      "flying",
     );
     this.land();
   }
@@ -82,13 +82,13 @@ export class ZombieEgg extends BaseEntity implements Entity {
       case "zombie":
         return new Zombie(
           position,
-          ZOMBIE_VARIANTS[this.variant % ZOMBIE_VARIANTS.length]
+          ZOMBIE_VARIANTS[this.variant % ZOMBIE_VARIANTS.length],
         );
       case "crawler":
         return new Crawler(
           position,
           0,
-          CRAWLER_TEXTURES[this.variant % CRAWLER_TEXTURES.length]
+          CRAWLER_TEXTURES[this.variant % CRAWLER_TEXTURES.length],
         );
     }
   }
@@ -109,7 +109,7 @@ export class ZombieEgg extends BaseEntity implements Entity {
       const fullCreatureSize =
         (2 * ZOMBIE_RADIUS) / creatureSprite.texture.width;
       creatureSprite.scale.set(
-        lerp(0.5 * fullCreatureSize, fullCreatureSize, smoothStep(t))
+        lerp(0.5 * fullCreatureSize, fullCreatureSize, smoothStep(t)),
       );
 
       creatureSprite.alpha = smoothStep(t);

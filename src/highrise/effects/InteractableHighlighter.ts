@@ -4,7 +4,8 @@ import Human from "../human/Human";
 
 export default class InteractableHighlighter
   extends BaseEntity
-  implements Entity {
+  implements Entity
+{
   constructor(private getHuman: () => Human) {
     super();
   }

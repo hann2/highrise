@@ -74,22 +74,22 @@ export default class LightSwitchRoomTemplate implements RoomTemplate {
   }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
     entities.push(
-      new Decoration(roomToWorldPosition(V(1, 1)), transformer, rCardinal())
+      new Decoration(roomToWorldPosition(V(1, 1)), transformer, rCardinal()),
     );
     const centerWorldCoords = roomToWorldPosition(
-      DIMENSIONS.sub(V(1, 1)).mul(0.5)
+      DIMENSIONS.sub(V(1, 1)).mul(0.5),
     );
     const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
     entities.push(
       new RepeatingFloor(
         this.floor,
         centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
-        dimensionsWorldCoords
-      )
+        dimensionsWorldCoords,
+      ),
     );
     entities.push(new SparkGenerator(roomToWorldPosition(V(1, 1))));
     entities.push(
-      new LightSwitch(roomToWorldPosition(V(-0.4, 1)), roomToWorldAngle(0))
+      new LightSwitch(roomToWorldPosition(V(-0.4, 1)), roomToWorldAngle(0)),
     );
     entities.push(
       new OverheadLight(
@@ -98,8 +98,8 @@ export default class LightSwitchRoomTemplate implements RoomTemplate {
           radius: 5,
           intensity: 0.7,
         },
-        false
-      )
+        false,
+      ),
     );
     entities.push(
       new OverheadLight(
@@ -108,8 +108,8 @@ export default class LightSwitchRoomTemplate implements RoomTemplate {
           radius: 5,
           intensity: 0.7,
         },
-        false
-      )
+        false,
+      ),
     );
     entities.push(
       new OverheadLight(
@@ -118,8 +118,8 @@ export default class LightSwitchRoomTemplate implements RoomTemplate {
           radius: 5,
           intensity: 0.7,
         },
-        false
-      )
+        false,
+      ),
     );
     entities.push(
       new OverheadLight(
@@ -128,8 +128,8 @@ export default class LightSwitchRoomTemplate implements RoomTemplate {
           radius: 5,
           intensity: 0.7,
         },
-        false
-      )
+        false,
+      ),
     );
     return entities;
   }

@@ -40,7 +40,7 @@ export function addInnerWalls(cellGrid: CellGrid): Entity[] {
         }
 
         const [x1, y1] = CellGrid.levelCoordToWorldCoord(
-          V(i + 0.5, startJ - 0.5)
+          V(i + 0.5, startJ - 0.5),
         );
         const [x2, y2] = CellGrid.levelCoordToWorldCoord(V(i + 0.5, j + 0.5));
         const wallType = isChainLink ? ChainLinkFence : SolidWall;
@@ -65,7 +65,7 @@ export function addInnerWalls(cellGrid: CellGrid): Entity[] {
         }
 
         const [x1, y1] = CellGrid.levelCoordToWorldCoord(
-          V(startI - 0.5, j + 0.5)
+          V(startI - 0.5, j + 0.5),
         );
         const [x2, y2] = CellGrid.levelCoordToWorldCoord(V(i + 0.5, j + 0.5));
         const wallType = isChainLink ? ChainLinkFence : SolidWall;

@@ -18,7 +18,7 @@ export default class HumanVoice extends BaseEntity implements Entity {
     this.sounds = makeSoundRings(human.character.sounds);
 
     this.speakingCircle = this.addChild(
-      new SpeakingCircle(() => human.getPosition())
+      new SpeakingCircle(() => human.getPosition()),
     );
   }
 
@@ -41,7 +41,7 @@ export default class HumanVoice extends BaseEntity implements Entity {
       const sound = this.sounds[soundClass].getNext();
       if (sound) {
         this.currentSound = this.game?.addEntity(
-          new PositionalSound(sound, this.human.getPosition())
+          new PositionalSound(sound, this.human.getPosition()),
         );
       }
     }

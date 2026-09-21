@@ -21,7 +21,8 @@ const JOIN_DISTANCE = 2; // meters
 // Controller for a human that is waiting to be found
 export default class SurvivorHumanController
   extends BaseEntity
-  implements Entity {
+  implements Entity
+{
   tags = ["survivor_controller"];
 
   // The human this AI is controlling
@@ -49,7 +50,7 @@ export default class SurvivorHumanController
     this.target = getNearestVisibleEnemy(
       this.game!,
       this.human,
-      MAX_ATTACK_DISTANCE
+      MAX_ATTACK_DISTANCE,
     );
   }
 
@@ -60,8 +61,9 @@ export default class SurvivorHumanController
       return false;
     }
 
-    const distance = this.human.getPosition().isub(leader.body.position)
-      .magnitude;
+    const distance = this.human
+      .getPosition()
+      .isub(leader.body.position).magnitude;
 
     if (distance < JOIN_DISTANCE && testLineOfSight(this.human, leader)) {
       return true;
@@ -117,7 +119,7 @@ export default class SurvivorHumanController
           ) {
             this.triggerOnCooldown = true;
             this.wait(
-              rUniform(MIN_TRIGGER_COOLDOWN, MAX_TRIGGER_COOLDOWN)
+              rUniform(MIN_TRIGGER_COOLDOWN, MAX_TRIGGER_COOLDOWN),
             ).then(() => {
               this.triggerOnCooldown = false;
             });

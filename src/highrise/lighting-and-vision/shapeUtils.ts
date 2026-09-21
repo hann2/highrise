@@ -6,7 +6,7 @@ import { polarToVec } from "../../core/util/MathUtil";
 export function getShapeCorners(
   shape: Shape,
   body: Body,
-  center: [number, number]
+  center: [number, number],
 ): [number, number][] {
   switch (shape.type) {
     case Shape.BOX:
@@ -40,7 +40,9 @@ export function getShapeCorners(
       for (let i = 0; i < n; i++) {
         const circle = shape as Circle;
         points.push(
-          polarToVec((i * 2 * Math.PI) / n, circle.radius).iadd(circle.position)
+          polarToVec((i * 2 * Math.PI) / n, circle.radius).iadd(
+            circle.position,
+          ),
         );
       }
       for (const point of points) {
@@ -70,7 +72,7 @@ function shapePointToWorld(
   out: [number, number],
   point: [number, number],
   shape: Shape,
-  body: Body
+  body: Body,
 ): void {
   shape;
   vec2.toGlobalFrame(out, point, shape.position, shape.angle);
