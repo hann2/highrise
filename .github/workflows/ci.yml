@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Asset manifest is up to date
+        run: npm run generate-manifest && git diff --exit-code resources/resources.ts
+      - run: npm run tsc
+      - run: npm run test:physics
+      - run: npm run build
+      # The Playwright smoke test (npm test) isn't run here because it needs a
+      # GPU to be meaningful. Run it locally before merging.

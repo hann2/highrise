@@ -1,0 +1,20 @@
+{
+  "frames": 601,
+  "ticks": 601,
+  "loopCpuMs": {
+    "mean": 1.93,
+    "p50": 1.9,
+    "p95": 2.3,
+    "p99": 2.6,
+    "max": 3
+  },
+  "frameIntervalMs": {
+    "mean": 16.66,
+    "p50": 16.7,
+    "p95": 16.7,
+    "p99": 16.8,
+    "max": 16.8
+  },
+  "entities": 802,
+  "bodies": 207
+}

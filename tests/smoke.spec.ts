@@ -62,6 +62,110 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.screenshot({ path: "tests/output/level-1-action.png" });
   expectNoIssues(issues);
 
+  // --- Guns can be picked up and bullets hurt zombies ---
+  // Pin the player and a zombie in place so that the shots can't miss
+  await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (game.entities.getById("party_manager") as any).leader;
+    const pickup = [...game.entities.all].find(
+      (e) => e.constructor.name === "WeaponPickup",
+    ) as any;
+    leader.body.position.set(pickup.getPosition());
+  });
+  await page.waitForTimeout(300);
+  await page.keyboard.press("KeyE");
+  await page.waitForTimeout(500);
+  const targetHp = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (game.entities.getById("party_manager") as any).leader;
+    const zombie = game.entities
+      .getTagged("zombie")
+      .find((e) => e.constructor.name === "Zombie") as any;
+    const playerPosition = leader.getPosition();
+    const pin = () => {
+      if (!zombie.isDestroyed && !leader.isDestroyed) {
+        leader.hp = leader.maxHp;
+        leader.body.position.set(playerPosition);
+        leader.body.velocity.set(0, 0);
+        zombie.body.position.set(playerPosition.add([2.5, 0]));
+        zombie.body.velocity.set(0, 0);
+        requestAnimationFrame(pin);
+      }
+    };
+    pin();
+    (window as any).testZombie = zombie;
+    return zombie.hp as number;
+  });
+  await page.waitForTimeout(1200); // let the camera settle
+  const [targetX, targetY] = await page.evaluate(() => {
+    const zombie = (window as any).testZombie;
+    const [x, y] = window.DEBUG.game!.camera.toScreen(zombie.getPosition());
+    return [x, y];
+  });
+  await page.mouse.move(targetX, targetY);
+  for (let i = 0; i < 3; i++) {
+    await page.mouse.down();
+    await page.waitForTimeout(120);
+    await page.mouse.up();
+    await page.waitForTimeout(350);
+  }
+  const hpAfterShooting = await page.evaluate(
+    () => (window as any).testZombie.hp as number,
+  );
+  expect(hpAfterShooting).toBeLessThan(targetHp);
+  // unpin them
+  await page.evaluate(() => (window as any).testZombie.die());
+  expectNoIssues(issues);
+
+  // --- Doors swing on their hinges and stop at their limits ---
+  const doors = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const doors = [...game.entities.all].filter(
+      (e) => e.constructor.name === "Door",
+    ) as any[];
+    const restAngles = doors.map((door) => door.body.angle);
+    for (const door of doors) {
+      door.body.angularVelocity = 6;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const swings = doors.map((door, i) =>
+      Math.abs(door.body.angle - restAngles[i]),
+    );
+    const hingeDrifts = doors.map((door) =>
+      Math.hypot(
+        door.body.position[0] - door.hingePoint[0],
+        door.body.position[1] - door.hingePoint[1],
+      ),
+    );
+    return {
+      count: doors.length,
+      swungCount: swings.filter((swing) => swing > 0.3).length,
+      maxSwing: Math.max(...swings),
+      maxHingeDrift: Math.max(...hingeDrifts),
+    };
+  });
+  expect(doors.count).toBeGreaterThan(0);
+  // Some doors only open one way or are blocked, but most should have swung
+  expect(doors.swungCount).toBeGreaterThan(doors.count / 2);
+  expect(doors.maxSwing).toBeLessThan(2.2);
+  expect(doors.maxHingeDrift).toBeLessThan(0.05);
+
+  // --- Physics hasn't blown up ---
+  const nonFiniteBodies = await page.evaluate(() => {
+    let count = 0;
+    for (const body of window.DEBUG.game!.world.bodies.all) {
+      if (
+        !Number.isFinite(body.position[0]) ||
+        !Number.isFinite(body.position[1]) ||
+        !Number.isFinite(body.angle)
+      ) {
+        count++;
+      }
+    }
+    return count;
+  });
+  expect(nonFiniteBodies).toBe(0);
+
   // --- Zombies can die ---
   // (Not checking the zombie count, because dead zombies sometimes become crawlers)
   const zombieDestroyed = await page.evaluate(() => {
