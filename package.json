@@ -5,7 +5,7 @@
   "main": "index.ts",
   "repository": "github:hann2/highrise",
   "scripts": {
-    "start": "parcel src/index.html",
+    "start": "npm run dev-server",
     "build": "parcel build src/index.html",
     "deploy": "vercel",
     "deploy-prod": "vercel --prod",
@@ -13,7 +13,10 @@
     "tsc-watch": "tsc --noEmit --watch",
     "generate-asset-types": "./generate-asset-types.js -d ./resources; ./generate-asset-types.js -d ./src",
     "postinstall": "patch-package",
-    "prettier": "prettier --write src"
+    "prettier": "prettier --write src",
+    "dev-server": "parcel src/index.html",
+    "test": "playwright test",
+    "benchmark": "BENCHMARK=1 playwright test"
   },
   "author": "Philip Hann, Simon Baumgardt-Wellander",
   "license": "MIT",
@@ -26,6 +29,7 @@
     "pixi.js": "^5.3.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^14.14.10",
     "camelcase": "^6.2.0",
     "eslint": "^7.14.0",

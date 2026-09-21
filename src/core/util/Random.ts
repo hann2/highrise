@@ -4,8 +4,21 @@ import { mod } from "./MathUtil";
  * Utility functions for doing things based on random numbers.
  */
 
-// just for shorthand
-const r = Math.random;
+// The source of all randomness. Defaults to Math.random, but can be replaced
+// with a seeded generator to make things reproducible (e.g. for tests).
+let r: () => number = Math.random;
+
+/** Make all the functions in this file deterministic. Seed should be an integer. */
+export function seedRandom(seed: number): void {
+  // mulberry32
+  let a = seed | 0;
+  r = () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 /** Return a random number between `min` and `max`. */
 export function rUniform(min: number, max: number): number {

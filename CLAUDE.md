@@ -2,6 +2,8 @@
 
 Top-down 2D co-op-style zombie shooter for the browser. TypeScript, Pixi.js v5 (rendering), p2.js (physics), Web Audio, bundled with Parcel 1. Deployed to Vercel.
 
+`src/core/` is an old (2020–22) snapshot of Simon's shared engine. Newer descendants: `simonbw/game-engine` (Pixi 8 + p2, Parcel 2, typed events) and the `src/core` of `simonbw/tack-and-trim` (custom physics replacing p2, custom WebGPU immediate-mode renderer replacing Pixi).
+
 ## Commands
 
 - `npm ci` — install (runs `patch-package` on postinstall; required for `pixi-tilemap` types)

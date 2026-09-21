@@ -4,6 +4,7 @@ import CustomWorld from "../core/physics/CustomWorld";
 import SpatialHashingBroadphase from "../core/physics/SpatialHashingBroadphase";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import FPSMeter from "../core/util/FPSMeter";
+import { seedRandom } from "../core/util/Random";
 import { initLayers, Layer } from "./config/layers";
 import { initContactMaterials } from "./config/PhysicsMaterials";
 import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "./constants/constants";
@@ -24,6 +25,12 @@ declare global {
 
 export async function main() {
   await new Promise((resolve) => window.addEventListener("load", resolve));
+
+  // Allow reproducible runs (mostly for tests and benchmarks) with ?seed=123
+  const seed = new URLSearchParams(window.location.search).get("seed");
+  if (seed != null) {
+    seedRandom(parseInt(seed, 10));
+  }
 
   const game = new Game({
     tickIterations: 1,

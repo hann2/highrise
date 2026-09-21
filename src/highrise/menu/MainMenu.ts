@@ -15,6 +15,7 @@ const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 2.2;
 
 let firstTime = true;
 export default class MainMenu extends BaseEntity implements Entity {
+  id = "main_menu";
   persistenceLevel = Persistence.Floor;
   pausable = false;
   sprite: Sprite & GameSprite;

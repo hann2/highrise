@@ -65,7 +65,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     this.body.addShape(shape);
 
     const color = hslToHex({
-      h: Math.random(),
+      h: rUniform(0, 1),
       s: 1,
       l: 0.8,
     });

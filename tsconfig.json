@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "lib": ["es2019", "dom"],
+    "lib": [
+      "es2019",
+      "dom"
+    ],
     "noEmit": true,
     "target": "ES5",
     "downlevelIteration": true,
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true
   }
 }
