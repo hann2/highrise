@@ -106,7 +106,7 @@ test("game boots, plays, and changes levels without errors", async ({
   // to level generation legitimately changes it, but handy when comparing runs.
   const fingerprint = await page.evaluate(() => {
     let sum = 0;
-    for (const body of window.DEBUG.game!.world.bodies as any[]) {
+    for (const body of window.DEBUG.game!.world.bodies.all) {
       // Only walls, because decoration placement isn't fully reproducible yet
       if (body.owner?.constructor?.name === "Wall") {
         for (const shape of body.shapes) {

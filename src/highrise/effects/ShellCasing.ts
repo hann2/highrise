@@ -1,4 +1,6 @@
-import { Body, Capsule, vec2 } from "p2";
+import type { Body } from "../../core/physics/body/Body";
+import { Capsule } from "../../core/physics/shapes/Capsule";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -10,7 +12,7 @@ import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { Layer } from "../../config/layers";
 import { CollisionGroups } from "../../config/CollisionGroups";
-import { P2Materials } from "../../config/PhysicsMaterials";
+import { PhysicsMaterials } from "../../config/PhysicsMaterials";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
 const SIZE = 0.03; // meters wide
@@ -47,7 +49,8 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.sprite.scale.set(SIZE / this.sprite.texture.width);
     this.sprite.anchor.set(0.5, 0.5);
 
-    this.body = new Body({
+    this.body = createRigid2D({
+      motion: "dynamic",
       mass: 0.1,
       position,
       velocity,
@@ -63,7 +66,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     });
     shape.collisionGroup = CollisionGroups.Particle;
     shape.collisionMask = CollisionGroups.Walls | CollisionGroups.Enemies;
-    shape.material = P2Materials.glowstick;
+    shape.material = PhysicsMaterials.glowstick;
     this.body.addShape(shape, undefined, Math.PI / 2);
 
     this.bounceSounds = new ShuffleRing(sounds);
@@ -107,7 +110,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
   }
 
   onImpact() {
-    const gain = clamp(vec2.length(this.body.velocity) / 10) * 0.5;
+    const gain = clamp(this.body.velocity.magnitude / 10) * 0.5;
     const sound = this.bounceSounds.getNext();
     const position = this.getPosition();
     this.game?.addEntity(new PositionalSound(sound, position, { gain }));

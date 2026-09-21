@@ -1,4 +1,6 @@
-import { Body, Box } from "p2";
+import type { Body } from "../../core/physics/body/Body";
+import { Box } from "../../core/physics/shapes/Box";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -34,8 +36,8 @@ export default class Exit extends BaseEntity implements Entity {
     this.sprite.rotation = direction;
 
     const position = V(Math.min(x1, x2) + w / 2, Math.min(y1, y2) + h / 2);
-    this.body = new Body({
-      mass: 0,
+    this.body = createRigid2D({
+      motion: "static",
       position,
       collisionResponse: false,
     });

@@ -1,58 +1,73 @@
 # Highrise
 
-Top-down 2D co-op-style zombie shooter for the browser. TypeScript, Pixi.js v5 (rendering), p2.js (physics), Web Audio, bundled with Parcel 1. Deployed to Vercel.
+Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), a custom 2D physics engine, Web Audio, bundled with Parcel 2. Deployed to Vercel.
 
-`src/core/` is an old (2020–22) snapshot of Simon's shared engine. Newer descendants: `simonbw/game-engine` (Pixi 8 + p2, Parcel 2, typed events) and the `src/core` of `simonbw/tack-and-trim` (custom physics replacing p2, custom WebGPU immediate-mode renderer replacing Pixi).
+`src/core/` is Simon's shared game engine, copied per game. It descends from `simonbw/game-engine` (entities, events, rendering, io, sound) plus the physics engine from `simonbw/tack-and-trim`, stripped down to general-purpose 2D. When fixing engine bugs here, consider whether they should be upstreamed.
 
 ## Commands
 
-- `npm ci` — install (runs `patch-package` on postinstall; required for `pixi-tilemap` types)
-- `npm start` — dev server at http://localhost:1234
+- `npm ci` — install (Node version in `.nvmrc`)
+- `npm start` — dev server at http://localhost:1234, plus a watcher that regenerates the asset manifest
 - `npm run build` — production build to `dist/`
-- `npm run tsc` — type check (the only automated check; there are no tests and no eslint config)
+- `npm run tsc` — type check. Parcel does not type check, so always run this after changes
+- `npm test` — Playwright smoke test that boots and plays the real game. Run after any non-trivial change; see `tests/CLAUDE.md`
+- `npm run test:physics` — fast node tests for the physics engine. Run after touching `src/core/physics`
+- `npm run benchmark` — seeded frame time benchmark
 - `npm run prettier` — format `src/`
-- `npm run generate-asset-types` — regenerate `.d.ts` files next to assets (run after adding/renaming any asset)
-
-Parcel does not type check. Always run `npm run tsc` after changes.
+- `npm run generate-manifest` — regenerate `resources/resources.ts` after adding/removing assets (`npm start` does this automatically)
 
 ## Layout
 
-- `src/core/` — game-agnostic engine. Must not import from `src/highrise/`.
-  - `Game.ts` — main loop, entity add/remove, event dispatch, pause, slow-mo
-  - `entity/` — `Entity` interface and `BaseEntity` base class
+- `src/core/` — game-agnostic engine. Must not import from `src/highrise/` (type-only imports via `src/config/` are the one exception)
+  - `Game.ts` — main loop (fixed timestep), entity add/remove, event dispatch, pause, slow-mo
+  - `entity/` — `Entity` interface, `BaseEntity` base class, event type maps
   - `graphics/` — Pixi renderer wrapper, layers, camera
-  - `physics/` — fixes/extensions to p2 (`CustomWorld`, `SpatialHashingBroadphase`, CCD, custom springs)
-  - `io/` — keyboard/mouse/gamepad
-  - `sound/` — positional audio on Web Audio
-  - `Vector.js` + `Vector.d.ts` — `V()`/`V2d`, an array-subclass 2D vector compatible with p2's `[x, y]` tuples. Hand-written JS with a separate declaration file; keep both in sync.
+  - `physics/` — custom 2D rigid body engine (see its `README.md` and `CLAUDE.md`)
+  - `io/`, `sound/`, `resources/` (preloader), `util/`
+- `src/config/` — configures core for this game: render `Layer`s, `CustomEvents`, `CollisionGroups`, `PhysicsMaterials`
 - `src/highrise/` — the actual game
   - `main.ts` — bootstraps `Game`, preloader, and global controllers
-  - `controllers/` — long-lived entities driving game flow (`GameController`, `LevelController`, etc.)
-  - `config/` — configures core for this game: render `Layer` enum, `CollisionGroups`, `PhysicsMaterials`
+  - `controllers/` — long-lived entities driving game flow (`GameController`, `LevelController`, ...)
   - `levels/level-generation/` — procedural generation (room placement → maze → walls → doors → closets/nubbies → entity placement); `level-templates/` define per-floor themes; `rooms/` define room templates
   - `human/`, `characters/`, `enemies/`, `weapons/`, `projectiles/`, `environment/`, `effects/`, `hud/`, `menu/`
-  - `lighting-and-vision/` — custom lighting/shadow pipeline using GLSL filters (`light.frag`, `shadow.frag`)
-- `resources/` — ~900MB of images, audio, fonts, plus source files (`resources/assets/*.afdesign` etc.). Every importable asset has a generated sibling `.d.ts`.
-- `notes/` — design ideas and todo lists (`simon-random-todos.txt` is the closest thing to a backlog)
-- `patches/` — `patch-package` patch fixing `pixi-tilemap` type imports
+  - `lighting-and-vision/` — lights are baked into render textures (with shadow polygons cast from physics shapes), composited additively into a lighting texture, which is multiplied over the world. `VisionController` masks what the player can't see
+- `resources/` — only assets the game ships. Everything in here is preloaded, so don't put unused files here
+- `assets/` — not shipped: `assets/source` (design files), `assets/unused` (audio/images not currently used)
+- `bin/generate-manifest.ts` — generates `resources/resources.ts`
+- `tests/` — Playwright e2e (`*.spec.ts`), physics node tests (`physics/`), reference screenshots
+- `notes/` — design ideas; `simon-random-todos.txt` is the closest thing to a backlog
 
 ## Architecture conventions
 
 - Everything in the game is an `Entity` (usually `extends BaseEntity`) added with `game.addEntity(...)`. Entities optionally declare `body`/`bodies`, `sprite`/`sprites`, `springs`, `constraints`, `children`; the `Game` registers those with physics/rendering on add and cleans them up on `destroy()`.
-- Lifecycle hooks live in `core/entity/GameEventHandler.ts`: `onAdd`, `afterAdded`, `beforeTick`, `onTick(dt)`, `afterPhysics`, `onRender(dt)`, `onLateRender`, `onPause`/`onUnpause`, `onDestroy`, `onResize`. IO hooks (`onKeyDown`, etc.) are in `IOEventHandler.ts`; collision hooks in `EntityPhysics.ts`.
 - Child entities: use `this.addChild(entity)` so they are added/destroyed with the parent.
-- Custom game events: `game.dispatch({ type: "levelComplete", ... })`, received via a `handlers = { levelComplete: (event) => {...} }` map on the entity. Event payloads are untyped (`any`).
-- Sprites choose their render layer via `sprite.layerName = Layer.X` (see `highrise/config/layers.ts`).
+- **Events are methods named `on<EventName>`.** Built-in events are in `core/entity/BaseGameEvents.ts` (`onAdd({ game })`, `onAfterAdded`, `onBeforeTick`, `onTick(dt)`, `onAfterPhysics`, `onRender(dt)`, `onLateRender`, `onPause`, `onUnpause`, `onDestroy({ game })`, `onResize({ size })`), `IoEvents.ts` (`onKeyDown({ key })`, `onButtonDown({ button })`, `onMouseDown`, ...), and `PhysicsEvents.ts` (`onBeginContact({ other, ... })`, `onImpact`, ...).
+- Custom game events are declared with their payload types in `src/config/CustomEvent.ts`, dispatched with `game.dispatch("levelComplete", undefined)` / `game.dispatch("startLevel", { level })`, and handled by an `onStartLevel({ level })` method.
+- **Gotcha:** `EntityList` registers *every* method starting with `on` as an event handler. Don't name an ordinary method `on<SomeEventName>` (e.g. `onGiveWeapon`) or it will be called on dispatch with the event payload. The type checker catches this only when the signatures differ.
+- Sprites choose their render layer via `sprite.layerName = Layer.X` (`src/config/layers.ts`, ordered bottom to top). Use a Pixi `Container` (not an empty `Sprite`) as a parent for other display objects.
 - Fast entity lookup: `game.entities.getTagged(tag)`, `getById(id)`, or type-guard filters registered with `game.entities.addFilter(isHuman)` and read with `getByFilter(isHuman)`.
-- `persistenceLevel` controls what survives scene clears: clearing removes entities at or below a threshold. Default is 0; global controllers use 100.
-- Assets are imported as URL strings with a type prefix naming convention: `img_fooBar`, `snd_fooBar`, `fnt_fooBar`, `frag_fooBar`. Anything used at runtime must be reachable from the preloader lists in `highrise/preloader/`.
+- `persistenceLevel` (see `Persistence` in `highrise/constants/constants.ts`) controls what `game.clearScene(threshold)` removes.
+- Assets are referred to by name (camelCased file name without extension): `Sprite.from("andyHead")`, `new PositionalSound("wallHit1", position)`, `fontName("captureIt")`. Names are type checked against the manifest (`ImageName`, `SoundName`, `FontName`), so type arrays of them accordingly. Names must be unique per asset type; the manifest generator fails loudly otherwise.
 - Stats-as-data: guns, melee weapons, characters, decorations, and zombie variants are plain objects in their own files, collected in an index (`gunStats.ts`, `weapons.ts`, `decorations.ts`, `Character.ts`).
-- `.frag` imports rely on Parcel 1's built-in glslify support; they arrive as strings.
+- All randomness goes through `core/util/Random.ts` so that `?seed=123` makes runs reproducible. Don't call `Math.random()` directly.
 - `process.env.NODE_ENV === "development"` gates `CheatController`. `window.DEBUG.game` exposes the game in the console.
 
-## Gotchas
+## Physics
 
-- `src/index.ts` must call `polyfill()` before importing anything else — import order matters there.
-- tsconfig targets ES5 with `downlevelIteration`; Parcel 1 uses its own Babel pipeline and ignores most of tsconfig.
-- `pixi.js` is pinned to v5 API (`PIXI.Loader`, `filters`, `pixi-tilemap` v2). v6+ changes are breaking.
-- The repo is large (~800MB of git history, mostly binary assets). Avoid broad globbing/searching under `resources/`.
+- Bodies come from factories: `createRigid2D({ motion: "dynamic" | "kinematic" | "static", ... })`, or `createPointMass2D(...)` for things that should never rotate from collisions (humans — their `angle` is set directly).
+- Pairs are only collision-tested if at least one body is dynamic. A sensor-like body that you move by hand but that must detect static things is a dynamic body with `mass: 0, collisionResponse: false` (see `SwingingWeapon`).
+- There is no gravity. Friction comes from actual contact forces.
+- `game.world.raycast(from, to, { collisionMask, filter, skipBackfaces })` returns the closest `RaycastHit` or `null`. `collisionMask` is matched against the shape's `collisionGroup` only; to respect a shape's own `collisionMask` (e.g. fences that let projectiles through) use `filter` — see `projectileRaycast`.
+- Boxes can't be resized; replace the shape (see `ElevatorDoor`). Concave colliders: `convexShapesFromPolygon` in `core/physics/utils/polygonShapes.ts`.
+- Vectors are `V2d` (`core/Vector.ts`), an `Array` subclass so it is compatible with `[x, y]` tuples. Methods prefixed with `i` mutate in place (`iadd`, `imul`); the others allocate.
+
+## Rendering gotchas (Pixi 8)
+
+- Filters nested inside another filter render nothing if their `resolution`s differ. The stage-level damage filter in `DamagedOverlay` uses `resolution: "inherit"` for this reason.
+- Custom filters are GLSL ES 3.0 for the WebGL renderer (`damage-filter.frag`), imported as a string via Parcel's glsl transformer.
+- Rendering into textures mid-frame (`LightingManager`, `Light`) uses `renderer.render({ container, target, clear })`.
+
+## Misc gotchas
+
+- `src/index.ts` must import `core/Polyfills` first.
+- The repo is large (~800MB of git history, mostly binary assets). Avoid broad globbing/searching under `resources/` and `assets/`.

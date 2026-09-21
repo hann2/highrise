@@ -1,52 +1,48 @@
-import p2 from "p2";
-import { WithOwner } from "./entity/WithOwner";
+import { PhysicsEventMap } from "./physics/events/PhysicsEvents";
 
-export interface ContactInfo {
-  bodyA: p2.Body & WithOwner;
-  bodyB: p2.Body & WithOwner;
-  shapeA: p2.Shape & WithOwner;
-  shapeB: p2.Shape & WithOwner;
-}
-
-export interface ContactInfoWithEquations extends ContactInfo {
-  contactEquations: p2.ContactEquation[];
-}
+type BeginContactEvent = PhysicsEventMap["beginContact"];
+type EndContactEvent = PhysicsEventMap["endContact"];
 
 /**
  * Manages a list of active physics contacts between bodies and shapes.
  * Tracks the beginning and end of collisions to maintain a current list
  * of ongoing contacts for collision handling.
  */
-export default class ContactList {
-  private contacts: ContactInfoWithEquations[] = [];
+export class ContactList {
+  private contacts: BeginContactEvent[] = [];
 
-  beginContact(contactInfo: ContactInfoWithEquations) {
-    if (shouldTrack(contactInfo)) {
-      this.contacts.push(contactInfo);
+  beginContact(event: BeginContactEvent) {
+    if (shouldTrack(event)) {
+      this.contacts.push(event);
     }
   }
 
-  endContact(contactInfo: ContactInfo) {
-    if (shouldTrack(contactInfo)) {
+  endContact(event: EndContactEvent) {
+    if (shouldTrack(event)) {
       const index = this.contacts.findIndex((info) =>
-        contactsAreEqual(info, contactInfo),
+        contactsAreEqual(info, event),
       );
-      this.contacts.splice(index, 1);
+      if (index !== -1) {
+        this.contacts.splice(index, 1);
+      }
     }
   }
 
-  getContacts(): ReadonlyArray<ContactInfoWithEquations> {
+  getContacts(): ReadonlyArray<BeginContactEvent> {
     return this.contacts;
   }
 }
 
 /** Whether or not this is a collision we need to keep track of */
-function shouldTrack({ shapeA, shapeB, bodyA, bodyB }: ContactInfo): boolean {
+function shouldTrack(_event: BeginContactEvent | EndContactEvent): boolean {
   return true;
 }
 
-/** Whether or not two ContactInfos represent the same contact */
-function contactsAreEqual(a: ContactInfo, b: ContactInfo): boolean {
+/** Whether or not two contact events represent the same contact */
+function contactsAreEqual(
+  a: BeginContactEvent | EndContactEvent,
+  b: BeginContactEvent | EndContactEvent,
+): boolean {
   return (
     (a.bodyA === b.bodyA &&
       a.bodyB === b.bodyB &&

@@ -1,19 +1,20 @@
-import { ContactMaterial, Material } from "p2";
+import { ContactMaterial } from "../core/physics/material/ContactMaterial";
+import { Material } from "../core/physics/material/Material";
 import type Game from "../core/Game";
 
-export const P2Materials = {
+export const PhysicsMaterials = {
   wall: new Material(),
   glowstick: new Material(),
 };
 
 export const ContactMaterials: ReadonlyArray<ContactMaterial> = [
-  new ContactMaterial(P2Materials.wall, P2Materials.glowstick, {
+  new ContactMaterial(PhysicsMaterials.wall, PhysicsMaterials.glowstick, {
     restitution: 0.5,
   }),
 ];
 
 export function initContactMaterials(game: Game) {
   for (const contactMaterial of ContactMaterials) {
-    game.world.addContactMaterial(contactMaterial);
+    game.world.contactMaterials.add(contactMaterial);
   }
 }

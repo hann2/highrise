@@ -1,7 +1,5 @@
-import { Ray, RaycastResult, vec2 } from "p2";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import CustomWorld from "../../../core/physics/CustomWorld";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CollisionGroups } from "../../../config/CollisionGroups";
@@ -119,19 +117,15 @@ export default class SpitterController extends BaseEntity implements Entity {
   shamble() {
     const shamblingDirection: V2d = choose(...CARDINAL_DIRECTIONS_VALUES);
 
-    const ray = new Ray({
-      mode: Ray.CLOSEST,
-      from: this.spitter.getPosition(),
-      to: this.spitter.getPosition().add(shamblingDirection.mul(100)),
+    // Walk until we hit a wall
+    const from = this.spitter.getPosition();
+    const to = from.add(shamblingDirection.mul(100));
+    const hit = this.game!.world.raycast(from, to, {
       skipBackfaces: true,
       collisionMask: CollisionGroups.Walls,
     });
-    const result = new RaycastResult();
-    (this.game!.world as CustomWorld).raycast(result, ray, true);
-    const out = vec2.create();
-    result.getHitPoint(out, ray);
 
-    this.moveTarget = V(out[0], out[1]);
+    this.moveTarget = hit?.point ?? to;
     this.objective = "SHAMBLE";
   }
 
@@ -153,8 +147,7 @@ export default class SpitterController extends BaseEntity implements Entity {
     let nearestDistance: number = maxDistance;
 
     for (const human of humans) {
-      const distance = vec2.dist(
-        human.body.position,
+      const distance = human.body.position.distanceTo(
         this.spitter.body.position,
       );
       if (distance < nearestDistance) {

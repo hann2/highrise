@@ -1,4 +1,7 @@
-import { Body, Box, RevoluteConstraint } from "p2";
+import type { Body } from "../../core/physics/body/Body";
+import { Box } from "../../core/physics/shapes/Box";
+import { RevoluteConstraint } from "../../core/physics/constraints/RevoluteConstraint";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -43,7 +46,8 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.sprite.position.set(...hingePoint);
     this.sprite.layerName = Layer.WORLD_FRONT;
 
-    this.body = new Body({
+    this.body = createRigid2D({
+      motion: "dynamic",
       mass: 1.0,
       position: hingePoint,
     });

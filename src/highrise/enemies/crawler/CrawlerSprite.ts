@@ -1,4 +1,3 @@
-import { vec2 } from "p2";
 import { clamp, smoothStep } from "../../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
@@ -81,7 +80,7 @@ export default class CrawlereSprite extends BodySprite {
 
   onTick(dt: number) {
     if (!this.crawler.isStunned) {
-      const moveSpeed = clamp(vec2.length(this.crawler.body.velocity));
+      const moveSpeed = clamp(this.crawler.body.velocity.magnitude);
       this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;
     }
   }

@@ -1,4 +1,4 @@
-import { Body } from "p2";
+import type { Body } from "../../../core/physics/body/Body";
 import type Entity from "../../../core/entity/Entity";
 import type { WithOwner } from "../../../core/entity/WithOwner";
 import Game from "../../../core/Game";
@@ -17,7 +17,7 @@ import FleshImpact from "../../effects/FleshImpact";
 import Hittable from "../../environment/Hittable";
 import Human from "../../human/Human";
 import Bullet from "../../projectiles/Bullet";
-import AimSpring from "../../utils/AimSpring";
+import { AimSpring } from "../../../core/physics/springs/AimSpring";
 import { PhasedAction } from "../../utils/PhasedAction";
 import SwingingWeapon from "../../weapons/melee/SwingingWeapon";
 import { makeSimpleEnemyBody } from "./enemyUtils";
@@ -76,7 +76,7 @@ export class BaseEnemy extends Creature implements Hittable {
 
   onAdd({ game }: { game: Game }) {
     this.voice = this.addChild(this.makeVoice());
-    this.aimSpring = new AimSpring(game.ground, this.body);
+    this.aimSpring = new AimSpring(this.body);
     this.springs = [this.aimSpring];
   }
 
@@ -140,8 +140,8 @@ export class BaseEnemy extends Creature implements Hittable {
     return true;
   }
 
-  knockback(impulse: [number, number], relativePos?: [number, number]) {
-    this.body.applyImpulse([impulse[0] * 0.1, impulse[1] * 0.1], relativePos);
+  knockback(impulse: V2d, relativePos?: V2d) {
+    this.body.applyImpulse(impulse.mul(0.1), relativePos);
   }
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d) {

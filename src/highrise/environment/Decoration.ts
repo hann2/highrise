@@ -1,4 +1,7 @@
-import { Body, Box } from "p2";
+import type { Body } from "../../core/physics/body/Body";
+import { convexShapesFromPolygon } from "../../core/physics/utils/polygonShapes";
+import { Box } from "../../core/physics/shapes/Box";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { SoundName } from "../../../resources/resources";
 import { Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
@@ -51,11 +54,7 @@ export default class Decoration extends BaseEntity implements Entity {
     }
 
     if (decorationInfo.isSolid) {
-      this.body = new Body({
-        mass: 0,
-        position,
-        angle: angle,
-      });
+      this.body = createRigid2D({ motion: "static", position, angle });
 
       const [widthInset, heightInset] = decorationInfo.bodyInset ?? [0, 0];
       const width = this.sprite.width - widthInset;
@@ -66,16 +65,9 @@ export default class Decoration extends BaseEntity implements Entity {
           point[0] * width * 0.5 * (flipX ? -1 : 1),
           point[1] * height * 0.5 * (flipY ? -1 : 1),
         ]);
-        if (flipX != flipX) {
-          // one axis is flipped but not both
-          points.reverse();
+        for (const shape of convexShapesFromPolygon(points)) {
+          this.body.addShape(shape);
         }
-        console.log(points);
-        this.body.fromPolygon(points, {
-          optimalDecomp: true,
-          removeCollinearPoints: false,
-          skipSimpleCheck: false,
-        });
       } else {
         const shape = new Box({ width, height });
 

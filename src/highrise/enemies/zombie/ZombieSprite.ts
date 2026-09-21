@@ -1,4 +1,3 @@
-import { vec2 } from "p2";
 import {
   angleDelta,
   clamp,
@@ -84,7 +83,7 @@ export default class ZombieSprite extends BodySprite {
 
   onTick(dt: number) {
     if (!this.zombie.isStunned) {
-      const moveSpeed = clamp(vec2.length(this.zombie.body.velocity), -1, 4);
+      const moveSpeed = clamp(this.zombie.body.velocity.magnitude, -1, 4);
       this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;
     }
   }

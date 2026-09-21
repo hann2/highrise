@@ -1,4 +1,6 @@
-import { Body, Box } from "p2";
+import { Body } from "../../../core/physics/body/Body";
+import { Box } from "../../../core/physics/shapes/Box";
+import { createRigid2D } from "../../../core/physics/body/bodyFactories";
 import { Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
@@ -39,8 +41,11 @@ export default class SwingingWeapon extends BaseEntity {
     this.sprite.anchor.set(...handlePosition);
     this.sprite.layerName = Layer.WEAPONS;
 
-    this.body = new Body({ collisionResponse: false });
-    this.body.type = Body.DYNAMIC; // Cuz it moves
+    this.body = createRigid2D({
+      motion: "dynamic",
+      mass: 0,
+      collisionResponse: false,
+    });
     const shape = new Box({
       width: size[0],
       height: size[1] * 1.1,

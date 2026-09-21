@@ -1,4 +1,3 @@
-import { vec2 } from "p2";
 import {
   angleDelta,
   clamp,
@@ -85,7 +84,7 @@ export default class SprinterSprite extends BodySprite {
 
   onTick(dt: number) {
     if (!this.sprinter.isStunned) {
-      const moveSpeed = clamp(vec2.length(this.sprinter.body.velocity), -1, 4);
+      const moveSpeed = clamp(this.sprinter.body.velocity.magnitude, -1, 4);
       this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;
     }
   }

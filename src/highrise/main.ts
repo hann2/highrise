@@ -1,7 +1,7 @@
 import AutoPauser from "../core/AutoPauser";
 import Game from "../core/Game";
-import CustomWorld from "../core/physics/CustomWorld";
-import SpatialHashingBroadphase from "../core/physics/SpatialHashingBroadphase";
+import { SpatialHashingBroadphase } from "../core/physics/collision/broadphase/SpatialHashingBroadphase";
+import { World } from "../core/physics/world/World";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import FPSMeter from "../core/util/FPSMeter";
 import { seedRandom } from "../core/util/Random";
@@ -34,16 +34,16 @@ export async function main() {
 
   const game = new Game({
     ticksPerSecond: 60,
-    world: new CustomWorld({
-      gravity: [0, 0],
-      broadphase: new SpatialHashingBroadphase(
-        CELL_SIZE / 2,
-        DEFAULT_LEVEL_SIZE * 2,
-        DEFAULT_LEVEL_SIZE * 2,
-      ),
+    world: new World({
+      // Needed for contact friction to be based on how hard things are pressed together
+      solverConfig: { frictionIterations: 2 },
+      broadphase: new SpatialHashingBroadphase({
+        cellSize: CELL_SIZE / 2,
+        width: DEFAULT_LEVEL_SIZE * 2,
+        height: DEFAULT_LEVEL_SIZE * 2,
+      }),
     }),
   });
-  game.world.frictionGravity = 10;
   initContactMaterials(game);
 
   window.DEBUG = { game };

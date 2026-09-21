@@ -1,4 +1,3 @@
-import { vec2 } from "p2";
 import {
   angleDelta,
   clamp,
@@ -84,7 +83,7 @@ export default class HeavySprite extends BodySprite {
 
   onTick(dt: number) {
     if (!this.heavy.isStunned) {
-      const moveSpeed = clamp(vec2.length(this.heavy.body.velocity));
+      const moveSpeed = clamp(this.heavy.body.velocity.magnitude);
       this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;
     }
   }

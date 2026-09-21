@@ -1,4 +1,3 @@
-import { Ray, RaycastResult } from "p2";
 import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -8,9 +7,12 @@ import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
 
+// Lasers stop at the same things that bullets do
+const LASER_COLLISION_MASK =
+  CollisionGroups.All ^ CollisionGroups.Humans ^ CollisionGroups.Furniture;
+
 export class LaserSight extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite = new Graphics();
-  private ray: Ray;
   private startDot: Sprite;
   private endDot: Sprite;
 
@@ -36,18 +38,6 @@ export class LaserSight extends BaseEntity implements Entity {
       dot.alpha = 0.7;
       dot.anchor.set(0.5);
     }
-
-    this.ray = new Ray({
-      from: V(0, 0),
-      to: V(0, 0),
-      mode: Ray.CLOSEST,
-      collisionGroup: CollisionGroups.Projectiles,
-      collisionMask:
-        CollisionGroups.All ^
-        CollisionGroups.Humans ^
-        CollisionGroups.Furniture,
-      checkCollisionResponse: true,
-    });
   }
 
   onRender() {
@@ -56,24 +46,18 @@ export class LaserSight extends BaseEntity implements Entity {
     const from = this.getEmitterPosition();
     const to = from.add(polarToVec(this.getAngle(), this.maxDistance));
 
-    this.ray.from = from;
-    this.ray.to = to;
-    this.ray.update();
-
     this.startDot.position.set(from[0], from[1]);
 
-    const result = new RaycastResult();
-    this.game?.world.raycast(result, this.ray);
+    const hit = this.game?.world.raycast(from, to, {
+      collisionMask: LASER_COLLISION_MASK,
+      filter: (body, shape) =>
+        (shape.collisionMask & CollisionGroups.Projectiles) !== 0,
+    });
 
-    const end: [number, number] = [0, 0];
-    if (result.hasHit()) {
-      result.getHitPoint(end, this.ray);
-      this.endDot.visible = true;
+    const end = hit?.point ?? to;
+    this.endDot.visible = hit != null;
+    if (hit) {
       this.endDot.position.set(end[0], end[1]);
-    } else {
-      this.endDot.visible = false;
-      end[0] = to[0];
-      end[1] = to[1];
     }
 
     this.sprite

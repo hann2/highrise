@@ -1,4 +1,7 @@
 import { CustomEvents } from "../../config/CustomEvent";
+import type { Body } from "../physics/body/Body";
+import type { Constraint } from "../physics/constraints/Constraint";
+import type { Spring } from "../physics/springs/Spring";
 import Game from "../Game";
 import { BaseGameEvents } from "./BaseGameEvents";
 import { EventHandler, EventHandlerName } from "./EventHandler";
@@ -63,14 +66,14 @@ export default interface Entity extends EventHandler<GameEventMap> {
   /////////////////////
 
   /** Physics body that gets automatically added/removed from the world */
-  readonly body?: p2.Body & WithOwner;
+  readonly body?: Body & WithOwner;
 
   /** Physics bodies that gets automatically added/removed from the world */
-  readonly bodies?: readonly (p2.Body & WithOwner)[];
+  readonly bodies?: readonly (Body & WithOwner)[];
 
   /** Physics springs that gets automatically added/removed from the world */
-  readonly springs?: p2.Spring[];
+  readonly springs?: Spring[];
 
   /** Physics constraints that gets automatically added/removed from the world */
-  readonly constraints?: p2.Constraint[];
+  readonly constraints?: Constraint[];
 }

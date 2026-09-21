@@ -1,4 +1,6 @@
-import { Body, Circle } from "p2";
+import type { Body } from "../../../core/physics/body/Body";
+import { Circle } from "../../../core/physics/shapes/Circle";
+import { createRigid2D } from "../../../core/physics/body/bodyFactories";
 import Game from "../../../core/Game";
 import { angleDelta } from "../../../core/util/MathUtil";
 import { V2d } from "../../../core/Vector";
@@ -10,7 +12,7 @@ export function makeSimpleEnemyBody(
   radius: number,
   mass: number = 1,
 ) {
-  const body = new Body({ mass, position });
+  const body = createRigid2D({ motion: "dynamic", mass, position });
   const shape = new Circle({ radius });
   shape.collisionGroup = CollisionGroups.Enemies;
   shape.collisionMask = CollisionGroups.All;

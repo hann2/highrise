@@ -1,4 +1,5 @@
-import { Body, RotationalSpring } from "p2";
+import type { Body } from "../../core/physics/body/Body";
+import { RotationalSpring } from "../../core/physics/springs/RotationalSpring";
 import { angleDelta, normalizeAngle } from "../../core/util/MathUtil";
 
 export default class DoorSpring extends RotationalSpring {
@@ -16,7 +17,7 @@ export default class DoorSpring extends RotationalSpring {
     this.minRotation = minRotation;
     this.maxRotation = maxRotation;
   }
-  applyForce() {
+  applyForce(): this {
     const bodyA = this.bodyA;
     const bodyB = this.bodyB;
     const relativeBodyAngle = bodyB.angle - bodyA.angle;
@@ -37,5 +38,6 @@ export default class DoorSpring extends RotationalSpring {
 
     bodyA.angularForce -= torque;
     bodyB.angularForce += torque;
+    return this;
   }
 }

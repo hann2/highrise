@@ -1,4 +1,6 @@
-import { Body, Circle } from "p2";
+import type { Body } from "../../core/physics/body/Body";
+import { Circle } from "../../core/physics/shapes/Circle";
+import { createPointMass2D } from "../../core/physics/body/bodyFactories";
 import { SoundName } from "../../../resources/resources";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -78,10 +80,10 @@ export default class Human extends BaseEntity implements Entity {
     this.voice = this.addChild(new HumanVoice(this));
     this.addChild(new Flashlight(this));
 
-    this.body = new Body({
+    this.body = createPointMass2D({
+      motion: "dynamic",
       mass: 0.5,
       position: position.clone(),
-      fixedRotation: true,
     });
 
     const shape = new Circle({ radius: HUMAN_RADIUS });

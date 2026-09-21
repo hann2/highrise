@@ -1,4 +1,3 @@
-import { Ray, RaycastResult } from "p2";
 import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -11,6 +10,7 @@ import { Layer } from "../../config/layers";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import Human from "../human/Human";
 import Spitter from "../enemies/spitter/Spitter";
+import { HitResult, projectileRaycast } from "./Projectile";
 
 export const DEATH_ORB_RADIUS = 0.4; // meters
 const MAX_LIFESPAN = 3.0; // seconds
@@ -18,9 +18,6 @@ const MAX_LIFESPAN = 3.0; // seconds
 export default class DeathOrb extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
   velocity: V2d;
-
-  private ray: Ray;
-  private raycastResult = new RaycastResult();
 
   renderPosition: V2d;
   hitPosition?: V2d;
@@ -36,15 +33,6 @@ export default class DeathOrb extends BaseEntity implements Entity {
     super();
 
     this.velocity = polarToVec(direction, speed);
-    this.ray = new Ray({
-      from: position.clone(), // to be set later
-      to: V(0, 0),
-      mode: Ray.ALL,
-      collisionGroup: CollisionGroups.Projectiles,
-      collisionMask: CollisionGroups.All ^ CollisionGroups.Enemies,
-      checkCollisionResponse: true,
-    });
-
     const [texture, glowTexture] = getBlobPair();
 
     this.sprite = Sprite.from(texture);
@@ -90,38 +78,13 @@ export default class DeathOrb extends BaseEntity implements Entity {
     }
   }
 
-  checkForCollision(
-    dt: number,
-  ): { hit: Entity; hitNormal: V2d; hitPosition: V2d } | undefined {
-    this.raycastResult.reset();
-    this.ray.to = this.position.addScaled(this.velocity, dt);
-    this.ray.update();
-
-    let hitFraction = Infinity;
-    let hit: Entity | undefined;
-    let hitNormal: V2d;
-    this.ray.callback = ({ fraction, body, normal }) => {
-      const owner = (body as WithOwner).owner;
-      if (fraction < hitFraction) {
-        hitFraction = fraction;
-        hit = owner;
-        // To keep at most one allocation
-        if (hitNormal) {
-          hitNormal.set(normal);
-        } else {
-          hitNormal = V(normal);
-        }
-      }
-    };
-
-    this.game!.world.raycast(this.raycastResult, this.ray);
-
-    if (hit) {
-      const hitPosition = V(this.ray.from).ilerp(this.ray.to, hitFraction);
-      return { hit, hitNormal: hitNormal!, hitPosition };
-    } else {
-      return undefined;
-    }
+  checkForCollision(dt: number): HitResult | undefined {
+    return projectileRaycast(
+      this.game!,
+      this.position,
+      this.position.addScaled(this.velocity, dt),
+      CollisionGroups.All ^ CollisionGroups.Enemies,
+    );
   }
 
   onRender(dt: number) {

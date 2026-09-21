@@ -1,7 +1,6 @@
-import { Ray, RaycastResult } from "p2";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { WithOwner } from "../../core/entity/WithOwner";
+import Game from "../../core/Game";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../../config/CollisionGroups";
 
@@ -9,8 +8,6 @@ const MAX_LIFESPAN = 3.0; // seconds
 
 export type HitResult = { hit: Entity; hitNormal: V2d; hitPosition: V2d };
 export class Projectile extends BaseEntity implements Entity {
-  ray: Ray;
-  raycastResult = new RaycastResult();
   hitPosition?: V2d;
   renderPosition: V2d;
 
@@ -19,15 +16,6 @@ export class Projectile extends BaseEntity implements Entity {
     public velocity: V2d,
   ) {
     super();
-
-    this.ray = new Ray({
-      from: position.clone(), // to be set later
-      to: V(0, 0),
-      mode: Ray.ALL,
-      collisionGroup: CollisionGroups.Projectiles,
-      collisionMask: this.makeCollisionMask(),
-      checkCollisionResponse: true,
-    });
 
     this.renderPosition = position.clone();
   }
@@ -69,34 +57,31 @@ export class Projectile extends BaseEntity implements Entity {
   }
 
   checkForCollision(dt: number): HitResult | undefined {
-    this.raycastResult.reset();
-    this.ray.to = this.position.addScaled(this.velocity, dt);
-    this.ray.update();
-
-    let hitFraction = Infinity;
-    let hit: Entity | undefined;
-    let hitNormal: V2d;
-    this.ray.callback = ({ fraction, body, normal }) => {
-      const owner = (body as WithOwner).owner;
-      if (fraction < hitFraction) {
-        hitFraction = fraction;
-        hit = owner;
-        // To keep at most one allocation
-        if (hitNormal) {
-          hitNormal.set(normal);
-        } else {
-          hitNormal = V(normal);
-        }
-      }
-    };
-
-    this.game!.world.raycast(this.raycastResult, this.ray);
-
-    if (hit) {
-      const hitPosition = V(this.ray.from).ilerp(this.ray.to, hitFraction);
-      return { hit, hitNormal: hitNormal!, hitPosition };
-    } else {
-      return undefined;
-    }
+    return projectileRaycast(
+      this.game!,
+      this.position,
+      this.position.addScaled(this.velocity, dt),
+      this.makeCollisionMask(),
+    );
   }
+}
+
+/** Find the first thing that a projectile going from one point to another would hit. */
+export function projectileRaycast(
+  game: Game,
+  from: V2d,
+  to: V2d,
+  collisionMask: number,
+): HitResult | undefined {
+  const hit = game.world.raycast(from, to, {
+    collisionMask,
+    // Some things (like fences) opt out of being hit by projectiles
+    filter: (body, shape) =>
+      (shape.collisionMask & CollisionGroups.Projectiles) !== 0,
+  });
+  const owner = hit?.body.owner;
+  if (hit && owner) {
+    return { hit: owner, hitNormal: hit.normal, hitPosition: hit.point };
+  }
+  return undefined;
 }

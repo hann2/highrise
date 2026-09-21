@@ -1,4 +1,6 @@
-import { Body, Box, vec2 } from "p2";
+import type { Body } from "../../core/physics/body/Body";
+import { Box } from "../../core/physics/shapes/Box";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { BLEND_MODES, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -8,7 +10,7 @@ import { choose, rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
-import { P2Materials } from "../../config/PhysicsMaterials";
+import { PhysicsMaterials } from "../../config/PhysicsMaterials";
 import BulletHole from "../effects/BulletHole";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
@@ -26,7 +28,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
   ) {
     super();
 
-    const length = vec2.dist([x1, y1], [x2, y2]);
+    const length = V(x1, y1).distanceTo([x2, y2]);
     const x = (x1 + x2) / 2;
     const y = (y1 + y2) / 2;
 
@@ -56,18 +58,14 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
     this.sprites = [wallSprite, aoSprite];
 
-    this.body = new Body({
-      mass: 0,
-      position: [x, y],
-      angle,
-    });
+    this.body = createRigid2D({ motion: "static", position: [x, y], angle });
 
     let collisionGroup = CollisionGroups.Walls;
 
     const shape = new Box({ width: type.collisionWidth, height: length });
     shape.collisionGroup = CollisionGroups.None;
     shape.collisionMask = CollisionGroups.All;
-    shape.material = P2Materials.wall;
+    shape.material = PhysicsMaterials.wall;
     this.body.addShape(shape);
 
     if (type.blocksMovement) {

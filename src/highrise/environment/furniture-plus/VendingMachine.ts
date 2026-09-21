@@ -1,4 +1,6 @@
-import { Body, Box } from "p2";
+import type { Body } from "../../../core/physics/body/Body";
+import { Box } from "../../../core/physics/shapes/Box";
+import { createRigid2D } from "../../../core/physics/body/bodyFactories";
 import { SoundName } from "../../../../resources/resources";
 import { BLEND_MODES, Sprite } from "pixi.js";
 import BaseEntity from "../../../core/entity/BaseEntity";
@@ -65,7 +67,8 @@ export default class VendingMachine
 
     this.sprites = [this.machineSprite];
 
-    this.body = new Body({
+    this.body = createRigid2D({
+      motion: "static",
       position: position.clone(),
       angle: rotation,
     });

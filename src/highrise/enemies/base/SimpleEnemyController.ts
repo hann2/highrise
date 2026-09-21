@@ -1,7 +1,5 @@
-import { Ray, RaycastResult, vec2 } from "p2";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import CustomWorld from "../../../core/physics/CustomWorld";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CollisionGroups } from "../../../config/CollisionGroups";
@@ -123,19 +121,15 @@ export default class SimpleEnemyController
   shamble() {
     const shamblingDirection: V2d = choose(...CARDINAL_DIRECTIONS_VALUES);
 
-    const ray = new Ray({
-      mode: Ray.CLOSEST,
-      from: this.enemy.getPosition(),
-      to: this.enemy.getPosition().add(shamblingDirection.mul(100)),
+    // Walk until we hit a wall
+    const from = this.enemy.getPosition();
+    const to = from.add(shamblingDirection.mul(100));
+    const hit = this.game!.world.raycast(from, to, {
       skipBackfaces: true,
       collisionMask: CollisionGroups.Walls,
     });
-    const result = new RaycastResult();
-    (this.game!.world as CustomWorld).raycast(result, ray, true);
-    const out = vec2.create();
-    result.getHitPoint(out, ray);
 
-    this.moveTarget = V(out[0], out[1]);
+    this.moveTarget = hit?.point ?? to;
     this.objective = "SHAMBLE";
 
     if (rBool(0.01)) {
@@ -161,7 +155,7 @@ export default class SimpleEnemyController
     let nearestDistance: number = maxDistance;
 
     for (const human of humans) {
-      const distance = vec2.dist(human.body.position, this.enemy.body.position);
+      const distance = human.body.position.distanceTo(this.enemy.body.position);
       if (distance < nearestDistance) {
         if (this.inVision(human)) {
           nearestDistance = distance;

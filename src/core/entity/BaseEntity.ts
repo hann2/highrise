@@ -1,9 +1,12 @@
-import p2, { Body, Constraint, Spring } from "p2";
 import { EntityDef } from "../EntityDef";
 import Game from "../Game";
 import { V, V2d } from "../Vector";
 import { clamp } from "../util/MathUtil";
-import { shapeFromDef } from "../util/PhysicsUtils";
+import type { Body } from "../physics/body/Body";
+import { createRigid2D } from "../physics/body/bodyFactories";
+import type { Constraint } from "../physics/constraints/Constraint";
+import type { Spring } from "../physics/springs/Spring";
+import { shapeFromDef } from "../physics/utils/ShapeUtils";
 import Entity, { GameEventMap } from "./Entity";
 import { GameSprite, spriteFromDef } from "./GameSprite";
 
@@ -11,8 +14,8 @@ import { GameSprite, spriteFromDef } from "./GameSprite";
  * Base class for lots of stuff in the game.
  */
 export default abstract class BaseEntity implements Entity {
-  bodies?: p2.Body[];
-  body?: p2.Body;
+  bodies?: Body[];
+  body?: Body;
   children: Entity[] = [];
   constraints?: Constraint[];
   game: Game | undefined = undefined;
@@ -47,7 +50,7 @@ export default abstract class BaseEntity implements Entity {
     }
 
     if (def.body) {
-      this.body = new Body({ mass: def.body.mass });
+      this.body = createRigid2D({ motion: "dynamic", mass: def.body.mass });
       for (const shapeDef of def.body.shapes) {
         const shape = shapeFromDef(shapeDef);
         this.body.addShape(shape, shape.position, shape.angle);
@@ -56,20 +59,16 @@ export default abstract class BaseEntity implements Entity {
   }
 
   /** Convert local coordinates to world coordinates. Requires a body */
-  localToWorld(localPoint: [number, number]): V2d {
+  localToWorld(localPoint: V2d | [number, number]): V2d {
     if (this.body) {
-      const result: V2d = V(0, 0);
-      this.body.toWorldFrame(result, localPoint);
-      return result;
+      return this.body.toWorldFrame(V(localPoint));
     }
     return V(0, 0);
   }
 
-  worldToLocal(worldPoint: [number, number]): V2d {
+  worldToLocal(worldPoint: V2d | [number, number]): V2d {
     if (this.body) {
-      const result: V2d = V(0, 0);
-      this.body.toLocalFrame(result, worldPoint);
-      return result;
+      return this.body.toLocalFrame(V(worldPoint));
     }
     return V(0, 0);
   }

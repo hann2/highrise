@@ -22,9 +22,8 @@
   "license": "MIT",
   "dependencies": {
     "@pixi/tilemap": "^5.0.2",
-    "@types/p2": "^0.7.45",
-    "p2": "^0.7.1",
-    "pixi.js": "^8.21.0"
+    "pixi.js": "^8.21.0",
+    "poly-decomp-es": "^0.4.2"
   },
   "devDependencies": {
     "@parcel/transformer-glsl": "^2.16.4",

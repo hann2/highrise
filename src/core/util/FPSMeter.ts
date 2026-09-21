@@ -40,7 +40,7 @@ export default class FPSMeter extends BaseEntity implements Entity {
   getStats() {
     return {
       fps: Math.ceil(1000 / this.averageDuration),
-      bodyCount: this.game?.world.bodies.length ?? 0,
+      bodyCount: this.game?.world.bodies.all.size ?? 0,
       entityCount: this.game?.entities.all.size ?? 0,
       spriteCount: this.game?.renderer.spriteCount ?? 0,
     };

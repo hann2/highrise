@@ -1,5 +1,6 @@
-import { ContactEquation, Shape } from "p2";
-import Entity from "./Entity";
+import { ContactEquation } from "../physics/equations/ContactEquation";
+import { Shape } from "../physics/shapes/Shape";
+import type Entity from "./Entity";
 
 export type PhysicsEvents = {
   /** Called when a physics contact starts */

@@ -1,26 +1,24 @@
-import p2, { World } from "p2";
 import { DEFAULT_LAYER, LAYERS } from "../config/layers";
-import ContactList, {
-  ContactInfo,
-  ContactInfoWithEquations,
-} from "./ContactList";
+import { ContactList } from "./ContactList";
 import EntityList from "./EntityList";
 import { V } from "./Vector";
 import Entity, { GameEventMap } from "./entity/Entity";
 import { eventHandlerName } from "./entity/EventHandler";
-import { WithOwner } from "./entity/WithOwner";
 import {
   GameRenderer2d,
   GameRenderer2dOptions,
 } from "./graphics/GameRenderer2d";
 import { IOManager } from "./io/IO";
-import CustomWorld from "./physics/CustomWorld";
+import type { Body } from "./physics/body/Body";
+import { createRigid2D } from "./physics/body/bodyFactories";
+import { PhysicsEventMap } from "./physics/events/PhysicsEvents";
+import { World } from "./physics/world/World";
 import { lerp } from "./util/MathUtil";
 
 interface GameOptions {
   audio?: AudioContext;
   ticksPerSecond?: number;
-  world?: World | CustomWorld;
+  world?: World;
 }
 
 /**
@@ -43,11 +41,11 @@ export default class Game {
   }
 
   /** The top level container for physics. */
-  readonly world: p2.World;
+  readonly world: World;
   /** Keep track of currently occuring collisions */
   readonly contactList: ContactList;
   /** A static physics body positioned at [0,0] with no shapes. Useful for constraints/springs */
-  readonly ground: p2.Body;
+  readonly ground: Body;
   /** The audio context that is connected to the output */
   readonly audio: AudioContext;
   /** Volume control for all sound output by the game. */
@@ -110,13 +108,12 @@ export default class Game {
 
     this.ticksPerSecond = ticksPerSecond;
     this.tickDuration = 1.0 / this.ticksPerSecond;
-    // this.world = new World({ gravity: [0, 0] });
-    this.world = world ?? new CustomWorld({ gravity: [0, 0] });
+    this.world = world ?? new World();
     this.world.on("beginContact", this.beginContact, null);
     this.world.on("endContact", this.endContact, null);
     this.world.on("impact", this.impact, null);
-    this.ground = new p2.Body({ mass: 0 });
-    this.world.addBody(this.ground);
+    this.ground = createRigid2D({ motion: "static" });
+    this.world.bodies.add(this.ground);
     this.contactList = new ContactList();
 
     this.audio = audio ?? new AudioContext();
@@ -200,12 +197,12 @@ export default class Game {
 
     if (entity.body) {
       entity.body.owner = entity;
-      this.world.addBody(entity.body);
+      this.world.bodies.add(entity.body);
     }
     if (entity.bodies) {
       for (const body of entity.bodies) {
         body.owner = entity;
-        this.world.addBody(body);
+        this.world.bodies.add(body);
       }
     }
     if (entity.springs) {
@@ -215,7 +212,7 @@ export default class Game {
     }
     if (entity.constraints) {
       for (const constraint of entity.constraints) {
-        this.world.addConstraint(constraint);
+        this.world.constraints.add(constraint);
       }
     }
 
@@ -367,11 +364,11 @@ export default class Game {
     this.io.removeHandler(entity);
 
     if (entity.body) {
-      this.world.removeBody(entity.body);
+      this.world.bodies.remove(entity.body);
     }
     if (entity.bodies) {
       for (const body of entity.bodies) {
-        this.world.removeBody(body);
+        this.world.bodies.remove(body);
       }
     }
     if (entity.springs) {
@@ -381,7 +378,7 @@ export default class Game {
     }
     if (entity.constraints) {
       for (const constraint of entity.constraints) {
-        this.world.removeConstraint(constraint);
+        this.world.constraints.remove(constraint);
       }
     }
 
@@ -429,14 +426,14 @@ export default class Game {
 
   // Handle beginning of collision between things.
   // Fired during narrowphase.
-  private beginContact = (contactInfo: ContactInfoWithEquations) => {
+  private beginContact = (contactInfo: PhysicsEventMap["beginContact"]) => {
     this.contactList.beginContact(contactInfo);
     const { shapeA, shapeB, bodyA, bodyB, contactEquations } = contactInfo;
     const ownerA = shapeA.owner || bodyA.owner;
     const ownerB = shapeB.owner || bodyB.owner;
 
     // If either owner has been removed from the game, we shouldn't do the contact
-    if (!(ownerA && !ownerA.game) || (ownerB && !ownerB.game)) {
+    if (!wasRemoved(ownerA) && !wasRemoved(ownerB)) {
       if (ownerA?.onBeginContact) {
         ownerA.onBeginContact({
           other: ownerB,
@@ -458,14 +455,14 @@ export default class Game {
 
   // Handle end of collision between things.
   // Fired during narrowphase.
-  private endContact = (contactInfo: ContactInfo) => {
+  private endContact = (contactInfo: PhysicsEventMap["endContact"]) => {
     this.contactList.endContact(contactInfo);
     const { shapeA, shapeB, bodyA, bodyB } = contactInfo;
     const ownerA = shapeA.owner || bodyA.owner;
     const ownerB = shapeB.owner || bodyB.owner;
 
     // If either owner has been removed from the game, we shouldn't do the contact
-    if (!(ownerA && !ownerA.game) || (ownerB && !ownerB.game)) {
+    if (!wasRemoved(ownerA) && !wasRemoved(ownerB)) {
       if (ownerA?.onEndContact) {
         ownerA.onEndContact({
           other: ownerB,
@@ -509,14 +506,11 @@ export default class Game {
 
   // Handle collision between things.
   // Fired after physics step.
-  private impact = (e: {
-    bodyA: p2.Body & WithOwner;
-    bodyB: p2.Body & WithOwner;
-  }) => {
+  private impact = (e: PhysicsEventMap["impact"]) => {
     const ownerA = e.bodyA.owner;
     const ownerB = e.bodyB.owner;
     // If either owner has been removed from the game, we shouldn't do the contact
-    if (!(ownerA && !ownerA.game) || (ownerB && !ownerB.game)) {
+    if (!wasRemoved(ownerA) && !wasRemoved(ownerB)) {
       if (ownerA?.onImpact) {
         ownerA.onImpact({ other: ownerB });
       }
@@ -525,4 +519,9 @@ export default class Game {
       }
     }
   };
+}
+
+/** True if this is an entity that is no longer in the game. */
+function wasRemoved(entity: Entity | undefined): boolean {
+  return entity != undefined && !entity.game;
 }

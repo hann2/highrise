@@ -74,7 +74,7 @@ test("benchmark: seeded level frame times", async ({ page }) => {
       loopCpuMs: summarize(loopTimes),
       frameIntervalMs: summarize(frameTimes),
       entities: game.entities.all.size,
-      bodies: game.world.bodies.length,
+      bodies: game.world.bodies.all.size,
     };
   }, MEASURE_MS);
   await wander;

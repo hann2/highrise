@@ -1,4 +1,6 @@
-import { Body, Box } from "p2";
+import { Body } from "../../core/physics/body/Body";
+import { Box } from "../../core/physics/shapes/Box";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -28,7 +30,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
   dimensions: V2d;
   verticalMovement: boolean;
   sprite: Graphics;
-  doorShape: Box;
+  doorShape?: Box;
   body: Body;
 
   constructor(
@@ -48,21 +50,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
     this.sprite.position.set(...staticCorner);
     (this.sprite as GameSprite).layerName = Layer.WORLD_FRONT;
 
-    const shape = new Box({
-      width: Math.abs(this.dimensions.x),
-      height: Math.abs(this.dimensions.y),
-    });
-    shape.collisionGroup = CollisionGroups.Walls | CollisionGroups.CastsShadow;
-    shape.collisionMask =
-      CollisionGroups.All ^
-      (CollisionGroups.Walls | CollisionGroups.CastsShadow);
-    this.doorShape = shape;
-
-    this.body = new Body({
-      mass: 0,
-    });
-    this.body.type = Body.KINEMATIC;
-    this.body.addShape(shape);
+    this.body = createRigid2D({ motion: "kinematic" });
 
     this.setOpenPercentage(0);
   }
@@ -76,9 +64,22 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
     this.sprite.clear();
     this.sprite.rect(0, 0, delta.x, delta.y).fill(0xff6666);
 
-    this.body.position = this.staticCorner.add(delta.mul(0.5));
-    this.doorShape.width = Math.abs(delta.x);
-    this.doorShape.height = Math.abs(delta.y);
+    this.body.position.set(this.staticCorner.add(delta.mul(0.5)));
+    this.setDoorShape(Math.abs(delta.x), Math.abs(delta.y));
+  }
+
+  /** Boxes can't be resized, so we make a new one whenever the door moves. */
+  private setDoorShape(width: number, height: number) {
+    if (this.doorShape) {
+      this.body.removeShape(this.doorShape);
+    }
+    this.doorShape = new Box({ width, height });
+    this.doorShape.collisionGroup =
+      CollisionGroups.Walls | CollisionGroups.CastsShadow;
+    this.doorShape.collisionMask =
+      CollisionGroups.All ^
+      (CollisionGroups.Walls | CollisionGroups.CastsShadow);
+    this.body.addShape(this.doorShape);
   }
 
   onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}

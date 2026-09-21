@@ -1,4 +1,6 @@
-import { Body, Capsule, vec2 } from "p2";
+import type { Body } from "../../core/physics/body/Body";
+import { Capsule } from "../../core/physics/shapes/Capsule";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { SoundName } from "../../../resources/resources";
 import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
@@ -11,7 +13,7 @@ import { choose, rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
-import { P2Materials } from "../../config/PhysicsMaterials";
+import { PhysicsMaterials } from "../../config/PhysicsMaterials";
 import { PointLight } from "../lighting-and-vision/PointLight";
 
 export const GLOWSTICK_TEXTURES = ["glowStick1", "glowStick2", "glowStick3"];
@@ -39,7 +41,8 @@ export default class GlowStick extends BaseEntity implements Entity {
     this.z = 1;
     this.zVelocity = rNormal(1, 0.4);
 
-    this.body = new Body({
+    this.body = createRigid2D({
+      motion: "dynamic",
       mass: 0.1,
       position,
       velocity,
@@ -53,7 +56,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     const shape = new Capsule({ radius: SIZE[1] / 2, length: SIZE[0] });
     shape.collisionGroup = CollisionGroups.Particle;
     shape.collisionMask = CollisionGroups.Walls | CollisionGroups.Enemies;
-    shape.material = P2Materials.glowstick;
+    shape.material = PhysicsMaterials.glowstick;
     this.body.addShape(shape);
 
     const color = hslToHex({
@@ -96,7 +99,7 @@ export default class GlowStick extends BaseEntity implements Entity {
   }
 
   onImpact() {
-    const gain = clamp(vec2.length(this.body.velocity) / 5);
+    const gain = clamp(this.body.velocity.magnitude / 5);
     const sound = choose(...DROP_SOUNDS);
     const position = this.getPosition();
     this.game?.addEntity(new PositionalSound(sound, position, { gain }));

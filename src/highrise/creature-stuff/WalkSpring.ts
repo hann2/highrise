@@ -1,4 +1,4 @@
-import { Body, vec2 } from "p2";
+import { Body } from "../../core/physics/body/Body";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { polarToVec } from "../../core/util/MathUtil";
@@ -26,10 +26,9 @@ export class WalkSpring extends BaseEntity implements Entity {
 
   onTick() {
     if (this.enabled) {
-      const force = vec2.create();
-      vec2.sub(force, this.targetVelocity, this.creatureBody.velocity);
-      vec2.scale(force, force, this.acceleration);
-      vec2.scale(force, force, this.creatureBody.mass);
+      const force = this.targetVelocity
+        .sub(this.creatureBody.velocity)
+        .imul(this.acceleration * this.creatureBody.mass);
 
       this.creatureBody.applyForce(force);
     }
