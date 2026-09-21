@@ -50,6 +50,15 @@ test("game boots, plays, and changes levels without errors", async ({
   const moved = Math.hypot(during[0] - before[0], during[1] - before[1]) > 0.05;
   expect(moved).toBe(true);
 
+  // --- Camera keeps up with the player ---
+  const cameraOffset = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (game.entities.getById("party_manager") as any).leader;
+    const [x, y] = leader.getPosition();
+    return Math.hypot(game.camera.x - x, game.camera.y - y);
+  });
+  expect(cameraOffset).toBeLessThan(0.5);
+
   // --- Player can attack and interact without anything blowing up ---
   await page.mouse.move(900, 300);
   await page.mouse.down();

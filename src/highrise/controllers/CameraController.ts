@@ -7,8 +7,12 @@ import { Persistence } from "../constants/constants";
 import PartyManager from "../environment/PartyManager";
 import Human from "../human/Human";
 
+/** How quickly the camera catches up to the player, per second */
+const FOLLOW_STIFFNESS = 10;
+
 export default class CameraController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
+  private shouldCut = true;
 
   constructor(
     private camera: Camera2d,
@@ -21,14 +25,30 @@ export default class CameraController extends BaseEntity implements Entity {
     this.camera.z = 65;
   }
 
-  onRender() {
+  /** Cut straight to the player instead of panning across the new level */
+  onStartLevel() {
+    this.shouldCut = true;
+  }
+
+  onTick() {
     const player = this.getPlayer();
-    if (player) {
-      this.camera.smoothCenter(player.getPosition());
+    if (player && this.shouldCut) {
+      // The party may not have been placed yet when startLevel is dispatched
+      this.shouldCut = false;
+      this.camera.center(player.getPosition());
+      this.camera.velocity.set(0, 0);
+    } else if (player) {
+      this.camera.smoothCenter(
+        player.getPosition(),
+        V(player.body.velocity),
+        FOLLOW_STIFFNESS,
+      );
     } else {
       this.camera.smoothSetVelocity(V(0, 0));
     }
+  }
 
+  onRender() {
     this.getListener().setPosition(this.camera.position);
 
     if (this.game?.io.isKeyDown("Equal")) {
