@@ -14,7 +14,8 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2022",
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "experimentalDecorators": true
   },
   "include": [
     "src",

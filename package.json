@@ -15,7 +15,8 @@
     "test": "playwright test",
     "benchmark": "BENCHMARK=1 playwright test",
     "generate-manifest": "tsx ./bin/generate-manifest.ts",
-    "watch-manifest": "tsx ./bin/generate-manifest.ts watch"
+    "watch-manifest": "tsx ./bin/generate-manifest.ts watch",
+    "test:physics": "tsx --test tests/physics/*.test.ts"
   },
   "author": "Philip Hann, Simon Baumgardt-Wellander",
   "license": "MIT",
