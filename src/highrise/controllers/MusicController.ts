@@ -3,7 +3,6 @@ import Entity from "../../core/entity/Entity";
 import { SoundInstance } from "../../core/sound/SoundInstance";
 import { Persistence } from "../constants/constants";
 
-export const MUSIC_URLS = ["bassGrooveLoop1"];
 const MUSIC_VOLUME = 0.7;
 
 export default class MusicController extends BaseEntity implements Entity {
@@ -24,7 +23,7 @@ export default class MusicController extends BaseEntity implements Entity {
     );
   }
 
-  async onAdd() {
+  onAdd() {
     this.fadeIn(4);
   }
 

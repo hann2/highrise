@@ -1,8 +1,8 @@
+import { CollisionGroups } from "../../../config/CollisionGroups";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
-import { V, V2d } from "../../../core/Vector";
-import { CollisionGroups } from "../../../config/CollisionGroups";
+import { V2d } from "../../../core/Vector";
 import Human, { isHuman } from "../../human/Human";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
 import { testLineOfSight } from "../../utils/visionUtils";
@@ -84,22 +84,15 @@ export default class SimpleEnemyController
     }
   }
 
-  anyoneInAttackRange(): Human | undefined {
-    const humans = [...this.game!.entities.getByFilter(isHuman)];
-    for (const human of humans) {
-      if (this.inAttackRange(human)) {
-        return human;
-      }
-    }
-  }
-
   targetInAttackRange(): boolean {
     return !!this.target && this.inAttackRange(this.target);
   }
 
   inAttackRange(human: Human): boolean {
-    const direction = human.getPosition().sub(this.enemy.body.position);
-    return direction.magnitude < this.attackRange;
+    return (
+      human.getPosition().distanceTo(this.enemy.body.position) <
+      this.attackRange
+    );
   }
 
   targetInVision(): boolean {
@@ -113,8 +106,7 @@ export default class SimpleEnemyController
   atMoveTarget() {
     return (
       !!this.moveTarget &&
-      this.enemy.getPosition().sub(this.moveTarget).magnitude <
-        1.2 * this.bodySize
+      this.enemy.getPosition().distanceTo(this.moveTarget) < 1.2 * this.bodySize
     );
   }
 
@@ -149,12 +141,10 @@ export default class SimpleEnemyController
   // Searches the map for the nearest human in range that is visible
   // This is slow, so be careful
   anyoneInVision(maxDistance: number = 15): Human | undefined {
-    const humans = [...this.game!.entities.getByFilter(isHuman)];
-
     let nearestVisibleHuman: Human | undefined;
     let nearestDistance: number = maxDistance;
 
-    for (const human of humans) {
+    for (const human of this.game!.entities.getByFilter(isHuman)) {
       const distance = human.body.position.distanceTo(this.enemy.body.position);
       if (distance < nearestDistance) {
         if (this.inVision(human)) {

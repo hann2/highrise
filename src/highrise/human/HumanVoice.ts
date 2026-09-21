@@ -1,6 +1,6 @@
+import { SoundName } from "../../../resources/resources";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { SoundName } from "../../../resources/resources";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { CharacterSoundClass, CharacterSounds } from "../characters/Character";
 import SpeakingCircle from "../hud/SpeakingCircle";

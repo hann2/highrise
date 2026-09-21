@@ -1,6 +1,5 @@
 import { V, V2d } from "../../../core/Vector";
-import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "../../constants/constants";
-import Wall from "../../environment/Wall";
+import { CELL_SIZE } from "../../constants/constants";
 
 export interface Closet {
   backCell: V2d;
@@ -130,7 +129,7 @@ export default class CellGrid {
   }
 
   static wallIdsEqual(a: WallID, b: WallID): boolean {
-    return a[0].x === b[0].x && a[0].y === b[0].y && a[1] === b[1];
+    return a[0].equals(b[0]) && a[1] === b[1];
   }
 
   static getWallInDirection(cell: V2d, direction: V2d): WallID {
@@ -148,7 +147,7 @@ export default class CellGrid {
   ): WallID {
     const perpDirection = direction.rotate90cw();
     const cell = gridPoint.add(direction.add(perpDirection).mul(0.5));
-    return CellGrid.getWallInDirection(cell, perpDirection.mul(-1));
+    return CellGrid.getWallInDirection(cell, perpDirection.negate());
   }
 
   static levelCoordToWorldCoord(coord: V2d): V2d {

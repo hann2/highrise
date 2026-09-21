@@ -1,13 +1,12 @@
-import { BLEND_MODES, Text } from "pixi.js";
-import { fontName } from "../../../core/resources/resourceUtils";
+import { Text } from "pixi.js";
+import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
+import { fontName } from "../../../core/resources/resourceUtils";
 import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { Layer } from "../../../config/layers";
-import Decoration from "../../environment/Decoration";
-import { cementFloor, piano } from "../../environment/decorations/decorations";
+import { cementFloor } from "../../environment/decorations/decorations";
 import HealthPickup from "../../environment/HealthPickup";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
@@ -59,7 +58,7 @@ export default class SpawnRoom implements RoomTemplate {
     entities.push(new SpawnLocation(roomToWorldPosition(V(2, 1))));
 
     if (this.levelIndex > 0) {
-      let starterWeapon = rBool(0.5)
+      const starterWeapon = rBool(0.5)
         ? new MeleeWeapon(choose(...MELEE_WEAPONS))
         : new Gun(choose(...GUN_TIERS[0]));
       entities.push(
@@ -140,7 +139,7 @@ class SpawnRoomFloorPaint extends BaseEntity implements Entity {
     const isTutorial = levelIndex < 1;
     const text = isTutorial ? "WASD = ↑←↓→" : `Level ${levelIndex}`;
     this.sprite = new Text({
-      text: text,
+      text,
       style: {
         fontSize: isTutorial ? 32 : 64,
         fontFamily: fontName("captureIt"),

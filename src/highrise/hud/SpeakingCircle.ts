@@ -1,10 +1,9 @@
 import { Graphics } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { clamp } from "../../core/util/MathUtil";
-import Human from "../human/Human";
-import { Layer } from "../../config/layers";
 import { V2d } from "../../core/Vector";
 
 const RESOLUTION = 8; // To draw the circle with more triangles
@@ -34,7 +33,7 @@ export default class SpeakingCircle extends BaseEntity implements Entity {
 
   onRender(dt: number) {
     this.sprite.clear();
-    this.sprite.position.set(...this.getPosition());
+    this.sprite.position.copyFrom(this.getPosition());
 
     if (this.active) {
       this.sprite.alpha = clamp(this.sprite.alpha + dt * FADE_SPEED);

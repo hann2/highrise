@@ -1,9 +1,9 @@
-import { SoundName } from "../../../resources/resources";
 // This file exists to avoid circular dependencies causing imports to return as undefined
-// SO DON'T PUT ANY IMPORTS IN THIS FILE EXCEPT RESOURCES
+// SO DON'T PUT ANY IMPORTS IN THIS FILE EXCEPT TYPES
 
-import { BodyTextures } from "../creature-stuff/BodySprite";
-import { EnemySounds } from "../enemies/base/EnemyVoice";
+import type { SoundName } from "../../../resources/resources";
+import type { BodyTextures } from "../creature-stuff/BodySprite";
+import type { EnemySounds } from "../enemies/base/EnemyVoice";
 
 export const DEFAULT_LEVEL_SIZE = 14; // number of rows/columns
 export const CELL_SIZE = 2;

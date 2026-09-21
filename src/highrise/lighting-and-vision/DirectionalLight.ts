@@ -1,12 +1,13 @@
 import { BlurFilter, Graphics } from "pixi.js";
-import { degToRad } from "../../core/util/MathUtil";
+import { degToRad, polarToVec } from "../../core/util/MathUtil";
 import Light from "./Light";
 
 export class DirectionalLight extends Light {
   graphics: Graphics;
+
   constructor(
     private _length: number = 1,
-    private _width: number = degToRad(30),
+    private _spread: number = degToRad(30),
     intensity: number = 1.0,
     color: number = 0xffffff,
     shadowsEnabled: boolean = true,
@@ -34,24 +35,21 @@ export class DirectionalLight extends Light {
   }
 
   set spread(value: number) {
-    this._width = value;
+    this._spread = value;
     this.redraw();
   }
 
   get spread() {
-    return this._width;
+    return this._spread;
   }
 
   redraw() {
-    const theta = this.spread / 2;
-    const length = this.length;
+    const left = polarToVec(this.spread / 2, this.length);
+    const right = polarToVec(-this.spread / 2, this.length);
 
     this.graphics
       .clear()
-      .moveTo(0, 0)
-      .lineTo(Math.cos(theta) * length, Math.sin(theta) * length)
-      .lineTo(Math.cos(-theta) * length, Math.sin(-theta) * length)
-      .lineTo(0, 0)
+      .poly([0, 0, left.x, left.y, right.x, right.y])
       .fill(0xffffff);
   }
 

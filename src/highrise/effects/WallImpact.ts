@@ -1,34 +1,33 @@
-import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
-import { choose, rUniform } from "../../core/util/Random";
+import { choose, rDirection, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { BLOB_TEXTURES } from "./Splat";
 
 const FRICTION = 5.0;
+
 export default class WallImpact extends BaseEntity implements Entity {
-  sprite: Graphics & GameSprite;
+  sprite: Container & GameSprite;
   particles: Particle[] = [];
 
   constructor(position: V2d, normal?: V2d, color: number = 0xffff00) {
     super();
 
-    this.sprite = new Graphics();
-    this.sprite.blendMode = "add";
-    this.sprite.position.set(...position);
-    this.particles = [];
+    this.sprite = new Container();
+    this.sprite.position.copyFrom(position);
 
     for (let i = 0; i < 10; i++) {
       const particleSprite = Sprite.from(choose(...BLOB_TEXTURES));
       particleSprite.blendMode = "add";
-      particleSprite.rotation = rUniform(0, Math.PI * 2);
+      particleSprite.rotation = rDirection();
       this.sprite.addChild(particleSprite);
       this.particles.push({
         position: V(0, 0),
-        velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
-        color: color,
+        velocity: polarToVec(rDirection(), rUniform(0.8, 6.0)),
+        color,
         radius: rUniform(0.1, 0.4) ** 2,
         alpha: rUniform(0.5, 1.0),
         sprite: particleSprite,
@@ -51,7 +50,7 @@ export default class WallImpact extends BaseEntity implements Entity {
 
   onRender() {
     for (const { position, color, radius, alpha, sprite } of this.particles) {
-      sprite.position.set(...position);
+      sprite.position.copyFrom(position);
       sprite.tint = color;
       sprite.width = radius;
       sprite.height = radius;

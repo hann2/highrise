@@ -1,5 +1,5 @@
-import { rNormal, rUniform } from "../../../core/util/Random";
-import { V, V2d } from "../../../core/Vector";
+import { rDirection, rNormal } from "../../../core/util/Random";
+import { V2d } from "../../../core/Vector";
 import { SPITTER_SOUNDS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import GooImpact from "../../effects/GooImpact";
@@ -26,7 +26,7 @@ export default class Spitter extends BaseEnemy {
   tags = ["zombie"];
   hp: number = HEALTH;
 
-  constructor(position: V2d, angle: number = rUniform(0, Math.PI * 2)) {
+  constructor(position: V2d, angle: number = rDirection()) {
     super(position);
 
     this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
@@ -50,7 +50,7 @@ export default class Spitter extends BaseEnemy {
       },
       onAttack: () => {
         if (this.game) {
-          this.game!.addEntity(
+          this.game.addEntity(
             new Phlegm(
               this.getPosition(),
               this.body.angle,
@@ -64,25 +64,18 @@ export default class Spitter extends BaseEnemy {
     });
   }
 
-  get isStunned() {
-    return this.stunnedTimer > 0;
-  }
-
   onTick(dt: number) {
-    if (this.stunnedTimer > 0) {
-      this.stunnedTimer -= dt;
-    }
+    super.onTick(dt);
 
-    const friction = V(this.body.velocity).mul(-FRICTION);
-    this.body.applyImpulse(friction);
+    this.body.applyImpulse(this.body.velocity.mul(-FRICTION));
   }
 
   makeBlood(position: V2d, damage: number, normal?: V2d) {
     this.game?.addEntity(new GooImpact(position, damage / 10, normal));
   }
 
-  onDie() {
-    super.onDie();
+  handleDeath() {
+    super.handleDeath();
     this.game?.addEntity(new GooImpact(this.getPosition(), 5));
     this.voice.speak("death");
   }

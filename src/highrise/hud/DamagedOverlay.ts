@@ -6,12 +6,12 @@ import {
   Graphics,
   UniformGroup,
 } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
-import { clamp, smoothStep } from "../../core/util/MathUtil";
-import { Layer } from "../../config/layers";
+import { smoothStep } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
 import frag_damageFilter from "./damage-filter.frag";
@@ -54,13 +54,13 @@ export class DamagedOverlay extends BaseEntity implements Entity {
     game.renderer.removeStageFilter(this.colorFilter);
   }
 
-  onHumanInjured({ human, amount }: { human: Human; amount: number }) {
+  onHumanInjured({ human }: { human: Human }) {
     if (human === this.getPlayer()) {
       this.flash(0xff0000, 0, 0.4);
     }
   }
 
-  onHumanHealed({ human, amount }: { human: Human; amount: number }) {
+  onHumanHealed({ human }: { human: Human }) {
     if (human === this.getPlayer()) {
       this.flash(0x00ff00, 0.0, 0.8);
     }

@@ -52,7 +52,7 @@ export function opposite(
   direction: keyof typeof Direction,
 ): keyof typeof Direction {
   const vec = Direction[direction];
-  return vectorToId(vec.mul(-1));
+  return vectorToId(vec.negate());
 }
 
 export function isCardinal(direction: keyof typeof Direction): boolean {

@@ -11,7 +11,6 @@ export enum GraphicsQuality {
 }
 
 function parseQuality(quality: string | null): GraphicsQuality | undefined {
-  console.log("parsing saved quality", quality);
   if (!quality) {
     return undefined;
   }
@@ -22,11 +21,6 @@ function parseQuality(quality: string | null): GraphicsQuality | undefined {
   }
   return undefined;
 }
-
-export type GraphicsQualtiyEvent = {
-  type: "graphicsQualityChanged";
-  quality: GraphicsQuality;
-};
 
 const DEFAULT_QUALITY = GraphicsQuality.Medium;
 
@@ -72,27 +66,12 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
     }
   }
 
-  nextQuality() {}
-
   onToggleGraphicsQuality() {
     this.nextGraphicsQuality();
   }
 
   onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
-    const game = this.game;
-    if (game) {
-      switch (quality) {
-        case GraphicsQuality.Low:
-          game.renderer.setResolution(MAX_RESOLUTION / 2);
-          break;
-        case GraphicsQuality.Medium:
-          game.renderer.setResolution(MAX_RESOLUTION);
-          break;
-        case GraphicsQuality.High:
-          game.renderer.setResolution(MAX_RESOLUTION);
-          break;
-      }
-    }
+    this.game?.renderer.setResolution(getResolutionForGraphicsQuality(quality));
   }
 }
 

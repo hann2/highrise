@@ -21,10 +21,8 @@ export default class VolumeController extends BaseEntity implements Entity {
     this.muted = localStorage.getItem("muted") === "true";
     const loadedVolume = parseInt(localStorage.getItem("volume") || "");
     if (!isNaN(loadedVolume) && loadedVolume >= 0) {
-      console.log("volume loaded", loadedVolume);
       this.volume = clamp(loadedVolume);
     } else {
-      console.log("bad volume loaded", loadedVolume);
       this.volume = 1;
     }
   }
@@ -36,9 +34,9 @@ export default class VolumeController extends BaseEntity implements Entity {
   set muted(muted: boolean) {
     this._muted = muted;
     if (this.game) {
-      this.game!.masterGain.gain.value = muted ? 0 : this.volume;
+      this.game.masterGain.gain.value = muted ? 0 : this.volume;
       localStorage.setItem("muted", muted ? "true" : "false");
-      this.game!.dispatch("muteChanged", {
+      this.game.dispatch("muteChanged", {
         muted: this._muted,
         volume: this._volume,
       });
@@ -53,12 +51,10 @@ export default class VolumeController extends BaseEntity implements Entity {
     if (!isNaN(value)) {
       this._volume = clamp(value);
       localStorage.setItem("volume", String(value));
-      if (this.game) {
-        this.game!.dispatch("volumeChanged", {
-          muted: this._muted,
-          volume: this._volume,
-        });
-      }
+      this.game?.dispatch("volumeChanged", {
+        muted: this._muted,
+        volume: this._volume,
+      });
     }
   }
 

@@ -57,7 +57,7 @@ export default class MeleeWeapon extends BaseEntity implements Entity {
 
   onTick(dt: number) {
     if (this.currentCooldown > 0) {
-      ((this.currentCooldown -= dt), 0);
+      this.currentCooldown -= dt;
     }
   }
 

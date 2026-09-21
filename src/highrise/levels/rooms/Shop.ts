@@ -1,5 +1,5 @@
 import Entity from "../../../core/entity/Entity";
-import { hsvToRgb, rgbToHex } from "../../../core/util/ColorUtils";
+import { hsvToHex } from "../../../core/util/ColorUtils";
 import { choose, rCardinal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import Decoration from "../../environment/Decoration";
@@ -22,14 +22,7 @@ import {
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
-import {
-  AngleTransformer,
-  DimensionsTransformer,
-  PositionTransformer,
-  RoomTransformer,
-  VectorTransformer,
-  WallTransformer,
-} from "./ElementTransformer";
+import { RoomTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
@@ -127,9 +120,7 @@ export default class Shop implements RoomTemplate {
       floorInfo.imageName == carpetFloor1.imageName ||
       floorInfo.imageName == carpetFloor2.imageName
     ) {
-      floor.sprite.tint = rgbToHex(
-        hsvToRgb({ h: rUniform(0, 1), s: 0.6, v: 0.7 }),
-      );
+      floor.sprite.tint = hsvToHex({ h: rUniform(0, 1), s: 0.6, v: 0.7 });
     }
 
     entities.push(floor);

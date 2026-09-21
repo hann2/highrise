@@ -1,7 +1,6 @@
-import Game from "../../../core/Game";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { normalizeAngle, polarToVec } from "../../../core/util/MathUtil";
-import { choose, rNormal, rUniform } from "../../../core/util/Random";
+import { choose, rDirection, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { SPITTER_SOUNDS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
@@ -9,7 +8,6 @@ import DeathOrb from "../../projectiles/DeathOrb";
 import Phlegm from "../../projectiles/Phlegm";
 import { BaseEnemy } from "../base/Enemy";
 import { makeSimpleEnemyBody } from "../base/enemyUtils";
-import Zombie from "../zombie/Zombie";
 import NecromancerController from "./NecromancerController";
 import NecromancerSprite from "./NecromancerSprite";
 import { ZombieEgg } from "./ZombieEgg";
@@ -53,8 +51,8 @@ export default class Necromancer extends BaseEnemy {
     return body;
   }
 
-  onAdd({ game }: { game: Game }) {
-    super.onAdd({ game });
+  onAdd() {
+    super.onAdd();
 
     this.aimSpring.stiffness = 50;
     this.aimSpring.damping = 5;
@@ -160,7 +158,7 @@ export default class Necromancer extends BaseEnemy {
       windDownDuration: WINDDOWN_TIME,
       cooldownDuration: COOLDOWN_TIME,
 
-      onAttack: (direction: V2d = polarToVec(rUniform(0, 2 * Math.PI), 1)) => {
+      onAttack: (direction: V2d = polarToVec(rDirection(), 1)) => {
         const nZombies = 5; // TODO: Limit number of minions
         const separation = Math.PI / 5;
         const angles: number[] = [];
@@ -188,7 +186,7 @@ export default class Necromancer extends BaseEnemy {
       onAttack: ({ targetPosition }: { targetPosition: V2d }) => {
         const angles: number[] = [];
         const nCrawlers = 7;
-        const startingAngle = rUniform(0, Math.PI * 2);
+        const startingAngle = rDirection();
         for (let i = 0; i < nCrawlers; i++) {
           angles.push(
             normalizeAngle(startingAngle + (i * Math.PI * 2) / nCrawlers),

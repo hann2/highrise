@@ -1,11 +1,10 @@
 import { Container, Sprite, Text } from "pixi.js";
-import { fontName } from "../../core/resources/resourceUtils";
-import { V2d } from "../../core/Vector";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
-import Game from "../../core/Game";
-import { Layer } from "../../config/layers";
+import { fontName } from "../../core/resources/resourceUtils";
+import { V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
@@ -53,7 +52,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     this.bulletSpriteContainer.position.set(width - 10, height - 10);
   }
 
-  onNewWeapon(weapon: Weapon | undefined) {
+  setWeapon(weapon: Weapon | undefined) {
     this.lastWeapon = weapon;
 
     this.bulletSpriteContainer.removeChildren();
@@ -75,7 +74,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     const weapon = this.getHuman().weapon;
 
     if (weapon != this.lastWeapon) {
-      this.onNewWeapon(weapon);
+      this.setWeapon(weapon);
     }
 
     if (weapon instanceof Gun) {

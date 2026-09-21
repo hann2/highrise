@@ -98,7 +98,7 @@ export default class Light extends BaseEntity implements Entity {
     this.shadowsEnabled = false;
     if (this.shadows) {
       this.container.removeChild(this.shadows.graphics);
-      this.shadows?.destroy();
+      this.shadows.destroy();
       this.shadows = undefined;
     }
   }

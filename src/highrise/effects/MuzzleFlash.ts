@@ -1,13 +1,14 @@
-import { BLEND_MODES, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
+import { ImageName } from "../../../resources/resources";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layer } from "../../config/layers";
 import { PointLight } from "../lighting-and-vision/PointLight";
 
-export const MUZZLE_FLASH_URLS = [
+const MUZZLE_FLASH_TEXTURES: ImageName[] = [
   "muzzleFlash1",
   "muzzleFlash2",
   "muzzleFlash3",
@@ -29,6 +30,7 @@ export const MUZZLE_FLASH_URLS = [
 const SCALE = 1 / 220; // scale of the image
 const DURATION = 0.1; // seconds
 const RADIUS = 12; // meters for light
+
 export default class MuzzleFlash extends BaseEntity implements Entity {
   light?: PointLight;
   timeLeft: number = DURATION;
@@ -37,10 +39,10 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
   constructor(position: V2d, angle: number) {
     super();
 
-    this.sprite = Sprite.from(choose(...MUZZLE_FLASH_URLS));
+    this.sprite = Sprite.from(choose(...MUZZLE_FLASH_TEXTURES));
     this.sprite.anchor.set(0.1, 0.5);
     this.sprite.scale.set(SCALE);
-    this.sprite.position.set(...position);
+    this.sprite.position.copyFrom(position);
     this.sprite.rotation = angle;
     this.sprite.blendMode = "add";
     this.sprite.layerName = Layer.EMISSIVES;
@@ -54,7 +56,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
         color: 0xffeeaa,
         shadowsEnabled: true,
         softShadows: true,
-        position: [this.sprite.position.x, this.sprite.position.y],
+        position: this.getPosition(),
       }),
     );
   }

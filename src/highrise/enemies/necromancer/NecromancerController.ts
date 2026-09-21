@@ -3,8 +3,8 @@ import Entity from "../../../core/entity/Entity";
 import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
-import { Direction, opposite } from "../../utils/directions";
 import Human, { isHuman } from "../../human/Human";
+import { Direction, opposite } from "../../utils/directions";
 import Necromancer from "./Necromancer";
 
 interface Zone {
@@ -54,7 +54,7 @@ export default class NecromancerController
     }
   }
 
-  async onTick() {
+  onTick() {
     if (this.objective === "FLEE") {
       if (this.atMoveTarget()) {
         this.objective = "DEFEND";
@@ -128,7 +128,7 @@ export default class NecromancerController
   atMoveTarget() {
     return (
       !!this.moveTarget &&
-      this.necromancer.getPosition().sub(this.moveTarget).magnitude <
+      this.necromancer.getPosition().distanceTo(this.moveTarget) <
         1.2 * ZOMBIE_RADIUS
     );
   }
@@ -143,11 +143,9 @@ export default class NecromancerController
   }
 
   getEnemiesInArena(): Human[] {
-    const humans = [...this.game!.entities.getByFilter(isHuman)];
-
     const result: Human[] = [];
 
-    for (const human of humans) {
+    for (const human of this.game!.entities.getByFilter(isHuman)) {
       const p = human.getPosition();
       const c1 = this.necromancer.arenaUpperLeftCorner;
       const c2 = c1.add(this.necromancer.arenaDimensions);

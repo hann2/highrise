@@ -15,7 +15,7 @@ export const Kyle: Character = {
     hurt: [
       "kyleHurt1",
       "kyleHurt2",
-      // snd_kyleHurt3,
+      // "kyleHurt3",
       "kyleHurt4",
       "kyleHurt5",
       "kyleHurt6",

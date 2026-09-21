@@ -1,6 +1,6 @@
-import { Body } from "../../core/physics/body/Body";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import type { Body } from "../../core/physics/body/Body";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 

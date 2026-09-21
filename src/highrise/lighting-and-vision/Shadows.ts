@@ -1,10 +1,11 @@
-import { AABB } from "../../core/physics/collision/AABB";
-import type { Body } from "../../core/physics/body/Body";
 import { Graphics } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import type { Body } from "../../core/physics/body/Body";
+import { AABB } from "../../core/physics/collision/AABB";
 import { V2d } from "../../core/Vector";
 import { getShapeCorners } from "./shapeUtils";
+
 /**
  * Draws shadows from a given point
  *
@@ -15,7 +16,7 @@ import { getShapeCorners } from "./shapeUtils";
  */
 export class Shadows extends BaseEntity implements Entity {
   dirty: boolean = true;
-  graphics: Graphics;
+  graphics = new Graphics();
 
   constructor(
     private lightPos: V2d,
@@ -23,8 +24,6 @@ export class Shadows extends BaseEntity implements Entity {
     private checkDynamicBodies = false,
   ) {
     super();
-    this.graphics = new Graphics();
-    // this.graphics.blendMode = "multiply";
   }
 
   setPosition(position: V2d) {

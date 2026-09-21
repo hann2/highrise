@@ -9,14 +9,10 @@ import RoomTemplate from "../rooms/RoomTemplate";
 import TutorialRoomTemplate from "../rooms/TutorialRoom";
 import LevelTemplate from "./LevelTemplate";
 
-// Level for testing all the bathrooms
+// Hand-built level that teaches the controls
 export default class TutorialLevel extends LevelTemplate {
-  chooseRoomTemplates(seed: number): RoomTemplate[] {
-    const rooms: RoomTemplate[] = [];
-
-    rooms.push(new TutorialRoomTemplate());
-
-    return rooms;
+  chooseRoomTemplates(): RoomTemplate[] {
+    return [new TutorialRoomTemplate()];
   }
 
   getSize(): [number, number] {

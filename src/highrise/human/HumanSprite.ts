@@ -25,8 +25,8 @@ export default class HumanSprite extends BodySprite {
   }
 
   onTick(dt: number) {
-    const { body, weapon } = this.human;
-    [this.sprite.x, this.sprite.y] = body.position;
+    const { body } = this.human;
+    this.sprite.position.copyFrom(body.position);
     this.sprite.rotation = body.angle;
 
     this._stanceAngle = stepToward(
@@ -56,12 +56,12 @@ export default class HumanSprite extends BodySprite {
       const pushOffset = this.getPushOffset();
       if (weapon instanceof MeleeWeapon) {
         this.weaponSprite.visible = weapon.currentCooldown <= 0;
-        this.weaponSprite.position.set(
-          ...V(weapon.swing.restPosition).iadd([pushOffset, 0]),
+        this.weaponSprite.position.copyFrom(
+          V(weapon.swing.restPosition).iadd([pushOffset, 0]),
         );
       } else {
-        this.weaponSprite.position.set(
-          ...weapon.getCurrentHoldPosition().iadd([pushOffset, 0]),
+        this.weaponSprite.position.copyFrom(
+          weapon.getCurrentHoldPosition().iadd([pushOffset, 0]),
         );
         this.weaponSprite.rotation = weapon.getCurrentHoldAngle() + pushOffset;
       }
@@ -112,7 +112,7 @@ export default class HumanSprite extends BodySprite {
       return [left.iadd([pushOffset, 0]), right.iadd([pushOffset, 0])];
     } else {
       // Wave em in the air like you just don't care?
-      let x: number = 0.3 + pushOffset;
+      const x = 0.3 + pushOffset;
       const y = Math.sin(this.game!.elapsedTime * 2) * 0.05;
       return [V(x, -0.2 + y), V(x, 0.2 - y)];
     }
@@ -136,13 +136,13 @@ export default class HumanSprite extends BodySprite {
     }
   }
 
-  async handleNewWeapon(weapon: Gun | MeleeWeapon) {
+  handleNewWeapon(weapon: Gun | MeleeWeapon) {
     if (weapon instanceof Gun) {
-      const { textures, muzzleLength } = weapon.stats;
+      const { textures } = weapon.stats;
       this.weaponSprite = Sprite.from(textures.holding);
       this.weaponSprite.scale.set(GUN_SCALE);
       this.weaponSprite.anchor.set(0.5, 0.5);
-      this.weaponSprite.position.set(...weapon.getCurrentHoldPosition());
+      this.weaponSprite.position.copyFrom(weapon.getCurrentHoldPosition());
       this.sprite.addChild(this.weaponSprite);
 
       if (weapon.stats.laserSightColor) {
@@ -178,7 +178,7 @@ export default class HumanSprite extends BodySprite {
     return V(0, 0);
   }
 
-  onDropWeapon() {
+  handleDropWeapon() {
     if (this.weaponSprite) {
       this.sprite.removeChild(this.weaponSprite);
       this.weaponSprite = undefined;

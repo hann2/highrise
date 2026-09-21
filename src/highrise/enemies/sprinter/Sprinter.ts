@@ -1,6 +1,6 @@
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { degToRad } from "../../../core/util/MathUtil";
-import { choose, rBool, rInteger, rNormal } from "../../../core/util/Random";
+import { choose, rInteger, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import {
   HUMAN_RADIUS,
@@ -13,7 +13,6 @@ import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange, makeSimpleEnemyBody } from "../base/enemyUtils";
 import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
-import Crawler from "../crawler/Crawler";
 import { SPRINTER_VARIANTS, ZombieVariant } from "../zombie/ZombieVariants";
 import SprinterSprite from "./SprinterSprite";
 
@@ -70,7 +69,7 @@ export default class Sprinter extends BaseEnemy {
             ATTACK_ANGLE_RANGE,
           )) {
             human.inflictDamage(rInteger(10, 15));
-            this.game?.addEntity(
+            this.game.addEntity(
               new PositionalSound(hitSoundRing.getNext(), this.getPosition(), {
                 speed: rNormal(1, 0.05),
               }),

@@ -1,10 +1,10 @@
 import { degToRad } from "../../../core/util/MathUtil";
-import { rInteger, rNormal, rUniform } from "../../../core/util/Random";
+import { rDirection, rInteger, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import { BodyTextures } from "../../creature-stuff/BodySprite";
-import { BaseEnemy as BaseEnemy } from "../base/Enemy";
+import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange } from "../base/enemyUtils";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import CrawlerSprite from "./CrawlerSprite";
@@ -20,7 +20,7 @@ export default class Crawler extends BaseEnemy {
 
   constructor(
     position: V2d,
-    angle: number = rUniform(0, Math.PI * 2),
+    angle: number = rDirection(),
     textures?: BodyTextures,
   ) {
     super(position);

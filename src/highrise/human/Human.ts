@@ -1,10 +1,11 @@
-import type { Body } from "../../core/physics/body/Body";
-import { Circle } from "../../core/physics/shapes/Circle";
-import { createPointMass2D } from "../../core/physics/body/bodyFactories";
 import { SoundName } from "../../../resources/resources";
+import { CollisionGroups } from "../../config/CollisionGroups";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import type Game from "../../core/Game";
+import type { Body } from "../../core/physics/body/Body";
+import { createPointMass2D } from "../../core/physics/body/bodyFactories";
+import { Circle } from "../../core/physics/shapes/Circle";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import {
   angleDelta,
@@ -16,7 +17,6 @@ import {
 import { rNormal } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Character, randomCharacter } from "../characters/Character";
-import { CollisionGroups } from "../../config/CollisionGroups";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants/constants";
 import { WalkSpring } from "../creature-stuff/WalkSpring";
 import FleshImpact from "../effects/FleshImpact";
@@ -86,10 +86,13 @@ export default class Human extends BaseEntity implements Entity {
       position: position.clone(),
     });
 
-    const shape = new Circle({ radius: HUMAN_RADIUS });
-    shape.collisionGroup = CollisionGroups.Humans;
-    shape.collisionMask = CollisionGroups.All;
-    this.body.addShape(shape);
+    this.body.addShape(
+      new Circle({
+        radius: HUMAN_RADIUS,
+        collisionGroup: CollisionGroups.Humans,
+        collisionMask: CollisionGroups.All,
+      }),
+    );
 
     this.addChild(this.glowstickAction);
     this.addChild(this.pushAction);
@@ -116,9 +119,8 @@ export default class Human extends BaseEntity implements Entity {
     this.body.angle += turnAmount;
   }
 
-  setPosition([x, y]: [number, number]) {
-    this.body.position[0] = x;
-    this.body.position[1] = y;
+  setPosition(position: [number, number]) {
+    this.body.position.set(position);
   }
 
   getDirection(): number {
@@ -159,25 +161,22 @@ export default class Human extends BaseEntity implements Entity {
     if (this.weapon) {
       this.game?.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
       this.weapon = undefined;
-      this.humanSprite.onDropWeapon();
+      this.humanSprite.handleDropWeapon();
     }
   }
 
   // Return a list of all interactables within range
   getNearbyInteractables(): Interactable[] {
-    const result = [];
-
     return (
       [...this.game!.entities.getByFilter(isInteractable)]
         // .filter((i) => testLineOfSight(i, this)) // TODO: Fast vision test for interactables
         .filter(
-          (i) =>
-            i.getPosition().sub(this.body.position).magnitude < i.maxDistance,
+          (i) => i.getPosition().distanceTo(this.body.position) < i.maxDistance,
         )
         .sort(
           (i1, i2) =>
-            i1.getPosition().sub(this.body.position).magnitude -
-            i2.getPosition().sub(this.body.position).magnitude,
+            i1.getPosition().distanceTo(this.body.position) -
+            i2.getPosition().distanceTo(this.body.position),
         )
     );
   }
@@ -314,7 +313,7 @@ export default class Human extends BaseEntity implements Entity {
     },
   ]);
 
-  async throwGlowstick() {
+  throwGlowstick() {
     if (!this.glowstickAction.isActive()) {
       this.glowstickAction.do();
     }

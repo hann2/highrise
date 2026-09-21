@@ -1,12 +1,12 @@
 import { CompositeTilemap } from "@pixi/tilemap";
 import { Texture } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { V, V2d } from "../../core/Vector";
-import { Layer } from "../../config/layers";
+import { V2d } from "../../core/Vector";
 import { DecorationInfo } from "./decorations/DecorationInfo";
 
-export type Tiles = ((DecorationInfo & {}) | undefined)[][];
+export type Tiles = (DecorationInfo | undefined)[][];
 
 export default class TiledFloor extends BaseEntity implements Entity {
   constructor(position: V2d, tileDimensions: V2d, tiles: Tiles) {
@@ -30,7 +30,7 @@ export default class TiledFloor extends BaseEntity implements Entity {
         const { offset, dimensions } = tile.sheetInfo!;
 
         const childPosition = position
-          .add(V(i * tileW, j * tileH))
+          .add([i * tileW, j * tileH])
           // Have to reverse the scale from above for these positions
           .mul(1 / scale);
 

@@ -1,8 +1,8 @@
+import { CollisionGroups } from "../../../config/CollisionGroups";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
-import { V, V2d } from "../../../core/Vector";
-import { CollisionGroups } from "../../../config/CollisionGroups";
+import { V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import Human, { isHuman } from "../../human/Human";
 import { CARDINAL_DIRECTIONS_VALUES } from "../../utils/directions";
@@ -80,22 +80,15 @@ export default class SpitterController extends BaseEntity implements Entity {
     }
   }
 
-  anyoneInAttackRange(): Human | undefined {
-    const humans = [...this.game!.entities.getByFilter(isHuman)];
-    for (const human of humans) {
-      if (this.inAttackRange(human)) {
-        return human;
-      }
-    }
-  }
-
   targetInAttackRange(): boolean {
     return !!this.target && this.inAttackRange(this.target);
   }
 
   inAttackRange(human: Human): boolean {
-    const direction = human.getPosition().sub(this.spitter.body.position);
-    return direction.magnitude < SPITTER_ATTACK_RANGE;
+    return (
+      human.getPosition().distanceTo(this.spitter.body.position) <
+      SPITTER_ATTACK_RANGE
+    );
   }
 
   targetInVision(): boolean {
@@ -109,7 +102,7 @@ export default class SpitterController extends BaseEntity implements Entity {
   atMoveTarget() {
     return (
       !!this.moveTarget &&
-      this.spitter.getPosition().sub(this.moveTarget).magnitude <
+      this.spitter.getPosition().distanceTo(this.moveTarget) <
         1.2 * ZOMBIE_RADIUS
     );
   }
@@ -141,12 +134,10 @@ export default class SpitterController extends BaseEntity implements Entity {
   // Searches the map for the nearest human in range that is visible
   // This is slow, so be careful
   anyoneInVision(maxDistance: number = 15): Human | undefined {
-    const humans = [...this.game!.entities.getByFilter(isHuman)];
-
     let nearestVisibleHuman: Human | undefined;
     let nearestDistance: number = maxDistance;
 
-    for (const human of humans) {
+    for (const human of this.game!.entities.getByFilter(isHuman)) {
       const distance = human.body.position.distanceTo(
         this.spitter.body.position,
       );

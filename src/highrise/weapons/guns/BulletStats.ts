@@ -1,4 +1,4 @@
-import { SoundName } from "../../../../resources/resources";
+import { ImageName, SoundName } from "../../../../resources/resources";
 
 export interface BulletStats {
   // Amount of damage done to enemies
@@ -12,7 +12,7 @@ export interface BulletStats {
   // Sound the casing makes when it hits the ground
   dropSounds: SoundName[];
   // Texture of the casing as it's flying and hitting the ground
-  dropTexture: string;
+  dropTexture: ImageName;
   // Bullets per shot
   bulletsPerShot: number;
 }

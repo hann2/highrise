@@ -1,14 +1,12 @@
-import type { Body } from "../../core/physics/body/Body";
-import { Box } from "../../core/physics/shapes/Box";
-import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Sprite } from "pixi.js";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
+import { Box } from "../../core/physics/shapes/Box";
 import { V } from "../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
-import { Layer } from "../../config/layers";
-import Interactable from "./Interactable";
 import { OverheadLight } from "./lighting/OverheadLight";
 import { getPartyLeader } from "./PartyManager";
 
@@ -41,11 +39,14 @@ export default class Exit extends BaseEntity implements Entity {
       position,
       collisionResponse: false,
     });
-
-    const shape = new Box({ width: w, height: h });
-    shape.collisionGroup = CollisionGroups.Sensors;
-    shape.collisionMask = CollisionGroups.Humans;
-    this.body.addShape(shape, [0, 0], 0);
+    this.body.addShape(
+      new Box({
+        width: w,
+        height: h,
+        collisionGroup: CollisionGroups.Sensors,
+        collisionMask: CollisionGroups.Humans,
+      }),
+    );
 
     this.addChild(new OverheadLight(position));
   }

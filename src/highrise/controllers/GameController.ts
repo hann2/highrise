@@ -17,34 +17,29 @@ import LevelController from "./LevelController";
 export class GameController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Permanent;
 
-  constructor() {
-    super();
-  }
-
   onGoToMainMenu() {
-    console.log("go to main menu");
     const game = this.game!;
     game.clearScene(Persistence.Menu);
     game.addEntity(new MainMenu());
   }
 
   onNewGame() {
-    console.log("new game");
     const game = this.game!;
     const partyManager = game.addEntity(new PartyManager());
     const getPlayer = () => partyManager.leader;
-    game.addEntity(new LevelController());
-    game.addEntity(new CameraController(game.camera, getPlayer));
-    game.addEntity(new PlayerHumanController(getPlayer));
-    game.addEntity(new VisionController(getPlayer));
-    game.addEntity(new DamagedOverlay(getPlayer));
-    game.addEntity(new AmmoOverlay(getPlayer));
-    game.addEntity(new LightingManager());
-    game.addEntity(new PauseMenu());
+    game.addEntities(
+      new LevelController(),
+      new CameraController(game.camera, getPlayer),
+      new PlayerHumanController(getPlayer),
+      new VisionController(getPlayer),
+      new DamagedOverlay(getPlayer),
+      new AmmoOverlay(getPlayer),
+      new LightingManager(),
+      new PauseMenu(),
+    );
   }
 
   async onGameOver({ victory }: { victory: boolean }) {
-    console.log("game over");
     const game = this.game!;
 
     const gameOverScreen = game.addEntity(new GameOverScreen(victory));

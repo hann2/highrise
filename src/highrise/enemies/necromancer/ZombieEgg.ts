@@ -1,4 +1,5 @@
 import { Container, Sprite } from "pixi.js";
+import { ImageName } from "../../../../resources/resources";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
@@ -43,13 +44,14 @@ export class ZombieEgg extends BaseEntity implements Entity {
   }
 
   async onAdd() {
-    const distance = this.target.sub(this.startPosition).magnitude;
+    const distance = this.target.distanceTo(this.startPosition);
     const flightTime = 0.2 + distance / SPEED;
     await this.wait(
       flightTime,
       (dt, t) => {
-        const [x, y] = this.startPosition.lerp(this.target, smoothStep(t));
-        this.sprite?.position.set(x, y);
+        this.sprite.position.copyFrom(
+          this.startPosition.lerp(this.target, smoothStep(t)),
+        );
         const heightScale = 1.0 + Math.sin(t * Math.PI);
         this.sprite.scale.set(heightScale);
       },
@@ -61,11 +63,11 @@ export class ZombieEgg extends BaseEntity implements Entity {
   makeCreatureSprite(): Sprite {
     switch (this.spawnType) {
       case "zombie": {
-        const choices = ["zombie1", "zombie2", "zombie3"];
+        const choices: ImageName[] = ["zombie1", "zombie2", "zombie3"];
         return Sprite.from(choices[this.variant % choices.length]);
       }
       case "crawler": {
-        const choices = ["crawler1", "crawler2", "crawler3"];
+        const choices: ImageName[] = ["crawler1", "crawler2", "crawler3"];
         return Sprite.from(choices[this.variant % choices.length]);
       }
     }

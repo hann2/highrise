@@ -1,6 +1,6 @@
-import { SoundName } from "../../../../resources/resources";
-import { SwingAngles, SwingDurations } from "./SwingDescriptor";
+import { ImageName, SoundName } from "../../../../resources/resources";
 import { BaseWeaponStats } from "../WeaponStats";
+import { SwingAngles, SwingDurations } from "./SwingDescriptor";
 
 // Stats that make a melee weapon unique
 
@@ -37,11 +37,11 @@ export interface MeleeWeaponStats extends BaseWeaponStats {
 
   textures: {
     // Texture rendered by the pickup
-    pickup: string;
+    pickup: ImageName;
     // Texture rendered when holding
-    hold: string;
+    hold: ImageName;
     // Texture rendered when attacking
-    attack: string;
+    attack: ImageName;
   };
 
   sounds: {

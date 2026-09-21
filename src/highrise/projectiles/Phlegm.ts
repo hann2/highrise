@@ -1,12 +1,12 @@
-import { BLEND_MODES, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
-import { choose, rSign, rUniform } from "../../core/util/Random";
+import { rDirection, rSign, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
-import { Layer } from "../../config/layers";
 import GooImpact from "../effects/GooImpact";
 import GooSplat from "../effects/GooSplat";
 import { getBlobPair, getSplatSound } from "../effects/Splat";
@@ -16,15 +16,14 @@ import { PointLight } from "../lighting-and-vision/PointLight";
 import { HitResult, Projectile } from "./Projectile";
 
 export const PHLEGM_RADIUS = 0.1; // meters
-const FRICTION = 0.12; // Something
 
 export default class Phlegm extends Projectile implements Entity {
   light: PointLight;
   spin: number;
   z: number;
   zVelocity: number;
-  mainSprite: Sprite;
-  glowSprite: Sprite;
+  mainSprite: Sprite & GameSprite;
+  glowSprite: Sprite & GameSprite;
 
   constructor(
     position: V2d,
@@ -44,13 +43,13 @@ export default class Phlegm extends Projectile implements Entity {
 
     const [blobTexture, glowTexture] = getBlobPair();
 
-    this.mainSprite = Sprite.from(choose(blobTexture));
+    this.mainSprite = Sprite.from(blobTexture);
     const scale = (2 * PHLEGM_RADIUS) / this.mainSprite.texture.width;
     this.mainSprite.anchor.set(0.5);
     this.mainSprite.scale.set(scale);
-    this.mainSprite.rotation = rUniform(0, Math.PI * 2);
+    this.mainSprite.rotation = rDirection();
     this.mainSprite.tint = color;
-    (this.mainSprite as GameSprite).layerName = Layer.WEAPONS;
+    this.mainSprite.layerName = Layer.WEAPONS;
 
     this.glowSprite = Sprite.from(glowTexture);
     this.glowSprite.blendMode = "add";
@@ -58,16 +57,13 @@ export default class Phlegm extends Projectile implements Entity {
     this.glowSprite.scale.set(scale);
     this.glowSprite.tint = color;
     this.glowSprite.alpha = 0.3;
-    this.mainSprite.rotation = this.mainSprite.rotation;
-    (this.glowSprite as GameSprite).layerName = Layer.EMISSIVES;
+    this.glowSprite.layerName = Layer.EMISSIVES;
 
     this.sprites = [this.mainSprite, this.glowSprite];
 
     this.light = this.addChild(
       new PointLight({ radius: 1, shadowsEnabled: false, position, color }),
     );
-
-    this.renderPosition = position.clone();
   }
 
   makeCollisionMask() {
@@ -90,7 +86,7 @@ export default class Phlegm extends Projectile implements Entity {
     super.onTick(dt);
   }
 
-  onHit({ hit, hitPosition, hitNormal }: HitResult) {
+  handleHit({ hit, hitPosition, hitNormal }: HitResult) {
     if (hit instanceof Human) {
       hit.inflictDamage(this.damage);
     }
@@ -101,8 +97,8 @@ export default class Phlegm extends Projectile implements Entity {
   }
 
   onRender(dt: number) {
-    this.mainSprite.position.set(...this.renderPosition);
-    this.glowSprite.position.set(...this.renderPosition);
+    this.mainSprite.position.copyFrom(this.renderPosition);
+    this.glowSprite.position.copyFrom(this.renderPosition);
     this.light.setPosition(this.renderPosition);
 
     this.mainSprite.rotation += dt * this.spin;

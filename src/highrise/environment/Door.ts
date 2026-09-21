@@ -1,27 +1,27 @@
-import type { Body } from "../../core/physics/body/Body";
-import { Box } from "../../core/physics/shapes/Box";
-import { RevoluteConstraint } from "../../core/physics/constraints/RevoluteConstraint";
-import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Sprite } from "pixi.js";
+import { ImageName } from "../../../resources/resources";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
+import type { Body } from "../../core/physics/body/Body";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
+import { RevoluteConstraint } from "../../core/physics/constraints/RevoluteConstraint";
+import { Box } from "../../core/physics/shapes/Box";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
-import { Layer } from "../../config/layers";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
 import DoorSpring from "../utils/DoorSpring";
-import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import { DoorFrame } from "./DoorFrame";
 import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
 
-export const DEFAULT_DOOR_SPRITES = ["door1"];
+export const DEFAULT_DOOR_SPRITES: ImageName[] = ["door1"];
 
 export default class Door extends BaseEntity implements Entity, Hittable {
   tags: string[];
@@ -35,21 +35,21 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     private minAngle: number,
     private maxAngle: number,
     blocksVision: boolean = true,
-    imageName: string = choose(...DEFAULT_DOOR_SPRITES),
+    imageName: ImageName = choose(...DEFAULT_DOOR_SPRITES),
   ) {
     super();
-    this.hingePoint = hingePoint;
 
     this.sprite = Sprite.from(imageName);
     this.sprite.scale.set(length / this.sprite.width);
     this.sprite.anchor.set(0, 0.5); // door sprites are horizontal
-    this.sprite.position.set(...hingePoint);
+    this.sprite.position.copyFrom(hingePoint);
     this.sprite.layerName = Layer.WORLD_FRONT;
 
     this.body = createRigid2D({
       motion: "dynamic",
       mass: 1.0,
       position: hingePoint,
+      angle: restingAngle,
     });
 
     const shape = new Box({ width: DOOR_THICKNESS / 2, height: length });
@@ -67,16 +67,16 @@ export default class Door extends BaseEntity implements Entity, Hittable {
       this.tags = [];
     }
     this.body.addShape(shape, [length / 2, 0], Math.PI / 2);
-    this.body.angle = restingAngle;
 
     this.addChild(new DoorFrame(hingePoint, restingAngle, length));
   }
 
   onAdd({ game }: { game: Game }) {
-    const constraint = new RevoluteConstraint(game.ground, this.body, {
-      worldPivot: this.hingePoint,
-    });
-    this.constraints = [constraint];
+    this.constraints = [
+      new RevoluteConstraint(game.ground, this.body, {
+        worldPivot: this.hingePoint,
+      }),
+    ];
     this.springs = [
       new DoorSpring(
         game.ground,
@@ -91,9 +91,9 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.sprite.rotation = this.body.angle;
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
+  hitByMelee() {}
 
-  onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
+  hitByBullet(bullet: Bullet, position: V2d, normal: V2d) {
     this.body.applyImpulse(
       bullet.velocity.mul(bullet.stats.mass * 0.5),
       position.sub(this.body.position),

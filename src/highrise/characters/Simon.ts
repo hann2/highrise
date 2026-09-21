@@ -23,9 +23,9 @@ export const Simon: Character = {
     ],
     joinParty: ["simonJoinParty1"],
     lookHere: ["simonLookHere1", "simonLookHere2"],
-    misc: [], // TODO: snd_simon misc
+    misc: [], // TODO: Simon misc
     nearDeath: ["simonNearDeath2"],
-    newLevel: [], // TODO: snd_simon newLevel
+    newLevel: [], // TODO: Simon newLevel
     pickupItem: ["simonPickupItem1", "simonPickupItem2", "simonPickupItem3"],
     pickupGun: ["simonPickupItem1", "simonPickupItem2", "simonPickupItem3"],
     pickupMelee: ["simonPickupItem1", "simonPickupItem2", "simonPickupItem3"],

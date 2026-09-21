@@ -1,14 +1,13 @@
-import { Container, Sprite, Text } from "pixi.js";
-import { fontName } from "../../core/resources/resourceUtils";
-import { V2d } from "../../core/Vector";
+import { Container, Text } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
-import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
-import { clamp, smoothStep } from "../../core/util/MathUtil";
-import { Layer } from "../../config/layers";
+import { fontName } from "../../core/resources/resourceUtils";
+import { smoothStep } from "../../core/util/MathUtil";
+import { V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import ClickableText from "./ClickableText";
 import CreditsScreen from "./CreditsScreen";
@@ -67,24 +66,24 @@ export default class MainMenu extends BaseEntity implements Entity {
       new ClickableText("Credits", () => this.rollCredits()),
     );
     this.creditsButton.sprite.anchor.set(1, 1);
-    (this.creditsButton.sprite as Text).style.align = "right";
+    this.creditsButton.sprite.style.align = "right";
 
     this.feedbackButton = this.addChild(new FeedbackButton());
     this.feedbackButton.sprite.anchor.set(1, 1);
-    (this.feedbackButton.sprite as Text).style.align = "right";
+    this.feedbackButton.sprite.style.align = "right";
   }
 
-  async onAdd({ game }: { game: Game }) {
+  async onAdd() {
     this.titleText.alpha = 0;
     this.startText.alpha = 0;
     this.creditsButton.sprite.alpha = 0;
     this.feedbackButton.sprite.alpha = 0;
 
-    await this.wait(firstTime ? 5 : 3.0, (dt, t) => {
-      this.titleText.alpha = smoothStep(clamp(t * 1.5));
-      this.startText.alpha = smoothStep(clamp(2.8 * t - 1.8));
-      this.creditsButton.sprite.alpha = smoothStep(clamp(2.8 * t - 1.8));
-      this.feedbackButton.sprite.alpha = smoothStep(clamp(2.8 * t - 1.8));
+    await this.wait(firstTime ? 5 : 3.0, (_, t) => {
+      this.titleText.alpha = smoothStep(t * 1.5);
+      this.startText.alpha = smoothStep(2.8 * t - 1.8);
+      this.creditsButton.sprite.alpha = smoothStep(2.8 * t - 1.8);
+      this.feedbackButton.sprite.alpha = smoothStep(2.8 * t - 1.8);
     });
     firstTime = false;
   }
@@ -104,13 +103,12 @@ export default class MainMenu extends BaseEntity implements Entity {
       this.startText.eventMode = "none";
       this.creditsButton.sprite.eventMode = "none";
       this.feedbackButton.sprite.eventMode = "none";
-      await this.wait(4.0, (dt, t) => {
-        this.titleText.alpha = smoothStep(clamp(2.0 - 2 * t));
-        this.startText.alpha = smoothStep(clamp(1.0 - 4 * t));
-        this.creditsButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));
-        this.feedbackButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));
+      await this.wait(4.0, (_, t) => {
+        this.titleText.alpha = smoothStep(2.0 - 2 * t);
+        this.startText.alpha = smoothStep(1.0 - 4 * t);
+        this.creditsButton.sprite.alpha = smoothStep(1.0 - 4 * t);
+        this.feedbackButton.sprite.alpha = smoothStep(1.0 - 4 * t);
       });
-      console.log("roll credits");
       this.destroy();
     }
   }
@@ -127,11 +125,11 @@ export default class MainMenu extends BaseEntity implements Entity {
       this.startText.eventMode = "none";
       this.creditsButton.sprite.eventMode = "none";
       this.feedbackButton.sprite.eventMode = "none";
-      await this.wait(FADE_OUT_TIME, (dt, t) => {
-        this.titleText.alpha = smoothStep(clamp(1.5 - 1.5 * t));
-        this.startText.alpha = smoothStep(clamp(1.0 - 4 * t));
-        this.creditsButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));
-        this.feedbackButton.sprite.alpha = smoothStep(clamp(1.0 - 4 * t));
+      await this.wait(FADE_OUT_TIME, (_, t) => {
+        this.titleText.alpha = smoothStep(1.5 - 1.5 * t);
+        this.startText.alpha = smoothStep(1.0 - 4 * t);
+        this.creditsButton.sprite.alpha = smoothStep(1.0 - 4 * t);
+        this.feedbackButton.sprite.alpha = smoothStep(1.0 - 4 * t);
       });
       this.game?.dispatch("newGame", undefined);
       this.destroy();

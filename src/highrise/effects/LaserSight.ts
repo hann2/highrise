@@ -1,18 +1,19 @@
-import { BLEND_MODES, Graphics, Sprite } from "pixi.js";
+import { Container, Graphics, Sprite } from "pixi.js";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { polarToVec } from "../../core/util/MathUtil";
-import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
-import { Layer } from "../../config/layers";
+import { V2d } from "../../core/Vector";
 
 // Lasers stop at the same things that bullets do
 const LASER_COLLISION_MASK =
   CollisionGroups.All ^ CollisionGroups.Humans ^ CollisionGroups.Furniture;
 
 export class LaserSight extends BaseEntity implements Entity {
-  sprite: Graphics & GameSprite = new Graphics();
+  sprite: Container & GameSprite = new Container();
+  private beam = new Graphics();
   private startDot: Sprite;
   private endDot: Sprite;
 
@@ -25,7 +26,9 @@ export class LaserSight extends BaseEntity implements Entity {
     super();
 
     this.sprite.layerName = Layer.EMISSIVES;
-    this.sprite.blendMode = "add";
+
+    this.beam.blendMode = "add";
+    this.sprite.addChild(this.beam);
 
     this.startDot = Sprite.from("impactParticle");
     this.endDot = Sprite.from("impactParticle");
@@ -41,28 +44,27 @@ export class LaserSight extends BaseEntity implements Entity {
   }
 
   onRender() {
-    this.sprite.clear();
-
     const from = this.getEmitterPosition();
     const to = from.add(polarToVec(this.getAngle(), this.maxDistance));
 
-    this.startDot.position.set(from[0], from[1]);
+    this.startDot.position.copyFrom(from);
 
     const hit = this.game?.world.raycast(from, to, {
       collisionMask: LASER_COLLISION_MASK,
-      filter: (body, shape) =>
+      filter: (_body, shape) =>
         (shape.collisionMask & CollisionGroups.Projectiles) !== 0,
     });
 
     const end = hit?.point ?? to;
     this.endDot.visible = hit != null;
     if (hit) {
-      this.endDot.position.set(end[0], end[1]);
+      this.endDot.position.copyFrom(end);
     }
 
-    this.sprite
-      .moveTo(from[0], from[1])
-      .lineTo(end[0], end[1])
+    this.beam
+      .clear()
+      .moveTo(from.x, from.y)
+      .lineTo(end.x, end.y)
       .stroke({ width: 0.01, color: this.color, alpha: 0.2 });
   }
 }

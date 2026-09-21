@@ -11,18 +11,12 @@ import VisionController from "../lighting-and-vision/VisionController";
 export default class CheatController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Permanent;
 
-  constructor() {
-    super();
-  }
-
   onKeyDown({ key }: { key: KeyCode }) {
     switch (key) {
       case "KeyL":
-        console.log("dispatching levelComplete");
         this.game!.dispatch("levelComplete", undefined);
         break;
       case "KeyV":
-        console.log("Toggling vision");
         for (const visionController of this.game!.entities.getByFilter(
           (e): e is VisionController => e instanceof VisionController,
         )) {

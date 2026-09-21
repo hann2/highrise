@@ -1,11 +1,11 @@
-import { Container, Sprite, Text } from "pixi.js";
-import { fontName } from "../../core/resources/resourceUtils";
+import { Container, Text } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
-import { Layer } from "../../config/layers";
+import { fontName } from "../../core/resources/resourceUtils";
 import { CREDITS_TEXT } from "./Credits";
 import MainMenu from "./MainMenu";
 
@@ -92,9 +92,8 @@ export default class CreditsScreen extends BaseEntity implements Entity {
   }
 
   onKeyDown({ key }: { key: KeyCode }) {
-    switch (key) {
-      case "Escape":
-        this.backToMenu();
+    if (key === "Escape") {
+      this.backToMenu();
     }
   }
 
@@ -108,7 +107,7 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     if (this.game!.io.isKeyDown("Space")) {
       speed *= 10;
     }
-    this.sprite!.y -= speed;
+    this.sprite.y -= speed;
 
     if (this.sprite.getBounds().bottom < 0) {
       this.backToMenu();

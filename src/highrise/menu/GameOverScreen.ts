@@ -1,10 +1,10 @@
-import { Container, Graphics, Sprite, Text } from "pixi.js";
-import { fontName } from "../../core/resources/resourceUtils";
-import { V2d } from "../../core/Vector";
+import { Container, Graphics, Text } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
-import { Layer } from "../../config/layers";
+import { fontName } from "../../core/resources/resourceUtils";
+import { V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 
 const FADE_IN_TIME = 3.0;
@@ -33,7 +33,7 @@ export default class GameOverScreen extends BaseEntity implements Entity {
     this.sprite.addChild(this.background);
 
     this.titleText = new Text({
-      text: text,
+      text,
       style: {
         align: "center",
         fill: textColor,
@@ -47,12 +47,12 @@ export default class GameOverScreen extends BaseEntity implements Entity {
 
   async onAdd() {
     this.sprite.alpha = 0;
-    await this.wait(FADE_IN_TIME, (dt, t) => {
+    await this.wait(FADE_IN_TIME, (_, t) => {
       this.sprite.alpha = t;
     });
     this.sprite.alpha = 1;
     await this.wait(HOLD_TIME);
-    await this.wait(FADE_OUT_TIME, (dt, t) => {
+    await this.wait(FADE_OUT_TIME, (_, t) => {
       this.sprite.alpha = 1.0 - t;
     });
     this.sprite.alpha = 0;

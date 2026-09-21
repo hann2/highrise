@@ -1,6 +1,6 @@
+import { SoundName } from "../../../../resources/resources";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { SoundName } from "../../../../resources/resources";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
@@ -37,7 +37,7 @@ export default class EnemyVoice extends BaseEntity implements Entity {
     );
   }
 
-  onTick(dt: number) {
+  onTick() {
     this.currentSound?.setPosition(this.getPosition());
 
     if (this.currentSound?.isDestroyed) {

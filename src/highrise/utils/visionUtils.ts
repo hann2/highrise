@@ -1,6 +1,6 @@
+import { CollisionGroups } from "../../config/CollisionGroups";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Game from "../../core/Game";
-import { CollisionGroups } from "../../config/CollisionGroups";
 import { BaseEnemy, isEnemy } from "../enemies/base/Enemy";
 import Human from "../human/Human";
 
@@ -29,7 +29,7 @@ export function getNearestVisibleEnemy(
   let nearestDistance: number = maxDistance;
 
   for (const enemy of enemies) {
-    const distance = enemy.getPosition().sub(human.getPosition()).magnitude;
+    const distance = enemy.getPosition().distanceTo(human.getPosition());
     if (distance < maxDistance) {
       const isVisible = testLineOfSight(human, enemy);
       if (isVisible) {

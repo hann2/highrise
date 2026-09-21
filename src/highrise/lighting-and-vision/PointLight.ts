@@ -27,7 +27,9 @@ export class PointLight extends Light {
     this.setIntensity(intensity);
     this.setColor(color);
 
-    position && this.setPosition(position);
+    if (position) {
+      this.setPosition(position);
+    }
   }
 
   setRadius(radius: number) {

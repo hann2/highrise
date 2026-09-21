@@ -8,10 +8,6 @@ import { Persistence } from "../constants/constants";
 export class FPSMeterController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Permanent;
 
-  constructor() {
-    super();
-  }
-
   onAdd({ game }: { game: Game }) {
     for (const fpsMeter of game.entities.getByFilter(
       (e): e is FPSMeter => e instanceof FPSMeter,

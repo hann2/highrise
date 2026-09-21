@@ -1,6 +1,5 @@
-import Game from "../../../core/Game";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
-import { rInteger, rNormal, rUniform } from "../../../core/util/Random";
+import { rDirection, rInteger, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import {
   HUMAN_RADIUS,
@@ -23,10 +22,11 @@ const HEALTH = 1000;
 const ATTACK_RANGE = HUMAN_RADIUS + HEAVY_RADIUS + 0.3;
 
 const hitSoundRing = new ShuffleRing(ZOMBIE_ATTACK_HIT_SOUNDS);
+
 export default class Heavy extends BaseEnemy {
   hp = rNormal(HEALTH, HEALTH / 10);
 
-  constructor(position: V2d, angle: number = rUniform(0, Math.PI * 2)) {
+  constructor(position: V2d, angle: number = rDirection()) {
     super(position);
 
     this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
@@ -35,8 +35,8 @@ export default class Heavy extends BaseEnemy {
     this.addChild(new HeavySprite(this));
   }
 
-  onAdd({ game }: { game: Game }) {
-    super.onAdd({ game });
+  onAdd() {
+    super.onAdd();
     this.aimSpring.stiffness = 30;
     this.aimSpring.damping = 10;
   }
@@ -49,7 +49,7 @@ export default class Heavy extends BaseEnemy {
     return new EnemyVoice(() => this.getPosition(), PERRY_ZOMBIE_SOUNDS);
   }
 
-  onDie() {
+  handleDeath() {
     this.game?.addEntity(new FleshImpact(this.getPosition(), 9));
     this.voice.speak("death", true);
   }
@@ -73,7 +73,7 @@ export default class Heavy extends BaseEnemy {
           )) {
             human.inflictDamage(rInteger(30, 45));
 
-            this.game?.addEntity(
+            this.game.addEntity(
               new PositionalSound(hitSoundRing.getNext(), this.getPosition(), {
                 speed: rNormal(0.75, 0.1),
               }),

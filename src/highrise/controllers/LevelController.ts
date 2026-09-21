@@ -1,10 +1,9 @@
 import BaseEntity from "../../core/entity/BaseEntity";
-import { reseedIfSeeded } from "../../core/util/Random";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
+import { reseedIfSeeded } from "../../core/util/Random";
 import { Persistence } from "../constants/constants";
 import FadeEffect from "../effects/FadeEffect";
-import PartyManager from "../environment/PartyManager";
 import { Level } from "../levels/Level";
 import {
   chooseTemplate,
@@ -64,7 +63,7 @@ export default class LevelController extends BaseEntity implements Entity {
   }
 
   // The whole party is dead
-  async onPartyDead() {
+  onPartyDead() {
     this.game?.dispatch("gameOver", { victory: false });
   }
 
@@ -72,11 +71,6 @@ export default class LevelController extends BaseEntity implements Entity {
     // So that seeded runs get the same levels no matter what happened before
     reseedIfSeeded(this.currentLevel);
     return generateLevel(chooseTemplate(this.currentLevel));
-  }
-
-  getPartyMembers() {
-    return (this.game!.entities.getById("party_manager") as PartyManager)
-      .partyMembers;
   }
 }
 

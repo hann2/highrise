@@ -1,4 +1,5 @@
 import { Container, Sprite } from "pixi.js";
+import { ImageName } from "../../../resources/resources";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
@@ -6,12 +7,12 @@ import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 
 export interface BodyTextures {
-  head: string;
-  torso: string;
-  leftHand: string;
-  rightHand: string;
-  leftArm: string;
-  rightArm: string;
+  head: ImageName;
+  torso: ImageName;
+  leftHand: ImageName;
+  rightHand: ImageName;
+  leftArm: ImageName;
+  rightArm: ImageName;
 }
 
 // A body with arms that faces a direction
@@ -26,7 +27,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   rightHandSprite: Sprite;
 
   constructor(
-    private textures: BodyTextures,
+    textures: BodyTextures,
     private radius: number,
   ) {
     super();
@@ -61,23 +62,25 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.rightHandSprite.width = this.armThickness;
     this.rightHandSprite.height = this.armThickness;
 
-    this.sprite.addChild(this.leftArmSprite);
-    this.sprite.addChild(this.rightArmSprite);
-    this.sprite.addChild(this.leftHandSprite);
-    this.sprite.addChild(this.rightHandSprite);
-    this.sprite.addChild(this.torsoSprite);
-    this.sprite.addChild(this.headSprite);
+    this.sprite.addChild(
+      this.leftArmSprite,
+      this.rightArmSprite,
+      this.leftHandSprite,
+      this.rightHandSprite,
+      this.torsoSprite,
+      this.headSprite,
+    );
   }
 
   onRender(dt: number) {
-    [this.sprite.x, this.sprite.y] = this.getPosition();
+    this.sprite.position.copyFrom(this.getPosition());
     this.sprite.rotation = this.getAngle();
 
     this.torsoSprite.rotation = this.getStanceAngle();
 
     const stanceOffset = this.getStanceOffset();
-    this.torsoSprite.position.set(...stanceOffset);
-    this.headSprite.position.set(...stanceOffset);
+    this.torsoSprite.position.copyFrom(stanceOffset);
+    this.headSprite.position.copyFrom(stanceOffset);
 
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();
     const [leftHandPos, rightHandPos] = this.getHandPositions();
@@ -85,8 +88,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     const leftArmPos = leftShoulderPos.lerp(leftHandPos, 0.5);
     const rightArmPos = rightShoulderPos.lerp(rightHandPos, 0.5);
 
-    this.leftArmSprite.position.set(...leftArmPos);
-    this.rightArmSprite.position.set(...rightArmPos);
+    this.leftArmSprite.position.copyFrom(leftArmPos);
+    this.rightArmSprite.position.copyFrom(rightArmPos);
 
     const leftArmSpan = leftHandPos.sub(leftShoulderPos);
     const rightArmSpan = rightHandPos.sub(rightShoulderPos);
@@ -96,8 +99,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.leftArmSprite.rotation = leftArmSpan.angle;
     this.rightArmSprite.rotation = rightArmSpan.angle;
 
-    this.leftHandSprite.position.set(...leftHandPos);
-    this.rightHandSprite.position.set(...rightHandPos);
+    this.leftHandSprite.position.copyFrom(leftHandPos);
+    this.rightHandSprite.position.copyFrom(rightHandPos);
   }
 
   // Override me!

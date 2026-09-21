@@ -1,6 +1,6 @@
+import { SoundName } from "../../../../resources/resources";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { SoundName } from "../../../../resources/resources";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import {
   clamp,
@@ -9,7 +9,12 @@ import {
   polarToVec,
   smoothStep,
 } from "../../../core/util/MathUtil";
-import { rNormal, rSign, rUniform } from "../../../core/util/Random";
+import {
+  rDirection,
+  rNormal,
+  rSign,
+  rUniform,
+} from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import MuzzleFlash from "../../effects/MuzzleFlash";
 import ShellCasing from "../../effects/ShellCasing";
@@ -57,7 +62,6 @@ export default class Gun extends BaseEntity implements Entity {
           startAction: (shooter: Human) => {
             this.playSound("reload", shooter.getPosition());
           },
-          endAction: () => {},
         },
         {
           name: "insert",
@@ -85,8 +89,6 @@ export default class Gun extends BaseEntity implements Entity {
               this.playSound("reloadFinish", shooter.getPosition());
             }
           },
-
-          endAction: () => {},
         },
       ]),
     );
@@ -94,7 +96,7 @@ export default class Gun extends BaseEntity implements Entity {
 
   // Whether or not we're currently in the middle of reloading
   get isReloading() {
-    return Boolean(this.reloadAction.isActive());
+    return this.reloadAction.isActive();
   }
 
   canShoot(): boolean {
@@ -114,7 +116,7 @@ export default class Gun extends BaseEntity implements Entity {
 
       if (this.ammo > 0) {
         // Actually shoot
-        this.onShoot(muzzlePosition, direction, shooter);
+        this.shoot(muzzlePosition, direction, shooter);
       } else {
         this.playSound("empty", muzzlePosition);
       }
@@ -122,7 +124,7 @@ export default class Gun extends BaseEntity implements Entity {
   }
 
   // Called when actually shooting a bullet
-  async onShoot(position: V2d, direction: number, shooter: Human) {
+  async shoot(position: V2d, direction: number, shooter: Human) {
     // Actual shot
     this.makeProjectile(position, direction, shooter);
 
@@ -175,7 +177,7 @@ export default class Gun extends BaseEntity implements Entity {
 
     let velocity;
     if (this.stats.ejectionType === EjectionType.RELOAD) {
-      velocity = V(polarToVec(rUniform(0, Math.PI * 2), rUniform(0, 1)));
+      velocity = polarToVec(rDirection(), rUniform(0, 1));
     } else {
       velocity = polarToVec(
         rNormal(shooterDirection + Math.PI / 2, degToRad(20)),
@@ -311,12 +313,11 @@ export default class Gun extends BaseEntity implements Entity {
 }
 
 type GunSoundRings = { [gunSoundName in GunSoundName]: ShuffleRing<SoundName> };
+
 function makeSoundRings(sounds: GunSounds): GunSoundRings {
-  const result = {} as any;
+  const result = {} as GunSoundRings;
   for (const [gunSound, soundNames] of Object.entries(sounds)) {
-    result[gunSound as GunSoundName] = new ShuffleRing(
-      (soundNames as SoundName[]) ?? [],
-    );
+    result[gunSound as GunSoundName] = new ShuffleRing(soundNames);
   }
   return result;
 }

@@ -1,9 +1,9 @@
 import { Sprite } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { choose, rUniform } from "../../core/util/Random";
-import { Layer } from "../../config/layers";
 import { BLOB_TEXTURES } from "./Splat";
 
 export default class BulletHole extends BaseEntity implements Entity {

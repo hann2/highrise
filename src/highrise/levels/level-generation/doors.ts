@@ -12,16 +12,16 @@ export function wallIDToDoorBuilder(
   const [cell, right] = wallID;
   let restingDirection = right ? Direction.DOWN : Direction.RIGHT;
   if (reverseHinge) {
-    restingDirection = restingDirection.mul(-1);
+    restingDirection = restingDirection.negate();
   }
 
   const hingeDirection = restingDirection
-    .mul(-1)
+    .negate()
     .add(right ? Direction.RIGHT : Direction.DOWN);
   const hingePoint = cell.add(hingeDirection.mul(0.5));
 
   return {
-    wallID: wallID,
+    wallID,
     hingePoint,
     restingDirection,
     chainLink,
@@ -54,8 +54,8 @@ export function buildDoorEntity(
   const doorDirection = doorBuilder.restingDirection;
   const hingePoint = doorBuilder.hingePoint;
 
-  const dIndex = directionsClockwise.findIndex(
-    (dir) => dir.x === doorDirection.x && dir.y === doorDirection.y,
+  const dIndex = directionsClockwise.findIndex((dir) =>
+    dir.equals(doorDirection),
   );
 
   const wallsClockwiseFromHingePoint: WallID[] = [];

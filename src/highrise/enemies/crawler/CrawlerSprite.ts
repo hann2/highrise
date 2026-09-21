@@ -1,7 +1,7 @@
+import { Layer } from "../../../config/layers";
 import { clamp, smoothStep } from "../../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { Layer } from "../../../config/layers";
 import { CRAWLER_TEXTURES, ZOMBIE_RADIUS } from "../../constants/constants";
 import { BodySprite } from "../../creature-stuff/BodySprite";
 import { lerpOffsets } from "../base/enemyUtils";

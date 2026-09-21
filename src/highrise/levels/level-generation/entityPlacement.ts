@@ -19,11 +19,8 @@ export function generateLevelEntities(
   seed: number = rInteger(0, 2 ** 32),
 ): Entity[] {
   const outerWalls = addOuterWalls([cellGrid.width, cellGrid.height]);
-  const {
-    entities: roomEntities,
-    enemyPositions: roomEnemyPositions,
-    itemPositions: roomItemPositions,
-  } = addRooms(cellGrid, levelTemplate, seed, levelTemplate.levelIndex);
+  const { entities: roomEntities, enemyPositions: roomEnemyPositions } =
+    addRooms(cellGrid, levelTemplate, seed, levelTemplate.levelIndex);
   buildMaze(cellGrid, seed, levelTemplate.getMaziness());
   const innerWalls = addInnerWalls(cellGrid);
   const [exitPoint, exitOpenDirection] = findExit(
@@ -73,14 +70,14 @@ export function generateLevelEntities(
 }
 
 function addExit(exitPoint: V2d, openDirection: V2d): Entity[] {
-  const exitWorldCoords = CellGrid.levelCoordToWorldCoord(exitPoint);
+  const [x, y] = CellGrid.levelCoordToWorldCoord(exitPoint);
   return [
     new Exit(
-      exitWorldCoords[0] - CELL_SIZE / 2,
-      exitWorldCoords[1] - CELL_SIZE / 2,
-      exitWorldCoords[0] + CELL_SIZE / 2,
-      exitWorldCoords[1] + CELL_SIZE / 2,
-      openDirection!.angle + Math.PI,
+      x - CELL_SIZE / 2,
+      y - CELL_SIZE / 2,
+      x + CELL_SIZE / 2,
+      y + CELL_SIZE / 2,
+      openDirection.angle + Math.PI,
     ),
   ];
 }

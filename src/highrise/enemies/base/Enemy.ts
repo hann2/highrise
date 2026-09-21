@@ -1,7 +1,7 @@
-import type { Body } from "../../../core/physics/body/Body";
 import type Entity from "../../../core/entity/Entity";
 import type { WithOwner } from "../../../core/entity/WithOwner";
-import Game from "../../../core/Game";
+import type { Body } from "../../../core/physics/body/Body";
+import { AimSpring } from "../../../core/physics/springs/AimSpring";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { clamp, normalizeAngle } from "../../../core/util/MathUtil";
 import { choose, rNormal } from "../../../core/util/Random";
@@ -17,7 +17,6 @@ import FleshImpact from "../../effects/FleshImpact";
 import Hittable from "../../environment/Hittable";
 import Human from "../../human/Human";
 import Bullet from "../../projectiles/Bullet";
-import { AimSpring } from "../../../core/physics/springs/AimSpring";
 import { PhasedAction } from "../../utils/PhasedAction";
 import SwingingWeapon from "../../weapons/melee/SwingingWeapon";
 import { makeSimpleEnemyBody } from "./enemyUtils";
@@ -74,7 +73,7 @@ export class BaseEnemy extends Creature implements Hittable {
     this.walkSpring = this.addChild(new WalkSpring(this.body));
   }
 
-  onAdd({ game }: { game: Game }) {
+  onAdd() {
     this.voice = this.addChild(this.makeVoice());
     this.aimSpring = new AimSpring(this.body);
     this.springs = [this.aimSpring];
@@ -89,23 +88,21 @@ export class BaseEnemy extends Creature implements Hittable {
   }
 
   makeAttackAction(): PhasedAction<AttackPhases, any> | undefined {
-    return this.addChild(
-      createAttackAction({
-        windupDuration: 0.2,
-        attackDuration: 0.1,
-        windDownDuration: 0.1,
-        cooldownDuration: 0.5,
-        onWindupStart: () => {
-          this.voice.speak("attack");
-        },
-        onAttack: () => {},
-      }),
-    );
+    return createAttackAction({
+      windupDuration: 0.2,
+      attackDuration: 0.1,
+      windDownDuration: 0.1,
+      cooldownDuration: 0.5,
+      onWindupStart: () => {
+        this.voice.speak("attack");
+      },
+      onAttack: () => {},
+    });
   }
 
   async attack() {
     if (this.attackAction && !this.attackAction.isActive()) {
-      await this.attackAction!.do();
+      await this.attackAction.do();
     }
   }
 
@@ -115,7 +112,7 @@ export class BaseEnemy extends Creature implements Hittable {
     }
   }
 
-  onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
+  hitByBullet(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
 
     const knockback = bullet.velocity.mul(bullet.stats.mass * 30);
@@ -144,7 +141,7 @@ export class BaseEnemy extends Creature implements Hittable {
     this.body.applyImpulse(impulse.mul(0.1), relativePos);
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d) {
+  hitByMelee(swingingWeapon: SwingingWeapon, position: V2d) {
     const damageAmount = swingingWeapon.getDamage();
     const knockbackAmount = swingingWeapon.getKnockback();
 
@@ -182,10 +179,10 @@ export class BaseEnemy extends Creature implements Hittable {
 
   stun(duration: number) {
     this.stunnedTimer = Math.max(this.stunnedTimer, duration);
-    this.onStun();
+    this.handleStun();
   }
 
-  onStun() {
+  handleStun() {
     if (this.getAttackPhase() === "windup") {
       this.attackAction?.reset();
     }
@@ -193,11 +190,11 @@ export class BaseEnemy extends Creature implements Hittable {
 
   die(killer?: Human) {
     this.game?.dispatch("zombieDied", { zombie: this, killer });
-    this.onDie();
+    this.handleDeath();
     this.destroy();
   }
 
-  onDie() {
+  handleDeath() {
     this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
     this.voice.speak("death", true);
   }

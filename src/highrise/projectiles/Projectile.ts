@@ -1,12 +1,13 @@
+import { CollisionGroups } from "../../config/CollisionGroups";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
-import { V, V2d } from "../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
+import { V2d } from "../../core/Vector";
 
 const MAX_LIFESPAN = 3.0; // seconds
 
 export type HitResult = { hit: Entity; hitNormal: V2d; hitPosition: V2d };
+
 export class Projectile extends BaseEntity implements Entity {
   hitPosition?: V2d;
   renderPosition: V2d;
@@ -44,7 +45,7 @@ export class Projectile extends BaseEntity implements Entity {
 
     const hitResult = this.checkForCollision(dt);
 
-    if (hitResult && this.onHit(hitResult)) {
+    if (hitResult && this.handleHit(hitResult)) {
       this.hitPosition = hitResult.hitPosition;
       this.destroy();
     } else {
@@ -52,7 +53,7 @@ export class Projectile extends BaseEntity implements Entity {
     }
   }
 
-  onHit({ hit, hitPosition, hitNormal }: HitResult): boolean {
+  handleHit(hitResult: HitResult): boolean {
     return true;
   }
 
@@ -76,7 +77,7 @@ export function projectileRaycast(
   const hit = game.world.raycast(from, to, {
     collisionMask,
     // Some things (like fences) opt out of being hit by projectiles
-    filter: (body, shape) =>
+    filter: (_body, shape) =>
       (shape.collisionMask & CollisionGroups.Projectiles) !== 0,
   });
   const owner = hit?.body.owner;

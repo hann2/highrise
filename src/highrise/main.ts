@@ -1,3 +1,5 @@
+import { Layer } from "../config/layers";
+import { initContactMaterials } from "../config/PhysicsMaterials";
 import AutoPauser from "../core/AutoPauser";
 import Game from "../core/Game";
 import { SpatialHashingBroadphase } from "../core/physics/collision/broadphase/SpatialHashingBroadphase";
@@ -5,8 +7,6 @@ import { World } from "../core/physics/world/World";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import FPSMeter from "../core/util/FPSMeter";
 import { seedRandom } from "../core/util/Random";
-import { Layer } from "../config/layers";
-import { initContactMaterials } from "../config/PhysicsMaterials";
 import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "./constants/constants";
 import CheatController from "./controllers/CheatController";
 import { FPSMeterController } from "./controllers/FPSMeterController";

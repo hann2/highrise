@@ -1,13 +1,13 @@
-import { Container, Graphics, Sprite, Text } from "pixi.js";
-import { fontName } from "../../core/resources/resourceUtils";
-import { V2d } from "../../core/Vector";
+import { Container, Graphics, Text } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
-import { Layer } from "../../config/layers";
+import { fontName } from "../../core/resources/resourceUtils";
+import { V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import ClickableText from "./ClickableText";
 import FeedbackButton from "./FeedbackButton";
@@ -53,7 +53,6 @@ export default class PauseMenu extends BaseEntity implements Entity {
       text: "",
       style: {
         fontSize: 48,
-
         fontFamily: fontName("captureIt"),
         fill: "white",
         align: "center",
@@ -99,15 +98,15 @@ export default class PauseMenu extends BaseEntity implements Entity {
   setVisibility(visible: boolean) {
     this.sprite.visible = visible;
 
-    this.mainMenuButton.sprite.visible = visible;
-    this.feedbackButton.sprite.visible = visible;
-    this.muteButton.sprite.visible = visible;
-    this.graphicsButton.sprite.visible = visible;
-
-    this.mainMenuButton.sprite.interactive = visible;
-    this.feedbackButton.sprite.interactive = visible;
-    this.muteButton.sprite.interactive = visible;
-    this.graphicsButton.sprite.interactive = visible;
+    for (const button of [
+      this.mainMenuButton,
+      this.feedbackButton,
+      this.muteButton,
+      this.graphicsButton,
+    ]) {
+      button.sprite.visible = visible;
+      button.sprite.eventMode = visible ? "static" : "none";
+    }
   }
 
   onPause() {

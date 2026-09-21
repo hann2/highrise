@@ -68,7 +68,7 @@ export default class Zombie extends BaseEnemy {
             ATTACK_ANGLE_RANGE,
           )) {
             human.inflictDamage(rInteger(10, 15));
-            this.game?.addEntity(
+            this.game.addEntity(
               new PositionalSound(hitSoundRing.getNext(), this.getPosition(), {
                 speed: rNormal(1, 0.05),
               }),
@@ -79,8 +79,8 @@ export default class Zombie extends BaseEnemy {
     });
   }
 
-  onDie() {
-    super.onDie();
+  handleDeath() {
+    super.handleDeath();
 
     if (rBool(CRAWLER_CHANCE)) {
       this.game?.addEntity(

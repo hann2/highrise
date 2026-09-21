@@ -6,6 +6,3 @@ export * from "./lobbyDecorations";
 export * from "./maintenanceDecorations";
 export * from "./redCarpetDecorations";
 export * from "./shopDecorations";
-
-// NOTE: Everything exported by this file is assumed to be a DecorationInfo by the preloaders.
-// If you have something else you want to export, consider putting it in a different file.

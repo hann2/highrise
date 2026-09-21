@@ -1,19 +1,18 @@
-import { Body } from "../../../core/physics/body/Body";
-import { Box } from "../../../core/physics/shapes/Box";
-import { createRigid2D } from "../../../core/physics/body/bodyFactories";
-import { Graphics, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
+import { CollisionGroups } from "../../../config/CollisionGroups";
+import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
+import { Body } from "../../../core/physics/body/Body";
+import { createRigid2D } from "../../../core/physics/body/bodyFactories";
+import { Box } from "../../../core/physics/shapes/Box";
+import { lerp } from "../../../core/util/MathUtil";
 import { V2d } from "../../../core/Vector";
 import { isHittable } from "../../environment/Hittable";
 import Human from "../../human/Human";
-import { Layer } from "../../../config/layers";
-import { CollisionGroups } from "../../../config/CollisionGroups";
 import MeleeWeapon from "./MeleeWeapon";
 import { SwingPhase } from "./SwingDescriptor";
-import { lerp } from "../../../core/util/MathUtil";
-import { off } from "process";
 
 // A utility class for dealing with the timings of a swing
 
@@ -49,9 +48,9 @@ export default class SwingingWeapon extends BaseEntity {
     const shape = new Box({
       width: size[0],
       height: size[1] * 1.1,
+      collisionGroup: CollisionGroups.Projectiles,
+      collisionMask: CollisionGroups.Enemies | CollisionGroups.Walls,
     });
-    shape.collisionGroup = CollisionGroups.Projectiles;
-    shape.collisionMask = CollisionGroups.Enemies | CollisionGroups.Walls;
     // figured through trial and error
     const offset: [number, number] = [
       lerp(-size[1] / 2, size[1] / 2, handlePosition[1]),
@@ -62,7 +61,7 @@ export default class SwingingWeapon extends BaseEntity {
 
   async onAdd() {
     this.weapon.playSound("windup", this.holder.getPosition());
-    await this.wait(this.weapon.swing.windDownDuration, undefined, "windup");
+    await this.wait(this.weapon.swing.windUpDuration, undefined, "windup");
     this.weapon.playSound("swing", this.holder.getPosition());
     await this.wait(this.weapon.swing.swingDuration, undefined, "swing");
     this.weapon.playSound("winddown", this.holder.getPosition());
@@ -70,7 +69,7 @@ export default class SwingingWeapon extends BaseEntity {
 
   onRender() {
     const [position, angle] = this.getWeaponPositionAndAngle();
-    this.sprite.position.set(...position);
+    this.sprite.position.copyFrom(position);
     this.sprite.rotation = angle + Math.PI / 2; // Why?
   }
 
@@ -97,9 +96,8 @@ export default class SwingingWeapon extends BaseEntity {
   }
 
   onTick(dt: number) {
-    const [[x, y], angle] = this.getWeaponPositionAndAngle();
-    this.body.position[0] = x;
-    this.body.position[1] = y;
+    const [position, angle] = this.getWeaponPositionAndAngle();
+    this.body.position.set(position);
     this.body.angle = angle;
 
     if (this.attackProgress >= this.weapon.swing.duration) {
@@ -131,8 +129,8 @@ export default class SwingingWeapon extends BaseEntity {
   }
 
   onBeginContact({ other }: { other?: Entity }) {
-    if (other != this.holder && isHittable(other)) {
-      other.onMeleeHit(this, this.getPosition());
+    if (other !== this.holder && isHittable(other)) {
+      other.hitByMelee(this, this.getPosition());
     }
   }
 }

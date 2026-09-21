@@ -1,6 +1,6 @@
+import type Game from "../core/Game";
 import { ContactMaterial } from "../core/physics/material/ContactMaterial";
 import { Material } from "../core/physics/material/Material";
-import type Game from "../core/Game";
 
 export const PhysicsMaterials = {
   wall: new Material(),

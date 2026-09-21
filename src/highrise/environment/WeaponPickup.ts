@@ -1,9 +1,9 @@
 import { Sprite } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import { GameSprite } from "../../core/entity/GameSprite";
-import { rSign, rUniform } from "../../core/util/Random";
+import { rDirection, rSign } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layer } from "../../config/layers";
 import Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
@@ -19,18 +19,18 @@ export default class WeaponPickup extends BaseEntity {
     super();
 
     this.addChild(weapon, true); // Take ownership of the gun. This is a little weird
-    this.addChild(new Interactable(position, this.onInteract.bind(this)));
+    this.addChild(new Interactable(position, this.handleInteract.bind(this)));
 
     this.sprite = Sprite.from(weapon.stats.textures.pickup);
     this.sprite.scale.set(weapon.stats.size[1] / this.sprite.height);
     this.sprite.scale.x *= rSign(); // Flip some of them
     this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.position.set(...position);
-    this.sprite.rotation = rUniform(0, Math.PI * 2);
+    this.sprite.position.copyFrom(position);
+    this.sprite.rotation = rDirection();
     this.sprite.layerName = Layer.ITEMS;
   }
 
-  onInteract(human: Human) {
+  handleInteract(human: Human) {
     human.giveWeapon(this.weapon);
     this.destroy();
   }

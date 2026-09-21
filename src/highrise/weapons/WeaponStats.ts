@@ -1,3 +1,4 @@
+import { ImageName } from "../../../resources/resources";
 import { GunStats } from "./guns/GunStats";
 import { MeleeWeaponStats } from "./melee/MeleeWeaponStats";
 
@@ -9,7 +10,7 @@ export interface BaseWeaponStats {
   readonly size: [number, number];
 
   readonly textures: {
-    readonly pickup: string;
+    readonly pickup: ImageName;
   };
 
   readonly sounds: {};

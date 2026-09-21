@@ -1,3 +1,4 @@
+import Gun from "../Gun";
 import { GunStats } from "../GunStats";
 import { AK47 } from "./AK-47";
 import { AR15 } from "./AR-15";
@@ -6,11 +7,10 @@ import { DoubleBarrelShotgun } from "./DoubleBarrelShotgun";
 import { FiveSeven } from "./FiveSeven";
 import { Glock } from "./Glock";
 import { M1911 } from "./M1911";
-import { Revolver } from "./Revolver";
 import { P90 } from "./P90";
 import { PumpShotgun } from "./PumpShotgun";
+import { Revolver } from "./Revolver";
 import { SPAS12 } from "./SPAS12";
-import Gun from "../Gun";
 
 // A list of all the guns
 export const GUNS: Array<GunStats> = [

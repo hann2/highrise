@@ -1,11 +1,11 @@
-import { BLEND_MODES, Text } from "pixi.js";
-import { fontName } from "../../../core/resources/resourceUtils";
+import { Text } from "pixi.js";
+import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
+import { fontName } from "../../../core/resources/resourceUtils";
 import { degToRad } from "../../../core/util/MathUtil";
 import { V, V2d } from "../../../core/Vector";
-import { Layer } from "../../../config/layers";
 import { CELL_SIZE } from "../../constants/constants";
 import Crawler from "../../enemies/crawler/Crawler";
 import Door from "../../environment/Door";
@@ -110,7 +110,7 @@ export default class TutorialRoomTemplate implements RoomTemplate {
     return entities;
   }
 
-  getEnemyPositions({ roomToWorldPosition }: RoomTransformer): V2d[] {
+  getEnemyPositions(): V2d[] {
     return [];
   }
 }

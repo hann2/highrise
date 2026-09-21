@@ -1,8 +1,8 @@
 import { Container, Sprite } from "pixi.js";
+import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
-import { Layer } from "../../../config/layers";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import Spitter from "./Spitter";
@@ -45,7 +45,7 @@ export default class SpitterSprite extends BaseEntity implements Entity {
 
   onRender() {
     const { body } = this.spitter;
-    this.sprite.position.set(...body.position);
+    this.sprite.position.copyFrom(body.position);
     this.sprite.rotation = body.angle;
     this.glow.setPosition(body.position);
 

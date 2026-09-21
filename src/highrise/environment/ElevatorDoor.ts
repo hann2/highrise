@@ -1,17 +1,16 @@
-import { Body } from "../../core/physics/body/Body";
-import { Box } from "../../core/physics/shapes/Box";
-import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Graphics } from "pixi.js";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import type { Body } from "../../core/physics/body/Body";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
+import { Box } from "../../core/physics/shapes/Box";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { smoothStep } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { Layer } from "../../config/layers";
-import { CollisionGroups } from "../../config/CollisionGroups";
-import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import Bullet from "../projectiles/Bullet";
 import Hittable from "./Hittable";
 import Interactable from "./Interactable";
@@ -25,30 +24,23 @@ const DING_TIME = 0.5;
  */
 class HalfDoor extends BaseEntity implements Entity, Hittable {
   tags = ["cast_shadow"];
-  staticCorner: V2d;
-  oppositeCorner: V2d;
   dimensions: V2d;
-  verticalMovement: boolean;
-  sprite: Graphics;
+  sprite: Graphics & GameSprite;
   doorShape?: Box;
   body: Body;
 
   constructor(
-    staticCorner: V2d,
+    private staticCorner: V2d,
     oppositeCorner: V2d,
-    verticalMovement: boolean,
+    private verticalMovement: boolean,
   ) {
     super();
 
-    this.staticCorner = staticCorner;
-    this.oppositeCorner = oppositeCorner;
-    const startingDimensions = this.oppositeCorner.sub(this.staticCorner);
-    this.dimensions = V(startingDimensions.x, startingDimensions.y);
-    this.verticalMovement = verticalMovement;
+    this.dimensions = oppositeCorner.sub(staticCorner);
 
     this.sprite = new Graphics();
-    this.sprite.position.set(...staticCorner);
-    (this.sprite as GameSprite).layerName = Layer.WORLD_FRONT;
+    this.sprite.position.copyFrom(staticCorner);
+    this.sprite.layerName = Layer.WORLD_FRONT;
 
     this.body = createRigid2D({ motion: "kinematic" });
 
@@ -73,18 +65,20 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
     if (this.doorShape) {
       this.body.removeShape(this.doorShape);
     }
-    this.doorShape = new Box({ width, height });
-    this.doorShape.collisionGroup =
-      CollisionGroups.Walls | CollisionGroups.CastsShadow;
-    this.doorShape.collisionMask =
-      CollisionGroups.All ^
-      (CollisionGroups.Walls | CollisionGroups.CastsShadow);
+    this.doorShape = new Box({
+      width,
+      height,
+      collisionGroup: CollisionGroups.Walls | CollisionGroups.CastsShadow,
+      collisionMask:
+        CollisionGroups.All ^
+        (CollisionGroups.Walls | CollisionGroups.CastsShadow),
+    });
     this.body.addShape(this.doorShape);
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
+  hitByMelee() {}
 
-  onBulletHit(bullet: Bullet, position: V2d) {
+  hitByBullet(bullet: Bullet, position: V2d) {
     this.game!.addEntity(
       new PositionalSound(choose("wallHit1", "wallHit2"), position),
     );
@@ -96,7 +90,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
  * A pair of elevator doors.  They must be axis aligned boxes.
  */
 export default class ElevatorDoor extends BaseEntity implements Entity {
-  openPerentage: number = 0;
+  openPercentage: number = 0;
   state: "STOPPED" | "OPENING" | "CLOSING" = "STOPPED";
   topDoor: HalfDoor;
   bottomDoor: HalfDoor;
@@ -137,33 +131,29 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
       );
     }
 
-    this.addChild(this.topDoor);
-    this.addChild(this.bottomDoor);
-
-    this.addChild(
-      new Interactable(
-        upperLeftCorner.add(dimensions.mul(0.5)),
-        this.onInteract.bind(this),
-      ),
+    this.addChildren(
+      this.topDoor,
+      this.bottomDoor,
+      new Interactable(this.center, this.handleInteract.bind(this)),
     );
   }
 
-  async onInteract() {
+  async handleInteract() {
     if (this.state === "STOPPED") {
       this.game?.addEntity(new PositionalSound("elevatorDing", this.center));
-      const isClosing = this.openPerentage === 1;
+      const isClosing = this.openPercentage === 1;
       this.state = isClosing ? "CLOSING" : "OPENING";
       await this.wait(DING_TIME);
       const sound = isClosing ? "elevatorDoorClose" : "elevatorDoorOpen";
       this.game?.addEntity(new PositionalSound(sound, this.center));
       await this.wait(isClosing ? CLOSE_TIME : OPEN_TIME, (dt, t) => {
-        this.openPerentage = smoothStep(isClosing ? 1 - t : t);
-        this.topDoor.setOpenPercentage(this.openPerentage);
-        this.bottomDoor.setOpenPercentage(this.openPerentage);
+        this.openPercentage = smoothStep(isClosing ? 1 - t : t);
+        this.topDoor.setOpenPercentage(this.openPercentage);
+        this.bottomDoor.setOpenPercentage(this.openPercentage);
       });
-      this.openPerentage = isClosing ? 0 : 1;
-      this.topDoor.setOpenPercentage(this.openPerentage);
-      this.bottomDoor.setOpenPercentage(this.openPerentage);
+      this.openPercentage = isClosing ? 0 : 1;
+      this.topDoor.setOpenPercentage(this.openPercentage);
+      this.bottomDoor.setOpenPercentage(this.openPercentage);
       this.state = "STOPPED";
     }
   }

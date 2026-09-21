@@ -1,4 +1,5 @@
 import { Container, RenderTexture, Sprite } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
@@ -6,7 +7,6 @@ import Game from "../../core/Game";
 import { rgbToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
-import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 import { AmbientLight } from "./AmbientLight";
 import Light from "./Light";
@@ -40,9 +40,9 @@ export default class LightingManager extends BaseEntity implements Entity {
   onAdd({ game }: { game: Game }) {
     const [width, height] = game.renderer.getSize();
     this.texture = RenderTexture.create({
-      width: width,
-      height: height,
-      resolution: game.renderer.app.renderer.resolution,
+      width,
+      height,
+      resolution: this.renderer.resolution,
     });
 
     this.sprite = new Sprite(this.texture);
@@ -105,11 +105,9 @@ export default class LightingManager extends BaseEntity implements Entity {
 
   // Use late render so that it happens after everyone else has rendered and all their light positions and stuff are updated
   onLateRender() {
-    const matrix = this.game!.camera.getMatrix();
-    // const inverseMatrix = matrix.clone().invert();
-    this.lightContainer.setFromMatrix(matrix);
-
     const camera = this.game!.camera;
+    this.lightContainer.setFromMatrix(camera.getMatrix());
+
     const [minX, minY] = camera.toWorld(V(0, 0));
     const [maxX, maxY] = camera.toWorld(camera.getViewportSize());
 

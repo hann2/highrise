@@ -1,18 +1,18 @@
-import type { Body } from "../../core/physics/body/Body";
-import { Capsule } from "../../core/physics/shapes/Capsule";
-import { createRigid2D } from "../../core/physics/body/bodyFactories";
-import { Container, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
+import { ImageName, SoundName } from "../../../resources/resources";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
+import { PhysicsMaterials } from "../../config/PhysicsMaterials";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
-import { SoundName } from "../../../resources/resources";
+import type { Body } from "../../core/physics/body/Body";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
+import { Capsule } from "../../core/physics/shapes/Capsule";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { clamp, degToRad, polarToVec } from "../../core/util/MathUtil";
-import { choose, rNormal, rUniform } from "../../core/util/Random";
+import { clamp } from "../../core/util/MathUtil";
+import { rNormal, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { Layer } from "../../config/layers";
-import { CollisionGroups } from "../../config/CollisionGroups";
-import { PhysicsMaterials } from "../../config/PhysicsMaterials";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
 const SIZE = 0.03; // meters wide
@@ -33,10 +33,10 @@ export default class ShellCasing extends BaseEntity implements Entity {
   bounceSounds: ShuffleRing<SoundName>;
 
   constructor(
-    private position: V2d,
+    position: V2d,
     velocity: V2d,
-    private rotation: number,
-    texture: string,
+    rotation: number,
+    texture: ImageName,
     sounds: SoundName[],
   ) {
     super();
@@ -54,19 +54,18 @@ export default class ShellCasing extends BaseEntity implements Entity {
       mass: 0.1,
       position,
       velocity,
+      damping: 1,
+      angularDamping: 1,
+      angularVelocity: rUniform(MAX_SPIN / 10, MAX_SPIN),
     });
-
-    this.body.angularDamping = 1;
-    this.body.damping = 1;
-    this.body.angularVelocity = rUniform(MAX_SPIN / 10, MAX_SPIN);
 
     const shape = new Capsule({
       radius: this.sprite.width / 2,
       length: this.sprite.height,
+      collisionGroup: CollisionGroups.Particle,
+      collisionMask: CollisionGroups.Walls | CollisionGroups.Enemies,
+      material: PhysicsMaterials.glowstick,
     });
-    shape.collisionGroup = CollisionGroups.Particle;
-    shape.collisionMask = CollisionGroups.Walls | CollisionGroups.Enemies;
-    shape.material = PhysicsMaterials.glowstick;
     this.body.addShape(shape, undefined, Math.PI / 2);
 
     this.bounceSounds = new ShuffleRing(sounds);
@@ -87,8 +86,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
         this.zVelocity *= -BOUNCE_RESTITUTION;
         this.body.angularVelocity *= 0.5;
-        this.body.velocity[0] *= 0.5;
-        this.body.velocity[1] *= 0.5;
+        this.body.velocity.imul(0.5);
       } else {
         // on ground
         this.zVelocity = 0;
@@ -101,8 +99,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
   }
 
   onRender() {
-    this.sprite.position.set(...this.position);
-    this.sprite.position.set(...this.body.position);
+    this.sprite.position.copyFrom(this.body.position);
     this.sprite.rotation = this.body.angle;
 
     const scale = 1 + this.z * 0.8;
@@ -118,14 +115,13 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
   // Turn this into a static thing so we don't have any more on ticks or on renders or physics or whatnot
   turnToStatic() {
-    const sprite = new Sprite();
-    sprite.texture = this.sprite.texture;
+    const sprite: Sprite & GameSprite = new Sprite(this.sprite.texture);
     sprite.scale.copyFrom(this.sprite.scale);
     sprite.anchor.copyFrom(this.sprite.anchor);
     sprite.tint = this.sprite.tint;
     sprite.position.copyFrom(this.sprite.position);
     sprite.rotation = this.sprite.rotation;
-    (sprite as GameSprite).layerName = this.sprite.layerName;
+    sprite.layerName = this.sprite.layerName;
 
     this.game?.addEntity(new StaticShellCasing(sprite));
 

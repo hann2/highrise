@@ -42,7 +42,7 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
       let wall = CellGrid.getWallInDirection(frontCell, direction);
       if (
         !cellGrid.isExisting(wall) &&
-        (direction.x !== -openDirection.x || direction.y != -openDirection.y)
+        !direction.equals(openDirection.negate())
       ) {
         frontFound += 1;
         directionFromFrontCellToDoorWall = direction;
@@ -58,18 +58,16 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
     );
     const right = doorWall[1];
     let doorRestingDirection = right ? Direction.DOWN : Direction.RIGHT;
-    const reverseHinge =
-      doorRestingDirection.x === openDirection.x &&
-      doorRestingDirection.y === openDirection.y;
+    const reverseHinge = doorRestingDirection.equals(openDirection);
     if (reverseHinge) {
-      doorRestingDirection = doorRestingDirection.mul(-1);
+      doorRestingDirection = doorRestingDirection.negate();
     }
     cellGrid.doors.push(wallIDToDoorBuilder(doorWall, reverseHinge));
 
     cellGrid.cells[frontCell.x][frontCell.y].content = "empty";
     const backWall = CellGrid.getWallInDirection(
       backCell,
-      openDirection.mul(-1),
+      openDirection.negate(),
     );
     const closet = {
       backCell,

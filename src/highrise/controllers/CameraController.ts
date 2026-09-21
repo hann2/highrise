@@ -4,7 +4,6 @@ import { Camera2d } from "../../core/graphics/Camera2d";
 import PositionalSoundListener from "../../core/sound/PositionalSoundListener";
 import { V } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
-import PartyManager from "../environment/PartyManager";
 import Human from "../human/Human";
 
 /** How quickly the camera catches up to the player, per second */

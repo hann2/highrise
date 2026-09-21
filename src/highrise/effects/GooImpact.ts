@@ -1,13 +1,13 @@
-import { BLEND_MODES, Container, Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
-import { rUniform } from "../../core/util/Random";
+import { rDirection, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import { Layer } from "../../config/layers";
 import GooSplat from "./GooSplat";
 import { getBlobPair, getSplatSound } from "./Splat";
 
@@ -36,18 +36,16 @@ export default class GooImpact extends BaseEntity implements Entity {
   ) {
     super();
 
-    const mainContainer = new Container();
-    (mainContainer as GameSprite).layerName = Layer.PARTICLES;
-    mainContainer.position.set(...position);
+    const mainContainer: GameSprite = new Container();
+    mainContainer.layerName = Layer.PARTICLES;
+    mainContainer.position.copyFrom(position);
 
-    const emissiveContainer = new Container();
-    (emissiveContainer as GameSprite).layerName = Layer.EMISSIVES;
+    const emissiveContainer: GameSprite = new Container();
+    emissiveContainer.layerName = Layer.EMISSIVES;
     emissiveContainer.alpha = 0.3;
-    emissiveContainer.position.set(...position);
+    emissiveContainer.position.copyFrom(position);
 
     this.sprites = [mainContainer, emissiveContainer];
-
-    this.particles = [];
 
     for (let i = 0; i < amount; i++) {
       const [texture, glowTexture] = getBlobPair();
@@ -55,8 +53,8 @@ export default class GooImpact extends BaseEntity implements Entity {
       const sprite = Sprite.from(texture);
       sprite.blendMode = "add";
       sprite.anchor.set(0.5, 0.5);
-      sprite.rotation = rUniform(0, Math.PI * 2);
-      sprite.addChild(sprite);
+      sprite.rotation = rDirection();
+      mainContainer.addChild(sprite);
 
       const glowSprite = Sprite.from(glowTexture);
       glowSprite.blendMode = "add";
@@ -70,7 +68,7 @@ export default class GooImpact extends BaseEntity implements Entity {
         radius: rUniform(0.1, 0.1 * amount),
         sprite,
         glowSprite,
-        velocity: polarToVec(rUniform(0, Math.PI * 2), rUniform(0.8, 6.0)),
+        velocity: polarToVec(rDirection(), rUniform(0.8, 6.0)),
         z: rUniform(height * 0.3, height * 1.5),
         zVelocity: rUniform(-5, 3),
         spin: rUniform(-10, 10),
@@ -104,22 +102,22 @@ export default class GooImpact extends BaseEntity implements Entity {
       .particles) {
       const scale = (radius * (1.0 + z)) / sprite.texture.width;
 
-      sprite.position.set(...position);
+      sprite.position.copyFrom(position);
       sprite.tint = color;
       sprite.scale.set(scale);
 
-      glowSprite.position.set(...position);
+      glowSprite.position.copyFrom(position);
       glowSprite.tint = color;
       glowSprite.scale.set(scale);
     }
   }
 
   particleToSplat(particle: Particle) {
-    const splatPos = particle.position.add([
-      this.sprites![0].x,
-      this.sprites![0].y,
-    ]);
-    this.game?.addEntity(new GooSplat(splatPos, particle.radius * 2));
-    this.game?.addEntity(new PositionalSound(getSplatSound(), splatPos));
+    const { x, y } = this.sprites![0];
+    const splatPos = particle.position.add([x, y]);
+    this.game?.addEntities(
+      new GooSplat(splatPos, particle.radius * 2),
+      new PositionalSound(getSplatSound(), splatPos),
+    );
   }
 }

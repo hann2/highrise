@@ -2,13 +2,12 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { rBool, rUniform } from "../../core/util/Random";
 import { BaseEnemy } from "../enemies/base/Enemy";
-import Interactable from "../environment/Interactable";
 import { getPartyLeader } from "../environment/PartyManager";
 import { getNearestVisibleEnemy, testLineOfSight } from "../utils/visionUtils";
 import Gun from "../weapons/guns/Gun";
 import { FireMode } from "../weapons/guns/GunStats";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
-import Human, { isHuman, PUSH_RANGE } from "./Human";
+import Human, { PUSH_RANGE } from "./Human";
 
 const MAX_ATTACK_DISTANCE = 10; // meters
 
@@ -30,7 +29,6 @@ export default class SurvivorHumanController
   // The zombie this AI is currently shooting at
   target?: BaseEnemy;
 
-  // The interaction target to make this human follow the player
   triggerOnCooldown: boolean = false;
 
   constructor(human: Human) {
@@ -60,13 +58,9 @@ export default class SurvivorHumanController
       return false;
     }
 
-    const distance = this.human
-      .getPosition()
-      .isub(leader.body.position).magnitude;
+    const distance = this.human.getPosition().distanceTo(leader.body.position);
 
-    if (distance < JOIN_DISTANCE && testLineOfSight(this.human, leader)) {
-      return true;
-    }
+    return distance < JOIN_DISTANCE && testLineOfSight(this.human, leader);
   }
 
   onTick(dt: number) {
@@ -126,7 +120,7 @@ export default class SurvivorHumanController
         }
       } else if (weapon instanceof MeleeWeapon) {
         const maxReach = weapon.stats.size[1] + weapon.swing.maxExtension;
-        if (displacement.magnitude < maxReach) {
+        if (distance < maxReach) {
           this.human.useWeapon();
         }
       }

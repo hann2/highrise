@@ -1,5 +1,4 @@
 import { Graphics } from "pixi.js";
-import { SoundName } from "../../../../resources/resources";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
@@ -9,13 +8,6 @@ import { PointLight } from "../../lighting-and-vision/PointLight";
 import Interactable from "../Interactable";
 
 const SWITCH_BOX_DIMENSIONS = V(0.3, 0.2);
-
-export const MACHINE_SOUNDS: SoundName[] = [
-  "powerWarmUp1",
-  "heavySwitchThrow",
-  "machineLoop1",
-  "lightPowerOn1",
-];
 
 export class LightSwitch extends BaseEntity implements Entity {
   sprite: Graphics;
@@ -29,7 +21,7 @@ export class LightSwitch extends BaseEntity implements Entity {
     super();
 
     this.light = this.addChild(new PointLight({ position, color: 0xff0000 }));
-    this.addChild(new Interactable(position, this.onInteract.bind(this)));
+    this.addChild(new Interactable(position, this.handleInteract.bind(this)));
 
     const corner = position.sub(SWITCH_BOX_DIMENSIONS.mul(0.5));
     this.sprite = new Graphics();
@@ -44,7 +36,7 @@ export class LightSwitch extends BaseEntity implements Entity {
     this.sprite.rotation = direction;
   }
 
-  async onInteract() {
+  async handleInteract() {
     if (this.on) {
       return;
     }

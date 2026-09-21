@@ -1,17 +1,16 @@
-import type { Body } from "../../core/physics/body/Body";
-import { convexShapesFromPolygon } from "../../core/physics/utils/polygonShapes";
-import { Box } from "../../core/physics/shapes/Box";
-import { createRigid2D } from "../../core/physics/body/bodyFactories";
-import { SoundName } from "../../../resources/resources";
 import { Sprite } from "pixi.js";
+import { SoundName } from "../../../resources/resources";
+import { CollisionGroups } from "../../config/CollisionGroups";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
+import { Box } from "../../core/physics/shapes/Box";
+import { convexShapesFromPolygon } from "../../core/physics/utils/polygonShapes";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { CollisionGroups } from "../../config/CollisionGroups";
-import { Layer } from "../../config/layers";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
 import SwingingWeapon from "../weapons/melee/SwingingWeapon";
@@ -19,10 +18,11 @@ import {
   DecorationInfo,
   getDecorationTexture,
 } from "./decorations/DecorationInfo";
+import Hittable from "./Hittable";
 
 export const DEFAULT_HIT_SOUNDS: SoundName[] = ["wallHit4"];
 
-export default class Decoration extends BaseEntity implements Entity {
+export default class Decoration extends BaseEntity implements Entity, Hittable {
   sprite: Sprite & GameSprite;
 
   constructor(
@@ -42,7 +42,7 @@ export default class Decoration extends BaseEntity implements Entity {
     this.sprite.layerName = layerName;
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.rotation = angle + (decorationInfo.rotation ?? 0);
-    this.sprite.position.set(...position);
+    this.sprite.position.copyFrom(position);
     const scale = decorationInfo.heightMeters / texture.height;
     this.sprite.scale.set(scale);
 
@@ -69,9 +69,7 @@ export default class Decoration extends BaseEntity implements Entity {
           this.body.addShape(shape);
         }
       } else {
-        const shape = new Box({ width, height });
-
-        this.body.addShape(shape, [0, 0], 0);
+        this.body.addShape(new Box({ width, height }));
       }
 
       for (const shape of this.body.shapes) {
@@ -85,18 +83,20 @@ export default class Decoration extends BaseEntity implements Entity {
     }
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {
+  hitByMelee(swingingWeapon: SwingingWeapon, position: V2d): void {
     if (this.decorationInfo.isHittable) {
       const sounds = this.decorationInfo.hitSounds ?? DEFAULT_HIT_SOUNDS;
       this.game?.addEntity(new PositionalSound(choose(...sounds), position));
     }
   }
 
-  onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
+  hitByBullet(bullet: Bullet, position: V2d, normal: V2d) {
     if (this.decorationInfo.isHittable) {
       const sounds = this.decorationInfo.hitSounds ?? DEFAULT_HIT_SOUNDS;
-      this.game!.addEntity(new PositionalSound(choose(...sounds), position));
-      this.game!.addEntity(new WallImpact(position, normal));
+      this.game!.addEntities(
+        new PositionalSound(choose(...sounds), position),
+        new WallImpact(position, normal),
+      );
 
       return true;
     }

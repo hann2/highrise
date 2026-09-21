@@ -1,7 +1,6 @@
 import { seededShuffle } from "../../../core/util/Random";
 import { cementFloor } from "../../environment/decorations/decorations";
 import RepeatingFloor from "../../environment/RepeatingFloor";
-import NecromancerArena from "../rooms/NecromancerArena";
 import RoomTemplate from "../rooms/RoomTemplate";
 import TransformedRoomTemplate, {
   POSSIBLE_ORIENTATIONS,

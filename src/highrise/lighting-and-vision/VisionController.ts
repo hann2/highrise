@@ -1,10 +1,10 @@
 import { BlurFilter, Container, Graphics, Sprite } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import Game from "../../core/Game";
 import { V } from "../../core/Vector";
-import { Layer } from "../../config/layers";
 import { Persistence } from "../constants/constants";
 import {
   getCurrentGraphicsQuality,
@@ -40,9 +40,7 @@ export default class VisionController extends BaseEntity implements Entity {
       .cut();
 
     this.sprite = new Container();
-    this.sprite.addChild(this.shadows.graphics);
-    this.sprite.addChild(fog);
-    this.sprite.addChild(distanceShadows);
+    this.sprite.addChild(this.shadows.graphics, fog, distanceShadows);
     this.sprite.layerName = Layer.VISION;
   }
 
@@ -77,7 +75,7 @@ export default class VisionController extends BaseEntity implements Entity {
     const player = this.getPlayer();
     if (player) {
       const position = player.getPosition();
-      this.sprite.position.set(...position);
+      this.sprite.position.copyFrom(position);
       this.shadows.setPosition(position);
       this.shadows.forceUpdate();
     }

@@ -1,6 +1,6 @@
 // Stats that make a gun unique
 
-import { SoundName } from "../../../../resources/resources";
+import { ImageName, SoundName } from "../../../../resources/resources";
 import { degToRad } from "../../../core/util/MathUtil";
 import { BaseWeaponStats } from "../WeaponStats";
 import { BulletStats, defaultBulletStats } from "./BulletStats";
@@ -52,11 +52,11 @@ export interface GunStats extends BaseWeaponStats {
 
   readonly textures: {
     // Texture to use when the item's on the ground
-    readonly pickup: string;
+    readonly pickup: ImageName;
     // Texture while in person's hands
-    readonly holding: string;
+    readonly holding: ImageName;
     // Texture of the ejected shell casing
-    readonly shellCasing: string;
+    readonly shellCasing: ImageName;
   };
 
   // Position of the left hand

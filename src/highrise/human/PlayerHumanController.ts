@@ -14,12 +14,12 @@ export default class PlayerHumanController
   implements Entity
 {
   persistenceLevel = Persistence.Game;
-  /** The human being controlled by the player */
 
   constructor(private getPlayer: () => Human) {
     super();
   }
 
+  /** The human being controlled by the player */
   get human() {
     return this.getPlayer();
   }
@@ -75,7 +75,7 @@ export default class PlayerHumanController
 
     // Shooting
     if (
-      (io.lmb || this.game?.io.getButton(ControllerButton.RT)) &&
+      (io.lmb || io.getButton(ControllerButton.RT)) &&
       this.human.weapon instanceof Gun &&
       this.human.weapon.stats.fireMode === FireMode.FULL_AUTO &&
       this.human.weapon.ammo > 0
@@ -98,24 +98,20 @@ export default class PlayerHumanController
 
     // Moving
     const direction = V(0, 0);
-    if (this.game?.io.isKeyDown("KeyW")) {
-      direction[1] += -1;
+    if (io.isKeyDown("KeyW")) {
+      direction.y -= 1;
     }
-    if (this.game?.io.isKeyDown("KeyS")) {
-      direction[1] += 1;
+    if (io.isKeyDown("KeyS")) {
+      direction.y += 1;
     }
-    if (this.game?.io.isKeyDown("KeyA")) {
-      direction[0] += -1;
+    if (io.isKeyDown("KeyA")) {
+      direction.x -= 1;
     }
-    if (this.game?.io.isKeyDown("KeyD")) {
-      direction[0] += 1;
+    if (io.isKeyDown("KeyD")) {
+      direction.x += 1;
     }
 
-    direction.iadd(io.getStick("left"));
-
-    if (direction.magnitude > 1) {
-      direction.magnitude = 1;
-    }
+    direction.iadd(io.getStick("left")).ilimit(1);
 
     this.human.walkSpring.walkTowards(direction.angle, direction.magnitude);
   }

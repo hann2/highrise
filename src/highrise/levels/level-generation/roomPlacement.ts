@@ -143,7 +143,7 @@ function addRoom(
       const farCell = CellGrid.getCellOnOtherSideOfWall(cell, wall);
       // TODO: hella slow, put in indexed format
       for (const c of occupiedCellsLevelCoords) {
-        if (c.x === farCell.x && c.y === farCell.y) {
+        if (c.equals(farCell)) {
           cellGrid.destroyWall(wall);
         }
       }

@@ -1,10 +1,10 @@
+import { ImageName, SoundName } from "../../../resources/resources";
 import { rInteger } from "../../core/util/Random";
-import { SoundName } from "../../../resources/resources";
 import { ShuffleRing } from "../utils/ShuffleRing";
 
 // This file is for all the constants shared by splatty stuff
 
-export const SPLAT_TEXTURES = [
+export const SPLAT_TEXTURES: ImageName[] = [
   "splat1",
   "splat2",
   "splat3",
@@ -14,7 +14,7 @@ export const SPLAT_TEXTURES = [
   "splat7",
 ];
 
-export const SPLAT_GLOW_TEXTURES = [
+export const SPLAT_GLOW_TEXTURES: ImageName[] = [
   "splatGlow1",
   "splatGlow2",
   "splatGlow3",
@@ -33,9 +33,15 @@ export const SPLAT_SOUNDS: SoundName[] = [
   "melonPlop6",
 ];
 
-export const BLOB_TEXTURES = ["blob1", "blob2", "blob3", "blob4", "blob5"];
+export const BLOB_TEXTURES: ImageName[] = [
+  "blob1",
+  "blob2",
+  "blob3",
+  "blob4",
+  "blob5",
+];
 
-export const BLOB_GLOW_TEXTURES = [
+export const BLOB_GLOW_TEXTURES: ImageName[] = [
   "blobGlow1",
   "blobGlow2",
   "blobGlow3",
@@ -45,24 +51,16 @@ export const BLOB_GLOW_TEXTURES = [
 
 const splatSoundRing = new ShuffleRing(SPLAT_SOUNDS);
 
-export function getSplatSound() {
+export function getSplatSound(): SoundName {
   return splatSoundRing.getNext();
 }
 
-export function getSplatPair() {
+export function getSplatPair(): [ImageName, ImageName] {
   const i = rInteger(0, SPLAT_TEXTURES.length);
   return [SPLAT_TEXTURES[i], SPLAT_GLOW_TEXTURES[i]];
 }
 
-export function getBlobPair() {
+export function getBlobPair(): [ImageName, ImageName] {
   const i = rInteger(0, BLOB_TEXTURES.length);
   return [BLOB_TEXTURES[i], BLOB_GLOW_TEXTURES[i]];
 }
-
-// Export everything so it can get preloaded
-export const SPLATS_AND_BLOBS_TEXTURES = [
-  ...SPLAT_TEXTURES,
-  ...SPLAT_GLOW_TEXTURES,
-  ...BLOB_TEXTURES,
-  ...BLOB_GLOW_TEXTURES,
-];

@@ -1,5 +1,5 @@
 import { Rectangle, Texture } from "pixi.js";
-import { SoundName } from "../../../../resources/resources";
+import { ImageName, SoundName } from "../../../../resources/resources";
 import { V2d } from "../../../core/Vector";
 
 /**
@@ -18,9 +18,9 @@ export const decorationRelativeTo = (
   return {
     ...partial,
     heightMeters:
-      (decorationSprite.heightMeters * partial.sheetInfo.dimensions!.y) /
-      decorationSprite.sheetInfo.dimensions!.y,
-  } as DecorationInfo;
+      (decorationSprite.heightMeters * partial.sheetInfo.dimensions.y) /
+      decorationSprite.sheetInfo.dimensions.y,
+  };
 };
 
 interface SheetInfo {
@@ -29,7 +29,7 @@ interface SheetInfo {
 }
 
 export interface DecorationInfo {
-  imageName: string;
+  imageName: ImageName;
   heightMeters: number; // height of object in world space (meters)
   sheetInfo?: SheetInfo; // how to get the decoration from the sprite sheet
   isSolid?: boolean; // whether or not this blocks movement
@@ -40,24 +40,14 @@ export interface DecorationInfo {
   hitSounds?: SoundName[]; // Sounds to make when hit
 }
 
-const textureCache = new Map<string, Texture>();
-
-function getOrMakeTexture(url: string): Texture {
-  if (!textureCache.has(url)) {
-    textureCache.set(url, Texture.from(url));
-  }
-  return textureCache.get(url)!;
-}
-
 export function getDecorationTexture(decorationInfo: DecorationInfo): Texture {
   if (decorationInfo.sheetInfo) {
     const { offset, dimensions } = decorationInfo.sheetInfo;
-    const baseTexture = getOrMakeTexture(decorationInfo.imageName);
     return new Texture({
-      source: baseTexture.source,
+      source: Texture.from(decorationInfo.imageName).source,
       frame: new Rectangle(...offset, ...dimensions),
     });
   } else {
-    return getOrMakeTexture(decorationInfo.imageName);
+    return Texture.from(decorationInfo.imageName);
   }
 }

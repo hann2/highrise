@@ -57,7 +57,7 @@ export class PhasedAction<
     if (phase.duration) {
       await this.wait(
         phase.duration,
-        (dt, t) => {
+        (_, t) => {
           this.phasePercent = t;
         },
         phase.name,

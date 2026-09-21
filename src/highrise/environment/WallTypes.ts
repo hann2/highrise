@@ -1,4 +1,4 @@
-import { SoundName } from "../../../resources/resources";
+import { ImageName, SoundName } from "../../../resources/resources";
 
 export interface WallType {
   // Whether or not this stops bullets from going through
@@ -12,8 +12,8 @@ export interface WallType {
 
   // Tint to apply to the image. Defaults to white
   color?: number;
-  // Url for the sprite to use
-  imageUrl: string;
+  // Image for the sprite to use
+  imageName: ImageName;
 
   // Width in meters to draw the sprite
   spriteWidth: number;
@@ -35,12 +35,12 @@ export const SolidWall: WallType = {
 
   impactSounds: ["wallHit3"],
   color: 0x999999,
-  imageUrl: "wall1",
+  imageName: "wall1",
   collisionWidth: 0.15,
   spriteWidth: 0.75,
 };
 
-// A regular solid wall
+// A bathroom stall wall
 export const BathroomWall: WallType = {
   blocksBullets: true,
   blocksMovement: true,
@@ -49,7 +49,7 @@ export const BathroomWall: WallType = {
 
   impactSounds: ["wallHit3"],
   color: 0x999999,
-  imageUrl: "wall1",
+  imageName: "wall1",
   collisionWidth: 0.1,
   spriteWidth: 0.3,
 };
@@ -63,9 +63,7 @@ export const ChainLinkFence: WallType = {
 
   collisionSounds: ["chainLinkFence1", "chainLinkFence2", "chainLinkFence3"],
   color: 0xffffff,
-  imageUrl: "chainLinkFence",
+  imageName: "chainLinkFence",
   collisionWidth: 0.15,
   spriteWidth: 0.225,
 };
-
-export const WALL_TYPES = [SolidWall, BathroomWall, ChainLinkFence];

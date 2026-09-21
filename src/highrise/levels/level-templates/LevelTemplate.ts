@@ -1,5 +1,5 @@
 import Entity from "../../../core/entity/Entity";
-import { hsvToRgb, rgbToHex } from "../../../core/util/ColorUtils";
+import { hsvToHex } from "../../../core/util/ColorUtils";
 import {
   choose,
   rBool,
@@ -10,8 +10,8 @@ import { V2d } from "../../../core/Vector";
 import { DEFAULT_LEVEL_SIZE } from "../../constants/constants";
 import Crawler from "../../enemies/crawler/Crawler";
 import Heavy from "../../enemies/heavy/Heavy";
-import Sprinter from "../../enemies/sprinter/Sprinter";
 import Spitter from "../../enemies/spitter/Spitter";
+import Sprinter from "../../enemies/sprinter/Sprinter";
 import Zombie from "../../enemies/zombie/Zombie";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import {
@@ -85,7 +85,7 @@ export default class LevelTemplate {
 
   // Creates the base floor entity for this level
   makeSubfloor(size: [number, number]): Entity {
-    const color = rgbToHex(hsvToRgb({ h: rUniform(0, 1), s: 0.4, v: 0.8 }));
+    const color = hsvToHex({ h: rUniform(0, 1), s: 0.4, v: 0.8 });
     const decorationInfo = choose(carpetFloor1, carpetFloor2);
     const floor = new RepeatingFloor(decorationInfo, [0, 0], size);
     floor.sprite.tint = color;

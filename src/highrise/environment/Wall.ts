@@ -1,20 +1,17 @@
-import type { Body } from "../../core/physics/body/Body";
-import { Box } from "../../core/physics/shapes/Box";
-import { createRigid2D } from "../../core/physics/body/bodyFactories";
-import { BLEND_MODES, Sprite } from "pixi.js";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity from "../../core/entity/Entity";
-import { GameSprite } from "../../core/entity/GameSprite";
-import { PositionalSound } from "../../core/sound/PositionalSound";
-import { choose, rNormal } from "../../core/util/Random";
-import { V, V2d } from "../../core/Vector";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
 import { PhysicsMaterials } from "../../config/PhysicsMaterials";
+import BaseEntity from "../../core/entity/BaseEntity";
+import Entity from "../../core/entity/Entity";
+import { loadGameSprite } from "../../core/entity/GameSprite";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
+import { Box } from "../../core/physics/shapes/Box";
+import { PositionalSound } from "../../core/sound/PositionalSound";
+import { choose, rNormal } from "../../core/util/Random";
+import { V, V2d } from "../../core/Vector";
 import BulletHole from "../effects/BulletHole";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
-import SwingingWeapon from "../weapons/melee/SwingingWeapon";
 import Hittable from "./Hittable";
 import { SolidWall, WallType } from "./WallTypes";
 
@@ -37,8 +34,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     const drawHeight = length + type.spriteWidth / 3; // add in width to make things line up nicely
 
     // TODO: AO Breaks on outside corners
-    const aoSprite = Sprite.from("wallAo1");
-    (aoSprite as GameSprite).layerName = Layer.FLOOR_AO;
+    const aoSprite = loadGameSprite("wallAo1", Layer.FLOOR_AO);
     aoSprite.blendMode = "multiply";
     aoSprite.anchor.set(0.5, 0.5);
     aoSprite.width = drawHeight;
@@ -47,8 +43,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     aoSprite.rotation = angle + Math.PI / 2;
 
     // TODO: Tile wall sprite rather than just stretch it
-    const wallSprite = Sprite.from(type.imageUrl);
-    (wallSprite as GameSprite).layerName = Layer.WALLS;
+    const wallSprite = loadGameSprite(type.imageName, Layer.WALLS);
     wallSprite.anchor.set(0.5, 0.5);
     wallSprite.width = drawHeight;
     wallSprite.height = type.spriteWidth;
@@ -60,12 +55,13 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
     this.body = createRigid2D({ motion: "static", position: [x, y], angle });
 
-    let collisionGroup = CollisionGroups.Walls;
-
-    const shape = new Box({ width: type.collisionWidth, height: length });
-    shape.collisionGroup = CollisionGroups.None;
-    shape.collisionMask = CollisionGroups.All;
-    shape.material = PhysicsMaterials.wall;
+    const shape = new Box({
+      width: type.collisionWidth,
+      height: length,
+      collisionGroup: CollisionGroups.None,
+      collisionMask: CollisionGroups.All,
+      material: PhysicsMaterials.wall,
+    });
     this.body.addShape(shape);
 
     if (type.blocksMovement) {
@@ -80,23 +76,25 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     }
   }
 
-  onMeleeHit(swingingWeapon: SwingingWeapon, position: V2d): void {}
+  hitByMelee() {}
 
-  onBulletHit(bullet: Bullet, position: V2d, normal: V2d) {
+  hitByBullet(bullet: Bullet, position: V2d, normal: V2d) {
     const sounds = this.type.impactSounds;
-    if (sounds && sounds.length) {
+    if (sounds?.length) {
       const sound = choose(...sounds);
       const speed = rNormal(1, 0.08);
       this.game!.addEntity(new PositionalSound(sound, position, { speed }));
     }
 
-    this.game?.addEntity(new WallImpact(position, normal, this.type.color));
-    this.game?.addEntity(new BulletHole(position));
+    this.game!.addEntities(
+      new WallImpact(position, normal, this.type.color),
+      new BulletHole(position),
+    );
 
     return true;
   }
 
-  onBeginContact({ other }: { other?: Entity }) {
+  onBeginContact() {
     const sounds = this.type.collisionSounds;
     if (sounds) {
       this.addChild(new PositionalSound(choose(...sounds), this.getPosition()));

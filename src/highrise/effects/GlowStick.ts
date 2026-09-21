@@ -1,26 +1,28 @@
-import type { Body } from "../../core/physics/body/Body";
-import { Capsule } from "../../core/physics/shapes/Capsule";
-import { createRigid2D } from "../../core/physics/body/bodyFactories";
-import { SoundName } from "../../../resources/resources";
-import { Container, Sprite } from "pixi.js";
-import BaseEntity from "../../core/entity/BaseEntity";
-import Entity from "../../core/entity/Entity";
-import { GameSprite } from "../../core/entity/GameSprite";
-import { PositionalSound } from "../../core/sound/PositionalSound";
-import { hslToHex } from "../../core/util/ColorUtils";
-import { clamp } from "../../core/util/MathUtil";
-import { choose, rNormal, rUniform } from "../../core/util/Random";
-import { V2d } from "../../core/Vector";
+import { Sprite } from "pixi.js";
+import { ImageName, SoundName } from "../../../resources/resources";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
 import { PhysicsMaterials } from "../../config/PhysicsMaterials";
+import BaseEntity from "../../core/entity/BaseEntity";
+import Entity from "../../core/entity/Entity";
+import { GameSprite } from "../../core/entity/GameSprite";
+import type { Body } from "../../core/physics/body/Body";
+import { createRigid2D } from "../../core/physics/body/bodyFactories";
+import { Capsule } from "../../core/physics/shapes/Capsule";
+import { PositionalSound } from "../../core/sound/PositionalSound";
+import { hslToHex } from "../../core/util/ColorUtils";
+import { clamp } from "../../core/util/MathUtil";
+import { choose, rDirection, rNormal, rUniform } from "../../core/util/Random";
+import { V2d } from "../../core/Vector";
 import { PointLight } from "../lighting-and-vision/PointLight";
 
-export const GLOWSTICK_TEXTURES = ["glowStick1", "glowStick2", "glowStick3"];
+const GLOWSTICK_TEXTURES: ImageName[] = [
+  "glowStick1",
+  "glowStick2",
+  "glowStick3",
+];
 
 const DROP_SOUNDS: SoundName[] = ["glowStickDrop1", "glowStickDrop2"];
-const CRACK_SOUNDS: SoundName[] = ["glowStickCrack1"];
-export const GLOWSTICK_SOUNDS: SoundName[] = [...DROP_SOUNDS, ...CRACK_SOUNDS];
 
 const SIZE = [0.3, 0.08];
 const SPRITE_LENGTH = 0.45;
@@ -46,25 +48,27 @@ export default class GlowStick extends BaseEntity implements Entity {
       mass: 0.1,
       position,
       velocity,
+      damping: 1,
+      angularDamping: 1,
+      angularVelocity: rUniform(5, 40),
+      angle: rDirection(),
     });
-
-    this.body.angularDamping = 1;
-    this.body.damping = 1;
-    this.body.angularVelocity = rUniform(5, 40);
-    this.body.angle = rUniform(0, Math.PI * 2);
-
-    const shape = new Capsule({ radius: SIZE[1] / 2, length: SIZE[0] });
-    shape.collisionGroup = CollisionGroups.Particle;
-    shape.collisionMask = CollisionGroups.Walls | CollisionGroups.Enemies;
-    shape.material = PhysicsMaterials.glowstick;
-    this.body.addShape(shape);
+    this.body.addShape(
+      new Capsule({
+        radius: SIZE[1] / 2,
+        length: SIZE[0],
+        collisionGroup: CollisionGroups.Particle,
+        collisionMask: CollisionGroups.Walls | CollisionGroups.Enemies,
+        material: PhysicsMaterials.glowstick,
+      }),
+    );
 
     const color = hslToHex({
       h: rUniform(0, 1),
       s: 1,
       l: 0.8,
     });
-    this.light = this.addChild(new PointLight({ radius: 3, color: color }));
+    this.light = this.addChild(new PointLight({ radius: 3, color }));
 
     this.sprite = Sprite.from(choose(...GLOWSTICK_TEXTURES));
     this.sprite.tint = color;
@@ -85,8 +89,7 @@ export default class GlowStick extends BaseEntity implements Entity {
 
         this.zVelocity *= -BOUNCE_RESTITUTION;
         this.body.angularVelocity *= 0.5;
-        this.body.velocity[0] *= 0.5;
-        this.body.velocity[1] *= 0.5;
+        this.body.velocity.imul(0.5);
       } else {
         // on ground
         this.zVelocity = 0;
@@ -107,7 +110,7 @@ export default class GlowStick extends BaseEntity implements Entity {
 
   onAfterPhysics() {
     this.light.setPosition(this.body.position);
-    this.sprite.position.set(...this.body.position);
+    this.sprite.position.copyFrom(this.body.position);
     this.sprite.rotation = this.body.angle;
   }
 
@@ -118,14 +121,13 @@ export default class GlowStick extends BaseEntity implements Entity {
 
   // Turn this into a static thing so we don't have any more on ticks or on renders or physics or whatnot
   turnToStatic() {
-    const sprite = new Sprite();
-    sprite.texture = this.sprite.texture;
+    const sprite: Sprite & GameSprite = new Sprite(this.sprite.texture);
     sprite.scale.copyFrom(this.sprite.scale);
     sprite.anchor.copyFrom(this.sprite.anchor);
     sprite.tint = this.sprite.tint;
     sprite.position.copyFrom(this.sprite.position);
     sprite.rotation = this.sprite.rotation;
-    (sprite as GameSprite).layerName = this.sprite.layerName;
+    sprite.layerName = this.sprite.layerName;
 
     this.game?.addEntity(new StaticGlowstick(sprite, this.light));
 
@@ -153,6 +155,4 @@ class StaticGlowstick extends BaseEntity {
     });
     this.destroy();
   }
-
-  // TODO: Destroy only the oldest ones
 }

@@ -1,7 +1,7 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
-import { polarToVec } from "../../../core/util/MathUtil";
-import { rNormal, rUniform } from "../../../core/util/Random";
+import { clampUp, polarToVec } from "../../../core/util/MathUtil";
+import { rDirection, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { Spark } from "./Spark";
 
@@ -9,9 +9,9 @@ import { Spark } from "./Spark";
  * Emits waves of sparks ever {period} seconds
  */
 export class SparkGenerator extends BaseEntity implements Entity {
-  remainder: number;
-  sparkAngle: number;
-  sparkArc: number;
+  remainder = 0;
+  sparkAngle = rDirection();
+  sparkArc = rNormal(Math.PI / 2, 0.5);
 
   constructor(
     public position: V2d,
@@ -20,19 +20,13 @@ export class SparkGenerator extends BaseEntity implements Entity {
     public period: number = 3,
   ) {
     super();
-
-    this.remainder = 0;
-    this.sparkAngle = rUniform(0, 2 * Math.PI);
-    this.sparkArc = rNormal(Math.PI / 2, 0.5);
   }
 
   onTick(dt: number) {
     const sparkMaxLifetime = 0.8;
     const sparkFrequency =
-      Math.max(
-        0,
-        Math.sin((this.game!.elapsedTime * Math.PI * 2) / this.period),
-      ) * this.baseSparkFrequency;
+      clampUp(Math.sin((this.game!.elapsedTime * Math.PI * 2) / this.period)) *
+      this.baseSparkFrequency;
 
     if (sparkFrequency !== 0) {
       // integer part will tell us how many sparks to create, decimal remainder gets stored for next time.

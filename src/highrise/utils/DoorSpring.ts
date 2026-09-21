@@ -1,6 +1,5 @@
 import type { Body } from "../../core/physics/body/Body";
 import { RotationalSpring } from "../../core/physics/springs/RotationalSpring";
-import { angleDelta, normalizeAngle } from "../../core/util/MathUtil";
 
 export default class DoorSpring extends RotationalSpring {
   constructor(
@@ -13,10 +12,8 @@ export default class DoorSpring extends RotationalSpring {
       damping: 5,
       stiffness: 300,
     });
-
-    this.minRotation = minRotation;
-    this.maxRotation = maxRotation;
   }
+
   applyForce(): this {
     const bodyA = this.bodyA;
     const bodyB = this.bodyB;
@@ -34,7 +31,7 @@ export default class DoorSpring extends RotationalSpring {
     const springyPart = -this.stiffness * angleDisplacement;
     const dampyPart =
       -this.damping * relativeVelocity * (angleDisplacement == 0 ? 1 : 10);
-    var torque = springyPart + dampyPart;
+    const torque = springyPart + dampyPart;
 
     bodyA.angularForce -= torque;
     bodyB.angularForce += torque;

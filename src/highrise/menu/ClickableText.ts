@@ -1,9 +1,9 @@
 import { Text } from "pixi.js";
-import { fontName } from "../../core/resources/resourceUtils";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
-import { Layer } from "../../config/layers";
+import { fontName } from "../../core/resources/resourceUtils";
 
 interface Options {
   inactiveColor?: string;
@@ -21,7 +21,7 @@ export default class ClickableText extends BaseEntity implements Entity {
     super();
 
     this.sprite = new Text({
-      text: text,
+      text,
       style: {
         align: "left",
         fill: inactiveColor,

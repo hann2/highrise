@@ -2,8 +2,6 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import Game from "../../core/Game";
 import { choose, rBool } from "../../core/util/Random";
-import { V } from "../../core/Vector";
-import { DustyRusty } from "../characters/DustyRusty";
 import { Persistence } from "../constants/constants";
 import AllyHumanController, { isAllyController } from "../human/AllyController";
 import Human from "../human/Human";
@@ -35,7 +33,6 @@ export default class PartyManager extends BaseEntity implements Entity {
     human,
     survivorController,
   }: PartyEvent & { survivorController?: SurvivorHumanController }) {
-    console.log("add to party");
     this.partyMembers.push(human);
     survivorController?.destroy();
     this.game!.addEntity(new AllyHumanController(human, () => this.leader));

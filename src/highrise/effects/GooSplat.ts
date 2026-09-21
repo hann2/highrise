@@ -1,11 +1,11 @@
-import { BLEND_MODES, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
+import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { GameSprite } from "../../core/entity/GameSprite";
+import { GameSprite, loadGameSprite } from "../../core/entity/GameSprite";
 import { darken } from "../../core/util/ColorUtils";
 import { smoothStep } from "../../core/util/MathUtil";
 import { rUniform } from "../../core/util/Random";
-import { Layer } from "../../config/layers";
 import { getSplatPair } from "./Splat";
 
 const SCALE = 1.0 / 64;
@@ -23,8 +23,7 @@ export default class GooSplat extends BaseEntity implements Entity {
 
     const [texture, glowTexture] = getSplatPair();
 
-    this.mainSprite = Sprite.from(texture);
-    (this.mainSprite as GameSprite).layerName = Layer.FLOOR_DECALS;
+    this.mainSprite = loadGameSprite(texture, Layer.FLOOR_DECALS);
     this.mainSprite.alpha = 0.9;
     this.mainSprite.scale.set(size * SCALE);
     this.mainSprite.anchor.set(0.5, 0.5);
@@ -32,8 +31,7 @@ export default class GooSplat extends BaseEntity implements Entity {
     this.mainSprite.rotation = rUniform(0, Math.PI / 2);
     this.mainSprite.tint = darken(COLOR, rUniform(0, 0.2));
 
-    this.glowSprite = Sprite.from(glowTexture);
-    (this.glowSprite as GameSprite).layerName = Layer.EMISSIVES;
+    this.glowSprite = loadGameSprite(glowTexture, Layer.EMISSIVES);
     this.glowSprite.blendMode = "add";
     this.glowSprite.alpha = GLOW_ALPHA;
     this.glowSprite.scale.set(size * SCALE);
