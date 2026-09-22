@@ -16,13 +16,14 @@ import { V, V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
 import { getOccluders } from "./occluders";
+import { getPenumbraTexture } from "./penumbraTexture";
 import {
   computeVisibility,
   visibilityAt,
   visibilityOutline,
   VisibilitySample,
 } from "./visibility";
-import { buildVisionMesh } from "./visionMesh";
+import { buildPenumbraMesh, buildVisionMesh, MeshData } from "./visionMesh";
 
 export const MAX_VISION = 10; // meters
 /** Where the vision mesh hands over to the static darkness beyond it */
@@ -31,7 +32,8 @@ const OUTER_RADIUS = MAX_VISION + 1;
 const VISION_SOURCE_RADIUS = 0.2;
 /** Softness of edges that aren't shadows (walls, the range limit), in meters */
 const EDGE_ANTIALIAS_WIDTH = 0.05;
-const MAX_PENUMBRA_WIDTH = 3;
+/** Penumbra wedges reach this far from their corner, past everything visible */
+const PENUMBRA_LENGTH = OUTER_RADIUS * 2;
 
 /**
  * Hides what the player can't see. The visible region is computed
@@ -44,12 +46,10 @@ export default class VisionController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
 
   sprite: Container & GameSprite;
-  private geometry = new MeshGeometry({
-    positions: new Float32Array(0),
-    uvs: new Float32Array(0),
-    indices: new Uint32Array(0),
-  });
+  private geometry = emptyGeometry();
+  private penumbraGeometry = emptyGeometry();
   private mesh: Mesh;
+  private penumbraMesh: Mesh;
 
   /** Where the player is looking from */
   private eye: V2d = V(0, 0);
@@ -74,6 +74,11 @@ export default class VisionController extends BaseEntity implements Entity {
       texture: getEdgeTexture(),
     });
     this.mesh.tint = 0x000000;
+    this.penumbraMesh = new Mesh({
+      geometry: this.penumbraGeometry,
+      texture: getPenumbraTexture(),
+    });
+    this.penumbraMesh.tint = 0x000000;
 
     const fog = Sprite.from("visionFog");
     fog.blendMode = "multiply";
@@ -91,7 +96,7 @@ export default class VisionController extends BaseEntity implements Entity {
       .cut();
 
     this.sprite = new Container();
-    this.sprite.addChild(this.mesh, fog, distanceShadows);
+    this.sprite.addChild(this.mesh, this.penumbraMesh, fog, distanceShadows);
     this.sprite.layerName = Layer.VISION;
   }
 
@@ -120,28 +125,51 @@ export default class VisionController extends BaseEntity implements Entity {
       getOccluders(this.game, this.eye, MAX_VISION, true),
     );
     this.samples = profiler.measure("VisionController.visibility", () =>
-      computeVisibility(this.eye, MAX_VISION, occluders),
+      computeVisibility(this.eye, MAX_VISION, occluders, {
+        sourceRadius: VISION_SOURCE_RADIUS,
+      }),
     );
     profiler.measure("VisionController.mesh", () => {
       const outline = visibilityOutline(this.eye, this.samples);
-      const { positions, uvs, indices } = buildVisionMesh(this.eye, outline, {
-        outerRadius: OUTER_RADIUS,
-        antialiasWidth: EDGE_ANTIALIAS_WIDTH,
-        sourceRadius: VISION_SOURCE_RADIUS,
-        maxPenumbraWidth: MAX_PENUMBRA_WIDTH,
-      });
-      this.mesh.visible = indices.length > 0;
-      // Set uvs first: the geometry expects them to be at least as long as positions
-      this.geometry.uvs = uvs;
-      this.geometry.positions = positions;
-      this.geometry.indices = indices;
+      setGeometry(
+        this.geometry,
+        buildVisionMesh(this.eye, outline, {
+          outerRadius: OUTER_RADIUS,
+          antialiasWidth: EDGE_ANTIALIAS_WIDTH,
+        }),
+      );
+      setGeometry(
+        this.penumbraGeometry,
+        buildPenumbraMesh(this.eye, outline.silhouettes, PENUMBRA_LENGTH),
+      );
+      this.mesh.visible = this.geometry.indices.length > 0;
+      this.penumbraMesh.visible = this.penumbraGeometry.indices.length > 0;
     });
   }
 
   @on("destroy")
   onDestroy() {
     this.geometry.destroy();
+    this.penumbraGeometry.destroy();
   }
+}
+
+function emptyGeometry(): MeshGeometry {
+  return new MeshGeometry({
+    positions: new Float32Array(0),
+    uvs: new Float32Array(0),
+    indices: new Uint32Array(0),
+  });
+}
+
+function setGeometry(
+  geometry: MeshGeometry,
+  { positions, uvs, indices }: MeshData,
+) {
+  // Set uvs first: the geometry expects them to be at least as long as positions
+  geometry.uvs = uvs;
+  geometry.positions = positions;
+  geometry.indices = indices;
 }
 
 const EDGE_TEXTURE_SIZE = 64;

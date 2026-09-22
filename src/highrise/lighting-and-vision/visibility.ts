@@ -18,6 +18,12 @@
  * one just after, so no rays need to be nudged by an epsilon to find the far
  * point; it lies on the same ray.
  *
+ * An eye with a radius sees around silhouette corners a little: the shadow
+ * behind a corner has a penumbra between the ray from one side of the eye
+ * and the ray from the other. The samples at such a corner record both
+ * directions so the outline can follow the umbra side and a wedge can be
+ * drawn between them.
+ *
  * https://www.redblobgames.com/articles/visibility/
  */
 
@@ -30,11 +36,30 @@ export interface Occluder {
   transmission: number;
 }
 
+/** A segment of an occluder's boundary, in world coordinates */
+export interface Surface {
+  readonly ax: number;
+  readonly ay: number;
+  readonly bx: number;
+  readonly by: number;
+}
+
 export interface Crossing {
   /** Distance from the eye along the ray */
   distance: number;
   /** Fraction of light that remains beyond this crossing */
   transmission: number;
+  /** What was crossed, or undefined at the range limit */
+  surface?: Surface;
+}
+
+/** The two samples on either side of a silhouette corner share one of these */
+export interface Silhouette {
+  corner: Point;
+  /** Unit direction of the edge of full shadow, from the corner outward */
+  umbraDirection: Point;
+  /** Unit direction of the edge of full light, from the corner outward */
+  litDirection: Point;
 }
 
 export interface VisibilitySample {
@@ -48,11 +73,15 @@ export interface VisibilitySample {
    * has transmission 0: an opaque surface or the range limit.
    */
   crossings: Crossing[];
+  /** Set on both samples of a silhouette corner. The one whose first crossing is the corner is the blocked side. */
+  silhouette?: Silhouette;
 }
 
 export interface VisibilityOptions {
   /** Angle between the evenly spaced rays that round off the range limit, in radians */
   arcStep?: number;
+  /** Radius of the eye, in meters. 0 gives hard shadows. */
+  sourceRadius?: number;
 }
 
 interface Corner {
@@ -64,11 +93,7 @@ interface Corner {
   edges: Edge[];
 }
 
-interface Edge {
-  ax: number;
-  ay: number;
-  bx: number;
-  by: number;
+interface Edge extends Surface {
   transmission: number;
   a: Corner;
   b: Corner;
@@ -77,6 +102,7 @@ interface Edge {
 interface Hit {
   distance: number;
   transmission: number;
+  surface?: Surface;
 }
 
 const TWO_PI = Math.PI * 2;
@@ -85,6 +111,12 @@ const DEFAULT_ARC_STEP = (5 * Math.PI) / 180;
 const BIN_COUNT = 64;
 const BIN_SIZE = TWO_PI / BIN_COUNT;
 const EPSILON = 1e-9;
+/**
+ * The eye never looks more than this fraction of the corner distance wide,
+ * so a corner right next to the eye doesn't get a penumbra spanning the
+ * whole screen.
+ */
+const MAX_SOURCE_RADIUS_FRACTION = 0.25;
 
 /** Wraps an angle into [0, 2π) */
 function normalizeAngle(angle: number): number {
@@ -97,7 +129,7 @@ export function computeVisibility(
   eye: Point,
   radius: number,
   occluders: readonly Occluder[],
-  { arcStep = DEFAULT_ARC_STEP }: VisibilityOptions = {},
+  { arcStep = DEFAULT_ARC_STEP, sourceRadius = 0 }: VisibilityOptions = {},
 ): VisibilitySample[] {
   const [ex, ey] = eye;
   const { edges, corners } = collectEdges(eye, radius, occluders);
@@ -129,7 +161,11 @@ export function computeVisibility(
       if (t <= EPSILON || t > radius || s < -EPSILON || s > 1 + EPSILON) {
         continue;
       }
-      hits.push({ distance: t, transmission: edge.transmission });
+      hits.push({
+        distance: t,
+        transmission: edge.transmission,
+        surface: edge,
+      });
     }
 
     if (!corner) {
@@ -141,39 +177,52 @@ export function computeVisibility(
     }
 
     // The corner's own edges only block the side of the ray they lie on
-    let lower: number | undefined;
-    let upper: number | undefined;
+    let lower: Edge | undefined;
+    let upper: Edge | undefined;
     for (const edge of corner.edges) {
       const other = edge.a === corner ? edge.b : edge.a;
       const side = dx * (other.y - corner.y) - dy * (other.x - corner.x);
       if (side > EPSILON) {
-        upper = Math.min(upper ?? 1, edge.transmission);
+        upper = pickDarker(upper, edge);
       } else if (side < -EPSILON) {
-        lower = Math.min(lower ?? 1, edge.transmission);
+        lower = pickDarker(lower, edge);
       }
     }
-    const cornerHit = (transmission: number): Hit => ({
+    const cornerHit = (edge: Edge): Hit => ({
       distance: corner.distance,
-      transmission,
+      transmission: edge.transmission,
+      surface: edge,
     });
-    if (lower !== undefined && upper !== undefined) {
-      hits.push(cornerHit(Math.min(lower, upper)));
+    if (lower && upper) {
+      hits.push(cornerHit(pickDarker(lower, upper)!));
       samples.push({
         sample: makeSample(angle, dx, dy, hits, radius),
         side: 0,
       });
-    } else if (lower !== undefined || upper !== undefined) {
+    } else if (lower || upper) {
       // A silhouette corner: the visible distance jumps here
       const open = makeSample(angle, dx, dy, hits, radius);
-      hits.push(cornerHit(lower ?? upper!));
+      hits.push(cornerHit((lower ?? upper)!));
       const blocked = makeSample(angle, dx, dy, hits, radius);
-      const [before, after] =
-        lower !== undefined ? [blocked, open] : [open, blocked];
-      if (sameCrossings(before, after)) {
-        samples.push({ sample: before, side: 0 }); // something nearer hides the corner
-      } else {
-        samples.push({ sample: before, side: -1 }, { sample: after, side: 1 });
+      if (sameCrossings(open, blocked)) {
+        samples.push({ sample: blocked, side: 0 }); // something nearer hides the corner
+        return;
       }
+      // The occluder is on the lower side, so the open side is the upper
+      // one (+90° from the ray), or the other way round
+      const openSign = lower ? 1 : -1;
+      const silhouette = makeSilhouette(
+        eye,
+        corner,
+        dx,
+        dy,
+        openSign,
+        sourceRadius,
+      );
+      open.silhouette = silhouette;
+      blocked.silhouette = silhouette;
+      const [before, after] = lower ? [blocked, open] : [open, blocked];
+      samples.push({ sample: before, side: -1 }, { sample: after, side: 1 });
     } else {
       samples.push({
         sample: makeSample(angle, dx, dy, hits, radius),
@@ -196,6 +245,43 @@ export function computeVisibility(
   return samples.map(({ sample }) => sample);
 }
 
+function pickDarker(current: Edge | undefined, edge: Edge): Edge {
+  return current && current.transmission <= edge.transmission ? current : edge;
+}
+
+/**
+ * The edges of the penumbra behind a silhouette corner: the ray through the
+ * corner from the side of the eye away from the occluder is where full
+ * shadow starts, the ray from the other side is where full light starts.
+ */
+function makeSilhouette(
+  eye: Point,
+  corner: Corner,
+  dx: number,
+  dy: number,
+  openSign: number,
+  sourceRadius: number,
+): Silhouette {
+  const offset = Math.min(
+    sourceRadius,
+    corner.distance * MAX_SOURCE_RADIUS_FRACTION,
+  );
+  // Perpendicular to the ray, toward the open side
+  const px = -dy * openSign * offset;
+  const py = dx * openSign * offset;
+  const direction = (fromX: number, fromY: number): Point => {
+    const x = corner.x - fromX;
+    const y = corner.y - fromY;
+    const length = Math.hypot(x, y) || 1;
+    return [x / length, y / length];
+  };
+  return {
+    corner: [corner.x, corner.y],
+    umbraDirection: direction(eye[0] + px, eye[1] + py),
+    litDirection: direction(eye[0] - px, eye[1] - py),
+  };
+}
+
 /** Turns the hits along a ray into crossings, stopping once no light is left */
 function makeSample(
   angle: number,
@@ -209,7 +295,11 @@ function makeSample(
   let transmission = 1;
   for (const hit of hits) {
     transmission *= hit.transmission;
-    crossings.push({ distance: hit.distance, transmission });
+    crossings.push({
+      distance: hit.distance,
+      transmission,
+      surface: hit.surface,
+    });
     if (transmission <= 0) {
       break;
     }
@@ -350,39 +440,236 @@ function binEdges(eye: Point, edges: Edge[]): Edge[][] {
 
 export interface OutlineVertex {
   point: Point;
-  /** Direction from the eye, in [0, 2π) */
-  angle: number;
   /** Distance from the eye */
   distance: number;
+  /**
+   * Unit direction in which the darkness behind this vertex extends: away
+   * from the eye, except at the ends of a shadow edge, where it is the
+   * umbra direction.
+   */
+  farDirection: Point;
+  /** Whether the edge from this vertex to the next is a shadow edge rather than a surface */
+  shadowEdgeNext: boolean;
+}
+
+export interface Outline {
+  /** The polygon, sorted by angle around the eye */
+  vertices: OutlineVertex[];
+  /** One per silhouette corner, for drawing penumbrae */
+  silhouettes: Silhouette[];
 }
 
 /**
- * The boundary of what is fully visible, as a polygon sorted by angle around
- * the eye. Consecutive duplicate points are removed. Two consecutive
- * vertices at the same angle are the ends of a shadow edge, which runs
- * straight away from the eye.
+ * The boundary of what is fully visible, as a polygon sorted by angle
+ * around the eye.
+ *
+ * Where two consecutive samples hit different surfaces that meet between
+ * them, the meeting point is added, so corners that aren't corners of any
+ * occluder (walls overlapping at a room corner) come out sharp instead of
+ * being cut off by a chord that moves with the samples.
+ *
+ * At a silhouette corner the shadow edge follows the umbra direction, so
+ * the region behind it is fully dark and the penumbra wedge can be drawn on
+ * top of what's left.
  */
 export function visibilityOutline(
   eye: Point,
   samples: readonly VisibilitySample[],
-): OutlineVertex[] {
+): Outline {
   const [ex, ey] = eye;
-  const outline: OutlineVertex[] = [];
-  for (const { angle, dx, dy, crossings } of samples) {
-    const { distance } = crossings[0];
-    const point: Point = [ex + dx * distance, ey + dy * distance];
-    const last = outline[outline.length - 1];
-    if (!last || !closeEnough(last.point, point)) {
-      outline.push({ point, angle, distance });
+  const vertices: OutlineVertex[] = [];
+  const silhouettes: Silhouette[] = [];
+  const n = samples.length;
+  if (n === 0) {
+    return { vertices, silhouettes };
+  }
+
+  const push = (point: Point, farDirection: Point, shadowEdgeNext: boolean) => {
+    const last = vertices[vertices.length - 1];
+    if (last && closeEnough(last.point, point)) {
+      return;
     }
+    vertices.push({
+      point,
+      distance: Math.hypot(point[0] - ex, point[1] - ey),
+      farDirection,
+      shadowEdgeNext,
+    });
+  };
+
+  const pointOf = ({ dx, dy, crossings }: VisibilitySample): Point => [
+    ex + dx * crossings[0].distance,
+    ey + dy * crossings[0].distance,
+  ];
+
+  // Adds the corner where the last vertex's surface meets this one's, if
+  // there is one between them
+  const joinSurfaces = (
+    previous: Surface | undefined,
+    next: Surface,
+    point: Point,
+  ) => {
+    const last = vertices[vertices.length - 1];
+    if (last && previous && previous !== next) {
+      const meeting = surfacesMeetBetween(
+        eye,
+        previous,
+        next,
+        last.point,
+        point,
+      );
+      if (meeting) {
+        push(meeting, direction(eye, meeting), false);
+      }
+    }
+  };
+
+  let lastSurface: Surface | undefined;
+  // One extra step wraps around so the last and first samples get joined too
+  for (let i = 0; i <= n; i++) {
+    const sample = samples[i % n];
+    const { silhouette } = sample;
+    const surface = sample.crossings[0].surface;
+    const point = pointOf(sample);
+
+    if (silhouette && samples[(i + 1) % n].silhouette === silhouette) {
+      // A silhouette pair: the corner, and the far end of its umbra edge
+      const partner = samples[(i + 1) % n];
+      const corner = silhouette.corner;
+      const open = closeEnough(point, corner) ? partner : sample;
+      const far = umbraFarPoint(
+        eye,
+        silhouette,
+        open.crossings[0],
+        pointOf(open),
+      );
+      const [first, second] = open === sample ? [far, corner] : [corner, far];
+      const openSurface = open.crossings[0].surface;
+      const [firstSurface, secondSurface] =
+        open === sample ? [openSurface, surface] : [surface, openSurface];
+      if (firstSurface) {
+        joinSurfaces(lastSurface, firstSurface, first);
+      }
+      if (closeEnough(first, second)) {
+        push(first, direction(eye, first), false);
+      } else {
+        push(first, silhouette.umbraDirection, true);
+        push(second, silhouette.umbraDirection, false);
+        if (i < n) {
+          silhouettes.push(silhouette);
+        }
+      }
+      lastSurface = secondSurface;
+      i++;
+      continue;
+    }
+
+    if (surface) {
+      joinSurfaces(lastSurface, surface, point);
+    }
+    push(point, [sample.dx, sample.dy], false);
+    lastSurface = surface;
   }
-  if (
-    outline.length > 1 &&
-    closeEnough(outline[0].point, outline[outline.length - 1].point)
+
+  // The wrap-around step re-added the first vertex; drop it
+  while (
+    vertices.length > 1 &&
+    closeEnough(vertices[0].point, vertices[vertices.length - 1].point)
   ) {
-    outline.pop();
+    vertices.pop();
   }
-  return outline;
+  return { vertices, silhouettes };
+}
+
+function direction(from: Point, to: Point): Point {
+  const x = to[0] - from[0];
+  const y = to[1] - from[1];
+  const length = Math.hypot(x, y) || 1;
+  return [x / length, y / length];
+}
+
+/**
+ * Where the umbra edge from a silhouette corner reaches the surface the
+ * open sample hit, clamped to that surface; the range limit if it hit
+ * nothing; or the open sample's own point if the umbra edge misses.
+ */
+function umbraFarPoint(
+  eye: Point,
+  { corner, umbraDirection: [ux, uy] }: Silhouette,
+  crossing: Crossing,
+  fallback: Point,
+): Point {
+  const [cx, cy] = corner;
+  const surface = crossing.surface;
+  if (surface) {
+    const sx = surface.bx - surface.ax;
+    const sy = surface.by - surface.ay;
+    const denominator = ux * sy - uy * sx;
+    if (Math.abs(denominator) > EPSILON) {
+      const rx = surface.ax - cx;
+      const ry = surface.ay - cy;
+      const t = (rx * sy - ry * sx) / denominator;
+      const s = Math.max(0, Math.min(1, (rx * uy - ry * ux) / denominator));
+      if (t > 0) {
+        return [surface.ax + sx * s, surface.ay + sy * s];
+      }
+    }
+    return fallback;
+  }
+  // Out to the range limit along the umbra direction
+  const radius = crossing.distance;
+  const px = cx - eye[0];
+  const py = cy - eye[1];
+  const along = px * ux + py * uy;
+  const t =
+    -along +
+    Math.sqrt(
+      Math.max(0, along * along - (px * px + py * py) + radius * radius),
+    );
+  return [cx + ux * t, cy + uy * t];
+}
+
+/**
+ * The point where two surfaces meet, if it lies on both of them and in the
+ * angular gap between two points on them.
+ */
+function surfacesMeetBetween(
+  eye: Point,
+  p: Surface,
+  q: Surface,
+  before: Point,
+  after: Point,
+): Point | undefined {
+  const px = p.bx - p.ax;
+  const py = p.by - p.ay;
+  const qx = q.bx - q.ax;
+  const qy = q.by - q.ay;
+  const denominator = px * qy - py * qx;
+  if (Math.abs(denominator) < EPSILON) {
+    return undefined;
+  }
+  const rx = q.ax - p.ax;
+  const ry = q.ay - p.ay;
+  const s = (rx * qy - ry * qx) / denominator;
+  const t = (rx * py - ry * px) / denominator;
+  const slack = 1e-6;
+  if (s < -slack || s > 1 + slack || t < -slack || t > 1 + slack) {
+    return undefined;
+  }
+  const x = p.ax + px * s;
+  const y = p.ay + py * s;
+  const vx = x - eye[0];
+  const vy = y - eye[1];
+  // Between the two: to the left of the ray to the first point and to the
+  // right of the ray to the second
+  const bx = before[0] - eye[0];
+  const by = before[1] - eye[1];
+  const ax = after[0] - eye[0];
+  const ay = after[1] - eye[1];
+  if (bx * vy - by * vx < -EPSILON || ax * vy - ay * vx > EPSILON) {
+    return undefined;
+  }
+  return [x, y];
 }
 
 function closeEnough(p: Point, q: Point): boolean {
