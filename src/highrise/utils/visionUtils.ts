@@ -30,7 +30,7 @@ export function getNearestVisibleEnemy(
 
   for (const enemy of enemies) {
     const distance = enemy.getPosition().distanceTo(human.getPosition());
-    if (distance < maxDistance) {
+    if (distance < nearestDistance) {
       const isVisible = testLineOfSight(human, enemy);
       if (isVisible) {
         nearestDistance = distance;

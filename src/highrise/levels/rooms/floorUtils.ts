@@ -1,3 +1,4 @@
+import { objectEntries } from "../../../core/util/ObjectUtils";
 import { V, V2d } from "../../../core/Vector";
 import { DecorationInfo } from "../../environment/decorations/DecorationInfo";
 import { DirectionalSprite } from "../../environment/decorations/DirectionalSprite";
@@ -7,6 +8,7 @@ import {
   decomposeDiagonal,
   DIAGONAL_DIRECTIONS,
   Direction,
+  DirectionName,
   isCardinal,
   opposite,
 } from "../../utils/directions";
@@ -88,50 +90,41 @@ export function fillFloorWithBorders(
 export function insetTile(
   originalSprite: DecorationInfo | undefined,
   directionalSprite: DirectionalSprite,
-  subDirection: keyof typeof Direction,
+  subDirection: DirectionName,
 ): DecorationInfo | undefined {
   if (!originalSprite) {
     return;
   }
-  let maybeOriginalDirection: keyof typeof Direction | undefined;
-  for (const baseDirection of Object.keys(directionalSprite.baseSprites)) {
-    if (directionalSprite.baseSprites[baseDirection] === originalSprite) {
-      maybeOriginalDirection = baseDirection;
-    }
-  }
-  const isInnerCorner = !maybeOriginalDirection;
-  if (isInnerCorner) {
-    for (const innerDirection of Object.keys(directionalSprite.insideCorners)) {
-      if (directionalSprite.insideCorners[innerDirection] === originalSprite) {
-        maybeOriginalDirection = opposite(innerDirection);
-      }
-    }
-  }
+  const { baseSprites, insideCorners } = directionalSprite;
+  const originalDirection =
+    objectEntries(baseSprites).find(([, s]) => s === originalSprite)?.[0] ??
+    opposite(
+      objectEntries(insideCorners).find(([, s]) => s === originalSprite)![0],
+    );
 
-  const originalDirection: keyof typeof Direction = maybeOriginalDirection!;
-
+  if (originalDirection === "CENTER") {
+    return baseSprites.CENTER;
+  }
   const originalV = Direction[originalDirection];
   const subV = Direction[subDirection];
-  if (originalDirection === "CENTER") {
-    return directionalSprite.baseSprites.CENTER;
-  } else if (isCardinal(originalDirection)) {
+  if (isCardinal(originalDirection)) {
     if (subV.x === originalV.x || subV.y === originalV.y) {
-      return directionalSprite.baseSprites[opposite(originalDirection)];
+      return baseSprites[opposite(originalDirection)];
     } else {
-      return directionalSprite.baseSprites[originalDirection];
+      return baseSprites[originalDirection];
     }
   } else {
     if (subDirection === originalDirection) {
-      return directionalSprite.insideCorners[opposite(originalDirection)];
+      return insideCorners[opposite(originalDirection)];
     } else if (subDirection === opposite(originalDirection)) {
-      return directionalSprite.baseSprites[originalDirection];
+      return baseSprites[originalDirection];
     } else {
       const [horizontalComponent, verticalComponent] =
         decomposeDiagonal(originalDirection);
       if (subV.x === originalV.x) {
-        return directionalSprite.baseSprites[opposite(horizontalComponent)];
+        return baseSprites[opposite(horizontalComponent)];
       } else {
-        return directionalSprite.baseSprites[opposite(verticalComponent)];
+        return baseSprites[opposite(verticalComponent)];
       }
     }
   }

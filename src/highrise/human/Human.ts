@@ -29,7 +29,6 @@ import { PhasedAction } from "../utils/PhasedAction";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
-import Flashlight from "./Flashlight";
 import HumanSprite from "./HumanSprite";
 import HumanVoice from "./HumanVoice";
 
@@ -79,7 +78,6 @@ export default class Human extends BaseEntity implements Entity {
 
     this.humanSprite = this.addChild(new HumanSprite(this));
     this.voice = this.addChild(new HumanVoice(this));
-    this.addChild(new Flashlight(this));
 
     this.body = createPointMass2D({
       motion: "dynamic",

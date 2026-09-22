@@ -38,10 +38,7 @@ export type CustomEvents = {
   // Settings
   toggleGraphicsQuality: void;
   graphicsQualityChanged: { quality: GraphicsQuality };
-  mute: void;
-  unMute: void;
   toggleMute: void;
-  setVolume: { volume: number };
   muteChanged: { muted: boolean; volume: number };
   volumeChanged: { muted: boolean; volume: number };
 };

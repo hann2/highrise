@@ -1,4 +1,4 @@
-import { ImageName, SoundName } from "../../../../resources/resources";
+import { SoundName } from "../../../../resources/resources";
 
 export interface BulletStats {
   // Amount of damage done to enemies
@@ -12,7 +12,6 @@ export interface BulletStats {
   // Sound the casing makes when it hits the ground
   dropSounds: SoundName[];
   // Texture of the casing as it's flying and hitting the ground
-  dropTexture: ImageName;
   // Bullets per shot
   bulletsPerShot: number;
 }
@@ -30,7 +29,6 @@ export const defaultBulletStats: BulletStats = {
     "casingDropBoard3",
     "casingDropBoard4",
   ],
-  dropTexture: "pistolCasing",
 };
 
 // 9mm pistol round
@@ -47,8 +45,6 @@ export const NineMil: BulletStats = {
     "casingDropBoard3",
     "casingDropBoard4",
   ],
-
-  dropTexture: "pistolCasing",
 };
 
 // .45 caliber pistol round
@@ -71,7 +67,6 @@ export const FiveFiveSix: BulletStats = {
   damage: 45,
   mass: 0.01,
   muzzleVelocity: 120,
-  dropTexture: "rifleCasing",
 };
 
 // 7.62mm rifle round for AK-47
@@ -80,7 +75,6 @@ export const SevenSixTwo: BulletStats = {
   damage: 50,
   mass: 0.016,
   muzzleVelocity: 120,
-  dropTexture: "rifleCasing",
 };
 
 // 12ga shotgun shell with 9 buckshot pellets
@@ -90,6 +84,5 @@ export const TwelveGuageBuckshot: BulletStats = {
   mass: 0.003,
   muzzleVelocity: 55,
   bulletsPerShot: 9,
-  dropTexture: "shotgunCasing",
   dropSounds: ["shotgunCasingDrop1"],
 };

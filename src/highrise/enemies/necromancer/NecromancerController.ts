@@ -1,11 +1,12 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { on } from "../../../core/entity/handler";
+import { objectEntries, objectKeys } from "../../../core/util/ObjectUtils";
 import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import Human, { isHuman } from "../../human/Human";
-import { Direction, opposite } from "../../utils/directions";
+import { Direction, DirectionName, opposite } from "../../utils/directions";
 import Necromancer from "./Necromancer";
 
 interface Zone {
@@ -13,13 +14,15 @@ interface Zone {
   dimensions: V2d;
 }
 
+type ZoneId = DirectionName | "CENTER";
+
 export default class NecromancerController
   extends BaseEntity
   implements Entity
 {
   moveTarget?: V2d;
   objective?: "FLEE" | "DEFEND" | "SURROUND" | "ATTACK";
-  zones: Record<string, Zone>;
+  zones: Record<ZoneId, Zone>;
 
   constructor(public necromancer: Necromancer) {
     super();
@@ -27,26 +30,23 @@ export default class NecromancerController
     const c = this.necromancer.arenaUpperLeftCorner;
     const [w, h] = this.necromancer.arenaDimensions;
     this.moveTarget = c.add(this.necromancer.arenaDimensions.mul(0.5));
-    this.zones = {
-      CENTER: {
-        upperRightCorner: c.add(V(w / 3, h / 3)),
-        dimensions: V(w / 3, w / 3),
-      },
+    const zoneSize = V(w / 3, h / 3);
+    const zones: Partial<Record<ZoneId, Zone>> = {
+      CENTER: { upperRightCorner: c.add(zoneSize), dimensions: zoneSize },
     };
-
-    for (const dId of Object.keys(Direction)) {
-      const d = Direction[dId];
-      const scaledDir = V((d.x * w) / 3, (d.y * h) / 3);
-      this.zones[dId] = {
-        upperRightCorner: c.add(V(w / 3, h / 3)).add(scaledDir),
-        dimensions: V(w / 3, w / 3),
+    for (const [dId, d] of objectEntries(Direction)) {
+      zones[dId] = {
+        upperRightCorner: c
+          .add(zoneSize)
+          .add(V(d.x * zoneSize.x, d.y * zoneSize.y)),
+        dimensions: zoneSize,
       };
     }
+    this.zones = zones as Record<ZoneId, Zone>;
   }
 
-  positionToZone(p: V2d): string | undefined {
-    for (const zoneId of Object.keys(this.zones)) {
-      const z = this.zones[zoneId];
+  positionToZone(p: V2d): ZoneId | undefined {
+    for (const [zoneId, z] of objectEntries(this.zones)) {
       const c1 = z.upperRightCorner;
       const c2 = z.upperRightCorner.add(z.dimensions);
       if (p.x > c1.x && p.y > c1.y && p.x < c2.x && p.y < c2.y) {
@@ -67,15 +67,15 @@ export default class NecromancerController
     }
 
     const enemies = this.getEnemiesInArena();
-    const occupiedZones: string[] = enemies
+    const occupiedZones = enemies
       .map((e) => this.positionToZone(e.getPosition()))
-      .filter((a) => !!a) as string[];
+      .filter((zone) => zone != undefined);
     const currentZone = this.positionToZone(this.necromancer.getPosition());
 
     if (!enemies.length) {
       return;
     }
-    if (!currentZone || currentZone in occupiedZones) {
+    if (!currentZone || occupiedZones.includes(currentZone)) {
       this.flee(occupiedZones);
       return;
     }
@@ -114,12 +114,11 @@ export default class NecromancerController
     }
   }
 
-  flee(occupiedZones: string[]) {
-    const unoccupiedZones = Object.keys(this.zones).filter(
-      (z) => !(z in occupiedZones),
+  flee(occupiedZones: ZoneId[]) {
+    const unoccupiedZones = objectKeys(this.zones).filter(
+      (z) => !occupiedZones.includes(z),
     );
-    const targetZoneId: string =
-      unoccupiedZones[rInteger(0, unoccupiedZones.length)];
+    const targetZoneId = unoccupiedZones[rInteger(0, unoccupiedZones.length)];
     const targetZone = this.zones[targetZoneId];
     this.moveTarget = targetZone.upperRightCorner.add(
       targetZone.dimensions.mul(0.5),

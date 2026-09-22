@@ -762,7 +762,6 @@ const sounds = {
   "wallHit4": require("url:./audio/impacts/wall-hit-4.flac"),
   "zombieBite1": require("url:./audio/impacts/zombie-bite-1.flac"),
   "zombieBite2": require("url:./audio/impacts/zombie-bite-2.flac"),
-  "glowStickCrack1": require("url:./audio/misc/glow-stick-crack-1.flac"),
   "glowStickDrop1": require("url:./audio/misc/glow-stick-drop-1.flac"),
   "glowStickDrop2": require("url:./audio/misc/glow-stick-drop-2.flac"),
   "pop1": require("url:./audio/misc/pop1.flac"),

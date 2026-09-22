@@ -17,7 +17,7 @@ export default class VolumeController extends BaseEntity implements Entity {
     super();
 
     this.muted = localStorage.getItem("muted") === "true";
-    const loadedVolume = parseInt(localStorage.getItem("volume") || "");
+    const loadedVolume = parseFloat(localStorage.getItem("volume") ?? "");
     if (!isNaN(loadedVolume) && loadedVolume >= 0) {
       this.volume = clamp(loadedVolume);
     } else {
@@ -62,23 +62,10 @@ export default class VolumeController extends BaseEntity implements Entity {
     game.masterGain.gain.value = gain;
   }
 
-  @on("mute")
-  onMute() {
-    this.muted = true;
-  }
-  @on("unMute")
-  onUnMute() {
-    this.muted = false;
-  }
   @on("toggleMute")
   onToggleMute() {
     this.muted = !this._muted;
   }
-  @on("setVolume")
-  onSetVolume({ volume }: { volume: number }) {
-    this.volume = volume;
-  }
-
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyM") {
