@@ -47,9 +47,7 @@ export default class Necromancer extends BaseEnemy {
   }
 
   makeBody(position: V2d) {
-    const body = makeSimpleEnemyBody(position, NECROMANCER_RADIUS, 40);
-    body.damping = 10;
-    return body;
+    return makeSimpleEnemyBody(position, NECROMANCER_RADIUS, 40);
   }
 
   @on("add")

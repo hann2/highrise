@@ -49,8 +49,7 @@ export default class GlowStick extends BaseEntity implements Entity {
       mass: 0.1,
       position,
       velocity,
-      damping: 1,
-      angularDamping: 1,
+      // No damping: speed is only lost on z-bounces (see onTick)
       angularVelocity: rUniform(5, 40),
       angle: rDirection(),
     });

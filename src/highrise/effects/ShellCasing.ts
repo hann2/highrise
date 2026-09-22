@@ -55,8 +55,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
       mass: 0.1,
       position,
       velocity,
-      damping: 1,
-      angularDamping: 1,
+      // No damping: speed is only lost on z-bounces (see onTick)
       angularVelocity: rUniform(MAX_SPIN / 10, MAX_SPIN),
     });
 
