@@ -11,15 +11,11 @@ import {
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
-import type { Body } from "../../core/physics/body/Body";
-import { AABB } from "../../core/physics/collision/AABB";
 import { profiler } from "../../core/util/Profiler";
 import { V2d } from "../../core/Vector";
 import { LIGHT_RESOLUTION } from "./lightingConstants";
+import { getShadowCasters } from "./occluders";
 import { getShapeCorners } from "./shapeUtils";
-
-/** Entities with this tag block light and vision */
-export const CAST_SHADOW_TAG = "cast_shadow";
 
 type Point = [number, number];
 
@@ -248,7 +244,13 @@ export class Shadows extends BaseEntity implements Entity {
       point[1] - lightY,
     ];
 
-    for (const body of this.getAffectedBodies()) {
+    const casters = getShadowCasters(
+      this.game,
+      this.lightPos,
+      this.radius,
+      this.checkDynamicBodies,
+    );
+    for (const body of casters) {
       for (const shape of body.shapes) {
         const corners = getShapeCorners(shape, body);
         const n = corners.length;
@@ -347,37 +349,6 @@ export class Shadows extends BaseEntity implements Entity {
     }
 
     return { umbras, penumbras };
-  }
-
-  // Returns the nearby bodies that cast a shadow
-  getAffectedBodies(): Body[] {
-    const center = this.lightPos;
-    const world = this.game.world;
-    const aabb = new AABB({
-      lowerBound: center.sub([this.radius, this.radius]),
-      upperBound: center.add([this.radius, this.radius]),
-    });
-    const result: Body[] = [];
-
-    // Static casters (walls) come from the broadphase hash. Asking it for
-    // moving bodies too would make it hash every dynamic body in the world
-    // for each query, and only a handful of them (doors) cast shadows.
-    for (const body of world.broadphase.aabbQuery(world, aabb, false)) {
-      if (body.owner?.tags?.includes(CAST_SHADOW_TAG)) {
-        result.push(body);
-      }
-    }
-
-    if (this.checkDynamicBodies) {
-      for (const entity of this.game.entities.getTagged(CAST_SHADOW_TAG)) {
-        const body = entity.body;
-        if (body && body.motion !== "static" && body.getAABB().overlaps(aabb)) {
-          result.push(body);
-        }
-      }
-    }
-
-    return result;
   }
 }
 

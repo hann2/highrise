@@ -12,6 +12,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - `npm run tsc` — type check. Parcel does not type check, so always run this after changes
 - `npm test` — Playwright smoke test that boots and plays the real game. Run after any non-trivial change; see `tests/CLAUDE.md`
 - `npm run test:physics` — fast node tests for the physics engine. Run after touching `src/core/physics`
+- `npm run test:vision` — fast node tests for the visibility geometry in `lighting-and-vision/visibility.ts` and `visionMesh.ts`
 - `npm run benchmark` — seeded frame time benchmark, with a CPU profile of where the loop time goes. Also runs the lighting benchmark, which measures the frame cost with lighting and/or vision turned off. Benchmarks run without vsync, so their frame intervals include GPU time
 - `npm run prettier` — format `src/`
 - `npm run generate-manifest` — regenerate `resources/resources.ts` after adding/removing assets (`npm start` does this automatically)
@@ -32,7 +33,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
   - `levels/level-generation/` — procedural generation (room placement → maze → walls → doors → closets/nubbies → entity placement); `level-templates/` define per-floor themes; `rooms/` define room templates
   - `human/`, `characters/`, `enemies/`, `weapons/`, `projectiles/`, `environment/`, `effects/`
   - `menu/` and `hud/` — screens and HUD text are Preact (`.tsx` + a plain `.css` next to them); see the UI convention below
-  - `lighting-and-vision/` — each `Light` is baked into its own render texture (re-baked only when it moves or changes), and the `LightingManager` composites the visible ones additively over the ambient color into a screen-sized texture that is multiplied over the world. `Shadows` turns nearby `cast_shadow`-tagged physics shapes into a coverage mask (umbra polygons plus penumbra wedges for a light with a source radius, accumulated additively so seams don't leak); lights erase with it, `VisionController` draws it in black to hide what the player can't see. Humans carry a `DirectionalLight` flashlight
+  - `lighting-and-vision/` — each `Light` is baked into its own render texture (re-baked only when it moves or changes), and the `LightingManager` composites the visible ones additively over the ambient color into a screen-sized texture that is multiplied over the world. Lights get their shadows from `Shadows`, which turns nearby `cast_shadow`-tagged physics shapes into a coverage mask (umbra polygons plus penumbra wedges for a light with a source radius) that the light erases with. Vision works the other way round: `visibility.ts` casts rays from the player to build the visible region as an angle-sorted polygon (pure geometry, node-tested, with per-occluder transmission so tinted glass can come later), `visionMesh.ts` turns it into a mesh that darkens everything outside it with soft penumbra edges, and `VisionController` draws that; `visibilityOf(point)` tells anyone whether the player can see a point. Humans carry a `DirectionalLight` flashlight
 - `resources/` — only assets the game ships. Everything in here is preloaded, so don't put unused files here
 - `assets/` — not shipped: `assets/source` (design files), `assets/unused` (audio/images not currently used)
 - `bin/generate-manifest.ts` — generates `resources/resources.ts`
@@ -77,7 +78,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 
 - Filters nested inside another filter render nothing if their `resolution`s differ. The stage-level damage filter in `DamagedOverlay` uses `resolution: "inherit"` for this reason.
 - Custom filters are GLSL ES 3.0 for the WebGL renderer (`damage-filter.frag`), imported as a string via Parcel's glsl transformer.
-- Rendering into textures mid-frame (`LightingManager`, `Light`, `Shadows`) uses `renderer.render({ container, target, clear })`. Pass `clearColor: [0, 0, 0, 0]` or the target is cleared to the opaque canvas background. Filters don't work inside such a pass (they size themselves to the canvas, not the target); apply them on the stage, like `VisionController`'s blur of the mask sprite.
+- Rendering into textures mid-frame (`LightingManager`, `Light`, `Shadows`) uses `renderer.render({ container, target, clear })`. Pass `clearColor: [0, 0, 0, 0]` or the target is cleared to the opaque canvas background. Filters don't work inside such a pass (they size themselves to the canvas, not the target); apply them on the stage instead, or avoid them altogether the way vision does (soft edges as mesh geometry).
 - `renderer.width`/`height` are logical pixels in Pixi 8; don't divide by `resolution` again (that bug broke Low quality, which halves the resolution).
 
 ## Misc gotchas
