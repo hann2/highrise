@@ -4,11 +4,9 @@ import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import { profiler } from "../../core/util/Profiler";
 import { V } from "../../core/Vector";
+import { LIGHT_RESOLUTION } from "./lightingConstants";
 import LightingManager from "./LightingManager";
 import { Shadows } from "./Shadows";
-
-/** Pixels per meter in the baked light textures */
-const RESOLUTION = 32;
 
 /**
  * A light that gets baked into its own texture, which the LightingManager
@@ -29,7 +27,8 @@ export default class Light extends BaseEntity implements Entity {
     public lightSprite: Sprite = new Sprite(),
     public shadowsEnabled: boolean = false,
     public shadowRadius: number = 1,
-    public softShadows: boolean = false,
+    /** Radius of the light source in meters; bigger means softer shadows, 0 means hard */
+    public sourceRadius: number = 0,
     size: number = shadowRadius * 2,
   ) {
     super();
@@ -42,7 +41,7 @@ export default class Light extends BaseEntity implements Entity {
     this.bakedTexture = RenderTexture.create({
       width: size,
       height: size,
-      resolution: RESOLUTION,
+      resolution: LIGHT_RESOLUTION,
     });
     this.bakedSprite = new Sprite(this.bakedTexture);
     this.bakedSprite.anchor.set(0.5, 0.5);
@@ -65,6 +64,10 @@ export default class Light extends BaseEntity implements Entity {
     this.lightManager = undefined;
     // These aren't registered with the renderer as entity sprites, so nothing
     // else cleans them up. The baked texture in particular is GPU memory.
+    if (this.shadows) {
+      // The shadows clean up their own sprite
+      this.container.removeChild(this.shadows.maskSprite);
+    }
     this.bakedSprite.destroy();
     this.bakedTexture.destroy(true);
     this.container.destroy({ children: true });
@@ -94,6 +97,7 @@ export default class Light extends BaseEntity implements Entity {
           container: this.container,
           target: this.bakedTexture,
           clear: true,
+          clearColor: [0, 0, 0, 0],
           transform,
         });
       });
@@ -107,10 +111,12 @@ export default class Light extends BaseEntity implements Entity {
     this.shadowsEnabled = true;
     if (!this.shadows) {
       const { x, y } = this.bakedSprite.position;
-      this.shadows = this.addChild(new Shadows(V(x, y), this.shadowRadius));
-      this.container.addChild(this.shadows.graphics);
-
-      // TODO: Make soft shadows work (this.softShadows)
+      this.shadows = this.addChild(
+        new Shadows(V(x, y), this.shadowRadius, false, this.sourceRadius),
+      );
+      // Erase the blocked fraction of the light
+      this.shadows.maskSprite.blendMode = "erase";
+      this.container.addChild(this.shadows.maskSprite);
     }
   }
 
@@ -118,7 +124,7 @@ export default class Light extends BaseEntity implements Entity {
     this.dirty = true;
     this.shadowsEnabled = false;
     if (this.shadows) {
-      this.container.removeChild(this.shadows.graphics);
+      this.container.removeChild(this.shadows.maskSprite);
       this.shadows.destroy();
       this.shadows = undefined;
     }
@@ -138,5 +144,11 @@ export default class Light extends BaseEntity implements Entity {
   setColor(value: number) {
     this.dirty = true;
     this.lightSprite.tint = value;
+  }
+
+  setSourceRadius(value: number) {
+    this.dirty = true;
+    this.sourceRadius = value;
+    this.shadows?.setSourceRadius(value);
   }
 }

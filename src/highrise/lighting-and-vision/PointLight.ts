@@ -6,9 +6,15 @@ export interface PointLightOptions {
   intensity?: number;
   color?: number;
   shadowsEnabled?: boolean;
+  /** Soft shadows with a source radius proportional to the light's radius */
   softShadows?: boolean;
+  /** Radius of the light source in meters, for soft shadows. Overrides softShadows. */
+  sourceRadius?: number;
   position?: [number, number];
 }
+
+/** Source radius as a fraction of the light radius, when softShadows is set */
+const SOFTNESS = 0.08;
 
 export class PointLight extends Light {
   constructor({
@@ -17,13 +23,14 @@ export class PointLight extends Light {
     color = 0xffffff,
     shadowsEnabled = true,
     softShadows = false,
+    sourceRadius = softShadows ? radius * SOFTNESS : 0,
     position,
   }: PointLightOptions) {
     super(
       Sprite.from("pointLight"),
       shadowsEnabled,
       radius,
-      softShadows,
+      sourceRadius,
       radius * 2,
     );
     this.lightSprite.anchor.set(0.5, 0.5);

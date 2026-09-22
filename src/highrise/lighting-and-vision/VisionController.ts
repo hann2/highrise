@@ -1,4 +1,4 @@
-import { BlurFilter, Container, Graphics, Sprite } from "pixi.js";
+import { Container, Graphics, Sprite } from "pixi.js";
 import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -15,6 +15,14 @@ import Human from "../human/Human";
 import { Shadows } from "./Shadows";
 
 export const MAX_VISION = 10; // meters
+/** How wide the "eye" is, in meters. Softens the edges of what can be seen. */
+const VISION_SOURCE_RADIUS = 0.25;
+/** Pixels per meter of the vision mask */
+const VISION_RESOLUTION: Record<GraphicsQuality, number> = {
+  [GraphicsQuality.Low]: 16,
+  [GraphicsQuality.Medium]: 32,
+  [GraphicsQuality.High]: 64,
+};
 
 export default class VisionController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -35,7 +43,9 @@ export default class VisionController extends BaseEntity implements Entity {
   constructor(private getPlayer: () => Human | undefined) {
     super();
 
-    this.shadows = this.addChild(new Shadows(V(0, 0), MAX_VISION, true));
+    this.shadows = this.addChild(
+      new Shadows(V(0, 0), MAX_VISION, true, VISION_SOURCE_RADIUS),
+    );
 
     const fog = Sprite.from("visionFog");
     fog.blendMode = "multiply";
@@ -51,7 +61,9 @@ export default class VisionController extends BaseEntity implements Entity {
       .cut();
 
     this.sprite = new Container();
-    this.sprite.addChild(this.shadows.graphics, fog, distanceShadows);
+    // Blocked areas are drawn black
+    this.shadows.maskSprite.tint = 0x000000;
+    this.sprite.addChild(this.shadows.maskSprite, fog, distanceShadows);
     this.sprite.layerName = Layer.VISION;
   }
 
@@ -64,24 +76,11 @@ export default class VisionController extends BaseEntity implements Entity {
 
   @on("graphicsQualityChanged")
   onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
-    switch (quality) {
-      case GraphicsQuality.Low: {
-        this.shadows.graphics.filters = [];
-        break;
-      }
-      case GraphicsQuality.Medium: {
-        const blurFilter = new BlurFilter({ strength: 4, quality: 1 });
-        blurFilter.repeatEdgePixels = true;
-        this.shadows.graphics.filters = [blurFilter];
-        break;
-      }
-      case GraphicsQuality.High: {
-        const blurFilter = new BlurFilter({ strength: 8, quality: 4 });
-        blurFilter.repeatEdgePixels = true;
-        this.shadows.graphics.filters = [blurFilter];
-        break;
-      }
-    }
+    // Soft edges cost a few extra triangles per wall, so only skip them on Low
+    this.shadows.setSourceRadius(
+      quality === GraphicsQuality.Low ? 0 : VISION_SOURCE_RADIUS,
+    );
+    this.shadows.setResolution(VISION_RESOLUTION[quality]);
   }
 
   @on("render")
@@ -94,6 +93,7 @@ export default class VisionController extends BaseEntity implements Entity {
       const position = player.getPosition();
       this.sprite.position.copyFrom(position);
       this.shadows.setPosition(position);
+      // Doors can move without the player moving, so always rebuild
       this.shadows.forceUpdate();
     }
   }
