@@ -12,7 +12,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - `npm run tsc` — type check. Parcel does not type check, so always run this after changes
 - `npm test` — Playwright smoke test that boots and plays the real game. Run after any non-trivial change; see `tests/CLAUDE.md`
 - `npm run test:physics` — fast node tests for the physics engine. Run after touching `src/core/physics`
-- `npm run benchmark` — seeded frame time benchmark, with a CPU profile of where the loop time goes
+- `npm run benchmark` — seeded frame time benchmark, with a CPU profile of where the loop time goes. Also runs the lighting benchmark, which measures the frame cost with lighting and/or vision turned off. Benchmarks run without vsync, so their frame intervals include GPU time
 - `npm run prettier` — format `src/`
 - `npm run generate-manifest` — regenerate `resources/resources.ts` after adding/removing assets (`npm start` does this automatically)
 
@@ -30,7 +30,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
   - `controllers/` — long-lived entities driving game flow (`GameController`, `LevelController`, ...)
   - `levels/level-generation/` — procedural generation (room placement → maze → walls → doors → closets/nubbies → entity placement); `level-templates/` define per-floor themes; `rooms/` define room templates
   - `human/`, `characters/`, `enemies/`, `weapons/`, `projectiles/`, `environment/`, `effects/`, `hud/`, `menu/`
-  - `lighting-and-vision/` — lights are baked into render textures (with shadow polygons cast from physics shapes), composited additively into a lighting texture, which is multiplied over the world. `VisionController` masks what the player can't see
+  - `lighting-and-vision/` — each `Light` is baked into its own render texture (re-baked only when it moves or changes), and the `LightingManager` composites the visible ones additively over the ambient color into a screen-sized texture that is multiplied over the world. `Shadows` turns nearby `cast_shadow`-tagged physics shapes into a coverage mask (umbra polygons plus penumbra wedges for a light with a source radius, accumulated additively so seams don't leak); lights erase with it, `VisionController` draws it in black to hide what the player can't see. Humans carry a `DirectionalLight` flashlight
 - `resources/` — only assets the game ships. Everything in here is preloaded, so don't put unused files here
 - `assets/` — not shipped: `assets/source` (design files), `assets/unused` (audio/images not currently used)
 - `bin/generate-manifest.ts` — generates `resources/resources.ts`
