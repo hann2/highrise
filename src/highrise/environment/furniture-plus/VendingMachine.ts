@@ -60,7 +60,7 @@ export default class VendingMachine
     this.lightSprite.rotation = rotation;
 
     this.light = this.addChild(new Light(this.lightSprite, false, 2));
-    this.light.setPosition(position.add([0.25, 0.25])); // WTF, why?
+    this.light.setPosition(position);
 
     this.body = createRigid2D({
       motion: "static",
