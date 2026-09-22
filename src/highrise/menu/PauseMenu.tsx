@@ -29,7 +29,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
       return null;
     }
     const game = this.game;
-    const resumeButton = game.io.usingGamepad ? "START" : "P";
+    const resumeButton = game.io.usingGamepad ? "START" : "ESC";
     return (
       <div className="menu-screen">
         <div className="pause-menu__background" />
@@ -57,7 +57,22 @@ export default class PauseMenu extends ReactEntity implements Entity {
   onAdd(data: { game: Game }) {
     this.visible = data.game.paused;
     super.onAdd(data);
+    document.addEventListener("fullscreenchange", this.onFullscreenChange);
   }
+
+  @on("destroy")
+  onDestroy(data: { game: Game }) {
+    document.removeEventListener("fullscreenchange", this.onFullscreenChange);
+    super.onDestroy(data);
+  }
+
+  // Browsers reserve Escape in fullscreen for leaving it and don't deliver the
+  // key press, so leaving fullscreen pauses too.
+  private onFullscreenChange = () => {
+    if (!document.fullscreenElement) {
+      this.game.pause();
+    }
+  };
 
   @on("pause")
   onPause() {
@@ -71,7 +86,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
 
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
-    if (key === "KeyP") {
+    if (key === "Escape") {
       this.game.togglePause();
     }
   }

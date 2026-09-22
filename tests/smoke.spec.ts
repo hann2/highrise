@@ -202,10 +202,10 @@ test("game boots, plays, and changes levels without errors", async ({
   expectNoIssues(issues);
 
   // --- Pausing stops the clock ---
-  await page.keyboard.press("KeyP");
+  await page.keyboard.press("Escape");
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
   await page.screenshot({ path: "tests/output/paused.png" });
-  await page.keyboard.press("KeyP");
+  await page.keyboard.press("Escape");
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
 
   // --- Level transitions work (KeyL is a dev cheat) ---
