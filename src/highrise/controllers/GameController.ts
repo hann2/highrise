@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { Persistence } from "../constants/constants";
 import PartyManager from "../environment/PartyManager";
 import { AmmoOverlay } from "../hud/AmmoOverlay";
@@ -17,12 +18,14 @@ import LevelController from "./LevelController";
 export class GameController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Permanent;
 
+  @on("goToMainMenu")
   onGoToMainMenu() {
     const game = this.game!;
     game.clearScene(Persistence.Menu);
     game.addEntity(new MainMenu());
   }
 
+  @on("newGame")
   onNewGame() {
     const game = this.game!;
     const partyManager = game.addEntity(new PartyManager());
@@ -39,6 +42,7 @@ export class GameController extends BaseEntity implements Entity {
     );
   }
 
+  @on("gameOver")
   async onGameOver({ victory }: { victory: boolean }) {
     const game = this.game!;
 

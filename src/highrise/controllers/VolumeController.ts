@@ -1,14 +1,12 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
 import { clamp } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
 
-export const VOLUME_CONTROLLER_ID = "volume_controller";
-
 export default class VolumeController extends BaseEntity implements Entity {
-  id = VOLUME_CONTROLLER_ID;
   pausable = false;
   persistenceLevel = Persistence.Permanent;
 
@@ -58,24 +56,30 @@ export default class VolumeController extends BaseEntity implements Entity {
     }
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     const gain = this._muted ? 0 : this._volume;
     game.masterGain.gain.value = gain;
   }
 
+  @on("mute")
   onMute() {
     this.muted = true;
   }
+  @on("unMute")
   onUnMute() {
     this.muted = false;
   }
+  @on("toggleMute")
   onToggleMute() {
     this.muted = !this._muted;
   }
+  @on("setVolume")
   onSetVolume({ volume }: { volume: number }) {
     this.volume = volume;
   }
 
+  @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyM") {
       this.muted = !this._muted;
@@ -84,5 +88,5 @@ export default class VolumeController extends BaseEntity implements Entity {
 }
 
 export function getVolumeController(game: Game): VolumeController {
-  return game.entities.getById(VOLUME_CONTROLLER_ID) as VolumeController;
+  return game.entities.getSingleton(VolumeController);
 }

@@ -3,6 +3,7 @@ import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { rDirection, rSign, rUniform } from "../../core/util/Random";
@@ -72,6 +73,7 @@ export default class Phlegm extends Projectile implements Entity {
     );
   }
 
+  @on("tick")
   onTick(dt: number) {
     this.zVelocity += -9.8 * dt;
     this.z = clampUp(this.z + this.zVelocity * dt);
@@ -96,6 +98,7 @@ export default class Phlegm extends Projectile implements Entity {
     return true;
   }
 
+  @on("render")
   onRender(dt: number) {
     this.mainSprite.position.copyFrom(this.renderPosition);
     this.glowSprite.position.copyFrom(this.renderPosition);

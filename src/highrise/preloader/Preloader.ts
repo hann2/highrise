@@ -1,4 +1,5 @@
 import { RESOURCES } from "../../../resources/resources";
+import { on } from "../../core/entity/handler";
 import CorePreloader, {
   PreloaderProgress,
 } from "../../core/resources/Preloader";
@@ -9,6 +10,7 @@ export default class Preloader extends CorePreloader {
     super(RESOURCES, (progress) => updateLoadingScreen(progress));
   }
 
+  @on("destroy")
   onDestroy() {
     document.getElementById("preloader")?.remove();
   }

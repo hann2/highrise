@@ -2,6 +2,7 @@ import { Container, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rDirection, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
@@ -35,6 +36,7 @@ export default class WallImpact extends BaseEntity implements Entity {
     }
   }
 
+  @on("tick")
   onTick(dt: number) {
     for (const particle of this.particles) {
       particle.position.iaddScaled(particle.velocity, dt);
@@ -48,6 +50,7 @@ export default class WallImpact extends BaseEntity implements Entity {
     }
   }
 
+  @on("render")
   onRender() {
     for (const { position, color, radius, alpha, sprite } of this.particles) {
       sprite.position.copyFrom(position);

@@ -13,8 +13,6 @@ class Cell {
 
 // TODO: EVERYTHING IN THIS FILE
 export default class LevelGridMap extends BaseEntity implements Entity {
-  id = "level_grid_map";
-
   private cells = new Grid<Cell>();
 
   /**

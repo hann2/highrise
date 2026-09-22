@@ -6,6 +6,7 @@ import { PhysicsMaterials } from "../../config/PhysicsMaterials";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import type { Body } from "../../core/physics/body/Body";
 import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Capsule } from "../../core/physics/shapes/Capsule";
@@ -71,6 +72,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.bounceSounds = new ShuffleRing(sounds);
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (this.z < 0) {
       this.z = 0;
@@ -98,6 +100,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     }
   }
 
+  @on("render")
   onRender() {
     this.sprite.position.copyFrom(this.body.position);
     this.sprite.rotation = this.body.angle;
@@ -106,6 +109,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.sprite.scale.set((SIZE / this.sprite.texture.width) * scale);
   }
 
+  @on("impact")
   onImpact() {
     const gain = clamp(this.body.velocity.magnitude / 10) * 0.5;
     const sound = this.bounceSounds.getNext();
@@ -136,6 +140,7 @@ class StaticShellCasing extends BaseEntity {
     sprite.layerName = Layer.FLOOR_STUFF;
   }
 
+  @on("add")
   async onAdd() {
     await this.wait(120);
     await this.wait(10, (dt, t) => {

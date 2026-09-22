@@ -28,3 +28,9 @@ export type IoEvents = {
 };
 
 export default interface IOEventHandler extends EventHandler<IoEvents> {}
+
+/** What the IOManager uses to send its events into the game */
+export type IoEventDispatch = <E extends keyof IoEvents>(
+  event: E,
+  data: IoEvents[E],
+) => void;

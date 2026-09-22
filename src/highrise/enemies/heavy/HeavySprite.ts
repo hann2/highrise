@@ -1,3 +1,4 @@
+import { on } from "../../../core/entity/handler";
 import {
   angleDelta,
   clamp,
@@ -81,6 +82,7 @@ export default class HeavySprite extends BodySprite {
     return p * WIGGLE_AMOUNT;
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (!this.heavy.isStunned) {
       const moveSpeed = clamp(this.heavy.body.velocity.magnitude);

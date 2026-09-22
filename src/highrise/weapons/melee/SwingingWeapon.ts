@@ -4,6 +4,7 @@ import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
+import { on } from "../../../core/entity/handler";
 import { Body } from "../../../core/physics/body/Body";
 import { createRigid2D } from "../../../core/physics/body/bodyFactories";
 import { Box } from "../../../core/physics/shapes/Box";
@@ -59,6 +60,7 @@ export default class SwingingWeapon extends BaseEntity {
     this.body.addShape(shape, offset);
   }
 
+  @on("add")
   async onAdd() {
     this.weapon.playSound("windup", this.holder.getPosition());
     await this.wait(this.weapon.swing.windUpDuration, undefined, "windup");
@@ -67,6 +69,7 @@ export default class SwingingWeapon extends BaseEntity {
     this.weapon.playSound("winddown", this.holder.getPosition());
   }
 
+  @on("render")
   onRender() {
     const [position, angle] = this.getWeaponPositionAndAngle();
     this.sprite.position.copyFrom(position);
@@ -95,6 +98,7 @@ export default class SwingingWeapon extends BaseEntity {
     }
   }
 
+  @on("tick")
   onTick(dt: number) {
     const [position, angle] = this.getWeaponPositionAndAngle();
     this.body.position.set(position);
@@ -128,6 +132,7 @@ export default class SwingingWeapon extends BaseEntity {
     return [worldPosition, worldAngle];
   }
 
+  @on("beginContact")
   onBeginContact({ other }: { other?: Entity }) {
     if (other !== this.holder && isHittable(other)) {
       other.hitByMelee(this, this.getPosition());

@@ -1,5 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { on } from "../../../core/entity/handler";
 import { rBool, rInteger } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
@@ -54,6 +55,7 @@ export default class NecromancerController
     }
   }
 
+  @on("tick")
   onTick() {
     if (this.objective === "FLEE") {
       if (this.atMoveTarget()) {

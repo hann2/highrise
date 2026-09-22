@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { reseedIfSeeded } from "../../core/util/Random";
 import { Persistence } from "../constants/constants";
@@ -17,10 +18,10 @@ const FORCE_TUTORIAL = process.env.NODE_ENV === "development" && false;
 
 // High level control flow for levels and the party
 export default class LevelController extends BaseEntity implements Entity {
-  id = "level_controller";
   persistenceLevel = Persistence.Game;
   currentLevel: number = 0;
 
+  @on("add")
   async onAdd() {
     this.currentLevel =
       localStorage.getItem("tutorialComplete") != "true" || FORCE_TUTORIAL
@@ -35,6 +36,7 @@ export default class LevelController extends BaseEntity implements Entity {
   }
 
   // We just got to the exit
+  @on("levelComplete")
   async onLevelComplete() {
     if (this.currentLevel === 0) {
       localStorage.setItem("tutorialComplete", "true");
@@ -58,11 +60,13 @@ export default class LevelController extends BaseEntity implements Entity {
   }
 
   // We just started a new level
+  @on("startLevel")
   onStartLevel({ level }: { level: Level }) {
     this.game!.addEntities(...level.entities);
   }
 
   // The whole party is dead
+  @on("partyDead")
   onPartyDead() {
     this.game?.dispatch("gameOver", { victory: false });
   }
@@ -75,6 +79,5 @@ export default class LevelController extends BaseEntity implements Entity {
 }
 
 export function getCurrentLevelNumber(game: Game): number {
-  return (game.entities.getById("level_controller") as LevelController)
-    .currentLevel;
+  return game.entities.getSingleton(LevelController).currentLevel;
 }

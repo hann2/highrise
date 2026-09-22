@@ -9,6 +9,7 @@ import type { Spring } from "../physics/springs/Spring";
 import { shapeFromDef } from "../physics/utils/ShapeUtils";
 import Entity, { GameEventMap } from "./Entity";
 import { GameSprite, spriteFromDef } from "./GameSprite";
+import { on } from "./handler";
 
 /**
  * Base class for lots of stuff in the game.
@@ -248,6 +249,7 @@ class Timer extends BaseEntity implements Entity {
     this.duringEffect = duringEffect;
   }
 
+  @on("tick")
   onTick(dt: number) {
     this.timeRemaining -= dt;
     const t = clamp(1.0 - this.timeRemaining / this.delay);
@@ -276,6 +278,7 @@ class RenderTimer extends BaseEntity implements Entity {
     this.duringEffect = duringEffect;
   }
 
+  @on("render")
   onRender(dt: number) {
     this.timeRemaining -= dt;
     const t = clamp(1.0 - this.timeRemaining / this.delay);

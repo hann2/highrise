@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { fontName } from "../../core/resources/resourceUtils";
 import { V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
@@ -45,6 +46,7 @@ export default class GameOverScreen extends BaseEntity implements Entity {
     this.sprite.addChild(this.titleText);
   }
 
+  @on("add")
   async onAdd() {
     this.sprite.alpha = 0;
     await this.wait(FADE_IN_TIME, (_, t) => {
@@ -59,6 +61,7 @@ export default class GameOverScreen extends BaseEntity implements Entity {
     this.destroy();
   }
 
+  @on("resize")
   onResize({ size: [width, height] }: { size: V2d }) {
     this.titleText.position.set(width / 2, height / 2);
     this.background.width = width;

@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { degToRad } from "../../core/util/MathUtil";
 import { DirectionalLight } from "../lighting-and-vision/DirectionalLight";
 import { PointLight } from "../lighting-and-vision/PointLight";
@@ -19,6 +20,7 @@ export default class Flashlight extends BaseEntity implements Entity {
     // );
   }
 
+  @on("afterPhysics")
   onAfterPhysics() {
     const { position, angle } = this.human.body;
     this.pointLight?.setPosition(position);

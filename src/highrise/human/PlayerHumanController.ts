@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { V } from "../../core/Vector";
@@ -14,6 +15,7 @@ export default class PlayerHumanController
   implements Entity
 {
   persistenceLevel = Persistence.Game;
+  tickLayer = "input" as const;
 
   constructor(private getPlayer: () => Human) {
     super();
@@ -24,10 +26,12 @@ export default class PlayerHumanController
     return this.getPlayer();
   }
 
+  @on("mouseDown")
   onMouseDown() {
     this.human.useWeapon();
   }
 
+  @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
     switch (button) {
       case ControllerButton.RT:
@@ -48,6 +52,7 @@ export default class PlayerHumanController
     }
   }
 
+  @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     switch (key) {
       case "KeyE":
@@ -65,6 +70,7 @@ export default class PlayerHumanController
     }
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (this.human.isDestroyed) {
       this.destroy();

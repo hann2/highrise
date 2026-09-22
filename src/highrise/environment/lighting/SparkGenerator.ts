@@ -1,5 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { on } from "../../../core/entity/handler";
 import { clampUp, polarToVec } from "../../../core/util/MathUtil";
 import { rDirection, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
@@ -22,6 +23,7 @@ export class SparkGenerator extends BaseEntity implements Entity {
     super();
   }
 
+  @on("tick")
   onTick(dt: number) {
     const sparkMaxLifetime = 0.8;
     const sparkFrequency =

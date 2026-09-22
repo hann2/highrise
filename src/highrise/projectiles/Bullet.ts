@@ -3,6 +3,7 @@ import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { isHittable } from "../environment/Hittable";
@@ -61,6 +62,7 @@ export default class Bullet extends Projectile implements Entity {
     }
   }
 
+  @on("render")
   onRender(dt: number) {
     const endPoint = this.getRelativeEndPoint(dt);
 

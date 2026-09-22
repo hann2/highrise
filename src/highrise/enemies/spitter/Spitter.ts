@@ -1,3 +1,4 @@
+import { on } from "../../../core/entity/handler";
 import { rDirection, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { SPITTER_SOUNDS } from "../../constants/constants";
@@ -64,6 +65,7 @@ export default class Spitter extends BaseEnemy {
     });
   }
 
+  @on("tick")
   onTick(dt: number) {
     super.onTick(dt);
 

@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { Camera2d } from "../../core/graphics/Camera2d";
 import PositionalSoundListener from "../../core/sound/PositionalSoundListener";
 import { V } from "../../core/Vector";
@@ -11,6 +12,7 @@ const FOLLOW_STIFFNESS = 10;
 
 export default class CameraController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
+  tickLayer = "camera" as const;
   private shouldCut = true;
 
   constructor(
@@ -20,15 +22,18 @@ export default class CameraController extends BaseEntity implements Entity {
     super();
   }
 
+  @on("add")
   onAdd() {
     this.camera.z = 65;
   }
 
   /** Cut straight to the player instead of panning across the new level */
+  @on("startLevel")
   onStartLevel() {
     this.shouldCut = true;
   }
 
+  @on("tick")
   onTick() {
     const player = this.getPlayer();
     if (player && this.shouldCut) {
@@ -47,6 +52,7 @@ export default class CameraController extends BaseEntity implements Entity {
     }
   }
 
+  @on("render")
   onRender() {
     this.getListener().setPosition(this.camera.position);
 
@@ -59,11 +65,10 @@ export default class CameraController extends BaseEntity implements Entity {
   }
 
   getListener(): PositionalSoundListener {
-    return this.game!.entities.getById(
-      "positional_sound_listener",
-    ) as PositionalSoundListener;
+    return this.game!.entities.getSingleton(PositionalSoundListener);
   }
 
+  @on("inputDeviceChange")
   onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     if (usingGamepad) {
       this.game?.renderer.hideCursor();

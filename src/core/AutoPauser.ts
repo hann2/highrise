@@ -1,5 +1,6 @@
 import BaseEntity from "./entity/BaseEntity";
 import Entity from "./entity/Entity";
+import { on } from "./entity/handler";
 
 /** Pauses and unpauses the game when visibility is lost. */
 export default class AutoPauser extends BaseEntity implements Entity {
@@ -8,10 +9,12 @@ export default class AutoPauser extends BaseEntity implements Entity {
 
   autoPaused: boolean = false;
 
+  @on("add")
   onAdd() {
     document.addEventListener("visibilitychange", this.onVisibilityChange);
   }
 
+  @on("destroy")
   onDestroy() {
     document.removeEventListener("visibilitychange", this.onVisibilityChange);
   }

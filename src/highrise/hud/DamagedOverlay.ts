@@ -10,6 +10,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { smoothStep } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
@@ -46,26 +47,31 @@ export class DamagedOverlay extends BaseEntity implements Entity {
     });
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     game.renderer.addStageFilter(this.colorFilter);
   }
 
+  @on("destroy")
   onDestroy({ game }: { game: Game }) {
     game.renderer.removeStageFilter(this.colorFilter);
   }
 
+  @on("humanInjured")
   onHumanInjured({ human }: { human: Human }) {
     if (human === this.getPlayer()) {
       this.flash(0xff0000, 0, 0.4);
     }
   }
 
+  @on("humanHealed")
   onHumanHealed({ human }: { human: Human }) {
     if (human === this.getPlayer()) {
       this.flash(0x00ff00, 0.0, 0.8);
     }
   }
 
+  @on("render")
   onRender() {
     const human = this.getPlayer();
     if (human && !human.isDestroyed) {

@@ -3,6 +3,7 @@ import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
+import { on } from "../../../core/entity/handler";
 import Necromancer, { NECROMANCER_RADIUS } from "./Necromancer";
 
 interface BodySprites {
@@ -38,6 +39,7 @@ export default class NecromancerSprite extends BaseEntity implements Entity {
     }
   }
 
+  @on("render")
   onRender() {
     const { body } = this.necromancer;
     this.sprite.position.copyFrom(body.position);

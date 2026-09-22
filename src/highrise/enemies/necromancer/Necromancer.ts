@@ -1,3 +1,4 @@
+import { on } from "../../../core/entity/handler";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { normalizeAngle, polarToVec } from "../../../core/util/MathUtil";
 import { choose, rDirection, rNormal } from "../../../core/util/Random";
@@ -51,6 +52,7 @@ export default class Necromancer extends BaseEnemy {
     return body;
   }
 
+  @on("add")
   onAdd() {
     super.onAdd();
 

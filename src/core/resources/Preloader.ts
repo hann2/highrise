@@ -1,5 +1,6 @@
 import * as Pixi from "pixi.js";
 import { SoundName } from "../../../resources/resources";
+import { on } from "../entity/handler";
 import Game from "../Game";
 import BaseEntity from "../entity/BaseEntity";
 import Entity from "../entity/Entity";
@@ -52,6 +53,7 @@ export default class Preloader extends BaseEntity implements Entity {
     });
   }
 
+  @on("add")
   async onAdd({ game }: { game: Game }) {
     await Promise.all([
       this.loadFonts(),

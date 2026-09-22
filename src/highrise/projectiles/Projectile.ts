@@ -1,6 +1,7 @@
 import { CollisionGroups } from "../../config/CollisionGroups";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { V2d } from "../../core/Vector";
 
@@ -27,6 +28,7 @@ export class Projectile extends BaseEntity implements Entity {
     );
   }
 
+  @on("add")
   async onAdd() {
     // Make sure we don't have any infinitely living bullets around
     await this.wait(MAX_LIFESPAN, undefined, "life_timer");
@@ -37,6 +39,7 @@ export class Projectile extends BaseEntity implements Entity {
     return 0.0;
   }
 
+  @on("tick")
   onTick(dt: number) {
     this.velocity.imul(Math.exp(-dt * this.getFriction()));
 

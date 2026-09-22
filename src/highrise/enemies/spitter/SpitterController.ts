@@ -1,6 +1,7 @@
 import { CollisionGroups } from "../../../config/CollisionGroups";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { on } from "../../../core/entity/handler";
 import { choose, rBool, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
@@ -21,6 +22,7 @@ export default class SpitterController extends BaseEntity implements Entity {
     super();
   }
 
+  @on("tick")
   onTick(dt: number) {
     switch (this.objective) {
       case "ATTACK":

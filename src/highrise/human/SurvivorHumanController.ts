@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { rBool, rUniform } from "../../core/util/Random";
 import { BaseEnemy } from "../enemies/base/Enemy";
 import { getPartyLeader } from "../environment/PartyManager";
@@ -63,6 +64,7 @@ export default class SurvivorHumanController
     return distance < JOIN_DISTANCE && testLineOfSight(this.human, leader);
   }
 
+  @on("tick")
   onTick(dt: number) {
     // If our human dies/gets removed, we shouldn't be here anymore
     if (!this.human.game) {

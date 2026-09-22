@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
 import { fontName } from "../../core/resources/resourceUtils";
@@ -83,14 +84,17 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     }
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     this.sprite.y = game.renderer.getHeight();
   }
 
+  @on("resize")
   onResize() {
     this.sprite.x = this.game!.renderer.getWidth() / 2;
   }
 
+  @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "Escape") {
       this.backToMenu();
@@ -102,6 +106,7 @@ export default class CreditsScreen extends BaseEntity implements Entity {
     this.destroy();
   }
 
+  @on("render")
   onRender() {
     let speed = SCROLL_SPEED;
     if (this.game!.io.isKeyDown("Space")) {

@@ -3,6 +3,7 @@ import { LayerName } from "../../config/layers";
 import BaseEntity from "../entity/BaseEntity";
 import Entity from "../entity/Entity";
 import { GameSprite } from "../entity/GameSprite";
+import { on } from "../entity/handler";
 
 const SMOOTHING = 0.95;
 
@@ -23,10 +24,12 @@ export default class FPSMeter extends BaseEntity implements Entity {
     this.sprite.layerName = layerName;
   }
 
+  @on("add")
   onAdd() {
     this.averageDuration = 1 / 60;
   }
 
+  @on("render")
   onRender() {
     const now = performance.now();
     const duration = now - this.lastUpdate;

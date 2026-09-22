@@ -1,4 +1,5 @@
 import type Entity from "../../../core/entity/Entity";
+import { on } from "../../../core/entity/handler";
 import type { WithOwner } from "../../../core/entity/WithOwner";
 import type { Body } from "../../../core/physics/body/Body";
 import { AimSpring } from "../../../core/physics/springs/AimSpring";
@@ -73,6 +74,7 @@ export class BaseEnemy extends Creature implements Hittable {
     this.walkSpring = this.addChild(new WalkSpring(this.body));
   }
 
+  @on("add")
   onAdd() {
     this.voice = this.addChild(this.makeVoice());
     this.aimSpring = new AimSpring(this.body);
@@ -106,6 +108,7 @@ export class BaseEnemy extends Creature implements Hittable {
     }
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (this.stunnedTimer > 0) {
       this.stunnedTimer -= dt;

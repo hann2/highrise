@@ -1,5 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { on } from "../../../core/entity/handler";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { V2d } from "../../../core/Vector";
 import {
@@ -25,6 +26,7 @@ export class OverheadLight extends BaseEntity implements Entity {
   }
 
   /** A light switch somewhere got flipped */
+  @on("lightsOn")
   onLightsOn({ position: lightPosition }: { position: V2d }) {
     if (this.isOn) {
       return;

@@ -1,3 +1,4 @@
+import { on } from "../../../core/entity/handler";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { rDirection, rInteger, rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
@@ -35,6 +36,7 @@ export default class Heavy extends BaseEnemy {
     this.addChild(new HeavySprite(this));
   }
 
+  @on("add")
   onAdd() {
     super.onAdd();
     this.aimSpring.stiffness = 30;

@@ -4,6 +4,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { PointLight } from "../lighting-and-vision/PointLight";
@@ -48,6 +49,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.EMISSIVES;
   }
 
+  @on("add")
   onAdd() {
     this.light = this.addChild(
       new PointLight({
@@ -61,6 +63,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     );
   }
 
+  @on("tick")
   onTick(dt: number) {
     const t = this.timeLeft / DURATION;
     this.light?.setIntensity(0.9 * t);

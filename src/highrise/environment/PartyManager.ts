@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { choose, rBool } from "../../core/util/Random";
 import { Persistence } from "../constants/constants";
@@ -16,11 +17,11 @@ interface PartyEvent {
 // Keeps track of who's in the party
 export default class PartyManager extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
-  id = "party_manager";
 
   partyMembers: Human[] = [];
   leader!: Human;
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     game.entities.addFilter(isAllyController);
 
@@ -29,6 +30,7 @@ export default class PartyManager extends BaseEntity implements Entity {
     this.onAddToParty({ human: this.leader });
   }
 
+  @on("addToParty")
   onAddToParty({
     human,
     survivorController,
@@ -44,11 +46,13 @@ export default class PartyManager extends BaseEntity implements Entity {
     }
   }
 
+  @on("levelComplete")
   onLevelComplete() {
     const speaker = choose(...this.partyMembers);
     speaker.voice.speak("relief");
   }
 
+  @on("startLevel")
   async onStartLevel({ level }: { level: Level }) {
     const spawnLocations = level.entities.filter(
       (entity): entity is SpawnLocation => entity instanceof SpawnLocation,
@@ -65,6 +69,7 @@ export default class PartyManager extends BaseEntity implements Entity {
     speaker.voice.speak(choose("newLevel", "misc"));
   }
 
+  @on("humanDied")
   onHumanDied({ human }: PartyEvent) {
     const indexInParty = this.partyMembers.indexOf(human);
     if (indexInParty >= 0) {
@@ -79,6 +84,7 @@ export default class PartyManager extends BaseEntity implements Entity {
     }
   }
 
+  @on("zombieDied")
   async onZombieDied({ killer }: { killer?: Human }) {
     if (killer && this.hasMember(killer) && rBool(0.2)) {
       await this.wait(0.5);
@@ -103,7 +109,7 @@ export default class PartyManager extends BaseEntity implements Entity {
 }
 
 export function getPartyManager(game?: Game): PartyManager | undefined {
-  return game?.entities.getById("party_manager") as PartyManager;
+  return game?.entities.getByConstructor(PartyManager)[0];
 }
 
 export function getPartyLeader(game?: Game): Human | undefined {

@@ -1,4 +1,5 @@
 import { Sprite } from "pixi.js";
+import { on } from "../../core/entity/handler";
 import { lerp, smoothStep, stepToward } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
@@ -24,6 +25,7 @@ export default class HumanSprite extends BodySprite {
     super(human.character.textures, HUMAN_RADIUS);
   }
 
+  @on("tick")
   onTick(dt: number) {
     const { body } = this.human;
     this.sprite.position.copyFrom(body.position);
@@ -48,6 +50,7 @@ export default class HumanSprite extends BodySprite {
     );
   }
 
+  @on("render")
   onRender(dt: number) {
     super.onRender(dt);
 

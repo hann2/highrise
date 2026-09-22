@@ -24,7 +24,10 @@ export async function loadGame(page: Page, seed: number) {
   });
   // Main menu only shows up once preloading is done
   await page.waitForFunction(
-    () => window.DEBUG.game!.entities.getById("main_menu") != null,
+    () =>
+      [...window.DEBUG.game!.entities.all].some(
+        (e) => e.constructor.name === "MainMenu",
+      ),
     null,
     { timeout: 120000 },
   );
@@ -48,8 +51,8 @@ export async function startGame(page: Page) {
 
 export async function getLeaderPosition(page: Page): Promise<[number, number]> {
   return page.evaluate(() => {
-    const partyManager = window.DEBUG.game!.entities.getById(
-      "party_manager",
+    const partyManager = [...window.DEBUG.game!.entities.all].find(
+      (e) => e.constructor.name === "PartyManager",
     ) as any;
     const [x, y] = partyManager.leader.body.position;
     return [x, y] as [number, number];
@@ -59,8 +62,11 @@ export async function getLeaderPosition(page: Page): Promise<[number, number]> {
 export async function getLevelNumber(page: Page): Promise<number> {
   return page.evaluate(
     () =>
-      (window.DEBUG.game!.entities.getById("level_controller") as any)
-        .currentLevel,
+      (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "LevelController",
+        ) as any
+      ).currentLevel,
   );
 }
 

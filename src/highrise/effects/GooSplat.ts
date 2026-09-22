@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite, loadGameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { darken } from "../../core/util/ColorUtils";
 import { smoothStep } from "../../core/util/MathUtil";
 import { rUniform } from "../../core/util/Random";
@@ -43,6 +44,7 @@ export default class GooSplat extends BaseEntity implements Entity {
     this.sprites = [this.mainSprite, this.glowSprite];
   }
 
+  @on("add")
   async onAdd() {
     await this.wait(10, (_, t) => {
       const alpha = smoothStep(1.0 - t);

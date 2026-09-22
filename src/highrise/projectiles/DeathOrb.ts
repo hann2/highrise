@@ -3,6 +3,7 @@ import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { getBlobPair } from "../effects/Splat";
@@ -50,6 +51,7 @@ export default class DeathOrb extends Projectile implements Entity {
     return true;
   }
 
+  @on("render")
   onRender(dt: number) {
     this.sprite.position.copyFrom(this.renderPosition);
     this.sprite.rotation += dt * 1.5;

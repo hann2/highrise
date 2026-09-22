@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { choose, rUniform } from "../../core/util/Random";
 import { BLOB_TEXTURES } from "./Splat";
 
@@ -21,6 +22,7 @@ export default class BulletHole extends BaseEntity implements Entity {
     this.sprite.tint = 0x333333;
   }
 
+  @on("add")
   async onAdd() {
     // TODO: Destroy only the oldest ones
     await this.wait(10);

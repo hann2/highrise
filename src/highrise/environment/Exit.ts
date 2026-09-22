@@ -4,6 +4,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Box } from "../../core/physics/shapes/Box";
 import { V } from "../../core/Vector";
@@ -51,6 +52,7 @@ export default class Exit extends BaseEntity implements Entity {
     this.addChild(new OverheadLight(position));
   }
 
+  @on("beginContact")
   onBeginContact({ other }: { other?: Entity }) {
     if (other === getPartyLeader(this.game)) {
       this.game!.dispatch("levelComplete", undefined);

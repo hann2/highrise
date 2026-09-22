@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { clamp } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 
@@ -31,6 +32,7 @@ export default class SpeakingCircle extends BaseEntity implements Entity {
     this.sprite.alpha = 0;
   }
 
+  @on("render")
   onRender(dt: number) {
     this.sprite.clear();
     this.sprite.position.copyFrom(this.getPosition());

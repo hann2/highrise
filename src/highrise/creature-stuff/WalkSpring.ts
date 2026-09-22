@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import type { Body } from "../../core/physics/body/Body";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
@@ -24,6 +25,7 @@ export class WalkSpring extends BaseEntity implements Entity {
     this.targetVelocity.set(0, 0);
   }
 
+  @on("tick")
   onTick() {
     if (this.enabled) {
       const force = this.targetVelocity

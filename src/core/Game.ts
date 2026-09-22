@@ -1,5 +1,7 @@
 import { DEFAULT_LAYER, LAYERS } from "../config/layers";
 import { ContactList } from "./ContactList";
+import { TICK_LAYERS } from "../config/tickLayers";
+import { on } from "./entity/handler";
 import EntityList from "./EntityList";
 import { V } from "./Vector";
 import Entity, { GameEventMap } from "./entity/Entity";
@@ -124,7 +126,9 @@ export default class Game {
     rendererOptions?: GameRenderer2dOptions;
   } = {}) {
     await this.renderer.init(rendererOptions);
-    this.io = new IOManager(this.renderer.canvas);
+    this.io = new IOManager(this.renderer.canvas, (event, data) =>
+      this.dispatch(event, data as GameEventMap[typeof event], false),
+    );
     this.addEntity(this.renderer.camera);
 
     window.requestAnimationFrame(() => this.loop(this.lastFrameTime));
@@ -140,6 +144,7 @@ export default class Game {
   }
 
   /** TODO: Document onResize */
+  @on("resize")
   onResize(size: [number, number]) {
     this.dispatch("resize", { size: V(size) });
   }
@@ -189,7 +194,6 @@ export default class Game {
     }
 
     this.entities.add(entity);
-    this.io.addHandler(entity);
 
     if (entity.body) {
       entity.body.owner = entity;
@@ -225,6 +229,9 @@ export default class Game {
 
     if (entity.onResize) {
       entity.onResize({ size: this.renderer.getSize() });
+    }
+    if (entity.onInputDeviceChange) {
+      entity.onInputDeviceChange({ usingGamepad: this.io.usingGamepad });
     }
 
     if (entity.children) {
@@ -357,7 +364,6 @@ export default class Game {
   private cleanupEntity(entity: Entity) {
     entity.game = undefined; // This should be done by `removeEntity`, but better safe than sorry
     this.entities.remove(entity);
-    this.io.removeHandler(entity);
 
     if (entity.body) {
       this.world.bodies.remove(entity.body);
@@ -398,7 +404,13 @@ export default class Game {
   private tick(dt: number) {
     this.ticknumber += 1;
     this.dispatch("beforeTick", dt);
-    this.dispatch("tick", dt);
+    for (const layer of TICK_LAYERS) {
+      for (const entity of this.entities.getTickersOnLayer(layer)) {
+        if (entity.game && !(this.paused && entity.pausable)) {
+          entity.onTick!(dt);
+        }
+      }
+    }
   }
 
   /** Called before normal ticks */

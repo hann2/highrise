@@ -3,6 +3,7 @@ import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
+import { on } from "../../../core/entity/handler";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 import Spitter from "./Spitter";
@@ -43,6 +44,7 @@ export default class SpitterSprite extends BaseEntity implements Entity {
     this.glow = this.addChild(new PointLight({ color: 0x00ff00 }));
   }
 
+  @on("render")
   onRender() {
     const { body } = this.spitter;
     this.sprite.position.copyFrom(body.position);

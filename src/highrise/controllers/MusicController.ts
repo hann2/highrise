@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { SoundInstance } from "../../core/sound/SoundInstance";
 import { Persistence } from "../constants/constants";
 
@@ -23,6 +24,7 @@ export default class MusicController extends BaseEntity implements Entity {
     );
   }
 
+  @on("add")
   onAdd() {
     this.fadeIn(4);
   }

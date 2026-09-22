@@ -1,3 +1,4 @@
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import {
   getCurrentGraphicsQuality,
@@ -12,6 +13,7 @@ export default class GraphicsButton extends ClickableText {
     });
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     this.updateText(getCurrentGraphicsQuality(game));
   }
@@ -20,6 +22,7 @@ export default class GraphicsButton extends ClickableText {
     this.sprite.text = `Graphics: ${quality}`;
   }
 
+  @on("graphicsQualityChanged")
   onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
     this.updateText(quality);
   }

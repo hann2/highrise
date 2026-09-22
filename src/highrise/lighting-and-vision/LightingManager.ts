@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { rgbToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
@@ -12,7 +13,6 @@ import { AmbientLight } from "./AmbientLight";
 import Light from "./Light";
 
 export default class LightingManager extends BaseEntity implements Entity {
-  id = "lighting_manager";
   persistenceLevel = Persistence.Game;
 
   texture!: RenderTexture;
@@ -27,6 +27,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     return this.game!.renderer.app.renderer;
   }
 
+  @on("resize")
   onResize({ size: [width, height] }: { size: V2d }) {
     this.texture.resize(width, height);
 
@@ -37,6 +38,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     }
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     const [width, height] = game.renderer.getSize();
     this.texture = RenderTexture.create({
@@ -104,6 +106,7 @@ export default class LightingManager extends BaseEntity implements Entity {
   }
 
   // Use late render so that it happens after everyone else has rendered and all their light positions and stuff are updated
+  @on("lateRender")
   onLateRender() {
     const camera = this.game!.camera;
     this.lightContainer.setFromMatrix(camera.getMatrix());

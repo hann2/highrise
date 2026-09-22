@@ -5,6 +5,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import type { Body } from "../../core/physics/body/Body";
 import { createRigid2D } from "../../core/physics/body/bodyFactories";
@@ -71,6 +72,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.addChild(new DoorFrame(hingePoint, restingAngle, length));
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     this.constraints = [
       new RevoluteConstraint(game.ground, this.body, {
@@ -87,6 +89,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     ];
   }
 
+  @on("render")
   onRender() {
     this.sprite.rotation = this.body.angle;
   }

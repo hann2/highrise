@@ -1,4 +1,5 @@
 import { CustomEvents } from "../../config/CustomEvent";
+import { TickLayerName } from "../../config/tickLayers";
 import type { Body } from "../physics/body/Body";
 import type { Constraint } from "../physics/constraints/Constraint";
 import type { Spring } from "../physics/springs/Spring";
@@ -41,6 +42,11 @@ export default interface Entity extends EventHandler<GameEventMap> {
 
   /** Entity that has this entity as a child */
   parent?: Entity;
+
+  /** The layer this entity's onTick runs in (see config/tickLayers.ts) */
+  readonly tickLayer?: TickLayerName;
+  /** Like tickLayer, for entities that need to tick in several layers */
+  readonly tickLayers?: readonly TickLayerName[];
 
   /** Used for determining if this entity should stay around when we reach a transition
    * point, like the end of a level or we change to a new menu screen */

@@ -1,4 +1,5 @@
 import { Matrix, Point } from "pixi.js";
+import { on } from "../entity/handler";
 import { V, V2d } from "../Vector";
 import BaseEntity from "../entity/BaseEntity";
 import Entity from "../entity/Entity";
@@ -12,6 +13,7 @@ import { LayerInfo } from "./LayerInfo";
 export class Camera2d extends BaseEntity implements Entity {
   tags = ["camera"];
   persistenceLevel = 100;
+  tickLayer = "camera" as const;
 
   renderer: GameRenderer2d;
   position: V2d;
@@ -71,6 +73,7 @@ export class Camera2d extends BaseEntity implements Entity {
     return this.position;
   }
 
+  @on("tick")
   onTick(dt: number) {
     this.x += this.vx * dt;
     this.y += this.vy * dt;

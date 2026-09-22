@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { clamp } from "../../core/util/MathUtil";
 import { rBool, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
@@ -37,6 +38,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
     super();
   }
 
+  @on("tick")
   onTick(dt: number) {
     const human = this.human;
     const leader = this.getLeader();

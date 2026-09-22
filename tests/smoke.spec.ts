@@ -53,7 +53,11 @@ test("game boots, plays, and changes levels without errors", async ({
   // --- Camera keeps up with the player ---
   const cameraOffset = await page.evaluate(() => {
     const game = window.DEBUG.game!;
-    const leader = (game.entities.getById("party_manager") as any).leader;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
     const [x, y] = leader.getPosition();
     return Math.hypot(game.camera.x - x, game.camera.y - y);
   });
@@ -75,7 +79,11 @@ test("game boots, plays, and changes levels without errors", async ({
   // Pin the player and a zombie in place so that the shots can't miss
   await page.evaluate(() => {
     const game = window.DEBUG.game!;
-    const leader = (game.entities.getById("party_manager") as any).leader;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
     const pickup = [...game.entities.all].find(
       (e) => e.constructor.name === "WeaponPickup",
     ) as any;
@@ -86,7 +94,11 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.waitForTimeout(500);
   const targetHp = await page.evaluate(() => {
     const game = window.DEBUG.game!;
-    const leader = (game.entities.getById("party_manager") as any).leader;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
     const zombie = game.entities
       .getTagged("zombie")
       .find((e) => e.constructor.name === "Zombie") as any;
@@ -198,7 +210,9 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.waitForFunction(
     () => {
       const entities = window.DEBUG.game!.entities;
-      const levelController = entities.getById("level_controller") as any;
+      const levelController = [...entities.all].find(
+        (e) => e.constructor.name === "LevelController",
+      ) as any;
       return (
         levelController.currentLevel === 2 &&
         entities.getTagged("zombie").length > 0

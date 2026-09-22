@@ -2,6 +2,7 @@ import { SoundName } from "../../../resources/resources";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import type Game from "../../core/Game";
 import type { Body } from "../../core/physics/body/Body";
 import { createPointMass2D } from "../../core/physics/body/bodyFactories";
@@ -99,10 +100,12 @@ export default class Human extends BaseEntity implements Entity {
     this.walkSpring = this.addChild(new WalkSpring(this.body, SPEED, 80));
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     game.entities.addFilter(isEnemy);
   }
 
+  @on("tick")
   onTick() {
     const healthPercent = this.hp / this.maxHp;
     if (healthPercent < 0.3) {

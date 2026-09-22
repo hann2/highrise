@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { darken } from "../../core/util/ColorUtils";
 import { choose, rUniform } from "../../core/util/Random";
 import { SPLAT_TEXTURES } from "./Splat";
@@ -24,6 +25,7 @@ export default class BloodSplat extends BaseEntity implements Entity {
     this.sprite.tint = darken(0xff0000, rUniform(0.1, 0.4));
   }
 
+  @on("add")
   async onAdd() {
     // TODO: Destroy only the oldest ones
     await this.wait(10);

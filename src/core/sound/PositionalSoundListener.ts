@@ -1,3 +1,4 @@
+import { on } from "../entity/handler";
 import Game from "../Game";
 import { V2d } from "../Vector";
 import BaseEntity from "../entity/BaseEntity";
@@ -13,9 +14,9 @@ export default class PositionalSoundListener
   extends BaseEntity
   implements Entity
 {
-  id = "positional_sound_listener";
   persistenceLevel = 100;
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     // So we can get these all quickly
     game.entities.addFilter(isPositionalSound);
@@ -31,7 +32,5 @@ export default class PositionalSoundListener
 export function getPositionalSoundListener(
   game?: Game,
 ): PositionalSoundListener | undefined {
-  return game?.entities.getById(
-    "positional_sound_listener",
-  ) as PositionalSoundListener;
+  return game?.entities.getByConstructor(PositionalSoundListener)[0];
 }

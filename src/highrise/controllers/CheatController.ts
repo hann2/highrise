@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { lerp } from "../../core/util/MathUtil";
@@ -11,6 +12,7 @@ import VisionController from "../lighting-and-vision/VisionController";
 export default class CheatController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Permanent;
 
+  @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     switch (key) {
       case "KeyL":
@@ -31,6 +33,7 @@ export default class CheatController extends BaseEntity implements Entity {
     }
   }
 
+  @on("tick")
   onTick() {
     const io = this.game!.io;
     if (io.usingGamepad) {

@@ -1,5 +1,6 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
 import { Persistence } from "../constants/constants";
@@ -27,8 +28,6 @@ const DEFAULT_QUALITY = GraphicsQuality.Medium;
 export const MAX_RESOLUTION = window.devicePixelRatio || 1;
 
 export class GraphicsQualityController extends BaseEntity implements Entity {
-  id = "graphicsQualityController";
-
   persistenceLevel = Persistence.Permanent;
   pausable = false;
 
@@ -40,6 +39,7 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
     this.currentQuality = savedQuality ?? DEFAULT_QUALITY;
   }
 
+  @on("add")
   onAdd() {
     this.setGraphicsQuality(this.currentQuality);
   }
@@ -60,26 +60,26 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
     }
   }
 
+  @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyO") {
       this.nextGraphicsQuality();
     }
   }
 
+  @on("toggleGraphicsQuality")
   onToggleGraphicsQuality() {
     this.nextGraphicsQuality();
   }
 
+  @on("graphicsQualityChanged")
   onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
     this.game?.renderer.setResolution(getResolutionForGraphicsQuality(quality));
   }
 }
 
 export function getCurrentGraphicsQuality(game: Game): GraphicsQuality {
-  const controller = game.entities.getById(
-    "graphicsQualityController",
-  ) as GraphicsQualityController;
-  return controller.currentQuality;
+  return game.entities.getSingleton(GraphicsQualityController).currentQuality;
 }
 
 export function getResolutionForGraphicsQuality(

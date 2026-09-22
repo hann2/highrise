@@ -55,6 +55,7 @@ _Note: `imageName` is a helper function that limits the string type to only name
 ### Events
 
 Entities can run code at certain times in the game loop.
+Handlers are methods named `on<EventName>` marked with the `@on("eventName")` decorator from `entity/handler.ts`; the decorator is what registers them.
 The three most important events are probably `onAdd`, `onTick`, and `onRender`.
 
 #### `onAdd?(game: Game)`
@@ -67,6 +68,7 @@ Useful for initializing stuff that you need access to the `game` for.
 If you want an entity to do something every frame, put that logic in the `onTick()` method.
 
 ```TypeScript
+  @on("tick")
   onTick(dt: number) {
     if (this.game!.io.keyIsDown("Space")) {
       // Accelerate upwards
@@ -107,17 +109,23 @@ You shouldn't need to deal with this often.
 
 ### Custom Events
 
-You can define handlers for any type of custom event you want using the `handlers` field.
+Custom events are declared with their payload types in `config/CustomEvent.ts`:
 
-For example, say we have a `LevelManager` class somewhere that determines when we start a level.
+```TypeScript
+export type CustomEvents = {
+  levelStarted: { level: number };
+};
+```
+
+Say we have a `LevelManager` class somewhere that determines when we start a level.
 It can dispatch a `levelStarted` event using `Game#dispatch`...
 
 ```TypeScript
 class LevelManager extends BaseEntity implements Entity {
-  //...
+  @on("tick")
   onTick() {
     //...level management stuff
-    this.game.dispatch({ type: 'levelStarted', level: 1 });
+    this.game.dispatch("levelStarted", { level: 1 });
   }
 }
 ```
@@ -125,12 +133,12 @@ class LevelManager extends BaseEntity implements Entity {
 and then we can listen for that event in our `Ball` class to do something at the start of a level.
 
 ```TypeScript
-class Ball extends BaseEntity implements Entity
-  handlers = {
-    levelStarted: () => {
-      this.body.velocity = [0, 0];
-    },
-  };
+class Ball extends BaseEntity implements Entity {
+  @on("levelStarted")
+  onLevelStarted({ level }: { level: number }) {
+    this.body.velocity = [0, 0];
+  }
+}
 ```
 
 ## Finding Entities
@@ -139,9 +147,9 @@ Entities have a `tags` property you can add to them to make them easy to find.
 You can use `game.entities.getTagged("yourTagName")` to get a list of all the entities that have `yourTagName` in their `tags` list.
 You can also use `game.entities.getTaggedAll` and `game.entities.getTaggedAny` to find entities that match all of a given list of tags, or any of them, respectively.
 
-If you know there is only ever going to be 1 instance of an entity, you can give it an `id`.
-This lets you use `game.entities.getById('entityId')` to easily retrieve your entity.
-If you try to add an entity to the game with the same `id` as one that is already in the game, it will throw an error, so be cautious with this.
+If you know there is only ever going to be one instance of a class, `game.entities.getSingleton(TheClass)` retrieves it (and throws if there isn't exactly one).
+`game.entities.getByConstructor(TheClass)` returns all instances of exactly that class.
+You can also give an entity a string `id` and find it with `game.entities.getById('entityId')`; adding two entities with the same `id` throws.
 
 ## Graphics
 

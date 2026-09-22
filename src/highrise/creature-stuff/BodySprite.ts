@@ -3,6 +3,7 @@ import { ImageName } from "../../../resources/resources";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 
@@ -72,6 +73,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     );
   }
 
+  @on("render")
   onRender(dt: number) {
     this.sprite.position.copyFrom(this.getPosition());
     this.sprite.rotation = this.getAngle();

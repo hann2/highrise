@@ -1,3 +1,4 @@
+import { on } from "../../../core/entity/handler";
 import {
   angleDelta,
   clamp,
@@ -82,6 +83,7 @@ export default class SprinterSprite extends BodySprite {
     return p * WIGGLE_AMOUNT;
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (!this.sprinter.isStunned) {
       const moveSpeed = clamp(this.sprinter.body.velocity.magnitude, -1, 4);

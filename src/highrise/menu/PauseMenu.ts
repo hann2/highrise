@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
@@ -76,15 +77,18 @@ export default class PauseMenu extends BaseEntity implements Entity {
     this.graphicsButton = this.addChild(new GraphicsButton());
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     this.setVisibility(game.paused);
   }
 
+  @on("inputDeviceChange")
   onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     const buttonName = usingGamepad ? "START" : "P";
     this.resumeText.text = `Press ${buttonName} to resume`;
   }
 
+  @on("resize")
   onResize({ size: [width, height] }: { size: V2d }) {
     this.pausedText.position.set(width / 2, height / 2);
     this.resumeText.position.set(width / 2, height / 2);
@@ -109,20 +113,24 @@ export default class PauseMenu extends BaseEntity implements Entity {
     }
   }
 
+  @on("pause")
   onPause() {
     this.setVisibility(true);
   }
 
+  @on("unpause")
   onUnpause() {
     this.setVisibility(false);
   }
 
+  @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyP") {
       this.game?.togglePause();
     }
   }
 
+  @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
     if (button === ControllerButton.START) {
       this.game?.togglePause();

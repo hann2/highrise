@@ -6,6 +6,7 @@ import { PhysicsMaterials } from "../../config/PhysicsMaterials";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import type { Body } from "../../core/physics/body/Body";
 import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Capsule } from "../../core/physics/shapes/Capsule";
@@ -77,6 +78,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.EMISSIVES;
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (this.z < 0) {
       this.z = 0;
@@ -101,6 +103,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     }
   }
 
+  @on("impact")
   onImpact() {
     const gain = clamp(this.body.velocity.magnitude / 5);
     const sound = choose(...DROP_SOUNDS);
@@ -108,12 +111,14 @@ export default class GlowStick extends BaseEntity implements Entity {
     this.game?.addEntity(new PositionalSound(sound, position, { gain }));
   }
 
+  @on("afterPhysics")
   onAfterPhysics() {
     this.light.setPosition(this.body.position);
     this.sprite.position.copyFrom(this.body.position);
     this.sprite.rotation = this.body.angle;
   }
 
+  @on("render")
   onRender() {
     const scale = 1 + this.z * 0.8;
     this.sprite.scale.set((SPRITE_LENGTH / this.sprite.texture.width) * scale);
@@ -147,6 +152,7 @@ class StaticGlowstick extends BaseEntity {
     this.sprite.layerName = Layer.FLOOR_STUFF;
   }
 
+  @on("add")
   async onAdd() {
     await this.wait(120);
     await this.wait(10, (dt, t) => {

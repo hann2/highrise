@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { fontName } from "../../core/resources/resourceUtils";
@@ -17,7 +18,6 @@ const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 2.2;
 
 let firstTime = true;
 export default class MainMenu extends BaseEntity implements Entity {
-  id = "main_menu";
   persistenceLevel = Persistence.Floor;
   pausable = false;
   sprite: Container & GameSprite;
@@ -73,6 +73,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     this.feedbackButton.sprite.style.align = "right";
   }
 
+  @on("add")
   async onAdd() {
     this.titleText.alpha = 0;
     this.startText.alpha = 0;
@@ -88,6 +89,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     firstTime = false;
   }
 
+  @on("resize")
   onResize({ size: [width, height] }: { size: V2d }) {
     this.titleText.position.set(width / 2, height / 2);
     this.startText.position.set(width / 2, height / 2);
@@ -113,6 +115,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     }
   }
 
+  @on("inputDeviceChange")
   onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     this.startText.text = usingGamepad
       ? "Press START to start"
@@ -136,6 +139,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     }
   }
 
+  @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "Enter") {
       this.startGame();
@@ -144,6 +148,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     }
   }
 
+  @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
     if (button === ControllerButton.START) {
       this.startGame();

@@ -4,6 +4,7 @@ import { PhysicsMaterials } from "../../config/PhysicsMaterials";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { loadGameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Box } from "../../core/physics/shapes/Box";
 import { PositionalSound } from "../../core/sound/PositionalSound";
@@ -94,6 +95,7 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     return true;
   }
 
+  @on("beginContact")
   onBeginContact() {
     const sounds = this.type.collisionSounds;
     if (sounds) {

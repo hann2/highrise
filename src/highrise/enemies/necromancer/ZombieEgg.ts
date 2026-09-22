@@ -3,6 +3,7 @@ import { ImageName } from "../../../../resources/resources";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
+import { on } from "../../../core/entity/handler";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { darken } from "../../../core/util/ColorUtils";
 import { lerp, smoothStep } from "../../../core/util/MathUtil";
@@ -43,6 +44,7 @@ export class ZombieEgg extends BaseEntity implements Entity {
     this.variant = rInteger(0, 1000);
   }
 
+  @on("add")
   async onAdd() {
     const distance = this.target.distanceTo(this.startPosition);
     const flightTime = 0.2 + distance / SPEED;

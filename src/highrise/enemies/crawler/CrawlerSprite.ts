@@ -1,4 +1,5 @@
 import { Layer } from "../../../config/layers";
+import { on } from "../../../core/entity/handler";
 import { clamp, smoothStep } from "../../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
@@ -78,6 +79,7 @@ export default class CrawlereSprite extends BodySprite {
     return p * WIGGLE_AMOUNT;
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (!this.crawler.isStunned) {
       const moveSpeed = clamp(this.crawler.body.velocity.magnitude);

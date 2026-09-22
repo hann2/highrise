@@ -3,6 +3,7 @@ import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
+import { on } from "../../../core/entity/handler";
 import { rNormal } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { PointLight } from "../../lighting-and-vision/PointLight";
@@ -41,17 +42,20 @@ export class Spark extends BaseEntity implements Entity {
     this.renderPosition = position.clone();
   }
 
+  @on("add")
   async onAdd() {
     // Make sure we don't have any infinitely living bullets around
     await this.wait(this.lifetime, undefined, "life_timer");
     this.destroy();
   }
 
+  @on("tick")
   onTick(dt: number) {
     this.renderPosition.set(this.position);
     this.position.iaddScaled(this.velocity, dt);
   }
 
+  @on("render")
   onRender(dt: number) {
     const endPoint = this.velocity.mul(dt);
 

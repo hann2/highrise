@@ -1,8 +1,7 @@
-import IOEventHandler from "../entity/IoEvents";
+import { IoEventDispatch } from "../entity/IoEvents";
 import { clamp, clampUp } from "../util/MathUtil";
 import { V, V2d } from "../Vector";
 import { ControllerAxis, ControllerButton } from "./Gamepad";
-import IOHandlerList from "./IOHandlerList";
 import { KeyCode } from "./Keys";
 import { MouseButtons } from "./MouseButtons";
 
@@ -13,7 +12,6 @@ const GAMEPAD_MAXIMUM = 0.95;
 
 // Manages IO
 export class IOManager {
-  handlers = new IOHandlerList();
   private keys: Map<KeyCode, boolean> = new Map();
   // buttons pressed last frame. Used for checking differences in state.
   private lastButtons: boolean[] = [];
@@ -22,7 +20,10 @@ export class IOManager {
   usingGamepad: boolean = false; // True if the gamepad is the main input device
   view: HTMLElement;
 
-  constructor(view: HTMLElement) {
+  constructor(
+    view: HTMLElement,
+    private dispatch: IoEventDispatch,
+  ) {
     this.view = view;
 
     this.view.onclick = (e) => this.onClick(e);
@@ -43,9 +44,7 @@ export class IOManager {
     document.onvisibilitychange = (event) => {
       for (const keyCode of this.keys.keys()) {
         this.keys.set(keyCode, false);
-        for (const handler of this.handlers.filtered.onKeyUp) {
-          handler.onKeyUp({ key: keyCode });
-        }
+        this.dispatch("keyUp", { key: keyCode });
       }
     };
 
@@ -85,13 +84,9 @@ export class IOManager {
       for (const [button, isDown] of buttons.entries()) {
         if (isDown && !this.lastButtons[button]) {
           this.setUsingGamepad(true);
-          for (const handler of this.handlers.filtered.onButtonDown) {
-            handler.onButtonDown({ button });
-          }
+          this.dispatch("buttonDown", { button });
         } else if (!isDown && this.lastButtons[button]) {
-          for (const handler of this.handlers.filtered.onButtonUp) {
-            handler.onButtonUp({ button });
-          }
+          this.dispatch("buttonUp", { button });
         }
       }
       this.lastButtons = buttons;
@@ -103,21 +98,8 @@ export class IOManager {
   private setUsingGamepad(value: boolean) {
     if (this.usingGamepad != value) {
       this.usingGamepad = value;
-      for (const handler of this.handlers.filtered.onInputDeviceChange) {
-        handler.onInputDeviceChange({ usingGamepad: this.usingGamepad });
-      }
+      this.dispatch("inputDeviceChange", { usingGamepad: this.usingGamepad });
     }
-  }
-
-  addHandler(handler: IOEventHandler): void {
-    this.handlers.add(handler);
-    if (handler.onInputDeviceChange) {
-      handler.onInputDeviceChange({ usingGamepad: this.usingGamepad });
-    }
-  }
-
-  removeHandler(handler: IOEventHandler): void {
-    this.handlers.remove(handler);
   }
 
   // Update the position of the mouse.
@@ -132,14 +114,10 @@ export class IOManager {
     this.mousePosition = V(event.clientX, event.clientY);
     switch (event.button) {
       case MouseButtons.LEFT:
-        for (const handler of this.handlers.filtered.onClick) {
-          handler.onClick();
-        }
+        this.dispatch("click", undefined);
         break;
       case MouseButtons.RIGHT:
-        for (const handler of this.handlers.filtered.onRightClick) {
-          handler.onRightClick();
-        }
+        this.dispatch("rightClick", undefined);
         break;
     }
   }
@@ -151,14 +129,10 @@ export class IOManager {
     this.mouseButtons[event.button] = true;
     switch (event.button) {
       case MouseButtons.LEFT:
-        for (const handler of this.handlers.filtered.onMouseDown) {
-          handler.onMouseDown();
-        }
+        this.dispatch("mouseDown", undefined);
         break;
       case MouseButtons.RIGHT:
-        for (const handler of this.handlers.filtered.onRightDown) {
-          handler.onRightDown();
-        }
+        this.dispatch("rightDown", undefined);
         break;
     }
   }
@@ -170,14 +144,10 @@ export class IOManager {
     this.mouseButtons[event.button] = false;
     switch (event.button) {
       case MouseButtons.LEFT:
-        for (const handler of this.handlers.filtered.onMouseUp) {
-          handler.onMouseUp();
-        }
+        this.dispatch("mouseUp", undefined);
         break;
       case MouseButtons.RIGHT:
-        for (const handler of this.handlers.filtered.onRightUp) {
-          handler.onRightUp();
-        }
+        this.dispatch("rightUp", undefined);
         break;
     }
   }
@@ -200,9 +170,7 @@ export class IOManager {
     const wasPressed = this.keys.get(code); // for filtering out auto-repeat stuff
     this.keys.set(code, true);
     if (!wasPressed) {
-      for (const handler of this.handlers.filtered.onKeyDown) {
-        handler.onKeyDown({ key: code, event });
-      }
+      this.dispatch("keyDown", { key: code, event });
     }
     if (this.shouldPreventDefault(event)) {
       event.preventDefault();
@@ -214,9 +182,7 @@ export class IOManager {
   onKeyUp(event: KeyboardEvent) {
     const code = event.code as KeyCode;
     this.keys.set(code, false);
-    for (const handler of this.handlers.filtered.onKeyUp) {
-      handler.onKeyUp({ key: code, event });
-    }
+    this.dispatch("keyUp", { key: code, event });
     if (this.shouldPreventDefault(event)) {
       event.preventDefault();
       return false;

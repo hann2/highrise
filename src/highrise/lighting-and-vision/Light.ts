@@ -1,6 +1,7 @@
 import { Container, Matrix, RenderTexture, Sprite } from "pixi.js";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
 import { V } from "../../core/Vector";
 import LightingManager from "./LightingManager";
 import { Shadows } from "./Shadows";
@@ -41,13 +42,13 @@ export default class Light extends BaseEntity implements Entity {
     }
   }
 
+  @on("add")
   onAdd() {
-    this.lightManager = this.game!.entities.getById(
-      "lighting_manager",
-    ) as LightingManager;
+    this.lightManager = this.game!.entities.getSingleton(LightingManager);
     this.lightManager.addLight(this);
   }
 
+  @on("destroy")
   onDestroy() {
     this.lightManager!.removeLight(this);
     this.lightManager = undefined;

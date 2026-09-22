@@ -1,5 +1,6 @@
+import { DEFAULT_TICK_LAYER, TickLayerName } from "../config/tickLayers";
 import Entity, { GameEventHandler, GameEventName } from "./entity/Entity";
-import { handlerNameToEventName } from "./entity/EventHandler";
+import { getHandlers } from "./entity/handler";
 import { EntityFilter, hasBody } from "./EntityFilter";
 import { FilterMultiMap } from "./util/FilterListMap";
 import MultiMap from "./util/ListMap";
@@ -14,6 +15,10 @@ export default class EntityList implements Iterable<Entity> {
   private tagged = new MultiMap<string, Entity>();
   /** Maps event types to entities that handle them */
   private handlers = new MultiMap<GameEventName, Entity>();
+  /** Maps tick layers to the entities that tick on them */
+  private tickLayerEntities = new MultiMap<TickLayerName, Entity>();
+  /** Maps constructors to their instances */
+  private byConstructor = new MultiMap<Constructor<Entity>, Entity>();
   /** Maps filters to entities that pass them */
   private filters = new FilterMultiMap<Entity>();
   /** All entities */
@@ -39,11 +44,16 @@ export default class EntityList implements Iterable<Entity> {
       }
     }
 
-    for (const methodName of getAllMethods(entity)) {
-      if (methodName.startsWith("on")) {
-        this.handlers.add(handlerNameToEventName(methodName), entity);
+    for (const eventName of getHandlers(entity)) {
+      this.handlers.add(eventName, entity);
+    }
+    if (this.handlers.has("tick", entity)) {
+      for (const layer of tickLayersOf(entity)) {
+        this.tickLayerEntities.add(layer, entity);
       }
     }
+
+    this.byConstructor.add(entity.constructor as Constructor<Entity>, entity);
 
     if (entity.id) {
       if (this.idToEntity.has(entity.id)) {
@@ -65,11 +75,19 @@ export default class EntityList implements Iterable<Entity> {
       }
     }
 
-    for (const methodName of getAllMethods(entity)) {
-      if (methodName.startsWith("on")) {
-        this.handlers.remove(handlerNameToEventName(methodName), entity);
+    if (this.handlers.has("tick", entity)) {
+      for (const layer of tickLayersOf(entity)) {
+        this.tickLayerEntities.remove(layer, entity);
       }
     }
+    for (const eventName of getHandlers(entity)) {
+      this.handlers.remove(eventName, entity);
+    }
+
+    this.byConstructor.remove(
+      entity.constructor as Constructor<Entity>,
+      entity,
+    );
 
     if (entity.id) {
       this.idToEntity.delete(entity.id);
@@ -79,6 +97,24 @@ export default class EntityList implements Iterable<Entity> {
   /** Get the entity with the given id. */
   getById(id: string) {
     return this.idToEntity.get(id);
+  }
+
+  /** Returns all entities of the given class (exact class, not subclasses). */
+  getByConstructor<T extends Entity>(
+    constructor: Constructor<T>,
+  ): ReadonlyArray<T> {
+    return this.byConstructor.get(constructor) as ReadonlyArray<T>;
+  }
+
+  /** Returns the one entity of the given class. Throws if there isn't exactly one. */
+  getSingleton<T extends Entity>(constructor: Constructor<T>): T {
+    const instances = this.getByConstructor(constructor);
+    if (instances.length !== 1) {
+      throw new Error(
+        `Expected exactly one ${constructor.name}, found ${instances.length}`,
+      );
+    }
+    return instances[0];
   }
 
   /** Returns all entities with the given tag. */
@@ -143,6 +179,11 @@ export default class EntityList implements Iterable<Entity> {
     >;
   }
 
+  /** All the entities that tick on the given layer. */
+  getTickersOnLayer(layer: TickLayerName): ReadonlyArray<Entity> {
+    return this.tickLayerEntities.get(layer);
+  }
+
   /**
    * Iterate through all the entities.
    */
@@ -151,30 +192,8 @@ export default class EntityList implements Iterable<Entity> {
   }
 }
 
-function getAllMethods(entity: object): string[] {
-  const methods: string[] = [];
-  let current = entity;
+type Constructor<T> = abstract new (...args: any[]) => T;
 
-  // Traverse up the prototype chain
-  while (
-    current !== null &&
-    current !== undefined &&
-    current !== Object.prototype
-  ) {
-    // Get own property names of the current object
-    const propertyNames = Object.getOwnPropertyNames(current);
-
-    // Filter out non-function properties and already added methods
-    for (const name of propertyNames as [keyof typeof current]) {
-      // Access on entity and not currentObject because we're looking at prototypes
-      if (typeof entity[name] === "function" && !methods.includes(name)) {
-        methods.push(name);
-      }
-    }
-
-    // Move up the prototype chain
-    current = Object.getPrototypeOf(current);
-  }
-
-  return methods;
+function tickLayersOf(entity: Entity): readonly TickLayerName[] {
+  return entity.tickLayers ?? [entity.tickLayer ?? DEFAULT_TICK_LAYER];
 }

@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { V } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
@@ -44,12 +45,14 @@ export default class VisionController extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.VISION;
   }
 
+  @on("add")
   onAdd({ game }: { game: Game }) {
     this.onGraphicsQualityChanged({
       quality: getCurrentGraphicsQuality(game),
     });
   }
 
+  @on("graphicsQualityChanged")
   onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
     switch (quality) {
       case GraphicsQuality.Low: {
@@ -71,6 +74,7 @@ export default class VisionController extends BaseEntity implements Entity {
     }
   }
 
+  @on("render")
   onRender() {
     const player = this.getPlayer();
     if (player) {

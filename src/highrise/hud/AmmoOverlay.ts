@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { fontName } from "../../core/resources/resourceUtils";
 import { V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
@@ -39,6 +40,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     this.sprite.addChild(this.bulletSpriteContainer);
   }
 
+  @on("inputDeviceChange")
   onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     if (usingGamepad) {
       this.reloadText.text = "Press X To Reload";
@@ -47,6 +49,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     }
   }
 
+  @on("resize")
   onResize({ size: [width, height] }: { size: V2d }) {
     this.reloadText.position.set(width - 10, height - 10);
     this.bulletSpriteContainer.position.set(width - 10, height - 10);
@@ -70,6 +73,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     }
   }
 
+  @on("render")
   onRender() {
     const weapon = this.getHuman().weapon;
 

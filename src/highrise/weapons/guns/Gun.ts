@@ -1,6 +1,7 @@
 import { SoundName } from "../../../../resources/resources";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { on } from "../../../core/entity/handler";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import {
   clamp,
@@ -238,6 +239,7 @@ export default class Gun extends BaseEntity implements Entity {
     this.reloadAction.reset();
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (this.shootCooldown > 0) {
       this.shootCooldown -= dt;

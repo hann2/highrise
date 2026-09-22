@@ -1,5 +1,6 @@
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
+import { on } from "../../../core/entity/handler";
 import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { choose } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
@@ -55,6 +56,7 @@ export default class MeleeWeapon extends BaseEntity implements Entity {
     }
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (this.currentCooldown > 0) {
       this.currentCooldown -= dt;

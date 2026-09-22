@@ -1,3 +1,4 @@
+import { on } from "../../../core/entity/handler";
 import {
   angleDelta,
   clamp,
@@ -81,6 +82,7 @@ export default class ZombieSprite extends BodySprite {
     return p * WIGGLE_AMOUNT;
   }
 
+  @on("tick")
   onTick(dt: number) {
     if (!this.zombie.isStunned) {
       const moveSpeed = clamp(this.zombie.body.velocity.magnitude, -1, 4);

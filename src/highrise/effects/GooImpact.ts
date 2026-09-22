@@ -3,6 +3,7 @@ import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
+import { on } from "../../core/entity/handler";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
@@ -76,6 +77,7 @@ export default class GooImpact extends BaseEntity implements Entity {
     }
   }
 
+  @on("tick")
   onTick(dt: number) {
     for (const particle of this.particles) {
       if (particle.z > 0) {
@@ -97,6 +99,7 @@ export default class GooImpact extends BaseEntity implements Entity {
     }
   }
 
+  @on("render")
   onRender() {
     for (const { position, color, radius, sprite, glowSprite, z } of this
       .particles) {
