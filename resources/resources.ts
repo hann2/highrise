@@ -840,9 +840,8 @@ const sounds = {
 };
 export type SoundName = keyof typeof sounds;
 const fonts = {
-  "comfortaa": require("url:./fonts/Comfortaa/comfortaa.ttf"),
+  "oswald": require("url:./fonts/Oswald/oswald.ttf"),
   "captureIt": require("url:./fonts/capture_it/capture_it.ttf"),
-  "dsDigi": require("url:./fonts/ds-digi/ds-digi.ttf"),
 };
 export type FontName = keyof typeof fonts;
 export const RESOURCES = { images, sounds, fonts };
