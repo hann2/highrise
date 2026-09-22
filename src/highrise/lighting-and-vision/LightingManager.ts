@@ -7,6 +7,7 @@ import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { rgbToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
+import { profiler } from "../../core/util/Profiler";
 import { V, V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import { AmbientLight } from "./AmbientLight";
@@ -23,6 +24,16 @@ export default class LightingManager extends BaseEntity implements Entity {
   ambientLights: Set<AmbientLight> = new Set();
   ambientColor = 0;
 
+  private _enabled = true;
+  /** When disabled, the world is drawn unlit (for debugging and benchmarks). */
+  get enabled() {
+    return this._enabled;
+  }
+  set enabled(value: boolean) {
+    this._enabled = value;
+    this.sprite.visible = value;
+  }
+
   private get renderer() {
     return this.game.renderer.app.renderer;
   }
@@ -31,10 +42,10 @@ export default class LightingManager extends BaseEntity implements Entity {
   onResize({ size: [width, height] }: { size: V2d }) {
     this.texture.resize(width, height);
 
-    // For some reason this needs to happen
+    // Baked textures don't survive the renderer being resized, so re-bake
+    // them. Lazily, so that the off-screen ones don't all pile up in one frame.
     for (const light of this.lights) {
       light.dirty = true;
-      light.bakeIfNeeded();
     }
   }
 
@@ -80,9 +91,9 @@ export default class LightingManager extends BaseEntity implements Entity {
       g += light.color.g;
       b += light.color.b;
     }
-    r = clamp(r, 0, 256);
-    g = clamp(g, 0, 256);
-    b = clamp(b, 0, 256);
+    r = clamp(r, 0, 255);
+    g = clamp(g, 0, 255);
+    b = clamp(b, 0, 255);
     this.ambientColor = rgbToHex({ r, g, b });
   }
 
@@ -95,19 +106,22 @@ export default class LightingManager extends BaseEntity implements Entity {
     maxY: number,
   ) {
     const { x, y } = light.bakedSprite.position;
-    const { x: rx, y: ry, width, height } = light.bakedSprite.getLocalBounds();
+    const halfSize = light.size / 2;
 
     return (
-      x + rx < maxX &&
-      x + rx + width > minX &&
-      y + ry < maxY &&
-      y + ry + height > minY
+      x - halfSize < maxX &&
+      x + halfSize > minX &&
+      y - halfSize < maxY &&
+      y + halfSize > minY
     );
   }
 
   // Use late render so that it happens after everyone else has rendered and all their light positions and stuff are updated
   @on("lateRender")
   onLateRender() {
+    if (!this.enabled) {
+      return;
+    }
     const camera = this.game.camera;
     this.lightContainer.setFromMatrix(camera.getMatrix());
 
@@ -123,11 +137,13 @@ export default class LightingManager extends BaseEntity implements Entity {
     }
 
     // Then render it all on top of the ambient light
-    this.renderer.render({
-      container: this.lightContainer,
-      target: this.texture,
-      clear: true,
-      clearColor: this.ambientColor,
+    profiler.measure("LightingManager.composite", () => {
+      this.renderer.render({
+        container: this.lightContainer,
+        target: this.texture,
+        clear: true,
+        clearColor: this.ambientColor,
+      });
     });
     this.lightContainer.removeChildren();
   }

@@ -7,8 +7,8 @@ export default defineConfig({
   testDir: "./tests",
   timeout: 120000,
   // Benchmarks are run separately with `npm run benchmark`
-  testIgnore: process.env.BENCHMARK ? [] : ["**/benchmark.spec.ts"],
-  testMatch: process.env.BENCHMARK ? "**/benchmark.spec.ts" : "**/*.spec.ts",
+  testIgnore: process.env.BENCHMARK ? [] : ["**/*benchmark.spec.ts"],
+  testMatch: process.env.BENCHMARK ? "**/*benchmark.spec.ts" : "**/*.spec.ts",
   workers: 1,
   use: {
     baseURL: `http://localhost:${TEST_PORT}`,
@@ -17,7 +17,16 @@ export default defineConfig({
     // rendering. Playwright's `headless: true` uses the old headless shell.
     headless: false,
     launchOptions: {
-      args: ["--headless=new", "--ignore-gpu-blocklist", "--mute-audio"],
+      args: [
+        "--headless=new",
+        "--ignore-gpu-blocklist",
+        "--mute-audio",
+        // Benchmarks run without vsync so that frame intervals measure the
+        // whole CPU + GPU frame instead of being capped at the refresh rate
+        ...(process.env.BENCHMARK
+          ? ["--disable-gpu-vsync", "--disable-frame-rate-limit"]
+          : []),
+      ],
     },
   },
   webServer: {

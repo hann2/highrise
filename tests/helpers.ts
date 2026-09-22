@@ -87,6 +87,74 @@ export async function captureProfile(page: Page, ms: number) {
   }, ms);
 }
 
+/** Walks the leader in a square for `ms`, so that lighting and AI have work to do */
+export async function wander(page: Page, ms: number) {
+  const keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
+  const end = Date.now() + ms;
+  for (let i = 0; Date.now() < end; i++) {
+    const key = keys[i % keys.length];
+    await page.keyboard.down(key);
+    await page.waitForTimeout(500);
+    await page.keyboard.up(key);
+  }
+}
+
+/**
+ * Measures frame intervals and the CPU time spent inside the game loop for
+ * `ms`. Frame intervals are only meaningful when vsync is off, which the
+ * Playwright config does for benchmarks.
+ */
+export async function measureFrames(page: Page, ms: number) {
+  return page.evaluate(async (measureMs) => {
+    const game = window.DEBUG.game!;
+    const frameTimes: number[] = [];
+    const loopTimes: number[] = [];
+    const originalLoop = (game as any).loop;
+    (game as any).loop = function (...args: unknown[]) {
+      const loopStart = performance.now();
+      originalLoop.apply(this, args);
+      loopTimes.push(performance.now() - loopStart);
+    };
+    const startTick = game.ticknumber;
+    const start = performance.now();
+    let last = start;
+    await new Promise<void>((resolve) => {
+      const frame = (now: number) => {
+        frameTimes.push(now - last);
+        last = now;
+        if (now - start < measureMs) {
+          requestAnimationFrame(frame);
+        } else {
+          resolve();
+        }
+      };
+      requestAnimationFrame(frame);
+    });
+    (game as any).loop = originalLoop;
+    const round = (n: number) => Math.round(n * 100) / 100;
+    const summarize = (times: number[]) => {
+      times.sort((a, b) => a - b);
+      const percentile = (p: number) =>
+        times[Math.min(times.length - 1, Math.floor(times.length * p))];
+      return {
+        mean: round(times.reduce((a, b) => a + b, 0) / times.length),
+        p50: round(percentile(0.5)),
+        p95: round(percentile(0.95)),
+        p99: round(percentile(0.99)),
+        max: round(times[times.length - 1]),
+      };
+    };
+    return {
+      frames: frameTimes.length,
+      ticks: game.ticknumber - startTick,
+      loopCpuMs: summarize(loopTimes),
+      frameIntervalMs: summarize(frameTimes),
+      entities: game.entities.all.size,
+      bodies: game.world.bodies.all.size,
+    };
+  }, ms);
+}
+
 export function expectNoIssues(issues: string[]) {
   expect(issues, issues.join("\n")).toHaveLength(0);
 }

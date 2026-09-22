@@ -22,6 +22,16 @@ export default class VisionController extends BaseEntity implements Entity {
   shadows: Shadows;
   sprite: Container & GameSprite;
 
+  private _enabled = true;
+  /** When disabled, everything is visible (for cheats and benchmarks). */
+  get enabled() {
+    return this._enabled;
+  }
+  set enabled(value: boolean) {
+    this._enabled = value;
+    this.sprite.visible = value;
+  }
+
   constructor(private getPlayer: () => Human | undefined) {
     super();
 
@@ -76,6 +86,9 @@ export default class VisionController extends BaseEntity implements Entity {
 
   @on("render")
   onRender() {
+    if (!this.enabled) {
+      return;
+    }
     const player = this.getPlayer();
     if (player) {
       const position = player.getPosition();

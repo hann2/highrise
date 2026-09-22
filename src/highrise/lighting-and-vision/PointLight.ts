@@ -19,7 +19,13 @@ export class PointLight extends Light {
     softShadows = false,
     position,
   }: PointLightOptions) {
-    super(Sprite.from("pointLight"), shadowsEnabled, radius, softShadows);
+    super(
+      Sprite.from("pointLight"),
+      shadowsEnabled,
+      radius,
+      softShadows,
+      radius * 2,
+    );
     this.lightSprite.anchor.set(0.5, 0.5);
     this.lightSprite.blendMode = "add";
 
@@ -40,6 +46,6 @@ export class PointLight extends Light {
     this.lightSprite.width = radius * 2;
     this.lightSprite.height = radius * 2;
 
-    this.resizeBakedTexture();
+    this.setSize(radius * 2);
   }
 }

@@ -22,7 +22,7 @@ export default class CheatController extends BaseEntity implements Entity {
         for (const visionController of this.game.entities.getByFilter(
           (e): e is VisionController => e instanceof VisionController,
         )) {
-          visionController.sprite.visible = !visionController.sprite.visible;
+          visionController.enabled = !visionController.enabled;
         }
         break;
       case "KeyH":
