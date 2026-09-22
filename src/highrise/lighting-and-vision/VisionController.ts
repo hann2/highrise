@@ -1,8 +1,10 @@
 import {
   Container,
   Graphics,
+  Matrix,
   Mesh,
   MeshGeometry,
+  RenderTexture,
   Sprite,
   Texture,
 } from "pixi.js";
@@ -11,10 +13,13 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
+import Game from "../../core/Game";
 import { profiler } from "../../core/util/Profiler";
 import { V, V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
+import { Level } from "../levels/Level";
+import { ExploredMap } from "./ExploredMap";
 import { getOccluders } from "./occluders";
 import { getPenumbraTexture } from "./penumbraTexture";
 import {
@@ -34,13 +39,23 @@ const VISION_SOURCE_RADIUS = 0.2;
 const EDGE_ANTIALIAS_WIDTH = 0.05;
 /** Penumbra wedges reach this far from their corner, past everything visible */
 const PENUMBRA_LENGTH = OUTER_RADIUS * 2;
+/** How dark explored places are when the player can't currently see them */
+const EXPLORED_DARKNESS = 0.6;
+/** Pixels per meter of the darkness texture. The screen is about 65 px/m at the default zoom. */
+const DARKNESS_RESOLUTION = 48;
 
 /**
- * Hides what the player can't see. The visible region is computed
- * additively as a polygon (see `visibility.ts`) and everything outside it is
- * covered by a mesh with soft edges (see `visionMesh.ts`), so there is no
- * render texture and no blur filter, and the polygon is available to anyone
- * who wants to know whether a point is visible.
+ * Fog of war. What the player has never seen is black; what they have seen
+ * but can't see right now is dimmed; what they can see is clear.
+ *
+ * The visible region is computed additively as a polygon (see
+ * `visibility.ts`), and meshes with soft edges (see `visionMesh.ts`) cover
+ * everything outside it. They are rendered at full strength into a texture
+ * centered on the player, which is drawn over the world at the dim
+ * strength (drawing the meshes dimmed directly would show their overlaps),
+ * and an `ExploredMap` remembers where the visible region has been and
+ * draws the black on top. The polygon is available to anyone who wants to
+ * know whether a point is visible; enemies hide themselves with it.
  */
 export default class VisionController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -50,6 +65,11 @@ export default class VisionController extends BaseEntity implements Entity {
   private penumbraGeometry = emptyGeometry();
   private mesh: Mesh;
   private penumbraMesh: Mesh;
+  /** The meshes, rendered into `darkness` each frame */
+  private darknessContainer = new Container();
+  private darkness: RenderTexture;
+  private darknessSprite: Sprite;
+  private explored?: ExploredMap;
 
   /** Where the player is looking from */
   private eye: V2d = V(0, 0);
@@ -79,6 +99,16 @@ export default class VisionController extends BaseEntity implements Entity {
       texture: getPenumbraTexture(),
     });
     this.penumbraMesh.tint = 0x000000;
+    this.darknessContainer.addChild(this.mesh, this.penumbraMesh);
+    // No multisampling: every visible edge in it is a gradient already
+    this.darkness = RenderTexture.create({
+      width: OUTER_RADIUS * 2,
+      height: OUTER_RADIUS * 2,
+      resolution: DARKNESS_RESOLUTION,
+    });
+    this.darknessSprite = new Sprite(this.darkness);
+    this.darknessSprite.anchor.set(0.5);
+    this.darknessSprite.alpha = EXPLORED_DARKNESS;
 
     const fog = Sprite.from("visionFog");
     fog.blendMode = "multiply";
@@ -94,9 +124,10 @@ export default class VisionController extends BaseEntity implements Entity {
       .fill(0x000000)
       .circle(0, 0, OUTER_RADIUS - 0.1)
       .cut();
+    distanceShadows.alpha = EXPLORED_DARKNESS;
 
     this.sprite = new Container();
-    this.sprite.addChild(this.mesh, this.penumbraMesh, fog, distanceShadows);
+    this.sprite.addChild(this.darknessSprite, distanceShadows, fog);
     this.sprite.layerName = Layer.VISION;
   }
 
@@ -106,6 +137,21 @@ export default class VisionController extends BaseEntity implements Entity {
       return 1;
     }
     return visibilityAt(this.eye, this.samples, point);
+  }
+
+  @on("add")
+  onAdd({ game }: { game: Game }) {
+    this.explored = new ExploredMap(
+      game.renderer.app.renderer,
+      MAX_VISION,
+      this.darkness,
+    );
+    this.sprite.addChild(this.explored.sprite);
+  }
+
+  @on("startLevel")
+  onStartLevel({ level }: { level: Level }) {
+    this.explored?.reset(level.width, level.height);
   }
 
   @on("render")
@@ -119,6 +165,11 @@ export default class VisionController extends BaseEntity implements Entity {
     }
     this.eye = player.getPosition();
     this.sprite.position.copyFrom(this.eye);
+    if (this.explored) {
+      // The map is in world coordinates, this container follows the eye
+      const [ox, oy] = this.explored.origin;
+      this.explored.sprite.position.set(ox - this.eye[0], oy - this.eye[1]);
+    }
 
     // Doors can move without the player moving, so always recompute
     const occluders = profiler.measure("VisionController.occluders", () =>
@@ -145,10 +196,26 @@ export default class VisionController extends BaseEntity implements Entity {
       this.mesh.visible = this.geometry.indices.length > 0;
       this.penumbraMesh.visible = this.penumbraGeometry.indices.length > 0;
     });
+    profiler.measure("VisionController.darkness", () => {
+      // The meshes are relative to the eye, so put it in the middle
+      this.game.renderer.app.renderer.render({
+        container: this.darknessContainer,
+        target: this.darkness,
+        clear: true,
+        clearColor: [0, 0, 0, 0],
+        transform: new Matrix().translate(OUTER_RADIUS, OUTER_RADIUS),
+      });
+    });
+    profiler.measure("VisionController.explored", () => {
+      this.explored?.update(this.eye);
+    });
   }
 
   @on("destroy")
   onDestroy() {
+    this.explored?.destroy();
+    this.darknessContainer.destroy({ children: true });
+    this.darkness.destroy(true);
     this.geometry.destroy();
     this.penumbraGeometry.destroy();
   }

@@ -1,4 +1,5 @@
 import { choose, rInteger } from "../../../core/util/Random";
+import { CELL_SIZE } from "../../constants/constants";
 import { Level } from "../Level";
 import BathroomLevel from "../level-templates/BathroomLevel";
 import ChapelLevel from "../level-templates/ChapelLevel";
@@ -36,5 +37,9 @@ export const generateLevel = (
 ): Level => {
   console.log("Generating level with seed " + seed);
   const cellGrid = new CellGrid(...levelTemplate.getSize());
-  return { entities: generateLevelEntities(cellGrid, levelTemplate, seed) };
+  return {
+    entities: generateLevelEntities(cellGrid, levelTemplate, seed),
+    width: cellGrid.width * CELL_SIZE,
+    height: cellGrid.height * CELL_SIZE,
+  };
 };

@@ -17,11 +17,15 @@ import { WalkSpring } from "../../creature-stuff/WalkSpring";
 import FleshImpact from "../../effects/FleshImpact";
 import Hittable from "../../environment/Hittable";
 import Human from "../../human/Human";
+import VisionController from "../../lighting-and-vision/VisionController";
 import Bullet from "../../projectiles/Bullet";
 import { PhasedAction } from "../../utils/PhasedAction";
 import SwingingWeapon from "../../weapons/melee/SwingingWeapon";
 import { makeSimpleEnemyBody } from "./enemyUtils";
 import EnemyVoice from "./EnemyVoice";
+
+/** Seconds for an enemy to fade in or out at the edge of the player's vision */
+const VISIBILITY_FADE_TIME = 0.15;
 
 export class BaseEnemy extends Creature implements Hittable {
   hp: number = 100;
@@ -112,6 +116,28 @@ export class BaseEnemy extends Creature implements Hittable {
   onTick(dt: number) {
     if (this.stunnedTimer > 0) {
       this.stunnedTimer -= dt;
+    }
+  }
+
+  /** How visible the enemy currently is; fades so leaving vision doesn't pop */
+  private shownAlpha = 1;
+
+  @on("render")
+  onRender(dt: number) {
+    const vision = this.game.entities.getSingleton(VisionController);
+    const target = vision.visibilityOf(this.body.position) > 0 ? 1 : 0;
+    const step = dt / VISIBILITY_FADE_TIME;
+    this.shownAlpha = clamp(
+      target,
+      this.shownAlpha - step,
+      this.shownAlpha + step,
+    );
+    for (const child of this.children ?? []) {
+      const sprite = child.sprite;
+      if (sprite) {
+        sprite.alpha = this.shownAlpha;
+        sprite.visible = this.shownAlpha > 0;
+      }
     }
   }
 
