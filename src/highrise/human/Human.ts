@@ -30,6 +30,7 @@ import { ShuffleRing } from "../utils/ShuffleRing";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import HumanSprite from "./HumanSprite";
+import Flashlight from "./Flashlight";
 import HumanVoice from "./HumanVoice";
 
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
@@ -78,6 +79,7 @@ export default class Human extends BaseEntity implements Entity {
 
     this.humanSprite = this.addChild(new HumanSprite(this));
     this.voice = this.addChild(new HumanVoice(this));
+    this.addChild(new Flashlight(this));
 
     this.body = createPointMass2D({
       motion: "dynamic",

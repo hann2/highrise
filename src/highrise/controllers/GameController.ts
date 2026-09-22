@@ -28,6 +28,8 @@ export class GameController extends BaseEntity implements Entity {
   @on("newGame")
   onNewGame() {
     const game = this.game;
+    // Humans carry lights, so this has to exist before the party does
+    game.addEntity(new LightingManager());
     const partyManager = game.addEntity(new PartyManager());
     const getPlayer = () => partyManager.leader;
     game.addEntities(
@@ -37,7 +39,6 @@ export class GameController extends BaseEntity implements Entity {
       new VisionController(getPlayer),
       new DamagedOverlay(getPlayer),
       new AmmoOverlay(getPlayer),
-      new LightingManager(),
       new PauseMenu(),
     );
   }

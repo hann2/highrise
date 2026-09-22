@@ -131,9 +131,12 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   setPosition([x, y]: [number, number]) {
-    this.dirty = true;
-    this.bakedSprite.position.set(x, y);
-    this.shadows?.setPosition(V(x, y));
+    const position = this.bakedSprite.position;
+    if (x !== position.x || y !== position.y) {
+      this.dirty = true;
+      position.set(x, y);
+      this.shadows?.setPosition(V(x, y));
+    }
   }
 
   setIntensity(value: number) {
