@@ -104,6 +104,7 @@ Current: one survivor per floor in a closet, auto-joins at 2 m with line of sigh
 
 Current: the lobby is level 1 (a room with cosmetic elevators, a desk, a piano and Bob the Heavy). The main menu is HTML. Character is random from a shuffle ring.
 
+- Done 2026-09-22: a character select screen (`menu/CharacterSelect.tsx`) between the main menu and the game, all 13 characters, no unlocking yet. The lobby version below can replace it later.
 - The lobby becomes the between-runs hub, not a floor. It is the diegetic main menu.
 - Character select: unlocked characters stand in the lobby; walk to one and interact to pick them. Each starting character has unique stats and a starting weapon (and maybe one trait: Takeshi has the katana and fast melee, Santa has a toy bag that hands out consumables, etc.). Locked characters could be visible as silhouettes/empty chairs so the player knows there's more.
 - Floor directory: the building directory board by the stairs shows the run: each floor's theme and icons for what's notable (store, infirmary, survivor, siege, boss). This is the see-what's-coming run map, not a level select. Whether there is ever a "start at floor 5" unlock is an open question.

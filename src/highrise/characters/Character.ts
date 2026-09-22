@@ -17,6 +17,7 @@ import { Wendy } from "./Wendy";
 
 // Data about a character
 export interface Character {
+  name: string;
   textures: CharacterTextures;
   sounds: CharacterSounds;
 }
@@ -59,6 +60,19 @@ export const CHARACTERS = [
 ];
 
 const CHARACTERS_SHUFFLED = new ShuffleRing(CHARACTERS);
+
+// Characters that are in the party, so survivors shouldn't look like them
+let charactersInUse: ReadonlySet<Character> = new Set();
+
+export function setCharactersInUse(characters: Iterable<Character>) {
+  charactersInUse = new Set(characters);
+}
+
+/** A character nobody in the party already is. */
 export function randomCharacter(): Character {
-  return CHARACTERS_SHUFFLED.getNext();
+  let character = CHARACTERS_SHUFFLED.getNext();
+  while (charactersInUse.has(character)) {
+    character = CHARACTERS_SHUFFLED.getNext();
+  }
+  return character;
 }

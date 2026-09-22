@@ -33,8 +33,20 @@ export async function loadGame(page: Page, seed: number) {
   );
 }
 
-/** Starts a new game from the main menu and waits for the level to exist. */
+/**
+ * Starts a new game and waits for the level to exist. From the main menu it
+ * plays as the first character; from the character select it plays as whoever
+ * is selected.
+ */
 export async function startGame(page: Page) {
+  const onCharacterSelect = () =>
+    [...window.DEBUG.game!.entities.all].some(
+      (e) => e.constructor.name === "CharacterSelect",
+    );
+  if (!(await page.evaluate(onCharacterSelect))) {
+    await page.keyboard.press("Enter");
+  }
+  await page.waitForFunction(onCharacterSelect, null, { timeout: 30000 });
   await page.keyboard.press("Enter");
   await page.waitForFunction(
     () => {

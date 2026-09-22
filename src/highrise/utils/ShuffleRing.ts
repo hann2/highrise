@@ -17,7 +17,8 @@ export class ShuffleRing<T> {
 
   getNext(): T {
     this.index += 1;
-    if (this.index >= this.values.length) {
+    // Shuffle before the first pass too, not just between passes
+    if (this.index === 0 || this.index >= this.values.length) {
       this.index = 0;
       shuffle(this.values);
     }

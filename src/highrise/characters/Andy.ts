@@ -1,6 +1,7 @@
 import { Character } from "./Character";
 
 export const Andy: Character = {
+  name: "Andy",
   textures: {
     head: "andyHead",
     leftArm: "andyLeftArm",

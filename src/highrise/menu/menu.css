@@ -137,3 +137,68 @@
   text-align: left;
   padding-left: 2px;
 }
+
+/* Character select: a grid of heads in the middle of the screen */
+.character-select {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  font-family: captureIt;
+  color: white;
+}
+
+.character-select__title {
+  font-size: 96px;
+  line-height: 1;
+  color: red;
+}
+
+.character-select__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.character-select__portrait {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.1s,
+    border-color 0.1s;
+}
+
+.character-select__portrait img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  /* Heads are drawn facing right; turn them to face the player */
+  transform: rotate(-90deg);
+}
+
+.character-select__portrait--selected {
+  border-color: red;
+  transform: scale(1.15);
+}
+
+.character-select__name {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.character-select__hint {
+  font-family: oswald;
+  font-weight: 300;
+  font-size: 20px;
+  color: #dddddd;
+}

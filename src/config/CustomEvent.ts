@@ -1,4 +1,5 @@
 import type { V2d } from "../core/Vector";
+import type { Character } from "../highrise/characters/Character";
 import type { GraphicsQuality } from "../highrise/controllers/GraphicsQualityController";
 import type { BaseEnemy } from "../highrise/enemies/base/Enemy";
 import type Human from "../highrise/human/Human";
@@ -14,7 +15,7 @@ import type { Level } from "../highrise/levels/Level";
 export type CustomEvents = {
   // Game flow
   goToMainMenu: void;
-  newGame: void;
+  newGame: { character: Character };
   startLevel: { level: Level };
   levelComplete: void;
   partyDead: void;

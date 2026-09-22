@@ -9,7 +9,7 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "315:-335350934";
+const LEVEL_2_FINGERPRINT = "315:1038549143";
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
@@ -27,10 +27,38 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await game()).toBeGreaterThan(0);
   expectNoIssues(issues);
 
+  // --- Pick a character ---
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(
+    () =>
+      [...window.DEBUG.game!.entities.all].some(
+        (e) => e.constructor.name === "CharacterSelect",
+      ),
+    null,
+    { timeout: 30000 },
+  );
+  await page.waitForTimeout(500);
+  // Two right and one down from the first character is Santa
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowDown");
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: "tests/output/character-select.png" });
+  expectNoIssues(issues);
+
   // --- Start a game ---
   await startGame(page);
   const startLevel = await getLevelNumber(page);
   expect(startLevel).toBe(1);
+  const leaderName = await page.evaluate(
+    () =>
+      (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "PartyManager",
+        ) as any
+      ).leader.character.name,
+  );
+  expect(leaderName).toBe("Santa");
   // let the fade in finish and lighting settle
   await page.waitForTimeout(2500);
   await page.screenshot({ path: "tests/output/level-1-start.png" });
@@ -178,6 +206,10 @@ test("game boots, plays, and changes levels without errors", async ({
   // Stand the player beside a door that is at rest, on the side it opens away from
   const doorMidpoint = await page.evaluate(() => {
     const game = window.DEBUG.game!;
+    // A zombie wandering into the doorway would stop the door
+    for (const zombie of game.entities.getTagged("zombie")) {
+      zombie.destroy();
+    }
     const leader = (
       [...game.entities.all].find(
         (e) => e.constructor.name === "PartyManager",

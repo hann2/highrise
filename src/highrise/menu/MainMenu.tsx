@@ -6,6 +6,7 @@ import { KeyCode } from "../../core/io/Keys";
 import ReactEntity from "../../core/ReactEntity";
 import { smoothStep } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
+import CharacterSelect from "./CharacterSelect";
 import CreditsScreen from "./CreditsScreen";
 import "./menu.css";
 import { FeedbackButton, MenuButton, MenuButtons } from "./MenuButtons";
@@ -83,7 +84,7 @@ export default class MainMenu extends ReactEntity implements Entity {
         this.startOpacity = smoothStep(1.0 - 4 * t);
         this.buttonsOpacity = smoothStep(1.0 - 4 * t);
       });
-      this.game.dispatch("newGame", undefined);
+      this.game.addEntity(new CharacterSelect());
       this.destroy();
     }
   }

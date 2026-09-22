@@ -1,6 +1,7 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
+import { Character } from "../characters/Character";
 import { Persistence } from "../constants/constants";
 import PartyManager from "../environment/PartyManager";
 import { AmmoOverlay } from "../hud/AmmoOverlay";
@@ -26,11 +27,11 @@ export class GameController extends BaseEntity implements Entity {
   }
 
   @on("newGame")
-  onNewGame() {
+  onNewGame({ character }: { character: Character }) {
     const game = this.game;
     // Humans carry lights, so this has to exist before the party does
     game.addEntity(new LightingManager());
-    const partyManager = game.addEntity(new PartyManager());
+    const partyManager = game.addEntity(new PartyManager(character));
     const getPlayer = () => partyManager.leader;
     game.addEntities(
       new LevelController(),

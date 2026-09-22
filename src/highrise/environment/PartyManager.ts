@@ -3,6 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { choose, rBool } from "../../core/util/Random";
+import { Character, setCharactersInUse } from "../characters/Character";
 import { Persistence } from "../constants/constants";
 import AllyHumanController, { isAllyController } from "../human/AllyController";
 import Human from "../human/Human";
@@ -21,13 +22,22 @@ export default class PartyManager extends BaseEntity implements Entity {
   partyMembers: Human[] = [];
   leader!: Human;
 
+  constructor(private startingCharacter: Character) {
+    super();
+  }
+
   @on("add")
   onAdd({ game }: { game: Game }) {
     game.entities.addFilter(isAllyController);
 
     this.partyMembers = [];
-    this.leader = game.addEntity(new Human());
+    this.leader = game.addEntity(new Human(undefined, this.startingCharacter));
     this.onAddToParty({ human: this.leader });
+  }
+
+  @on("destroy")
+  onDestroy() {
+    setCharactersInUse([]);
   }
 
   @on("addToParty")
@@ -36,6 +46,7 @@ export default class PartyManager extends BaseEntity implements Entity {
     survivorController,
   }: PartyEvent & { survivorController?: SurvivorHumanController }) {
     this.partyMembers.push(human);
+    setCharactersInUse(this.partyMembers.map((member) => member.character));
     survivorController?.destroy();
     this.game.addEntity(new AllyHumanController(human, () => this.leader));
 
@@ -74,6 +85,7 @@ export default class PartyManager extends BaseEntity implements Entity {
     const indexInParty = this.partyMembers.indexOf(human);
     if (indexInParty >= 0) {
       this.partyMembers.splice(indexInParty, 1);
+      setCharactersInUse(this.partyMembers.map((member) => member.character));
     }
     if (human === this.leader) {
       if (this.partyMembers.length > 0) {
