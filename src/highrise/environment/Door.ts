@@ -102,7 +102,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
       position.sub(this.body.position),
     );
 
-    this.game!.addEntities(
+    this.game.addEntities(
       new PositionalSound(choose("wallHit1", "wallHit2"), position),
       new WallImpact(position, normal),
     );

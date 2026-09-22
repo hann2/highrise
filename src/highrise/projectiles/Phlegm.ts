@@ -79,8 +79,8 @@ export default class Phlegm extends Projectile implements Entity {
     this.z = clampUp(this.z + this.zVelocity * dt);
 
     if (this.z < 0) {
-      this.game?.addEntity(new PositionalSound(getSplatSound(), this.position));
-      this.game?.addEntity(new GooSplat(this.position, PHLEGM_RADIUS * 2));
+      this.game.addEntity(new PositionalSound(getSplatSound(), this.position));
+      this.game.addEntity(new GooSplat(this.position, PHLEGM_RADIUS * 2));
       this.destroy();
       return;
     }
@@ -92,8 +92,8 @@ export default class Phlegm extends Projectile implements Entity {
     if (hit instanceof Human) {
       hit.inflictDamage(this.damage);
     }
-    this.game?.addEntity(new PositionalSound(getSplatSound(), this.position));
-    this.game?.addEntity(new GooImpact(hitPosition, 3, hitNormal, 0.7));
+    this.game.addEntity(new PositionalSound(getSplatSound(), this.position));
+    this.game.addEntity(new GooImpact(hitPosition, 3, hitNormal, 0.7));
 
     return true;
   }

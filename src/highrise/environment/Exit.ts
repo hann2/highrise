@@ -55,7 +55,7 @@ export default class Exit extends BaseEntity implements Entity {
   @on("beginContact")
   onBeginContact({ other }: { other?: Entity }) {
     if (other === getPartyLeader(this.game)) {
-      this.game!.dispatch("levelComplete", undefined);
+      this.game.dispatch("levelComplete", undefined);
     }
   }
 }

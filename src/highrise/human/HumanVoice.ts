@@ -42,7 +42,7 @@ export default class HumanVoice extends BaseEntity implements Entity {
     if (!this.currentSound) {
       const sound = this.sounds[soundClass].getNext();
       if (sound) {
-        this.currentSound = this.game?.addEntity(
+        this.currentSound = this.game.addEntity(
           new PositionalSound(sound, this.human.getPosition()),
         );
       }

@@ -116,13 +116,16 @@ export class BaseEnemy extends Creature implements Hittable {
   }
 
   hitByBullet(bullet: Bullet, position: V2d, normal: V2d) {
+    if (this.isDestroyed) {
+      return true;
+    }
     this.hp -= bullet.damage;
 
     const knockback = bullet.velocity.mul(bullet.stats.mass * 30);
     const relativePos = position.sub(this.body.position);
     this.knockback(knockback, relativePos);
 
-    this.game?.addEntity(
+    this.game.addEntity(
       new PositionalSound(
         choose("fleshHit1", "fleshHit2", "fleshHit3"),
         position,
@@ -145,6 +148,9 @@ export class BaseEnemy extends Creature implements Hittable {
   }
 
   hitByMelee(swingingWeapon: SwingingWeapon, position: V2d) {
+    if (this.isDestroyed) {
+      return;
+    }
     const damageAmount = swingingWeapon.getDamage();
     const knockbackAmount = swingingWeapon.getKnockback();
 
@@ -163,7 +169,7 @@ export class BaseEnemy extends Creature implements Hittable {
       const sounds = swingingWeapon.weapon.stats.sounds.hitFlesh;
       if (sounds) {
         const soundName = choose(...sounds);
-        this.game?.addEntity(new PositionalSound(soundName, position));
+        this.game.addEntity(new PositionalSound(soundName, position));
       }
 
       this.makeBlood(position, damageAmount);
@@ -177,7 +183,7 @@ export class BaseEnemy extends Creature implements Hittable {
   }
 
   makeBlood(position: V2d, damage: number, normal?: V2d) {
-    this.game?.addEntity(new FleshImpact(position, damage / 10, normal));
+    this.game.addEntity(new FleshImpact(position, damage / 10, normal));
   }
 
   stun(duration: number) {
@@ -191,14 +197,18 @@ export class BaseEnemy extends Creature implements Hittable {
     }
   }
 
+  /** Dying is idempotent: a body that was destroyed this step is still in the physics world */
   die(killer?: Human) {
-    this.game?.dispatch("zombieDied", { zombie: this, killer });
+    if (this.isDestroyed) {
+      return;
+    }
+    this.game.dispatch("zombieDied", { zombie: this, killer });
     this.handleDeath();
     this.destroy();
   }
 
   handleDeath() {
-    this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
+    this.game.addEntity(new FleshImpact(this.getPosition(), 6));
     this.voice.speak("death", true);
   }
 }

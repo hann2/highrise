@@ -136,7 +136,7 @@ export default class Gun extends BaseEntity implements Entity {
 
     // Various effects
     this.playSound("shoot", position);
-    this.game?.addEntity(new MuzzleFlash(position, direction));
+    this.game.addEntity(new MuzzleFlash(position, direction));
 
     if (this.stats.ejectionType === EjectionType.AUTOMATIC) {
       this.makeShellCasing(shooter);
@@ -186,7 +186,7 @@ export default class Gun extends BaseEntity implements Entity {
       );
     }
 
-    this.game?.addEntity(
+    this.game.addEntity(
       new ShellCasing(
         position,
         velocity,
@@ -203,7 +203,7 @@ export default class Gun extends BaseEntity implements Entity {
         -this.stats.bulletSpread / 2,
         this.stats.bulletSpread / 2,
       );
-      this.game?.addEntity(
+      this.game.addEntity(
         new Bullet(
           position.clone(),
           direction + spread,
@@ -256,7 +256,7 @@ export default class Gun extends BaseEntity implements Entity {
     if (sound) {
       // TODO: We should really just edit the sound files to be balanced
       const gain = soundClass === "shoot" ? 0.3 : 1.0;
-      return this.game?.addEntity(
+      return this.game.addEntity(
         new PositionalSound(sound, position, { gain }),
       );
     }

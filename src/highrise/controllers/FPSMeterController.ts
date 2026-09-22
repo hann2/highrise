@@ -21,7 +21,7 @@ export class FPSMeterController extends BaseEntity implements Entity {
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "Backslash") {
-      for (const fpsMeter of this.game!.entities.getByFilter(
+      for (const fpsMeter of this.game.entities.getByFilter(
         (e): e is FPSMeter => e instanceof FPSMeter,
       )) {
         fpsMeter.sprite.visible = !fpsMeter.sprite.visible;

@@ -29,8 +29,11 @@ export type GameEventHandler<Key extends GameEventName> = Record<
  * A thing that responds to game events.
  */
 export default interface Entity extends EventHandler<GameEventMap> {
-  /** The game this entity belongs to. This should only be set by the Game. */
-  game: Game | undefined;
+  /** The game this entity belongs to. Throws if the entity isn't in a game. Only the Game sets it. */
+  get game(): Game;
+  set game(value: Game | undefined);
+  /** Whether this entity is currently in a game */
+  readonly isAdded: boolean;
 
   /** TODO: Document entity.id */
   id?: string;

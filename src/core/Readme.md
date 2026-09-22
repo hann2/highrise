@@ -70,7 +70,7 @@ If you want an entity to do something every frame, put that logic in the `onTick
 ```TypeScript
   @on("tick")
   onTick(dt: number) {
-    if (this.game!.io.keyIsDown("Space")) {
+    if (this.game.io.keyIsDown("Space")) {
       // Accelerate upwards
       this.body.applyForce([-10, 0]);
     }

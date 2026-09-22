@@ -82,7 +82,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
         const gain = clamp(Math.abs(this.zVelocity) / 15) * 0.5;
         const speed = rNormal(1, 0.05);
         const position = this.getPosition();
-        this.game?.addEntity(
+        this.game.addEntity(
           new PositionalSound(sound, position, { gain, speed }),
         );
 
@@ -114,7 +114,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     const gain = clamp(this.body.velocity.magnitude / 10) * 0.5;
     const sound = this.bounceSounds.getNext();
     const position = this.getPosition();
-    this.game?.addEntity(new PositionalSound(sound, position, { gain }));
+    this.game.addEntity(new PositionalSound(sound, position, { gain }));
   }
 
   // Turn this into a static thing so we don't have any more on ticks or on renders or physics or whatnot
@@ -127,7 +127,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     sprite.rotation = this.sprite.rotation;
     sprite.layerName = this.sprite.layerName;
 
-    this.game?.addEntity(new StaticShellCasing(sprite));
+    this.game.addEntity(new StaticShellCasing(sprite));
 
     this.destroy();
   }

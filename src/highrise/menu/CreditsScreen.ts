@@ -91,7 +91,7 @@ export default class CreditsScreen extends BaseEntity implements Entity {
 
   @on("resize")
   onResize() {
-    this.sprite.x = this.game!.renderer.getWidth() / 2;
+    this.sprite.x = this.game.renderer.getWidth() / 2;
   }
 
   @on("keyDown")
@@ -102,14 +102,14 @@ export default class CreditsScreen extends BaseEntity implements Entity {
   }
 
   backToMenu() {
-    this.game?.addEntity(new MainMenu());
+    this.game.addEntity(new MainMenu());
     this.destroy();
   }
 
   @on("render")
   onRender() {
     let speed = SCROLL_SPEED;
-    if (this.game!.io.isKeyDown("Space")) {
+    if (this.game.io.isKeyDown("Space")) {
       speed *= 10;
     }
     this.sprite.y -= speed;

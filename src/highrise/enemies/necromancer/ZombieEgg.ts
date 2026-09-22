@@ -97,7 +97,7 @@ export class ZombieEgg extends BaseEntity implements Entity {
 
     const position = V(this.sprite.x, this.sprite.y);
 
-    this.game?.addEntity(new PositionalSound(getSplatSound(), position));
+    this.game.addEntity(new PositionalSound(getSplatSound(), position));
 
     const creatureSprite = this.makeCreatureSprite();
     creatureSprite.anchor.set(0.5);
@@ -119,7 +119,7 @@ export class ZombieEgg extends BaseEntity implements Entity {
 
     const creature = this.makeCreature(position);
     creature.body.angle = this.sprite.rotation;
-    this.game?.addEntity(creature);
+    this.game.addEntity(creature);
 
     this.destroy();
   }

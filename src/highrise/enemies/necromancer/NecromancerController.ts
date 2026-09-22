@@ -146,7 +146,7 @@ export default class NecromancerController
   getEnemiesInArena(): Human[] {
     const result: Human[] = [];
 
-    for (const human of this.game!.entities.getByFilter(isHuman)) {
+    for (const human of this.game.entities.getByFilter(isHuman)) {
       const p = human.getPosition();
       const c1 = this.necromancer.arenaUpperLeftCorner;
       const c2 = c1.add(this.necromancer.arenaDimensions);

@@ -16,17 +16,17 @@ export default class CheatController extends BaseEntity implements Entity {
   onKeyDown({ key }: { key: KeyCode }) {
     switch (key) {
       case "KeyL":
-        this.game!.dispatch("levelComplete", undefined);
+        this.game.dispatch("levelComplete", undefined);
         break;
       case "KeyV":
-        for (const visionController of this.game!.entities.getByFilter(
+        for (const visionController of this.game.entities.getByFilter(
           (e): e is VisionController => e instanceof VisionController,
         )) {
           visionController.sprite.visible = !visionController.sprite.visible;
         }
         break;
       case "KeyH":
-        for (const human of this.game!.entities.getByFilter(isHuman)) {
+        for (const human of this.game.entities.getByFilter(isHuman)) {
           human.heal(100);
         }
         break;
@@ -35,12 +35,12 @@ export default class CheatController extends BaseEntity implements Entity {
 
   @on("tick")
   onTick() {
-    const io = this.game!.io;
+    const io = this.game.io;
     if (io.usingGamepad) {
       const t = io.getButton(ControllerButton.LT);
-      this.game!.slowMo = lerp(1.0, 0.5, t);
+      this.game.slowMo = lerp(1.0, 0.5, t);
     } else {
-      this.game!.slowMo = io.isKeyDown("ShiftLeft") ? 0.2 : 1.0;
+      this.game.slowMo = io.isKeyDown("ShiftLeft") ? 0.2 : 1.0;
     }
   }
 }

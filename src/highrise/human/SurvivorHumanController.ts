@@ -38,7 +38,7 @@ export default class SurvivorHumanController
   }
 
   joinParty() {
-    this.game?.dispatch("addToParty", {
+    this.game.dispatch("addToParty", {
       human: this.human,
       survivorController: this,
     });
@@ -46,7 +46,7 @@ export default class SurvivorHumanController
 
   scanForTargets() {
     this.target = getNearestVisibleEnemy(
-      this.game!,
+      this.game,
       this.human,
       MAX_ATTACK_DISTANCE,
     );
@@ -67,7 +67,7 @@ export default class SurvivorHumanController
   @on("tick")
   onTick(dt: number) {
     // If our human dies/gets removed, we shouldn't be here anymore
-    if (!this.human.game) {
+    if (!this.human.isAdded) {
       this.destroy();
       return;
     }

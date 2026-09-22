@@ -44,7 +44,7 @@ export default class Light extends BaseEntity implements Entity {
 
   @on("add")
   onAdd() {
-    this.lightManager = this.game!.entities.getSingleton(LightingManager);
+    this.lightManager = this.game.entities.getSingleton(LightingManager);
     this.lightManager.addLight(this);
   }
 
@@ -71,7 +71,7 @@ export default class Light extends BaseEntity implements Entity {
         this.lightSprite.width * 0.5,
         this.lightSprite.height * 0.5,
       );
-      this.game?.renderer.app.renderer.render({
+      this.game.renderer.app.renderer.render({
         container: this.container,
         target: this.bakedTexture,
         clear: true,

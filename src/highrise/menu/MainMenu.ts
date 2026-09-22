@@ -101,7 +101,7 @@ export default class MainMenu extends BaseEntity implements Entity {
     if (!this.inTransition) {
       this.inTransition = true;
       await this.wait();
-      this.game?.addEntity(new CreditsScreen());
+      this.game.addEntity(new CreditsScreen());
       this.startText.eventMode = "none";
       this.creditsButton.sprite.eventMode = "none";
       this.feedbackButton.sprite.eventMode = "none";
@@ -134,7 +134,7 @@ export default class MainMenu extends BaseEntity implements Entity {
         this.creditsButton.sprite.alpha = smoothStep(1.0 - 4 * t);
         this.feedbackButton.sprite.alpha = smoothStep(1.0 - 4 * t);
       });
-      this.game?.dispatch("newGame", undefined);
+      this.game.dispatch("newGame", undefined);
       this.destroy();
     }
   }

@@ -52,7 +52,7 @@ export class LightSwitch extends BaseEntity implements Entity {
         gain: 0,
       }),
     );
-    this.game!.dispatch("lightsOn", { position: this.position });
+    this.game.dispatch("lightsOn", { position: this.position });
 
     await this.wait(0.5, (dt, t) => {
       loop.gain = t;

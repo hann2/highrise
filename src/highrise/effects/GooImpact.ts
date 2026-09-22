@@ -118,7 +118,7 @@ export default class GooImpact extends BaseEntity implements Entity {
   particleToSplat(particle: Particle) {
     const { x, y } = this.sprites![0];
     const splatPos = particle.position.add([x, y]);
-    this.game?.addEntities(
+    this.game.addEntities(
       new GooSplat(splatPos, particle.radius * 2),
       new PositionalSound(getSplatSound(), splatPos),
     );

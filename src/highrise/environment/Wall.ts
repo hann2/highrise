@@ -84,10 +84,10 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     if (sounds?.length) {
       const sound = choose(...sounds);
       const speed = rNormal(1, 0.08);
-      this.game!.addEntity(new PositionalSound(sound, position, { speed }));
+      this.game.addEntity(new PositionalSound(sound, position, { speed }));
     }
 
-    this.game!.addEntities(
+    this.game.addEntities(
       new WallImpact(position, normal, this.type.color),
       new BulletHole(position),
     );

@@ -56,24 +56,24 @@ export default class CameraController extends BaseEntity implements Entity {
   onRender() {
     this.getListener().setPosition(this.camera.position);
 
-    if (this.game?.io.isKeyDown("Equal")) {
+    if (this.game.io.isKeyDown("Equal")) {
       this.camera.z *= 1.01;
     }
-    if (this.game?.io.isKeyDown("Minus")) {
+    if (this.game.io.isKeyDown("Minus")) {
       this.camera.z *= 0.99;
     }
   }
 
   getListener(): PositionalSoundListener {
-    return this.game!.entities.getSingleton(PositionalSoundListener);
+    return this.game.entities.getSingleton(PositionalSoundListener);
   }
 
   @on("inputDeviceChange")
   onInputDeviceChange({ usingGamepad }: { usingGamepad: boolean }) {
     if (usingGamepad) {
-      this.game?.renderer.hideCursor();
+      this.game.renderer.hideCursor();
     } else {
-      this.game?.renderer.setCursor("crosshair");
+      this.game.renderer.setCursor("crosshair");
     }
   }
 }

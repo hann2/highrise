@@ -10,20 +10,8 @@ export default class VolumeController extends BaseEntity implements Entity {
   pausable = false;
   persistenceLevel = Persistence.Permanent;
 
-  private _muted!: boolean;
-  private _volume!: number;
-
-  constructor() {
-    super();
-
-    this.muted = localStorage.getItem("muted") === "true";
-    const loadedVolume = parseFloat(localStorage.getItem("volume") ?? "");
-    if (!isNaN(loadedVolume) && loadedVolume >= 0) {
-      this.volume = clamp(loadedVolume);
-    } else {
-      this.volume = 1;
-    }
-  }
+  private _muted = localStorage.getItem("muted") === "true";
+  private _volume = loadSavedVolume();
 
   get muted(): boolean {
     return this._muted;
@@ -31,14 +19,12 @@ export default class VolumeController extends BaseEntity implements Entity {
 
   set muted(muted: boolean) {
     this._muted = muted;
-    if (this.game) {
-      this.game.masterGain.gain.value = muted ? 0 : this.volume;
-      localStorage.setItem("muted", muted ? "true" : "false");
-      this.game.dispatch("muteChanged", {
-        muted: this._muted,
-        volume: this._volume,
-      });
-    }
+    this.game.masterGain.gain.value = muted ? 0 : this.volume;
+    localStorage.setItem("muted", muted ? "true" : "false");
+    this.game.dispatch("muteChanged", {
+      muted: this._muted,
+      volume: this._volume,
+    });
   }
 
   get volume() {
@@ -48,8 +34,8 @@ export default class VolumeController extends BaseEntity implements Entity {
   set volume(value: number) {
     if (!isNaN(value)) {
       this._volume = clamp(value);
-      localStorage.setItem("volume", String(value));
-      this.game?.dispatch("volumeChanged", {
+      localStorage.setItem("volume", String(this._volume));
+      this.game.dispatch("volumeChanged", {
         muted: this._muted,
         volume: this._volume,
       });
@@ -72,6 +58,11 @@ export default class VolumeController extends BaseEntity implements Entity {
       this.muted = !this._muted;
     }
   }
+}
+
+function loadSavedVolume(): number {
+  const saved = parseFloat(localStorage.getItem("volume") ?? "");
+  return isNaN(saved) ? 1 : clamp(saved);
 }
 
 export function getVolumeController(game: Game): VolumeController {

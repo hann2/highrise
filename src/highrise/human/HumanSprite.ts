@@ -116,7 +116,7 @@ export default class HumanSprite extends BodySprite {
     } else {
       // Wave em in the air like you just don't care?
       const x = 0.3 + pushOffset;
-      const y = Math.sin(this.game!.elapsedTime * 2) * 0.05;
+      const y = Math.sin(this.game.elapsedTime * 2) * 0.05;
       return [V(x, -0.2 + y), V(x, 0.2 - y)];
     }
   }

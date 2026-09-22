@@ -118,7 +118,7 @@ export default class SimpleEnemyController
     // Walk until we hit a wall
     const from = this.enemy.getPosition();
     const to = from.add(shamblingDirection.mul(100));
-    const hit = this.game!.world.raycast(from, to, {
+    const hit = this.game.world.raycast(from, to, {
       skipBackfaces: true,
       collisionMask: CollisionGroups.Walls,
     });
@@ -146,7 +146,7 @@ export default class SimpleEnemyController
     let nearestVisibleHuman: Human | undefined;
     let nearestDistance: number = maxDistance;
 
-    for (const human of this.game!.entities.getByFilter(isHuman)) {
+    for (const human of this.game.entities.getByFilter(isHuman)) {
       const distance = human.body.position.distanceTo(this.enemy.body.position);
       if (distance < nearestDistance) {
         if (this.inVision(human)) {

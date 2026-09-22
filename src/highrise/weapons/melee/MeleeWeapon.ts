@@ -67,7 +67,7 @@ export default class MeleeWeapon extends BaseEntity implements Entity {
     const sounds = this.stats.sounds[soundClass];
     if (sounds.length > 0) {
       const soundName = choose(...sounds);
-      this.game?.addEntity(new PositionalSound(soundName, position));
+      this.game.addEntity(new PositionalSound(soundName, position));
     }
   }
 }

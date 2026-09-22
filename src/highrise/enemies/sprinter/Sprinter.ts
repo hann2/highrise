@@ -60,7 +60,7 @@ export default class Sprinter extends BaseEnemy {
         this.voice.speak("attack");
       },
       onAttack: () => {
-        if (this.game) {
+        if (this.isAdded) {
           for (const human of getHumansInRange(
             this.game,
             this.body.position,

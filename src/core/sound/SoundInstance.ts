@@ -47,7 +47,7 @@ export class SoundInstance extends BaseEntity implements Entity {
   }
 
   set pan(value: number) {
-    if (!this.game) {
+    if (!this.isAdded) {
       this.options.pan = value;
     } else {
       this.panNode.pan.value = value;
@@ -55,7 +55,7 @@ export class SoundInstance extends BaseEntity implements Entity {
   }
 
   get pan(): number {
-    if (!this.game) {
+    if (!this.isAdded) {
       return this.options.pan ?? 0;
     } else {
       return this.panNode.pan.value;
@@ -63,7 +63,7 @@ export class SoundInstance extends BaseEntity implements Entity {
   }
 
   set gain(value: number) {
-    if (!this.game) {
+    if (!this.isAdded) {
       this.options.gain = value;
     } else {
       this.gainNode.gain.value = value;
@@ -71,7 +71,7 @@ export class SoundInstance extends BaseEntity implements Entity {
   }
 
   get gain(): number {
-    if (!this.game) {
+    if (!this.isAdded) {
       return this.options.gain ?? 1;
     } else {
       return this.gainNode.gain.value;
@@ -155,7 +155,7 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   @on("tick")
   onTick() {
-    const now = this.game!.audio.currentTime;
+    const now = this.game.audio.currentTime;
     this.elapsed += (now - this.lastTick) * this.sourceNode.playbackRate.value;
     if (this.continuous) {
       this.elapsed = this.elapsed % this.sourceNode.buffer!.duration;
@@ -164,7 +164,7 @@ export class SoundInstance extends BaseEntity implements Entity {
   }
 
   updatePlaybackRate() {
-    if (this.sourceNode && this.game) {
+    if (this.sourceNode && this.isAdded) {
       if (this.reactToSlowMo) {
         this.sourceNode.playbackRate.value = this._speed * this.game.slowMo;
       } else {
@@ -201,13 +201,13 @@ export class SoundInstance extends BaseEntity implements Entity {
 
   restartSound(startTime: number) {
     this.sourceNode.disconnect();
-    const newNode = this.game!.audio.createBufferSource();
+    const newNode = this.game.audio.createBufferSource();
     newNode.buffer = this.sourceNode.buffer;
     newNode.loop = this.sourceNode.loop;
     this.sourceNode = newNode;
     this.sourceNode.connect(this.panNode);
     this.sourceNode.start(
-      this.game!.audio.currentTime,
+      this.game.audio.currentTime,
       clamp(startTime, 0, this.sourceNode.buffer!.duration),
     );
   }

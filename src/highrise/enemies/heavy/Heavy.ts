@@ -52,7 +52,7 @@ export default class Heavy extends BaseEnemy {
   }
 
   handleDeath() {
-    this.game?.addEntity(new FleshImpact(this.getPosition(), 9));
+    this.game.addEntity(new FleshImpact(this.getPosition(), 9));
     this.voice.speak("death", true);
   }
 
@@ -66,7 +66,7 @@ export default class Heavy extends BaseEnemy {
         this.voice.speak("attack");
       },
       onAttack: () => {
-        if (this.game) {
+        if (this.isAdded) {
           for (const human of getHumansInRange(
             this.game,
             this.body.position,

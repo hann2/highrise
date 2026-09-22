@@ -81,7 +81,7 @@ export default class VendingMachine
       new Interactable(
         position,
         () => {
-          this.game?.addEntity(new PositionalSound("quarterDrop1", position));
+          this.game.addEntity(new PositionalSound("quarterDrop1", position));
         },
         1.2,
       ),
@@ -116,7 +116,7 @@ export default class VendingMachine
   hitByMelee(swingingWeapon: SwingingWeapon, position: V2d): void {
     this.hp -= swingingWeapon.getDamage();
 
-    this.game!.addEntities(
+    this.game.addEntities(
       new PositionalSound(choose(...VENDING_MACHINE_HIT_SOUNDS), position),
       new WallImpact(position),
     );
@@ -129,7 +129,7 @@ export default class VendingMachine
   hitByBullet(bullet: Bullet, position: V2d, normal: V2d) {
     this.hp -= bullet.damage;
 
-    this.game!.addEntities(
+    this.game.addEntities(
       new PositionalSound(choose(...VENDING_MACHINE_HIT_SOUNDS), position),
       new WallImpact(position, normal, 0x444444),
     );

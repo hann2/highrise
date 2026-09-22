@@ -4,8 +4,6 @@ import type { BaseEnemy } from "../highrise/enemies/base/Enemy";
 import type Human from "../highrise/human/Human";
 import type SurvivorHumanController from "../highrise/human/SurvivorHumanController";
 import type { Level } from "../highrise/levels/Level";
-import type Gun from "../highrise/weapons/guns/Gun";
-import type MeleeWeapon from "../highrise/weapons/melee/MeleeWeapon";
 
 /**
  * Global event types that can be dispatched by the Game and listened to by entities.
@@ -24,7 +22,6 @@ export type CustomEvents = {
 
   // Humans
   addToParty: { human: Human; survivorController?: SurvivorHumanController };
-  giveWeapon: { human: Human; weapon: Gun | MeleeWeapon };
   humanInjured: { human: Human; amount: number };
   humanHealed: { human: Human; amount: number };
   humanDied: { human: Human };

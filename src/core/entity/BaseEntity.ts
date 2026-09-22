@@ -19,7 +19,7 @@ export default abstract class BaseEntity implements Entity {
   body?: Body;
   children: Entity[] = [];
   constraints?: Constraint[];
-  game: Game | undefined = undefined;
+  private _game?: Game;
   parent?: Entity;
   pausable: boolean = true;
   persistenceLevel: number = 0;
@@ -29,6 +29,24 @@ export default abstract class BaseEntity implements Entity {
   sprite?: GameSprite;
   sprites?: GameSprite[];
 
+  /** The game this entity is in. Throws if it hasn't been added yet (or has been destroyed). */
+  get game(): Game {
+    if (!this._game) {
+      throw new Error(
+        `${this.constructor.name} used this.game while not in a game`,
+      );
+    }
+    return this._game;
+  }
+
+  set game(value: Game | undefined) {
+    this._game = value;
+  }
+
+  get isAdded(): boolean {
+    return this._game != undefined;
+  }
+
   constructor(entityDef?: EntityDef) {
     if (entityDef) {
       this.loadFromDef(entityDef);
@@ -36,7 +54,7 @@ export default abstract class BaseEntity implements Entity {
   }
 
   loadFromDef(def: EntityDef): void {
-    if (this.game) {
+    if (this.isAdded) {
       throw new Error(
         "Can't load from def after entity has been added to game.",
       );
@@ -84,13 +102,13 @@ export default abstract class BaseEntity implements Entity {
   }
 
   get isDestroyed() {
-    return this.game == null;
+    return !this.isAdded;
   }
 
   // Removes this from the game. You probably shouldn't override this method.
   destroy() {
-    if (this.game) {
-      this.game.removeEntity(this);
+    if (this._game) {
+      this._game.removeEntity(this);
       while (this.children?.length) {
         this.children[this.children.length - 1].destroy();
       }
@@ -120,7 +138,7 @@ export default abstract class BaseEntity implements Entity {
     this.children = this.children ?? [];
     this.children.push(child);
 
-    if (this.game && !child.game) {
+    if (this.isAdded && !child.isAdded) {
       this.game.addEntity(child);
     }
     return child;
@@ -228,7 +246,7 @@ export default abstract class BaseEntity implements Entity {
     data: GameEventMap[EventName],
     respectPause?: boolean,
   ) {
-    this.game?.dispatch(eventName, data, respectPause);
+    this.game.dispatch(eventName, data, respectPause);
   }
 }
 

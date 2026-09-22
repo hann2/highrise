@@ -64,8 +64,8 @@ export default class PauseMenu extends BaseEntity implements Entity {
 
     this.mainMenuButton = this.addChild(
       new ClickableText("Main Menu", () => {
-        this.game?.unpause();
-        this.game?.dispatch("gameOver", { victory: false });
+        this.game.unpause();
+        this.game.dispatch("gameOver", { victory: false });
         this.destroy();
       }),
     );
@@ -126,14 +126,14 @@ export default class PauseMenu extends BaseEntity implements Entity {
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyP") {
-      this.game?.togglePause();
+      this.game.togglePause();
     }
   }
 
   @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
     if (button === ControllerButton.START) {
-      this.game?.togglePause();
+      this.game.togglePause();
     }
   }
 }

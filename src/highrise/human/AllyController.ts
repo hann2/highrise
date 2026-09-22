@@ -43,7 +43,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
     const human = this.human;
     const leader = this.getLeader();
     // If our human dies/gets removed, we shouldn't be here anymore
-    if (!human.game) {
+    if (!human.isAdded) {
       this.destroy();
       return;
     }
@@ -82,7 +82,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
     }
 
     const nearestVisibleZombie = getNearestVisibleEnemy(
-      this.game!,
+      this.game,
       human,
       MAX_SHOOT_DISTANCE,
     );

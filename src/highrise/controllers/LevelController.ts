@@ -31,8 +31,8 @@ export default class LevelController extends BaseEntity implements Entity {
 
     await this.wait(0.0); // so that this happens async (why does that matter?)
 
-    this.game?.dispatch("startLevel", { level });
-    this.game?.addEntity(new FadeEffect(0, 0, 1.5 * LEVEL_FADE_TIME));
+    this.game.dispatch("startLevel", { level });
+    this.game.addEntity(new FadeEffect(0, 0, 1.5 * LEVEL_FADE_TIME));
   }
 
   // We just got to the exit
@@ -46,29 +46,29 @@ export default class LevelController extends BaseEntity implements Entity {
     const fadeOutTime = LEVEL_FADE_TIME;
     const fadeHoldTime = LEVEL_FADE_TIME / 2;
     const fadeInTime = LEVEL_FADE_TIME;
-    this.game?.addEntity(new FadeEffect(fadeOutTime, fadeHoldTime, fadeInTime));
+    this.game.addEntity(new FadeEffect(fadeOutTime, fadeHoldTime, fadeInTime));
 
     await this.wait(fadeOutTime);
-    this.game?.clearScene(Persistence.Floor);
+    this.game.clearScene(Persistence.Floor);
 
     if (this.currentLevel <= MAX_LEVEL) {
       const level = this.generateLevel();
-      this.game?.dispatch("startLevel", { level });
+      this.game.dispatch("startLevel", { level });
     } else {
-      this.game?.dispatch("gameOver", { victory: true });
+      this.game.dispatch("gameOver", { victory: true });
     }
   }
 
   // We just started a new level
   @on("startLevel")
   onStartLevel({ level }: { level: Level }) {
-    this.game!.addEntities(...level.entities);
+    this.game.addEntities(...level.entities);
   }
 
   // The whole party is dead
   @on("partyDead")
   onPartyDead() {
-    this.game?.dispatch("gameOver", { victory: false });
+    this.game.dispatch("gameOver", { victory: false });
   }
 
   generateLevel(): Level {

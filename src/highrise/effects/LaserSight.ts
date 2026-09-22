@@ -51,7 +51,7 @@ export class LaserSight extends BaseEntity implements Entity {
 
     this.startDot.position.copyFrom(from);
 
-    const hit = this.game?.world.raycast(from, to, {
+    const hit = this.game.world.raycast(from, to, {
       collisionMask: LASER_COLLISION_MASK,
       filter: (_body, shape) =>
         (shape.collisionMask & CollisionGroups.Projectiles) !== 0,

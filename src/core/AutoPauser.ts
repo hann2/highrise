@@ -21,13 +21,13 @@ export default class AutoPauser extends BaseEntity implements Entity {
 
   onVisibilityChange = () => {
     if (document.hidden) {
-      if (!this.game!.paused) {
-        this.game!.pause();
+      if (!this.game.paused) {
+        this.game.pause();
         this.autoPaused = true;
       }
     } else {
-      if (this.autoPaused && this.game!.paused) {
-        this.game!.unpause();
+      if (this.autoPaused && this.game.paused) {
+        this.game.unpause();
         this.autoPaused = false;
       }
     }

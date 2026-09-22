@@ -27,7 +27,7 @@ export class SparkGenerator extends BaseEntity implements Entity {
   onTick(dt: number) {
     const sparkMaxLifetime = 0.8;
     const sparkFrequency =
-      clampUp(Math.sin((this.game!.elapsedTime * Math.PI * 2) / this.period)) *
+      clampUp(Math.sin((this.game.elapsedTime * Math.PI * 2) / this.period)) *
       this.baseSparkFrequency;
 
     if (sparkFrequency !== 0) {

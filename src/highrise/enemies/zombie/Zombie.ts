@@ -59,7 +59,7 @@ export default class Zombie extends BaseEnemy {
         this.voice.speak("attack");
       },
       onAttack: () => {
-        if (this.game) {
+        if (this.isAdded) {
           for (const human of getHumansInRange(
             this.game,
             this.body.position,
@@ -83,7 +83,7 @@ export default class Zombie extends BaseEnemy {
     super.handleDeath();
 
     if (rBool(CRAWLER_CHANCE)) {
-      this.game?.addEntity(
+      this.game.addEntity(
         new Crawler(
           this.getPosition(),
           this.body.angle,

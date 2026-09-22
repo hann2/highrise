@@ -77,7 +77,7 @@ export default class PlayerHumanController
       return;
     }
 
-    const io = this.game!.io;
+    const io = this.game.io;
 
     // Shooting
     if (
@@ -97,7 +97,7 @@ export default class PlayerHumanController
         this.human.setDirection(direction.angle, dt);
       }
     } else {
-      const mousePosition = this.game!.camera.toWorld(io.mousePosition);
+      const mousePosition = this.game.camera.toWorld(io.mousePosition);
       const mouseDirection = mousePosition.sub(this.human.getPosition()).angle;
       this.human.setDirection(mouseDirection, dt);
     }

@@ -62,7 +62,7 @@ export class Projectile extends BaseEntity implements Entity {
 
   checkForCollision(dt: number): HitResult | undefined {
     return projectileRaycast(
-      this.game!,
+      this.game,
       this.position,
       this.position.addScaled(this.velocity, dt),
       this.makeCollisionMask(),

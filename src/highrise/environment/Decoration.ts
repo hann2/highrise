@@ -86,14 +86,14 @@ export default class Decoration extends BaseEntity implements Entity, Hittable {
   hitByMelee(swingingWeapon: SwingingWeapon, position: V2d): void {
     if (this.decorationInfo.isHittable) {
       const sounds = this.decorationInfo.hitSounds ?? DEFAULT_HIT_SOUNDS;
-      this.game?.addEntity(new PositionalSound(choose(...sounds), position));
+      this.game.addEntity(new PositionalSound(choose(...sounds), position));
     }
   }
 
   hitByBullet(bullet: Bullet, position: V2d, normal: V2d) {
     if (this.decorationInfo.isHittable) {
       const sounds = this.decorationInfo.hitSounds ?? DEFAULT_HIT_SOUNDS;
-      this.game!.addEntities(
+      this.game.addEntities(
         new PositionalSound(choose(...sounds), position),
         new WallImpact(position, normal),
       );

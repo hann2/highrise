@@ -9,7 +9,7 @@ export function testLineOfSight(
   looker: BaseEntity,
   target: BaseEntity,
 ): boolean {
-  const hit = looker.game!.world.raycast(
+  const hit = looker.game.world.raycast(
     looker.getPosition(),
     target.getPosition(),
     { skipBackfaces: true, collisionMask: CollisionGroups.CastsShadow },

@@ -37,7 +37,7 @@ export default class PartyManager extends BaseEntity implements Entity {
   }: PartyEvent & { survivorController?: SurvivorHumanController }) {
     this.partyMembers.push(human);
     survivorController?.destroy();
-    this.game!.addEntity(new AllyHumanController(human, () => this.leader));
+    this.game.addEntity(new AllyHumanController(human, () => this.leader));
 
     human.persistenceLevel = Persistence.Game;
 
@@ -79,7 +79,7 @@ export default class PartyManager extends BaseEntity implements Entity {
       if (this.partyMembers.length > 0) {
         this.setLeader(this.partyMembers[0]);
       } else {
-        this.game!.dispatch("partyDead", undefined);
+        this.game.dispatch("partyDead", undefined);
       }
     }
   }
@@ -97,7 +97,7 @@ export default class PartyManager extends BaseEntity implements Entity {
   }
 
   getAllyControllers() {
-    return this.game!.entities.getByFilter(isAllyController);
+    return this.game.entities.getByFilter(isAllyController);
   }
 
   setLeader(leader: Human) {

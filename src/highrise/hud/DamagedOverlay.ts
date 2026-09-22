@@ -86,7 +86,7 @@ export class DamagedOverlay extends BaseEntity implements Entity {
   }
 
   makeOverlay(color: number = 0xff0000): Graphics {
-    const [width, height] = this.game!.renderer.getSize();
+    const [width, height] = this.game.renderer.getSize();
     return new Graphics().rect(0, 0, width, height).fill(color);
   }
 

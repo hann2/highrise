@@ -24,7 +24,7 @@ export default class LightingManager extends BaseEntity implements Entity {
   ambientColor = 0;
 
   private get renderer() {
-    return this.game!.renderer.app.renderer;
+    return this.game.renderer.app.renderer;
   }
 
   @on("resize")
@@ -108,7 +108,7 @@ export default class LightingManager extends BaseEntity implements Entity {
   // Use late render so that it happens after everyone else has rendered and all their light positions and stuff are updated
   @on("lateRender")
   onLateRender() {
-    const camera = this.game!.camera;
+    const camera = this.game.camera;
     this.lightContainer.setFromMatrix(camera.getMatrix());
 
     const [minX, minY] = camera.toWorld(V(0, 0));

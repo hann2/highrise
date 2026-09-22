@@ -9,7 +9,7 @@ import ClickableText from "./ClickableText";
 export default class GraphicsButton extends ClickableText {
   constructor() {
     super("Graphics: ", () => {
-      this.game?.dispatch("toggleGraphicsQuality", undefined);
+      this.game.dispatch("toggleGraphicsQuality", undefined);
     });
   }
 

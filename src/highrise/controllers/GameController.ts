@@ -20,14 +20,14 @@ export class GameController extends BaseEntity implements Entity {
 
   @on("goToMainMenu")
   onGoToMainMenu() {
-    const game = this.game!;
+    const game = this.game;
     game.clearScene(Persistence.Menu);
     game.addEntity(new MainMenu());
   }
 
   @on("newGame")
   onNewGame() {
-    const game = this.game!;
+    const game = this.game;
     const partyManager = game.addEntity(new PartyManager());
     const getPlayer = () => partyManager.leader;
     game.addEntities(
@@ -44,7 +44,7 @@ export class GameController extends BaseEntity implements Entity {
 
   @on("gameOver")
   async onGameOver({ victory }: { victory: boolean }) {
-    const game = this.game!;
+    const game = this.game;
 
     const gameOverScreen = game.addEntity(new GameOverScreen(victory));
     await this.waitUntil(() => gameOverScreen.sprite.alpha > 0.99);

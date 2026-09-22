@@ -23,7 +23,7 @@ export default class PositionalSoundListener
   }
 
   setPosition(position: V2d) {
-    for (const sound of this.game!.entities.getByFilter(isPositionalSound)) {
+    for (const sound of this.game.entities.getByFilter(isPositionalSound)) {
       sound.setListenerPosition(position);
     }
   }

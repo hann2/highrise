@@ -6,7 +6,7 @@ import ClickableText from "./ClickableText";
 export default class MuteButton extends ClickableText {
   constructor() {
     super("Mute", () => {
-      this.game?.dispatch("toggleMute", undefined);
+      this.game.dispatch("toggleMute", undefined);
     });
   }
 

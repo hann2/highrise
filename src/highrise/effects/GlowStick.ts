@@ -87,7 +87,7 @@ export default class GlowStick extends BaseEntity implements Entity {
         const gain = clamp(Math.abs(this.zVelocity) / 15) * 2;
         const sound = choose(...DROP_SOUNDS);
         const position = this.getPosition();
-        this.game?.addEntity(new PositionalSound(sound, position, { gain }));
+        this.game.addEntity(new PositionalSound(sound, position, { gain }));
 
         this.zVelocity *= -BOUNCE_RESTITUTION;
         this.body.angularVelocity *= 0.5;
@@ -108,7 +108,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     const gain = clamp(this.body.velocity.magnitude / 5);
     const sound = choose(...DROP_SOUNDS);
     const position = this.getPosition();
-    this.game?.addEntity(new PositionalSound(sound, position, { gain }));
+    this.game.addEntity(new PositionalSound(sound, position, { gain }));
   }
 
   @on("afterPhysics")
@@ -134,7 +134,7 @@ export default class GlowStick extends BaseEntity implements Entity {
     sprite.rotation = this.sprite.rotation;
     sprite.layerName = this.sprite.layerName;
 
-    this.game?.addEntity(new StaticGlowstick(sprite, this.light));
+    this.game.addEntity(new StaticGlowstick(sprite, this.light));
 
     this.destroy();
   }

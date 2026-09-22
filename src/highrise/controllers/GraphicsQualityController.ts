@@ -46,7 +46,7 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
 
   setGraphicsQuality(quality: GraphicsQuality) {
     this.currentQuality = quality;
-    this.game?.dispatch("graphicsQualityChanged", { quality });
+    this.game.dispatch("graphicsQualityChanged", { quality });
     localStorage.setItem("graphicsQuality", quality);
   }
 
@@ -74,7 +74,7 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
 
   @on("graphicsQualityChanged")
   onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
-    this.game?.renderer.setResolution(getResolutionForGraphicsQuality(quality));
+    this.game.renderer.setResolution(getResolutionForGraphicsQuality(quality));
   }
 }
 

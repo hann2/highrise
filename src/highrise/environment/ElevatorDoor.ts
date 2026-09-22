@@ -79,7 +79,7 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
   hitByMelee() {}
 
   hitByBullet(bullet: Bullet, position: V2d) {
-    this.game!.addEntity(
+    this.game.addEntity(
       new PositionalSound(choose("wallHit1", "wallHit2"), position),
     );
     return true;
@@ -140,12 +140,12 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
 
   async handleInteract() {
     if (this.state === "STOPPED") {
-      this.game?.addEntity(new PositionalSound("elevatorDing", this.center));
+      this.game.addEntity(new PositionalSound("elevatorDing", this.center));
       const isClosing = this.openPercentage === 1;
       this.state = isClosing ? "CLOSING" : "OPENING";
       await this.wait(DING_TIME);
       const sound = isClosing ? "elevatorDoorClose" : "elevatorDoorOpen";
-      this.game?.addEntity(new PositionalSound(sound, this.center));
+      this.game.addEntity(new PositionalSound(sound, this.center));
       await this.wait(isClosing ? CLOSE_TIME : OPEN_TIME, (dt, t) => {
         this.openPercentage = smoothStep(isClosing ? 1 - t : t);
         this.topDoor.setOpenPercentage(this.openPercentage);

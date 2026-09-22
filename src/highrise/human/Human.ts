@@ -142,17 +142,17 @@ export default class Human extends BaseEntity implements Entity {
     }
   }
 
-  async giveWeapon(weapon: Gun | MeleeWeapon, shouldSpeak: boolean = true) {
+  /** Equip a weapon. `isPickup` is false for weapons a human spawns holding. */
+  async giveWeapon(weapon: Gun | MeleeWeapon, isPickup: boolean = true) {
     if (this.weapon) {
       this.dropWeapon();
     }
     this.weapon = weapon;
     this.addChild(weapon, true);
-    this.game?.dispatch("giveWeapon", { human: this, weapon });
-    weapon.playSound("pickup", this.getPosition());
     this.humanSprite.handleNewWeapon(weapon);
 
-    if (shouldSpeak) {
+    if (isPickup) {
+      weapon.playSound("pickup", this.getPosition());
       await this.wait(0.5);
       this.voice.speak(weapon instanceof Gun ? "pickupGun" : "pickupMelee");
     }
@@ -160,7 +160,7 @@ export default class Human extends BaseEntity implements Entity {
 
   dropWeapon() {
     if (this.weapon) {
-      this.game?.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
+      this.game.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
       this.weapon = undefined;
       this.humanSprite.handleDropWeapon();
     }
@@ -169,7 +169,7 @@ export default class Human extends BaseEntity implements Entity {
   // Return a list of all interactables within range
   getNearbyInteractables(): Interactable[] {
     return (
-      [...this.game!.entities.getByFilter(isInteractable)]
+      [...this.game.entities.getByFilter(isInteractable)]
         // .filter((i) => testLineOfSight(i, this)) // TODO: Fast vision test for interactables
         .filter(
           (i) => i.getPosition().distanceTo(this.body.position) < i.maxDistance,
@@ -195,10 +195,13 @@ export default class Human extends BaseEntity implements Entity {
 
   // Inflict damage on the human
   async inflictDamage(amount: number) {
+    if (this.isDestroyed) {
+      return;
+    }
     this.hp -= amount;
 
-    this.game?.addEntity(new FleshImpact(this.getPosition(), 1));
-    this.game?.dispatch("humanInjured", { human: this, amount });
+    this.game.addEntity(new FleshImpact(this.getPosition(), 1));
+    this.game.dispatch("humanInjured", { human: this, amount });
 
     if (this.hp <= 0) {
       this.die();
@@ -212,12 +215,15 @@ export default class Human extends BaseEntity implements Entity {
   }
 
   die() {
+    if (this.isDestroyed) {
+      return;
+    }
     this.voice.speak("death", true);
-    this.game?.dispatch("humanDied", { human: this });
-    this.game?.addEntity(new FleshImpact(this.getPosition(), 6));
+    this.game.dispatch("humanDied", { human: this });
+    this.game.addEntity(new FleshImpact(this.getPosition(), 6));
 
     if (this.weapon) {
-      this.game?.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
+      this.game.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
     }
     this.destroy();
   }
@@ -225,7 +231,7 @@ export default class Human extends BaseEntity implements Entity {
   heal(amount: number) {
     this.voice.speak("pickupHealth");
     this.hp = Math.min(this.hp + amount, this.maxHp);
-    this.game?.dispatch("humanHealed", { human: this, amount });
+    this.game.dispatch("humanHealed", { human: this, amount });
   }
 
   pushAction = new PhasedAction([
@@ -237,10 +243,10 @@ export default class Human extends BaseEntity implements Entity {
       name: "push",
       duration: 0.05,
       startAction: () => {
-        this.game?.addEntity(
+        this.game.addEntity(
           new PositionalSound("swordSwoosh1", this.getPosition()),
         );
-        const enemies = this.game!.entities.getByFilter(isEnemy);
+        const enemies = this.game.entities.getByFilter(isEnemy);
         for (const enemy of enemies) {
           const relPosition = enemy.getPosition().isub(this.getPosition());
           const distance = clampUp(
@@ -256,7 +262,7 @@ export default class Human extends BaseEntity implements Entity {
             enemy.knockback(relPosition.inormalize().imul(amount));
             enemy.stun(PUSH_STUN * rNormal(1, 0.2));
             enemy.voice.speak("hit");
-            this.game?.addEntity(
+            this.game.addEntity(
               new PositionalSound(pushSoundRing.getNext(), this.getPosition(), {
                 gain: amount / PUSH_KNOCKBACK,
                 speed: rNormal(1, 0.05),
@@ -298,7 +304,7 @@ export default class Human extends BaseEntity implements Entity {
       name: "throw",
       duration: 0.1,
       startAction: () => {
-        this.game?.addEntity(
+        this.game.addEntity(
           new GlowStick(
             this.getPosition(),
             polarToVec(this.getDirection(), rNormal(5, 1)).iadd(

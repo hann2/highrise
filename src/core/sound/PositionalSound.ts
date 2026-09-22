@@ -25,7 +25,7 @@ export class PositionalSound extends SoundInstance implements Entity {
   private maxDistance;
 
   set distanceGain(value: number) {
-    if (!this.game) {
+    if (!this.isAdded) {
       this._distanceGain = value;
     } else {
       this.distanceGainNode.gain.value = value;

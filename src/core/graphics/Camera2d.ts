@@ -96,7 +96,7 @@ export class Camera2d extends BaseEntity implements Entity {
     stiffness: number = 4.0,
   ) {
     // Closing more than the whole gap in one tick would overshoot
-    const k = Math.min(stiffness, this.game!.ticksPerSecond);
+    const k = Math.min(stiffness, this.game.ticksPerSecond);
     this.vx = vx + k * (x - this.x);
     this.vy = vy + k * (y - this.y);
   }

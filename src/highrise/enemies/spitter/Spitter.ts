@@ -50,7 +50,7 @@ export default class Spitter extends BaseEnemy {
         this.voice.speak("attack");
       },
       onAttack: () => {
-        if (this.game) {
+        if (this.isAdded) {
           this.game.addEntity(
             new Phlegm(
               this.getPosition(),
@@ -73,12 +73,12 @@ export default class Spitter extends BaseEnemy {
   }
 
   makeBlood(position: V2d, damage: number, normal?: V2d) {
-    this.game?.addEntity(new GooImpact(position, damage / 10, normal));
+    this.game.addEntity(new GooImpact(position, damage / 10, normal));
   }
 
   handleDeath() {
     super.handleDeath();
-    this.game?.addEntity(new GooImpact(this.getPosition(), 5));
+    this.game.addEntity(new GooImpact(this.getPosition(), 5));
     this.voice.speak("death");
   }
 }

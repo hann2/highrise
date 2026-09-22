@@ -126,7 +126,7 @@ export class Shadows extends BaseEntity implements Entity {
   // Returns the nearby bodies that cast a shadow
   getAffectedBodies(): Body[] {
     const center = this.lightPos;
-    const world = this.game!.world;
+    const world = this.game.world;
     const aabb = new AABB({
       lowerBound: center.sub([this.radius, this.radius]),
       upperBound: center.add([this.radius, this.radius]),

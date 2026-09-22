@@ -93,7 +93,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
 
   particleToSplat(particle: Particle) {
     const splatPos = particle.position.add(this.getPosition());
-    this.game?.addEntities(
+    this.game.addEntities(
       new BloodSplat(splatPos, particle.radius * 2),
       new PositionalSound(getSplatSound(), splatPos),
     );

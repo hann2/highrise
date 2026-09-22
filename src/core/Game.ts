@@ -174,7 +174,7 @@ export default class Game {
   ) {
     const effectivelyPaused = respectPause && this.paused;
     for (const entity of this.entities.getHandlers(eventName)) {
-      if (entity.game && !(effectivelyPaused && entity.pausable)) {
+      if (entity.isAdded && !(effectivelyPaused && entity.pausable)) {
         const functionName = eventHandlerName(eventName);
         entity[functionName](data);
       }
@@ -189,7 +189,7 @@ export default class Game {
     }
 
     // If the entity was destroyed during it's onAdd, we shouldn't add it
-    if (!entity.game) {
+    if (!entity.isAdded) {
       return entity;
     }
 
@@ -236,7 +236,7 @@ export default class Game {
 
     if (entity.children) {
       for (const child of entity.children) {
-        if (!child.game) {
+        if (!child.isAdded) {
           this.addEntity(child);
         }
       }
@@ -287,7 +287,7 @@ export default class Game {
   clearScene(persistenceThreshold = 0) {
     for (const entity of this.entities) {
       if (
-        entity.game && // Not already destroyed
+        entity.isAdded && // Not already destroyed
         !this.entitiesToRemove.has(entity) && // not already about to be destroyed
         entity.persistenceLevel <= persistenceThreshold &&
         !entity.parent // We only wanna deal with top-level things, let parents handle the rest
@@ -406,7 +406,7 @@ export default class Game {
     this.dispatch("beforeTick", dt);
     for (const layer of TICK_LAYERS) {
       for (const entity of this.entities.getTickersOnLayer(layer)) {
-        if (entity.game && !(this.paused && entity.pausable)) {
+        if (entity.isAdded && !(this.paused && entity.pausable)) {
           entity.onTick!(dt);
         }
       }
@@ -531,5 +531,5 @@ export default class Game {
 
 /** True if this is an entity that is no longer in the game. */
 function wasRemoved(entity: Entity | undefined): boolean {
-  return entity != undefined && !entity.game;
+  return entity != undefined && !entity.isAdded;
 }

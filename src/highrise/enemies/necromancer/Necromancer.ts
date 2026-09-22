@@ -130,7 +130,7 @@ export default class Necromancer extends BaseEnemy {
         this.addChild(new DeathOrb(this.getPosition(), this.body.angle));
 
         const sound = choose(...SPITTER_SOUNDS.attack);
-        this.game?.addEntity(new PositionalSound(sound, this.getPosition()));
+        this.game.addEntity(new PositionalSound(sound, this.getPosition()));
       },
     }),
 
@@ -147,7 +147,7 @@ export default class Necromancer extends BaseEnemy {
             new Phlegm(this.getPosition(), this.body.angle + rNormal(0, 0.3)),
           );
           const sound = choose(...SPITTER_SOUNDS.attack);
-          this.game?.addEntity(new PositionalSound(sound, this.getPosition()));
+          this.game.addEntity(new PositionalSound(sound, this.getPosition()));
           await this.wait(0.1);
         }
       },
@@ -174,7 +174,7 @@ export default class Necromancer extends BaseEnemy {
             (position) => new ZombieEgg(this.getPosition(), position, "zombie"),
           );
 
-        this.game!.addEntities(...eggs);
+        this.game.addEntities(...eggs);
       },
     }),
 
@@ -201,7 +201,7 @@ export default class Necromancer extends BaseEnemy {
             (target) => new ZombieEgg(this.getPosition(), target, "crawler"),
           );
 
-        this.game!.addEntities(...eggs);
+        this.game.addEntities(...eggs);
       },
     }),
   };
