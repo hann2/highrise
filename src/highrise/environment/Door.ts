@@ -12,6 +12,7 @@ import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { RevoluteConstraint } from "../../core/physics/constraints/RevoluteConstraint";
 import { Box } from "../../core/physics/shapes/Box";
 import { PositionalSound } from "../../core/sound/PositionalSound";
+import { polarToVec } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import WallImpact from "../effects/WallImpact";
@@ -31,7 +32,7 @@ export default class Door extends BaseEntity implements Entity, Hittable {
 
   constructor(
     private hingePoint: V2d,
-    length: number,
+    private length: number,
     private restingAngle: number,
     private minAngle: number,
     private maxAngle: number,
@@ -92,6 +93,24 @@ export default class Door extends BaseEntity implements Entity, Hittable {
   @on("render")
   onRender() {
     this.sprite.rotation = this.body.angle;
+  }
+
+  /** Evenly spaced points along the door, from the hinge to the free end. */
+  getPointsAlong(count: number): V2d[] {
+    const along = polarToVec(this.body.angle, this.length);
+    const points: V2d[] = [];
+    for (let i = 0; i < count; i++) {
+      points.push(this.body.position.addScaled(along, i / (count - 1)));
+    }
+    return points;
+  }
+
+  /** Shoved by a human. `impulse` is applied at `position`. */
+  hitByPush(impulse: V2d, position: V2d) {
+    this.body.applyImpulse(impulse, position.sub(this.body.position));
+    this.game.addEntity(
+      new PositionalSound(choose("wallHit1", "wallHit2"), position),
+    );
   }
 
   hitByMelee() {}

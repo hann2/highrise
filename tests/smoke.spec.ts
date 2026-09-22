@@ -174,6 +174,78 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(doors.maxSwing).toBeLessThan(2.2);
   expect(doors.maxHingeDrift).toBeLessThan(0.05);
 
+  // --- Pushing a door flings it open ---
+  // Stand the player beside a door that is at rest, on the side it opens away from
+  const doorMidpoint = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const door = [...game.entities.all].find(
+      (e) => e.constructor.name === "Door" && (e as any).maxAngle > 1,
+    ) as any;
+    door.body.angle = door.restingAngle;
+    door.body.angularVelocity = 0;
+    const angle = door.restingAngle;
+    const along = [Math.cos(angle), Math.sin(angle)];
+    // Pushing towards +90° from the door turns it towards its max angle
+    const pushDirection = [-along[1], along[0]];
+    const midpoint = [
+      door.hingePoint[0] + along[0] * door.length * 0.6,
+      door.hingePoint[1] + along[1] * door.length * 0.6,
+    ];
+    const standAt = [
+      midpoint[0] - pushDirection[0] * 0.6,
+      midpoint[1] - pushDirection[1] * 0.6,
+    ];
+    const pin = () => {
+      if (!(window as any).testDoor) return;
+      leader.body.position.set(standAt);
+      leader.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    (window as any).testDoor = door;
+    pin();
+    return midpoint;
+  });
+  await page.waitForTimeout(800); // let the camera settle
+  const [doorScreenX, doorScreenY] = await page.evaluate(
+    (midpoint) => [...window.DEBUG.game!.camera.toScreen(midpoint as any)],
+    doorMidpoint,
+  );
+  await page.mouse.move(doorScreenX, doorScreenY);
+  await page.waitForTimeout(300);
+  const doorPush = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const door = (window as any).testDoor;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    door.body.angle = door.restingAngle;
+    door.body.angularVelocity = 0;
+    leader.push();
+    let maxAngularVelocity = 0;
+    const start = performance.now();
+    while (performance.now() - start < 400) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      maxAngularVelocity = Math.max(
+        maxAngularVelocity,
+        door.body.angularVelocity,
+      );
+    }
+    (window as any).testDoor = undefined;
+    return {
+      maxAngularVelocity,
+      swing: door.body.angle - door.restingAngle,
+    };
+  });
+  expect(doorPush.maxAngularVelocity).toBeGreaterThan(4);
+  expect(doorPush.swing).toBeGreaterThan(1);
+
   // --- Physics hasn't blown up ---
   const nonFiniteBodies = await page.evaluate(() => {
     let count = 0;

@@ -23,6 +23,7 @@ import { WalkSpring } from "../creature-stuff/WalkSpring";
 import FleshImpact from "../effects/FleshImpact";
 import GlowStick from "../effects/GlowStick";
 import { isEnemy } from "../enemies/base/Enemy";
+import Door from "../environment/Door";
 import Interactable, { isInteractable } from "../environment/Interactable";
 import WeaponPickup from "../environment/WeaponPickup";
 import { PhasedAction } from "../utils/PhasedAction";
@@ -43,6 +44,7 @@ export const PUSH_ANGLE = degToRad(70);
 export const PUSH_KNOCKBACK = 110; // newtons?
 export const PUSH_STUN = 0.75; // seconds
 export const PUSH_COOLDOWN = 0.1; // seconds
+export const PUSH_DOOR_IMPULSE = 12; // newton-seconds, enough to fling a door open
 
 export const GLOWSTICK_COOLDOWN = 1.0; // seconds
 
@@ -272,6 +274,10 @@ export default class Human extends BaseEntity implements Entity {
             );
           }
         }
+
+        for (const door of this.game.entities.getByConstructor(Door)) {
+          this.pushDoor(door);
+        }
       },
     },
     {
@@ -283,6 +289,28 @@ export default class Human extends BaseEntity implements Entity {
       duration: PUSH_COOLDOWN,
     },
   ]);
+
+  /** Fling a door open if part of it is within the push cone. */
+  private pushDoor(door: Door) {
+    const position = this.getPosition();
+    let closest: V2d | undefined;
+    let closestDistance = PUSH_RANGE;
+    for (const point of door.getPointsAlong(9)) {
+      const relPosition = point.sub(position);
+      const distance = clampUp(relPosition.magnitude - HUMAN_RADIUS);
+      const theta = Math.abs(angleDelta(relPosition.angle, this.body.angle));
+      if (distance < closestDistance && theta < PUSH_ANGLE) {
+        closest = point;
+        closestDistance = distance;
+      }
+    }
+    if (closest) {
+      const amount =
+        PUSH_DOOR_IMPULSE -
+        0.5 * PUSH_DOOR_IMPULSE * (closestDistance / PUSH_RANGE);
+      door.hitByPush(polarToVec(this.body.angle, amount), closest);
+    }
+  }
 
   canPush() {
     const isPushing = this.pushAction.isActive();
