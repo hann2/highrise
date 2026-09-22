@@ -12,7 +12,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - `npm run tsc` — type check. Parcel does not type check, so always run this after changes
 - `npm test` — Playwright smoke test that boots and plays the real game. Run after any non-trivial change; see `tests/CLAUDE.md`
 - `npm run test:physics` — fast node tests for the physics engine. Run after touching `src/core/physics`
-- `npm run benchmark` — seeded frame time benchmark
+- `npm run benchmark` — seeded frame time benchmark, with a CPU profile of where the loop time goes
 - `npm run prettier` — format `src/`
 - `npm run generate-manifest` — regenerate `resources/resources.ts` after adding/removing assets (`npm start` does this automatically)
 
@@ -52,7 +52,14 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - Assets are referred to by name (camelCased file name without extension): `Sprite.from("andyHead")`, `new PositionalSound("wallHit1", position)`, `fontName("captureIt")`. Names are type checked against the manifest (`ImageName`, `SoundName`, `FontName`), so type arrays of them accordingly. Names must be unique per asset type; the manifest generator fails loudly otherwise.
 - Stats-as-data: guns, melee weapons, characters, decorations, and zombie variants are plain objects in their own files, collected in an index (`gunStats.ts`, `weapons.ts`, `decorations.ts`, `Character.ts`).
 - All randomness goes through `core/util/Random.ts` so that `?seed=123` makes runs reproducible. Don't call `Math.random()` directly, and don't consume randomness at module load time (the seed is applied in `main()`, after modules have run): `ShuffleRing` shuffles lazily for exactly this reason.
-- `process.env.NODE_ENV === "development"` gates `CheatController`. `window.DEBUG.game` exposes the game in the console.
+- `process.env.NODE_ENV === "development"` gates `CheatController`. `window.DEBUG.game` and `window.DEBUG.profiler` expose the game and the profiler in the console.
+
+## Profiling
+
+- Backslash cycles the corner overlay: off → fps → fps + a per-frame CPU breakdown (`?profile=1` starts there). The breakdown is a tree: `Game.nextFrame` → `Game.tick` (per tick layer, per entity class) / `World.step` (broadphase, narrowphase, solver) / `Game.render` (per entity class, then `Renderer.render` for Pixi). Numbers are smoothed ms per frame.
+- The profiler is `core/util/Profiler.ts`. Add sections with `@profile` on a method or `profiler.measure("label", () => ...)`; they nest under whatever is running. Per-entity timing only happens while `profiler.entityDetail` is on (the overlay and `captureProfile` turn it on), because it costs a couple of `performance.now()` calls per entity per tick.
+- For exact numbers rather than smoothed ones, `profiler.startCapture()` / `stopCapture("Game.nextFrame")` average over a window; that is what `npm run benchmark` and the `captureProfile` test helper use.
+- There is no GPU profiling; `Renderer.render` is the CPU side of Pixi only. If it's small but the frame rate is bad, the GPU is the bottleneck.
 
 ## Physics
 

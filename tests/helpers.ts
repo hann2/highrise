@@ -70,6 +70,23 @@ export async function getLevelNumber(page: Page): Promise<number> {
   );
 }
 
+/**
+ * Records where the game loop's CPU time goes for `ms` of play, per section
+ * and per entity class, averaged over the window. Format with
+ * `JSON.stringify` or look at `label`, `depth` and `msPerFrame`.
+ */
+export async function captureProfile(page: Page, ms: number) {
+  return page.evaluate(async (ms) => {
+    const profiler = window.DEBUG.profiler!;
+    profiler.entityDetail = true;
+    profiler.startCapture();
+    await new Promise((resolve) => setTimeout(resolve, ms));
+    const report = profiler.stopCapture("Game.nextFrame");
+    profiler.entityDetail = false;
+    return report;
+  }, ms);
+}
+
 export function expectNoIssues(issues: string[]) {
   expect(issues, issues.join("\n")).toHaveLength(0);
 }

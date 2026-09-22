@@ -1,9 +1,11 @@
 import { DEFAULT_LAYER, LAYERS } from "../config/layers";
 import { ContactList } from "./ContactList";
 import { TICK_LAYERS } from "../config/tickLayers";
+import { profile, profiler } from "./util/Profiler";
 import { on } from "./entity/handler";
 import EntityList from "./EntityList";
 import { V } from "./Vector";
+import { BaseGameEvents } from "./entity/BaseGameEvents";
 import Entity, { GameEventMap } from "./entity/Entity";
 import { eventHandlerName } from "./entity/EventHandler";
 import {
@@ -113,6 +115,9 @@ export default class Game {
     this.ground = createRigid2D({ motion: "static" });
     this.world.bodies.add(this.ground);
     this.contactList = new ContactList();
+
+    // Everything that happens in a frame is nested under this label
+    profiler.registerScope("Game.nextFrame");
 
     this.audio = audio ?? new AudioContext();
     this.masterGain = this.audio.createGain();
@@ -299,9 +304,14 @@ export default class Game {
 
   private timeToSimulate = 0.0;
   private iterationsRemaining = 0.0;
-  /** The main event loop. Run one frame of the game.  */
   private loop(time: number): void {
     window.requestAnimationFrame((t) => this.loop(t));
+    this.nextFrame(time);
+  }
+
+  /** Run one frame of the game. */
+  @profile
+  private nextFrame(time: number): void {
     this.framenumber += 1;
 
     const lastFrameDuration = (time - this.lastFrameTime) / 1000;
@@ -332,8 +342,7 @@ export default class Game {
       this.timeToSimulate -= this.tickDuration;
       this.tick(this.tickDuration);
       if (!this.paused) {
-        const stepDt = this.tickDuration;
-        this.world.step(stepDt);
+        this.world.step(this.tickDuration);
         this.cleanupEntities();
         this.contacts();
       }
@@ -401,35 +410,65 @@ export default class Game {
   }
 
   /** Called before physics. */
+  @profile
   private tick(dt: number) {
     this.ticknumber += 1;
-    this.dispatch("beforeTick", dt);
+    this.callHandlers("beforeTick", dt);
     for (const layer of TICK_LAYERS) {
-      for (const entity of this.entities.getTickersOnLayer(layer)) {
-        if (entity.isAdded && !(this.paused && entity.pausable)) {
-          entity.onTick!(dt);
-        }
-      }
+      profiler.measure(layer, () => {
+        this.callHandlers("tick", dt, this.entities.getTickersOnLayer(layer));
+      });
     }
   }
 
   /** Called before normal ticks */
+  @profile
   private slowTick(dt: number) {
-    this.dispatch("slowTick", dt);
+    this.callHandlers("slowTick", dt);
   }
 
   /** Called after physics. */
+  @profile
   private afterPhysics() {
     this.cleanupEntities();
-    this.dispatch("afterPhysics", undefined);
+    this.callHandlers("afterPhysics", undefined);
   }
 
   /** Called before actually rendering. */
+  @profile
   private render(dt: number) {
     this.cleanupEntities();
-    this.dispatch("render", dt);
-    this.dispatch("lateRender", dt);
-    this.renderer.render();
+    this.callHandlers("render", dt);
+    this.callHandlers("lateRender", dt);
+    profiler.measure("Renderer.render", () => this.renderer.render());
+  }
+
+  /**
+   * Like dispatch, for the per-frame events. When the profiler wants entity
+   * detail, the time is attributed to each entity's class.
+   */
+  private callHandlers<E extends keyof BaseGameEvents>(
+    eventName: E,
+    data: BaseGameEvents[E],
+    entities: Iterable<Entity> = this.entities.getHandlers(eventName),
+  ) {
+    const paused = this.paused;
+    const handlerName = eventHandlerName(eventName);
+    if (profiler.entityDetail) {
+      for (const entity of entities) {
+        if (entity.isAdded && !(paused && entity.pausable)) {
+          profiler.measure(entity.constructor.name, () =>
+            (entity[handlerName] as (data: BaseGameEvents[E]) => void)(data),
+          );
+        }
+      }
+    } else {
+      for (const entity of entities) {
+        if (entity.isAdded && !(paused && entity.pausable)) {
+          (entity[handlerName] as (data: BaseGameEvents[E]) => void)(data);
+        }
+      }
+    }
   }
 
   // Handle beginning of collision between things.
@@ -488,6 +527,7 @@ export default class Game {
     }
   };
 
+  @profile
   private contacts() {
     for (const contactInfo of this.contactList.getContacts()) {
       const { shapeA, shapeB, bodyA, bodyB, contactEquations } = contactInfo;

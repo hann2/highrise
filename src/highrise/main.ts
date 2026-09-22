@@ -6,10 +6,12 @@ import { SpatialHashingBroadphase } from "../core/physics/collision/broadphase/S
 import { World } from "../core/physics/world/World";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
 import FPSMeter from "../core/util/FPSMeter";
+import { profiler } from "../core/util/Profiler";
+import ProfilerOverlay from "../core/util/ProfilerOverlay";
 import { seedRandom } from "../core/util/Random";
 import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "./constants/constants";
 import CheatController from "./controllers/CheatController";
-import { FPSMeterController } from "./controllers/FPSMeterController";
+import { StatsOverlayController } from "./controllers/StatsOverlayController";
 import { GameController } from "./controllers/GameController";
 import { GraphicsQualityController } from "./controllers/GraphicsQualityController";
 import MusicController from "./controllers/MusicController";
@@ -19,15 +21,16 @@ import Preloader from "./preloader/Preloader";
 
 declare global {
   interface Window {
-    DEBUG: { game?: Game };
+    DEBUG: { game?: Game; profiler?: typeof profiler };
   }
 }
 
 export async function main() {
   await new Promise((resolve) => window.addEventListener("load", resolve));
 
+  const params = new URLSearchParams(window.location.search);
   // Allow reproducible runs (mostly for tests and benchmarks) with ?seed=123
-  const seed = new URLSearchParams(window.location.search).get("seed");
+  const seed = params.get("seed");
   if (seed != null) {
     seedRandom(parseInt(seed, 10));
   }
@@ -46,7 +49,7 @@ export async function main() {
   });
   initContactMaterials(game);
 
-  window.DEBUG = { game };
+  window.DEBUG = { game, profiler };
   await game.init();
 
   const preloader = game.addEntity(new Preloader());
@@ -64,7 +67,11 @@ export async function main() {
   game.addEntity(new GraphicsQualityController());
   game.addEntity(new GameController());
   game.addEntity(new FPSMeter(Layer.MENU));
-  game.addEntity(new FPSMeterController());
+  game.addEntity(new ProfilerOverlay(Layer.MENU));
+  // ?profile=1 starts with the profiler breakdown on screen
+  game.addEntity(
+    new StatsOverlayController(params.has("profile") ? "profiler" : "off"),
+  );
 
   if (process.env.NODE_ENV === "development") {
     game.addEntity(new CheatController());

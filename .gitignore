@@ -2,6 +2,7 @@ node_modules/
 .cache/
 .parcel-cache/
 dist/
+.parcel-dev/
 .vercel
 *.DS_Store
 yarn.lock

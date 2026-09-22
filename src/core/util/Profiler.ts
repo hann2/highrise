@@ -5,6 +5,10 @@ interface ProfileEntry {
   frameCalls: number;
   frameMs: number;
 
+  // Totals since startCapture() (only accumulated while capturing)
+  captureCalls: number;
+  captureMs: number;
+
   // Smoothed per-frame values (for display)
   smoothedCallsPerFrame: number;
   smoothedMsPerFrame: number;
@@ -21,6 +25,23 @@ export interface ProfileStats {
   callsPerFrame: number;
   msPerFrame: number;
   maxMs: number;
+}
+
+/** Exact averages over a capture window, for automated comparisons */
+export interface CaptureStats {
+  label: string;
+  depth: number;
+  /** Total ms spent in this section over the whole capture */
+  totalMs: number;
+  msPerFrame: number;
+  callsPerFrame: number;
+  maxMs: number;
+}
+
+export interface CaptureReport {
+  frames: number;
+  /** Depth-first, children sorted by time, like getStats() */
+  stats: CaptureStats[];
 }
 
 /**
@@ -44,6 +65,16 @@ export interface ProfileStats {
 class Profiler {
   private entries = new Map<string, ProfileEntry>();
   private enabled = true;
+
+  /**
+   * Whether the game loop should also time every entity's handlers (grouped
+   * by class). Costs a couple of performance.now() calls per entity per tick,
+   * so it's off unless someone is looking at the numbers.
+   */
+  entityDetail = false;
+
+  private capturing = false;
+  private captureFrames = 0;
 
   // Stack tracking
   private stack: string[] = [];
@@ -157,8 +188,15 @@ class Profiler {
     this.cachedStatsParams = null;
 
     const prefix = scopeLabel + this.separator;
+    if (this.capturing) {
+      this.captureFrames++;
+    }
     for (const [key, entry] of this.entries) {
       if (key === scopeLabel || key.startsWith(prefix)) {
+        if (this.capturing) {
+          entry.captureCalls += entry.frameCalls;
+          entry.captureMs += entry.frameMs;
+        }
         entry.smoothedCallsPerFrame = this.smoothedUpdate(
           entry.frameCalls,
           entry.smoothedCallsPerFrame,
@@ -251,6 +289,39 @@ class Profiler {
       }
     }
     console.log("========================");
+  }
+
+  /**
+   * Start accumulating exact totals. Unlike the smoothed per-frame numbers,
+   * these are averages over the whole window, so they're the thing to use
+   * for benchmarks. Also resets maxMs so that it covers just the capture.
+   */
+  startCapture(): void {
+    this.capturing = true;
+    this.captureFrames = 0;
+    for (const entry of this.entries.values()) {
+      entry.captureCalls = 0;
+      entry.captureMs = 0;
+      entry.maxMs = 0;
+    }
+  }
+
+  /** Stop capturing and return the totals, in the same order as getStats(). */
+  stopCapture(scope?: string): CaptureReport {
+    this.capturing = false;
+    const frames = Math.max(this.captureFrames, 1);
+    const stats = this.getStats(undefined, scope).map((stat) => {
+      const entry = this.entries.get(stat.label)!;
+      return {
+        label: stat.label,
+        depth: stat.depth,
+        totalMs: entry.captureMs,
+        msPerFrame: entry.captureMs / frames,
+        callsPerFrame: entry.captureCalls / frames,
+        maxMs: entry.maxMs,
+      };
+    });
+    return { frames: this.captureFrames, stats };
   }
 
   /** Clear all stats */
@@ -390,6 +461,8 @@ class Profiler {
       entry = {
         frameCalls: 0,
         frameMs: 0,
+        captureCalls: 0,
+        captureMs: 0,
         smoothedCallsPerFrame: 0,
         smoothedMsPerFrame: 0,
         maxMs: 0,

@@ -11,7 +11,7 @@
     "tsc": "tsc --noEmit",
     "tsc-watch": "tsc --noEmit --watch",
     "prettier": "prettier --write src",
-    "dev-server": "parcel --no-hmr src/index.html",
+    "dev-server": "parcel --no-hmr --dist-dir .parcel-dev src/index.html",
     "test": "playwright test",
     "benchmark": "BENCHMARK=1 playwright test",
     "generate-manifest": "tsx ./bin/generate-manifest.ts",

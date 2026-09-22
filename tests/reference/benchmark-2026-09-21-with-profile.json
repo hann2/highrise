@@ -1,0 +1,512 @@
+{
+  "frames": 601,
+  "ticks": 601,
+  "loopCpuMs": {
+    "mean": 2.06,
+    "p50": 2,
+    "p95": 2.6,
+    "p99": 2.9,
+    "max": 3.7
+  },
+  "frameIntervalMs": {
+    "mean": 16.65,
+    "p50": 16.7,
+    "p95": 16.7,
+    "p99": 16.8,
+    "max": 16.8
+  },
+  "entities": 800,
+  "bodies": 207,
+  "profile": [
+    {
+      "label": "Game.nextFrame",
+      "depth": 0,
+      "msPerFrame": 2.194,
+      "callsPerFrame": 1,
+      "maxMs": 3.3
+    },
+    {
+      "label": "Game.render",
+      "depth": 1,
+      "msPerFrame": 1.431,
+      "callsPerFrame": 1,
+      "maxMs": 2
+    },
+    {
+      "label": "Game.render > Renderer.render",
+      "depth": 2,
+      "msPerFrame": 0.641,
+      "callsPerFrame": 1,
+      "maxMs": 0.9
+    },
+    {
+      "label": "Game.render > VisionController",
+      "depth": 2,
+      "msPerFrame": 0.354,
+      "callsPerFrame": 1,
+      "maxMs": 0.5
+    },
+    {
+      "label": "Game.render > LightingManager",
+      "depth": 2,
+      "msPerFrame": 0.149,
+      "callsPerFrame": 1,
+      "maxMs": 0.3
+    },
+    {
+      "label": "Game.render > ZombieSprite",
+      "depth": 2,
+      "msPerFrame": 0.082,
+      "callsPerFrame": 19,
+      "maxMs": 0.2
+    },
+    {
+      "label": "Game.render > CrawlereSprite",
+      "depth": 2,
+      "msPerFrame": 0.044,
+      "callsPerFrame": 11,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.render > SpeakingCircle",
+      "depth": 2,
+      "msPerFrame": 0.044,
+      "callsPerFrame": 33,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.render > HumanSprite",
+      "depth": 2,
+      "msPerFrame": 0.025,
+      "callsPerFrame": 2,
+      "maxMs": 0.2
+    },
+    {
+      "label": "Game.render > Door",
+      "depth": 2,
+      "msPerFrame": 0.011,
+      "callsPerFrame": 21,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.render > HeavySprite",
+      "depth": 2,
+      "msPerFrame": 0.007,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.render > DamagedOverlay",
+      "depth": 2,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.render > AmmoOverlay",
+      "depth": 2,
+      "msPerFrame": 0.003,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.render > ProfilerOverlay",
+      "depth": 2,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.render > FPSMeter",
+      "depth": 2,
+      "msPerFrame": 0.004,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.render > CameraController",
+      "depth": 2,
+      "msPerFrame": 0.004,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick",
+      "depth": 1,
+      "msPerFrame": 0.39,
+      "callsPerFrame": 1,
+      "maxMs": 1.3
+    },
+    {
+      "label": "Game.tick > main",
+      "depth": 2,
+      "msPerFrame": 0.346,
+      "callsPerFrame": 1,
+      "maxMs": 1.2
+    },
+    {
+      "label": "Game.tick > main > SimpleEnemyController",
+      "depth": 3,
+      "msPerFrame": 0.126,
+      "callsPerFrame": 31,
+      "maxMs": 0.3
+    },
+    {
+      "label": "Game.tick > main > SurvivorHumanController",
+      "depth": 3,
+      "msPerFrame": 0.033,
+      "callsPerFrame": 1,
+      "maxMs": 0.8
+    },
+    {
+      "label": "Game.tick > main > WalkSpring",
+      "depth": 3,
+      "msPerFrame": 0.024,
+      "callsPerFrame": 33,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > Zombie",
+      "depth": 3,
+      "msPerFrame": 0.01,
+      "callsPerFrame": 19,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > EnemyVoice",
+      "depth": 3,
+      "msPerFrame": 0.011,
+      "callsPerFrame": 31,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > ZombieSprite",
+      "depth": 3,
+      "msPerFrame": 0.008,
+      "callsPerFrame": 19,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > AllyHumanController",
+      "depth": 3,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > Crawler",
+      "depth": 3,
+      "msPerFrame": 0.006,
+      "callsPerFrame": 11,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > HumanSprite",
+      "depth": 3,
+      "msPerFrame": 0.007,
+      "callsPerFrame": 2,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > CrawlereSprite",
+      "depth": 3,
+      "msPerFrame": 0.007,
+      "callsPerFrame": 11,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > SoundInstance",
+      "depth": 3,
+      "msPerFrame": 0.006,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > Heavy",
+      "depth": 3,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > Gun",
+      "depth": 3,
+      "msPerFrame": 0.002,
+      "callsPerFrame": 2,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > CheatController",
+      "depth": 3,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > MeleeWeapon",
+      "depth": 3,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 2,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > HeavySprite",
+      "depth": 3,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > HumanVoice",
+      "depth": 3,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 2,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > main > Human",
+      "depth": 3,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 2,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > input",
+      "depth": 2,
+      "msPerFrame": 0.029,
+      "callsPerFrame": 1,
+      "maxMs": 0.2
+    },
+    {
+      "label": "Game.tick > input > PlayerHumanController",
+      "depth": 3,
+      "msPerFrame": 0.027,
+      "callsPerFrame": 1,
+      "maxMs": 0.2
+    },
+    {
+      "label": "Game.tick > camera",
+      "depth": 2,
+      "msPerFrame": 0.011,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > camera > Camera2d",
+      "depth": 3,
+      "msPerFrame": 0.002,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.tick > camera > CameraController",
+      "depth": 3,
+      "msPerFrame": 0.003,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step",
+      "depth": 1,
+      "msPerFrame": 0.359,
+      "callsPerFrame": 1,
+      "maxMs": 0.6
+    },
+    {
+      "label": "World.step > World.doBroadphase",
+      "depth": 2,
+      "msPerFrame": 0.11,
+      "callsPerFrame": 1,
+      "maxMs": 0.3
+    },
+    {
+      "label": "World.step > World.solve",
+      "depth": 2,
+      "msPerFrame": 0.081,
+      "callsPerFrame": 1,
+      "maxMs": 0.2
+    },
+    {
+      "label": "World.step > World.solve > Solver.setup",
+      "depth": 3,
+      "msPerFrame": 0.033,
+      "callsPerFrame": 1,
+      "maxMs": 0.2
+    },
+    {
+      "label": "World.step > World.solve > Solver.iterate",
+      "depth": 3,
+      "msPerFrame": 0.029,
+      "callsPerFrame": 1,
+      "maxMs": 0.2
+    },
+    {
+      "label": "World.step > World.solve > Solver.iterate > general",
+      "depth": 4,
+      "msPerFrame": 0.012,
+      "callsPerFrame": 388.76,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.solve > Solver.iterate > planar2D",
+      "depth": 4,
+      "msPerFrame": 0.009,
+      "callsPerFrame": 173.87,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.solve > Solver.finalize",
+      "depth": 3,
+      "msPerFrame": 0.003,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.solve > planar2D",
+      "depth": 3,
+      "msPerFrame": 0.002,
+      "callsPerFrame": 37.13,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.solve > general",
+      "depth": 3,
+      "msPerFrame": 0.002,
+      "callsPerFrame": 84,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.solve > Solver.warmStart",
+      "depth": 3,
+      "msPerFrame": 0.002,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.narrowphase",
+      "depth": 2,
+      "msPerFrame": 0.039,
+      "callsPerFrame": 1,
+      "maxMs": 0.2
+    },
+    {
+      "label": "World.step > World.contactEquations",
+      "depth": 2,
+      "msPerFrame": 0.024,
+      "callsPerFrame": 1,
+      "maxMs": 0.2
+    },
+    {
+      "label": "World.step > World.updateOverlapTracking",
+      "depth": 2,
+      "msPerFrame": 0.012,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.constraintUpdate",
+      "depth": 2,
+      "msPerFrame": 0.01,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.constraintUpdate > RevoluteConstraint",
+      "depth": 3,
+      "msPerFrame": 0.008,
+      "callsPerFrame": 21,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.frictionEquations",
+      "depth": 2,
+      "msPerFrame": 0.012,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.emitContactEvents",
+      "depth": 2,
+      "msPerFrame": 0.007,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.collectEquations",
+      "depth": 2,
+      "msPerFrame": 0.012,
+      "callsPerFrame": 1,
+      "maxMs": 0.2
+    },
+    {
+      "label": "World.step > World.emitImpactEvents",
+      "depth": 2,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.integratePositions",
+      "depth": 2,
+      "msPerFrame": 0.005,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.handleCollisionWakeUps",
+      "depth": 2,
+      "msPerFrame": 0.002,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.integrateForcesToVelocity",
+      "depth": 2,
+      "msPerFrame": 0.005,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.applyForces",
+      "depth": 2,
+      "msPerFrame": 0.004,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.emitPreSolveAndWakeUp",
+      "depth": 2,
+      "msPerFrame": 0.002,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "World.step > World.updateSleeping",
+      "depth": 2,
+      "msPerFrame": 0,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.slowTick",
+      "depth": 1,
+      "msPerFrame": 0.003,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.contacts",
+      "depth": 1,
+      "msPerFrame": 0.003,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    },
+    {
+      "label": "Game.afterPhysics",
+      "depth": 1,
+      "msPerFrame": 0.001,
+      "callsPerFrame": 1,
+      "maxMs": 0.1
+    }
+  ]
+}
