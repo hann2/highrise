@@ -22,14 +22,16 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
   - `Game.ts` — main loop (fixed timestep), entity add/remove, event dispatch, pause, slow-mo
   - `entity/` — `Entity` interface, `BaseEntity` base class, event type maps
   - `graphics/` — Pixi renderer wrapper, layers, camera
+  - `ReactEntity.ts` — an entity that renders Preact content into a `div` over the canvas, re-rendered every frame
   - `physics/` — custom 2D rigid body engine (see its `README.md` and `CLAUDE.md`)
-  - `io/`, `sound/`, `resources/` (preloader), `util/`
+  - `io/`, `sound/`, `resources/` (preloader), `util/` (profiler, `stats-overlay/`, random, math)
 - `src/config/` — configures core for this game: render `Layer`s, `CustomEvents`, `CollisionGroups`, `PhysicsMaterials`
 - `src/highrise/` — the actual game
   - `main.ts` — bootstraps `Game`, preloader, and global controllers
   - `controllers/` — long-lived entities driving game flow (`GameController`, `LevelController`, ...)
   - `levels/level-generation/` — procedural generation (room placement → maze → walls → doors → closets/nubbies → entity placement); `level-templates/` define per-floor themes; `rooms/` define room templates
-  - `human/`, `characters/`, `enemies/`, `weapons/`, `projectiles/`, `environment/`, `effects/`, `hud/`, `menu/`
+  - `human/`, `characters/`, `enemies/`, `weapons/`, `projectiles/`, `environment/`, `effects/`
+  - `menu/` and `hud/` — screens and HUD text are Preact (`.tsx` + a plain `.css` next to them); see the UI convention below
   - `lighting-and-vision/` — each `Light` is baked into its own render texture (re-baked only when it moves or changes), and the `LightingManager` composites the visible ones additively over the ambient color into a screen-sized texture that is multiplied over the world. `Shadows` turns nearby `cast_shadow`-tagged physics shapes into a coverage mask (umbra polygons plus penumbra wedges for a light with a source radius, accumulated additively so seams don't leak); lights erase with it, `VisionController` draws it in black to hide what the player can't see. Humans carry a `DirectionalLight` flashlight
 - `resources/` — only assets the game ships. Everything in here is preloaded, so don't put unused files here
 - `assets/` — not shipped: `assets/source` (design files), `assets/unused` (audio/images not currently used)
@@ -47,6 +49,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - By convention `on*` names are only used for decorated event handlers; direct-call hooks use other names (`hitByBullet`, `handleDeath`, `handleInteract`).
 - `onTick` runs in tick layers (`src/config/tickLayers.ts`: `input`, `main`, `camera`, in that order). An entity picks one with `tickLayer = "camera" as const`; the camera follows in the last layer so it sees final positions.
 - Sprites choose their render layer via `sprite.layerName = Layer.X` (`src/config/layers.ts`, ordered bottom to top). Use a Pixi `Container` (not an empty `Sprite` or a `Graphics`) as a parent for other display objects. Position sprites from vectors with `sprite.position.copyFrom(v)`.
+- **UI is HTML, the world is Pixi.** Menus, screens, and HUD text extend (or add a child) `ReactEntity`, whose `getReactContent` returns Preact JSX; it re-renders every frame, so components just read game state (`this.game.io.usingGamepad`, `getVolumeController(game).muted`) instead of tracking it through events, and fades are fields driven by `this.wait(...)` callbacks. Shared button components live in `menu/MenuButtons.tsx`; styles are plain CSS files imported for their side effect (`import "./menu.css"`), with `.menu-screen` as the full-page, `pointer-events: none` root that buttons opt out of. Fonts from the manifest are registered as `FontFace`s, so `font-family: captureIt` works in CSS. Text positioned in the world (floor labels in `TutorialRoom`/`SpawnRoom`, `SpeakingCircle`) and texture-based HUD (ammo shells) stay Pixi. Subclasses that override `onAdd`/`onRender` must call `super`.
 - Fast entity lookup: `game.entities.getSingleton(LevelController)` / `getByConstructor(Cls)` (exact class), `getTagged(tag)`, `getById(id)`, or type-guard filters registered with `game.entities.addFilter(isHuman)` and read with `getByFilter(isHuman)`.
 - `persistenceLevel` (see `Persistence` in `highrise/constants/constants.ts`) controls what `game.clearScene(threshold)` removes.
 - Assets are referred to by name (camelCased file name without extension): `Sprite.from("andyHead")`, `new PositionalSound("wallHit1", position)`, `fontName("captureIt")`. Names are type checked against the manifest (`ImageName`, `SoundName`, `FontName`), so type arrays of them accordingly. Names must be unique per asset type; the manifest generator fails loudly otherwise.
@@ -56,8 +59,8 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 
 ## Profiling
 
-- Backslash cycles the corner overlay: off → fps → fps + a per-frame CPU breakdown (`?profile=1` starts there). The breakdown is a tree: `Game.nextFrame` → `Game.tick` (per tick layer, per entity class) / `World.step` (broadphase, narrowphase, solver) / `Game.render` (per entity class, then `Renderer.render` for Pixi). Numbers are smoothed ms per frame.
-- The profiler is `core/util/Profiler.ts`. Add sections with `@profile` on a method or `profiler.measure("label", () => ...)`; they nest under whatever is running. Per-entity timing only happens while `profiler.entityDetail` is on (the overlay and `captureProfile` turn it on), because it costs a couple of `performance.now()` calls per entity per tick.
+- Backslash cycles the corner `StatsOverlay` (`core/util/stats-overlay/`, a `ReactEntity`): off → lean (fps + counts) → profiler (per-frame CPU breakdown; `?profile=1` starts there; `R` resets, `P` pauses profiling) → render. Shift-Backslash goes backwards. Panels implement `StatsPanel`; add one to the list in `main.ts`. The breakdown is a tree: `Game.nextFrame` → `Game.tick` (per tick layer, per entity class) / `World.step` (broadphase, narrowphase, solver) / `Game.render` (per entity class, then `Renderer.render` for Pixi). Numbers are smoothed ms per frame.
+- The profiler is `core/util/Profiler.ts`. Add sections with `@profile` on a method or `profiler.measure("label", () => ...)`; they nest under whatever is running. Per-entity timing only happens while `profiler.entityDetail` is on (the profiler panel and `captureProfile` turn it on), because it costs a couple of `performance.now()` calls per entity per tick.
 - For exact numbers rather than smoothed ones, `profiler.startCapture()` / `stopCapture("Game.nextFrame")` average over a window; that is what `npm run benchmark` and the `captureProfile` test helper use.
 - There is no GPU profiling; `Renderer.render` is the CPU side of Pixi only. If it's small but the frame rate is bad, the GPU is the bottleneck.
 
@@ -80,4 +83,6 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 ## Misc gotchas
 
 - `src/index.ts` must import `core/Polyfills` first.
+- JSX is Preact (`jsxImportSource` in `tsconfig.json`). Parcel's dev builds ask for `preact/jsx-dev-runtime`, which Preact doesn't ship, hence the `alias` in `package.json`.
+- Fullscreen is requested on `document.documentElement`, not the canvas, so the HTML overlays stay visible.
 - The repo is large (~800MB of git history, mostly binary assets). Avoid broad globbing/searching under `resources/` and `assets/`.

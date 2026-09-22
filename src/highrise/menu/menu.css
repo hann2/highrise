@@ -1,0 +1,139 @@
+/* A full-page overlay that lets the mouse through to the game, except where a
+   button (or anything else with pointer-events: auto) says otherwise. */
+.menu-screen {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Sits just above the center of the screen */
+.menu-title {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  transform: translateX(-50%);
+  font-family: captureIt;
+  font-size: 128px;
+  line-height: 1;
+  color: red;
+}
+
+.menu-title--medium {
+  font-size: 96px;
+}
+
+.menu-title--dark {
+  color: black;
+}
+
+/* Sits just below the center of the screen */
+.menu-subtitle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%);
+  font-family: captureIt;
+  font-size: 64px;
+  line-height: 1;
+  color: white;
+}
+
+.menu-subtitle--small {
+  font-size: 48px;
+}
+
+.menu-subtitle--clickable {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* A column of buttons in a corner of the screen */
+.menu-buttons {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-buttons--top-left {
+  top: 10px;
+  left: 10px;
+  align-items: flex-start;
+}
+
+.menu-buttons--bottom-right {
+  right: 10px;
+  bottom: 10px;
+  align-items: flex-end;
+}
+
+.menu-button {
+  pointer-events: auto;
+  cursor: pointer;
+  font-family: captureIt;
+  font-size: 40px;
+  line-height: 40px;
+  color: #dddddd;
+}
+
+.menu-button:hover {
+  color: #ffffff;
+}
+
+/* While a screen is fading out nothing on it should respond to the mouse */
+.menu-screen--inactive .menu-button,
+.menu-screen--inactive .menu-subtitle--clickable {
+  pointer-events: none;
+}
+
+.pause-menu__background {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.5);
+}
+
+.game-over {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Two columns so "label—name" lines line up on the middle of the screen */
+.credits {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-family: comfortaa;
+  font-weight: 300;
+  font-size: 20px;
+  line-height: 28px;
+  color: white;
+}
+
+.credits__line {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.credits__heading {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+}
+
+.credits__label {
+  font-size: 14px;
+  text-align: right;
+  padding-right: 2px;
+}
+
+.credits__name {
+  text-align: left;
+  padding-left: 2px;
+}

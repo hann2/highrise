@@ -1,0 +1,152 @@
+.stats-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  font-family: Menlo, Consolas, monospace;
+  font-weight: 300;
+  font-size: 11px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 8px;
+  min-width: 32em;
+  box-sizing: border-box;
+  max-height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-overlay__header {
+  display: flex;
+  gap: 16px;
+}
+
+.stats-overlay__subheader {
+  font-size: 10px;
+  color: #aaa;
+}
+
+.stats-overlay__section {
+  border-top: 1px solid #444;
+  padding-top: 8px;
+}
+
+.stats-overlay__section-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.stats-overlay__section-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.stats-overlay__hint {
+  font-size: 10px;
+  color: #999;
+}
+
+.stats-overlay__grid {
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.stats-overlay__divider {
+  border-top: 1px solid #333;
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+/* Stat rows */
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stats-row--indent {
+  padding-left: 12px;
+}
+
+.stats-row__label {
+  color: #aaa;
+}
+
+.stats-row__value {
+  color: #fff;
+}
+
+.stats-row__value--warning {
+  color: #ffff66;
+}
+
+.stats-row__value--error {
+  color: #ff6666;
+}
+
+.stats-row__value--success {
+  color: #66ff66;
+}
+
+.stats-row__value--muted {
+  color: #aaa;
+}
+
+.stats-row__value--dim {
+  color: #999;
+}
+
+/* Profile rows with bar visualization */
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 1px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Invisible overlay that holds the clean copy/paste text. Visible label/time
+   have user-select: none so only this text ends up on the clipboard. */
+.profile-row__copy {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  white-space: pre;
+  user-select: text;
+}
+
+.profile-row__label {
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.profile-row__calls {
+  color: #888;
+  margin-left: 8px;
+}
+
+.profile-row__time {
+  color: #888;
+  margin-left: 8px;
+  user-select: none;
+}
+
+.profile-row--slow {
+  color: #ff6666;
+}
+
+/* Empty state */
+.stats-overlay__empty {
+  color: #666;
+  font-style: italic;
+}
+
+.profile-row__max {
+  color: #666;
+  margin-right: 8px;
+}

@@ -23,7 +23,8 @@
   "dependencies": {
     "@pixi/tilemap": "^5.0.2",
     "pixi.js": "^8.21.0",
-    "poly-decomp-es": "^0.4.2"
+    "poly-decomp-es": "^0.4.2",
+    "preact": "^10.29.8"
   },
   "devDependencies": {
     "@parcel/transformer-glsl": "^2.16.4",
@@ -38,6 +39,9 @@
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "url": "^0.11.4"
+  },
+  "alias": {
+    "preact/jsx-dev-runtime": "preact/jsx-runtime"
   },
   "browserslist": "last 2 Chrome versions, last 2 Firefox versions, last 2 Safari versions"
 }

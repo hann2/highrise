@@ -48,7 +48,7 @@ export class GameController extends BaseEntity implements Entity {
     const game = this.game;
 
     const gameOverScreen = game.addEntity(new GameOverScreen(victory));
-    await this.waitUntil(() => gameOverScreen.sprite.alpha > 0.99);
+    await this.waitUntil(() => gameOverScreen.opacity > 0.99);
     game.clearScene(Persistence.Game);
     await this.waitUntil(() => gameOverScreen.isDestroyed);
     game.dispatch("goToMainMenu", undefined);

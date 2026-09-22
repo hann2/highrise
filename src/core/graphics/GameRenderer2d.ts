@@ -70,13 +70,18 @@ export class GameRenderer2d {
       });
   }
 
-  /** TODO: Document request fullscreen */
+  /**
+   * Goes fullscreen on the next click anywhere on the page. The whole document
+   * goes fullscreen rather than just the canvas so that HTML overlays (see
+   * ReactEntity) stay visible.
+   */
   requestFullscreen() {
     const makeFullScreen = () => {
-      this.canvas.requestFullscreen();
-      this.canvas.removeEventListener("click", makeFullScreen);
+      document.documentElement.requestFullscreen().catch(() => {
+        // The browser can refuse (e.g. iframes without the permission); that's fine
+      });
     };
-    this.canvas.addEventListener("click", makeFullScreen);
+    document.addEventListener("click", makeFullScreen, { once: true });
   }
 
   /**

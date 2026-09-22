@@ -1,17 +1,17 @@
-import { Layer } from "../config/layers";
 import { initContactMaterials } from "../config/PhysicsMaterials";
 import AutoPauser from "../core/AutoPauser";
 import Game from "../core/Game";
 import { SpatialHashingBroadphase } from "../core/physics/collision/broadphase/SpatialHashingBroadphase";
 import { World } from "../core/physics/world/World";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
-import FPSMeter from "../core/util/FPSMeter";
 import { profiler } from "../core/util/Profiler";
-import ProfilerOverlay from "../core/util/ProfilerOverlay";
 import { seedRandom } from "../core/util/Random";
+import { createLeanPanel } from "../core/util/stats-overlay/LeanPanel";
+import { createProfilerPanel } from "../core/util/stats-overlay/ProfilerPanel";
+import { createRenderPanel } from "../core/util/stats-overlay/RenderPanel";
+import { StatsOverlay } from "../core/util/stats-overlay/StatsOverlay";
 import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "./constants/constants";
 import CheatController from "./controllers/CheatController";
-import { StatsOverlayController } from "./controllers/StatsOverlayController";
 import { GameController } from "./controllers/GameController";
 import { GraphicsQualityController } from "./controllers/GraphicsQualityController";
 import MusicController from "./controllers/MusicController";
@@ -66,11 +66,12 @@ export async function main() {
   game.addEntity(new PositionalSoundListener());
   game.addEntity(new GraphicsQualityController());
   game.addEntity(new GameController());
-  game.addEntity(new FPSMeter(Layer.MENU));
-  game.addEntity(new ProfilerOverlay(Layer.MENU));
-  // ?profile=1 starts with the profiler breakdown on screen
+  // Backslash cycles the stats panels; ?profile=1 starts with the profiler one
   game.addEntity(
-    new StatsOverlayController(params.has("profile") ? "profiler" : "off"),
+    new StatsOverlay(
+      [createLeanPanel(), createProfilerPanel(), createRenderPanel()],
+      params.has("profile") ? "profiler" : undefined,
+    ),
   );
 
   if (process.env.NODE_ENV === "development") {
