@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite } from "pixi.js";
+import { BlurFilter, Container, Graphics, Sprite } from "pixi.js";
 import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -17,11 +17,27 @@ import { Shadows } from "./Shadows";
 export const MAX_VISION = 10; // meters
 /** How wide the "eye" is, in meters. Softens the edges of what can be seen. */
 const VISION_SOURCE_RADIUS = 0.25;
-/** Pixels per meter of the vision mask */
-const VISION_RESOLUTION: Record<GraphicsQuality, number> = {
-  [GraphicsQuality.Low]: 16,
-  [GraphicsQuality.Medium]: 32,
-  [GraphicsQuality.High]: 64,
+/**
+ * Per quality level: pixels per meter of the vision mask (the screen is about
+ * 65 px/m at the default zoom, twice that on a retina display), and an
+ * on-screen blur of the mask, in screen pixels, that softens the edges right
+ * next to walls where the penumbrae are too narrow to.
+ */
+const VISION_QUALITY: Record<
+  GraphicsQuality,
+  { resolution: number; sourceRadius: number; blur?: BlurFilter }
+> = {
+  [GraphicsQuality.Low]: { resolution: 32, sourceRadius: 0 },
+  [GraphicsQuality.Medium]: {
+    resolution: 64,
+    sourceRadius: VISION_SOURCE_RADIUS,
+    blur: new BlurFilter({ strength: 3, quality: 1 }),
+  },
+  [GraphicsQuality.High]: {
+    resolution: 64,
+    sourceRadius: VISION_SOURCE_RADIUS,
+    blur: new BlurFilter({ strength: 6, quality: 2 }),
+  },
 };
 
 export default class VisionController extends BaseEntity implements Entity {
@@ -44,7 +60,12 @@ export default class VisionController extends BaseEntity implements Entity {
     super();
 
     this.shadows = this.addChild(
-      new Shadows(V(0, 0), MAX_VISION, true, VISION_SOURCE_RADIUS),
+      new Shadows({
+        position: V(0, 0),
+        radius: MAX_VISION,
+        checkDynamicBodies: true,
+        sourceRadius: VISION_SOURCE_RADIUS,
+      }),
     );
 
     const fog = Sprite.from("visionFog");
@@ -76,11 +97,11 @@ export default class VisionController extends BaseEntity implements Entity {
 
   @on("graphicsQualityChanged")
   onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
-    // Soft edges cost a few extra triangles per wall, so only skip them on Low
-    this.shadows.setSourceRadius(
-      quality === GraphicsQuality.Low ? 0 : VISION_SOURCE_RADIUS,
-    );
-    this.shadows.setResolution(VISION_RESOLUTION[quality]);
+    const { resolution, blur, sourceRadius } = VISION_QUALITY[quality];
+    this.shadows.setResolution(resolution);
+    this.shadows.setSourceRadius(sourceRadius);
+    // Filters only work on the stage, not inside the mask render
+    this.shadows.maskSprite.filters = blur ? [blur] : [];
   }
 
   @on("render")

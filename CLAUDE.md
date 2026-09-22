@@ -74,7 +74,8 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 
 - Filters nested inside another filter render nothing if their `resolution`s differ. The stage-level damage filter in `DamagedOverlay` uses `resolution: "inherit"` for this reason.
 - Custom filters are GLSL ES 3.0 for the WebGL renderer (`damage-filter.frag`), imported as a string via Parcel's glsl transformer.
-- Rendering into textures mid-frame (`LightingManager`, `Light`) uses `renderer.render({ container, target, clear })`.
+- Rendering into textures mid-frame (`LightingManager`, `Light`, `Shadows`) uses `renderer.render({ container, target, clear })`. Pass `clearColor: [0, 0, 0, 0]` or the target is cleared to the opaque canvas background. Filters don't work inside such a pass (they size themselves to the canvas, not the target); apply them on the stage, like `VisionController`'s blur of the mask sprite.
+- `renderer.width`/`height` are logical pixels in Pixi 8; don't divide by `resolution` again (that bug broke Low quality, which halves the resolution).
 
 ## Misc gotchas
 

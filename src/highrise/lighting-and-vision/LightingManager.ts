@@ -40,7 +40,9 @@ export default class LightingManager extends BaseEntity implements Entity {
 
   @on("resize")
   onResize({ size: [width, height] }: { size: V2d }) {
-    this.texture.resize(width, height);
+    // The graphics quality setting changes the renderer's resolution, and
+    // this texture has to match or the lighting is drawn at the wrong scale
+    this.texture.resize(width, height, this.renderer.resolution);
 
     // Baked textures don't survive the renderer being resized, so re-bake
     // them. Lazily, so that the off-screen ones don't all pile up in one frame.

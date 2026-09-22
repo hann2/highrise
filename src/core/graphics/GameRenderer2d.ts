@@ -81,16 +81,18 @@ export class GameRenderer2d {
 
   /**
    * Gets the effective height of the renderer viewport in logical pixels.
+   * (Pixi 8 already reports logical sizes; dividing by the resolution again
+   * was a Pixi 7 habit that broke everything at non-1 resolutions.)
    */
   getHeight(): number {
-    return this.app.renderer.height / this.app.renderer.resolution;
+    return this.app.renderer.height;
   }
 
   /**
    * Gets the effective width of the renderer viewport in logical pixels.
    */
   getWidth(): number {
-    return this.app.renderer.width / this.app.renderer.resolution;
+    return this.app.renderer.width;
   }
 
   getSize(): V2d {

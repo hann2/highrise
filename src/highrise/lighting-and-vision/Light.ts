@@ -112,7 +112,11 @@ export default class Light extends BaseEntity implements Entity {
     if (!this.shadows) {
       const { x, y } = this.bakedSprite.position;
       this.shadows = this.addChild(
-        new Shadows(V(x, y), this.shadowRadius, false, this.sourceRadius),
+        new Shadows({
+          position: V(x, y),
+          radius: this.shadowRadius,
+          sourceRadius: this.sourceRadius,
+        }),
       );
       // Erase the blocked fraction of the light
       this.shadows.maskSprite.blendMode = "erase";

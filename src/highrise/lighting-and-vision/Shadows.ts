@@ -23,6 +23,19 @@ export const CAST_SHADOW_TAG = "cast_shadow";
 
 type Point = [number, number];
 
+export interface ShadowsOptions {
+  /** Where the light is, in world coordinates */
+  position: V2d;
+  /** How far from the light shadows are computed, in meters */
+  radius?: number;
+  /** Whether moving bodies (doors) cast shadows too */
+  checkDynamicBodies?: boolean;
+  /** Radius of the light source in meters. 0 gives hard shadows. */
+  sourceRadius?: number;
+  /** Pixels per meter of the mask */
+  resolution?: number;
+}
+
 /** One wedge of partial shadow: the corner it starts at, the edge of full shadow, and the edge of full light */
 interface Penumbra {
   corner: Point;
@@ -73,15 +86,26 @@ export class Shadows extends BaseEntity implements Entity {
     texture: getPenumbraTexture(),
   });
 
-  constructor(
-    private lightPos: V2d,
-    private radius: number = 10,
-    private checkDynamicBodies = false,
-    /** Radius of the light source in meters. 0 gives hard shadows. */
-    private sourceRadius = 0,
-    private resolution = LIGHT_RESOLUTION,
-  ) {
+  private lightPos: V2d;
+  private radius: number;
+  private checkDynamicBodies: boolean;
+  private sourceRadius: number;
+  private resolution: number;
+
+  constructor({
+    position,
+    radius = 10,
+    checkDynamicBodies = false,
+    sourceRadius = 0,
+    resolution = LIGHT_RESOLUTION,
+  }: ShadowsOptions) {
     super();
+    this.lightPos = position;
+    this.radius = radius;
+    this.checkDynamicBodies = checkDynamicBodies;
+    this.sourceRadius = sourceRadius;
+    this.resolution = resolution;
+
     this.umbraGraphics.blendMode = "add";
     this.penumbraMesh.blendMode = "add";
     this.geometryContainer.addChild(this.umbraGraphics, this.penumbraMesh);
@@ -90,6 +114,7 @@ export class Shadows extends BaseEntity implements Entity {
       width: radius * 2,
       height: radius * 2,
       resolution,
+      antialias: true,
     });
     this.maskSprite = new Sprite(this.maskTexture);
     this.maskSprite.anchor.set(0.5);
