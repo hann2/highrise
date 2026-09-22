@@ -11,7 +11,7 @@ The Playwright tests start their own dev server on port 3456, so they can run wh
 ## How tests drive the game
 
 - `?seed=123` in the URL seeds `core/util/Random.ts`, making level generation reproducible.
-- Levels are reseeded with `seed + levelNumber` right before generation, so the wall/room layout of every level is reproducible regardless of what happened earlier in the run. Known limitation: a few decorations/vending machines still differ between runs with the same seed (cause not yet tracked down). The smoke test logs a wall-layout fingerprint for comparing runs.
+- Levels are reseeded with `seed + levelNumber` right before generation, so everything generated for a level is reproducible regardless of what happened earlier in the run. The smoke test asserts a fingerprint of `LevelController.level.entities` for level 2 against `LEVEL_2_FINGERPRINT`; when you change level generation on purpose, paste the new value from the failure message. If it changes when you didn't touch level generation, something is consuming randomness nondeterministically (see the randomness note in the root `CLAUDE.md`).
 - `window.DEBUG.game` exposes the `Game`. Tests find things with `entities.getById(...)` (`main_menu`, `party_manager`, `level_controller`) and `entities.getTagged(...)` (`human`, `zombie`).
 - Tests reach into entities by class name (`e.constructor.name === "Door"`), which only works in development builds where names aren't minified.
 - Dev-only cheat keys from `CheatController` are used for flow control: `KeyL` completes the level, `KeyV` toggles the vision mask.

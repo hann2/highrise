@@ -1,12 +1,18 @@
 import { shuffle } from "../../core/util/Random";
 
-// For when you want to get a random element out of a set,
-// but you wanna make sure you're not getting the same one twice in a row
+/**
+ * For when you want to get a random element out of a set, but you wanna make
+ * sure you're not getting the same one twice in a row.
+ *
+ * Shuffles lazily, so that rings created at module load time don't consume
+ * randomness before the RNG has been seeded.
+ */
 export class ShuffleRing<T> {
-  index: number = -1;
+  private values: T[];
+  private index = -1;
 
-  constructor(private values: T[]) {
-    shuffle(values);
+  constructor(values: readonly T[]) {
+    this.values = [...values];
   }
 
   getNext(): T {

@@ -8,6 +8,9 @@ import {
   startGame,
 } from "./helpers";
 
+// See the "Seeded levels are reproducible" assertion
+const LEVEL_2_FINGERPRINT = "315:-335350934";
+
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
  * prefer one long test that makes lots of assertions along the way over lots
@@ -229,22 +232,32 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.waitForTimeout(2500);
   await page.screenshot({ path: "tests/output/level-2-start.png" });
 
-  // Seeded levels should be reproducible. Not asserted on because any change
-  // to level generation legitimately changes it, but handy when comparing runs.
+  // Seeded levels are reproducible: everything generated for the level (walls,
+  // rooms, decorations, pickups, which enemies where) must be identical every
+  // run. If you change level generation on purpose, update the expected value.
   const fingerprint = await page.evaluate(() => {
-    let sum = 0;
-    for (const body of window.DEBUG.game!.world.bodies.all) {
-      // Only walls, because decoration placement isn't fully reproducible yet
-      if (body.owner?.constructor?.name === "Wall") {
-        for (const shape of body.shapes) {
-          sum += (body.position[0] + shape.position[0]) * 3;
-          sum += (body.position[1] + shape.position[1]) * 7;
-        }
+    const levelController = [...window.DEBUG.game!.entities.all].find(
+      (e) => e.constructor.name === "LevelController",
+    ) as any;
+    const rows: string[] = levelController.level.entities.map((e: any) => {
+      let row = e.constructor.name;
+      // Things that move have been ticking since they were generated, so only
+      // their order in the list is stable. Everything else is pinned in place.
+      if (e.body?.motion !== "dynamic") {
+        try {
+          const [x, y] = e.getPosition();
+          row += ` ${x.toFixed(2)},${y.toFixed(2)}`;
+        } catch {}
       }
+      return row + ` ${e.decorationInfo?.imageName ?? e.character?.name ?? ""}`;
+    });
+    let hash = 0;
+    for (const c of rows.join("\n")) {
+      hash = (hash * 31 + c.charCodeAt(0)) | 0;
     }
-    return Math.round(sum);
+    return `${rows.length}:${hash}`;
   });
-  console.log(`level 2 fingerprint: ${fingerprint}`);
+  expect(fingerprint).toBe(LEVEL_2_FINGERPRINT);
 
   // --- Zoomed out overview with the vision mask off (KeyV is a dev cheat) ---
   // Mostly useful as a visual reference for level generation and lighting.

@@ -51,7 +51,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - `persistenceLevel` (see `Persistence` in `highrise/constants/constants.ts`) controls what `game.clearScene(threshold)` removes.
 - Assets are referred to by name (camelCased file name without extension): `Sprite.from("andyHead")`, `new PositionalSound("wallHit1", position)`, `fontName("captureIt")`. Names are type checked against the manifest (`ImageName`, `SoundName`, `FontName`), so type arrays of them accordingly. Names must be unique per asset type; the manifest generator fails loudly otherwise.
 - Stats-as-data: guns, melee weapons, characters, decorations, and zombie variants are plain objects in their own files, collected in an index (`gunStats.ts`, `weapons.ts`, `decorations.ts`, `Character.ts`).
-- All randomness goes through `core/util/Random.ts` so that `?seed=123` makes runs reproducible. Don't call `Math.random()` directly.
+- All randomness goes through `core/util/Random.ts` so that `?seed=123` makes runs reproducible. Don't call `Math.random()` directly, and don't consume randomness at module load time (the seed is applied in `main()`, after modules have run): `ShuffleRing` shuffles lazily for exactly this reason.
 - `process.env.NODE_ENV === "development"` gates `CheatController`. `window.DEBUG.game` exposes the game in the console.
 
 ## Physics

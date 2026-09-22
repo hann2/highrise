@@ -20,6 +20,8 @@ const FORCE_TUTORIAL = process.env.NODE_ENV === "development" && false;
 export default class LevelController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
   currentLevel: number = 0;
+  /** What was generated for the current level */
+  level?: Level;
 
   @on("add")
   async onAdd() {
@@ -74,7 +76,8 @@ export default class LevelController extends BaseEntity implements Entity {
   generateLevel(): Level {
     // So that seeded runs get the same levels no matter what happened before
     reseedIfSeeded(this.currentLevel);
-    return generateLevel(chooseTemplate(this.currentLevel));
+    this.level = generateLevel(chooseTemplate(this.currentLevel));
+    return this.level;
   }
 }
 
