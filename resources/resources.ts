@@ -171,7 +171,6 @@ const images = {
   "favicon": require("url:./images/favicon.png"),
   "healthKit": require("url:./images/health-kit.png"),
   "pointLight": require("url:./images/lights/point-light.png"),
-  "visionFog": require("url:./images/lights/vision-fog.png"),
   "muzzleFlash1": require("url:./images/muzzle_flashs/muzzle-flash-1.png"),
   "muzzleFlash10": require("url:./images/muzzle_flashs/muzzle-flash-10.png"),
   "muzzleFlash11": require("url:./images/muzzle_flashs/muzzle-flash-11.png"),

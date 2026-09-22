@@ -43,6 +43,8 @@ const PENUMBRA_LENGTH = OUTER_RADIUS * 2;
 const EXPLORED_DARKNESS = 0.6;
 /** Pixels per meter of the darkness texture. The screen is about 65 px/m at the default zoom. */
 const DARKNESS_RESOLUTION = 48;
+/** Vision starts fading out at this fraction of MAX_VISION and is gone at the limit */
+const RANGE_FADE_START = 0.65;
 
 /**
  * Fog of war. What the player has never seen is black; what they have seen
@@ -99,7 +101,13 @@ export default class VisionController extends BaseEntity implements Entity {
       texture: getPenumbraTexture(),
     });
     this.penumbraMesh.tint = 0x000000;
-    this.darknessContainer.addChild(this.mesh, this.penumbraMesh);
+    // Beyond a distance, things fade out of sight even in the open
+    const rangeFade = new Sprite(getRangeFadeTexture());
+    rangeFade.anchor.set(0.5);
+    rangeFade.width = MAX_VISION * 2;
+    rangeFade.height = MAX_VISION * 2;
+    rangeFade.tint = 0x000000;
+    this.darknessContainer.addChild(this.mesh, this.penumbraMesh, rangeFade);
     // No multisampling: every visible edge in it is a gradient already
     this.darkness = RenderTexture.create({
       width: OUTER_RADIUS * 2,
@@ -109,12 +117,6 @@ export default class VisionController extends BaseEntity implements Entity {
     this.darknessSprite = new Sprite(this.darkness);
     this.darknessSprite.anchor.set(0.5);
     this.darknessSprite.alpha = EXPLORED_DARKNESS;
-
-    const fog = Sprite.from("visionFog");
-    fog.blendMode = "multiply";
-    fog.width = MAX_VISION * 2;
-    fog.height = MAX_VISION * 2;
-    fog.anchor.set(0.5);
 
     // The mesh's outer edge is a polygon just inside this circle, so the
     // hole is a bit smaller than the mesh to leave no slivers between them
@@ -127,7 +129,7 @@ export default class VisionController extends BaseEntity implements Entity {
     distanceShadows.alpha = EXPLORED_DARKNESS;
 
     this.sprite = new Container();
-    this.sprite.addChild(this.darknessSprite, distanceShadows, fog);
+    this.sprite.addChild(this.darknessSprite, distanceShadows);
     this.sprite.layerName = Layer.VISION;
   }
 
@@ -241,6 +243,42 @@ function setGeometry(
 
 const EDGE_TEXTURE_SIZE = 64;
 let edgeTexture: Texture | undefined;
+const RANGE_FADE_TEXTURE_SIZE = 256;
+let rangeFadeTexture: Texture | undefined;
+
+/** A disc that is clear in the middle and opaque at its edge, smooth in between */
+function getRangeFadeTexture(): Texture {
+  if (!rangeFadeTexture) {
+    const size = RANGE_FADE_TEXTURE_SIZE;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d")!;
+    const image = ctx.createImageData(size, size);
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const dx = (x + 0.5) / size - 0.5;
+        const dy = (y + 0.5) / size - 0.5;
+        const r = Math.hypot(dx, dy) * 2;
+        const t = Math.max(
+          0,
+          Math.min(1, (r - RANGE_FADE_START) / (1 - RANGE_FADE_START)),
+        );
+        const alpha = t * t * (3 - 2 * t);
+        const i = (y * size + x) * 4;
+        image.data[i] = 255;
+        image.data[i + 1] = 255;
+        image.data[i + 2] = 255;
+        image.data[i + 3] = Math.round(alpha * 255);
+      }
+    }
+    ctx.putImageData(image, 0, 0);
+    rangeFadeTexture = Texture.from(canvas);
+    rangeFadeTexture.source.addressMode = "clamp-to-edge";
+    rangeFadeTexture.source.scaleMode = "linear";
+  }
+  return rangeFadeTexture;
+}
 
 /** A vertical alpha ramp: clear at v = 0, opaque at v = 1, smooth in between */
 function getEdgeTexture(): Texture {
