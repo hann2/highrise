@@ -44,6 +44,14 @@ const EXPLORED_DARKNESS = 0.6;
 const DARKNESS_RESOLUTION = 48;
 /** Vision starts fading out at this fraction of the vision range and is gone at the limit */
 const RANGE_FADE_START = 0.65;
+/**
+ * How far past the range the range fade sprite reaches, in meters. Its
+ * texture is opaque beyond the range, and the vision mesh's soft edge at
+ * the range limit is centered on the limit, so the two would leave a
+ * lighter seam there if the sprite ended at the range. It ends where the
+ * mesh is solid instead, and the mesh covers everything past it.
+ */
+const RANGE_FADE_OVERLAP = 0.1;
 
 /**
  * Fog of war. What the player has never seen is black; what they have seen
@@ -143,8 +151,9 @@ export default class VisionController extends BaseEntity implements Entity {
 
   /** Sizes everything that depends on the range, except the darkness texture */
   private sizeToRange() {
-    this.rangeFade.width = this.range * 2;
-    this.rangeFade.height = this.range * 2;
+    const fadeSize = (this.range + RANGE_FADE_OVERLAP) * 2;
+    this.rangeFade.width = fadeSize;
+    this.rangeFade.height = fadeSize;
     // The mesh's outer edge is a polygon just inside this circle, so the
     // hole is a bit smaller than the mesh to leave no slivers between them
     this.distanceShadows
@@ -346,7 +355,7 @@ let edgeTexture: Texture | undefined;
 const RANGE_FADE_TEXTURE_SIZE = 256;
 let rangeFadeTexture: Texture | undefined;
 
-/** A disc that is clear in the middle and opaque at its edge, smooth in between */
+/** Clear in the middle, opaque from the edge of the disc out to the corners, smooth in between */
 function getRangeFadeTexture(): Texture {
   if (!rangeFadeTexture) {
     const size = RANGE_FADE_TEXTURE_SIZE;
@@ -364,8 +373,9 @@ function getRangeFadeTexture(): Texture {
           0,
           Math.min(1, (r - RANGE_FADE_START) / (1 - RANGE_FADE_START)),
         );
-        // Beyond the range the mesh takes over, so the corners stay clear
-        const alpha = r > 1 ? 0 : t * t * (3 - 2 * t);
+        // Opaque beyond the range too: overlapping the mesh there costs
+        // nothing, since the darkness is composited at full strength
+        const alpha = t * t * (3 - 2 * t);
         const i = (y * size + x) * 4;
         image.data[i] = 255;
         image.data[i + 1] = 255;
