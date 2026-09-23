@@ -7,6 +7,7 @@ import ReactEntity from "../../core/ReactEntity";
 import { smoothStep } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
 import { RunSummary } from "../persistence/SaveData";
+import Encyclopedia, { isEncyclopediaOpen } from "./Encyclopedia";
 import "./menu.css";
 import { MenuButton } from "./MenuButtons";
 
@@ -48,6 +49,7 @@ export default class GameOverScreen extends ReactEntity implements Entity {
     const { summary } = this;
     const victory = summary.outcome === "victory";
     const continueButton = this.game.io.usingGamepad ? "A" : "Enter";
+    const encyclopediaButton = this.game.io.usingGamepad ? "Y" : "E";
     return (
       <div
         className={`menu-screen run-summary ${victory ? "run-summary--victory" : ""} ${
@@ -72,8 +74,12 @@ export default class GameOverScreen extends ReactEntity implements Entity {
           </div>
           {this.renderCallouts()}
           <MenuButton onClick={() => this.continue()}>Main Menu</MenuButton>
+          <MenuButton onClick={() => this.openEncyclopedia()}>
+            Encyclopedia
+          </MenuButton>
           <div className="run-summary__hint">
-            Press {continueButton} to continue
+            Press {continueButton} to continue · {encyclopediaButton} for the
+            encyclopedia
           </div>
         </div>
       </div>
@@ -131,6 +137,13 @@ export default class GameOverScreen extends ReactEntity implements Entity {
     this.ready = true;
   }
 
+  /** Over the summary, which comes back when it closes */
+  openEncyclopedia() {
+    if (this.ready && !isEncyclopediaOpen(this.game)) {
+      this.game.addEntity(new Encyclopedia(this.persistenceLevel));
+    }
+  }
+
   async continue() {
     if (this.ready && !this.leaving) {
       this.leaving = true;
@@ -144,15 +157,25 @@ export default class GameOverScreen extends ReactEntity implements Entity {
 
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
+    if (isEncyclopediaOpen(this.game)) {
+      return;
+    }
     if (key === "Enter" || key === "Space" || key === "Escape") {
       this.continue();
+    } else if (key === "KeyE") {
+      this.openEncyclopedia();
     }
   }
 
   @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
+    if (isEncyclopediaOpen(this.game)) {
+      return;
+    }
     if (button === ControllerButton.A || button === ControllerButton.START) {
       this.continue();
+    } else if (button === ControllerButton.Y) {
+      this.openEncyclopedia();
     }
   }
 }

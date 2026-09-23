@@ -5,6 +5,7 @@ import { ControllerAxis, ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import ReactEntity from "../../core/ReactEntity";
 import { Persistence } from "../constants/constants";
+import { markSeen } from "../persistence/SaveData";
 import { Upgrade } from "../upgrades/Upgrade";
 import "./menu.css";
 
@@ -74,6 +75,10 @@ export default class UpgradeSelect extends ReactEntity implements Entity {
     super.onAdd(data);
     this.shownAt = data.game.elapsedTime;
     data.game.pause();
+    // Reading an offer is enough for the encyclopedia
+    for (const upgrade of this.choices) {
+      markSeen("upgrades", upgrade.name);
+    }
   }
 
   select(index: number) {

@@ -1,5 +1,6 @@
 import { rUniform } from "../../core/util/Random";
 import type Human from "../human/Human";
+import { markSeen } from "../persistence/SaveData";
 import {
   Bloodthirsty,
   CurbStomp,
@@ -70,4 +71,5 @@ export function drawUpgrades(human: Human, count: number = 3): Upgrade[] {
 export function takeUpgrade(human: Human, upgrade: Upgrade) {
   upgrade.apply(human);
   human.upgrades.push(upgrade);
+  markSeen("upgrades", upgrade.name);
 }

@@ -5,6 +5,7 @@ import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import ReactEntity from "../../core/ReactEntity";
 import { Persistence } from "../constants/constants";
+import Encyclopedia, { isEncyclopediaOpen } from "./Encyclopedia";
 import "./menu.css";
 import {
   FeedbackButton,
@@ -26,8 +27,13 @@ export default class PauseMenu extends ReactEntity implements Entity {
   }
 
   renderContent() {
-    // The upgrade screen pauses the game too, but isn't a pause
-    if (!this.visible || isUpgradeSelectOpen(this.game)) {
+    // The upgrade screen pauses the game too, but isn't a pause. The
+    // encyclopedia covers the menu and gives it back when it closes.
+    if (
+      !this.visible ||
+      isUpgradeSelectOpen(this.game) ||
+      isEncyclopediaOpen(this.game)
+    ) {
       return null;
     }
     const game = this.game;
@@ -41,6 +47,9 @@ export default class PauseMenu extends ReactEntity implements Entity {
         </div>
         <MenuButtons corner="top-left">
           <MenuButton onClick={() => this.goToMainMenu()}>Main Menu</MenuButton>
+          <MenuButton onClick={() => this.openEncyclopedia()}>
+            Encyclopedia
+          </MenuButton>
           <FeedbackButton />
           <MuteButton game={game} />
           <GraphicsButton game={game} />
@@ -53,6 +62,18 @@ export default class PauseMenu extends ReactEntity implements Entity {
     this.game.unpause();
     this.game.dispatch("gameOver", { victory: false });
     this.destroy();
+  }
+
+  /** Over the pause menu, with the game still paused */
+  openEncyclopedia() {
+    if (this.visible && !isEncyclopediaOpen(this.game)) {
+      this.game.addEntity(new Encyclopedia(Persistence.Game));
+    }
+  }
+
+  /** Whether this menu is showing and in charge of the keys */
+  private get takingInput(): boolean {
+    return !isUpgradeSelectOpen(this.game) && !isEncyclopediaOpen(this.game);
   }
 
   @on("add")
@@ -88,15 +109,25 @@ export default class PauseMenu extends ReactEntity implements Entity {
 
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
-    if (key === "Escape" && !isUpgradeSelectOpen(this.game)) {
+    if (!this.takingInput) {
+      return;
+    }
+    if (key === "Escape") {
       this.game.togglePause();
+    } else if (key === "KeyE") {
+      this.openEncyclopedia();
     }
   }
 
   @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
-    if (button === ControllerButton.START && !isUpgradeSelectOpen(this.game)) {
+    if (!this.takingInput) {
+      return;
+    }
+    if (button === ControllerButton.START) {
       this.game.togglePause();
+    } else if (button === ControllerButton.Y) {
+      this.openEncyclopedia();
     }
   }
 }

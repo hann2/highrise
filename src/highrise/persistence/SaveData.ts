@@ -48,6 +48,8 @@ export interface SaveData {
   totalRuns: number;
   /** The highest floor any run has reached */
   bestFloor: number;
+  /** Names of the things the player has come across, for the encyclopedia */
+  seen: SeenFlags;
 }
 
 export function defaultSaveData(): SaveData {
@@ -57,6 +59,7 @@ export function defaultSaveData(): SaveData {
     runs: [],
     totalRuns: 0,
     bestFloor: 0,
+    seen: { guns: [], melee: [], upgrades: [], enemies: [] },
   };
 }
 
@@ -142,6 +145,7 @@ export function parseSaveData(raw: unknown): SaveData {
     nonNegative(raw.bestFloor),
     ...data.runs.map((run) => run.floorReached),
   );
+  data.seen = parseSeenFlags(raw.seen);
   return data;
 }
 
@@ -185,4 +189,37 @@ function stringArray(x: unknown): string[] {
 
 function nonNegative(x: unknown): number {
   return typeof x === "number" && Number.isFinite(x) && x >= 0 ? x : 0;
+}
+
+/** What the encyclopedia has revealed, by kind, as the names from the data indexes */
+export interface SeenFlags {
+  guns: string[];
+  melee: string[];
+  upgrades: string[];
+  enemies: string[];
+}
+
+export type SeenKind = keyof SeenFlags;
+
+/** Records that the player has come across something. Only saves when it's new. */
+export function markSeen(kind: SeenKind, name: string): void {
+  const data = loadSaveData();
+  if (!data.seen[kind].includes(name)) {
+    data.seen[kind].push(name);
+    saveSaveData(data);
+  }
+}
+
+export function isSeen(kind: SeenKind, name: string): boolean {
+  return loadSaveData().seen[kind].includes(name);
+}
+
+function parseSeenFlags(raw: unknown): SeenFlags {
+  const seen = isObject(raw) ? raw : {};
+  return {
+    guns: stringArray(seen.guns),
+    melee: stringArray(seen.melee),
+    upgrades: stringArray(seen.upgrades),
+    enemies: stringArray(seen.enemies),
+  };
 }

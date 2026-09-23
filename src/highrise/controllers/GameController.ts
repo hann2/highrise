@@ -3,6 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import { Character } from "../characters/Character";
 import { Persistence } from "../constants/constants";
+import EncyclopediaTracker from "../encyclopedia/EncyclopediaTracker";
 import PartyManager from "../environment/PartyManager";
 import { AmmoOverlay } from "../hud/AmmoOverlay";
 import { DamagedOverlay } from "../hud/DamagedOverlay";
@@ -40,6 +41,7 @@ export class GameController extends BaseEntity implements Entity {
     const getPlayer = () => partyManager.leader;
     game.addEntities(
       new RunStats(character),
+      new EncyclopediaTracker(),
       new QuarterDropper(),
       new LevelController(),
       new CameraController(game.camera, getPlayer),

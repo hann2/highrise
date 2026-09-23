@@ -704,6 +704,83 @@ test("game boots, plays, and changes levels without errors", async ({
   // --- Pausing stops the clock ---
   await page.keyboard.press("Escape");
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
+
+  // --- The encyclopedia opens over the pause menu and shows what was found ---
+  const heldGun = await page.evaluate(
+    () =>
+      (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "PartyManager",
+        ) as any
+      ).leader.weapon.stats.name as string,
+  );
+  await page.locator(".menu-button", { hasText: "Encyclopedia" }).waitFor();
+  await page.locator(".menu-button", { hasText: "Encyclopedia" }).click();
+  await expect(page.locator(".encyclopedia")).toBeVisible();
+  await expect(page.locator(".pause-menu__background")).toHaveCount(0);
+  const selectedTab = page.locator(".encyclopedia__tab--selected");
+  await expect(selectedTab).toContainText("Characters");
+  // Right goes to the guns: the one picked up is revealed, the rest aren't
+  await page.keyboard.press("ArrowRight");
+  await expect(selectedTab).toContainText("Guns");
+  await expect(selectedTab).toContainText(/[1-9]\d* \/ 11/);
+  const gunEntries = page.locator(".encyclopedia__entry");
+  await expect(gunEntries).toHaveCount(11);
+  await expect(
+    page.locator(".encyclopedia__entry", { hasText: heldGun }),
+  ).toHaveCount(1);
+  expect(
+    await page.locator(".encyclopedia__entry--unknown").count(),
+  ).toBeGreaterThan(0);
+  await expect(
+    page.locator(".encyclopedia__entry--unknown").first(),
+  ).toHaveText("???");
+  // Down walks the list; the detail panel follows the selection
+  const gunNames = await gunEntries.allInnerTexts();
+  const heldIndex = gunNames.findIndex((name) => name.trim() === heldGun);
+  await page.mouse.move(1, 1); // so hovering doesn't move the selection
+  for (let i = 0; i < heldIndex; i++) {
+    await page.keyboard.press("ArrowDown");
+  }
+  const detail = page.locator(".encyclopedia__detail");
+  await expect(detail).toContainText(heldGun);
+  await expect(detail).toContainText("Magazine");
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: "tests/output/encyclopedia.png" });
+  const unknownIndex = gunNames.findIndex((name) => name.trim() === "???");
+  for (let i = heldIndex; i < unknownIndex; i++) {
+    await page.keyboard.press("ArrowDown");
+  }
+  for (let i = unknownIndex; i > heldIndex; i--) {
+    await page.keyboard.press("ArrowUp");
+  }
+  await expect(detail).toContainText(heldGun);
+  // Unfound entries show no name or stats
+  await page.locator(".encyclopedia__entry--unknown").first().click();
+  await expect(page.locator(".encyclopedia__detail-name")).toHaveText("???");
+  expect(await detail.innerText()).not.toContain("Magazine");
+  // Guns → Melee → Upgrades → Enemies, where the zombie shot earlier is known
+  for (let i = 0; i < 3; i++) {
+    await page.keyboard.press("ArrowRight");
+  }
+  await expect(selectedTab).toContainText("Enemies");
+  await expect(
+    page.locator(".encyclopedia__entry:not(.encyclopedia__entry--unknown)", {
+      hasText: "Zombie",
+    }),
+  ).toHaveCount(1);
+  // Escape closes it without unpausing, and the pause menu comes back
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".encyclopedia")).toHaveCount(0);
+  await expect(page.locator(".pause-menu__background")).toHaveCount(1);
+  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
+  const seen = await page.evaluate(
+    () => JSON.parse(window.localStorage.getItem("highriseSaveData")!).seen,
+  );
+  expect(seen.guns).toContain(heldGun);
+  expect(seen.enemies).toContain("Zombie");
+  expectNoIssues(issues);
+
   await page.screenshot({ path: "tests/output/paused.png" });
   await page.keyboard.press("Escape");
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
@@ -919,12 +996,30 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(run.quartersSpent).toBe(3);
   expect(run.quartersCollected).toBeGreaterThanOrEqual(6);
   expect(run.timeSeconds).toBeGreaterThan(5);
+  // Offered upgrades count as seen, and saving the run kept the seen flags
+  expect(saved.seen.upgrades).toEqual(expect.arrayContaining(UPGRADE_OFFER));
+  expect(saved.seen.guns.length).toBeGreaterThan(0);
   // The game is cleared away behind the summary
   expect(
     await page.evaluate(
       () => window.DEBUG.game!.entities.getTagged("human").length,
     ),
   ).toBe(0);
+
+  // The encyclopedia opens from the summary too, and Escape closes it
+  // without also leaving the summary
+  await page.keyboard.press("KeyE");
+  await expect(page.locator(".encyclopedia")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".encyclopedia")).toHaveCount(0);
+  await page.waitForTimeout(1500);
+  expect(
+    await page.evaluate(() =>
+      [...window.DEBUG.game!.entities.all].some(
+        (e) => e.constructor.name === "GameOverScreen",
+      ),
+    ),
+  ).toBe(true);
 
   // Continuing goes back to the main menu
   await page.keyboard.press("Enter");
@@ -936,5 +1031,13 @@ test("game boots, plays, and changes levels without errors", async ({
     null,
     { timeout: 15000 },
   );
+
+  // --- The main menu opens the encyclopedia too, and comes back after ---
+  await page.keyboard.press("KeyE");
+  await expect(page.locator(".encyclopedia")).toBeVisible();
+  await expect(page.locator(".menu-title")).toHaveCount(0);
+  await page.locator(".menu-button", { hasText: "Back" }).click();
+  await expect(page.locator(".encyclopedia")).toHaveCount(0);
+  await expect(page.locator(".menu-title")).toHaveCount(1);
   expectNoIssues(issues);
 });

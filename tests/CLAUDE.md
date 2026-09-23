@@ -2,7 +2,7 @@
 
 Playwright end-to-end tests that run the real game in headless Chrome (with GPU).
 
-- `npm test` — smoke test. Run this after any non-trivial change; it is the main way to tell "compiles" from "works". It boots the game, moves, picks up a gun and shoots a zombie, swings the doors, checks physics sanity, pauses, changes levels (picking an upgrade on the way), and checks that player stats take effect.
+- `npm test` — smoke test. Run this after any non-trivial change; it is the main way to tell "compiles" from "works". It boots the game, moves, picks up a gun and shoots a zombie, swings the doors, checks physics sanity, pauses, browses the encyclopedia, changes levels (picking an upgrade on the way), and checks that player stats take effect.
 - `npm run test:physics` — node tests for `src/core/physics` (`tests/physics/`). No browser, runs in about a second. Several tests pin exact numeric results; if you change solver/integration behavior on purpose, re-record them with `PHYSICS_RECORD_PINS=1 npm run test:physics` and paste the output into `PINS`. If you didn't mean to change behavior and a pin fails, you broke something.
 - `npm run test:vision` — node tests for the vision polygon and mesh (`tests/vision/`). They build small scenes of boxes and check what is visible, so add a case there when you touch `visibility.ts` or `visionMesh.ts`.
 - `npm run benchmark` — seeded frame-time benchmark. Writes `tests/output/benchmark.json` with `loopCpuMs` percentiles and a `profile` breakdown (per section and per entity class, ms per frame) and prints the breakdown as a table. Numbers are only comparable on the same machine. `captureProfile(page, ms)` in `helpers.ts` gets the same breakdown from any test or script.

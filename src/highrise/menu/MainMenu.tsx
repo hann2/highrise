@@ -8,6 +8,7 @@ import { smoothStep } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
 import CharacterSelect from "./CharacterSelect";
 import CreditsScreen from "./CreditsScreen";
+import Encyclopedia, { isEncyclopediaOpen } from "./Encyclopedia";
 import "./menu.css";
 import { FeedbackButton, MenuButton, MenuButtons } from "./MenuButtons";
 
@@ -29,6 +30,10 @@ export default class MainMenu extends ReactEntity implements Entity {
 
   renderContent() {
     const startButton = this.game.io.usingGamepad ? "START" : "Enter";
+    // The encyclopedia covers the menu and gives it back when it closes
+    if (isEncyclopediaOpen(this.game)) {
+      return null;
+    }
     return (
       <div
         className={`menu-screen ${this.inTransition ? "menu-screen--inactive" : ""}`}
@@ -44,6 +49,9 @@ export default class MainMenu extends ReactEntity implements Entity {
           Press {startButton} to start
         </div>
         <MenuButtons corner="bottom-right" opacity={this.buttonsOpacity}>
+          <MenuButton onClick={() => this.openEncyclopedia()}>
+            Encyclopedia
+          </MenuButton>
           <MenuButton onClick={() => this.rollCredits()}>Credits</MenuButton>
           <FeedbackButton />
         </MenuButtons>
@@ -76,6 +84,12 @@ export default class MainMenu extends ReactEntity implements Entity {
     }
   }
 
+  openEncyclopedia() {
+    if (!this.inTransition && !isEncyclopediaOpen(this.game)) {
+      this.game.addEntity(new Encyclopedia(this.persistenceLevel));
+    }
+  }
+
   async startGame() {
     if (!this.inTransition) {
       this.inTransition = true;
@@ -91,19 +105,29 @@ export default class MainMenu extends ReactEntity implements Entity {
 
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
+    if (isEncyclopediaOpen(this.game)) {
+      return;
+    }
     if (key === "Enter") {
       this.startGame();
     } else if (key === "KeyC") {
       this.rollCredits();
+    } else if (key === "KeyE") {
+      this.openEncyclopedia();
     }
   }
 
   @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
+    if (isEncyclopediaOpen(this.game)) {
+      return;
+    }
     if (button === ControllerButton.START) {
       this.startGame();
     } else if (button === ControllerButton.BACK) {
       this.rollCredits();
+    } else if (button === ControllerButton.Y) {
+      this.openEncyclopedia();
     }
   }
 }
