@@ -216,6 +216,16 @@ export default class VisionController extends BaseEntity implements Entity {
     this.explored?.reset(level.width, level.height);
   }
 
+  /** Starts a fresh explored map for a place that isn't a level, or restores a saved one */
+  resetExplored(width: number, height: number, from?: Texture) {
+    this.explored?.reset(width, height, from);
+  }
+
+  /** The explored map as a PNG data URL, for `resetExplored` later */
+  exportExplored(): Promise<string> | undefined {
+    return this.explored?.toImage();
+  }
+
   @on("render")
   onRender() {
     if (!this.enabled) {

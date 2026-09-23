@@ -85,8 +85,12 @@ export class ExploredMap {
     return [-MARGIN, -MARGIN];
   }
 
-  /** Forgets everything and fits the map to a level of the given size in meters */
-  reset(levelWidth: number, levelHeight: number) {
+  /**
+   * Fits the map to a level of the given size in meters. Forgets everything,
+   * unless `from` is a map saved earlier with `toImage` for the same size, in
+   * which case that is remembered instead.
+   */
+  reset(levelWidth: number, levelHeight: number, from?: Texture) {
     const width = levelWidth + 2 * MARGIN;
     const height = levelHeight + 2 * MARGIN;
     this.resolution = Math.min(
@@ -102,11 +106,32 @@ export class ExploredMap {
       resolution: this.resolution,
     });
     this.sprite.texture = this.texture;
-    this.renderer.render({
-      container: new Container(),
+    if (from) {
+      const saved = new Sprite(from);
+      saved.width = width;
+      saved.height = height;
+      this.renderer.render({
+        container: saved,
+        target: this.texture,
+        clear: true,
+        clearColor: [0, 0, 0, 0],
+      });
+      saved.destroy();
+    } else {
+      this.renderer.render({
+        container: new Container(),
+        target: this.texture,
+        clear: true,
+        clearColor: [0, 0, 0, 1],
+      });
+    }
+  }
+
+  /** The map as a PNG data URL, to keep for `reset` later */
+  toImage(): Promise<string> {
+    return this.renderer.extract.base64({
       target: this.texture,
-      clear: true,
-      clearColor: [0, 0, 0, 1],
+      format: "png",
     });
   }
 

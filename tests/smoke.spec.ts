@@ -58,6 +58,14 @@ test("game boots, plays, and changes levels without errors", async ({
       visionControllers: [...game.entities.all].filter(
         (e) => e.constructor.name === "VisionController",
       ).length,
+      lobbyExploredSaved: (() => {
+        try {
+          return !!JSON.parse(localStorage.getItem("highriseSaveData")!)
+            .lobbyExplored;
+        } catch {
+          return false;
+        }
+      })(),
       cameraOnPlayer: Math.hypot(
         game.camera.x - lobby.player.getPosition()[0],
         game.camera.y - lobby.player.getPosition()[1],
@@ -72,7 +80,9 @@ test("game boots, plays, and changes levels without errors", async ({
   // Only the rescued characters are in the lobby; no enemies, no fog
   expect(inElevator.humans).toBe(3);
   expect(inElevator.zombies).toBe(0);
-  expect(inElevator.visionControllers).toBe(0);
+  // Fog of war in the lobby too, unexplored the first time
+  expect(inElevator.visionControllers).toBe(1);
+  expect(inElevator.lobbyExploredSaved).toBe(false);
   expect(inElevator.cameraOnPlayer).toBeLessThan(0.5);
   // Walking into the shut doors goes nowhere
   const beforeWalking = await getLobbyPlayerPosition(page);
@@ -2009,6 +2019,13 @@ test("game boots, plays, and changes levels without errors", async ({
     };
   });
   expect(back).toEqual({ character: "Nancy", doorOpen: 0 });
+  // What was seen of the lobby before the run was saved, and is back
+  const lobbyExplored = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem("highriseSaveData")!).lobbyExplored as
+        string | undefined,
+  );
+  expect(lobbyExplored?.startsWith("data:image/png")).toBe(true);
   await expect(page.locator(".menu-title")).toHaveCount(0);
   await arriveInLobby(page);
   // Whoever made it out of floor 1 waits in the lobby now

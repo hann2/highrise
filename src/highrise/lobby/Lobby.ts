@@ -3,6 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { reseedIfSeeded } from "../../core/util/Random";
+import { Texture } from "pixi.js";
 import { V2d } from "../../core/Vector";
 import { Character, CHARACTERS } from "../characters/Character";
 import { CELL_SIZE, Persistence } from "../constants/constants";
@@ -21,15 +22,17 @@ import {
   BOOKCASE_POSITION,
   CHARACTER_SPOTS,
   DIRECTORY_BOARD_POSITION,
+  LOBBY_SIZE,
   RECEPTIONIST_POSITION,
   STAIRS_CELL,
 } from "../levels/rooms/LobbyRoomTemplate";
 import LightingManager from "../lighting-and-vision/LightingManager";
+import VisionController from "../lighting-and-vision/VisionController";
 import { isCreditsOpen } from "../menu/CreditsScreen";
 import Encyclopedia, { isEncyclopediaOpen } from "../menu/Encyclopedia";
 import PauseMenu from "../menu/PauseMenu";
 import TitleScreen, { isTitleScreenOpen } from "../menu/TitleScreen";
-import { loadSaveData } from "../persistence/SaveData";
+import { loadSaveData, updateSaveData } from "../persistence/SaveData";
 import { generateRunPlan, RunPlan } from "../run/RunPlan";
 import { Direction } from "../utils/directions";
 import DirectoryBoard from "./DirectoryBoard";
@@ -46,6 +49,8 @@ const START_RUN_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 0.8;
 const DOORS_OPEN_ENOUGH = 0.4;
 /** How often the save is checked for newly rescued characters, so the unlock cheat shows up (seconds) */
 const UNLOCK_CHECK_INTERVAL = 0.5;
+/** How often what's been seen of the lobby is saved, in case the page is closed (seconds) */
+const EXPLORED_SAVE_INTERVAL = 10;
 
 const at = (cell: V2d) => CellGrid.levelCoordToWorldCoord(cell);
 
@@ -71,6 +76,9 @@ export default class Lobby extends BaseEntity implements Entity {
   /** How many of the character spots have someone in them */
   private spotsUsed = 0;
   private unlockCheckTime = UNLOCK_CHECK_INTERVAL;
+  /** Fog of war, remembered between visits and page loads */
+  private vision!: VisionController;
+  private exploredSaveTime = EXPLORED_SAVE_INTERVAL;
 
   constructor(private showTitle: boolean) {
     super();
@@ -94,6 +102,8 @@ export default class Lobby extends BaseEntity implements Entity {
     );
     this.player.body.angle = Direction[ARRIVAL_ELEVATOR.openDirection].angle;
     this.addWaitingCharacters(character);
+    this.vision = this.addChild(new VisionController(() => this.player));
+    this.restoreExplored();
 
     const stairs = at(STAIRS_CELL);
     const half = CELL_SIZE / 2;
@@ -212,6 +222,39 @@ export default class Lobby extends BaseEntity implements Entity {
     }
   }
 
+  /** What has been seen of the lobby so far, from the save; nothing the first time */
+  private async restoreExplored() {
+    const [width, height] = LOBBY_SIZE.mul(CELL_SIZE);
+    // Everything unseen until the saved map is loaded, so nothing shows through
+    this.vision.resetExplored(width, height);
+    const saved = loadSaveData().lobbyExplored;
+    if (!saved) {
+      return;
+    }
+    const image = new Image();
+    image.src = saved;
+    try {
+      await image.decode();
+    } catch {
+      return; // A bad image just means starting over
+    }
+    if (!this.isDestroyed) {
+      const texture = Texture.from(image);
+      this.vision.resetExplored(width, height, texture);
+      texture.destroy(true);
+    }
+  }
+
+  /** Remembers what has been seen of the lobby */
+  private async saveExplored() {
+    const image = await this.vision.exportExplored();
+    if (image) {
+      updateSaveData((data) => {
+        data.lobbyExplored = image;
+      });
+    }
+  }
+
   /** Whether the player has to stand still: in the elevator, or behind a screen */
   isInputBlocked(): boolean {
     return (
@@ -250,6 +293,13 @@ export default class Lobby extends BaseEntity implements Entity {
       this.unlockCheckTime = UNLOCK_CHECK_INTERVAL;
       this.addNewlyUnlocked();
     }
+    if (this.arrived) {
+      this.exploredSaveTime -= dt;
+      if (this.exploredSaveTime <= 0) {
+        this.exploredSaveTime = EXPLORED_SAVE_INTERVAL;
+        this.saveExplored();
+      }
+    }
   }
 
   /** Up the stairs: fade out, clear the lobby away, and start the run as whoever the player is */
@@ -266,6 +316,7 @@ export default class Lobby extends BaseEntity implements Entity {
       ),
     );
     await this.wait(START_RUN_FADE_TIME);
+    await this.saveExplored();
     const game = this.game;
     const character = this.player.character;
     const plan = this.plan;

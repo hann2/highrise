@@ -65,6 +65,8 @@ export interface SaveData {
   autoPause: boolean;
   /** Name of the character the last run started with, who you arrive in the lobby as */
   lastCharacter?: string;
+  /** How much of the lobby has been seen, as a PNG data URL of its explored map */
+  lobbyExplored?: string;
 }
 
 export function defaultSaveData(): SaveData {
@@ -77,6 +79,7 @@ export function defaultSaveData(): SaveData {
     seen: { guns: [], melee: [], consumables: [], upgrades: [], enemies: [] },
     autoPause: true,
     lastCharacter: undefined,
+    lobbyExplored: undefined,
   };
 }
 
@@ -193,6 +196,12 @@ export function parseSaveData(raw: unknown): SaveData {
   }
   if (typeof raw.lastCharacter === "string") {
     data.lastCharacter = raw.lastCharacter;
+  }
+  if (
+    typeof raw.lobbyExplored === "string" &&
+    raw.lobbyExplored.startsWith("data:image/")
+  ) {
+    data.lobbyExplored = raw.lobbyExplored;
   }
   return data;
 }
