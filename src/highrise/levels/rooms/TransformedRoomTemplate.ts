@@ -67,6 +67,8 @@ export default class TransformedRoomTemplate implements RoomTemplate {
         wallID: transformer.transformWall(d.wallID),
         hingePoint: transformer.transformPosition(d.hingePoint),
         restingDirection: transformer.transformVector(d.restingDirection),
+        opensToward:
+          d.opensToward && transformer.transformVector(d.opensToward),
       };
     });
   }

@@ -23,12 +23,35 @@ import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
 
+// The closer that swings one-way and locked doors shut (N·m per radian, N·m·s per radian)
+const CLOSER_STIFFNESS = 15;
+const CLOSER_DAMPING = 3;
+
+export interface DoorOptions {
+  /** The door can only swing this way from rest: 1 towards increasing angle, -1 towards decreasing */
+  oneWay?: 1 | -1;
+  /** Starts locked. See {@link Door.locked}. */
+  locked?: boolean;
+}
+
 export const DEFAULT_DOOR_SPRITES: ImageName[] = ["door1"];
 
 export default class Door extends BaseEntity implements Entity, Hittable {
   tags: string[];
   sprite: Sprite & GameSprite;
   body: Body;
+
+  /**
+   * A locked door can't be opened by anything: its hinge only lets it swing
+   * further shut, and a closer pulls it shut. Pushes and bullets don't move it.
+   */
+  locked: boolean;
+  /** Only swings this way from rest (see {@link DoorOptions.oneWay}), and has a closer */
+  readonly oneWay?: 1 | -1;
+
+  private hinge?: RevoluteConstraint;
+  /** While locked, the range of angles (relative to rest) it can still reach. Only ever shrinks towards 0. */
+  private latch: [number, number] = [-Infinity, Infinity];
 
   constructor(
     private hingePoint: V2d,
@@ -38,8 +61,12 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     private maxAngle: number,
     blocksVision: boolean = true,
     imageName: ImageName = choose(...DEFAULT_DOOR_SPRITES),
+    { oneWay, locked = false }: DoorOptions = {},
   ) {
     super();
+
+    this.oneWay = oneWay;
+    this.locked = locked;
 
     this.sprite = Sprite.from(imageName);
     this.sprite.scale.set(length / this.sprite.width);
@@ -75,11 +102,10 @@ export default class Door extends BaseEntity implements Entity, Hittable {
 
   @on("add")
   onAdd({ game }: { game: Game }) {
-    this.constraints = [
-      new RevoluteConstraint(game.ground, this.body, {
-        worldPivot: this.hingePoint,
-      }),
-    ];
+    this.hinge = new RevoluteConstraint(game.ground, this.body, {
+      worldPivot: this.hingePoint,
+    });
+    this.constraints = [this.hinge];
     this.springs = [
       new DoorSpring(
         game.ground,
@@ -88,6 +114,52 @@ export default class Door extends BaseEntity implements Entity, Hittable {
         this.restingAngle + this.maxAngle,
       ),
     ];
+  }
+
+  setLocked(locked: boolean) {
+    if (locked && !this.locked) {
+      this.latch = [-Infinity, Infinity];
+    }
+    this.locked = locked;
+  }
+
+  /** The middle of the doorway, where the middle of the door is when it's shut */
+  getDoorwayCenter(): V2d {
+    return this.hingePoint.add(
+      polarToVec(this.restingAngle, this.length * 0.5),
+    );
+  }
+
+  /** Current angle relative to the resting angle */
+  getOpenAngle(): number {
+    return this.body.angle - this.restingAngle;
+  }
+
+  @on("tick")
+  onTick() {
+    const offset = this.getOpenAngle();
+    let lower = -Infinity;
+    let upper = Infinity;
+    if (this.oneWay === 1) {
+      lower = 0;
+    } else if (this.oneWay === -1) {
+      upper = 0;
+    }
+    if (this.locked) {
+      this.latch[0] = Math.max(this.latch[0], Math.min(offset, 0));
+      this.latch[1] = Math.min(this.latch[1], Math.max(offset, 0));
+      lower = Math.max(lower, this.latch[0]);
+      upper = Math.min(upper, this.latch[1]);
+    }
+    this.hinge?.setLimits(
+      Number.isFinite(lower) ? this.restingAngle + lower : undefined,
+      Number.isFinite(upper) ? this.restingAngle + upper : undefined,
+    );
+
+    if (this.locked || this.oneWay) {
+      this.body.angularForce -=
+        CLOSER_STIFFNESS * offset + CLOSER_DAMPING * this.body.angularVelocity;
+    }
   }
 
   @on("render")
@@ -107,7 +179,9 @@ export default class Door extends BaseEntity implements Entity, Hittable {
 
   /** Shoved by a human. `impulse` is applied at `position`. */
   hitByPush(impulse: V2d, position: V2d) {
-    this.body.applyImpulse(impulse, position.sub(this.body.position));
+    if (!this.locked) {
+      this.body.applyImpulse(impulse, position.sub(this.body.position));
+    }
     this.game.addEntity(
       new PositionalSound(choose("wallHit1", "wallHit2"), position),
     );
@@ -116,10 +190,12 @@ export default class Door extends BaseEntity implements Entity, Hittable {
   hitByMelee() {}
 
   hitByBullet(bullet: Bullet, position: V2d, normal: V2d) {
-    this.body.applyImpulse(
-      bullet.velocity.mul(bullet.stats.mass * 0.5),
-      position.sub(this.body.position),
-    );
+    if (!this.locked) {
+      this.body.applyImpulse(
+        bullet.velocity.mul(bullet.stats.mass * 0.5),
+        position.sub(this.body.position),
+      );
+    }
 
     this.game.addEntities(
       new PositionalSound(choose("wallHit1", "wallHit2"), position),

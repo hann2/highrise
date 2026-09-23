@@ -10,3 +10,4 @@ yarn.lock
 tests/output/
 test-results/
 playwright-report/
+.claude/worktrees/

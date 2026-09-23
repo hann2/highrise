@@ -9,10 +9,10 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "315:1038549143";
+const LEVEL_2_FINGERPRINT = "331:-782604189";
 // What the upgrade screen offers after level 1 with this seed, in order.
-// Changes when the upgrade pool or rarities change.
-const UPGRADE_OFFER = ["Steady Aim", "Quick Hands", "Vitamins"];
+// Changes when the upgrade pool, the rarities, or level generation change.
+const UPGRADE_OFFER = ["Fresh Batteries", "Linebacker", "Bloodthirsty"];
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
@@ -219,7 +219,11 @@ test("game boots, plays, and changes levels without errors", async ({
       ) as any
     ).leader;
     const door = [...game.entities.all].find(
-      (e) => e.constructor.name === "Door" && (e as any).maxAngle > 1,
+      (e: any) =>
+        e.constructor.name === "Door" &&
+        e.maxAngle > 1 &&
+        !e.locked &&
+        !e.oneWay,
     ) as any;
     // A zombie wandering into the doorway would stop the door. (Copy the
     // list, because destroying a zombie removes it from the tagged list.)
@@ -287,6 +291,250 @@ test("game boots, plays, and changes levels without errors", async ({
   });
   expect(doorPush.maxAngularVelocity).toBeGreaterThan(4);
   expect(doorPush.swing).toBeGreaterThan(1);
+
+  // --- A keycard opens one of the locked rooms ---
+  const keycards = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const entities = [...game.entities.all] as any[];
+    const leader = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    ).leader;
+    const wait = async (ms: number) => {
+      const start = performance.now();
+      while (performance.now() - start < ms) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    };
+    // Keeps the leader where window.testPinAt says until it's cleared
+    const pin = () => {
+      const at = (window as any).testPinAt;
+      if (!at) return;
+      leader.body.position.set(at);
+      leader.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    const standAt = async (position: any) => {
+      const wasPinned = !!(window as any).testPinAt;
+      (window as any).testPinAt = position;
+      if (!wasPinned) pin();
+      await wait(200);
+    };
+    /** Tries to swing a door open on whichever side it has room to, and returns how far it went */
+    const trySwing = async (door: any) => {
+      door.body.angularVelocity = door.maxAngle > 1 ? 6 : -6;
+      await wait(300);
+      return Math.abs(door.getOpenAngle());
+    };
+
+    const keycardPickups = entities.filter(
+      (e) => e.constructor.name === "Keycard",
+    );
+    const locks = entities.filter((e) => e.constructor.name === "KeycardLock");
+    (window as any).testLocks = locks;
+    const result = {
+      keycardCount: keycardPickups.length,
+      lockCount: locks.length,
+      lockedDoorsStayShut: 0,
+      openedWithoutKeycard: false,
+      keycardsPickedUp: 0,
+      hudShown: false,
+    };
+    if (keycardPickups.length !== 1 || locks.length !== 2) {
+      return result;
+    }
+
+    for (const lock of locks) {
+      if ((await trySwing(lock.door)) < 0.1) {
+        result.lockedDoorsStayShut++;
+      }
+    }
+
+    // Without a keycard the lock does nothing
+    await standAt(locks[0].outsidePosition);
+    leader.interactWithNearest();
+    await wait(100);
+    result.openedWithoutKeycard = !locks[0].door.locked;
+
+    await standAt(keycardPickups[0].getPosition());
+    leader.interactWithNearest();
+    await wait(100);
+    result.keycardsPickedUp = leader.keycards;
+    result.hudShown = !!document.querySelector(".hud-keycards");
+
+    // Stays pinned here for the screenshot, then uses the lock from here
+    const doorway = locks[0].door.getDoorwayCenter();
+    await standAt(doorway.lerp(locks[0].outsidePosition, 1.6));
+    return result;
+  });
+  expect(keycards.keycardCount).toBe(1);
+  expect(keycards.lockCount).toBe(2);
+  expect(keycards.lockedDoorsStayShut).toBe(2);
+  expect(keycards.openedWithoutKeycard).toBe(false);
+  expect(keycards.keycardsPickedUp).toBe(1);
+  expect(keycards.hudShown).toBe(true);
+  await page.waitForTimeout(800); // let the camera settle
+  await page.screenshot({ path: "tests/output/level-1-locked-door.png" });
+
+  const unlocking = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const locks = (window as any).testLocks;
+    const wait = async (ms: number) => {
+      const start = performance.now();
+      while (performance.now() - start < ms) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    };
+    leader.interactWithNearest();
+    await wait(100);
+    const door = locks[0].door;
+    const result = {
+      unlocked: !door.locked,
+      keycardsLeft: leader.keycards,
+      lockRemoved: locks[0].isDestroyed,
+      unlockedSwing: 0,
+      otherStillLocked: locks[1].door.locked,
+    };
+    door.body.angularVelocity = door.maxAngle > 1 ? 6 : -6;
+    await wait(300);
+    result.unlockedSwing = Math.abs(door.getOpenAngle());
+    (window as any).testPinAt = undefined;
+    return result;
+  });
+  expect(unlocking.unlocked).toBe(true);
+  expect(unlocking.keycardsLeft).toBe(0);
+  expect(unlocking.lockRemoved).toBe(true);
+  expect(unlocking.unlockedSwing).toBeGreaterThan(0.3);
+  expect(unlocking.otherStillLocked).toBe(true);
+  expectNoIssues(issues);
+
+  // --- The exit stairwell's door only opens inwards, and locks behind the leader ---
+  const stairwell = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const entities = [...game.entities.all] as any[];
+    const leader = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    ).leader;
+    const wait = async (ms: number) => {
+      const start = performance.now();
+      while (performance.now() - start < ms) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    };
+    let pinnedAt: any = undefined;
+    const pin = () => {
+      if (!pinnedAt) return;
+      leader.body.position.set(pinnedAt);
+      leader.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    const standAt = async (position: any) => {
+      const wasPinned = !!pinnedAt;
+      pinnedAt = position;
+      if (!wasPinned) pin();
+      await wait(200);
+    };
+    /** Swings the door towards `direction` (1 = the way it opens) and returns how far it went that way */
+    const trySwing = async (door: any, direction: number) => {
+      door.body.angle = door.restingAngle;
+      door.body.angularVelocity = 6 * direction * door.oneWay;
+      await wait(300);
+      return door.getOpenAngle() * direction * door.oneWay;
+    };
+
+    const stairwells = entities.filter(
+      (e) => e.constructor.name === "Stairwell",
+    );
+    const exits = entities.filter((e) => e.constructor.name === "Exit");
+    const stairwell = stairwells[0];
+    const door = stairwell?.door;
+    const result = {
+      stairwellCount: stairwells.length,
+      exitCount: exits.length,
+      exitInside: false,
+      hasOneWayDoor: false,
+      lockedWhenPartyAway: false,
+      unlockedForParty: false,
+      outwardSwing: 1,
+      inwardSwing: 0,
+      sealed: false,
+      lockedAfterEntering: false,
+      sealedSwing: 1,
+      levelBefore: 0,
+      levelAfter: 0,
+    };
+    if (!door || exits.length !== 1) {
+      return result;
+    }
+    const levelController = entities.find(
+      (e) => e.constructor.name === "LevelController",
+    );
+    result.levelBefore = levelController.currentLevel;
+    result.exitInside = stairwell.contains(exits[0].getPosition());
+    result.hasOneWayDoor = door.oneWay === 1 || door.oneWay === -1;
+    result.lockedWhenPartyAway = door.locked;
+
+    // Which way is in? The doorway is on the edge of the stairwell's box.
+    const doorway = door.getDoorwayCenter();
+    const { min, max } = stairwell;
+    const inward =
+      Math.abs(doorway[0] - min[0]) < 0.01
+        ? [1, 0]
+        : Math.abs(doorway[0] - max[0]) < 0.01
+          ? [-1, 0]
+          : Math.abs(doorway[1] - min[1]) < 0.01
+            ? [0, 1]
+            : [0, -1];
+
+    // Party members in the hallway can open it, but only inwards
+    await standAt(doorway.add(inward.map((x) => x * -1.2)));
+    result.unlockedForParty = !door.locked;
+    result.outwardSwing = await trySwing(door, -1);
+    result.inwardSwing = await trySwing(door, 1);
+
+    // Stand inside, away from the doorway and off the stairs
+    const exitPosition = exits[0].getPosition();
+    const cellCenters = [
+      [min[0] + 1, min[1] + 1],
+      [max[0] - 1, min[1] + 1],
+      [min[0] + 1, max[1] - 1],
+      [max[0] - 1, max[1] - 1],
+    ]
+      .map(([x, y]) => exitPosition.clone().set(x, y))
+      .filter((p) => p.distanceTo(exitPosition) > 0.5)
+      .sort((a, b) => b.distanceTo(doorway) - a.distanceTo(doorway));
+    await standAt(cellCenters[0]);
+    await wait(2500);
+    result.sealed = stairwell.sealed;
+    result.lockedAfterEntering = door.locked;
+    result.sealedSwing = Math.max(
+      Math.abs(await trySwing(door, 1)),
+      Math.abs(await trySwing(door, -1)),
+    );
+    result.levelAfter = levelController.currentLevel;
+
+    pinnedAt = undefined;
+    return result;
+  });
+  expect(stairwell.stairwellCount).toBe(1);
+  expect(stairwell.exitCount).toBe(1);
+  expect(stairwell.exitInside).toBe(true);
+  expect(stairwell.hasOneWayDoor).toBe(true);
+  expect(stairwell.lockedWhenPartyAway).toBe(true);
+  expect(stairwell.unlockedForParty).toBe(true);
+  expect(stairwell.outwardSwing).toBeLessThan(0.1);
+  expect(stairwell.inwardSwing).toBeGreaterThan(0.5);
+  expect(stairwell.sealed).toBe(true);
+  expect(stairwell.lockedAfterEntering).toBe(true);
+  expect(stairwell.sealedSwing).toBeLessThan(0.1);
+  // Standing in the stairwell doesn't finish the level; the stairs do
+  expect(stairwell.levelAfter).toBe(stairwell.levelBefore);
+  await page.screenshot({ path: "tests/output/level-1-stairwell.png" });
+  expectNoIssues(issues);
 
   // --- Physics hasn't blown up ---
   const nonFiniteBodies = await page.evaluate(() => {
@@ -501,16 +749,8 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
   await page.waitForTimeout(600);
   await page.screenshot({ path: "tests/output/upgrade-select.png" });
-  // Take Vitamins with the keyboard
-  const hpBefore = await page.evaluate(
-    () =>
-      (
-        [...window.DEBUG.game!.entities.all].find(
-          (e) => e.constructor.name === "PartyManager",
-        ) as any
-      ).leader.hp as number,
-  );
-  const pick = offer.names.indexOf("Vitamins");
+  // Take Linebacker with the keyboard
+  const pick = offer.names.indexOf("Linebacker");
   // The card under the mouse is selected when the screen appears, so get the
   // mouse out of the way and step from wherever the selection is
   await page.mouse.move(1, 1);
@@ -580,7 +820,7 @@ test("game boots, plays, and changes levels without errors", async ({
   });
   expect(fingerprint).toBe(LEVEL_2_FINGERPRINT);
 
-  // --- The upgrade stuck: the leader has more health than before ---
+  // --- The upgrade stuck: the leader pushes harder than before ---
   const upgraded = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
@@ -594,12 +834,17 @@ test("game boots, plays, and changes levels without errors", async ({
       hp: leader.hp,
     };
   });
-  expect(upgraded.upgrades).toEqual(["Vitamins"]);
-  expect(upgraded.maxHp).toBe(statsBefore.maxHp + 20);
-  // Healed by as much, unless a zombie got a bite in since
-  expect(upgraded.hp).toBeGreaterThan(hpBefore);
+  expect(upgraded.upgrades).toEqual(["Linebacker"]);
+  expect(upgraded.stats.pushKnockback).toBeCloseTo(
+    statsBefore.pushKnockback * 1.4,
+  );
+  expect(upgraded.stats.pushStun).toBeCloseTo(statsBefore.pushStun * 1.3);
   // Nothing else changed
-  expect({ ...upgraded.stats, maxHp: statsBefore.maxHp }).toEqual(statsBefore);
+  expect({
+    ...upgraded.stats,
+    pushKnockback: statsBefore.pushKnockback,
+    pushStun: statsBefore.pushStun,
+  }).toEqual(statsBefore);
 
   // --- Stats are read at use time: bigger magazine, instant reload, and
   // vision and flashlight ranges that rebuild their textures ---

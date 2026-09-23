@@ -15,6 +15,10 @@ export default class TutorialLevel extends LevelTemplate {
     return [new TutorialRoomTemplate()];
   }
 
+  hasExitStairwell(): boolean {
+    return false;
+  }
+
   getSize(): [number, number] {
     return [15, 3];
   }
@@ -25,6 +29,14 @@ export default class TutorialLevel extends LevelTemplate {
 
   getPickups() {
     return [];
+  }
+
+  getLockedRooms() {
+    return [];
+  }
+
+  getKeycardPickup() {
+    return undefined;
   }
 
   makeSubfloor(size: [number, number]) {

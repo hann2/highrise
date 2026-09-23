@@ -20,6 +20,7 @@ import {
   cementFloor,
 } from "../../environment/decorations/decorations";
 import HealthPickup from "../../environment/HealthPickup";
+import Keycard from "../../environment/Keycard";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import WeaponPickup from "../../environment/WeaponPickup";
@@ -38,7 +39,19 @@ import RoomTemplate from "../rooms/RoomTemplate";
 import { CLOSET_DECORATORS } from "./helpers/closetHelpers";
 import { NUBBY_DECORATORS } from "./helpers/nubbyHelpers";
 
-type PickupMaker = (location: V2d) => Entity | Entity[];
+/** Makes what goes in a closet. `alongBackWall` is a unit vector along the closet's back wall. */
+export type PickupMaker = (
+  location: V2d,
+  alongBackWall: V2d,
+) => Entity | Entity[];
+
+/** A closet behind a keycard-locked door */
+export interface LockedRoom {
+  /** Painted on the floor outside the door */
+  label: string;
+  makePickups: PickupMaker;
+}
+
 export default class LevelTemplate {
   constructor(public levelIndex: number) {}
 
@@ -77,6 +90,14 @@ export default class LevelTemplate {
     }
 
     return entities;
+  }
+
+  /**
+   * Whether the floor ends in an exit stairwell (a safe room behind a one-way
+   * door). Otherwise the stairs are at the dead end furthest from the spawn.
+   */
+  hasExitStairwell(): boolean {
+    return true;
   }
 
   getMaziness(): number {
@@ -165,6 +186,48 @@ export default class LevelTemplate {
     }
 
     return pickups;
+  }
+
+  /** The best gun tier that shows up in this floor's normal closets */
+  getBestGunTier(): number {
+    if (this.levelIndex >= 5) {
+      return 3;
+    } else if (this.levelIndex >= 4) {
+      return 2;
+    } else if (this.levelIndex >= 2) {
+      return 1;
+    }
+    return 0;
+  }
+
+  /**
+   * Closets behind keycard-locked doors, with better stuff than the normal
+   * ones. There's only one keycard per floor, so the player picks one.
+   */
+  getLockedRooms(): LockedRoom[] {
+    const armoryTier = Math.min(
+      this.getBestGunTier() + 1,
+      GUN_TIERS.length - 1,
+    );
+    return [
+      {
+        label: "ARMORY",
+        makePickups: (l) =>
+          new WeaponPickup(l, new Gun(choose(...GUN_TIERS[armoryTier]))),
+      },
+      {
+        label: "SUPPLY",
+        makePickups: (l, alongBackWall) => [
+          new HealthPickup(l.addScaled(alongBackWall, 0.4)),
+          new HealthPickup(l.addScaled(alongBackWall, -0.4)),
+        ],
+      },
+    ];
+  }
+
+  /** The keycard that opens one of the locked rooms */
+  getKeycardPickup(): PickupMaker | undefined {
+    return (l) => new Keycard(l);
   }
 
   generateHallwayLight(positionLevelCoords: V2d): OverheadLight | undefined {

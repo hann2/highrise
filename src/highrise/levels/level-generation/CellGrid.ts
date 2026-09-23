@@ -1,5 +1,6 @@
 import { V, V2d } from "../../../core/Vector";
 import { CELL_SIZE } from "../../constants/constants";
+import type Door from "../../environment/Door";
 
 export interface Closet {
   backCell: V2d;
@@ -7,6 +8,9 @@ export interface Closet {
   backWall: WallID;
   doorWall: WallID;
   backWallDirection: V2d;
+  /** Direction from the front cell to the door, i.e. out towards the hallway */
+  doorDirection: V2d;
+  door: DoorBuilder;
 }
 export type WallID = [V2d, boolean];
 export interface DoorBuilder {
@@ -14,6 +18,11 @@ export interface DoorBuilder {
   hingePoint: V2d;
   restingDirection: V2d;
   chainLink: boolean;
+  /** Makes it a one-way door that only swings in this direction (level coordinates) */
+  opensToward?: V2d;
+  locked?: boolean;
+  /** Called with the door entity once it's been built, before it's added to the game */
+  onBuilt?: (door: Door) => void;
 }
 export interface WallBuilder {
   exists: boolean;

@@ -23,11 +23,15 @@ export function generateLevelEntities(
     addRooms(cellGrid, levelTemplate, seed, levelTemplate.levelIndex);
   buildMaze(cellGrid, seed, levelTemplate.getMaziness());
   const innerWalls = addInnerWalls(cellGrid);
-  const [exitPoint, exitOpenDirection] = findExit(
-    cellGrid,
-    cellGrid.spawnLocation,
-  );
-  const exits = addExit(exitPoint, exitOpenDirection);
+  // Floors without an exit stairwell have the stairs at the furthest dead end
+  const exits: Entity[] = [];
+  if (!levelTemplate.hasExitStairwell()) {
+    const [exitPoint, exitOpenDirection] = findExit(
+      cellGrid,
+      cellGrid.spawnLocation,
+    );
+    exits.push(...addExit(exitPoint, exitOpenDirection));
+  }
   cellGrid.closets = generateClosets(cellGrid);
   const {
     entities: closetEntities,

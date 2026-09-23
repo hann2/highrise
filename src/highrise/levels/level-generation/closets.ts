@@ -2,10 +2,12 @@ import Entity from "../../../core/entity/Entity";
 import { seededShuffle } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { CELL_SIZE } from "../../constants/constants";
+import FloorText from "../../environment/FloorText";
+import KeycardLock from "../../environment/KeycardLock";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
-import LevelTemplate from "../level-templates/LevelTemplate";
+import LevelTemplate, { PickupMaker } from "../level-templates/LevelTemplate";
 import CellGrid, { Closet } from "./CellGrid";
 import { wallIDToDoorBuilder } from "./doors";
 
@@ -62,7 +64,8 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
     if (reverseHinge) {
       doorRestingDirection = doorRestingDirection.negate();
     }
-    cellGrid.doors.push(wallIDToDoorBuilder(doorWall, reverseHinge));
+    const door = wallIDToDoorBuilder(doorWall, reverseHinge);
+    cellGrid.doors.push(door);
 
     cellGrid.cells[frontCell.x][frontCell.y].content = "empty";
     const backWall = CellGrid.getWallInDirection(
@@ -75,6 +78,8 @@ export function generateClosets(cellGrid: CellGrid): Closet[] {
       doorWall,
       backWall,
       backWallDirection: openDirection,
+      doorDirection: directionFromFrontCellToDoorWall,
+      door,
     };
 
     closets.push(closet);
@@ -88,17 +93,22 @@ export function fillClosets(
   levelTemplate: LevelTemplate,
   seed: number,
 ): { entities: Entity[]; potentialEnemyLocations: V2d[] } {
-  const shuffledClosets: Closet[] = seededShuffle(cellGrid.closets, seed);
-
-  let closetIndex = 0;
+  const remaining: Closet[] = seededShuffle(cellGrid.closets, seed);
   const entities: Entity[] = [];
-  const consumeLocation = (f: (l: V2d) => Entity | Entity[]) => {
-    const closet = shuffledClosets[closetIndex];
-    closetIndex += 1;
-    if (!closet) {
+  let closetIndex = 0;
+
+  /** Takes the first remaining closet that `prefer`s, or the first one if none do */
+  const takeCloset = (prefer?: (closet: Closet) => boolean) => {
+    if (remaining.length === 0) {
       console.warn("Not enough closets in map for all pickups!");
-      return;
+      return undefined;
     }
+    const i = prefer ? Math.max(0, remaining.findIndex(prefer)) : 0;
+    return remaining.splice(i, 1)[0];
+  };
+
+  const fillCloset = (closet: Closet, f: PickupMaker) => {
+    closetIndex += 1;
     cellGrid.cells[closet.backCell[0]][closet.backCell[1]].content = "pickup";
     const location = closet.backCell.add(closet.backWallDirection.mul(0.5));
     entities.push(
@@ -107,7 +117,10 @@ export function fillClosets(
         intensity: 0.5,
       }),
     );
-    const entity = f(CellGrid.levelCoordToWorldCoord(location));
+    const entity = f(
+      CellGrid.levelCoordToWorldCoord(location),
+      closet.backWallDirection.rotate90cw(),
+    );
     if (entity instanceof Array) {
       entities.push(...entity);
     } else {
@@ -139,16 +152,65 @@ export function fillClosets(
     entities.push(...levelTemplate.getClosetDecorations(closetIndex, closet));
   };
 
-  levelTemplate.getPickups().forEach(consumeLocation);
+  // Locked rooms first, so there's always room for them and the keycard
+  const lockedRooms = levelTemplate.getLockedRooms();
+  for (const { label, makePickups } of lockedRooms) {
+    const closet = takeCloset();
+    if (!closet) {
+      break;
+    }
+    entities.push(...lockCloset(closet, label));
+    fillCloset(closet, makePickups);
+  }
+
+  const makeKeycard = levelTemplate.getKeycardPickup();
+  if (lockedRooms.length > 0 && makeKeycard) {
+    // Somewhere you have to go looking for it
+    const minDistance = (cellGrid.width + cellGrid.height) / 3;
+    const closet = takeCloset(
+      (c) =>
+        Math.abs(c.backCell.x - cellGrid.spawnLocation.x) +
+          Math.abs(c.backCell.y - cellGrid.spawnLocation.y) >=
+        minDistance,
+    );
+    if (closet) {
+      fillCloset(closet, makeKeycard);
+    }
+  }
+
+  for (const makePickup of levelTemplate.getPickups()) {
+    const closet = takeCloset();
+    if (!closet) {
+      break;
+    }
+    fillCloset(closet, makePickup);
+  }
 
   const potentialEnemyLocations: V2d[] = [];
-
-  for (let i = closetIndex; i < shuffledClosets.length; i++) {
-    consumeLocation((l: V2d) => {
+  for (const closet of remaining) {
+    fillCloset(closet, (l: V2d) => {
       potentialEnemyLocations.push(l);
       return [];
     });
   }
 
   return { entities, potentialEnemyLocations };
+}
+
+/** Puts a keycard lock on a closet's door, with a label on the floor outside */
+function lockCloset(closet: Closet, label: string): Entity[] {
+  const outside = CellGrid.levelCoordToWorldCoord(
+    closet.frontCell.add(closet.doorDirection.mul(0.85)),
+  );
+  closet.door.locked = true;
+  closet.door.onBuilt = (door) => door.addChild(new KeycardLock(door, outside));
+  return [
+    new FloorText(
+      CellGrid.levelCoordToWorldCoord(
+        closet.frontCell.add(closet.doorDirection.mul(1.2)),
+      ),
+      label,
+      { heightMeters: 0.3 },
+    ),
+  ];
 }
