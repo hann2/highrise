@@ -33,7 +33,9 @@ export default defineConfig({
   webServer: {
     command: `npm run dev-server -- --port ${TEST_PORT}`,
     url: `http://localhost:${TEST_PORT}`,
-    reuseExistingServer: false,
+    // TEST_REUSE_SERVER=1 runs against a dev server you started yourself on
+    // TEST_PORT, which skips the build and its startup timeout
+    reuseExistingServer: process.env.TEST_REUSE_SERVER === "1",
     // The first build has to process ~1400 assets
     timeout: 300000,
   },

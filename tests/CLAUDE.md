@@ -7,7 +7,7 @@ Playwright end-to-end tests that run the real game in headless Chrome (with GPU)
 - `npm run test:vision` — node tests for the vision polygon and mesh (`tests/vision/`). They build small scenes of boxes and check what is visible, so add a case there when you touch `visibility.ts` or `visionMesh.ts`.
 - `npm run benchmark` — seeded frame-time benchmark. Writes `tests/output/benchmark.json` with `loopCpuMs` percentiles and a `profile` breakdown (per section and per entity class, ms per frame) and prints the breakdown as a table. Numbers are only comparable on the same machine. `captureProfile(page, ms)` in `helpers.ts` gets the same breakdown from any test or script.
 
-The Playwright tests start their own dev server on port 3456, so they can run while `npm start` is running.
+The Playwright tests start their own dev server on port 3456, so they can run while `npm start` is running. `TEST_PORT=3460 npm test` uses another port, so several checkouts can test at once. For repeated runs, start `npm run dev-server -- --port 3460` yourself and run with `TEST_REUSE_SERVER=1 TEST_PORT=3460`: the build happens once, and a run takes about a minute instead of waiting on Parcel each time. If Parcel fails to start with a stale import ("Cannot load file") after a merge, delete `.parcel-cache` and `.parcel-dev`.
 
 ## How tests drive the game
 
