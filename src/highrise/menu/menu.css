@@ -263,6 +263,16 @@
   transform: scale(1.15);
 }
 
+/* Not rescued yet: a silhouette */
+.character-select__portrait--locked img {
+  filter: brightness(0) invert(0.3);
+  opacity: 0.8;
+}
+
+.character-select__portrait--locked {
+  cursor: not-allowed;
+}
+
 .character-select__name {
   font-size: 64px;
   line-height: 1;
@@ -273,6 +283,12 @@
   font-weight: 300;
   font-size: 20px;
   color: #dddddd;
+}
+
+.character-select__count {
+  font-family: oswald;
+  font-size: 16px;
+  color: #999999;
 }
 
 /* Upgrade select: three cards in the middle of the screen, between floors */

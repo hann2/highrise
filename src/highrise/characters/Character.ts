@@ -1,5 +1,7 @@
 import { SoundName } from "../../../resources/resources";
+import { choose } from "../../core/util/Random";
 import { BodyTextures } from "../creature-stuff/BodySprite";
+import { loadSaveData } from "../persistence/SaveData";
 import { ShuffleRing } from "../utils/ShuffleRing";
 import { Andy } from "./Andy";
 import { Chad } from "./Chad";
@@ -75,4 +77,20 @@ export function randomCharacter(): Character {
     character = CHARACTERS_SHUFFLED.getNext();
   }
   return character;
+}
+
+/**
+ * Who the survivor on a floor is: someone the player hasn't unlocked yet if
+ * possible, since getting them out unlocks them, and never someone already in
+ * the party. Seeded like the rest of level generation.
+ */
+export function randomSurvivorCharacter(): Character {
+  const unlocked = new Set(loadSaveData().unlockedCharacters);
+  const available = CHARACTERS.filter((c) => !charactersInUse.has(c));
+  const locked = available.filter((c) => !unlocked.has(c.name));
+  return choose(...(locked.length > 0 ? locked : available));
+}
+
+export function getCharacterByName(name: string): Character | undefined {
+  return CHARACTERS.find((character) => character.name === name);
 }

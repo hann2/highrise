@@ -7,6 +7,7 @@ import {
   seededShuffle,
 } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
+import { randomSurvivorCharacter } from "../../characters/Character";
 import { DEFAULT_LEVEL_SIZE } from "../../constants/constants";
 import Crawler from "../../enemies/crawler/Crawler";
 import Heavy from "../../enemies/heavy/Heavy";
@@ -163,7 +164,7 @@ export default class LevelTemplate {
       (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[0]))),
       (l) => new WeaponPickup(l, new MeleeWeapon(choose(...MELEE_WEAPONS))),
       (l) => {
-        const survivor = new Human(l);
+        const survivor = new Human(l, randomSurvivorCharacter());
         survivor.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
         return [survivor, new SurvivorHumanController(survivor)];
       },

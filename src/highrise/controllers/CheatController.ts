@@ -4,10 +4,15 @@ import { on } from "../../core/entity/handler";
 import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { lerp } from "../../core/util/MathUtil";
+import { CHARACTERS } from "../characters/Character";
 import { Persistence } from "../constants/constants";
 import { getPartyManager } from "../environment/PartyManager";
 import { isHuman } from "../human/Human";
 import VisionController from "../lighting-and-vision/VisionController";
+import {
+  resetUnlockedCharacters,
+  unlockCharacters,
+} from "../persistence/SaveData";
 
 // Put stuff in here that we want to disable on actual release
 export default class CheatController extends BaseEntity implements Entity {
@@ -28,6 +33,16 @@ export default class CheatController extends BaseEntity implements Entity {
         break;
       case "KeyK": // Quarters, for trying out vending machines
         getPartyManager(this.game)?.addQuarters(5);
+        break;
+      case "KeyU": // Unlock every character; with shift, back to the defaults
+        if (
+          this.game.io.isKeyDown("ShiftLeft") ||
+          this.game.io.isKeyDown("ShiftRight")
+        ) {
+          resetUnlockedCharacters();
+        } else {
+          unlockCharacters(CHARACTERS.map((character) => character.name));
+        }
         break;
       case "KeyH":
         for (const human of this.game.entities.getByFilter(isHuman)) {

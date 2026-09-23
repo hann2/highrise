@@ -10,6 +10,7 @@ import { smoothStep } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { Character, CHARACTERS } from "../characters/Character";
 import { Persistence } from "../constants/constants";
+import { loadSaveData } from "../persistence/SaveData";
 import "./menu.css";
 
 const COLUMNS = 7;
@@ -19,7 +20,11 @@ const FADE_TIME = 0.4;
 const STICK_PRESS = 0.6;
 const STICK_RELEASE = 0.3;
 
-// Pick who to play as, between the main menu and the game
+/**
+ * Pick who to play as, between the main menu and the game. Characters who
+ * haven't been rescued yet show as silhouettes and can be looked at but not
+ * picked.
+ */
 export default class CharacterSelect extends ReactEntity implements Entity {
   persistenceLevel = Persistence.Floor;
   pausable = false;
@@ -38,9 +43,21 @@ export default class CharacterSelect extends ReactEntity implements Entity {
     return CHARACTERS[this.selected];
   }
 
+  /** Read fresh every time, so the unlock cheat shows up straight away */
+  private getUnlocked(): Set<string> {
+    return new Set(loadSaveData().unlockedCharacters);
+  }
+
+  isUnlocked(character: Character): boolean {
+    return this.getUnlocked().has(character.name);
+  }
+
   renderContent() {
     const confirmButton = this.game.io.usingGamepad ? "A" : "Enter";
     const backButton = this.game.io.usingGamepad ? "B" : "Esc";
+    const unlocked = this.getUnlocked();
+    const unlockedCount = CHARACTERS.filter((c) => unlocked.has(c.name)).length;
+    const selectedUnlocked = unlocked.has(this.character.name);
     return (
       <div
         className={`menu-screen ${this.inTransition ? "menu-screen--inactive" : ""}`}
@@ -59,6 +76,10 @@ export default class CharacterSelect extends ReactEntity implements Entity {
                   i === this.selected
                     ? "character-select__portrait--selected"
                     : ""
+                } ${
+                  unlocked.has(character.name)
+                    ? ""
+                    : "character-select__portrait--locked"
                 }`}
                 onMouseEnter={() => this.select(i)}
                 onClick={() => {
@@ -70,9 +91,16 @@ export default class CharacterSelect extends ReactEntity implements Entity {
               </div>
             ))}
           </div>
-          <div className="character-select__name">{this.character.name}</div>
+          <div className="character-select__name">
+            {selectedUnlocked ? this.character.name : "???"}
+          </div>
           <div className="character-select__hint">
-            {confirmButton} to start · {backButton} to go back
+            {selectedUnlocked
+              ? `${confirmButton} to start · ${backButton} to go back`
+              : `Rescue them to unlock · ${backButton} to go back`}
+          </div>
+          <div className="character-select__count">
+            {unlockedCount} / {CHARACTERS.length} survivors
           </div>
         </div>
       </div>
@@ -99,6 +127,9 @@ export default class CharacterSelect extends ReactEntity implements Entity {
     }
     this.selected = (index + CHARACTERS.length) % CHARACTERS.length;
     this.voiceLine?.destroy();
+    if (!this.isUnlocked(this.character)) {
+      return;
+    }
     // Not everyone has misc lines yet
     const { misc, newLevel, joinParty } = this.character.sounds;
     const lines = [misc, newLevel, joinParty].find((l) => l.length > 0);
@@ -125,7 +156,7 @@ export default class CharacterSelect extends ReactEntity implements Entity {
   }
 
   async confirm() {
-    if (!this.inTransition) {
+    if (!this.inTransition && this.isUnlocked(this.character)) {
       this.inTransition = true;
       const character = this.character;
       await this.wait(FADE_TIME, (_, t) => {

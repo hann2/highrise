@@ -13,6 +13,17 @@ export const SAVE_DATA_VERSION = 1;
 /** How many past runs are kept */
 export const MAX_SAVED_RUNS = 20;
 
+/**
+ * Characters anyone can play from the start; the rest are unlocked by getting
+ * them out alive as survivors. Always unlocked, even in saves from before they
+ * were the default.
+ */
+export const DEFAULT_UNLOCKED_CHARACTERS: readonly string[] = [
+  "Andy",
+  "Chad",
+  "Nancy",
+];
+
 export type RunOutcome = "victory" | "died" | "quit";
 
 /** What happened in one run, as shown on the run summary screen */
@@ -30,7 +41,7 @@ export interface RunSummary {
   quartersSpent: number;
   /** Seconds of (unpaused) play */
   timeSeconds: number;
-  /** Enemy type that killed the last party member, if the party died */
+  /** Enemy type that killed the leader, if the leader died */
   causeOfDeath?: string;
   /** Names of the upgrades taken, in order */
   upgrades: string[];
@@ -53,7 +64,7 @@ export interface SaveData {
 export function defaultSaveData(): SaveData {
   return {
     version: SAVE_DATA_VERSION,
-    unlockedCharacters: [],
+    unlockedCharacters: [...DEFAULT_UNLOCKED_CHARACTERS],
     runs: [],
     totalRuns: 0,
     bestFloor: 0,
@@ -113,10 +124,24 @@ export function isCharacterUnlocked(name: string): boolean {
 }
 
 export function unlockCharacter(name: string): void {
+  unlockCharacters([name]);
+}
+
+/** Unlocks every one of `names` (a dev cheat) */
+export function unlockCharacters(names: readonly string[]): void {
   updateSaveData((data) => {
-    if (!data.unlockedCharacters.includes(name)) {
-      data.unlockedCharacters.push(name);
+    for (const name of names) {
+      if (!data.unlockedCharacters.includes(name)) {
+        data.unlockedCharacters.push(name);
+      }
     }
+  });
+}
+
+/** Locks everyone but the default characters again (a dev cheat) */
+export function resetUnlockedCharacters(): void {
+  updateSaveData((data) => {
+    data.unlockedCharacters = [...DEFAULT_UNLOCKED_CHARACTERS];
   });
 }
 
@@ -130,7 +155,11 @@ export function parseSaveData(raw: unknown): SaveData {
     return data;
   }
   // Migrations from older versions go here, keyed on raw.version
-  data.unlockedCharacters = stringArray(raw.unlockedCharacters);
+  for (const name of stringArray(raw.unlockedCharacters)) {
+    if (!data.unlockedCharacters.includes(name)) {
+      data.unlockedCharacters.push(name);
+    }
+  }
   data.runs = Array.isArray(raw.runs)
     ? raw.runs
         .map(parseRunSummary)

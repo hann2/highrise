@@ -35,7 +35,7 @@ Current: `Human.ts` uses constants for speed (5 m/s, 3 m/s when hurt), max HP (1
 
 ### 2. Pick one of three (M)
 
-**Done 2026-09-22 (`upgrades/`, `menu/UpgradeSelect.tsx`; shown on `levelComplete`, not yet on the stairwell landing). Upgrades are lost if the leader dies and an ally takes over.**
+**Done 2026-09-22 (`upgrades/`, `menu/UpgradeSelect.tsx`; shown on `levelComplete`, not yet on the stairwell landing).**
 
 Current: nothing is a choice. Every floor has the same closet contents (health, T0 gun, melee, survivor, plus a higher-tier gun on later floors).
 
@@ -99,6 +99,8 @@ Current: unlimited glowsticks on Q/LB, made to test the lighting.
 - The explosion/fire effects don't exist yet and are a chunk of the work.
 
 ### 8. Survivors become unlockable characters (M)
+
+**Done 2026-09-22 (`PartyManager`, `AllyController`, `hud/SurvivorToast.tsx`, `CharacterSelect`). Andy, Chad and Nancy are unlocked from the start. Allies in the exit stairwell when the floor completes are unlocked and leave; the rest are left behind. Leader death ends the run. Allies don't take pickups and fall back to following and pushing when their gun won't reload. No pathfinding yet: allies only get help finding the stairwell door once the leader is inside. Cheat `U` unlocks everyone, `Shift+U` resets.**
 
 Current: one survivor per floor in a closet, auto-joins at 2 m with line of sight, follows the leader, takes pickups by an etiquette rule, shoots within 6 m. When the leader dies control goes to the oldest ally.
 
@@ -175,6 +177,5 @@ Each step is playable and testable on its own.
 - Two weapon slots or one slot + always-available melee?
 - Can the player retreat into the arrival stairwell (panic room), or is it one-way too?
 - Should any "start at floor N" unlock exist, or is the directory purely a preview?
-- Ally death: does the run end when the leader dies, even with an ally alive?
 - Floor size and count.
 - Starting-character traits: stats only, or one rule-like trait each?

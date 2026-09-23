@@ -9,7 +9,7 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "331:-782604189";
+const LEVEL_2_FINGERPRINT = "332:1792088666";
 // What the upgrade screen offers after level 1 with this seed, in order.
 // Changes when the upgrade pool, the rarities, or level generation change.
 const UPGRADE_OFFER = ["Fresh Batteries", "Linebacker", "Bloodthirsty"];
@@ -45,12 +45,38 @@ test("game boots, plays, and changes levels without errors", async ({
     { timeout: 30000 },
   );
   await page.waitForTimeout(500);
-  // Two right and one down from the first character is Santa
+  // Only the default characters are unlocked in a new save
+  await expect(page.locator(".character-select__count")).toHaveText(
+    "3 / 13 survivors",
+  );
+  expect(
+    await page.locator(".character-select__portrait--locked").count(),
+  ).toBe(10);
+  // Two right and one down from the first character is Santa, who is locked
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowDown");
   await page.waitForTimeout(300);
+  await expect(page.locator(".character-select__name")).toHaveText("???");
+  await expect(page.locator(".character-select__hint")).toContainText(
+    "Rescue them to unlock",
+  );
   await page.screenshot({ path: "tests/output/character-select.png" });
+  // ...and can't be started
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(800);
+  expect(
+    await page.evaluate(() => ({
+      characterSelect: [...window.DEBUG.game!.entities.all].some(
+        (e) => e.constructor.name === "CharacterSelect",
+      ),
+      humans: window.DEBUG.game!.entities.getTagged("human").length,
+    })),
+  ).toEqual({ characterSelect: true, humans: 0 });
+  // One left of Santa is Nancy, who is unlocked from the start
+  await page.keyboard.press("ArrowLeft");
+  await page.waitForTimeout(300);
+  await expect(page.locator(".character-select__name")).toHaveText("Nancy");
   expectNoIssues(issues);
 
   // --- Start a game ---
@@ -65,7 +91,7 @@ test("game boots, plays, and changes levels without errors", async ({
         ) as any
       ).leader.character.name,
   );
-  expect(leaderName).toBe("Santa");
+  expect(leaderName).toBe("Nancy");
   // let the fade in finish and lighting settle
   await page.waitForTimeout(2500);
   await page.screenshot({ path: "tests/output/level-1-start.png" });
@@ -412,130 +438,6 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(unlocking.otherStillLocked).toBe(true);
   expectNoIssues(issues);
 
-  // --- The exit stairwell's door only opens inwards, and locks behind the leader ---
-  const stairwell = await page.evaluate(async () => {
-    const game = window.DEBUG.game!;
-    const entities = [...game.entities.all] as any[];
-    const leader = entities.find(
-      (e) => e.constructor.name === "PartyManager",
-    ).leader;
-    const wait = async (ms: number) => {
-      const start = performance.now();
-      while (performance.now() - start < ms) {
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-      }
-    };
-    let pinnedAt: any = undefined;
-    const pin = () => {
-      if (!pinnedAt) return;
-      leader.body.position.set(pinnedAt);
-      leader.body.velocity.set(0, 0);
-      requestAnimationFrame(pin);
-    };
-    const standAt = async (position: any) => {
-      const wasPinned = !!pinnedAt;
-      pinnedAt = position;
-      if (!wasPinned) pin();
-      await wait(200);
-    };
-    /** Swings the door towards `direction` (1 = the way it opens) and returns how far it went that way */
-    const trySwing = async (door: any, direction: number) => {
-      door.body.angle = door.restingAngle;
-      door.body.angularVelocity = 6 * direction * door.oneWay;
-      await wait(300);
-      return door.getOpenAngle() * direction * door.oneWay;
-    };
-
-    const stairwells = entities.filter(
-      (e) => e.constructor.name === "Stairwell",
-    );
-    const exits = entities.filter((e) => e.constructor.name === "Exit");
-    const stairwell = stairwells[0];
-    const door = stairwell?.door;
-    const result = {
-      stairwellCount: stairwells.length,
-      exitCount: exits.length,
-      exitInside: false,
-      hasOneWayDoor: false,
-      lockedWhenPartyAway: false,
-      unlockedForParty: false,
-      outwardSwing: 1,
-      inwardSwing: 0,
-      sealed: false,
-      lockedAfterEntering: false,
-      sealedSwing: 1,
-      levelBefore: 0,
-      levelAfter: 0,
-    };
-    if (!door || exits.length !== 1) {
-      return result;
-    }
-    const levelController = entities.find(
-      (e) => e.constructor.name === "LevelController",
-    );
-    result.levelBefore = levelController.currentLevel;
-    result.exitInside = stairwell.contains(exits[0].getPosition());
-    result.hasOneWayDoor = door.oneWay === 1 || door.oneWay === -1;
-    result.lockedWhenPartyAway = door.locked;
-
-    // Which way is in? The doorway is on the edge of the stairwell's box.
-    const doorway = door.getDoorwayCenter();
-    const { min, max } = stairwell;
-    const inward =
-      Math.abs(doorway[0] - min[0]) < 0.01
-        ? [1, 0]
-        : Math.abs(doorway[0] - max[0]) < 0.01
-          ? [-1, 0]
-          : Math.abs(doorway[1] - min[1]) < 0.01
-            ? [0, 1]
-            : [0, -1];
-
-    // Party members in the hallway can open it, but only inwards
-    await standAt(doorway.add(inward.map((x) => x * -1.2)));
-    result.unlockedForParty = !door.locked;
-    result.outwardSwing = await trySwing(door, -1);
-    result.inwardSwing = await trySwing(door, 1);
-
-    // Stand inside, away from the doorway and off the stairs
-    const exitPosition = exits[0].getPosition();
-    const cellCenters = [
-      [min[0] + 1, min[1] + 1],
-      [max[0] - 1, min[1] + 1],
-      [min[0] + 1, max[1] - 1],
-      [max[0] - 1, max[1] - 1],
-    ]
-      .map(([x, y]) => exitPosition.clone().set(x, y))
-      .filter((p) => p.distanceTo(exitPosition) > 0.5)
-      .sort((a, b) => b.distanceTo(doorway) - a.distanceTo(doorway));
-    await standAt(cellCenters[0]);
-    await wait(2500);
-    result.sealed = stairwell.sealed;
-    result.lockedAfterEntering = door.locked;
-    result.sealedSwing = Math.max(
-      Math.abs(await trySwing(door, 1)),
-      Math.abs(await trySwing(door, -1)),
-    );
-    result.levelAfter = levelController.currentLevel;
-
-    pinnedAt = undefined;
-    return result;
-  });
-  expect(stairwell.stairwellCount).toBe(1);
-  expect(stairwell.exitCount).toBe(1);
-  expect(stairwell.exitInside).toBe(true);
-  expect(stairwell.hasOneWayDoor).toBe(true);
-  expect(stairwell.lockedWhenPartyAway).toBe(true);
-  expect(stairwell.unlockedForParty).toBe(true);
-  expect(stairwell.outwardSwing).toBeLessThan(0.1);
-  expect(stairwell.inwardSwing).toBeGreaterThan(0.5);
-  expect(stairwell.sealed).toBe(true);
-  expect(stairwell.lockedAfterEntering).toBe(true);
-  expect(stairwell.sealedSwing).toBeLessThan(0.1);
-  // Standing in the stairwell doesn't finish the level; the stairs do
-  expect(stairwell.levelAfter).toBe(stairwell.levelBefore);
-  await page.screenshot({ path: "tests/output/level-1-stairwell.png" });
-  expectNoIssues(issues);
-
   // --- Physics hasn't blown up ---
   const nonFiniteBodies = await page.evaluate(() => {
     let count = 0;
@@ -610,6 +512,8 @@ test("game boots, plays, and changes levels without errors", async ({
     const standAt = machine.getFrontPosition(1.0);
     const pin = () => {
       if (!(window as any).testMachine) return;
+      // Zombies wander over while we stand here, and the leader dying ends the run
+      leader.hp = leader.maxHp;
       leader.body.position.set(standAt);
       leader.body.velocity.set(0, 0);
       requestAnimationFrame(pin);
@@ -701,6 +605,166 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(spilled).toBeLessThanOrEqual(4);
   expectNoIssues(issues);
 
+  // --- The exit stairwell's door only opens inwards, and locks behind the
+  // leader. The floor's survivor joins and follows the leader in. ---
+  const stairwell = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const entities = [...game.entities.all] as any[];
+    const leader = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    ).leader;
+    const wait = async (ms: number) => {
+      const start = performance.now();
+      while (performance.now() - start < ms) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    };
+    let pinnedAt: any = undefined;
+    const pin = () => {
+      if (!pinnedAt) return;
+      leader.body.position.set(pinnedAt);
+      leader.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    const standAt = async (position: any) => {
+      const wasPinned = !!pinnedAt;
+      pinnedAt = position;
+      if (!wasPinned) pin();
+      await wait(200);
+    };
+    /** Swings the door towards `direction` (1 = the way it opens) and returns how far it went that way */
+    const trySwing = async (door: any, direction: number) => {
+      door.body.angle = door.restingAngle;
+      door.body.angularVelocity = 6 * direction * door.oneWay;
+      await wait(300);
+      return door.getOpenAngle() * direction * door.oneWay;
+    };
+
+    const stairwells = entities.filter(
+      (e) => e.constructor.name === "Stairwell",
+    );
+    const survivorControllers = entities.filter(
+      (e) => e.constructor.name === "SurvivorHumanController",
+    );
+    const partyManager = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    );
+    const exits = entities.filter((e) => e.constructor.name === "Exit");
+    const stairwell = stairwells[0];
+    const door = stairwell?.door;
+    const result = {
+      stairwellCount: stairwells.length,
+      exitCount: exits.length,
+      exitInside: false,
+      hasOneWayDoor: false,
+      lockedWhenPartyAway: false,
+      unlockedForParty: false,
+      outwardSwing: 1,
+      inwardSwing: 0,
+      sealed: false,
+      lockedAfterEntering: false,
+      sealedSwing: 1,
+      levelBefore: 0,
+      levelAfter: 0,
+      survivorCount: survivorControllers.length,
+      survivorJoined: false,
+      allyInsideWhenSealed: false,
+      allyName: "",
+    };
+    if (!door || exits.length !== 1) {
+      return result;
+    }
+    const levelController = entities.find(
+      (e) => e.constructor.name === "LevelController",
+    );
+    result.levelBefore = levelController.currentLevel;
+    result.exitInside = stairwell.contains(exits[0].getPosition());
+    result.hasOneWayDoor = door.oneWay === 1 || door.oneWay === -1;
+    result.lockedWhenPartyAway = door.locked;
+
+    // Which way is in? The doorway is on the edge of the stairwell's box.
+    const doorway = door.getDoorwayCenter();
+    const { min, max } = stairwell;
+    const inward =
+      Math.abs(doorway[0] - min[0]) < 0.01
+        ? [1, 0]
+        : Math.abs(doorway[0] - max[0]) < 0.01
+          ? [-1, 0]
+          : Math.abs(doorway[1] - min[1]) < 0.01
+            ? [0, 1]
+            : [0, -1];
+
+    // Party members in the hallway can open it, but only inwards
+    await standAt(doorway.add(inward.map((x) => x * -1.2)));
+    result.unlockedForParty = !door.locked;
+    result.outwardSwing = await trySwing(door, -1);
+    result.inwardSwing = await trySwing(door, 1);
+
+    // The floor's survivor, put between the leader and the door, joins the
+    // party (they need to be close and in sight of the leader)
+    const survivor = survivorControllers[0]?.human;
+    if (survivor) {
+      result.allyName = survivor.character.name;
+      survivor.body.position.set(doorway.add(inward.map((x) => x * -0.5)));
+      survivor.body.velocity.set(0, 0);
+      await wait(300);
+      result.survivorJoined =
+        partyManager.partyMembers.includes(survivor) &&
+        survivorControllers[0].isDestroyed;
+    }
+
+    // Stand inside, away from the doorway and off the stairs
+    const exitPosition = exits[0].getPosition();
+    const cellCenters = [
+      [min[0] + 1, min[1] + 1],
+      [max[0] - 1, min[1] + 1],
+      [min[0] + 1, max[1] - 1],
+      [max[0] - 1, max[1] - 1],
+    ]
+      .map(([x, y]) => exitPosition.clone().set(x, y))
+      .filter((p) => p.distanceTo(exitPosition) > 0.5)
+      .sort((a, b) => b.distanceTo(doorway) - a.distanceTo(doorway));
+    await standAt(cellCenters[0]);
+    // The ally right behind the leader follows them in before it seals
+    const sealStart = performance.now();
+    while (!stairwell.sealed && performance.now() - sealStart < 7000) {
+      await wait(100);
+    }
+    await wait(300);
+    result.sealed = stairwell.sealed;
+    result.allyInsideWhenSealed =
+      !!survivor &&
+      !survivor.isDestroyed &&
+      stairwell.contains(survivor.getPosition());
+    result.lockedAfterEntering = door.locked;
+    result.sealedSwing = Math.max(
+      Math.abs(await trySwing(door, 1)),
+      Math.abs(await trySwing(door, -1)),
+    );
+    result.levelAfter = levelController.currentLevel;
+
+    pinnedAt = undefined;
+    return result;
+  });
+  expect(stairwell.stairwellCount).toBe(1);
+  expect(stairwell.survivorCount).toBe(1);
+  expect(stairwell.survivorJoined).toBe(true);
+  expect(stairwell.allyInsideWhenSealed).toBe(true);
+  expect(stairwell.exitCount).toBe(1);
+  expect(stairwell.exitInside).toBe(true);
+  expect(stairwell.hasOneWayDoor).toBe(true);
+  expect(stairwell.lockedWhenPartyAway).toBe(true);
+  expect(stairwell.unlockedForParty).toBe(true);
+  expect(stairwell.outwardSwing).toBeLessThan(0.1);
+  expect(stairwell.inwardSwing).toBeGreaterThan(0.5);
+  expect(stairwell.sealed).toBe(true);
+  expect(stairwell.lockedAfterEntering).toBe(true);
+  expect(stairwell.sealedSwing).toBeLessThan(0.1);
+  // Standing in the stairwell doesn't finish the level; the stairs do
+  expect(stairwell.levelAfter).toBe(stairwell.levelBefore);
+  await page.screenshot({ path: "tests/output/level-1-stairwell.png" });
+  expectNoIssues(issues);
+
   // --- Pausing stops the clock ---
   await page.keyboard.press("Escape");
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
@@ -744,6 +808,22 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(offer.paused).toBe(true);
   expect(offer.cards).toBe(3);
   expect(offer.pauseMenuShown).toBe(false);
+
+  // --- The ally in the stairwell made it out, and is unlocked for good ---
+  await expect(page.locator(".survivor-toast")).toContainText(
+    `${stairwell.allyName} made it out!`,
+  );
+  const unlockedAfterFloor1 = await page.evaluate(
+    () =>
+      JSON.parse(window.localStorage.getItem("highriseSaveData")!)
+        .unlockedCharacters as string[],
+  );
+  expect(unlockedAfterFloor1).toEqual([
+    "Andy",
+    "Chad",
+    "Nancy",
+    stairwell.allyName,
+  ]);
   // Escape doesn't unpause behind the upgrade screen's back
   await page.keyboard.press("Escape");
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
@@ -820,6 +900,23 @@ test("game boots, plays, and changes levels without errors", async ({
   });
   expect(fingerprint).toBe(LEVEL_2_FINGERPRINT);
 
+  // --- Survivors only come along for one floor ---
+  const floor2Party = await page.evaluate(() => {
+    const partyManager = [...window.DEBUG.game!.entities.all].find(
+      (e) => e.constructor.name === "PartyManager",
+    ) as any;
+    return {
+      size: partyManager.partyMembers.length,
+      leader: partyManager.leader.character.name,
+      humans: window.DEBUG.game!.entities.getTagged("human").map(
+        (h: any) => h.character.name,
+      ),
+    };
+  });
+  expect(floor2Party.size).toBe(1);
+  expect(floor2Party.leader).toBe("Nancy");
+  expect(floor2Party.humans).not.toContain(stairwell.allyName);
+
   // --- The upgrade stuck: the leader pushes harder than before ---
   const upgraded = await page.evaluate(() => {
     const leader = (
@@ -887,9 +984,72 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await game()).toBeGreaterThan(tickBefore + 60);
   expectNoIssues(issues);
 
-  // --- Quitting from the pause menu shows the run summary and saves the run ---
-  await page.keyboard.press("Escape");
-  await page.locator(".menu-button", { hasText: "Main Menu" }).click();
+  // --- The leader dying ends the run, even with an ally alive ---
+  // This floor's survivor joins (tried on each side of the leader until one
+  // is in sight), then a zombie finishes off the leader
+  const death = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const entities = [...game.entities.all] as any[];
+    const partyManager = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    );
+    const leader = partyManager.leader;
+    const survivorController = entities.find(
+      (e) => e.constructor.name === "SurvivorHumanController",
+    );
+    const wait = async (ms: number) => {
+      const start = performance.now();
+      while (performance.now() - start < ms) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    };
+    const result = {
+      allyJoined: false,
+      allyName: "",
+      leaderDead: false,
+      allyAliveWhenLeaderDied: false,
+    };
+    const ally = survivorController?.human;
+    if (!ally) {
+      return result;
+    }
+    result.allyName = ally.character.name;
+    for (let i = 0; i < 8 && !partyManager.hasMember(ally); i++) {
+      const angle = (i * Math.PI) / 4;
+      ally.body.position.set(
+        leader.getPosition().add([Math.cos(angle), Math.sin(angle)]),
+      );
+      ally.body.velocity.set(0, 0);
+      await wait(150);
+    }
+    result.allyJoined = partyManager.hasMember(ally);
+
+    // (The ally may well shoot it, so there's always another one lined up)
+    const findZombie = () =>
+      game.entities
+        .getTagged("zombie")
+        .find((e) => e.constructor.name === "Zombie") as any;
+    let zombie = findZombie();
+    leader.hp = 1;
+    const pin = () => {
+      if (leader.isDestroyed) return;
+      if (zombie.isDestroyed) zombie = findZombie();
+      zombie.body.position.set(leader.getPosition().add([0.8, 0]));
+      zombie.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    pin();
+    const start = performance.now();
+    while (!leader.isDestroyed && performance.now() - start < 10000) {
+      await wait(100);
+    }
+    result.leaderDead = leader.isDestroyed;
+    result.allyAliveWhenLeaderDied = !ally.isDestroyed;
+    return result;
+  });
+  expect(death.allyJoined).toBe(true);
+  expect(death.leaderDead).toBe(true);
+  expect(death.allyAliveWhenLeaderDied).toBe(true);
   await page.waitForFunction(
     () =>
       (
@@ -901,9 +1061,13 @@ test("game boots, plays, and changes levels without errors", async ({
     { timeout: 15000 },
   );
   const summaryText = await page.locator(".run-summary").innerText();
-  expect(summaryText).toContain("Run Over");
+  expect(summaryText).toContain("You Died");
   expect(summaryText).toContain("Floor reached");
-  expect(summaryText).toContain("Santa");
+  expect(summaryText).toContain("Nancy");
+  // The survivor who made it out of floor 1 is called out; the one who was
+  // with the leader when they died isn't
+  expect(summaryText).toContain(`Unlocked ${stairwell.allyName}!`);
+  expect(summaryText).not.toContain(`Unlocked ${death.allyName}!`);
   await page.screenshot({ path: "tests/output/run-summary.png" });
   const saved = await page.evaluate(() =>
     JSON.parse(window.localStorage.getItem("highriseSaveData")!),
@@ -911,8 +1075,13 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(saved.version).toBe(1);
   expect(saved.runs.length).toBe(1);
   const run = saved.runs[0];
-  expect(run.outcome).toBe("quit");
-  expect(run.character).toBe("Santa");
+  expect(run.outcome).toBe("died");
+  // Whatever got there first (a shot zombie can come back as a crawler), but
+  // known: the cause is taken before the run summary is
+  expect(["Zombie", "Crawler"]).toContain(run.causeOfDeath);
+  expect(run.charactersUnlocked).toEqual([stairwell.allyName]);
+  expect(saved.unlockedCharacters).not.toContain(death.allyName);
+  expect(run.character).toBe("Nancy");
   expect(run.floorReached).toBe(2);
   expect(saved.bestFloor).toBe(2);
   expect(run.kills.Zombie).toBeGreaterThan(0);
