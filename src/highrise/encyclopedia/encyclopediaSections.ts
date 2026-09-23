@@ -2,10 +2,9 @@ import { RESOURCES } from "../../../resources/resources";
 import { CHARACTERS } from "../characters/Character";
 import { isCharacterUnlocked, SaveData } from "../persistence/SaveData";
 import { UPGRADES } from "../upgrades/upgrades";
-import { GUN_TIERS, GUNS } from "../weapons/guns/gun-stats/gunStats";
+import { GUNS, gunTierOf } from "../weapons/guns/gun-stats/gunStats";
 import {
-  EjectionType,
-  FireMode,
+  fireModeName,
   GunStats,
   ReloadingStyle,
 } from "../weapons/guns/GunStats";
@@ -52,13 +51,13 @@ const guns: EncyclopediaSection = {
       name: gun.name,
       found: save.seen.guns.includes(gun.name),
       image: RESOURCES.images[gun.textures.pickup],
-      tag: `Tier ${GUN_TIERS.findIndex((tier) => tier.includes(gun)) + 1}`,
+      tag: `Tier ${gunTierOf(gun) + 1}`,
       stats: [
         ["Damage", gunDamage(gun)],
         ["Magazine", String(gun.ammoCapacity)],
         ["Fire rate", `${gun.fireRate} / s`],
         ["Reload", gunReload(gun)],
-        ["Mode", gunMode(gun)],
+        ["Mode", fireModeName(gun)],
       ],
     })),
 };
@@ -135,13 +134,6 @@ function gunReload(gun: GunStats): string {
   return seconds(
     gun.reloadStartTime + gun.reloadInsertTime + gun.reloadEndTime,
   );
-}
-
-function gunMode(gun: GunStats): string {
-  if (gun.ejectionType === EjectionType.PUMP) {
-    return "Pump action";
-  }
-  return gun.fireMode === FireMode.FULL_AUTO ? "Full auto" : "Semi auto";
 }
 
 function seconds(time: number): string {

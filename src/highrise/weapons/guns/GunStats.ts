@@ -85,6 +85,14 @@ export enum FireMode {
   FULL_AUTO,
 }
 
+/** How the gun fires, for players: "Pump action", "Full auto" or "Semi auto" */
+export function fireModeName(gun: GunStats): string {
+  if (gun.ejectionType === EjectionType.PUMP) {
+    return "Pump action";
+  }
+  return gun.fireMode === FireMode.FULL_AUTO ? "Full auto" : "Semi auto";
+}
+
 export enum EjectionType {
   // Shells eject on each shot
   AUTOMATIC,

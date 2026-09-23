@@ -6,9 +6,11 @@ import { reseedIfSeeded } from "../../core/util/Random";
 import { Persistence } from "../constants/constants";
 import FadeEffect from "../effects/FadeEffect";
 import { getPartyLeader } from "../environment/PartyManager";
+import type Human from "../human/Human";
 import { Level } from "../levels/Level";
 import UpgradeSelect from "../menu/UpgradeSelect";
 import { getRunStats } from "../run/RunStats";
+import type { Upgrade } from "../upgrades/Upgrade";
 import { drawUpgrades, takeUpgrade } from "../upgrades/upgrades";
 import { generateLevel } from "../levels/level-generation/levelGeneration";
 import LevelTemplate from "../levels/level-templates/LevelTemplate";
@@ -29,6 +31,8 @@ export default class LevelController extends BaseEntity implements Entity {
   currentLevel: number = 0;
   /** What was generated for the current level */
   level?: Level;
+  /** What the current level was generated from */
+  template?: LevelTemplate;
   /** Between reaching an exit and starting the next level */
   private changingLevel = false;
 
@@ -82,36 +86,57 @@ export default class LevelController extends BaseEntity implements Entity {
 
     if (this.currentLevel <= this.maxLevel) {
       const level = this.generateLevel();
-      // Not after the tutorial, which isn't part of the run
-      if (this.currentLevel > 1) {
-        // Drawn after generating, so the level doesn't depend on the draw
-        // and seeded runs get the same offers
-        await this.offerUpgrades();
-        if (this.isDestroyed) {
-          return;
-        }
+      // Not after the tutorial, which isn't part of the run. Drawn after
+      // generating, so the level doesn't depend on the draw and seeded runs
+      // get the same offers.
+      const pick =
+        this.currentLevel > 1 ? await this.offerUpgrades() : undefined;
+      if (this.isDestroyed) {
+        return;
       }
       this.game.dispatch("startLevel", { level });
+      // Taken once the party is in the new level, so anything it drops (the
+      // weapon a new gun replaces, a different type of grenade) lands there
+      if (pick) {
+        this.giveUpgrade(pick.leader, pick.upgrade);
+      }
     } else {
       this.game.dispatch("gameOver", { victory: true });
     }
     this.changingLevel = false;
   }
 
-  /** Lets the leader pick one of a few upgrades, with the game paused */
-  private async offerUpgrades() {
+  /**
+   * Lets the leader pick one of a few upgrades for the coming floor, with the
+   * game paused. Resolves with what they picked, for the caller to hand over.
+   */
+  private async offerUpgrades(): Promise<
+    { leader: Human; upgrade: Upgrade } | undefined
+  > {
     const leader = getPartyLeader(this.game);
     if (!leader) {
-      return;
+      return undefined;
     }
-    const choices = drawUpgrades(leader, 3);
+    const choices = this.drawOffer(leader);
     if (choices.length === 0) {
-      return;
+      return undefined;
     }
-    const screen = this.game.addEntity(new UpgradeSelect(choices));
+    const screen = this.game.addEntity(new UpgradeSelect(choices, leader));
     const upgrade = await screen.picked;
-    if (!leader.isDestroyed) {
-      takeUpgrade(leader, upgrade);
+    return { leader, upgrade };
+  }
+
+  /** Draws an offer for `human` suited to the current floor */
+  drawOffer(human: Human, count: number = 3): Upgrade[] {
+    return drawUpgrades(human, count, {
+      bestGunTier: this.template?.getBestGunTier(),
+    });
+  }
+
+  /** Hands a picked upgrade over to `human` and keeps score of it */
+  giveUpgrade(human: Human, upgrade: Upgrade) {
+    if (!human.isDestroyed) {
+      takeUpgrade(human, upgrade);
       getRunStats(this.game)?.recordUpgrade(upgrade.name);
     }
   }
@@ -131,7 +156,8 @@ export default class LevelController extends BaseEntity implements Entity {
   generateLevel(): Level {
     // So that seeded runs get the same levels no matter what happened before
     reseedIfSeeded(this.currentLevel);
-    this.level = generateLevel(this.makeTemplate());
+    this.template = this.makeTemplate();
+    this.level = generateLevel(this.template);
     return this.level;
   }
 
