@@ -122,12 +122,24 @@ export default class Preloader extends BaseEntity implements Entity {
     Pixi.Assets.addBundle("images", this.manifest.images);
 
     try {
-      await Pixi.Assets.loadBundle("images", (progressPercent) => {
-        this.progress.images.loaded = Math.round(
-          progressPercent * this.progress.images.total,
-        );
-        this.onProgress?.(this.progress);
-      });
+      const textures = await Pixi.Assets.loadBundle(
+        "images",
+        (progressPercent) => {
+          this.progress.images.loaded = Math.round(
+            progressPercent * this.progress.images.total,
+          );
+          this.onProgress?.(this.progress);
+        },
+      );
+      // World textures are usually drawn smaller than their pixel size, and
+      // without mipmaps fine patterns (carpet, tile grout) alias into moiré
+      // that crawls as the camera moves. This has to be set before a texture
+      // is first uploaded to the GPU, which happens on first render.
+      for (const texture of Object.values(textures)) {
+        if (texture instanceof Pixi.Texture) {
+          texture.source.autoGenerateMipmaps = true;
+        }
+      }
     } catch (e) {
       console.error("Images failed to load", e);
     }
