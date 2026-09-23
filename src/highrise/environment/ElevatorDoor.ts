@@ -100,6 +100,8 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
     upperLeftCorner: V2d,
     dimensions: V2d,
     verticalMovement: boolean,
+    /** Whether E opens and closes it. Otherwise only `open`/`close` do. */
+    interactable: boolean = true,
   ) {
     super();
 
@@ -131,17 +133,34 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
       );
     }
 
-    this.addChildren(
-      this.topDoor,
-      this.bottomDoor,
-      new Interactable(this.center, this.handleInteract.bind(this)),
-    );
+    this.addChildren(this.topDoor, this.bottomDoor);
+    if (interactable) {
+      this.addChild(
+        new Interactable(this.center, this.handleInteract.bind(this)),
+      );
+    }
   }
 
-  async handleInteract() {
-    if (this.state === "STOPPED") {
+  handleInteract() {
+    return this.openPercentage === 1 ? this.close() : this.open();
+  }
+
+  /** Dings, then slides open. Resolves once it's all the way open. */
+  open(): Promise<void> {
+    return this.move(false);
+  }
+
+  /** Dings, then slides shut. Resolves once it's all the way shut. */
+  close(): Promise<void> {
+    return this.move(true);
+  }
+
+  private async move(isClosing: boolean) {
+    if (
+      this.state === "STOPPED" &&
+      this.openPercentage !== (isClosing ? 0 : 1)
+    ) {
       this.game.addEntity(new PositionalSound("elevatorDing", this.center));
-      const isClosing = this.openPercentage === 1;
       this.state = isClosing ? "CLOSING" : "OPENING";
       await this.wait(DING_TIME);
       const sound = isClosing ? "elevatorDoorClose" : "elevatorDoorOpen";

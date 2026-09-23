@@ -12,6 +12,9 @@ import LevelTemplate from "./LevelTemplate";
 import { makeBathroomPair } from "./helpers/levelTemplateHelpers";
 
 export default class ChapelLevel extends LevelTemplate {
+  static floorName = "Chapel";
+  static floorNotes = ["Boss"];
+
   chooseRoomTemplates(seed: number): RoomTemplate[] {
     const rooms: RoomTemplate[] = [];
 

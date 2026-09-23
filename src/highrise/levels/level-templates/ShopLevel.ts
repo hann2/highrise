@@ -16,6 +16,8 @@ import { makeBathroomPair } from "./helpers/levelTemplateHelpers";
 import LevelTemplate from "./LevelTemplate";
 
 export default class ShopLevel extends LevelTemplate {
+  static floorName = "Shops";
+
   subFloorInfo: DecorationInfo;
 
   constructor(levelIndex: number) {

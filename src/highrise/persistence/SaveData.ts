@@ -63,6 +63,8 @@ export interface SaveData {
   seen: SeenFlags;
   /** Whether the game pauses while its tab is hidden (see AutoPauser) */
   autoPause: boolean;
+  /** Name of the character the last run started with, who you arrive in the lobby as */
+  lastCharacter?: string;
 }
 
 export function defaultSaveData(): SaveData {
@@ -74,7 +76,15 @@ export function defaultSaveData(): SaveData {
     bestFloor: 0,
     seen: { guns: [], melee: [], upgrades: [], enemies: [] },
     autoPause: true,
+    lastCharacter: undefined,
   };
+}
+
+/** Remembers who the player last started a run as */
+export function setLastCharacter(name: string): void {
+  updateSaveData((data) => {
+    data.lastCharacter = name;
+  });
 }
 
 /** Reads the save data, falling back to defaults for anything missing or broken. */
@@ -180,6 +190,9 @@ export function parseSaveData(raw: unknown): SaveData {
   data.seen = parseSeenFlags(raw.seen);
   if (typeof raw.autoPause === "boolean") {
     data.autoPause = raw.autoPause;
+  }
+  if (typeof raw.lastCharacter === "string") {
+    data.lastCharacter = raw.lastCharacter;
   }
   return data;
 }

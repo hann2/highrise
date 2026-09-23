@@ -14,9 +14,10 @@ import PlayerHumanController from "../human/PlayerHumanController";
 import LightingManager from "../lighting-and-vision/LightingManager";
 import VisionController from "../lighting-and-vision/VisionController";
 import GameOverScreen from "../menu/GameOverScreen";
-import MainMenu from "../menu/MainMenu";
 import PauseMenu from "../menu/PauseMenu";
-import { loadSaveData } from "../persistence/SaveData";
+import Lobby from "../lobby/Lobby";
+import { loadSaveData, setLastCharacter } from "../persistence/SaveData";
+import { RunPlan } from "../run/RunPlan";
 import RunStats from "../run/RunStats";
 import AmmoDropper from "./AmmoDropper";
 import CameraController from "./CameraController";
@@ -27,16 +28,18 @@ import QuarterDropper from "./QuarterDropper";
 export class GameController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Permanent;
 
-  @on("goToMainMenu")
-  onGoToMainMenu() {
+  /** Between runs: the lobby, which is also the main menu */
+  @on("goToLobby")
+  onGoToLobby({ showTitle }: { showTitle: boolean }) {
     const game = this.game;
     game.clearScene(Persistence.Menu);
-    game.addEntity(new MainMenu());
+    game.addEntity(new Lobby(showTitle));
   }
 
   @on("newGame")
-  onNewGame({ character }: { character: Character }) {
+  onNewGame({ character, plan }: { character: Character; plan: RunPlan }) {
     const game = this.game;
+    setLastCharacter(character.name);
     // Humans carry lights, so this has to exist before the party does
     game.addEntity(new LightingManager());
     const partyManager = game.addEntity(new PartyManager(character));
@@ -46,7 +49,7 @@ export class GameController extends BaseEntity implements Entity {
       new EncyclopediaTracker(),
       new QuarterDropper(),
       new AmmoDropper(),
-      new LevelController(),
+      new LevelController(plan),
       new CameraController(game.camera, getPlayer),
       new PlayerHumanController(getPlayer),
       new VisionController(getPlayer),
@@ -72,6 +75,6 @@ export class GameController extends BaseEntity implements Entity {
     await this.waitUntil(() => gameOverScreen.opacity > 0.99);
     game.clearScene(Persistence.Game);
     await this.waitUntil(() => gameOverScreen.isDestroyed);
-    game.dispatch("goToMainMenu", undefined);
+    game.dispatch("goToLobby", { showTitle: false });
   }
 }

@@ -5,6 +5,7 @@ import type { BaseEnemy } from "../highrise/enemies/base/Enemy";
 import type Human from "../highrise/human/Human";
 import type SurvivorHumanController from "../highrise/human/SurvivorHumanController";
 import type { Level } from "../highrise/levels/Level";
+import type { RunPlan } from "../highrise/run/RunPlan";
 
 /**
  * Global event types that can be dispatched by the Game and listened to by entities.
@@ -14,8 +15,10 @@ import type { Level } from "../highrise/levels/Level";
  */
 export type CustomEvents = {
   // Game flow
-  goToMainMenu: void;
-  newGame: { character: Character };
+  /** Back to the lobby between runs; with the title screen when the game boots */
+  goToLobby: { showTitle: boolean };
+  /** Starts a run of the planned floors as `character` */
+  newGame: { character: Character; plan: RunPlan };
   startLevel: { level: Level };
   levelComplete: void;
   partyDead: void;

@@ -11,6 +11,8 @@ import { makeBathroomPair } from "./helpers/levelTemplateHelpers";
 
 // A level on which there is an electrical generator
 export default class GeneratorLevel extends LevelTemplate {
+  static floorName = "Generator";
+
   chooseRoomTemplates(seed: number): RoomTemplate[] {
     const rooms: RoomTemplate[] = [];
 

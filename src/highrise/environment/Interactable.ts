@@ -3,6 +3,16 @@ import Entity from "../../core/entity/Entity";
 import { V2d } from "../../core/Vector";
 import Human from "../human/Human";
 
+/** Shown when an interactable is the nearest one (see `lobby/LobbyPrompt`) */
+export interface InteractPrompt {
+  /** What it is, like a name */
+  title: string;
+  /** What interacting does, shown after the interact button: "to play as" */
+  action?: string;
+  /** Shown instead of an action when interacting won't do anything */
+  hint?: string;
+}
+
 /** A thing on the ground that humans can interact with */
 export default class Interactable extends BaseEntity implements Entity {
   tags = ["interactable"];
@@ -15,6 +25,8 @@ export default class Interactable extends BaseEntity implements Entity {
   canInteract: (human: Human) => boolean = () => true;
   /** Whether a wall or door between the human and this blocks it */
   needsLineOfSight = true;
+  /** What to tell the player when this is the nearest thing to interact with */
+  prompt?: () => InteractPrompt;
 
   constructor(
     public position: V2d,

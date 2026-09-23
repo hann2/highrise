@@ -17,7 +17,11 @@ export default class PlayerHumanController
   persistenceLevel = Persistence.Game;
   tickLayer = "input" as const;
 
-  constructor(private getPlayer: () => Human) {
+  constructor(
+    private getPlayer: () => Human,
+    /** While this says so, the player stands still and nothing they press does anything */
+    private isInputBlocked: () => boolean = () => false,
+  ) {
     super();
   }
 
@@ -28,11 +32,17 @@ export default class PlayerHumanController
 
   @on("mouseDown")
   onMouseDown() {
+    if (this.isInputBlocked()) {
+      return;
+    }
     this.human.useWeapon();
   }
 
   @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
+    if (this.isInputBlocked()) {
+      return;
+    }
     switch (button) {
       case ControllerButton.RT:
         this.human.useWeapon();
@@ -60,6 +70,9 @@ export default class PlayerHumanController
 
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
+    if (this.isInputBlocked()) {
+      return;
+    }
     switch (key) {
       case "KeyE":
         this.human.interactWithNearest();
@@ -84,6 +97,9 @@ export default class PlayerHumanController
 
   @on("wheel")
   onWheel() {
+    if (this.isInputBlocked()) {
+      return;
+    }
     // With two slots, either direction means "the other one"
     this.human.swapWeapon();
   }
@@ -92,6 +108,11 @@ export default class PlayerHumanController
   onTick(dt: number) {
     if (this.human.isDestroyed) {
       this.destroy();
+      return;
+    }
+
+    if (this.isInputBlocked()) {
+      this.human.walkSpring.walkTowards(0, 0);
       return;
     }
 

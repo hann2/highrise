@@ -79,7 +79,7 @@ export async function main() {
     game.addEntity(new CheatController());
   }
 
-  game.dispatch("goToMainMenu", undefined);
+  game.dispatch("goToLobby", { showTitle: true });
 
   game.renderer.requestFullscreen();
 }

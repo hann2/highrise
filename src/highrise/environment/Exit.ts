@@ -20,6 +20,11 @@ export default class Exit extends BaseEntity implements Entity {
     x2: number,
     y2: number,
     direction: number,
+    /**
+     * What happens when something steps on the stairs. By default the
+     * party leader finishes the floor.
+     */
+    private onReached?: (other: Entity) => void,
   ) {
     super();
 
@@ -54,7 +59,12 @@ export default class Exit extends BaseEntity implements Entity {
 
   @on("beginContact")
   onBeginContact({ other }: { other?: Entity }) {
-    if (other === getPartyLeader(this.game)) {
+    if (!other) {
+      return;
+    }
+    if (this.onReached) {
+      this.onReached(other);
+    } else if (other === getPartyLeader(this.game)) {
       this.game.dispatch("levelComplete", undefined);
     }
   }
