@@ -52,7 +52,7 @@ export default class TutorialRoomTemplate implements RoomTemplate {
       }),
       new FloorPaint(
         toWorld(V(0.5, 1.5)),
-        (usingGamepad) => `${usingGamepad ? "LB" : "Q"} to throw\nglowstick`,
+        (usingGamepad) => `${usingGamepad ? "R3" : "F"} to toggle\nflashlight`,
       ),
       new Wall(toWorld(V(1.5, 2.5)), toWorld(V(1.5, 0.5))),
       new Wall(toWorld(V(2.5, -0.5)), toWorld(V(2.5, 1.5))),
@@ -85,7 +85,7 @@ export default class TutorialRoomTemplate implements RoomTemplate {
       new Wall(toWorld(V(7, 1.75)), toWorld(V(7, -0.5))),
       new FloorPaint(
         toWorld(V(5.75, 0.25)),
-        (usingGamepad) => `${usingGamepad ? "X" : "E"} to pick\nup weapon`,
+        (usingGamepad) => `${usingGamepad ? "B" : "E"} to pick\nup weapon`,
       ),
       new WeaponPickup(toWorld(V(5.75, 1)), new Gun(M1911)),
       new FloorPaint(

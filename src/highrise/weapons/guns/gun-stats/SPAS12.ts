@@ -18,6 +18,7 @@ export const SPAS12: GunStats = {
   fireMode: FireMode.SEMI_AUTO,
   reloadInsertTime: 0.35,
   ammoCapacity: 8,
+  ammoClass: "shotgun",
 
   textures: {
     ...defaultGunStats.textures,

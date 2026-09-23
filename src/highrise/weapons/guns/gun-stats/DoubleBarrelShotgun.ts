@@ -20,6 +20,7 @@ export const DoubleBarrelShotgun: GunStats = {
   ejectionType: EjectionType.RELOAD,
   reloadInsertTime: 1.2,
   ammoCapacity: 2,
+  ammoClass: "shotgun",
 
   textures: {
     ...defaultGunStats.textures,

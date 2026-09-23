@@ -37,17 +37,23 @@ export default class PlayerHumanController
       case ControllerButton.RT:
         this.human.useWeapon();
         break;
-      case ControllerButton.Y:
+      case ControllerButton.B:
         this.human.interactWithNearest();
+        break;
+      case ControllerButton.Y:
+        this.human.swapWeapon();
+        break;
+      case ControllerButton.LB:
+        this.human.useConsumable();
         break;
       case ControllerButton.X:
         this.human.reload();
         break;
-      case ControllerButton.LB:
-        this.human.throwGlowstick();
-        break;
       case ControllerButton.A:
         this.human.push();
+        break;
+      case ControllerButton.R3:
+        this.human.flashlight.toggle();
         break;
     }
   }
@@ -61,16 +67,25 @@ export default class PlayerHumanController
       case "KeyR":
         this.human.reload();
         break;
-      case "KeyQ":
-        this.human.throwGlowstick();
-        break;
       case "Space":
         this.human.push();
         break;
       case "KeyF":
         this.human.flashlight.toggle();
         break;
+      case "KeyQ":
+        this.human.swapWeapon();
+        break;
+      case "KeyG":
+        this.human.useConsumable();
+        break;
     }
+  }
+
+  @on("wheel")
+  onWheel() {
+    // With two slots, either direction means "the other one"
+    this.human.swapWeapon();
   }
 
   @on("tick")

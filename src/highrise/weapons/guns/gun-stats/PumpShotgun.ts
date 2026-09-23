@@ -18,6 +18,7 @@ export const PumpShotgun: GunStats = {
   ejectionType: EjectionType.PUMP,
   reloadInsertTime: 0.4,
   ammoCapacity: 7,
+  ammoClass: "shotgun",
 
   textures: {
     ...defaultGunStats.textures,

@@ -3,6 +3,7 @@
 import { ImageName, SoundName } from "../../../../resources/resources";
 import { degToRad } from "../../../core/util/MathUtil";
 import { BaseWeaponStats } from "../WeaponStats";
+import { AmmoClass } from "./ammo";
 import { BulletStats, defaultBulletStats } from "./BulletStats";
 
 export interface GunStats extends BaseWeaponStats {
@@ -14,6 +15,9 @@ export interface GunStats extends BaseWeaponStats {
   readonly fireMode: FireMode;
   // Maximum number of rounds in the gun
   readonly ammoCapacity: number;
+  // Which reserve it reloads from. Also decides its slot: pistols are
+  // secondaries, everything else is a primary.
+  readonly ammoClass: AmmoClass;
   // Whether you load rounds one-at-a-time or all-at-once
   readonly reloadingStyle: ReloadingStyle;
   // Seconds to start a reload.
@@ -102,6 +106,7 @@ export const defaultGunStats: GunStats = {
   fireRate: 1.0,
   fireMode: FireMode.SEMI_AUTO,
   ammoCapacity: 10,
+  ammoClass: "pistol",
   reloadStartTime: 0.1,
   reloadInsertTime: 1,
   reloadEndTime: 0.1,

@@ -9,10 +9,10 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "332:1792088666";
+const LEVEL_2_FINGERPRINT = "335:-827972538";
 // What the upgrade screen offers after level 1 with this seed, in order.
 // Changes when the upgrade pool, the rarities, or level generation change.
-const UPGRADE_OFFER = ["Fresh Batteries", "Linebacker", "Bloodthirsty"];
+const UPGRADE_OFFER = ["Bloodthirsty", "Night Eyes", "Glass Cannon"];
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
@@ -200,6 +200,296 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(hpAfterShooting).toBeLessThan(targetHp);
   // unpin them
   await page.evaluate(() => (window as any).testZombie.die());
+  expectNoIssues(issues);
+
+  // --- Two weapon slots: a primary gun fills the other slot, and Q swaps ---
+  const getSlots = () =>
+    page.evaluate(() => {
+      const leader = (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "PartyManager",
+        ) as any
+      ).leader;
+      return {
+        primary: leader.primary?.stats.name as string | undefined,
+        secondary: leader.secondary?.stats.name as string | undefined,
+        active: leader.activeSlot as string,
+        inHand: leader.weapon?.stats.name as string | undefined,
+      };
+    });
+  // What Santa holds by now depends on what was in reach of the E presses
+  // above, so first make sure there's a pistol in the secondary slot
+  const pistolName = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    if (leader.secondary?.stats.ammoClass !== "pistol") {
+      const pickup = [...game.entities.all].find(
+        (e: any) =>
+          e.constructor.name === "WeaponPickup" &&
+          e.weapon.stats.ammoClass === "pistol",
+      ) as any;
+      const home = leader.getPosition().clone();
+      leader.body.position.set(pickup.getPosition());
+      leader.body.velocity.set(0, 0);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      leader.interactWithNearest();
+      leader.body.position.set(home);
+      leader.body.velocity.set(0, 0);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return leader.secondary?.stats.name as string | undefined;
+  });
+  expect(pistolName).toBeDefined();
+  // A rifle goes in the other slot, leaving the pistol where it is
+  await page.keyboard.press("KeyJ"); // dev cheat: an AR-15 at the leader's feet
+  await page.waitForTimeout(200);
+  await page.keyboard.press("KeyE");
+  await page.waitForTimeout(300);
+  const slots = await getSlots();
+  expect(slots.primary).toBe("AR-15");
+  expect(slots.secondary).toBe(pistolName);
+  expect(slots.inHand).toBe("AR-15");
+  await expect(page.locator(".hud-inventory")).toContainText(pistolName!);
+  // Q used to throw glowsticks; now it swaps weapons, and glowsticks are gone
+  await page.keyboard.press("KeyQ");
+  await page.waitForTimeout(350);
+  const swapped = await getSlots();
+  expect(swapped.active).toBe("secondary");
+  expect(swapped.inHand).toBe(pistolName);
+  expect(
+    await page.evaluate(
+      () =>
+        [...window.DEBUG.game!.entities.all].filter(
+          (e) => e.constructor.name === "GlowStick",
+        ).length,
+    ),
+  ).toBe(0);
+  await expect(page.locator(".hud-reserve")).toHaveText("∞");
+  await expect(page.locator(".hud-inventory")).toContainText("AR-15");
+  // The mouse wheel swaps too
+  await page.mouse.wheel(0, 100);
+  await page.waitForTimeout(350);
+  expect((await getSlots()).inHand).toBe("AR-15");
+  await page.mouse.wheel(0, -100);
+  await page.waitForTimeout(350);
+  expect((await getSlots()).inHand).toBe(pistolName);
+  await page.keyboard.press("KeyQ");
+  await page.waitForTimeout(350);
+  expect((await getSlots()).inHand).toBe("AR-15");
+
+  // --- Reloading takes from the reserve, and does nothing when it's empty ---
+  const reserveReload = await page.evaluate(async () => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const wait = async (ms: number) => {
+      const start = performance.now();
+      while (performance.now() - start < ms) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    };
+    const gun = leader.weapon;
+    const capacity = gun.getCapacity(leader);
+    gun.ammo = 0;
+    leader.reserve.rifle = capacity + 5;
+    leader.reload();
+    const start = performance.now();
+    while (gun.isReloading && performance.now() - start < 6000) {
+      await wait(50);
+    }
+    const result = {
+      capacity,
+      reloadedAmmo: gun.ammo,
+      reserveLeft: leader.reserve.rifle,
+      emptyReloadStarted: false,
+      ammoAfterEmptyReload: -1,
+    };
+    gun.ammo = 0;
+    leader.reserve.rifle = 0;
+    leader.reload();
+    await wait(100);
+    result.emptyReloadStarted = gun.isReloading;
+    result.ammoAfterEmptyReload = gun.ammo;
+    return result;
+  });
+  expect(reserveReload.reloadedAmmo).toBe(reserveReload.capacity);
+  expect(reserveReload.reserveLeft).toBe(5);
+  expect(reserveReload.emptyReloadStarted).toBe(false);
+  expect(reserveReload.ammoAfterEmptyReload).toBe(0);
+  await expect(page.locator(".hud-reload-text")).toHaveText("No Ammo");
+  await expect(page.locator(".hud-reserve")).toHaveText("0");
+  await page.screenshot({ path: "tests/output/hud-no-ammo.png" });
+  await page.keyboard.press("KeyI"); // dev cheat: fill the reserves
+  await page.keyboard.press("KeyR");
+  await page.waitForTimeout(100);
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          [...window.DEBUG.game!.entities.all].find(
+            (e) => e.constructor.name === "PartyManager",
+          ) as any
+        ).leader.weapon.isReloading,
+    ),
+  ).toBe(true);
+  expectNoIssues(issues);
+
+  // --- The push hurts (a little), and a grenade hurts a lot ---
+  // A zombie is held just in front of the leader, wherever they face
+  await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const zombie = game.entities
+      .getTagged("zombie")
+      .find((e) => e.constructor.name === "Zombie") as any;
+    const playerPosition = leader.getPosition().clone();
+    (window as any).testZombie = zombie;
+    (window as any).testZombieDistance = 0.7;
+    const pin = () => {
+      if (
+        zombie.isDestroyed ||
+        leader.isDestroyed ||
+        !(window as any).testZombie
+      )
+        return;
+      const angle = leader.body.angle;
+      const distance = (window as any).testZombieDistance;
+      leader.hp = leader.maxHp;
+      leader.body.position.set(playerPosition);
+      leader.body.velocity.set(0, 0);
+      zombie.body.position.set(
+        playerPosition.add([
+          Math.cos(angle) * distance,
+          Math.sin(angle) * distance,
+        ]),
+      );
+      zombie.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    pin();
+  });
+  await page.waitForTimeout(300);
+  const pushed = await page.evaluate(async () => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const zombie = (window as any).testZombie;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const before = zombie.hp;
+    leader.push();
+    await wait(200);
+    const afterOne = zombie.hp;
+    // Still cooling down, so this one does nothing
+    leader.push();
+    await wait(200);
+    return { before, afterOne, afterTwo: zombie.hp };
+  });
+  expect(pushed.before - pushed.afterOne).toBeCloseTo(10);
+  expect(pushed.afterTwo).toBe(pushed.afterOne);
+
+  await page.keyboard.press("KeyN"); // dev cheat: frag grenades
+  await expect(page.locator(".hud-inventory")).toContainText("Frag Grenade");
+  const thrown = await page.evaluate(() => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const zombie = (window as any).testZombie;
+    (window as any).testZombieDistance = 2;
+    const countBefore = leader.consumableCount;
+    leader.useConsumable();
+    return { countBefore, countAfter: leader.consumableCount, hp: zombie.hp };
+  });
+  expect(thrown.countAfter).toBe(thrown.countBefore - 1);
+  await page.waitForTimeout(2100); // the fuse is 2 seconds
+  await page.screenshot({ path: "tests/output/grenade.png" });
+  await page.waitForTimeout(500);
+  const blasted = await page.evaluate(() => {
+    const zombie = (window as any).testZombie;
+    (window as any).testZombie = undefined; // unpin
+    return {
+      hp: zombie.isDestroyed ? 0 : zombie.hp,
+      grenadesLeft: [...window.DEBUG.game!.entities.all].filter(
+        (e) => e.constructor.name === "ThrownConsumable",
+      ).length,
+    };
+  });
+  expect(blasted.hp).toBeLessThan(thrown.hp - 20);
+  expect(blasted.grenadesLeft).toBe(0);
+  // All that noise brought zombies over; clear them off so the rest of the
+  // test isn't a fight. (Copy the list, because destroying removes from it.)
+  await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    for (const zombie of [...game.entities.getTagged("zombie")] as any[]) {
+      if (zombie.getPosition().distanceTo(leader.getPosition()) < 12) {
+        zombie.destroy();
+      }
+    }
+    leader.hp = leader.maxHp;
+  });
+
+  // --- Ammo boxes in closets restock the reserve ---
+  const ammoBox = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const box = [...game.entities.all].find(
+      (e) => e.constructor.name === "AmmoPickup",
+    ) as any;
+    if (!box) {
+      return undefined;
+    }
+    (window as any).testPinAt = box.getPosition();
+    const pin = () => {
+      const at = (window as any).testPinAt;
+      if (!at) return;
+      leader.body.position.set(at);
+      leader.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    pin();
+    leader.reserve[box.ammoClass] = 0;
+    const amount = box.amount;
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    return { ammoClass: box.ammoClass as string, amount: amount as number };
+  });
+  expect(ammoBox).toBeDefined();
+  await page.screenshot({ path: "tests/output/ammo-box.png" });
+  await page.keyboard.press("KeyE");
+  await page.waitForTimeout(200);
+  const restocked = await page.evaluate((ammoClass) => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    (window as any).testPinAt = undefined;
+    return leader.reserve[ammoClass] as number;
+  }, ammoBox!.ammoClass);
+  expect(restocked).toBe(ammoBox!.amount);
+  await page.keyboard.press("KeyI"); // dev cheat: fill the reserves again
   expectNoIssues(issues);
 
   // --- Doors swing on their hinges and stop at their limits ---
@@ -476,6 +766,12 @@ test("game boots, plays, and changes levels without errors", async ({
     const machine = find("VendingMachine");
     const before = partyManager.quarters;
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    // Zombies around the machine would interrupt the shopping
+    for (const zombie of [...game.entities.getTagged("zombie")] as any[]) {
+      if (zombie.getPosition().distanceTo(machine.getFrontPosition()) < 10) {
+        zombie.destroy();
+      }
+    }
     leader.body.position.set(machine.getFrontPosition(1.8));
     leader.body.velocity.set(0, 0);
     await wait(100);
@@ -906,8 +1202,8 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
   await page.waitForTimeout(600);
   await page.screenshot({ path: "tests/output/upgrade-select.png" });
-  // Take Linebacker with the keyboard
-  const pick = offer.names.indexOf("Linebacker");
+  // Take Glass Cannon with the keyboard
+  const pick = offer.names.indexOf("Glass Cannon");
   // The card under the mouse is selected when the screen appears, so get the
   // mouse out of the way and step from wherever the selection is
   await page.mouse.move(1, 1);
@@ -994,7 +1290,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(floor2Party.leader).toBe("Nancy");
   expect(floor2Party.humans).not.toContain(stairwell.allyName);
 
-  // --- The upgrade stuck: the leader pushes harder than before ---
+  // --- The upgrade stuck: the leader hits harder, and has less health ---
   const upgraded = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
@@ -1008,16 +1304,15 @@ test("game boots, plays, and changes levels without errors", async ({
       hp: leader.hp,
     };
   });
-  expect(upgraded.upgrades).toEqual(["Linebacker"]);
-  expect(upgraded.stats.pushKnockback).toBeCloseTo(
-    statsBefore.pushKnockback * 1.4,
-  );
-  expect(upgraded.stats.pushStun).toBeCloseTo(statsBefore.pushStun * 1.3);
+  expect(upgraded.upgrades).toEqual(["Glass Cannon"]);
+  expect(upgraded.stats.damage).toBeCloseTo(statsBefore.damage * 1.5);
+  expect(upgraded.maxHp).toBe(statsBefore.maxHp - 30);
+  expect(upgraded.hp).toBeLessThanOrEqual(upgraded.maxHp);
   // Nothing else changed
   expect({
     ...upgraded.stats,
-    pushKnockback: statsBefore.pushKnockback,
-    pushStun: statsBefore.pushStun,
+    damage: statsBefore.damage,
+    maxHp: statsBefore.maxHp,
   }).toEqual(statsBefore);
 
   // --- Stats are read at use time: bigger magazine, instant reload, and

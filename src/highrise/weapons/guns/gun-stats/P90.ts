@@ -17,6 +17,7 @@ export const P90: GunStats = {
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 2.0,
   ammoCapacity: 50,
+  ammoClass: "rifle",
 
   textures: {
     ...defaultGunStats.textures,

@@ -15,6 +15,8 @@ export type IoEvents = {
   rightDown: void;
   /** Called when the right mouse button is released anywhere. */
   rightUp: void;
+  /** Called when the mouse wheel (or a trackpad) scrolls. Positive `deltaY` is down. */
+  wheel: { deltaY: number };
   /** called when a keyboard key is pressed. */
   keyDown: { key: KeyCode; event: KeyboardEvent };
   /** called when a keyboard key is released. */

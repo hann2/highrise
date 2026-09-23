@@ -1,9 +1,11 @@
 import { rUniform } from "../../core/util/Random";
 import type Human from "../human/Human";
 import { markSeen } from "../persistence/SaveData";
+import { FlashbangPack, GrenadePack } from "./consumableUpgrades";
 import {
   Bloodthirsty,
   CurbStomp,
+  Scavenger,
   SecondWind,
   SpeedLoader,
 } from "./ruleUpgrades";
@@ -39,6 +41,9 @@ export const UPGRADES: ReadonlyArray<Upgrade> = [
   SpeedLoader,
   CurbStomp,
   SecondWind,
+  Scavenger,
+  GrenadePack,
+  FlashbangPack,
 ];
 
 /** Whether `human` can take `upgrade` (again) */
