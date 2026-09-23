@@ -24,7 +24,7 @@ import Hittable from "./Hittable";
 const DOOR_THICKNESS = 0.25;
 
 // The closer that swings one-way and locked doors shut (N·m per radian, N·m·s per radian)
-const CLOSER_STIFFNESS = 8;
+const CLOSER_STIFFNESS = 15;
 const CLOSER_DAMPING = 3;
 
 export interface DoorOptions {
