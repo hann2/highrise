@@ -94,11 +94,83 @@
   background: rgba(17, 17, 17, 0.5);
 }
 
-.game-over {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  user-select: none;
+/* The run summary after a game ends. Red for a loss, white for a win. */
+.run-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background: #660000;
+  color: white;
+}
+
+.run-summary--victory {
+  background: #ffffff;
+  color: #222222;
+}
+
+.run-summary__title {
+  font-family: captureIt;
+  font-size: 128px;
+  line-height: 1;
+  color: black;
+}
+
+.run-summary__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Two columns so the "label value" lines line up on the middle of the screen */
+.run-summary__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+  font-family: oswald;
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 36px;
+}
+
+.run-summary__label {
+  text-align: right;
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.run-summary__value {
+  text-align: left;
+  white-space: normal;
+  max-width: 40vw;
+}
+
+.run-summary__callout {
+  font-family: captureIt;
+  font-size: 40px;
+  line-height: 1;
+  color: #ffcc33;
+}
+
+.run-summary--victory .run-summary__callout {
+  color: #cc0000;
+}
+
+.run-summary--victory .menu-button {
+  color: #444444;
+}
+
+.run-summary--victory .menu-button:hover {
+  color: #000000;
+}
+
+.run-summary__hint {
+  font-family: oswald;
+  font-weight: 300;
+  font-size: 18px;
+  opacity: 0.7;
 }
 
 /* Two columns so "label—name" lines line up on the middle of the screen */

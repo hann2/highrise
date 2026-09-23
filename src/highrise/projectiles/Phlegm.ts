@@ -13,6 +13,7 @@ import GooSplat from "../effects/GooSplat";
 import { getBlobPair, getSplatSound } from "../effects/Splat";
 import Spitter from "../enemies/spitter/Spitter";
 import Human from "../human/Human";
+import { inflictDamageFrom } from "../run/damageSources";
 import { PointLight } from "../lighting-and-vision/PointLight";
 import { HitResult, Projectile } from "./Projectile";
 
@@ -90,7 +91,7 @@ export default class Phlegm extends Projectile implements Entity {
 
   handleHit({ hit, hitPosition, hitNormal }: HitResult) {
     if (hit instanceof Human) {
-      hit.inflictDamage(this.damage);
+      inflictDamageFrom(hit, this.damage, this.shooter ?? "Necromancer");
     }
     this.game.addEntity(new PositionalSound(getSplatSound(), this.position));
     this.game.addEntity(new GooImpact(hitPosition, 3, hitNormal, 0.7));

@@ -7,6 +7,7 @@ import { BodyTextures } from "../../creature-stuff/BodySprite";
 import type Human from "../../human/Human";
 import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange } from "../base/enemyUtils";
+import { inflictDamageFrom } from "../../run/damageSources";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import CrawlerSprite from "./CrawlerSprite";
 
@@ -55,7 +56,7 @@ export default class Crawler extends BaseEnemy {
             ATTACK_RANGE,
             ATTACK_ANGLE_RANGE,
           )) {
-            human.inflictDamage(rInteger(10, 15));
+            inflictDamageFrom(human, rInteger(10, 15), this);
           }
         }
       },

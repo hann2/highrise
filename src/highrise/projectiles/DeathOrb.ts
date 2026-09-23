@@ -9,6 +9,7 @@ import { V2d } from "../../core/Vector";
 import { getBlobPair } from "../effects/Splat";
 import Spitter from "../enemies/spitter/Spitter";
 import Human from "../human/Human";
+import { inflictDamageFrom } from "../run/damageSources";
 import { HitResult, Projectile } from "./Projectile";
 
 export const DEATH_ORB_RADIUS = 0.4; // meters
@@ -46,7 +47,7 @@ export default class DeathOrb extends Projectile implements Entity {
 
   handleHit({ hit }: HitResult) {
     if (hit instanceof Human) {
-      hit.inflictDamage(this.damage);
+      inflictDamageFrom(hit, this.damage, this.shooter ?? "Necromancer");
     }
     return true;
   }

@@ -5,6 +5,7 @@ import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import { lerp } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
+import { getPartyManager } from "../environment/PartyManager";
 import { isHuman } from "../human/Human";
 import VisionController from "../lighting-and-vision/VisionController";
 
@@ -24,6 +25,9 @@ export default class CheatController extends BaseEntity implements Entity {
         )) {
           visionController.enabled = !visionController.enabled;
         }
+        break;
+      case "KeyK": // Quarters, for trying out vending machines
+        getPartyManager(this.game)?.addQuarters(5);
         break;
       case "KeyH":
         for (const human of this.game.entities.getByFilter(isHuman)) {
