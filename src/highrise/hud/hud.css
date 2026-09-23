@@ -163,6 +163,33 @@
   opacity: 1;
 }
 
+/* Fades back while it's off, like the weapon not in hand */
+.hud-flashlight {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.hud-flashlight--on {
+  opacity: 1;
+}
+
+.hud-flashlight__beam {
+  fill: #fff1d6;
+  opacity: 0;
+}
+
+.hud-flashlight--on .hud-flashlight__beam {
+  opacity: 0.45;
+}
+
+.hud-flashlight__lens {
+  fill: #6a6a70;
+}
+
+.hud-flashlight--on .hud-flashlight__lens {
+  fill: #fff1d6;
+}
+
 /* Health, bottom left */
 .hud-health {
   position: fixed;

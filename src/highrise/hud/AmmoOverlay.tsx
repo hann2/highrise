@@ -23,7 +23,7 @@ const RESERVE_WIDTH = 64;
 /**
  * Bottom right of the screen: the rounds in the gun as shells (Pixi), the
  * reserve next to them, and above them both weapon slots (the one in hand
- * highlighted) and the consumables carried (HTML).
+ * highlighted), the consumables carried, and the flashlight (HTML).
  */
 export class AmmoOverlay extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -68,6 +68,23 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     return (
       <>
         <div className="hud-inventory">
+          <div
+            className={
+              "hud-item hud-flashlight" +
+              (human.flashlight.isOn ? " hud-flashlight--on" : "")
+            }
+          >
+            <span className="hud-key">{gamepad ? "R3" : "F"}</span>
+            <div className="hud-item__icon">
+              <FlashlightIcon />
+            </div>
+            <div className="hud-item__text">
+              <div className="hud-item__name">Flashlight</div>
+              <div className="hud-item__count">
+                {human.flashlight.isOn ? "On" : "Off"}
+              </div>
+            </div>
+          </div>
           {consumable && human.consumableCount > 0 && (
             <div className="hud-item hud-item--consumable">
               <span className="hud-key">{gamepad ? "LB" : "G"}</span>
@@ -243,6 +260,33 @@ function ConsumableIcon({ stats }: { stats: ConsumableStats }) {
         stroke={cssColor(stats.accentColor)}
         stroke-width={width * 0.07}
       />
+    </svg>
+  );
+}
+
+/** A flashlight pointing right, with a beam that shows while it's on */
+function FlashlightIcon() {
+  return (
+    <svg viewBox="0 0 44 22">
+      <path className="hud-flashlight__beam" d="M26 7 L44 0 L44 22 L26 15 Z" />
+      <rect
+        x="2"
+        y="8"
+        width="16"
+        height="6"
+        rx="1.5"
+        fill="#3a3a3e"
+        stroke="#1a1a1c"
+      />
+      <path d="M18 8 L24 5 L24 17 L18 14 Z" fill="#4a4a50" stroke="#1a1a1c" />
+      <rect
+        className="hud-flashlight__lens"
+        x="24"
+        y="5"
+        width="2"
+        height="12"
+      />
+      <rect x="8" y="7" width="3" height="2" fill="#8a8a90" />
     </svg>
   );
 }

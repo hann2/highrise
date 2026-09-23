@@ -314,6 +314,22 @@ test("game boots, plays, and changes levels without errors", async ({
   });
   expect(cameraOffset).toBeLessThan(0.5);
 
+  // --- The flashlight starts off, and F turns it on (and says so in the HUD) ---
+  const leaderFlashlightOn = () =>
+    page.evaluate(
+      () =>
+        (
+          [...window.DEBUG.game!.entities.all].find(
+            (e) => e.constructor.name === "PartyManager",
+          ) as any
+        ).leader.flashlight.isOn as boolean,
+    );
+  expect(await leaderFlashlightOn()).toBe(false);
+  await expect(page.locator(".hud-flashlight")).toContainText("Off");
+  await page.keyboard.press("KeyF");
+  expect(await leaderFlashlightOn()).toBe(true);
+  await expect(page.locator(".hud-flashlight")).toContainText("On");
+
   // --- Player can attack and interact without anything blowing up ---
   await page.mouse.move(900, 300);
   await page.mouse.down();

@@ -35,6 +35,8 @@ export default class SurvivorHumanController
   constructor(human: Human) {
     super();
     this.human = human;
+    // Flashlights start off, but survivors keep theirs on
+    human.flashlight.light.enabled = true;
   }
 
   joinParty() {
