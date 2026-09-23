@@ -111,10 +111,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 10px 4px 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: rgba(10, 10, 12, 0.45);
 }
 
 .hud-item__icon {
@@ -123,8 +119,6 @@
   justify-content: center;
   width: 64px;
   height: 32px;
-  border-radius: 3px;
-  background: rgba(232, 224, 200, 0.12);
 }
 
 /* A light outline so black guns show up on dark floors */
@@ -159,24 +153,14 @@
   opacity: 0.8;
 }
 
+/* The weapon not in hand fades back */
 .hud-weapon {
-  opacity: 0.55;
-  transition:
-    opacity 0.15s,
-    border-color 0.15s;
+  opacity: 0.4;
+  transition: opacity 0.15s;
 }
 
 .hud-weapon--active {
   opacity: 1;
-  border-color: rgba(232, 224, 200, 0.75);
-  background: rgba(10, 10, 12, 0.6);
-}
-
-.hud-weapon--empty {
-  opacity: 0.3;
-  border-style: dashed;
-  border-color: rgba(232, 224, 200, 0.4);
-  text-transform: capitalize;
 }
 
 /* Health, bottom left */

@@ -173,23 +173,13 @@ function WeaponCard({
 }) {
   const weapon = human.getWeaponInSlot(slot);
   const active = slot === human.activeSlot;
-  const classes = [
-    "hud-item",
-    "hud-weapon",
-    active ? "hud-weapon--active" : "",
-    weapon ? "" : "hud-weapon--empty",
-  ];
   if (!weapon) {
-    return (
-      <div className={classes.join(" ")}>
-        <div className="hud-item__text">
-          <div className="hud-item__name">No {slot}</div>
-        </div>
-      </div>
-    );
+    return null;
   }
   return (
-    <div className={classes.join(" ")}>
+    <div
+      className={"hud-item hud-weapon" + (active ? " hud-weapon--active" : "")}
+    >
       <span
         className="hud-key"
         style={{
