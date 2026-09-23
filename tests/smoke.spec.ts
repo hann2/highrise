@@ -1643,6 +1643,8 @@ test("game boots, plays, and changes levels without errors", async ({
       allyName: "",
       leaderDead: false,
       allyAliveWhenLeaderDied: false,
+      weaponsCarried: 0,
+      droppedWeapons: [] as [number, number][],
     };
     const ally = survivorController?.human;
     if (!ally) {
@@ -1665,6 +1667,8 @@ test("game boots, plays, and changes levels without errors", async ({
         .getTagged("zombie")
         .find((e) => e.constructor.name === "Zombie") as any;
     let zombie = findZombie();
+    const carried = [leader.primary, leader.secondary].filter((w) => w);
+    result.weaponsCarried = carried.length;
     leader.hp = 1;
     const pin = () => {
       if (leader.isDestroyed) return;
@@ -1680,11 +1684,24 @@ test("game boots, plays, and changes levels without errors", async ({
     }
     result.leaderDead = leader.isDestroyed;
     result.allyAliveWhenLeaderDied = !ally.isDestroyed;
+    // What they carried is left on the floor
+    result.droppedWeapons = [...game.entities.all]
+      .filter(
+        (e: any) =>
+          e.constructor.name === "WeaponPickup" && carried.includes(e.weapon),
+      )
+      .map((e: any) => [...e.getPosition()] as [number, number]);
     return result;
   });
   expect(death.allyJoined).toBe(true);
   expect(death.leaderDead).toBe(true);
   expect(death.allyAliveWhenLeaderDied).toBe(true);
+  // Both weapons drop, a little apart rather than in one pile
+  expect(death.droppedWeapons.length).toBe(death.weaponsCarried);
+  if (death.droppedWeapons.length === 2) {
+    const [[x1, y1], [x2, y2]] = death.droppedWeapons;
+    expect(Math.hypot(x1 - x2, y1 - y2)).toBeGreaterThan(0.2);
+  }
   await page.waitForFunction(
     () =>
       (
