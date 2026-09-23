@@ -8,6 +8,7 @@ import FadeEffect from "../effects/FadeEffect";
 import { getPartyLeader } from "../environment/PartyManager";
 import { Level } from "../levels/Level";
 import UpgradeSelect from "../menu/UpgradeSelect";
+import { getRunStats } from "../run/RunStats";
 import { drawUpgrades, takeUpgrade } from "../upgrades/upgrades";
 import {
   chooseTemplate,
@@ -94,6 +95,7 @@ export default class LevelController extends BaseEntity implements Entity {
     const upgrade = await screen.picked;
     if (!leader.isDestroyed) {
       takeUpgrade(leader, upgrade);
+      getRunStats(this.game)?.recordUpgrade(upgrade.name);
     }
   }
 
