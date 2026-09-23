@@ -72,6 +72,7 @@ export default class Human extends BaseEntity implements Entity {
   humanSprite: HumanSprite;
   voice: HumanVoice;
   walkSpring: WalkSpring;
+  flashlight: Flashlight;
 
   constructor(
     position: V2d = V(0, 0),
@@ -81,7 +82,7 @@ export default class Human extends BaseEntity implements Entity {
 
     this.humanSprite = this.addChild(new HumanSprite(this));
     this.voice = this.addChild(new HumanVoice(this));
-    this.addChild(new Flashlight(this));
+    this.flashlight = this.addChild(new Flashlight(this));
 
     this.body = createPointMass2D({
       motion: "dynamic",

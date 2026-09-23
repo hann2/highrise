@@ -22,6 +22,10 @@ export default class Flashlight extends BaseEntity implements Entity {
     );
   }
 
+  toggle() {
+    this.light.enabled = !this.light.enabled;
+  }
+
   @on("render")
   onRender() {
     // Only rebakes when the human actually moved or turned

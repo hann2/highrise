@@ -19,6 +19,8 @@ export default class Light extends BaseEntity implements Entity {
   public bakedSprite: Sprite;
   public bakedTexture: RenderTexture;
   public dirty: boolean;
+  /** Disabled lights are neither baked nor drawn */
+  public enabled: boolean = true;
   public container: Container = new Container();
   /** Width and height of the baked texture, in meters. */
   public size: number;

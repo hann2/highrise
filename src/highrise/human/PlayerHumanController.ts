@@ -67,6 +67,9 @@ export default class PlayerHumanController
       case "Space":
         this.human.push();
         break;
+      case "KeyF":
+        this.human.flashlight.toggle();
+        break;
     }
   }
 

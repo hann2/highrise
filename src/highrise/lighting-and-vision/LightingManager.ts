@@ -111,6 +111,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     const halfSize = light.size / 2;
 
     return (
+      light.enabled &&
       x - halfSize < maxX &&
       x + halfSize > minX &&
       y - halfSize < maxY &&
