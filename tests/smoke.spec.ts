@@ -1419,6 +1419,16 @@ test("game boots, plays, and changes levels without errors", async ({
         ) as any
       ).leader.stats,
   );
+  // Whoever is in the stairwell with the leader makes it out
+  const exitingFlashlightsOn = await page.evaluate(() => {
+    const allies = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).getAllies();
+    (window as any).testExitingAllies = allies;
+    return allies.filter((a: any) => a.flashlight.light.enabled).length;
+  });
   await page.keyboard.press("KeyL");
 
   // --- Between floors the leader picks one of three upgrades ---
@@ -1451,6 +1461,15 @@ test("game boots, plays, and changes levels without errors", async ({
   await expect(page.locator(".survivor-toast")).toContainText(
     `${stairwell.allyName} made it out!`,
   );
+  // and turned their flashlight off on the way up the stairs
+  expect(exitingFlashlightsOn).toBeGreaterThan(0);
+  expect(
+    await page.evaluate(() =>
+      (window as any).testExitingAllies.some(
+        (a: any) => a.flashlight.light.enabled,
+      ),
+    ),
+  ).toBe(false);
   const unlockedAfterFloor1 = await page.evaluate(
     () =>
       JSON.parse(window.localStorage.getItem("highriseSaveData")!)
