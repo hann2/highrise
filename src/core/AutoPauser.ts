@@ -9,6 +9,13 @@ export default class AutoPauser extends BaseEntity implements Entity {
 
   autoPaused: boolean = false;
 
+  constructor(
+    /** Turned off, the game keeps its pause state when visibility is lost */
+    public enabled: boolean = true,
+  ) {
+    super();
+  }
+
   @on("add")
   onAdd() {
     document.addEventListener("visibilitychange", this.onVisibilityChange);
@@ -21,7 +28,7 @@ export default class AutoPauser extends BaseEntity implements Entity {
 
   onVisibilityChange = () => {
     if (document.hidden) {
-      if (!this.game.paused) {
+      if (this.enabled && !this.game.paused) {
         this.game.pause();
         this.autoPaused = true;
       }

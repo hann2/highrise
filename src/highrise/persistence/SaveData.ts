@@ -61,6 +61,8 @@ export interface SaveData {
   bestFloor: number;
   /** Names of the things the player has come across, for the encyclopedia */
   seen: SeenFlags;
+  /** Whether the game pauses while its tab is hidden (see AutoPauser) */
+  autoPause: boolean;
 }
 
 export function defaultSaveData(): SaveData {
@@ -71,6 +73,7 @@ export function defaultSaveData(): SaveData {
     totalRuns: 0,
     bestFloor: 0,
     seen: { guns: [], melee: [], upgrades: [], enemies: [] },
+    autoPause: true,
   };
 }
 
@@ -175,6 +178,9 @@ export function parseSaveData(raw: unknown): SaveData {
     ...data.runs.map((run) => run.floorReached),
   );
   data.seen = parseSeenFlags(raw.seen);
+  if (typeof raw.autoPause === "boolean") {
+    data.autoPause = raw.autoPause;
+  }
   return data;
 }
 

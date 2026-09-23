@@ -17,6 +17,7 @@ import { GraphicsQualityController } from "./controllers/GraphicsQualityControll
 import MusicController from "./controllers/MusicController";
 import VolumeController from "./controllers/VolumeController";
 import { isHuman } from "./human/Human";
+import { loadSaveData } from "./persistence/SaveData";
 import Preloader from "./preloader/Preloader";
 
 declare global {
@@ -60,7 +61,7 @@ export async function main() {
   // Think of these like indexes in a DB
   game.entities.addFilter(isHuman);
 
-  game.addEntity(new AutoPauser());
+  game.addEntity(new AutoPauser(loadSaveData().autoPause));
   game.addEntity(new VolumeController());
   game.addEntity(new MusicController());
   game.addEntity(new PositionalSoundListener());

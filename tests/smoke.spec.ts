@@ -1158,6 +1158,39 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.keyboard.press("Escape");
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
 
+  // --- Hiding the tab pauses until it's back, unless auto-pause is off ---
+  const hidingPauses = () =>
+    page.evaluate(() => {
+      const game = window.DEBUG.game!;
+      const setHidden = (hidden: boolean) => {
+        Object.defineProperty(document, "hidden", {
+          configurable: true,
+          get: () => hidden,
+        });
+        document.dispatchEvent(new Event("visibilitychange"));
+      };
+      setHidden(true);
+      const paused = game.paused;
+      setHidden(false);
+      const resumed = !game.paused;
+      delete (document as { hidden?: boolean }).hidden;
+      return paused && resumed;
+    });
+  expect(await hidingPauses()).toBe(true);
+  await page.keyboard.press("Escape");
+  await page.locator(".menu-button", { hasText: "Auto-Pause: On" }).click();
+  await expect(
+    page.locator(".menu-button", { hasText: "Auto-Pause: Off" }),
+  ).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  expect(await hidingPauses()).toBe(false);
+  expect(
+    await page.evaluate(
+      () =>
+        JSON.parse(window.localStorage.getItem("highriseSaveData")!).autoPause,
+    ),
+  ).toBe(false);
+
   // --- Level transitions work (KeyL is a dev cheat) ---
   const statsBefore = await page.evaluate(
     () =>

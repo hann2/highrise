@@ -1,3 +1,4 @@
+import AutoPauser from "../../core/AutoPauser";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
@@ -5,9 +6,11 @@ import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import ReactEntity from "../../core/ReactEntity";
 import { Persistence } from "../constants/constants";
+import { updateSaveData } from "../persistence/SaveData";
 import Encyclopedia, { isEncyclopediaOpen } from "./Encyclopedia";
 import "./menu.css";
 import {
+  AutoPauseButton,
   FeedbackButton,
   GraphicsButton,
   MenuButton,
@@ -53,6 +56,10 @@ export default class PauseMenu extends ReactEntity implements Entity {
           <FeedbackButton />
           <MuteButton game={game} />
           <GraphicsButton game={game} />
+          <AutoPauseButton
+            enabled={this.autoPauser.enabled}
+            onClick={() => this.toggleAutoPause()}
+          />
         </MenuButtons>
       </div>
     );
@@ -62,6 +69,18 @@ export default class PauseMenu extends ReactEntity implements Entity {
     this.game.unpause();
     this.game.dispatch("gameOver", { victory: false });
     this.destroy();
+  }
+
+  private get autoPauser(): AutoPauser {
+    return this.game.entities.getSingleton(AutoPauser);
+  }
+
+  toggleAutoPause() {
+    const enabled = !this.autoPauser.enabled;
+    this.autoPauser.enabled = enabled;
+    updateSaveData((data) => {
+      data.autoPause = enabled;
+    });
   }
 
   /** Over the pause menu, with the game still paused */

@@ -64,3 +64,17 @@ export function GraphicsButton({ game }: { game: Game }) {
     </MenuButton>
   );
 }
+
+export function AutoPauseButton({
+  enabled,
+  onClick,
+}: {
+  enabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <MenuButton onClick={onClick}>
+      Auto-Pause: {enabled ? "On" : "Off"}
+    </MenuButton>
+  );
+}
