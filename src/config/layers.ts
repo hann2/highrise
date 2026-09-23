@@ -37,7 +37,7 @@ export enum Layer {
   LIGHTING = "lighting",
   // Layer for stuff that is lit on its own, in world coordinates
   EMISSIVES = "emissives",
-  // Special layer for vision overlay, in world coordinates
+  // Special layer for the vision overlay, in screen coordinates because the VisionController does the transforms
   VISION = "vision",
   // Most top level thing for HUD elements that are placed in world coordinates
   WORLD_OVERLAY = "world_overlay",
@@ -48,7 +48,12 @@ export enum Layer {
 }
 
 // Special layers that don't move with the camera
-const PARALAX_FREE_LAYERS: Layer[] = [Layer.LIGHTING, Layer.HUD, Layer.MENU];
+const PARALAX_FREE_LAYERS: Layer[] = [
+  Layer.LIGHTING,
+  Layer.VISION,
+  Layer.HUD,
+  Layer.MENU,
+];
 
 export type LayerName = Layer;
 

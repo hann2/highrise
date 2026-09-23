@@ -52,11 +52,13 @@ const RANGE_FADE_START = 0.65;
  * The visible region is computed additively as a polygon (see
  * `visibility.ts`), and meshes with soft edges (see `visionMesh.ts`) cover
  * everything outside it. They are rendered at full strength into a texture
- * centered on the player, which is drawn over the world at the dim
- * strength (drawing the meshes dimmed directly would show their overlaps),
- * and an `ExploredMap` remembers where the visible region has been and
- * draws the black on top. The polygon is available to anyone who wants to
- * know whether a point is visible; enemies hide themselves with it.
+ * centered on the player, and that plus the static darkness beyond it are
+ * rendered at full strength again into a screen-sized texture, which is
+ * drawn over the world at the dim strength. (Drawing any of those dimmed
+ * directly would show where they overlap as darker rings and corners.)
+ * An `ExploredMap` remembers where the visible region has been and draws
+ * the black on top. The polygon is available to anyone who wants to know
+ * whether a point is visible; enemies hide themselves with it.
  */
 export default class VisionController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -72,6 +74,14 @@ export default class VisionController extends BaseEntity implements Entity {
   private darknessSprite: Sprite;
   private rangeFade: Sprite;
   private distanceShadows: Graphics;
+  /** Everything the player can't see right now, in screen space; rendered into `unseen` */
+  private unseenContainer = new Container();
+  /** The part of that which follows the eye */
+  private eyeContainer = new Container();
+  private unseen!: RenderTexture;
+  private unseenSprite!: Sprite;
+  /** The explored map, in world coordinates under the camera transform */
+  private worldContainer = new Container();
   private explored?: ExploredMap;
   /** How far the player can currently see, in meters */
   private range = BASE_VISION_RANGE;
@@ -116,13 +126,12 @@ export default class VisionController extends BaseEntity implements Entity {
     this.darkness = makeDarknessTexture(this.outerRadius);
     this.darknessSprite = new Sprite(this.darkness);
     this.darknessSprite.anchor.set(0.5);
-    this.darknessSprite.alpha = EXPLORED_DARKNESS;
-
     this.distanceShadows = new Graphics();
-    this.distanceShadows.alpha = EXPLORED_DARKNESS;
+    this.eyeContainer.addChild(this.darknessSprite, this.distanceShadows);
+    this.unseenContainer.addChild(this.eyeContainer);
 
     this.sprite = new Container();
-    this.sprite.addChild(this.darknessSprite, this.distanceShadows);
+    this.sprite.addChild(this.worldContainer);
     this.sprite.layerName = Layer.VISION;
     this.sizeToRange();
   }
@@ -167,14 +176,39 @@ export default class VisionController extends BaseEntity implements Entity {
     return visibilityAt(this.eye, this.samples, point);
   }
 
+  private get renderer() {
+    return this.game.renderer.app.renderer;
+  }
+
   @on("add")
   onAdd({ game }: { game: Game }) {
-    this.explored = new ExploredMap(
-      game.renderer.app.renderer,
-      this.range,
-      this.darkness,
-    );
-    this.sprite.addChild(this.explored.sprite);
+    this.unseen = this.makeUnseenTexture();
+    this.unseenSprite = new Sprite(this.unseen);
+    this.unseenSprite.alpha = EXPLORED_DARKNESS;
+    this.sprite.addChildAt(this.unseenSprite, 0);
+
+    this.explored = new ExploredMap(this.renderer, this.range, this.darkness);
+    this.worldContainer.addChild(this.explored.sprite);
+  }
+
+  /** A screen-sized texture at the renderer's resolution */
+  private makeUnseenTexture(): RenderTexture {
+    const [width, height] = this.game.renderer.getSize();
+    return RenderTexture.create({
+      width,
+      height,
+      resolution: this.renderer.resolution,
+    });
+  }
+
+  @on("resize")
+  onResize() {
+    // A fresh texture rather than a resize, which leaves the sprite's
+    // texture coordinates behind
+    const old = this.unseen;
+    this.unseen = this.makeUnseenTexture();
+    this.unseenSprite.texture = this.unseen;
+    old.destroy(true);
   }
 
   @on("startLevel")
@@ -196,11 +230,13 @@ export default class VisionController extends BaseEntity implements Entity {
       this.setRange(range);
     }
     this.eye = player.getPosition();
-    this.sprite.position.copyFrom(this.eye);
+    const cameraMatrix = this.game.camera.getMatrix();
+    this.unseenContainer.setFromMatrix(cameraMatrix);
+    this.worldContainer.setFromMatrix(cameraMatrix);
+    this.eyeContainer.position.copyFrom(this.eye);
     if (this.explored) {
-      // The map is in world coordinates, this container follows the eye
       const [ox, oy] = this.explored.origin;
-      this.explored.sprite.position.set(ox - this.eye[0], oy - this.eye[1]);
+      this.explored.sprite.position.set(ox, oy);
     }
 
     // Doors can move without the player moving, so always recompute
@@ -232,12 +268,22 @@ export default class VisionController extends BaseEntity implements Entity {
     });
     profiler.measure("VisionController.darkness", () => {
       // The meshes are relative to the eye, so put it in the middle
-      this.game.renderer.app.renderer.render({
+      this.renderer.render({
         container: this.darknessContainer,
         target: this.darkness,
         clear: true,
         clearColor: [0, 0, 0, 0],
         transform: new Matrix().translate(this.outerRadius, this.outerRadius),
+      });
+    });
+    profiler.measure("VisionController.unseen", () => {
+      // At full strength, so that where the darkness and the static shape
+      // beyond it overlap is no darker than either
+      this.renderer.render({
+        container: this.unseenContainer,
+        target: this.unseen,
+        clear: true,
+        clearColor: [0, 0, 0, 0],
       });
     });
     profiler.measure("VisionController.explored", () => {
@@ -249,7 +295,9 @@ export default class VisionController extends BaseEntity implements Entity {
   onDestroy() {
     this.explored?.destroy();
     this.darknessContainer.destroy({ children: true });
+    this.unseenContainer.destroy({ children: true });
     this.darkness.destroy(true);
+    this.unseen.destroy(true);
     this.geometry.destroy();
     this.penumbraGeometry.destroy();
   }
@@ -306,7 +354,8 @@ function getRangeFadeTexture(): Texture {
           0,
           Math.min(1, (r - RANGE_FADE_START) / (1 - RANGE_FADE_START)),
         );
-        const alpha = t * t * (3 - 2 * t);
+        // Beyond the range the mesh takes over, so the corners stay clear
+        const alpha = r > 1 ? 0 : t * t * (3 - 2 * t);
         const i = (y * size + x) * 4;
         image.data[i] = 255;
         image.data[i + 1] = 255;
