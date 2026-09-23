@@ -44,6 +44,8 @@ const RETURN_FADE_IN_TIME = 1.0;
 const START_RUN_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 0.8;
 /** How far the elevator doors have to be open before the player can move */
 const DOORS_OPEN_ENOUGH = 0.4;
+/** How often the save is checked for newly rescued characters, so the unlock cheat shows up (seconds) */
+const UNLOCK_CHECK_INTERVAL = 0.5;
 
 const at = (cell: V2d) => CellGrid.levelCoordToWorldCoord(cell);
 
@@ -66,6 +68,9 @@ export default class Lobby extends BaseEntity implements Entity {
   arrived = false;
   /** Took the stairs; the run is about to start */
   leaving = false;
+  /** How many of the character spots have someone in them */
+  private spotsUsed = 0;
+  private unlockCheckTime = UNLOCK_CHECK_INTERVAL;
 
   constructor(private showTitle: boolean) {
     super();
@@ -141,22 +146,38 @@ export default class Lobby extends BaseEntity implements Entity {
     }
   }
 
-  /** Everyone else stands around the lobby: the unlocked ones first, in the best spots */
+  /** Everyone rescued so far stands around the lobby; the rest aren't here yet */
   private addWaitingCharacters(current: Character) {
-    const unlocked = new Set(loadSaveData().unlockedCharacters);
-    const others = CHARACTERS.filter((c) => c !== current);
-    const ordered = [
-      ...others.filter((c) => unlocked.has(c.name)),
-      ...others.filter((c) => !unlocked.has(c.name)),
-    ];
-    const elevator = at(ARRIVAL_ELEVATOR.cell);
-    ordered.forEach((character, i) => {
-      const spot = at(CHARACTER_SPOTS[i % CHARACTER_SPOTS.length]);
-      const human = this.addChild(new Human(spot, character));
-      // Waiting to see who comes out of the elevator
-      human.body.angle = elevator.sub(spot).angle;
-      this.addWaiting(human, spot);
-    });
+    for (const character of getUnlockedCharacters()) {
+      if (character !== current) {
+        this.addNewArrival(character);
+      }
+    }
+  }
+
+  /** Stands a character in the next free spot, looking at the elevator */
+  private addNewArrival(character: Character) {
+    const spot = at(CHARACTER_SPOTS[this.spotsUsed % CHARACTER_SPOTS.length]);
+    this.spotsUsed += 1;
+    const human = this.addChild(new Human(spot, character));
+    // Waiting to see who comes out of the elevator
+    human.body.angle = at(ARRIVAL_ELEVATOR.cell).sub(spot).angle;
+    this.addWaiting(human, spot);
+  }
+
+  /** Anyone rescued since the lobby was built (the unlock cheat) turns up */
+  private addNewlyUnlocked() {
+    const present = new Set([
+      this.player.character,
+      ...this.game.entities
+        .getTagged("lobby_character")
+        .map((c) => (c as LobbyCharacterController).human.character),
+    ]);
+    for (const character of getUnlockedCharacters()) {
+      if (!present.has(character)) {
+        this.addNewArrival(character);
+      }
+    }
   }
 
   private addWaiting(human: Human, home: V2d) {
@@ -220,9 +241,14 @@ export default class Lobby extends BaseEntity implements Entity {
   }
 
   @on("tick")
-  onTick() {
+  onTick(dt: number) {
     if (!this.arrived && this.arrivalDoor.openPercentage > DOORS_OPEN_ENOUGH) {
       this.arrived = true;
+    }
+    this.unlockCheckTime -= dt;
+    if (this.unlockCheckTime <= 0) {
+      this.unlockCheckTime = UNLOCK_CHECK_INTERVAL;
+      this.addNewlyUnlocked();
     }
   }
 
@@ -248,14 +274,17 @@ export default class Lobby extends BaseEntity implements Entity {
   }
 }
 
+/** The characters rescued so far, in the order they're listed */
+function getUnlockedCharacters(): Character[] {
+  const unlocked = loadSaveData().unlockedCharacters;
+  return CHARACTERS.filter((c) => unlocked.includes(c.name));
+}
+
 /** Who the player arrives as: whoever they last played, if they still can */
 function getStartingCharacter(): Character {
-  const save = loadSaveData();
-  const unlocked = CHARACTERS.filter((c) =>
-    save.unlockedCharacters.includes(c.name),
-  );
+  const unlocked = getUnlockedCharacters();
   return (
-    unlocked.find((c) => c.name === save.lastCharacter) ??
+    unlocked.find((c) => c.name === loadSaveData().lastCharacter) ??
     unlocked[0] ??
     CHARACTERS[0]
   );

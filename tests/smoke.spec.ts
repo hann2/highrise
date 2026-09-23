@@ -69,8 +69,8 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(inElevator.playerToDoor).toBeLessThan(1.2);
   expect(inElevator.elevatorCount).toBe(12);
   expect(inElevator.interactableElevators).toBe(0);
-  // Everyone stands around the lobby, locked or not; no enemies, no fog
-  expect(inElevator.humans).toBe(13);
+  // Only the rescued characters are in the lobby; no enemies, no fog
+  expect(inElevator.humans).toBe(3);
   expect(inElevator.zombies).toBe(0);
   expect(inElevator.visionControllers).toBe(0);
   expect(inElevator.cameraOnPlayer).toBeLessThan(0.5);
@@ -181,24 +181,32 @@ test("game boots, plays, and changes levels without errors", async ({
     Math.hypot(andy![0] - andyLeftAt[0], andy![1] - andyLeftAt[1]),
   ).toBeLessThan(0.5);
 
-  // --- Someone not rescued yet is a silhouette, and refuses ---
-  expect(await standBy("Santa")).toBeLessThan(1.5);
-  await expect(page.locator(".interact-prompt__title")).toHaveText("???");
-  await expect(page.locator(".interact-prompt__hint")).toHaveText(
-    "Rescue them to unlock",
+  // --- Someone not rescued yet isn't here, and turns up once they are ---
+  const lobbyCharacters = () =>
+    page.evaluate(() =>
+      window.DEBUG.game!.entities.getTagged("lobby_character").map(
+        (c: any) => c.human.character.name as string,
+      ),
+    );
+  expect(await lobbyCharacters()).not.toContain("Santa");
+  const saveBefore = await page.evaluate(() =>
+    localStorage.getItem("highriseSaveData"),
   );
-  await page.keyboard.press("KeyE");
-  await page.waitForTimeout(300);
-  expect(await playingAs()).toBe("Nancy");
-  const santaTint = await page.evaluate(
-    () =>
-      (
-        window.DEBUG.game!.entities.getTagged("lobby_character").find(
-          (c: any) => c.human.character.name === "Santa",
-        ) as any
-      ).human.humanSprite.sprite.tint as number,
-  );
-  expect(santaTint).toBeLessThan(0x404040);
+  await page.evaluate(() => {
+    // The save is still the corrupt one from boot; the loader fills in the rest
+    let save: any = {};
+    try {
+      save = JSON.parse(localStorage.getItem("highriseSaveData")!) ?? {};
+    } catch {}
+    save.unlockedCharacters = [...(save.unlockedCharacters ?? []), "Santa"];
+    localStorage.setItem("highriseSaveData", JSON.stringify(save));
+  });
+  await page.waitForTimeout(800);
+  expect(await lobbyCharacters()).toContain("Santa");
+  // Put the save back so the rest of the run sees the default unlocks
+  await page.evaluate((save) => {
+    localStorage.setItem("highriseSaveData", save!);
+  }, saveBefore);
   await page.waitForTimeout(500);
   await page.screenshot({ path: "tests/output/lobby-characters.png" });
   expectNoIssues(issues);
@@ -2003,14 +2011,12 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(back).toEqual({ character: "Nancy", doorOpen: 0 });
   await expect(page.locator(".menu-title")).toHaveCount(0);
   await arriveInLobby(page);
-  // Whoever made it out of floor 1 waits in the lobby now, unlocked
+  // Whoever made it out of floor 1 waits in the lobby now
   const rescued = await page.evaluate(
     (name) =>
-      (
-        window.DEBUG.game!.entities.getTagged("lobby_character").find(
-          (c: any) => c.human.character.name === name,
-        ) as any
-      )?.unlocked as boolean | undefined,
+      window.DEBUG.game!.entities.getTagged("lobby_character").some(
+        (c: any) => c.human.character.name === name,
+      ),
     stairwell.allyName,
   );
   expect(rescued).toBe(true);
