@@ -1,0 +1,36 @@
+/* Two loading bars stacked where the main menu's subtitle goes, just below the
+   title in the middle of the screen */
+.loading-bars {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%);
+  margin-top: 24px;
+  width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loading-bar__label {
+  display: flex;
+  justify-content: space-between;
+  font-family: captureIt;
+  font-size: 28px;
+  line-height: 1;
+  color: #dddddd;
+  margin-bottom: 6px;
+}
+
+.loading-bar__track {
+  height: 6px;
+  background: #2a2a2a;
+  overflow: hidden;
+}
+
+.loading-bar__fill {
+  height: 100%;
+  background: red;
+  transform-origin: left;
+  transition: transform 0.15s linear;
+}

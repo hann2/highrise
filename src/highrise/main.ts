@@ -54,7 +54,7 @@ export async function main() {
   await game.init();
 
   const preloader = game.addEntity(new Preloader());
-  await preloader.waitTillLoaded();
+  await preloader.waitTillReady();
   preloader.destroy();
 
   // Add some filters for fast lookup of certain entities later

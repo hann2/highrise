@@ -228,6 +228,12 @@
   );
 }
 
+.title-screen__blackout {
+  position: absolute;
+  inset: 0;
+  background: black;
+}
+
 /* Upgrade select: three cards in the middle of the screen, between floors */
 .upgrade-select {
   display: flex;
