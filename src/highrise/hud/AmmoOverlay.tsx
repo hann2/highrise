@@ -12,13 +12,20 @@ import Gun from "../weapons/guns/Gun";
 import { Weapon } from "../weapons/weapons";
 import "./hud.css";
 
+/** Pixels between the right edge of the screen and the shells, to make room for the reserve count */
+const RESERVE_WIDTH = 64;
+
+/**
+ * Bottom right of the screen: the rounds in the gun as shells (Pixi), the
+ * reserve next to them, and above them the other slot's weapon and the
+ * consumables carried (HTML).
+ */
 export class AmmoOverlay extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
   sprite: Container & GameSprite;
   bulletSpriteContainer: Container;
   private lastWeapon: Weapon | undefined = undefined;
   private lastCapacity = 0;
-  private needsReload = false;
 
   constructor(public getHuman: () => Human) {
     super();
@@ -29,23 +36,76 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     this.bulletSpriteContainer = new Container();
     this.sprite.addChild(this.bulletSpriteContainer);
 
-    // The text is drawn over the (dimmed) bullets when the gun is empty
-    this.addChild(new ReactEntity(() => this.renderReloadText()));
+    this.addChild(new ReactEntity(() => this.renderText()));
   }
 
-  renderReloadText() {
-    if (!this.needsReload) {
+  renderText() {
+    const human = this.getHuman();
+    if (human.isDestroyed) {
       return null;
     }
-    const reloadButton = this.game.io.usingGamepad ? "X" : "R";
+    const weapon = human.weapon;
+    const gamepad = this.game.io.usingGamepad;
+
+    let reserveText: string | undefined;
+    let warning: string | undefined;
+    if (weapon instanceof Gun) {
+      const reserve = human.getReserve(weapon.stats.ammoClass);
+      reserveText = reserve === Infinity ? "∞" : String(reserve);
+      if (weapon.ammo == 0) {
+        warning =
+          reserve > 0 ? `Press ${gamepad ? "X" : "R"} To Reload` : "No Ammo";
+      }
+    }
+
+    const other = human.otherWeapon;
+    const consumable = human.consumable;
+
     return (
-      <div className="hud-reload-text">Press {reloadButton} To Reload</div>
+      <>
+        <div className="hud-inventory">
+          {consumable && human.consumableCount > 0 && (
+            <div className="hud-inventory__row">
+              <span className="hud-key">{gamepad ? "LB" : "G"}</span>
+              {consumable.name} ×{human.consumableCount}
+            </div>
+          )}
+          {other && (
+            <div className="hud-inventory__row hud-inventory__other">
+              <span className="hud-key">{gamepad ? "Y" : "Q"}</span>
+              {other.stats.name}
+              {other instanceof Gun &&
+                ` ${other.ammo}/${formatReserve(human.getReserve(other.stats.ammoClass))}`}
+            </div>
+          )}
+        </div>
+        {reserveText !== undefined && (
+          <div
+            className={
+              "hud-reserve" + (reserveText === "0" ? " hud-reserve--empty" : "")
+            }
+          >
+            {reserveText}
+          </div>
+        )}
+        {warning && (
+          <div
+            className="hud-reload-text"
+            style={{ right: `${RESERVE_WIDTH + 10}px` }}
+          >
+            {warning}
+          </div>
+        )}
+      </>
     );
   }
 
   @on("resize")
   onResize({ size: [width, height] }: { size: V2d }) {
-    this.bulletSpriteContainer.position.set(width - 10, height - 10);
+    this.bulletSpriteContainer.position.set(
+      width - 10 - RESERVE_WIDTH,
+      height - 10,
+    );
   }
 
   setWeapon(weapon: Weapon | undefined, capacity: number) {
@@ -79,8 +139,6 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     }
 
     if (weapon instanceof Gun) {
-      this.needsReload = weapon.ammo == 0;
-
       const loaded = Math.min(weapon.ammo, capacity);
       for (let i = 0; i < loaded; i++) {
         this.bulletSpriteContainer.getChildAt(i).alpha = 0.9;
@@ -89,8 +147,10 @@ export class AmmoOverlay extends BaseEntity implements Entity {
       for (let i = loaded; i < capacity; i++) {
         this.bulletSpriteContainer.getChildAt(i).alpha = 0.3;
       }
-    } else {
-      this.needsReload = false;
     }
   }
+}
+
+function formatReserve(reserve: number): string {
+  return reserve === Infinity ? "∞" : String(reserve);
 }

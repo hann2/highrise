@@ -17,6 +17,7 @@ export const AR15: GunStats = {
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 1.5,
   ammoCapacity: 30,
+  ammoClass: "rifle",
 
   textures: {
     ...defaultGunStats.textures,

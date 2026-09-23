@@ -16,6 +16,7 @@ import MainMenu from "../menu/MainMenu";
 import PauseMenu from "../menu/PauseMenu";
 import { loadSaveData } from "../persistence/SaveData";
 import RunStats from "../run/RunStats";
+import AmmoDropper from "./AmmoDropper";
 import CameraController from "./CameraController";
 import LevelController from "./LevelController";
 import QuarterDropper from "./QuarterDropper";
@@ -41,6 +42,7 @@ export class GameController extends BaseEntity implements Entity {
     game.addEntities(
       new RunStats(character),
       new QuarterDropper(),
+      new AmmoDropper(),
       new LevelController(),
       new CameraController(game.camera, getPlayer),
       new PlayerHumanController(getPlayer),

@@ -19,6 +19,8 @@ import {
   carpetFloor2,
   cementFloor,
 } from "../../environment/decorations/decorations";
+import AmmoPickup from "../../environment/AmmoPickup";
+import ConsumablePickup from "../../environment/ConsumablePickup";
 import HealthPickup from "../../environment/HealthPickup";
 import Keycard from "../../environment/Keycard";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
@@ -27,6 +29,8 @@ import WeaponPickup from "../../environment/WeaponPickup";
 import Human from "../../human/Human";
 import SurvivorHumanController from "../../human/SurvivorHumanController";
 import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
+import { CONSUMABLES } from "../../weapons/consumables/consumable-stats/consumableStats";
+import { LIMITED_AMMO_CLASSES } from "../../weapons/guns/ammo";
 import Gun from "../../weapons/guns/Gun";
 import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
 import { Glock } from "../../weapons/guns/gun-stats/Glock";
@@ -167,7 +171,15 @@ export default class LevelTemplate {
         survivor.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
         return [survivor, new SurvivorHumanController(survivor)];
       },
+      (l) => new AmmoPickup(l, choose(...LIMITED_AMMO_CLASSES)),
     ];
+
+    if (this.levelIndex >= 3) {
+      pickups.push((l) => new AmmoPickup(l, choose(...LIMITED_AMMO_CLASSES)));
+    }
+    if (this.levelIndex % 2 === 0) {
+      pickups.push((l) => new ConsumablePickup(l, choose(...CONSUMABLES)));
+    }
 
     if (this.levelIndex >= 2) {
       pickups.push(
@@ -212,14 +224,26 @@ export default class LevelTemplate {
     return [
       {
         label: "ARMORY",
-        makePickups: (l) =>
-          new WeaponPickup(l, new Gun(choose(...GUN_TIERS[armoryTier]))),
+        makePickups: (l, alongBackWall) => [
+          new WeaponPickup(
+            l.addScaled(alongBackWall, 0.3),
+            new Gun(choose(...GUN_TIERS[armoryTier])),
+          ),
+          new ConsumablePickup(
+            l.addScaled(alongBackWall, -0.45),
+            choose(...CONSUMABLES),
+          ),
+        ],
       },
       {
         label: "SUPPLY",
         makePickups: (l, alongBackWall) => [
-          new HealthPickup(l.addScaled(alongBackWall, 0.4)),
-          new HealthPickup(l.addScaled(alongBackWall, -0.4)),
+          new HealthPickup(l.addScaled(alongBackWall, 0.5)),
+          new HealthPickup(l),
+          new AmmoPickup(
+            l.addScaled(alongBackWall, -0.5),
+            choose(...LIMITED_AMMO_CLASSES),
+          ),
         ],
       },
     ];

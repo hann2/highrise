@@ -193,7 +193,8 @@ export class BaseEnemy extends Creature implements Hittable {
 
     if (damageAmount) {
       const holder = swingingWeapon.holder;
-      this.hp -= swingingWeapon.weapon.stats.damage * holder.stats.damage;
+      // The phase's own damage: windups and winddowns hit softer than the swing
+      this.hp -= damageAmount * holder.stats.damage;
       if (this.diesInOneHitFrom(holder)) {
         this.hp = 0;
       }
@@ -217,6 +218,28 @@ export class BaseEnemy extends Creature implements Hittable {
 
     if (this.hp <= 0) {
       this.die(swingingWeapon.holder);
+    } else {
+      this.voice.speak("hit");
+    }
+  }
+
+  /**
+   * Damage from something that isn't a bullet or a swing, like a push or an
+   * explosion. Knockback and stun are up to the caller.
+   */
+  takeHit(damage: number, attacker?: Human) {
+    if (this.isDestroyed) {
+      return;
+    }
+    if (damage > 0) {
+      this.hp -= damage;
+      if (this.diesInOneHitFrom(attacker)) {
+        this.hp = 0;
+      }
+      this.makeBlood(this.getPosition(), damage);
+    }
+    if (this.hp <= 0) {
+      this.die(attacker);
     } else {
       this.voice.speak("hit");
     }

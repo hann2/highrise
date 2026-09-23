@@ -1,3 +1,4 @@
+import { SCAVENGER_DROP_CHANCE } from "../weapons/guns/ammo";
 import { Upgrade } from "./Upgrade";
 
 // Upgrades that change how something works rather than how well
@@ -39,5 +40,15 @@ export const SecondWind: Upgrade = {
   maxStacks: 1,
   apply: (human) => {
     human.stats.floorHeal += 25;
+  },
+};
+
+export const Scavenger: Upgrade = {
+  name: "Scavenger",
+  description: "Kills have a 15% chance to drop a box of ammo.",
+  rarity: "uncommon",
+  maxStacks: 1,
+  apply: (human) => {
+    human.stats.killAmmoDropChance += SCAVENGER_DROP_CHANCE;
   },
 };

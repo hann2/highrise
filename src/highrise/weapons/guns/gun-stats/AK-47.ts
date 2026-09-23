@@ -17,6 +17,7 @@ export const AK47: GunStats = {
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 1.8,
   ammoCapacity: 30,
+  ammoClass: "rifle",
 
   textures: {
     ...defaultGunStats.textures,

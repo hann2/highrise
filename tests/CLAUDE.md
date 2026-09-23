@@ -16,7 +16,7 @@ The Playwright tests start their own dev server on port 3456, so they can run wh
 - The upgrades offered between floors are drawn right after the next level is generated, so they are seeded too. `UPGRADE_OFFER` pins what level 1 offers; it changes when the pool or rarity weights change (paste the new value, and pick a different upgrade in the test if Vitamins is no longer offered).
 - `window.DEBUG.game` exposes the `Game`. Tests find things with `entities.getById(...)` (`main_menu`, `party_manager`, `level_controller`) and `entities.getTagged(...)` (`human`, `zombie`).
 - Tests reach into entities by class name (`e.constructor.name === "Door"`), which only works in development builds where names aren't minified.
-- Dev-only cheat keys from `CheatController` are used for flow control: `KeyL` completes the level, `KeyV` toggles the vision mask, `KeyK` gives the party 5 quarters.
+- Dev-only cheat keys from `CheatController` are used for flow control: `KeyL` completes the level, `KeyV` toggles the vision mask, `KeyK` gives the party 5 quarters, `KeyJ` drops an AR-15 at the leader's feet, `KeyN` / `KeyB` give the leader frag grenades / flashbangs, `KeyU` fills the leader's ammo reserves.
 - Any `pageerror` or `console.error` fails the test. Don't log errors for non-error conditions.
 
 ## Philosophy

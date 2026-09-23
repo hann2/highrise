@@ -62,6 +62,8 @@ Current: the spawn room is the arrival point; the exit is a stairs tile at the f
 
 ### 4. Limited ammo, two weapon slots, viable melee (M)
 
+**Done 2026-09-22 (`weapons/guns/ammo.ts`, `Human` `primary`/`secondary`, `environment/AmmoPickup.ts`, `controllers/AmmoDropper.ts`, Scavenger upgrade). Swap is Q / wheel / gamepad Y; gamepad interact moved to B. Push: 10 damage, ~0.5 s per push. Not done: ammo from vending machines/stores.**
+
 Current: reserve ammo is infinite (reload always refills). One weapon slot; pickup drops the current weapon. Push does no damage, 110 knockback, 0.75 s stun.
 
 - Reserve ammo per weapon class (pistol / rifle / shotgun) rather than per gun, so swapping within a class isn't punished. Ammo pickups, ammo from kills (rule card), ammo from stores.
@@ -91,6 +93,8 @@ Current: vending machines play a coin sound on interact and can be destroyed. Nu
 - The closet system already produces the right room shape; needs the locked door state from feature 3 and a `Keycard` pickup.
 
 ### 7. Consumables: grenades etc. (S–M)
+
+**Done 2026-09-22 (`weapons/consumables/`, `effects/Detonation.ts`): frag grenades and flashbangs, thrown with G / LB, found in closets (the ARMORY always has one) and offered as upgrade picks. Not done: molotovs, pipe bombs, medkits, stores.**
 
 Current: unlimited glowsticks on Q/LB, made to test the lighting.
 
@@ -150,6 +154,8 @@ Current: "You Win" or "You Lose" on a coloured screen, then the main menu.
 - Later: a run history / best run in the lobby.
 
 ### 13. Remove glowsticks (S)
+
+**Done 2026-09-22. The tutorial's glowstick step teaches the flashlight instead. The glowstick drop sounds live on as grenade bounces; the `glowStick1-3` images are unused.**
 
 - Remove the Q/LB glowstick and its cooldown from `Human`, the tutorial room step that teaches it, and the `GlowStick` entity if nothing else uses it. The `Flashlight` covers the "I need light" case. Possibly re-add as a consumable (feature 7).
 

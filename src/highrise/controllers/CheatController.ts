@@ -6,8 +6,14 @@ import { KeyCode } from "../../core/io/Keys";
 import { lerp } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
 import { getPartyManager } from "../environment/PartyManager";
+import WeaponPickup from "../environment/WeaponPickup";
 import { isHuman } from "../human/Human";
 import VisionController from "../lighting-and-vision/VisionController";
+import { Flashbang } from "../weapons/consumables/consumable-stats/Flashbang";
+import { FragGrenade } from "../weapons/consumables/consumable-stats/FragGrenade";
+import { LIMITED_AMMO_CLASSES, MAX_RESERVE } from "../weapons/guns/ammo";
+import Gun from "../weapons/guns/Gun";
+import { AR15 } from "../weapons/guns/gun-stats/AR-15";
 
 // Put stuff in here that we want to disable on actual release
 export default class CheatController extends BaseEntity implements Entity {
@@ -34,6 +40,29 @@ export default class CheatController extends BaseEntity implements Entity {
           human.heal(100);
         }
         break;
+      case "KeyJ": {
+        // A primary gun at the leader's feet
+        const leader = getPartyManager(this.game)?.leader;
+        if (leader) {
+          this.game.addEntity(
+            new WeaponPickup(leader.getPosition().clone(), new Gun(AR15)),
+          );
+        }
+        break;
+      }
+      case "KeyN":
+        getPartyManager(this.game)?.leader.giveConsumable(FragGrenade, 3);
+        break;
+      case "KeyB":
+        getPartyManager(this.game)?.leader.giveConsumable(Flashbang, 3);
+        break;
+      case "KeyU": {
+        const leader = getPartyManager(this.game)?.leader;
+        for (const ammoClass of LIMITED_AMMO_CLASSES) {
+          leader?.addReserve(ammoClass, MAX_RESERVE[ammoClass]);
+        }
+        break;
+      }
     }
   }
 

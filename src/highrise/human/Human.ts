@@ -24,11 +24,23 @@ import FleshImpact from "../effects/FleshImpact";
 import { isEnemy } from "../enemies/base/Enemy";
 import Door from "../environment/Door";
 import Interactable, { isInteractable } from "../environment/Interactable";
+import ConsumablePickup from "../environment/ConsumablePickup";
 import WeaponPickup from "../environment/WeaponPickup";
 import { PhasedAction } from "../utils/PhasedAction";
 import { ShuffleRing } from "../utils/ShuffleRing";
+import { ConsumableStats } from "../weapons/consumables/ConsumableStats";
+import ThrownConsumable from "../weapons/consumables/ThrownConsumable";
+import {
+  AmmoClass,
+  isLimitedAmmo,
+  LimitedAmmoClass,
+  MAX_RESERVE,
+  NEW_GUN_RESERVE_BONUS,
+  STARTING_RESERVE,
+} from "../weapons/guns/ammo";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
+import { otherSlot, slotFor, WeaponSlot } from "../weapons/weapons";
 import HumanSprite from "./HumanSprite";
 import Flashlight from "./Flashlight";
 import HumanVoice from "./HumanVoice";
@@ -44,8 +56,14 @@ export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
 export const PUSH_KNOCKBACK = 110; // newtons?
 export const PUSH_STUN = 0.75; // seconds
-export const PUSH_COOLDOWN = 0.1; // seconds
+// The whole push (windup + push + winddown + cooldown) takes about half a second
+export const PUSH_COOLDOWN = 0.3; // seconds
 export const PUSH_DOOR_IMPULSE = 12; // newton-seconds, enough to fling a door open
+
+/** Seconds between weapon swaps, so a mouse wheel flick doesn't swap back and forth */
+export const SWAP_COOLDOWN = 0.25;
+/** Seconds between throwing consumables */
+export const THROW_COOLDOWN = 0.6;
 
 export const PUSH_SOUNDS: SoundName[] = [
   "cabbageHit1",
@@ -70,7 +88,17 @@ export default class Human extends BaseEntity implements Entity {
   /** Upgrades picked so far this run, in order */
   upgrades: Upgrade[] = [];
   hp: number = this.stats.maxHp;
-  weapon?: Gun | MeleeWeapon;
+  /** Rifles and shotguns: limited ammo */
+  primary?: Gun;
+  /** Pistols and melee weapons: unlimited */
+  secondary?: Gun | MeleeWeapon;
+  /** Which slot is in hand */
+  activeSlot: WeaponSlot = "primary";
+  /** Reserve rounds per ammo class; pistol ammo is unlimited */
+  reserve: Record<LimitedAmmoClass, number> = { ...STARTING_RESERVE };
+  /** Grenades and the like, one type at a time */
+  consumable?: ConsumableStats;
+  consumableCount: number = 0;
   humanSprite: HumanSprite;
   voice: HumanVoice;
   walkSpring: WalkSpring;
@@ -158,14 +186,76 @@ export default class Human extends BaseEntity implements Entity {
     }
   }
 
-  /** Equip a weapon. `isPickup` is false for weapons a human spawns holding. */
-  async giveWeapon(weapon: Gun | MeleeWeapon, isPickup: boolean = true) {
-    if (this.weapon) {
-      this.dropWeapon();
+  /** The weapon in hand */
+  get weapon(): Gun | MeleeWeapon | undefined {
+    return this.getWeaponInSlot(this.activeSlot);
+  }
+
+  /** The weapon that isn't in hand, if there is one */
+  get otherWeapon(): Gun | MeleeWeapon | undefined {
+    return this.getWeaponInSlot(otherSlot(this.activeSlot));
+  }
+
+  getWeaponInSlot(slot: WeaponSlot): Gun | MeleeWeapon | undefined {
+    return slot === "primary" ? this.primary : this.secondary;
+  }
+
+  private setWeaponInSlot(slot: WeaponSlot, weapon: Gun | MeleeWeapon) {
+    if (slot === "primary") {
+      if (!(weapon instanceof Gun)) {
+        throw new Error(`${weapon.stats.name} can't be a primary`);
+      }
+      this.primary = weapon;
+    } else {
+      this.secondary = weapon;
     }
-    this.weapon = weapon;
+  }
+
+  /** Reserve rounds for a class of ammo. Pistol ammo never runs out. */
+  getReserve(ammoClass: AmmoClass): number {
+    return isLimitedAmmo(ammoClass) ? this.reserve[ammoClass] : Infinity;
+  }
+
+  /** Takes up to `amount` rounds out of the reserve and returns how many it got */
+  takeReserve(ammoClass: AmmoClass, amount: number): number {
+    if (!isLimitedAmmo(ammoClass)) {
+      return amount;
+    }
+    const taken = Math.min(amount, this.reserve[ammoClass]);
+    this.reserve[ammoClass] -= taken;
+    return taken;
+  }
+
+  /** Adds rounds to the reserve, up to what can be carried. Returns how many fit. */
+  addReserve(ammoClass: AmmoClass, amount: number): number {
+    if (!isLimitedAmmo(ammoClass)) {
+      return 0;
+    }
+    const before = this.reserve[ammoClass];
+    this.reserve[ammoClass] = Math.min(MAX_RESERVE[ammoClass], before + amount);
+    return this.reserve[ammoClass] - before;
+  }
+
+  /**
+   * Equip a weapon in its slot (see `slotFor`), dropping whatever was in that
+   * slot, and take it in hand. `isPickup` is false for weapons a human spawns
+   * holding.
+   */
+  async giveWeapon(weapon: Gun | MeleeWeapon, isPickup: boolean = true) {
+    const slot = slotFor(weapon);
+    this.dropWeapon(slot);
+    this.setWeaponInSlot(slot, weapon);
+    this.activeSlot = slot;
     this.addChild(weapon, true);
-    this.humanSprite.handleNewWeapon(weapon);
+    this.refreshWeaponSprite();
+
+    if (weapon instanceof Gun && !weapon.reserveBonusGiven) {
+      weapon.reserveBonusGiven = true;
+      const { ammoClass } = weapon.stats;
+      if (isLimitedAmmo(ammoClass)) {
+        this.addReserve(ammoClass, NEW_GUN_RESERVE_BONUS[ammoClass]);
+      }
+    }
 
     if (isPickup) {
       weapon.playSound("pickup", this.getPosition());
@@ -174,12 +264,119 @@ export default class Human extends BaseEntity implements Entity {
     }
   }
 
-  dropWeapon() {
-    if (this.weapon) {
-      this.game.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
-      this.weapon = undefined;
-      this.humanSprite.handleDropWeapon();
+  /** Drops the weapon in `slot` (by default the one in hand) on the floor */
+  dropWeapon(slot: WeaponSlot = this.activeSlot) {
+    const weapon = this.getWeaponInSlot(slot);
+    if (weapon) {
+      if (weapon instanceof Gun) {
+        weapon.cancelReload();
+      }
+      this.game.addEntity(new WeaponPickup(this.getPosition(), weapon));
+      if (slot === "primary") {
+        this.primary = undefined;
+      } else {
+        this.secondary = undefined;
+      }
+      this.refreshWeaponSprite();
     }
+  }
+
+  /** When the last swap happened, in game seconds */
+  private lastSwapTime = -Infinity;
+
+  /** Whether the weapon in hand can be put away right now */
+  canSwapWeapon(): boolean {
+    const weapon = this.weapon;
+    return (
+      this.otherWeapon !== undefined &&
+      this.game.elapsedTime - this.lastSwapTime >= SWAP_COOLDOWN &&
+      !(weapon instanceof MeleeWeapon && weapon.currentSwing)
+    );
+  }
+
+  /** Puts away the weapon in hand and takes out the other one */
+  swapWeapon() {
+    if (!this.canSwapWeapon()) {
+      return;
+    }
+    const weapon = this.weapon;
+    if (weapon instanceof Gun) {
+      weapon.cancelReload();
+    }
+    this.lastSwapTime = this.game.elapsedTime;
+    this.activeSlot = otherSlot(this.activeSlot);
+    this.refreshWeaponSprite();
+    const newWeapon = this.weapon;
+    if (newWeapon instanceof Gun) {
+      newWeapon.playSound("pickup", this.getPosition());
+    } else if (newWeapon instanceof MeleeWeapon) {
+      newWeapon.playSound("pickup", this.getPosition());
+    }
+  }
+
+  private refreshWeaponSprite() {
+    this.humanSprite.handleDropWeapon();
+    const weapon = this.weapon;
+    if (weapon) {
+      this.humanSprite.handleNewWeapon(weapon);
+    }
+  }
+
+  /**
+   * Adds consumables. Only one type is carried at a time, so a different
+   * type replaces what was carried, which is dropped on the floor.
+   */
+  giveConsumable(stats: ConsumableStats, count: number): number {
+    if (this.consumable && this.consumable !== stats) {
+      this.dropConsumables();
+    }
+    const taken = Math.min(count, stats.maxCarry - this.consumableCount);
+    if (taken > 0) {
+      this.consumable = stats;
+      this.consumableCount += taken;
+    }
+    return Math.max(0, taken);
+  }
+
+  private dropConsumables() {
+    if (this.consumable && this.consumableCount > 0 && this.isAdded) {
+      this.game.addEntity(
+        new ConsumablePickup(
+          this.getPosition(),
+          this.consumable,
+          this.consumableCount,
+        ),
+      );
+    }
+    this.consumable = undefined;
+    this.consumableCount = 0;
+  }
+
+  private lastThrowTime = -Infinity;
+
+  /** Throws one of the carried consumables the way the human is facing */
+  useConsumable() {
+    const stats = this.consumable;
+    if (
+      !stats ||
+      this.consumableCount <= 0 ||
+      this.game.elapsedTime - this.lastThrowTime < THROW_COOLDOWN
+    ) {
+      return;
+    }
+    this.lastThrowTime = this.game.elapsedTime;
+    this.consumableCount -= 1;
+    if (this.consumableCount <= 0) {
+      this.consumable = undefined;
+    }
+    const direction = this.getDirection();
+    const velocity = polarToVec(direction, stats.throwSpeed).iadd(
+      this.body.velocity,
+    );
+    const position = this.getPosition().add(
+      polarToVec(direction, HUMAN_RADIUS),
+    );
+    this.game.addEntity(new ThrownConsumable(stats, position, velocity, this));
   }
 
   // Return a list of all interactables within range
@@ -238,8 +435,10 @@ export default class Human extends BaseEntity implements Entity {
     this.game.dispatch("humanDied", { human: this });
     this.game.addEntity(new FleshImpact(this.getPosition(), 6));
 
-    if (this.weapon) {
-      this.game.addEntity(new WeaponPickup(this.getPosition(), this.weapon));
+    for (const weapon of [this.primary, this.secondary]) {
+      if (weapon) {
+        this.game.addEntity(new WeaponPickup(this.getPosition(), weapon));
+      }
     }
     this.destroy();
   }
@@ -281,7 +480,7 @@ export default class Human extends BaseEntity implements Entity {
               this.stats.pushKnockback;
             enemy.knockback(relPosition.inormalize().imul(amount));
             enemy.stun(PUSH_STUN * this.stats.pushStun * rNormal(1, 0.2));
-            enemy.voice.speak("hit");
+            enemy.takeHit(this.stats.pushDamage * this.stats.damage, this);
             this.game.addEntity(
               new PositionalSound(pushSoundRing.getNext(), this.getPosition(), {
                 gain: Math.min(1, amount / PUSH_KNOCKBACK),

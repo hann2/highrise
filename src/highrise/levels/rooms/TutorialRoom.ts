@@ -85,7 +85,7 @@ export default class TutorialRoomTemplate implements RoomTemplate {
       new Wall(toWorld(V(7, 1.75)), toWorld(V(7, -0.5))),
       new FloorPaint(
         toWorld(V(5.75, 0.25)),
-        (usingGamepad) => `${usingGamepad ? "X" : "E"} to pick\nup weapon`,
+        (usingGamepad) => `${usingGamepad ? "B" : "E"} to pick\nup weapon`,
       ),
       new WeaponPickup(toWorld(V(5.75, 1)), new Gun(M1911)),
       new FloorPaint(

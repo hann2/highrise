@@ -5,6 +5,7 @@
   font-family: oswald;
   font-size: 16px;
   color: red;
+  text-shadow: 0 1px 2px black;
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
@@ -63,4 +64,65 @@
   height: 14px;
   border-radius: 2px;
   background: linear-gradient(#eeeeee 0 25%, #2255cc 25% 55%, #eeeeee 55% 100%);
+}
+
+/* Reserve rounds, right of the shells (see AmmoOverlay) */
+.hud-reserve {
+  position: fixed;
+  right: 10px;
+  bottom: 8px;
+  width: 58px;
+  text-align: left;
+  font-family: oswald;
+  font-size: 24px;
+  line-height: 1;
+  color: #e8e0c8;
+  text-shadow: 0 1px 2px black;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.hud-reserve--empty {
+  color: #d04030;
+}
+
+/* Other weapon slot and consumables, above the shells */
+.hud-inventory {
+  position: fixed;
+  right: 10px;
+  bottom: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-family: oswald;
+  font-size: 15px;
+  color: #e8e0c8;
+  text-shadow: 0 1px 2px black;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.hud-inventory__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-inventory__other {
+  opacity: 0.65;
+}
+
+/* The key or button that does something, like a keycap */
+.hud-key {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 4px;
+  border: 1px solid rgba(232, 224, 200, 0.6);
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
 }

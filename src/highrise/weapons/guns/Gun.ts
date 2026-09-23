@@ -38,6 +38,9 @@ export default class Gun extends BaseEntity implements Entity {
   shootCooldown: number = 0;
   // Amount of ammo currently loaded in the gun
   ammo: number;
+  // Whether this gun's bonus reserve (`NEW_GUN_RESERVE_BONUS`) has been handed
+  // out, so dropping it and picking it up again doesn't make ammo
+  reserveBonusGiven = false;
 
   reloadAction: PhasedAction<"start" | "insert" | "finish", [Human]>;
   // Easy way to play random characteristic sounds for this gun
@@ -74,9 +77,9 @@ export default class Gun extends BaseEntity implements Entity {
           },
           endAction: (shooter: Human) => {
             if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
-              this.ammo += 1;
+              this.ammo += shooter.takeReserve(this.stats.ammoClass, 1);
             } else {
-              this.ammo = this.getCapacity(shooter);
+              this.loadFromReserve(shooter);
             }
           },
         },
@@ -224,9 +227,23 @@ export default class Gun extends BaseEntity implements Entity {
     );
   }
 
+  /** Whether reloading would do anything: there's room in the gun and rounds in `shooter`'s reserve */
+  canReload(shooter: Human): boolean {
+    return (
+      !this.isReloading &&
+      this.ammo < this.getCapacity(shooter) &&
+      shooter.getReserve(this.stats.ammoClass) > 0
+    );
+  }
+
+  /** Fills the gun from `shooter`'s reserve, as far as the reserve goes */
+  private loadFromReserve(shooter: Human) {
+    const wanted = Math.max(0, this.getCapacity(shooter) - this.ammo);
+    this.ammo += shooter.takeReserve(this.stats.ammoClass, wanted);
+  }
+
   async reload(shooter: Human) {
-    const capacity = this.getCapacity(shooter);
-    if (this.isReloading || this.ammo >= capacity) {
+    if (!this.canReload(shooter)) {
       return;
     }
     const instant = this.ammo === 0 && shooter.stats.instantEmptyReload;
@@ -240,13 +257,16 @@ export default class Gun extends BaseEntity implements Entity {
     }
 
     if (instant) {
-      this.ammo = capacity;
+      this.loadFromReserve(shooter);
       this.playSound("reload", shooter.getPosition());
     } else if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
       await this.reloadAction.do(shooter);
     } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
       await this.reloadAction.doSinglePhase("start", shooter);
-      while (this.ammo < this.getCapacity(shooter)) {
+      while (
+        this.ammo < this.getCapacity(shooter) &&
+        shooter.getReserve(this.stats.ammoClass) > 0
+      ) {
         await this.reloadAction.doSinglePhase("insert", shooter);
       }
       await this.reloadAction.doSinglePhase("finish", shooter);

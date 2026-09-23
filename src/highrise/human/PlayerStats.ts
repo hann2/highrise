@@ -25,6 +25,8 @@ export class PlayerStats {
   magazineSize = 1;
 
   // --- Push ---
+  /** Damage a push does, before the `damage` multiplier */
+  pushDamage = 10;
   /** Multiplier on how hard a push shoves enemies */
   pushKnockback = 1;
   /** Multiplier on how long a push stuns enemies */
@@ -45,4 +47,6 @@ export class PlayerStats {
   oneHitCrawlers = false;
   /** HP healed at the start of every floor */
   floorHeal = 0;
+  /** Extra chance that a kill drops an ammo box */
+  killAmmoDropChance = 0;
 }
