@@ -160,8 +160,8 @@ test("game boots, plays, and changes levels without errors", async ({
           .name as string,
     );
   expect(await standBy("Nancy")).toBeLessThan(1.5);
-  await expect(page.locator(".lobby-prompt__title")).toHaveText("Nancy");
-  await expect(page.locator(".lobby-prompt__action")).toContainText(
+  await expect(page.locator(".interact-prompt__title")).toHaveText("Nancy");
+  await expect(page.locator(".interact-prompt__action")).toContainText(
     "to play as",
   );
   const andyLeftAt = await getLobbyPlayerPosition(page);
@@ -183,8 +183,8 @@ test("game boots, plays, and changes levels without errors", async ({
 
   // --- Someone not rescued yet is a silhouette, and refuses ---
   expect(await standBy("Santa")).toBeLessThan(1.5);
-  await expect(page.locator(".lobby-prompt__title")).toHaveText("???");
-  await expect(page.locator(".lobby-prompt__hint")).toHaveText(
+  await expect(page.locator(".interact-prompt__title")).toHaveText("???");
+  await expect(page.locator(".interact-prompt__hint")).toHaveText(
     "Rescue them to unlock",
   );
   await page.keyboard.press("KeyE");
@@ -322,7 +322,7 @@ test("game boots, plays, and changes levels without errors", async ({
 
   // --- Guns can be picked up and bullets hurt zombies ---
   // Pin the player and a zombie in place so that the shots can't miss
-  await page.evaluate(() => {
+  const pickupName = await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const leader = (
       [...game.entities.all].find(
@@ -347,8 +347,23 @@ test("game boots, plays, and changes levels without errors", async ({
           a.getPosition().distanceTo(home) - b.getPosition().distanceTo(home),
       )[0];
     leader.body.position.set(pickup.getPosition());
+    return pickup.weapon.stats.name as string;
   });
   await page.waitForTimeout(300);
+  // Standing on it, the prompt says what E picks up, and it's ringed on the floor
+  await expect(page.locator(".interact-prompt")).toContainText(pickupName);
+  await expect(page.locator(".interact-prompt__key")).toHaveText("E");
+  expect(
+    await page.evaluate(() => {
+      const prompt = [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "InteractPrompt",
+      ) as any;
+      return {
+        target: prompt?.target?.parent?.constructor.name,
+        highlighted: !!prompt?.highlight?.sprite.visible,
+      };
+    }),
+  ).toEqual({ target: "WeaponPickup", highlighted: true });
   await page.keyboard.press("KeyE");
   await page.waitForTimeout(500);
   const targetHp = await page.evaluate(() => {
@@ -849,6 +864,7 @@ test("game boots, plays, and changes levels without errors", async ({
       lockCount: locks.length,
       lockedDoorsStayShut: 0,
       openedWithoutKeycard: false,
+      promptWithoutKeycard: "",
       keycardsPickedUp: 0,
       hudShown: false,
       reachableThroughDoor: [] as string[],
@@ -863,8 +879,10 @@ test("game boots, plays, and changes levels without errors", async ({
       }
     }
 
-    // Without a keycard the lock does nothing
+    // Without a keycard the lock does nothing, and says so
     await standAt(locks[0].outsidePosition);
+    result.promptWithoutKeycard =
+      document.querySelector(".interact-prompt")?.textContent ?? "";
     leader.interactWithNearest();
     await wait(100);
     result.openedWithoutKeycard = !locks[0].door.locked;
@@ -896,6 +914,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(keycards.lockCount).toBe(2);
   expect(keycards.lockedDoorsStayShut).toBe(2);
   expect(keycards.openedWithoutKeycard).toBe(false);
+  expect(keycards.promptWithoutKeycard).toBe("Card reader · needs a keycard");
   expect(keycards.keycardsPickedUp).toBe(1);
   expect(keycards.hudShown).toBe(true);
   await page.waitForTimeout(800); // let the camera settle
@@ -1048,6 +1067,9 @@ test("game boots, plays, and changes levels without errors", async ({
   const quartersBeforeBuying = await getQuarters();
   expect(quartersBeforeBuying).toBe(quarterDrop.after + 5);
   const healthPickupsBefore = await countHealthPickups();
+  await expect(page.locator(".interact-prompt")).toHaveText(
+    "ESnack machine · 3 quarters",
+  );
   await page.keyboard.press("KeyE");
   await page.waitForTimeout(1000);
   expect(await getQuarters()).toBe(quartersBeforeBuying - 3);
@@ -1767,13 +1789,15 @@ test("game boots, plays, and changes levels without errors", async ({
     const bookcase = [...game.entities.all].find(
       (e: any) =>
         e.constructor.name === "Interactable" &&
-        e.prompt?.().title === "Encyclopedia",
+        e.prompt?.(lobby.player).title === "Encyclopedia",
     ) as any;
     lobby.player.body.position.set(bookcase.getPosition().add([-1, 0]));
     lobby.player.body.velocity.set(0, 0);
     await new Promise((resolve) => setTimeout(resolve, 300));
   });
-  await expect(page.locator(".lobby-prompt__title")).toHaveText("Encyclopedia");
+  await expect(page.locator(".interact-prompt__title")).toHaveText(
+    "Encyclopedia",
+  );
   await page.keyboard.press("KeyE");
   await expect(page.locator(".encyclopedia")).toBeVisible();
   // Reading doesn't walk the player around

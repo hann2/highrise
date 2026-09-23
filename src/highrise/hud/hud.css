@@ -241,3 +241,83 @@
   line-height: 16px;
   text-align: center;
 }
+
+/* What the interact button would do, low in the middle (see InteractPrompt) */
+.interact-prompt {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+  white-space: pre;
+  text-shadow: 0 1px 2px black;
+}
+
+.interact-prompt__detail {
+  opacity: 0.75;
+}
+
+.interact-prompt__hint {
+  color: #999999;
+}
+
+/* The interact button, as a key cap */
+.interact-prompt__key {
+  display: inline-block;
+  min-width: 1.2em;
+  padding: 0 6px;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 700;
+  color: white;
+}
+
+/* During a run: one line in the HUD's style */
+.interact-prompt--small {
+  bottom: 18%;
+  font-family: oswald;
+  font-size: 18px;
+  color: #e8e0c8;
+}
+
+.interact-prompt--small .interact-prompt__key {
+  margin-right: 8px;
+  padding: 0 4px;
+  border-color: rgba(232, 224, 200, 0.6);
+  border-radius: 3px;
+  font-size: 13px;
+  line-height: 18px;
+  vertical-align: 2px;
+  color: #e8e0c8;
+}
+
+/* In the lobby: a big name, and what the button does under it */
+.interact-prompt--large {
+  bottom: 12%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-shadow: 0 2px 4px black;
+}
+
+.interact-prompt--large .interact-prompt__title {
+  font-family: captureIt;
+  font-size: 40px;
+  line-height: 1;
+  color: white;
+}
+
+.interact-prompt--large .interact-prompt__detail,
+.interact-prompt--large .interact-prompt__action,
+.interact-prompt--large .interact-prompt__hint {
+  font-family: oswald;
+  font-weight: 300;
+  font-size: 20px;
+  color: #dddddd;
+}
+
+.interact-prompt--large .interact-prompt__hint {
+  color: #999999;
+}

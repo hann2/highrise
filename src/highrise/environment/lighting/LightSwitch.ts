@@ -21,7 +21,13 @@ export class LightSwitch extends BaseEntity implements Entity {
     super();
 
     this.light = this.addChild(new PointLight({ position, color: 0xff0000 }));
-    this.addChild(new Interactable(position, this.handleInteract.bind(this)));
+    const interactable = this.addChild(
+      new Interactable(position, this.handleInteract.bind(this)),
+    );
+    // It only goes one way
+    interactable.canInteract = () => !this.on;
+    interactable.highlightRadius = 0.3;
+    interactable.prompt = () => ({ title: "Light switch" });
 
     const corner = position.sub(SWITCH_BOX_DIMENSIONS.mul(0.5));
     this.sprite = new Graphics();

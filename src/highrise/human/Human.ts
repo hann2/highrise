@@ -385,7 +385,10 @@ export default class Human extends BaseEntity implements Entity {
     this.game.addEntity(new ThrownConsumable(stats, position, velocity, this));
   }
 
-  // Return a list of all usable interactables within range and not behind a wall
+  /**
+   * All usable interactables within range and not behind a wall, nearest
+   * first, with the passive ones (which only say what they are) after the rest
+   */
   getNearbyInteractables(): Interactable[] {
     return [...this.game.entities.getByFilter(isInteractable)]
       .filter(
@@ -396,8 +399,9 @@ export default class Human extends BaseEntity implements Entity {
       )
       .sort(
         (i1, i2) =>
+          Number(i1.passive) - Number(i2.passive) ||
           i1.getPosition().distanceTo(this.body.position) -
-          i2.getPosition().distanceTo(this.body.position),
+            i2.getPosition().distanceTo(this.body.position),
       );
   }
 
@@ -422,13 +426,12 @@ export default class Human extends BaseEntity implements Entity {
 
   // Interacts with the nearest interactable within range if there is one
   interactWithNearest(): Interactable | null {
-    const interactables = this.getNearbyInteractables();
-    if (interactables.length > 0) {
-      interactables[0].interact(this);
-      return interactables[0];
-    } else {
+    const nearest = this.getNearbyInteractables()[0];
+    if (!nearest || nearest.passive) {
       return null;
     }
+    nearest.interact(this);
+    return nearest;
   }
 
   // Inflict damage on the human

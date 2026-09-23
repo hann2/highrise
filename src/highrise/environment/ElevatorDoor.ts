@@ -135,9 +135,10 @@ export default class ElevatorDoor extends BaseEntity implements Entity {
 
     this.addChildren(this.topDoor, this.bottomDoor);
     if (interactable) {
-      this.addChild(
+      const interactable = this.addChild(
         new Interactable(this.center, this.handleInteract.bind(this)),
       );
+      interactable.prompt = () => ({ title: "Elevator" });
     }
   }
 

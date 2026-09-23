@@ -5,6 +5,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { polarToVec } from "../../core/util/MathUtil";
 import { rDirection, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
+import { HUMAN_RADIUS } from "../constants/constants";
 import Interactable from "../environment/Interactable";
 import Human from "../human/Human";
 import { isCharacterUnlocked } from "../persistence/SaveData";
@@ -64,6 +65,7 @@ export default class LobbyCharacterController
       ),
     );
     this.interactable.maxDistance = 1.6;
+    this.interactable.highlightRadius = HUMAN_RADIUS + 0.2;
     this.interactable.prompt = () =>
       this.unlocked
         ? { title: this.human.character.name, action: "to play as" }

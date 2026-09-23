@@ -8,6 +8,7 @@ import PartyManager from "../environment/PartyManager";
 import { AmmoOverlay } from "../hud/AmmoOverlay";
 import { DamagedOverlay } from "../hud/DamagedOverlay";
 import { HealthBar } from "../hud/HealthBar";
+import InteractPrompt from "../hud/InteractPrompt";
 import { KeycardOverlay } from "../hud/KeycardOverlay";
 import { QuarterCounter } from "../hud/QuarterCounter";
 import PlayerHumanController from "../human/PlayerHumanController";
@@ -58,6 +59,7 @@ export class GameController extends BaseEntity implements Entity {
       new HealthBar(getPlayer),
       new QuarterCounter(),
       new KeycardOverlay(getPlayer),
+      new InteractPrompt(getPlayer),
       new PauseMenu(),
     );
   }

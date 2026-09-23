@@ -7,10 +7,12 @@ import { V2d } from "../../core/Vector";
 import Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
+import { slotFor } from "../weapons/weapons";
 import Interactable from "./Interactable";
 
 export default class WeaponPickup extends BaseEntity {
   sprite: Sprite & GameSprite;
+  interactable: Interactable;
 
   constructor(
     position: V2d,
@@ -19,7 +21,16 @@ export default class WeaponPickup extends BaseEntity {
     super();
 
     this.addChild(weapon, true); // Take ownership of the gun. This is a little weird
-    this.addChild(new Interactable(position, this.handleInteract.bind(this)));
+    this.interactable = this.addChild(
+      new Interactable(position, this.handleInteract.bind(this)),
+    );
+    this.interactable.prompt = (human) => {
+      const replaced = human.getWeaponInSlot(slotFor(weapon));
+      return {
+        title: weapon.stats.name,
+        detail: replaced && `replaces ${replaced.stats.name}`,
+      };
+    };
 
     this.sprite = Sprite.from(weapon.stats.textures.pickup);
     this.sprite.scale.set(weapon.stats.size[1] / this.sprite.height);

@@ -40,6 +40,10 @@ export default class AmmoPickup extends BaseEntity implements Entity {
     );
     interactable.canInteract = (human) =>
       human.getReserve(ammoClass) < MAX_RESERVE[ammoClass];
+    interactable.prompt = () => ({
+      title: ammoClass === "rifle" ? "Rifle ammo" : "Shotgun ammo",
+      detail: String(this.amount),
+    });
 
     this.box = drawAmmoBox(ammoClass);
     this.box.layerName = Layer.ITEMS;

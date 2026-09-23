@@ -13,7 +13,10 @@ export default class HealthPickup extends BaseEntity {
   constructor(position: V2d) {
     super();
 
-    this.addChild(new Interactable(position, this.handleInteract.bind(this)));
+    const interactable = this.addChild(
+      new Interactable(position, this.handleInteract.bind(this)),
+    );
+    interactable.prompt = () => ({ title: "Health kit" });
 
     this.sprite = Sprite.from("healthKit");
     this.sprite.scale.set(0.45 / this.sprite.width);

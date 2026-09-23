@@ -19,7 +19,10 @@ export default class Keycard extends BaseEntity implements Entity {
   constructor(position: V2d) {
     super();
 
-    this.addChild(new Interactable(position, this.handleInteract.bind(this)));
+    const interactable = this.addChild(
+      new Interactable(position, this.handleInteract.bind(this)),
+    );
+    interactable.prompt = () => ({ title: "Keycard" });
 
     this.sprite = new Graphics()
       .roundRect(-WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT, 0.03)
