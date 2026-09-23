@@ -6,6 +6,7 @@ import { Persistence } from "../constants/constants";
 import PartyManager from "../environment/PartyManager";
 import { AmmoOverlay } from "../hud/AmmoOverlay";
 import { DamagedOverlay } from "../hud/DamagedOverlay";
+import { KeycardOverlay } from "../hud/KeycardOverlay";
 import PlayerHumanController from "../human/PlayerHumanController";
 import LightingManager from "../lighting-and-vision/LightingManager";
 import VisionController from "../lighting-and-vision/VisionController";
@@ -40,6 +41,7 @@ export class GameController extends BaseEntity implements Entity {
       new VisionController(getPlayer),
       new DamagedOverlay(getPlayer),
       new AmmoOverlay(getPlayer),
+      new KeycardOverlay(getPlayer),
       new PauseMenu(),
     );
   }

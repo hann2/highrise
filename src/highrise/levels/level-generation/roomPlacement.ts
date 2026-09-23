@@ -6,8 +6,12 @@ import { CELL_SIZE } from "../../constants/constants";
 import { CARDINAL_DIRECTIONS_VALUES, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
 import { RoomTransformer } from "../rooms/ElementTransformer";
+import ExitStairwell from "../rooms/ExitStairwell";
 import RoomTemplate from "../rooms/RoomTemplate";
 import SpawnRoom from "../rooms/SpawnRoom";
+import TransformedRoomTemplate, {
+  ROTATED_ORIENTATIONS,
+} from "../rooms/TransformedRoomTemplate";
 import CellGrid, { DoorBuilder, WallBuilder, WallID } from "./CellGrid";
 
 function isEligibleCell(cellGrid: CellGrid, [x, y]: V2d): boolean {
@@ -194,6 +198,55 @@ function addRoom(
   };
 }
 
+/**
+ * Adds a room as far from `from` as it fits, trying each of `templates` (e.g.
+ * the same room in different orientations). Picks randomly among the spots
+ * that are nearly the furthest, so it isn't always in the same corner.
+ */
+function addRoomFarFrom(
+  cellGrid: CellGrid,
+  templates: RoomTemplate[],
+  from: V2d,
+  seed: number,
+): AddedRoomInfo {
+  const candidates: {
+    template: RoomTemplate;
+    location: V2d;
+    distance: number;
+  }[] = [];
+  const locations = [...cellGrid.getPositions()].map(V);
+  for (const template of templates) {
+    const wallIDs = template.generateWalls().map((w) => w.id);
+    const cells = template.getOccupiedCells();
+    for (const location of locations) {
+      const cellsLevelCoords = cells.map((c) => c.add(location));
+      if (
+        cellsLevelCoords.every((c) => isEligibleCell(cellGrid, c)) &&
+        doesRoomCutoffPartOfMap(
+          cellGrid,
+          wallIDs.map((w) => translateWallID(w, location)),
+        )
+      ) {
+        const center = cellsLevelCoords
+          .reduce((sum, c) => sum.iadd(c), V(0, 0))
+          .imul(1 / cellsLevelCoords.length);
+        const distance = center.sub(from).magnitude;
+        candidates.push({ template, location, distance });
+      }
+    }
+  }
+
+  if (candidates.length === 0) {
+    console.warn("Couldn't find a spot for the exit stairwell!");
+    return { entities: [], enemyPositions: [], itemPositions: [] };
+  }
+
+  const maxDistance = Math.max(...candidates.map((c) => c.distance));
+  const furthest = candidates.filter((c) => c.distance > maxDistance - 1.5);
+  const { template, location } = seededShuffle(furthest, seed)[0];
+  return addRoom(cellGrid, template, seed, location);
+}
+
 export function addRooms(
   cellGrid: CellGrid,
   levelTemplate: LevelTemplate,
@@ -204,6 +257,15 @@ export function addRooms(
   roomInfos.push(
     addRoom(cellGrid, new SpawnRoom(levelIndex), seed, cellGrid.spawnLocation),
   );
+  if (levelTemplate.hasExitStairwell()) {
+    const orientations = ROTATED_ORIENTATIONS.map(
+      (orientation) =>
+        new TransformedRoomTemplate(new ExitStairwell(), orientation),
+    );
+    roomInfos.push(
+      addRoomFarFrom(cellGrid, orientations, cellGrid.spawnLocation, seed),
+    );
+  }
   for (const roomTemplate of levelTemplate.chooseRoomTemplates(seed)) {
     roomInfos.push(addRoom(cellGrid, roomTemplate, seed));
   }

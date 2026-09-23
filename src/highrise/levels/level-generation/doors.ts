@@ -79,7 +79,16 @@ export function buildDoorEntity(
   const minAngle = (ccwWallCount - 0.1) * -(Math.PI / 2);
   const maxAngle = (cwWallCount - 0.1) * (Math.PI / 2);
 
-  return new Door(
+  // Turning towards increasing angle moves the free end of the door this way
+  const positiveSwingDirection = doorDirection.rotate90ccw();
+  const opensToward = doorBuilder.opensToward;
+  const oneWay = opensToward
+    ? opensToward.dot(positiveSwingDirection) > 0
+      ? 1
+      : -1
+    : undefined;
+
+  const door = new Door(
     CellGrid.levelCoordToWorldCoord(hingePoint),
     CELL_SIZE,
     doorDirection.angle,
@@ -87,5 +96,8 @@ export function buildDoorEntity(
     maxAngle,
     !doorBuilder.chainLink,
     doorBuilder.chainLink ? "chainLinkFence" : undefined,
+    { oneWay, locked: doorBuilder.locked },
   );
+  doorBuilder.onBuilt?.(door);
+  return door;
 }

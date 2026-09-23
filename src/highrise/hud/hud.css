@@ -9,3 +9,26 @@
   user-select: none;
   white-space: nowrap;
 }
+
+.hud-keycards {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: oswald;
+  font-size: 16px;
+  color: #ddeeff;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.hud-keycard-icon {
+  display: inline-block;
+  width: 22px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(#eeeeee 0 25%, #2255cc 25% 55%, #eeeeee 55% 100%);
+}

@@ -73,6 +73,8 @@ export default class Human extends BaseEntity implements Entity {
   voice: HumanVoice;
   walkSpring: WalkSpring;
   flashlight: Flashlight;
+  /** Keycards carried, for opening locked rooms (see `KeycardLock`) */
+  keycards: number = 0;
 
   constructor(
     position: V2d = V(0, 0),
