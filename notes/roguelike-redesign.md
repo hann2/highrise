@@ -118,7 +118,17 @@ Current: one survivor per floor in a closet, auto-joins at 2 m with line of sigh
 
 ### 9. Lobby hub: character select and floor directory (M–L)
 
-Current: the lobby is level 1 (a room with cosmetic elevators, a desk, a piano and Bob the Heavy). The main menu is HTML. Character is random from a shuffle ring.
+**Done 2026-09-23 (`lobby/`, `run/RunPlan.ts`, `menu/TitleScreen.tsx`; `CharacterSelect` and `MainMenu` are gone).** Decisions:
+
+- The game boots into the lobby with the player in a closed elevator (the only lit one) behind the HIGHRISE title; Enter/START fades the title, the elevator dings open (`ElevatorDoor.open`), and the player walks out. The rest of the bank stays shut and can't be opened. After a run the summary's "Back to the lobby" does the same without the title.
+- The lobby is hand-built (`LobbyRoomTemplate` + `generateLobby`, no maze): elevator bank, reception desk, sitting area, piano, the directory board, the stairwell, and two bookcases that open the encyclopedia. Lobby ambient light, no enemies, no fog of war, no run HUD. The pause menu has Credits there instead of Quit Run.
+- Bob stays as a joke: `ReceptionistBob` is a heavy's body behind the desk that turns to watch you and groans when you press E on him. He's not an enemy.
+- Every character except the one you are stands around the lobby, unlocked ones in the best spots. Unlocked ones mill about near their spot and turn to look at you when you're close; they never fight. E swaps you into them, and who you were stays where you left them. Locked ones are dark silhouettes that stand still; E on them just clicks ("Rescue them to unlock"). An HTML prompt names whoever is nearest. You arrive as the last character you started a run with (`SaveData.lastCharacter`), or the first unlocked one.
+- The directory board by the stairs lists the `RunPlan` top floor first ("4 Chapel · Boss" ... "L Lobby · You are here"). The plan is made when you arrive in the lobby: Shops → Maintenance → Generator → Chapel. The lobby is no longer a floor, so the level number is the floor number and every floor is one level easier than before (Shops is now level 1). Templates carry `floorName`/`floorNotes` (Maintenance: "Dark", Chapel: "Boss").
+- The stairwell has a one-way door; stepping on the stairs starts the run as whoever you are.
+- Not done: character traits/starting weapons, store/infirmary/survivor icons on the board (the plan doesn't know about them yet), a run history in the lobby.
+
+Current (before): the lobby is level 1 (a room with cosmetic elevators, a desk, a piano and Bob the Heavy). The main menu is HTML. Character is random from a shuffle ring.
 
 - Done 2026-09-22: a character select screen (`menu/CharacterSelect.tsx`) between the main menu and the game, all 13 characters, no unlocking yet. The lobby version below can replace it later.
 - The lobby becomes the between-runs hub, not a floor. It is the diegetic main menu.
