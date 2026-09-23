@@ -24,6 +24,8 @@ Each of these can be built and played on its own. Dependencies are noted. Sizes 
 
 ### 1. Player stats (S)
 
+**Done 2026-09-22 (`human/PlayerStats.ts`).**
+
 Current: `Human.ts` uses constants for speed (5 m/s, 3 m/s when hurt), max HP (100), push range/knockback/stun. Reload time, fire rate and spread live on the shared read-only `GunStats` objects.
 
 - A `PlayerStats` object on `Human`: move speed, max HP, damage multiplier, reload speed multiplier, fire rate multiplier, spread multiplier, magazine size bonus, push damage/knockback/stun, flashlight range, vision range, quarter drop rate, etc. Defaults are 1×/0.
@@ -32,6 +34,8 @@ Current: `Human.ts` uses constants for speed (5 m/s, 3 m/s when hurt), max HP (1
 - Prerequisite for 2 and 9.
 
 ### 2. Pick one of three (M)
+
+**Done 2026-09-22 (`upgrades/`, `menu/UpgradeSelect.tsx`; shown on `levelComplete`, not yet on the stairwell landing). Upgrades are lost if the leader dies and an ally takes over.**
 
 Current: nothing is a choice. Every floor has the same closet contents (health, T0 gun, melee, survivor, plus a higher-tier gun on later floors).
 
@@ -45,6 +49,8 @@ Current: nothing is a choice. Every floor has the same closet contents (health, 
 - Data model: `Upgrade = { name, description, rarity, apply(human) }`, collected in one index file like `gunStats.ts`. The encyclopedia (feature 11) reads the same list.
 
 ### 3. Stairwell safe zones with one-way doors (M)
+
+**Done 2026-09-22 (`levels/rooms/ExitStairwell.ts`, `environment/Stairwell.ts`, `Door` `locked`/`oneWay`). Spawn room door left two-way (panic room) pending playtest.**
 
 Current: the spawn room is the arrival point; the exit is a stairs tile at the furthest dead end; enemies can go anywhere.
 
@@ -67,6 +73,8 @@ Current: reserve ammo is infinite (reload always refills). One weapon slot; pick
 
 ### 5. Quarters, vending machines, stores (M)
 
+**Partly done 2026-09-22: quarters drop from enemies (25%), vending machines sell a health pickup for 3 quarters, HUD counter, cheat `K`. Not done: stores, machines alerting zombies.**
+
 Current: vending machines play a coin sound on interact and can be destroyed. Nubbies (single-cell dead ends) get a vending machine or water cooler 80% of the time.
 
 - Quarters drop from zombies (low chance, scaled by a stat) and are found on desks, in registers (the shop rooms have counters), in bathrooms. Diegetic and retro.
@@ -75,6 +83,8 @@ Current: vending machines play a coin sound on interact and can be destroyed. Nu
 - HUD: quarter count.
 
 ### 6. Keycards and locked rooms (S–M)
+
+**Done 2026-09-22 (`environment/Keycard.ts`, `KeycardLock.ts`; one keycard, an ARMORY and a SUPPLY closet per floor).**
 
 - Each floor has a keycard (on a body, in a desk) and two or three locked rooms: armory, infirmary, supply closet, a survivor's holding cell. One keycard, so the player picks which door to open.
 - The directory (feature 9) can show what's behind the locked doors on each floor, so the choice can be planned before arriving.
@@ -132,6 +142,8 @@ Current: 5 fixed templates in fixed order, 14×14 grid of 2 m cells, exit at the
 
 ### 12. Game over / run summary screen (S)
 
+**Done 2026-09-22 (`run/RunStats.ts`, `menu/GameOverScreen.tsx`).**
+
 Current: "You Win" or "You Lose" on a coloured screen, then the main menu.
 
 - Floors reached, cause of death, kills by type, quarters collected, upgrades taken, characters unlocked this run, time. "Return to lobby" button. Unlocks earned this run are called out.
@@ -142,6 +154,8 @@ Current: "You Win" or "You Lose" on a coloured screen, then the main menu.
 - Remove the Q/LB glowstick and its cooldown from `Human`, the tutorial room step that teaches it, and the `GlowStick` entity if nothing else uses it. The `Flashlight` covers the "I need light" case. Possibly re-add as a consumable (feature 7).
 
 ### 14. Meta persistence (S)
+
+**Done 2026-09-22 (`persistence/SaveData.ts`; nothing unlocks characters yet).**
 
 - One `SaveData` object in localStorage (versioned): unlocked characters, encyclopedia found flags, run history, settings. Everything that persists goes through it. Needed by 8, 9, 11, 12.
 
