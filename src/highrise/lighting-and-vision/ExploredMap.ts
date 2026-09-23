@@ -38,6 +38,8 @@ export class ExploredMap {
   /** The visible region, erased from the map. (Wrapped: a render call's root container's blend mode is ignored.) */
   private stampContainer = new Container();
   private stamp: Sprite;
+  private disc: Graphics;
+  private darknessSprite: Sprite;
 
   /**
    * @param darkness what the player can't see right now, centered on the
@@ -49,17 +51,12 @@ export class ExploredMap {
     darkness: Texture,
   ) {
     // The visible region: everything within range that isn't dark
-    const disc = new Graphics().circle(0, 0, radius).fill(0xffffff);
-    const darknessSprite = new Sprite(darkness);
-    darknessSprite.anchor.set(0.5);
-    darknessSprite.blendMode = "erase";
-    this.visibleContainer.addChild(disc, darknessSprite);
-    this.visibleTexture = RenderTexture.create({
-      width: radius * 2,
-      height: radius * 2,
-      resolution: RESOLUTION,
-      antialias: true,
-    });
+    this.disc = new Graphics().circle(0, 0, radius).fill(0xffffff);
+    this.darknessSprite = new Sprite(darkness);
+    this.darknessSprite.anchor.set(0.5);
+    this.darknessSprite.blendMode = "erase";
+    this.visibleContainer.addChild(this.disc, this.darknessSprite);
+    this.visibleTexture = makeVisibleTexture(radius);
     this.stamp = new Sprite(this.visibleTexture);
     this.stamp.anchor.set(0.5);
     this.stamp.blendMode = "erase";
@@ -67,6 +64,20 @@ export class ExploredMap {
 
     this.texture = RenderTexture.create({ width: 1, height: 1 });
     this.sprite = new Sprite(this.texture);
+  }
+
+  /**
+   * Changes how far the player can see, keeping what has been explored.
+   * `darkness` is the replacement for the texture passed to the constructor.
+   */
+  setRadius(radius: number, darkness: Texture) {
+    this.radius = radius;
+    this.disc.clear().circle(0, 0, radius).fill(0xffffff);
+    this.darknessSprite.texture = darkness;
+    // Fresh rather than resized, see `reset`
+    this.visibleTexture.destroy(true);
+    this.visibleTexture = makeVisibleTexture(radius);
+    this.stamp.texture = this.visibleTexture;
   }
 
   /** Where the top-left corner of the map is, in world coordinates */
@@ -126,4 +137,13 @@ export class ExploredMap {
     }
     this.texture.destroy(true);
   }
+}
+
+function makeVisibleTexture(radius: number): RenderTexture {
+  return RenderTexture.create({
+    width: radius * 2,
+    height: radius * 2,
+    resolution: RESOLUTION,
+    antialias: true,
+  });
 }

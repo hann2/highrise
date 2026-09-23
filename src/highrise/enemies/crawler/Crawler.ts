@@ -4,6 +4,7 @@ import { V2d } from "../../../core/Vector";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import { BodyTextures } from "../../creature-stuff/BodySprite";
+import type Human from "../../human/Human";
 import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange } from "../base/enemyUtils";
 import SimpleEnemyController from "../base/SimpleEnemyController";
@@ -30,6 +31,10 @@ export default class Crawler extends BaseEnemy {
 
     this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, ZOMBIE_RADIUS));
     this.addChild(new CrawlerSprite(this, textures));
+  }
+
+  diesInOneHitFrom(attacker?: Human): boolean {
+    return attacker?.stats.oneHitCrawlers ?? false;
   }
 
   makeAttackAction() {

@@ -3,7 +3,8 @@ import Entity from "../../core/entity/Entity";
 
 interface Phase<name extends string, Params extends Array<unknown> = []> {
   name: name;
-  duration: number;
+  /** Seconds, or a function of the action's params for durations that vary */
+  duration: number | ((...options: Params) => number);
   startAction?: (...options: Params) => void;
   endAction?: (...options: Params) => void;
 }
@@ -54,9 +55,13 @@ export class PhasedAction<
     this.phasePercent = 0;
     phase.startAction?.(...params);
 
-    if (phase.duration) {
+    const duration =
+      typeof phase.duration === "function"
+        ? phase.duration(...params)
+        : phase.duration;
+    if (duration) {
       await this.wait(
-        phase.duration,
+        duration,
         (_, t) => {
           this.phasePercent = t;
         },

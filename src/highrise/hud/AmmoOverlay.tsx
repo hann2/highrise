@@ -17,6 +17,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
   sprite: Container & GameSprite;
   bulletSpriteContainer: Container;
   private lastWeapon: Weapon | undefined = undefined;
+  private lastCapacity = 0;
   private needsReload = false;
 
   constructor(public getHuman: () => Human) {
@@ -47,13 +48,14 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     this.bulletSpriteContainer.position.set(width - 10, height - 10);
   }
 
-  setWeapon(weapon: Weapon | undefined) {
+  setWeapon(weapon: Weapon | undefined, capacity: number) {
     this.lastWeapon = weapon;
+    this.lastCapacity = capacity;
 
     this.bulletSpriteContainer.removeChildren();
 
     if (weapon instanceof Gun) {
-      const numBullets = weapon.stats.ammoCapacity;
+      const numBullets = capacity;
       const spacing = 5 + 10 / numBullets;
       for (let i = 0; i < numBullets; i++) {
         const bulletSprite = Sprite.from(weapon.stats.textures.shellCasing);
@@ -67,20 +69,24 @@ export class AmmoOverlay extends BaseEntity implements Entity {
 
   @on("render")
   onRender() {
-    const weapon = this.getHuman().weapon;
+    const human = this.getHuman();
+    const weapon = human.weapon;
+    // Upgrades can change the magazine size of the gun in hand
+    const capacity = weapon instanceof Gun ? weapon.getCapacity(human) : 0;
 
-    if (weapon != this.lastWeapon) {
-      this.setWeapon(weapon);
+    if (weapon != this.lastWeapon || capacity != this.lastCapacity) {
+      this.setWeapon(weapon, capacity);
     }
 
     if (weapon instanceof Gun) {
       this.needsReload = weapon.ammo == 0;
 
-      for (let i = 0; i < weapon.ammo; i++) {
+      const loaded = Math.min(weapon.ammo, capacity);
+      for (let i = 0; i < loaded; i++) {
         this.bulletSpriteContainer.getChildAt(i).alpha = 0.9;
       }
 
-      for (let i = weapon.ammo; i < weapon.stats.ammoCapacity; i++) {
+      for (let i = loaded; i < capacity; i++) {
         this.bulletSpriteContainer.getChildAt(i).alpha = 0.3;
       }
     } else {

@@ -41,7 +41,9 @@ export default class Bullet extends Projectile implements Entity {
 
   get damage(): number {
     return (
-      this.stats.damage * (this.velocity.magnitude / this.stats.muzzleVelocity)
+      this.stats.damage *
+      (this.shooter?.stats.damage ?? 1) *
+      (this.velocity.magnitude / this.stats.muzzleVelocity)
     );
   }
 

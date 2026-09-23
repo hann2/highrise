@@ -59,28 +59,31 @@ export default class Gun extends BaseEntity implements Entity {
       new PhasedAction([
         {
           name: "start",
-          duration: this.stats.reloadStartTime,
+          duration: (shooter: Human) =>
+            this.stats.reloadStartTime / shooter.stats.reloadSpeed,
           startAction: (shooter: Human) => {
             this.playSound("reload", shooter.getPosition());
           },
         },
         {
           name: "insert",
-          duration: this.stats.reloadInsertTime,
+          duration: (shooter: Human) =>
+            this.stats.reloadInsertTime / shooter.stats.reloadSpeed,
           startAction: (shooter: Human) => {
             this.playSound("reloadInsert", shooter.getPosition());
           },
-          endAction: () => {
+          endAction: (shooter: Human) => {
             if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
               this.ammo += 1;
             } else {
-              this.ammo = this.stats.ammoCapacity;
+              this.ammo = this.getCapacity(shooter);
             }
           },
         },
         {
           name: "finish",
-          duration: this.stats.reloadEndTime,
+          duration: (shooter: Human) =>
+            this.stats.reloadEndTime / shooter.stats.reloadSpeed,
           startAction: (shooter: Human) => {
             this.playSound("reloadFinish", shooter.getPosition());
 
@@ -129,7 +132,7 @@ export default class Gun extends BaseEntity implements Entity {
     // Actual shot
     this.makeProjectile(position, direction, shooter);
 
-    this.shootCooldown += 1.0 / this.stats.fireRate;
+    this.shootCooldown += 1.0 / (this.stats.fireRate * shooter.stats.fireRate);
     this.ammo -= 1;
     this.shellsToEject += 1;
     this.aimOffset += rSign() * this.stats.recoilAmount;
@@ -199,10 +202,8 @@ export default class Gun extends BaseEntity implements Entity {
 
   makeProjectile(position: V2d, direction: number, shooter: Human) {
     for (let i = 0; i < this.stats.bulletStats.bulletsPerShot; i++) {
-      const spread = rUniform(
-        -this.stats.bulletSpread / 2,
-        this.stats.bulletSpread / 2,
-      );
+      const maxSpread = this.stats.bulletSpread * shooter.stats.spread;
+      const spread = rUniform(-maxSpread / 2, maxSpread / 2);
       this.game.addEntity(
         new Bullet(
           position.clone(),
@@ -214,24 +215,41 @@ export default class Gun extends BaseEntity implements Entity {
     }
   }
 
+  /** How many rounds this gun holds for `shooter`, whose stats can enlarge the magazine */
+  getCapacity(shooter?: Human): number {
+    const multiplier = shooter?.stats.magazineSize ?? 1;
+    return Math.max(
+      this.stats.ammoCapacity,
+      Math.round(this.stats.ammoCapacity * multiplier),
+    );
+  }
+
   async reload(shooter: Human) {
-    if (!this.isReloading && this.ammo < this.stats.ammoCapacity) {
-      if (this.stats.ejectionType === EjectionType.RELOAD) {
-        while (this.shellsToEject > 0) {
-          this.makeShellCasing(shooter);
+    const capacity = this.getCapacity(shooter);
+    if (this.isReloading || this.ammo >= capacity) {
+      return;
+    }
+    const instant = this.ammo === 0 && shooter.stats.instantEmptyReload;
+    if (this.stats.ejectionType === EjectionType.RELOAD) {
+      while (this.shellsToEject > 0) {
+        this.makeShellCasing(shooter);
+        if (!instant) {
           await this.wait(0.02);
         }
       }
+    }
 
-      if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
-        await this.reloadAction.do(shooter);
-      } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
-        await this.reloadAction.doSinglePhase("start", shooter);
-        while (this.ammo < this.stats.ammoCapacity) {
-          await this.reloadAction.doSinglePhase("insert", shooter);
-        }
-        await this.reloadAction.doSinglePhase("finish", shooter);
+    if (instant) {
+      this.ammo = capacity;
+      this.playSound("reload", shooter.getPosition());
+    } else if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
+      await this.reloadAction.do(shooter);
+    } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
+      await this.reloadAction.doSinglePhase("start", shooter);
+      while (this.ammo < this.getCapacity(shooter)) {
+        await this.reloadAction.doSinglePhase("insert", shooter);
       }
+      await this.reloadAction.doSinglePhase("finish", shooter);
     }
   }
 

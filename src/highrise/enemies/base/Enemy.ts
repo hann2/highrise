@@ -160,6 +160,9 @@ export class BaseEnemy extends Creature implements Hittable {
 
     this.makeBlood(position, bullet.damage, normal);
 
+    if (this.diesInOneHitFrom(bullet.shooter)) {
+      this.hp = 0;
+    }
     if (this.hp <= 0) {
       this.die(bullet.shooter);
     } else {
@@ -189,7 +192,18 @@ export class BaseEnemy extends Creature implements Hittable {
     }
 
     if (damageAmount) {
-      this.hp -= swingingWeapon.weapon.stats.damage;
+      const holder = swingingWeapon.holder;
+      this.hp -= swingingWeapon.weapon.stats.damage * holder.stats.damage;
+      if (this.diesInOneHitFrom(holder)) {
+        this.hp = 0;
+      }
+      if (
+        this.hp <= 0 &&
+        holder.stats.meleeKillHeal > 0 &&
+        !holder.isDestroyed
+      ) {
+        holder.heal(holder.stats.meleeKillHeal, false);
+      }
       this.stunnedTimer = Math.max(this.stunnedTimer, rNormal(0.6, 0.1));
 
       const sounds = swingingWeapon.weapon.stats.sounds.hitFlesh;
@@ -206,6 +220,11 @@ export class BaseEnemy extends Creature implements Hittable {
     } else {
       this.voice.speak("hit");
     }
+  }
+
+  /** Whether any hit from `attacker` kills this enemy outright */
+  diesInOneHitFrom(_attacker?: Human): boolean {
+    return false;
   }
 
   makeBlood(position: V2d, damage: number, normal?: V2d) {

@@ -30,20 +30,19 @@ import {
 } from "./visibility";
 import { buildPenumbraMesh, buildVisionMesh, MeshData } from "./visionMesh";
 
-export const MAX_VISION = 10; // meters
-/** Where the vision mesh hands over to the static darkness beyond it */
-const OUTER_RADIUS = MAX_VISION + 1;
+/** How far the player can see with no upgrades (see `PlayerStats.visionRange`), in meters */
+export const BASE_VISION_RANGE = 10;
+/** How far past the vision range the vision mesh hands over to the static darkness beyond it */
+const OUTER_MARGIN = 1;
 /** Radius of the "eye", in meters: how soft the edges of shadows are */
 const VISION_SOURCE_RADIUS = 0.2;
 /** Softness of edges that aren't shadows (walls, the range limit), in meters */
 const EDGE_ANTIALIAS_WIDTH = 0.05;
-/** Penumbra wedges reach this far from their corner, past everything visible */
-const PENUMBRA_LENGTH = OUTER_RADIUS * 2;
 /** How dark explored places are when the player can't currently see them */
 const EXPLORED_DARKNESS = 0.6;
 /** Pixels per meter of the darkness texture. The screen is about 65 px/m at the default zoom. */
 const DARKNESS_RESOLUTION = 48;
-/** Vision starts fading out at this fraction of MAX_VISION and is gone at the limit */
+/** Vision starts fading out at this fraction of the vision range and is gone at the limit */
 const RANGE_FADE_START = 0.65;
 
 /**
@@ -71,7 +70,11 @@ export default class VisionController extends BaseEntity implements Entity {
   private darknessContainer = new Container();
   private darkness: RenderTexture;
   private darknessSprite: Sprite;
+  private rangeFade: Sprite;
+  private distanceShadows: Graphics;
   private explored?: ExploredMap;
+  /** How far the player can currently see, in meters */
+  private range = BASE_VISION_RANGE;
 
   /** Where the player is looking from */
   private eye: V2d = V(0, 0);
@@ -102,35 +105,58 @@ export default class VisionController extends BaseEntity implements Entity {
     });
     this.penumbraMesh.tint = 0x000000;
     // Beyond a distance, things fade out of sight even in the open
-    const rangeFade = new Sprite(getRangeFadeTexture());
-    rangeFade.anchor.set(0.5);
-    rangeFade.width = MAX_VISION * 2;
-    rangeFade.height = MAX_VISION * 2;
-    rangeFade.tint = 0x000000;
-    this.darknessContainer.addChild(this.mesh, this.penumbraMesh, rangeFade);
-    // No multisampling: every visible edge in it is a gradient already
-    this.darkness = RenderTexture.create({
-      width: OUTER_RADIUS * 2,
-      height: OUTER_RADIUS * 2,
-      resolution: DARKNESS_RESOLUTION,
-    });
+    this.rangeFade = new Sprite(getRangeFadeTexture());
+    this.rangeFade.anchor.set(0.5);
+    this.rangeFade.tint = 0x000000;
+    this.darknessContainer.addChild(
+      this.mesh,
+      this.penumbraMesh,
+      this.rangeFade,
+    );
+    this.darkness = makeDarknessTexture(this.outerRadius);
     this.darknessSprite = new Sprite(this.darkness);
     this.darknessSprite.anchor.set(0.5);
     this.darknessSprite.alpha = EXPLORED_DARKNESS;
 
-    // The mesh's outer edge is a polygon just inside this circle, so the
-    // hole is a bit smaller than the mesh to leave no slivers between them
-    const distanceShadows = new Graphics();
-    distanceShadows
-      .rect(-100, -100, 200, 200)
-      .fill(0x000000)
-      .circle(0, 0, OUTER_RADIUS - 0.1)
-      .cut();
-    distanceShadows.alpha = EXPLORED_DARKNESS;
+    this.distanceShadows = new Graphics();
+    this.distanceShadows.alpha = EXPLORED_DARKNESS;
 
     this.sprite = new Container();
-    this.sprite.addChild(this.darknessSprite, distanceShadows);
+    this.sprite.addChild(this.darknessSprite, this.distanceShadows);
     this.sprite.layerName = Layer.VISION;
+    this.sizeToRange();
+  }
+
+  /** Where the vision mesh hands over to the static darkness beyond it */
+  private get outerRadius() {
+    return this.range + OUTER_MARGIN;
+  }
+
+  /** Sizes everything that depends on the range, except the darkness texture */
+  private sizeToRange() {
+    this.rangeFade.width = this.range * 2;
+    this.rangeFade.height = this.range * 2;
+    // The mesh's outer edge is a polygon just inside this circle, so the
+    // hole is a bit smaller than the mesh to leave no slivers between them
+    this.distanceShadows
+      .clear()
+      .rect(-100, -100, 200, 200)
+      .fill(0x000000)
+      .circle(0, 0, this.outerRadius - 0.1)
+      .cut();
+  }
+
+  /** Changes how far the player can see (an upgrade, or a new leader) */
+  private setRange(range: number) {
+    this.range = range;
+    this.sizeToRange();
+    // A fresh texture rather than a resize, which leaves the sprites'
+    // texture coordinates behind
+    const oldDarkness = this.darkness;
+    this.darkness = makeDarknessTexture(this.outerRadius);
+    this.darknessSprite.texture = this.darkness;
+    this.explored?.setRadius(range, this.darkness);
+    oldDarkness.destroy(true);
   }
 
   /** How visible a point is to the player: 1 in plain view, 0 hidden */
@@ -145,7 +171,7 @@ export default class VisionController extends BaseEntity implements Entity {
   onAdd({ game }: { game: Game }) {
     this.explored = new ExploredMap(
       game.renderer.app.renderer,
-      MAX_VISION,
+      this.range,
       this.darkness,
     );
     this.sprite.addChild(this.explored.sprite);
@@ -165,6 +191,10 @@ export default class VisionController extends BaseEntity implements Entity {
     if (!player) {
       return;
     }
+    const range = BASE_VISION_RANGE * player.stats.visionRange;
+    if (range !== this.range) {
+      this.setRange(range);
+    }
     this.eye = player.getPosition();
     this.sprite.position.copyFrom(this.eye);
     if (this.explored) {
@@ -175,10 +205,10 @@ export default class VisionController extends BaseEntity implements Entity {
 
     // Doors can move without the player moving, so always recompute
     const occluders = profiler.measure("VisionController.occluders", () =>
-      getOccluders(this.game, this.eye, MAX_VISION, true),
+      getOccluders(this.game, this.eye, this.range, true),
     );
     this.samples = profiler.measure("VisionController.visibility", () =>
-      computeVisibility(this.eye, MAX_VISION, occluders, {
+      computeVisibility(this.eye, this.range, occluders, {
         sourceRadius: VISION_SOURCE_RADIUS,
       }),
     );
@@ -187,13 +217,15 @@ export default class VisionController extends BaseEntity implements Entity {
       setGeometry(
         this.geometry,
         buildVisionMesh(this.eye, outline, {
-          outerRadius: OUTER_RADIUS,
+          outerRadius: this.outerRadius,
           antialiasWidth: EDGE_ANTIALIAS_WIDTH,
         }),
       );
+      // Penumbra wedges reach this far from their corner, past everything visible
+      const penumbraLength = this.outerRadius * 2;
       setGeometry(
         this.penumbraGeometry,
-        buildPenumbraMesh(this.eye, outline.silhouettes, PENUMBRA_LENGTH),
+        buildPenumbraMesh(this.eye, outline.silhouettes, penumbraLength),
       );
       this.mesh.visible = this.geometry.indices.length > 0;
       this.penumbraMesh.visible = this.penumbraGeometry.indices.length > 0;
@@ -205,7 +237,7 @@ export default class VisionController extends BaseEntity implements Entity {
         target: this.darkness,
         clear: true,
         clearColor: [0, 0, 0, 0],
-        transform: new Matrix().translate(OUTER_RADIUS, OUTER_RADIUS),
+        transform: new Matrix().translate(this.outerRadius, this.outerRadius),
       });
     });
     profiler.measure("VisionController.explored", () => {
@@ -221,6 +253,16 @@ export default class VisionController extends BaseEntity implements Entity {
     this.geometry.destroy();
     this.penumbraGeometry.destroy();
   }
+}
+
+/** What the player can't see right now, centered on the eye */
+function makeDarknessTexture(outerRadius: number): RenderTexture {
+  // No multisampling: every visible edge in it is a gradient already
+  return RenderTexture.create({
+    width: outerRadius * 2,
+    height: outerRadius * 2,
+    resolution: DARKNESS_RESOLUTION,
+  });
 }
 
 function emptyGeometry(): MeshGeometry {

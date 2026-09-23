@@ -33,11 +33,13 @@ import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import HumanSprite from "./HumanSprite";
 import Flashlight from "./Flashlight";
 import HumanVoice from "./HumanVoice";
+import { PlayerStats } from "./PlayerStats";
+import type { Upgrade } from "../upgrades/Upgrade";
+import type { Level } from "../levels/Level";
 
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
 const SPEED = 5.0; // meters / second
 const HURT_SPEED = 3.0; // Speed while hurt
-const MAX_HEALTH = 100;
 
 export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
@@ -66,8 +68,11 @@ const pushSoundRing = new ShuffleRing(PUSH_SOUNDS);
 export default class Human extends BaseEntity implements Entity {
   body: Body;
   tags = ["human"];
-  maxHp: number = MAX_HEALTH;
-  hp: number = MAX_HEALTH;
+  /** Modifiers from upgrades; neutral for anyone who hasn't picked any */
+  stats = new PlayerStats();
+  /** Upgrades picked so far this run, in order */
+  upgrades: Upgrade[] = [];
+  hp: number = this.stats.maxHp;
   weapon?: Gun | MeleeWeapon;
   humanSprite: HumanSprite;
   voice: HumanVoice;
@@ -108,14 +113,22 @@ export default class Human extends BaseEntity implements Entity {
     game.entities.addFilter(isEnemy);
   }
 
+  get maxHp(): number {
+    return this.stats.maxHp;
+  }
+
+  @on("startLevel")
+  onStartLevel(_: { level: Level }) {
+    if (this.stats.floorHeal > 0 && this.hp < this.maxHp) {
+      this.heal(this.stats.floorHeal, false);
+    }
+  }
+
   @on("tick")
   onTick() {
     const healthPercent = this.hp / this.maxHp;
-    if (healthPercent < 0.3) {
-      this.walkSpring.speed = HURT_SPEED;
-    } else {
-      this.walkSpring.speed = SPEED;
-    }
+    const speed = healthPercent < 0.3 ? HURT_SPEED : SPEED;
+    this.walkSpring.speed = speed * this.stats.moveSpeed;
   }
 
   // Have the human face a specific angle
@@ -233,8 +246,10 @@ export default class Human extends BaseEntity implements Entity {
     this.destroy();
   }
 
-  heal(amount: number) {
-    this.voice.speak("pickupHealth");
+  heal(amount: number, speak: boolean = true) {
+    if (speak) {
+      this.voice.speak("pickupHealth");
+    }
     this.hp = Math.min(this.hp + amount, this.maxHp);
     this.game.dispatch("humanHealed", { human: this, amount });
   }
@@ -263,13 +278,15 @@ export default class Human extends BaseEntity implements Entity {
 
           if (distance < PUSH_RANGE && theta < PUSH_ANGLE) {
             const amount =
-              PUSH_KNOCKBACK - 0.5 * PUSH_KNOCKBACK * (distance / PUSH_RANGE);
+              (PUSH_KNOCKBACK -
+                0.5 * PUSH_KNOCKBACK * (distance / PUSH_RANGE)) *
+              this.stats.pushKnockback;
             enemy.knockback(relPosition.inormalize().imul(amount));
-            enemy.stun(PUSH_STUN * rNormal(1, 0.2));
+            enemy.stun(PUSH_STUN * this.stats.pushStun * rNormal(1, 0.2));
             enemy.voice.speak("hit");
             this.game.addEntity(
               new PositionalSound(pushSoundRing.getNext(), this.getPosition(), {
-                gain: amount / PUSH_KNOCKBACK,
+                gain: Math.min(1, amount / PUSH_KNOCKBACK),
                 speed: rNormal(1, 0.05),
               }),
             );

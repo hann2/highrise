@@ -92,7 +92,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
       !weapon.isReloading &&
       (weapon.ammo === 0 ||
         (weapon.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL &&
-          weapon.ammo < weapon.stats.ammoCapacity &&
+          weapon.ammo < weapon.getCapacity(human) &&
           !nearestVisibleZombie))
     ) {
       human.reload();
