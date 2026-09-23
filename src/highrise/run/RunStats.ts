@@ -6,6 +6,7 @@ import { Character } from "../characters/Character";
 import { Persistence } from "../constants/constants";
 import { getCurrentLevelNumber } from "../controllers/LevelController";
 import { BaseEnemy } from "../enemies/base/Enemy";
+import { getPartyLeader } from "../environment/PartyManager";
 import Human from "../human/Human";
 import { recordRun, RunSummary } from "../persistence/SaveData";
 import { getLastDamageSource } from "./damageSources";
@@ -23,7 +24,7 @@ export default class RunStats extends BaseEntity implements Entity {
   /** Seconds of play, not counting time paused */
   timeSeconds = 0;
   partyDead = false;
-  /** What killed the most recent party member to die */
+  /** What killed the leader */
   lastDeathCause?: string;
   /** Names of upgrades taken, in order. Filled in by the upgrade system. */
   upgrades: string[] = [];
@@ -57,8 +58,13 @@ export default class RunStats extends BaseEntity implements Entity {
     this.kills[name] = (this.kills[name] ?? 0) + 1;
   }
 
+  // The run ends when the leader dies, so that's the cause of death; allies
+  // dying before or after don't count
   @on("humanDied")
   onHumanDied({ human }: { human: Human }) {
+    if (human !== getPartyLeader(this.game)) {
+      return;
+    }
     const source = getLastDamageSource(human);
     if (source === undefined) {
       this.lastDeathCause = undefined;

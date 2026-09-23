@@ -2,7 +2,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import { PositionalSound } from "../../core/sound/PositionalSound";
-import { V2d } from "../../core/Vector";
+import { V, V2d } from "../../core/Vector";
 import Door from "./Door";
 import { getPartyManager } from "./PartyManager";
 
@@ -44,6 +44,27 @@ export default class Stairwell extends BaseEntity implements Entity {
     return (
       x >= this.min.x && x <= this.max.x && y >= this.min.y && y <= this.max.y
     );
+  }
+
+  /**
+   * A point `distance` into the stairwell from the middle of its doorway, for
+   * allies to head for when the leader is inside
+   */
+  getInsideOfDoorway(distance: number): V2d | undefined {
+    const doorway = this.door?.getDoorwayCenter();
+    if (!doorway) {
+      return undefined;
+    }
+    // The doorway is on one edge of the box; inward is away from that edge
+    const [x, y] = doorway;
+    const edgeDistances: [number, V2d][] = [
+      [Math.abs(x - this.min.x), V(1, 0)],
+      [Math.abs(x - this.max.x), V(-1, 0)],
+      [Math.abs(y - this.min.y), V(0, 1)],
+      [Math.abs(y - this.max.y), V(0, -1)],
+    ];
+    edgeDistances.sort((a, b) => a[0] - b[0]);
+    return doorway.add(edgeDistances[0][1].imul(distance));
   }
 
   @on("tick")
