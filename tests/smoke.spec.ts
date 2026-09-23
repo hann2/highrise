@@ -654,6 +654,7 @@ test("game boots, plays, and changes levels without errors", async ({
       openedWithoutKeycard: false,
       keycardsPickedUp: 0,
       hudShown: false,
+      reachableThroughDoor: [] as string[],
     };
     if (keycardPickups.length !== 1 || locks.length !== 2) {
       return result;
@@ -677,11 +678,23 @@ test("game boots, plays, and changes levels without errors", async ({
     result.keycardsPickedUp = leader.keycards;
     result.hudShown = !!document.querySelector(".hud-keycards");
 
-    // Stays pinned here for the screenshot, then uses the lock from here
+    // Right outside the locked door, the lock is usable but the closet's
+    // contents behind the door are not, even though they're within range
     const doorway = locks[0].door.getDoorwayCenter();
+    await standAt(doorway.lerp(locks[0].outsidePosition, 0.6));
+    result.reachableThroughDoor = leader
+      .getNearbyInteractables()
+      .map((i: any) => i.parent?.constructor.name);
+
+    // Stays pinned here for the screenshot, then uses the lock from here
     await standAt(doorway.lerp(locks[0].outsidePosition, 1.6));
     return result;
   });
+  expect(keycards.reachableThroughDoor).toContain("KeycardLock");
+  expect(keycards.reachableThroughDoor).not.toContain("WeaponPickup");
+  expect(keycards.reachableThroughDoor).not.toContain("HealthPickup");
+  expect(keycards.reachableThroughDoor).not.toContain("AmmoPickup");
+  expect(keycards.reachableThroughDoor).not.toContain("ConsumablePickup");
   expect(keycards.keycardCount).toBe(1);
   expect(keycards.lockCount).toBe(2);
   expect(keycards.lockedDoorsStayShut).toBe(2);

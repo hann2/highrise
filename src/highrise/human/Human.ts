@@ -51,6 +51,8 @@ import type { Level } from "../levels/Level";
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
 const SPEED = 5.0; // meters / second
 const HURT_SPEED = 3.0; // Speed while hurt
+// How close to an interactable a wall hit can be and still count as reaching it
+const REACH_TOLERANCE = 0.5; // meters
 
 export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
@@ -379,19 +381,37 @@ export default class Human extends BaseEntity implements Entity {
     this.game.addEntity(new ThrownConsumable(stats, position, velocity, this));
   }
 
-  // Return a list of all interactables within range
+  // Return a list of all interactables within range and not behind a wall
   getNearbyInteractables(): Interactable[] {
+    return [...this.game.entities.getByFilter(isInteractable)]
+      .filter(
+        (i) =>
+          i.getPosition().distanceTo(this.body.position) < i.maxDistance &&
+          this.canReach(i),
+      )
+      .sort(
+        (i1, i2) =>
+          i1.getPosition().distanceTo(this.body.position) -
+          i2.getPosition().distanceTo(this.body.position),
+      );
+  }
+
+  // Whether nothing solid is between us and the interactable, so that a
+  // closet's contents can't be grabbed through its locked door
+  private canReach(interactable: Interactable): boolean {
+    const target = interactable.getPosition();
+    const hit = this.game.world.raycast(this.body.position, target, {
+      collisionMask: CollisionGroups.Walls,
+      skipBackfaces: true,
+    });
+    if (!hit) {
+      return true;
+    }
+    // The thing we're reaching for may be solid itself (a vending machine,
+    // the card reader on a door), in which case hitting it is fine
     return (
-      [...this.game.entities.getByFilter(isInteractable)]
-        // .filter((i) => testLineOfSight(i, this)) // TODO: Fast vision test for interactables
-        .filter(
-          (i) => i.getPosition().distanceTo(this.body.position) < i.maxDistance,
-        )
-        .sort(
-          (i1, i2) =>
-            i1.getPosition().distanceTo(this.body.position) -
-            i2.getPosition().distanceTo(this.body.position),
-        )
+      hit.body === interactable.parent?.body ||
+      hit.point.distanceTo(target) < REACH_TOLERANCE
     );
   }
 
