@@ -12,6 +12,12 @@ export type HitResult = { hit: Entity; hitNormal: V2d; hitPosition: V2d };
 export class Projectile extends BaseEntity implements Entity {
   hitPosition?: V2d;
   renderPosition: V2d;
+  /**
+   * Where the shot really starts, if that's behind `position`. A gun's muzzle
+   * sits well in front of its shooter, so the first collision check sweeps
+   * from here to catch walls and enemies between the shooter and the muzzle.
+   */
+  sweepFrom?: V2d;
 
   constructor(
     public position: V2d,
@@ -61,9 +67,11 @@ export class Projectile extends BaseEntity implements Entity {
   }
 
   checkForCollision(dt: number): HitResult | undefined {
+    const from = this.sweepFrom ?? this.position;
+    this.sweepFrom = undefined;
     return projectileRaycast(
       this.game,
-      this.position,
+      from,
       this.position.addScaled(this.velocity, dt),
       this.makeCollisionMask(),
     );

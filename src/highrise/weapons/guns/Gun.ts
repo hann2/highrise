@@ -1,4 +1,5 @@
 import { SoundName } from "../../../../resources/resources";
+import { CollisionGroups } from "../../../config/CollisionGroups";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { on } from "../../../core/entity/handler";
@@ -9,6 +10,7 @@ import {
   lerp,
   polarToVec,
   smoothStep,
+  stepToward,
 } from "../../../core/util/MathUtil";
 import {
   rDirection,
@@ -31,6 +33,20 @@ import {
   ReloadingStyle,
 } from "./GunStats";
 
+// Pulling the gun in when it would poke through a wall. It first slides back
+// toward the body until the grip is at MIN_GRIP_X, then swings aside around the
+// grip, up to MAX_WALL_TILT.
+/** How far in front of the muzzle a wall has to be to leave the gun alone */
+const WALL_MARGIN = 0.1; // meters
+/** Closest the grip hand can come to the shoulders */
+const MIN_GRIP_X = 0.12; // meters, forward of the body's center
+const MAX_WALL_TILT = degToRad(75);
+/** Past this the gun isn't pointed anywhere useful, so it won't fire */
+const MAX_FIRING_TILT = degToRad(20);
+/** Meters per second. Pulling in is quick so the gun doesn't lag into a wall */
+const RETRACT_SPEED = 8;
+const EXTEND_SPEED = 3;
+
 export default class Gun extends BaseEntity implements Entity {
   // All the defining characteristics of this gun
   stats: GunStats;
@@ -51,6 +67,8 @@ export default class Gun extends BaseEntity implements Entity {
   shellsToEject = 0;
 
   aimOffset = 0;
+  /** How far the muzzle is pulled back from its usual spot to keep it out of a wall */
+  wallRetraction = 0;
 
   constructor(stats: GunStats) {
     super();
@@ -107,7 +125,17 @@ export default class Gun extends BaseEntity implements Entity {
   }
 
   canShoot(): boolean {
-    return !this.isReloading && this.shootCooldown <= 0 && this.ammo > 0;
+    return (
+      !this.isReloading &&
+      this.shootCooldown <= 0 &&
+      this.ammo > 0 &&
+      !this.isRaisedByWall()
+    );
+  }
+
+  /** Whether the gun is swung so far aside by a wall that it can't fire */
+  isRaisedByWall(): boolean {
+    return this.getWallPose().tilt > MAX_FIRING_TILT;
   }
 
   // Pull the trigger and do whatever the gun will do when that happens
@@ -117,7 +145,11 @@ export default class Gun extends BaseEntity implements Entity {
         this.cancelReload();
         this.playSound("reloadFinish", shooter.getPosition());
       }
-    } else if (this.shootCooldown <= 0 && this.pumpAmount <= 0) {
+    } else if (
+      this.shootCooldown <= 0 &&
+      this.pumpAmount <= 0 &&
+      !this.isRaisedByWall()
+    ) {
       const direction = shooter.getDirection() + this.getCurrentHoldAngle();
       const muzzlePosition = shooter.localToWorld(this.getMuzzlePosition());
 
@@ -207,14 +239,15 @@ export default class Gun extends BaseEntity implements Entity {
     for (let i = 0; i < this.stats.bulletStats.bulletsPerShot; i++) {
       const maxSpread = this.stats.bulletSpread * shooter.stats.spread;
       const spread = rUniform(-maxSpread / 2, maxSpread / 2);
-      this.game.addEntity(
-        new Bullet(
-          position.clone(),
-          direction + spread,
-          this.stats.bulletStats,
-          shooter,
-        ),
+      const bullet = new Bullet(
+        position.clone(),
+        direction + spread,
+        this.stats.bulletStats,
+        shooter,
       );
+      // Anything between the shooter and the muzzle gets hit too
+      bullet.sweepFrom = shooter.getPosition();
+      this.game.addEntity(bullet);
     }
   }
 
@@ -286,6 +319,48 @@ export default class Gun extends BaseEntity implements Entity {
     this.aimOffset *= Math.exp(-dt * this.stats.recoilRecovery);
   }
 
+  /** Pulls the gun in (or lets it back out) depending on how close the wall in front of `holder` is */
+  updateWallRetraction(holder: Human, dt: number) {
+    const reach = this.stats.holdPosition[0] + this.stats.muzzleLength / 2;
+    const hit = this.game.world.raycast(
+      holder.getPosition(),
+      holder.localToWorld([reach + WALL_MARGIN, 0]),
+      { collisionMask: CollisionGroups.Walls, skipBackfaces: true },
+    );
+    const target = hit ? reach + WALL_MARGIN - hit.distance : 0;
+    const speed = target > this.wallRetraction ? RETRACT_SPEED : EXTEND_SPEED;
+    this.wallRetraction = stepToward(this.wallRetraction, target, dt * speed);
+  }
+
+  /** How `wallRetraction` is split between sliding the gun back and swinging it aside */
+  private getWallPose(): { slide: number; tilt: number } {
+    if (this.wallRetraction <= 0) {
+      return { slide: 0, tilt: 0 };
+    }
+    const gripX = this.stats.rightHandPosition[0];
+    const slide = clamp(
+      this.wallRetraction,
+      0,
+      Math.max(0, gripX - MIN_GRIP_X),
+    );
+    // The rest comes from swinging the barrel aside around the grip
+    const barrel =
+      this.stats.holdPosition[0] + this.stats.muzzleLength / 2 - gripX;
+    const cos = (barrel - (this.wallRetraction - slide)) / barrel;
+    const tilt = Math.min(Math.acos(clamp(cos, -1, 1)), MAX_WALL_TILT);
+    return { slide, tilt };
+  }
+
+  /** Moves a point on the gun from its usual spot to where the wall pose puts it */
+  private applyWallPose(localPoint: V2d): V2d {
+    const { slide, tilt } = this.getWallPose();
+    if (slide === 0 && tilt === 0) {
+      return localPoint;
+    }
+    const grip = V(this.stats.rightHandPosition);
+    return localPoint.isub(grip).irotate(-tilt).iadd(grip).isub([slide, 0]);
+  }
+
   playSound(
     soundClass: GunSoundName,
     position: V2d,
@@ -313,22 +388,28 @@ export default class Gun extends BaseEntity implements Entity {
     const [rightX, rightY] = this.stats.rightHandPosition;
 
     return [
-      V(leftX + recoilOffset + pumpOffset, leftY),
-      V(rightX + recoilOffset, rightY),
+      this.applyWallPose(V(leftX + recoilOffset + pumpOffset, leftY)),
+      this.applyWallPose(V(rightX + recoilOffset, rightY)),
     ];
   }
 
   // Returns local coordinates for the center of the gun sprite
   getCurrentHoldPosition(): V2d {
     if (this.isReloading) {
-      return V(this.stats.holdPosition).imul(0.9);
+      return this.applyWallPose(V(this.stats.holdPosition).imul(0.9));
     } else {
       const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
-      return V(this.stats.holdPosition).iadd([recoilOffset, 0]);
+      return this.applyWallPose(
+        V(this.stats.holdPosition).iadd([recoilOffset, 0]),
+      );
     }
   }
 
   getCurrentHoldAngle(): number {
+    return this.getBaseHoldAngle() - this.getWallPose().tilt;
+  }
+
+  private getBaseHoldAngle(): number {
     if (this.isReloading) {
       const t = smoothStep(this.reloadAction.phasePercent);
       switch (this.reloadAction.currentPhase!.name) {
