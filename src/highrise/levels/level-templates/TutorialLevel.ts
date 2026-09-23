@@ -11,6 +11,8 @@ import LevelTemplate from "./LevelTemplate";
 
 // Hand-built level that teaches the controls
 export default class TutorialLevel extends LevelTemplate {
+  static floorName = "Tutorial";
+
   chooseRoomTemplates(): RoomTemplate[] {
     return [new TutorialRoomTemplate()];
   }

@@ -58,6 +58,11 @@ export interface LockedRoom {
 }
 
 export default class LevelTemplate {
+  /** What the floor is called on the lobby's directory board */
+  static floorName = "Offices";
+  /** Anything notable about the floor, for the directory board */
+  static floorNotes: readonly string[] = [];
+
   constructor(public levelIndex: number) {}
 
   getSize(): [number, number] {

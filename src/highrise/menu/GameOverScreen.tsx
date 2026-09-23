@@ -24,7 +24,7 @@ const TITLES: Record<RunSummary["outcome"], string> = {
 /**
  * The run summary: fades in over the game, stays until the player continues,
  * then fades out. `GameController` clears the game away behind it once it is
- * opaque and goes back to the main menu once it is destroyed.
+ * opaque and goes back to the lobby once it is destroyed.
  */
 export default class GameOverScreen extends ReactEntity implements Entity {
   persistenceLevel = Persistence.Menu;
@@ -73,7 +73,9 @@ export default class GameOverScreen extends ReactEntity implements Entity {
             ])}
           </div>
           {this.renderCallouts()}
-          <MenuButton onClick={() => this.continue()}>Main Menu</MenuButton>
+          <MenuButton onClick={() => this.continue()}>
+            Back to the lobby
+          </MenuButton>
           <MenuButton onClick={() => this.openEncyclopedia()}>
             Encyclopedia
           </MenuButton>

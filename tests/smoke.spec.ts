@@ -4,15 +4,16 @@ import {
   expectNoIssues,
   getLeaderPosition,
   getLevelNumber,
+  getLobbyPlayerPosition,
+  arriveInLobby,
   loadGame,
-  startGame,
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "335:-827972538";
+const LEVEL_2_FINGERPRINT = "413:-1956720600";
 // What the upgrade screen offers after level 1 with this seed, in order.
 // Changes when the upgrade pool, the rarities, or level generation change.
-const UPGRADE_OFFER = ["Bloodthirsty", "Night Eyes", "Glass Cannon"];
+const UPGRADE_OFFER = ["Night Eyes", "Steady Aim", "Scavenger"];
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
@@ -25,73 +26,253 @@ test("game boots, plays, and changes levels without errors", async ({
   const issues = collectIssues(page);
   const game = () => page.evaluate(() => window.DEBUG.game!.ticknumber);
 
-  // --- Boot to main menu ---
+  // --- Boot into the lobby, standing in a closed elevator behind the title ---
   // Broken save data must not stop the game (it gets replaced at game over)
   await page.addInitScript(() => {
     window.localStorage.setItem("highriseSaveData", "{not json");
   });
   await loadGame(page, 12345);
   expect(await game()).toBeGreaterThan(0);
+  await expect(page.locator(".menu-title")).toHaveText("HIGHRISE");
+  const inElevator = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const lobby = game.entities.getById("lobby") as any;
+    const elevators = [...game.entities.all].filter(
+      (e) => e.constructor.name === "ElevatorDoor",
+    ) as any[];
+    return {
+      // A new save arrives as the first unlocked character
+      character: lobby.player.character.name as string,
+      doorOpen: lobby.arrivalDoor.openPercentage as number,
+      playerToDoor: lobby.player
+        .getPosition()
+        .distanceTo(lobby.arrivalDoor.center) as number,
+      elevatorCount: elevators.length,
+      interactableElevators: [...game.entities.all].filter(
+        (e: any) =>
+          e.constructor.name === "Interactable" &&
+          e.parent?.constructor.name === "ElevatorDoor",
+      ).length,
+      humans: game.entities.getTagged("human").length,
+      zombies: game.entities.getTagged("zombie").length,
+      visionControllers: [...game.entities.all].filter(
+        (e) => e.constructor.name === "VisionController",
+      ).length,
+      cameraOnPlayer: Math.hypot(
+        game.camera.x - lobby.player.getPosition()[0],
+        game.camera.y - lobby.player.getPosition()[1],
+      ),
+    };
+  });
+  expect(inElevator.character).toBe("Andy");
+  expect(inElevator.doorOpen).toBe(0);
+  expect(inElevator.playerToDoor).toBeLessThan(1.2);
+  expect(inElevator.elevatorCount).toBe(12);
+  expect(inElevator.interactableElevators).toBe(0);
+  // Everyone stands around the lobby, locked or not; no enemies, no fog
+  expect(inElevator.humans).toBe(13);
+  expect(inElevator.zombies).toBe(0);
+  expect(inElevator.visionControllers).toBe(0);
+  expect(inElevator.cameraOnPlayer).toBeLessThan(0.5);
+  // Walking into the shut doors goes nowhere
+  const beforeWalking = await getLobbyPlayerPosition(page);
+  await page.keyboard.down("KeyD");
+  await page.waitForTimeout(500);
+  await page.keyboard.up("KeyD");
+  const afterWalking = await getLobbyPlayerPosition(page);
+  expect(Math.abs(afterWalking[0] - beforeWalking[0])).toBeLessThan(0.05);
+  await page.waitForTimeout(1000); // let the title fade in
+  await page.screenshot({ path: "tests/output/title.png" });
   expectNoIssues(issues);
 
-  // --- Pick a character ---
+  // --- Enter: the title goes, the elevator dings open, and out you walk ---
   await page.keyboard.press("Enter");
   await page.waitForFunction(
     () =>
-      [...window.DEBUG.game!.entities.all].some(
-        (e) => e.constructor.name === "CharacterSelect",
-      ),
+      (window.DEBUG.game!.entities.getById("lobby") as any).arrivalDoor
+        .openPercentage === 1,
+    null,
+    { timeout: 10000 },
+  );
+  await expect(page.locator(".menu-title")).toHaveCount(0);
+  await page.keyboard.down("KeyD");
+  await page.waitForTimeout(500);
+  await page.keyboard.up("KeyD");
+  const outside = await getLobbyPlayerPosition(page);
+  expect(outside[0] - beforeWalking[0]).toBeGreaterThan(1);
+  // The rest of the bank stays shut
+  expect(
+    await page.evaluate(
+      () =>
+        [...window.DEBUG.game!.entities.all].filter(
+          (e: any) =>
+            e.constructor.name === "ElevatorDoor" && e.openPercentage > 0,
+        ).length,
+    ),
+  ).toBe(1);
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: "tests/output/lobby-arrival.png" });
+  expectNoIssues(issues);
+
+  // --- The directory board lists the run ahead, top floor first ---
+  const board = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const lobby = game.entities.getById("lobby") as any;
+    const board = game.entities.getTagged("directory_board")[0] as any;
+    const [x, y] = board.getPosition();
+    // Stand in front of it to have a look
+    lobby.player.body.position.set([x, y + 2.5]);
+    return {
+      rows: board.rows as string[],
+      plan: lobby.plan.map((floor: any) => floor.name) as string[],
+    };
+  });
+  expect(board.plan).toEqual(["Shops", "Maintenance", "Generator", "Chapel"]);
+  expect(board.rows).toEqual([
+    "4 Chapel Boss",
+    "3 Generator",
+    "2 Maintenance Dark",
+    "1 Shops",
+    "L Lobby",
+  ]);
+  await page.waitForTimeout(800); // let the camera settle
+  await page.screenshot({ path: "tests/output/lobby-directory.png" });
+
+  // --- Walk up to someone unlocked and press E to play as them ---
+  /** Stands the player just below the waiting character called `name` */
+  const standBy = (name: string) =>
+    page.evaluate(async (name) => {
+      const game = window.DEBUG.game!;
+      const lobby = game.entities.getById("lobby") as any;
+      const waiting = game.entities
+        .getTagged("lobby_character")
+        .find((c: any) => c.human.character.name === name) as any;
+      const at = waiting.human.getPosition().add([0, 0.9]);
+      lobby.player.body.position.set(at);
+      lobby.player.body.velocity.set(0, 0);
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      return lobby.player.getPosition().distanceTo(waiting.human.getPosition());
+    }, name);
+  const playingAs = () =>
+    page.evaluate(
+      () =>
+        (window.DEBUG.game!.entities.getById("lobby") as any).player.character
+          .name as string,
+    );
+  expect(await standBy("Nancy")).toBeLessThan(1.5);
+  await expect(page.locator(".lobby-prompt__title")).toHaveText("Nancy");
+  await expect(page.locator(".lobby-prompt__action")).toContainText(
+    "to play as",
+  );
+  const andyLeftAt = await getLobbyPlayerPosition(page);
+  await page.keyboard.press("KeyE");
+  await page.waitForTimeout(300);
+  expect(await playingAs()).toBe("Nancy");
+  // Andy waits where he was left, as someone to swap back to
+  const andy = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const waiting = game.entities
+      .getTagged("lobby_character")
+      .find((c: any) => c.human.character.name === "Andy") as any;
+    return waiting ? [...waiting.human.getPosition()] : undefined;
+  });
+  expect(andy).toBeDefined();
+  expect(
+    Math.hypot(andy![0] - andyLeftAt[0], andy![1] - andyLeftAt[1]),
+  ).toBeLessThan(0.5);
+
+  // --- Someone not rescued yet is a silhouette, and refuses ---
+  expect(await standBy("Santa")).toBeLessThan(1.5);
+  await expect(page.locator(".lobby-prompt__title")).toHaveText("???");
+  await expect(page.locator(".lobby-prompt__hint")).toHaveText(
+    "Rescue them to unlock",
+  );
+  await page.keyboard.press("KeyE");
+  await page.waitForTimeout(300);
+  expect(await playingAs()).toBe("Nancy");
+  const santaTint = await page.evaluate(
+    () =>
+      (
+        window.DEBUG.game!.entities.getTagged("lobby_character").find(
+          (c: any) => c.human.character.name === "Santa",
+        ) as any
+      ).human.humanSprite.sprite.tint as number,
+  );
+  expect(santaTint).toBeLessThan(0x404040);
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: "tests/output/lobby-characters.png" });
+  expectNoIssues(issues);
+
+  // --- The pause menu works in the lobby, with the credits instead of quitting ---
+  await page.keyboard.press("Escape");
+  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
+  await expect(
+    page.locator(".menu-button", { hasText: "Credits" }),
+  ).toHaveCount(1);
+  await expect(
+    page.locator(".menu-button", { hasText: "Quit Run" }),
+  ).toHaveCount(0);
+  await page.locator(".menu-button", { hasText: "Credits" }).click();
+  await expect(page.locator(".credits")).toBeVisible();
+  await expect(page.locator(".pause-menu__background")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".credits")).toHaveCount(0);
+  await expect(page.locator(".pause-menu__background")).toHaveCount(1);
+  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
+  await page.keyboard.press("Escape");
+  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
+
+  // --- Up the stairs: through the stairwell's one-way door, onto the stairs ---
+  await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const lobby = game.entities.getById("lobby") as any;
+    const door = [...game.entities.all].find(
+      (e) => e.constructor.name === "Door",
+    ) as any;
+    // In the hallway, a couple of meters left of the doorway
+    lobby.player.body.position.set(door.getDoorwayCenter().add([-2, 0]));
+    lobby.player.body.velocity.set(0, 0);
+  });
+  await page.waitForTimeout(200);
+  await page.keyboard.down("KeyD");
+  await page.waitForTimeout(1100);
+  await page.keyboard.down("KeyW");
+  await page.waitForTimeout(600);
+  await page.keyboard.up("KeyD");
+  await page.keyboard.up("KeyW");
+  await page.waitForFunction(
+    () => {
+      const entities = window.DEBUG.game!.entities;
+      return (
+        !entities.getById("lobby") &&
+        entities.getTagged("human").length > 0 &&
+        entities.getTagged("zombie").length > 0
+      );
+    },
     null,
     { timeout: 30000 },
   );
-  await page.waitForTimeout(500);
-  // Only the default characters are unlocked in a new save
-  await expect(page.locator(".character-select__count")).toHaveText(
-    "3 / 13 survivors",
-  );
-  expect(
-    await page.locator(".character-select__portrait--locked").count(),
-  ).toBe(10);
-  // Two right and one down from the first character is Santa, who is locked
-  await page.keyboard.press("ArrowRight");
-  await page.keyboard.press("ArrowRight");
-  await page.keyboard.press("ArrowDown");
-  await page.waitForTimeout(300);
-  await expect(page.locator(".character-select__name")).toHaveText("???");
-  await expect(page.locator(".character-select__hint")).toContainText(
-    "Rescue them to unlock",
-  );
-  await page.screenshot({ path: "tests/output/character-select.png" });
-  // ...and can't be started
-  await page.keyboard.press("Enter");
-  await page.waitForTimeout(800);
-  expect(
-    await page.evaluate(() => ({
-      characterSelect: [...window.DEBUG.game!.entities.all].some(
-        (e) => e.constructor.name === "CharacterSelect",
-      ),
-      humans: window.DEBUG.game!.entities.getTagged("human").length,
-    })),
-  ).toEqual({ characterSelect: true, humans: 0 });
-  // One left of Santa is Nancy, who is unlocked from the start
-  await page.keyboard.press("ArrowLeft");
-  await page.waitForTimeout(300);
-  await expect(page.locator(".character-select__name")).toHaveText("Nancy");
-  expectNoIssues(issues);
 
-  // --- Start a game ---
-  await startGame(page);
+  // --- The run starts on its first floor, the Shops, as Nancy ---
   const startLevel = await getLevelNumber(page);
   expect(startLevel).toBe(1);
-  const leaderName = await page.evaluate(
-    () =>
-      (
-        [...window.DEBUG.game!.entities.all].find(
-          (e) => e.constructor.name === "PartyManager",
-        ) as any
-      ).leader.character.name,
-  );
-  expect(leaderName).toBe("Nancy");
+  const runStart = await page.evaluate(() => {
+    const entities = [...window.DEBUG.game!.entities.all] as any[];
+    return {
+      leader: entities.find((e) => e.constructor.name === "PartyManager").leader
+        .character.name as string,
+      floor: entities.find((e) => e.constructor.name === "LevelController")
+        .floor.name as string,
+      lastCharacter: JSON.parse(
+        window.localStorage.getItem("highriseSaveData")!,
+      ).lastCharacter as string,
+    };
+  });
+  expect(runStart).toEqual({
+    leader: "Nancy",
+    floor: "Shops",
+    lastCharacter: "Nancy",
+  });
   // let the fade in finish and lighting settle
   await page.waitForTimeout(2500);
   await page.screenshot({ path: "tests/output/level-1-start.png" });
@@ -148,9 +329,23 @@ test("game boots, plays, and changes levels without errors", async ({
         (e) => e.constructor.name === "PartyManager",
       ) as any
     ).leader;
-    const pickup = [...game.entities.all].find(
-      (e) => e.constructor.name === "WeaponPickup",
-    ) as any;
+    // The nearest gun, and then back to the spawn room, from its left side
+    // so that there's room to shoot across it
+    const home = ([...game.entities.all] as any[])
+      .filter((e) => e.constructor.name === "SpawnLocation")
+      .map((e) => e.position.clone())
+      .sort((a, b) => a[0] - b[0])[0];
+    (window as any).testHome = home;
+    const pickup = ([...game.entities.all] as any[])
+      .filter(
+        (e) =>
+          e.constructor.name === "WeaponPickup" &&
+          e.weapon.constructor.name === "Gun",
+      )
+      .sort(
+        (a, b) =>
+          a.getPosition().distanceTo(home) - b.getPosition().distanceTo(home),
+      )[0];
     leader.body.position.set(pickup.getPosition());
   });
   await page.waitForTimeout(300);
@@ -163,6 +358,8 @@ test("game boots, plays, and changes levels without errors", async ({
         (e) => e.constructor.name === "PartyManager",
       ) as any
     ).leader;
+    leader.body.position.set((window as any).testHome);
+    leader.body.velocity.set(0, 0);
     const zombie = game.entities
       .getTagged("zombie")
       .find((e) => e.constructor.name === "Zombie") as any;
@@ -1215,8 +1412,8 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
   await page.waitForTimeout(600);
   await page.screenshot({ path: "tests/output/upgrade-select.png" });
-  // Take Glass Cannon with the keyboard
-  const pick = offer.names.indexOf("Glass Cannon");
+  // Take Steady Aim with the keyboard
+  const pick = offer.names.indexOf("Steady Aim");
   // The card under the mouse is selected when the screen appears, so get the
   // mouse out of the way and step from wherever the selection is
   await page.mouse.move(1, 1);
@@ -1303,7 +1500,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(floor2Party.leader).toBe("Nancy");
   expect(floor2Party.humans).not.toContain(stairwell.allyName);
 
-  // --- The upgrade stuck: the leader hits harder, and has less health ---
+  // --- The upgrade stuck: the leader's shots spread less ---
   const upgraded = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
@@ -1317,16 +1514,14 @@ test("game boots, plays, and changes levels without errors", async ({
       hp: leader.hp,
     };
   });
-  expect(upgraded.upgrades).toEqual(["Glass Cannon"]);
-  expect(upgraded.stats.damage).toBeCloseTo(statsBefore.damage * 1.5);
-  expect(upgraded.maxHp).toBe(statsBefore.maxHp - 30);
+  expect(upgraded.upgrades).toEqual(["Steady Aim"]);
+  expect(upgraded.stats.spread).toBeCloseTo(statsBefore.spread * 0.6);
+  expect(upgraded.maxHp).toBe(statsBefore.maxHp);
   expect(upgraded.hp).toBeLessThanOrEqual(upgraded.maxHp);
   // Nothing else changed
-  expect({
-    ...upgraded.stats,
-    damage: statsBefore.damage,
-    maxHp: statsBefore.maxHp,
-  }).toEqual(statsBefore);
+  expect({ ...upgraded.stats, spread: statsBefore.spread }).toEqual(
+    statsBefore,
+  );
 
   // --- Stats are read at use time: bigger magazine, instant reload, and
   // vision and flashlight ranges that rebuild their textures ---
@@ -1498,23 +1693,67 @@ test("game boots, plays, and changes levels without errors", async ({
     ),
   ).toBe(true);
 
-  // Continuing goes back to the main menu
+  // --- Back to the lobby: no title, the elevator just opens, and the last
+  // character played is who comes out ---
+  await expect(
+    page.locator(".menu-button", { hasText: "Back to the lobby" }),
+  ).toHaveCount(1);
   await page.keyboard.press("Enter");
   await page.waitForFunction(
-    () =>
-      [...window.DEBUG.game!.entities.all].some(
-        (e) => e.constructor.name === "MainMenu",
-      ),
+    () => window.DEBUG.game!.entities.getById("lobby"),
     null,
     { timeout: 15000 },
   );
+  const back = await page.evaluate(() => {
+    const lobby = window.DEBUG.game!.entities.getById("lobby") as any;
+    return {
+      character: lobby.player.character.name as string,
+      doorOpen: lobby.arrivalDoor.openPercentage as number,
+    };
+  });
+  expect(back).toEqual({ character: "Nancy", doorOpen: 0 });
+  await expect(page.locator(".menu-title")).toHaveCount(0);
+  await arriveInLobby(page);
+  // Whoever made it out of floor 1 waits in the lobby now, unlocked
+  const rescued = await page.evaluate(
+    (name) =>
+      (
+        window.DEBUG.game!.entities.getTagged("lobby_character").find(
+          (c: any) => c.human.character.name === name,
+        ) as any
+      )?.unlocked as boolean | undefined,
+    stairwell.allyName,
+  );
+  expect(rescued).toBe(true);
+  expectNoIssues(issues);
 
-  // --- The main menu opens the encyclopedia too, and comes back after ---
+  // --- The encyclopedia opens from the bookcase, and Escape closes it ---
+  await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const lobby = game.entities.getById("lobby") as any;
+    const bookcase = [...game.entities.all].find(
+      (e: any) =>
+        e.constructor.name === "Interactable" &&
+        e.prompt?.().title === "Encyclopedia",
+    ) as any;
+    lobby.player.body.position.set(bookcase.getPosition().add([-1, 0]));
+    lobby.player.body.velocity.set(0, 0);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  });
+  await expect(page.locator(".lobby-prompt__title")).toHaveText("Encyclopedia");
   await page.keyboard.press("KeyE");
   await expect(page.locator(".encyclopedia")).toBeVisible();
-  await expect(page.locator(".menu-title")).toHaveCount(0);
-  await page.locator(".menu-button", { hasText: "Back" }).click();
+  // Reading doesn't walk the player around
+  const reading = await getLobbyPlayerPosition(page);
+  await page.keyboard.down("KeyD");
+  await page.waitForTimeout(300);
+  await page.keyboard.up("KeyD");
+  const stillReading = await getLobbyPlayerPosition(page);
+  expect(Math.abs(stillReading[0] - reading[0])).toBeLessThan(0.05);
+  await page.keyboard.press("Escape");
   await expect(page.locator(".encyclopedia")).toHaveCount(0);
-  await expect(page.locator(".menu-title")).toHaveCount(1);
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
+  await expect(page.locator(".pause-menu__background")).toHaveCount(0);
   expectNoIssues(issues);
 });

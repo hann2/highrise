@@ -14,6 +14,8 @@ import LevelTemplate from "./LevelTemplate";
 
 // Level for testing all the bathrooms
 export default class BathroomLevel extends LevelTemplate {
+  static floorName = "Restrooms";
+
   chooseRoomTemplates(seed: number): RoomTemplate[] {
     const rooms: RoomTemplate[] = [];
 

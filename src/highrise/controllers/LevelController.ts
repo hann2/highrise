@@ -10,17 +10,20 @@ import { Level } from "../levels/Level";
 import UpgradeSelect from "../menu/UpgradeSelect";
 import { getRunStats } from "../run/RunStats";
 import { drawUpgrades, takeUpgrade } from "../upgrades/upgrades";
-import {
-  chooseTemplate,
-  generateLevel,
-} from "../levels/level-generation/levelGeneration";
+import { generateLevel } from "../levels/level-generation/levelGeneration";
+import LevelTemplate from "../levels/level-templates/LevelTemplate";
+import TutorialLevel from "../levels/level-templates/TutorialLevel";
+import { FloorPlan, RunPlan } from "../run/RunPlan";
 
 const LEVEL_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
-const MAX_LEVEL = 5;
 
 const FORCE_TUTORIAL = process.env.NODE_ENV === "development" && false;
 
-// High level control flow for levels and the party
+/**
+ * High level control flow for levels and the party. Plays the tutorial as
+ * level 0 the first time, then the floors of the run's plan (made in the
+ * lobby) in order, numbered from 1.
+ */
 export default class LevelController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
   currentLevel: number = 0;
@@ -28,6 +31,20 @@ export default class LevelController extends BaseEntity implements Entity {
   level?: Level;
   /** Between reaching an exit and starting the next level */
   private changingLevel = false;
+
+  constructor(readonly plan: RunPlan) {
+    super();
+  }
+
+  /** The top floor of the run */
+  get maxLevel(): number {
+    return this.plan.length;
+  }
+
+  /** The plan for the current floor; undefined in the tutorial */
+  get floor(): FloorPlan | undefined {
+    return this.plan[this.currentLevel - 1];
+  }
 
   @on("add")
   async onAdd() {
@@ -63,7 +80,7 @@ export default class LevelController extends BaseEntity implements Entity {
     await this.wait(fadeOutTime);
     this.game.clearScene(Persistence.Floor);
 
-    if (this.currentLevel <= MAX_LEVEL) {
+    if (this.currentLevel <= this.maxLevel) {
       const level = this.generateLevel();
       // Not after the tutorial, which isn't part of the run
       if (this.currentLevel > 1) {
@@ -114,8 +131,15 @@ export default class LevelController extends BaseEntity implements Entity {
   generateLevel(): Level {
     // So that seeded runs get the same levels no matter what happened before
     reseedIfSeeded(this.currentLevel);
-    this.level = generateLevel(chooseTemplate(this.currentLevel));
+    this.level = generateLevel(this.makeTemplate());
     return this.level;
+  }
+
+  private makeTemplate(): LevelTemplate {
+    const floor = this.floor;
+    return floor
+      ? new floor.template(floor.number)
+      : new TutorialLevel(this.currentLevel);
   }
 }
 

@@ -25,6 +25,9 @@ import { makeBathroomPair } from "./helpers/levelTemplateHelpers";
 import LevelTemplate from "./LevelTemplate";
 
 export default class MaintenanceLevel extends LevelTemplate {
+  static floorName = "Maintenance";
+  static floorNotes = ["Dark"];
+
   subFloor: DecorationInfo;
   closetFloor: DecorationInfo;
   roomFloor: DecorationInfo;

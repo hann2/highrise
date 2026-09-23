@@ -12,7 +12,7 @@ export function collectIssues(page: Page): string[] {
   return issues;
 }
 
-/** Loads the game with a fixed seed and waits for the main menu. */
+/** Loads the game with a fixed seed and waits for the lobby (and its title screen). */
 export async function loadGame(page: Page, seed: number) {
   // Skip the tutorial level so we get a normal generated level
   await page.addInitScript(() => {
@@ -22,36 +22,50 @@ export async function loadGame(page: Page, seed: number) {
   await page.waitForFunction(() => window.DEBUG?.game, null, {
     timeout: 60000,
   });
-  // Main menu only shows up once preloading is done
+  // The lobby only shows up once preloading is done
   await page.waitForFunction(
-    () =>
-      [...window.DEBUG.game!.entities.all].some(
-        (e) => e.constructor.name === "MainMenu",
-      ),
+    () => window.DEBUG.game!.entities.getById("lobby"),
     null,
     { timeout: 120000 },
   );
 }
 
-/**
- * Starts a new game and waits for the level to exist. From the main menu it
- * plays as the first character; from the character select it plays as whoever
- * is selected.
- */
-export async function startGame(page: Page) {
-  const onCharacterSelect = () =>
+/** Waits until the lobby's elevator has opened, pressing Enter to get past the title if it's up. */
+export async function arriveInLobby(page: Page) {
+  const titleShowing = await page.evaluate(() =>
     [...window.DEBUG.game!.entities.all].some(
-      (e) => e.constructor.name === "CharacterSelect",
-    );
-  if (!(await page.evaluate(onCharacterSelect))) {
+      (e) => e.constructor.name === "TitleScreen" && !(e as any).inTransition,
+    ),
+  );
+  if (titleShowing) {
     await page.keyboard.press("Enter");
   }
-  await page.waitForFunction(onCharacterSelect, null, { timeout: 30000 });
-  await page.keyboard.press("Enter");
+  await page.waitForFunction(
+    () => (window.DEBUG.game!.entities.getById("lobby") as any)?.arrived,
+    null,
+    { timeout: 30000 },
+  );
+}
+
+/**
+ * From the lobby, starts a run as whoever the player is and waits for the
+ * first floor to exist: gets out of the elevator, then steps onto the stairs.
+ */
+export async function startGame(page: Page) {
+  await arriveInLobby(page);
+  await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const lobby = game.entities.getById("lobby") as any;
+    const stairs = [...game.entities.all].find(
+      (e) => e.constructor.name === "Exit",
+    ) as any;
+    lobby.player.body.position.set(stairs.getPosition());
+  });
   await page.waitForFunction(
     () => {
       const entities = window.DEBUG.game!.entities;
       return (
+        !entities.getById("lobby") &&
         entities.getTagged("human").length > 0 &&
         entities.getTagged("zombie").length > 0
       );
@@ -59,6 +73,17 @@ export async function startGame(page: Page) {
     null,
     { timeout: 30000 },
   );
+}
+
+/** Where the player is in the lobby */
+export async function getLobbyPlayerPosition(
+  page: Page,
+): Promise<[number, number]> {
+  return page.evaluate(() => {
+    const lobby = window.DEBUG.game!.entities.getById("lobby") as any;
+    const [x, y] = lobby.player.body.position;
+    return [x, y] as [number, number];
+  });
 }
 
 export async function getLeaderPosition(page: Page): Promise<[number, number]> {

@@ -101,7 +101,11 @@ function findEligibleLocation(
   }
 }
 
-function addRoom(
+/**
+ * Puts a room in the grid at `locationOverride`, or wherever it fits, and
+ * makes its entities.
+ */
+export function addRoom(
   cellGrid: CellGrid,
   template: RoomTemplate,
   seed: number,
@@ -277,7 +281,7 @@ export function addRooms(
   };
 }
 
-type AddedRoomInfo = {
+export type AddedRoomInfo = {
   entities: Entity[];
   enemyPositions: V2d[];
   itemPositions: V2d[];

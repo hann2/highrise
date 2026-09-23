@@ -5,6 +5,7 @@ import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import ReactEntity from "../../core/ReactEntity";
 import { Persistence } from "../constants/constants";
+import CreditsScreen, { isCreditsOpen } from "./CreditsScreen";
 import Encyclopedia, { isEncyclopediaOpen } from "./Encyclopedia";
 import "./menu.css";
 import {
@@ -16,24 +17,23 @@ import {
 } from "./MenuButtons";
 import { isUpgradeSelectOpen } from "./UpgradeSelect";
 
-// Shows the menu when paused, invisible otherwise
+/**
+ * Shows the menu when paused, invisible otherwise. In a run it can end the
+ * run; in the lobby it can roll the credits instead.
+ */
 export default class PauseMenu extends ReactEntity implements Entity {
   persistenceLevel = Persistence.Game;
   pausable = false;
   visible = false;
 
-  constructor() {
+  constructor(private place: "run" | "lobby" = "run") {
     super(() => this.renderContent());
   }
 
   renderContent() {
     // The upgrade screen pauses the game too, but isn't a pause. The
-    // encyclopedia covers the menu and gives it back when it closes.
-    if (
-      !this.visible ||
-      isUpgradeSelectOpen(this.game) ||
-      isEncyclopediaOpen(this.game)
-    ) {
+    // encyclopedia and credits cover the menu and give it back when they close.
+    if (!this.visible || !this.takingInput) {
       return null;
     }
     const game = this.game;
@@ -46,10 +46,15 @@ export default class PauseMenu extends ReactEntity implements Entity {
           Press {resumeButton} to resume
         </div>
         <MenuButtons corner="top-left">
-          <MenuButton onClick={() => this.goToMainMenu()}>Main Menu</MenuButton>
+          {this.place === "run" && (
+            <MenuButton onClick={() => this.quitRun()}>Quit Run</MenuButton>
+          )}
           <MenuButton onClick={() => this.openEncyclopedia()}>
             Encyclopedia
           </MenuButton>
+          {this.place === "lobby" && (
+            <MenuButton onClick={() => this.rollCredits()}>Credits</MenuButton>
+          )}
           <FeedbackButton />
           <MuteButton game={game} />
           <GraphicsButton game={game} />
@@ -58,7 +63,8 @@ export default class PauseMenu extends ReactEntity implements Entity {
     );
   }
 
-  goToMainMenu() {
+  /** Ends the run, which goes to the run summary and then the lobby */
+  quitRun() {
     this.game.unpause();
     this.game.dispatch("gameOver", { victory: false });
     this.destroy();
@@ -71,9 +77,20 @@ export default class PauseMenu extends ReactEntity implements Entity {
     }
   }
 
+  /** Over the pause menu, with the game still paused */
+  rollCredits() {
+    if (this.visible && !isCreditsOpen(this.game)) {
+      this.game.addEntity(new CreditsScreen(Persistence.Game));
+    }
+  }
+
   /** Whether this menu is showing and in charge of the keys */
   private get takingInput(): boolean {
-    return !isUpgradeSelectOpen(this.game) && !isEncyclopediaOpen(this.game);
+    return (
+      !isUpgradeSelectOpen(this.game) &&
+      !isEncyclopediaOpen(this.game) &&
+      !isCreditsOpen(this.game)
+    );
   }
 
   @on("add")
