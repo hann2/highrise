@@ -7,6 +7,15 @@ import Human from "../human/Human";
 export default class Interactable extends BaseEntity implements Entity {
   tags = ["interactable"];
 
+  /**
+   * Whether a human could do anything with this right now. Ones that can't
+   * are skipped, so a full ammo box doesn't swallow the E meant for the
+   * door beside it.
+   */
+  canInteract: (human: Human) => boolean = () => true;
+  /** Whether a wall or door between the human and this blocks it */
+  needsLineOfSight = true;
+
   constructor(
     public position: V2d,
     private handleInteract?: (human: Human, self: Interactable) => void,

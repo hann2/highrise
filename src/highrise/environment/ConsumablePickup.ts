@@ -22,7 +22,13 @@ export default class ConsumablePickup extends BaseEntity implements Entity {
   ) {
     super();
 
-    this.addChild(new Interactable(position, this.handleInteract.bind(this)));
+    const interactable = this.addChild(
+      new Interactable(position, this.handleInteract.bind(this)),
+    );
+    // Swapping types is always possible; topping up only while there's room
+    interactable.canInteract = (human) =>
+      (human.consumable && human.consumable !== stats) ||
+      human.consumableCount < stats.maxCarry;
 
     // One drawn per item, side by side
     this.sprite = new Container();

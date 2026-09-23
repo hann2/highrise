@@ -153,10 +153,14 @@ export default class Human extends BaseEntity implements Entity {
   }
 
   @on("tick")
-  onTick() {
+  onTick(dt: number) {
     const healthPercent = this.hp / this.maxHp;
     const speed = healthPercent < 0.3 ? HURT_SPEED : SPEED;
     this.walkSpring.speed = speed * this.stats.moveSpeed;
+
+    if (this.weapon instanceof Gun) {
+      this.weapon.updateWallRetraction(this, dt);
+    }
   }
 
   // Have the human face a specific angle
@@ -381,13 +385,14 @@ export default class Human extends BaseEntity implements Entity {
     this.game.addEntity(new ThrownConsumable(stats, position, velocity, this));
   }
 
-  // Return a list of all interactables within range and not behind a wall
+  // Return a list of all usable interactables within range and not behind a wall
   getNearbyInteractables(): Interactable[] {
     return [...this.game.entities.getByFilter(isInteractable)]
       .filter(
         (i) =>
           i.getPosition().distanceTo(this.body.position) < i.maxDistance &&
-          this.canReach(i),
+          i.canInteract(this) &&
+          (!i.needsLineOfSight || this.canReach(i)),
       )
       .sort(
         (i1, i2) =>

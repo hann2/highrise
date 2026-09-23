@@ -37,6 +37,9 @@ export default class KeycardLock extends BaseEntity implements Entity {
     this.interactable = this.addChild(
       new Interactable(doorway, this.handleInteract.bind(this), 1.8),
     );
+    // The reader sits on the door itself, and coming at it along the wall
+    // would put the wall's end in the way
+    this.interactable.needsLineOfSight = false;
 
     // A little red light on the hallway side, like a card reader
     this.sprite = new Container();

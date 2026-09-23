@@ -8,7 +8,11 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { rDirection, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import Human from "../human/Human";
-import { AMMO_PICKUP_AMOUNT, LimitedAmmoClass } from "../weapons/guns/ammo";
+import {
+  AMMO_PICKUP_AMOUNT,
+  LimitedAmmoClass,
+  MAX_RESERVE,
+} from "../weapons/guns/ammo";
 import Interactable from "./Interactable";
 
 const BOX_SIZE: [number, number] = [0.34, 0.24]; // meters
@@ -31,7 +35,11 @@ export default class AmmoPickup extends BaseEntity implements Entity {
   ) {
     super();
 
-    this.addChild(new Interactable(position, this.handleInteract.bind(this)));
+    const interactable = this.addChild(
+      new Interactable(position, this.handleInteract.bind(this)),
+    );
+    interactable.canInteract = (human) =>
+      human.getReserve(ammoClass) < MAX_RESERVE[ammoClass];
 
     this.box = drawAmmoBox(ammoClass);
     this.box.layerName = Layer.ITEMS;
