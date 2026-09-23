@@ -21,7 +21,6 @@ import { Character, randomCharacter } from "../characters/Character";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants/constants";
 import { WalkSpring } from "../creature-stuff/WalkSpring";
 import FleshImpact from "../effects/FleshImpact";
-import GlowStick from "../effects/GlowStick";
 import { isEnemy } from "../enemies/base/Enemy";
 import Door from "../environment/Door";
 import Interactable, { isInteractable } from "../environment/Interactable";
@@ -47,8 +46,6 @@ export const PUSH_KNOCKBACK = 110; // newtons?
 export const PUSH_STUN = 0.75; // seconds
 export const PUSH_COOLDOWN = 0.1; // seconds
 export const PUSH_DOOR_IMPULSE = 12; // newton-seconds, enough to fling a door open
-
-export const GLOWSTICK_COOLDOWN = 1.0; // seconds
 
 export const PUSH_SOUNDS: SoundName[] = [
   "cabbageHit1",
@@ -105,7 +102,6 @@ export default class Human extends BaseEntity implements Entity {
       }),
     );
 
-    this.addChild(this.glowstickAction);
     this.addChild(this.pushAction);
     this.walkSpring = this.addChild(new WalkSpring(this.body, SPEED, 80));
   }
@@ -342,37 +338,6 @@ export default class Human extends BaseEntity implements Entity {
   push() {
     if (this.canPush()) {
       this.pushAction.do();
-    }
-  }
-
-  glowstickAction = new PhasedAction([
-    {
-      name: "windup",
-      duration: 0.0,
-    },
-    {
-      name: "throw",
-      duration: 0.1,
-      startAction: () => {
-        this.game.addEntity(
-          new GlowStick(
-            this.getPosition(),
-            polarToVec(this.getDirection(), rNormal(5, 1)).iadd(
-              this.body.velocity,
-            ),
-          ),
-        );
-      },
-    },
-    {
-      name: "cooldown",
-      duration: GLOWSTICK_COOLDOWN,
-    },
-  ]);
-
-  throwGlowstick() {
-    if (!this.glowstickAction.isActive()) {
-      this.glowstickAction.do();
     }
   }
 }

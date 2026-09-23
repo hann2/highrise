@@ -52,7 +52,7 @@ export default class TutorialRoomTemplate implements RoomTemplate {
       }),
       new FloorPaint(
         toWorld(V(0.5, 1.5)),
-        (usingGamepad) => `${usingGamepad ? "LB" : "Q"} to throw\nglowstick`,
+        (usingGamepad) => `${usingGamepad ? "R3" : "F"} to toggle\nflashlight`,
       ),
       new Wall(toWorld(V(1.5, 2.5)), toWorld(V(1.5, 0.5))),
       new Wall(toWorld(V(2.5, -0.5)), toWorld(V(2.5, 1.5))),

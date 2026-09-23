@@ -11,7 +11,7 @@ export enum Layer {
   DECORATIONS = "decorations",
   // Stuff sprayed on the floor like blood/goo/paint
   FLOOR_DECALS = "floor_decals",
-  // stuff sitting on top of the floor, like glowsticks and casings
+  // stuff sitting on top of the floor, like shell casings
   FLOOR_STUFF = "floor_stuff",
   // ambient occlusion on the floor
   FLOOR_AO = "floor_ao",

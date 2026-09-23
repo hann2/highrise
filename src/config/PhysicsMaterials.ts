@@ -4,11 +4,11 @@ import { Material } from "../core/physics/material/Material";
 
 export const PhysicsMaterials = {
   wall: new Material(),
-  glowstick: new Material(),
+  smallObject: new Material(),
 };
 
 export const ContactMaterials: ReadonlyArray<ContactMaterial> = [
-  new ContactMaterial(PhysicsMaterials.wall, PhysicsMaterials.glowstick, {
+  new ContactMaterial(PhysicsMaterials.wall, PhysicsMaterials.smallObject, {
     restitution: 0.5,
   }),
 ];
