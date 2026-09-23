@@ -32,8 +32,8 @@ export default class MaintenanceLevel extends LevelTemplate {
   closetFloor: DecorationInfo;
   roomFloor: DecorationInfo;
 
-  constructor(levelIndex: number) {
-    super(levelIndex);
+  constructor(levelIndex: number, difficulty?: number) {
+    super(levelIndex, difficulty);
 
     const potentialFloors: DecorationInfo[] = shuffle([
       cementFloor,

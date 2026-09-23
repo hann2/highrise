@@ -6,7 +6,7 @@ import ShopLevel from "../levels/level-templates/ShopLevel";
 
 /** A level template class, with the name and notes it shows on the directory */
 export interface LevelTemplateClass {
-  new (levelIndex: number): LevelTemplate;
+  new (levelIndex: number, difficulty: number): LevelTemplate;
   readonly floorName: string;
   readonly floorNotes: readonly string[];
 }
@@ -17,6 +17,12 @@ export interface FloorPlan {
   readonly number: number;
   /** Made fresh for the floor when it's reached, after reseeding */
   readonly template: LevelTemplateClass;
+  /**
+   * How hard the floor is, as the level number it's tuned like (see
+   * `LevelTemplate.difficulty`). The lobby used to be level 1, so the floors
+   * above it are one harder than their number.
+   */
+  readonly difficulty: number;
   /** What the lobby's directory board calls it */
   readonly name: string;
   /** Short notes for the directory board, like "Boss" */
@@ -42,6 +48,7 @@ const FLOOR_TEMPLATES: readonly LevelTemplateClass[] = [
 export function generateRunPlan(): RunPlan {
   return FLOOR_TEMPLATES.map((template, i) => ({
     number: i + 1,
+    difficulty: i + 2,
     template,
     name: template.floorName,
     notes: [...template.floorNotes],

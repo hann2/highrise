@@ -10,10 +10,10 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "413:-1956720600";
+const LEVEL_2_FINGERPRINT = "429:28395690";
 // What the upgrade screen offers after level 1 with this seed, in order.
 // Changes when the upgrade pool, the rarities, or level generation change.
-const UPGRADE_OFFER = ["Night Eyes", "Steady Aim", "Scavenger"];
+const UPGRADE_OFFER = ["Hollow Points", "Grenade Pack", "Steady Aim"];
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we

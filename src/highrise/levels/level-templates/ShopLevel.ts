@@ -20,8 +20,8 @@ export default class ShopLevel extends LevelTemplate {
 
   subFloorInfo: DecorationInfo;
 
-  constructor(levelIndex: number) {
-    super(levelIndex);
+  constructor(levelIndex: number, difficulty?: number) {
+    super(levelIndex, difficulty);
 
     this.subFloorInfo = choose(woodFloor1, woodFloor2, woodFloor3);
   }

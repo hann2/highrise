@@ -25,7 +25,10 @@ const DIMENSIONS = V(3, 3);
 const DOORS: WallID[] = [[V(2, 0), true]];
 
 export default class SpawnRoom implements RoomTemplate {
-  constructor(private levelIndex: number) {}
+  constructor(
+    private levelIndex: number,
+    private difficulty: number = levelIndex,
+  ) {}
 
   getOccupiedCells(): V2d[] {
     return defaultOccupiedCells(DIMENSIONS, DOORS);
@@ -66,8 +69,8 @@ export default class SpawnRoom implements RoomTemplate {
       );
     }
 
-    // Better guns on future levels
-    switch (this.levelIndex) {
+    // Better guns on harder floors
+    switch (this.difficulty) {
       case 1:
         // Only starter
         break;
@@ -105,7 +108,7 @@ export default class SpawnRoom implements RoomTemplate {
       default:
     }
 
-    if (this.levelIndex > 1) {
+    if (this.difficulty > 1) {
       entities.push(new HealthPickup(roomToWorldPosition(V(0.75, 1.25))));
     }
 

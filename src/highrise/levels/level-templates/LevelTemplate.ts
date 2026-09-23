@@ -63,7 +63,15 @@ export default class LevelTemplate {
   /** Anything notable about the floor, for the directory board */
   static floorNotes: readonly string[] = [];
 
-  constructor(public levelIndex: number) {}
+  /**
+   * @param levelIndex the level number, for labels
+   * @param difficulty the level number the floor is tuned like: how many
+   *   enemies of which kinds, and which gun tiers turn up
+   */
+  constructor(
+    public levelIndex: number,
+    public difficulty: number = levelIndex,
+  ) {}
 
   getSize(): [number, number] {
     return [DEFAULT_LEVEL_SIZE, DEFAULT_LEVEL_SIZE];
@@ -136,7 +144,7 @@ export default class LevelTemplate {
       return result;
     }
 
-    const numZombies = 20 + this.levelIndex * 10;
+    const numZombies = 20 + this.difficulty * 10;
     for (let i = 0; i < numZombies && shuffled.length > 0; i++) {
       if (rBool(0.75)) {
         entities.push(new Zombie(nextLocation()));
@@ -145,17 +153,17 @@ export default class LevelTemplate {
       }
     }
 
-    if (this.levelIndex > 1) {
+    if (this.difficulty > 1) {
       const numSprinters = 5;
       for (let i = 0; i < numSprinters; i++) {
         entities.push(new Sprinter(nextLocation()));
       }
     }
-    if (this.levelIndex > 2) {
+    if (this.difficulty > 2) {
       entities.push(new Spitter(nextLocation()));
       entities.push(new Spitter(nextLocation()));
     }
-    if (this.levelIndex > 3) {
+    if (this.difficulty > 3) {
       entities.push(new Spitter(nextLocation()));
       entities.push(new Heavy(nextLocation()));
     }
@@ -180,24 +188,24 @@ export default class LevelTemplate {
       (l) => new AmmoPickup(l, choose(...LIMITED_AMMO_CLASSES)),
     ];
 
-    if (this.levelIndex >= 3) {
+    if (this.difficulty >= 3) {
       pickups.push((l) => new AmmoPickup(l, choose(...LIMITED_AMMO_CLASSES)));
     }
     if (this.levelIndex % 2 === 0) {
       pickups.push((l) => new ConsumablePickup(l, choose(...CONSUMABLES)));
     }
 
-    if (this.levelIndex >= 2) {
+    if (this.difficulty >= 2) {
       pickups.push(
         (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[1]))),
       );
     }
-    if (this.levelIndex >= 4) {
+    if (this.difficulty >= 4) {
       pickups.push(
         (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[2]))),
       );
     }
-    if (this.levelIndex >= 5) {
+    if (this.difficulty >= 5) {
       pickups.push(
         (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[3]))),
       );
@@ -208,11 +216,11 @@ export default class LevelTemplate {
 
   /** The best gun tier that shows up in this floor's normal closets */
   getBestGunTier(): number {
-    if (this.levelIndex >= 5) {
+    if (this.difficulty >= 5) {
       return 3;
-    } else if (this.levelIndex >= 4) {
+    } else if (this.difficulty >= 4) {
       return 2;
-    } else if (this.levelIndex >= 2) {
+    } else if (this.difficulty >= 2) {
       return 1;
     }
     return 0;

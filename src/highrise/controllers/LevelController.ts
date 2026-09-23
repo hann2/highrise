@@ -138,7 +138,7 @@ export default class LevelController extends BaseEntity implements Entity {
   private makeTemplate(): LevelTemplate {
     const floor = this.floor;
     return floor
-      ? new floor.template(floor.number)
+      ? new floor.template(floor.number, floor.difficulty)
       : new TutorialLevel(this.currentLevel);
   }
 }

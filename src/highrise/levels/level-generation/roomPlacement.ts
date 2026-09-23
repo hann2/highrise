@@ -259,7 +259,12 @@ export function addRooms(
 ): AddedRoomInfo {
   const roomInfos: AddedRoomInfo[] = [];
   roomInfos.push(
-    addRoom(cellGrid, new SpawnRoom(levelIndex), seed, cellGrid.spawnLocation),
+    addRoom(
+      cellGrid,
+      new SpawnRoom(levelIndex, levelTemplate.difficulty),
+      seed,
+      cellGrid.spawnLocation,
+    ),
   );
   if (levelTemplate.hasExitStairwell()) {
     const orientations = ROTATED_ORIENTATIONS.map(
