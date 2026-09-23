@@ -1329,8 +1329,25 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.locator(".encyclopedia__entry--unknown").first().click();
   await expect(page.locator(".encyclopedia__detail-name")).toHaveText("???");
   expect(await detail.innerText()).not.toContain("Magazine");
-  // Guns → Melee → Upgrades → Enemies, where the zombie shot earlier is known
-  for (let i = 0; i < 3; i++) {
+  // Guns → Melee → Consumables, where the frag grenades carried earlier are
+  // known and flashbangs aren't
+  for (let i = 0; i < 2; i++) {
+    await page.keyboard.press("ArrowRight");
+  }
+  await expect(selectedTab).toContainText("Consumables");
+  await expect(selectedTab).toContainText("1 / 2");
+  await expect(gunEntries).toHaveCount(2);
+  await expect(gunEntries.nth(0)).toContainText("Frag Grenade");
+  await expect(gunEntries.nth(1)).toHaveText("???");
+  await gunEntries.nth(0).click();
+  await expect(detail).toContainText("Blast radius");
+  await expect(
+    page.locator(".encyclopedia__detail-image img[src^='data:image/svg']"),
+  ).toHaveCount(1);
+  await page.mouse.move(1, 1);
+  await page.screenshot({ path: "tests/output/encyclopedia-consumables.png" });
+  // → Upgrades → Enemies, where the zombie shot earlier is known
+  for (let i = 0; i < 2; i++) {
     await page.keyboard.press("ArrowRight");
   }
   await expect(selectedTab).toContainText("Enemies");
@@ -1349,6 +1366,7 @@ test("game boots, plays, and changes levels without errors", async ({
   );
   expect(seen.guns).toContain(heldGun);
   expect(seen.enemies).toContain("Zombie");
+  expect(seen.consumables).toEqual(["Frag Grenade"]);
   expectNoIssues(issues);
 
   await page.screenshot({ path: "tests/output/paused.png" });

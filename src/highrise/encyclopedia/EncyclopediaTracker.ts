@@ -17,7 +17,7 @@ import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 
 /**
  * Records what the player comes across during a run for the encyclopedia:
- * weapons the party holds, enemies the player sees or kills. Upgrades are
+ * weapons and consumables the party holds, enemies the player sees or kills. Upgrades are
  * recorded where they're offered and taken.
  */
 export default class EncyclopediaTracker extends BaseEntity implements Entity {
@@ -47,6 +47,9 @@ export default class EncyclopediaTracker extends BaseEntity implements Entity {
         this.mark("guns", weapon.stats.name);
       } else if (weapon instanceof MeleeWeapon) {
         this.mark("melee", weapon.stats.name);
+      }
+      if (human.consumable && human.consumableCount > 0) {
+        this.mark("consumables", human.consumable.name);
       }
     }
 

@@ -2,6 +2,8 @@ import { RESOURCES } from "../../../resources/resources";
 import { CHARACTERS } from "../characters/Character";
 import { isCharacterUnlocked, SaveData } from "../persistence/SaveData";
 import { UPGRADES } from "../upgrades/upgrades";
+import { consumableImageUrl } from "../weapons/consumables/consumableImage";
+import { CONSUMABLES } from "../weapons/consumables/consumable-stats/consumableStats";
 import { GUNS, gunTierOf } from "../weapons/guns/gun-stats/gunStats";
 import {
   fireModeName,
@@ -80,6 +82,34 @@ const melee: EncyclopediaSection = {
     })),
 };
 
+const consumables: EncyclopediaSection = {
+  title: "Consumables",
+  getEntries: (save) =>
+    CONSUMABLES.map((consumable) => {
+      const stats: [string, string][] = [
+        ["Carry", String(consumable.maxCarry)],
+        ["Fuse", seconds(consumable.fuseTime)],
+      ];
+      if (consumable.damage > 0) {
+        stats.push(["Damage", String(consumable.damage)]);
+        stats.push(["Blast radius", meters(consumable.damageRadius)]);
+      }
+      if (consumable.stunDuration > 0 && consumable.stunRadius > 0) {
+        stats.push([
+          "Stun",
+          `${seconds(consumable.stunDuration)} within ${meters(consumable.stunRadius)}`,
+        ]);
+      }
+      return {
+        name: consumable.name,
+        found: save.seen.consumables.includes(consumable.name),
+        image: consumableImageUrl(consumable),
+        description: consumable.description,
+        stats,
+      };
+    }),
+};
+
 const upgrades: EncyclopediaSection = {
   title: "Upgrades",
   getEntries: (save) =>
@@ -117,7 +147,7 @@ export const ENCYCLOPEDIA_SECTIONS: ReadonlyArray<EncyclopediaSection> = [
   characters,
   guns,
   melee,
-  // Consumables (weapons/consumables/) go here once they exist, as a section with `seen.consumables`
+  consumables,
   upgrades,
   enemies,
 ];
@@ -138,4 +168,8 @@ function gunReload(gun: GunStats): string {
 
 function seconds(time: number): string {
   return `${Number(time.toFixed(2))} s`;
+}
+
+function meters(distance: number): string {
+  return `${Number(distance.toFixed(2))} m`;
 }

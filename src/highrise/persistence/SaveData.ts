@@ -74,7 +74,7 @@ export function defaultSaveData(): SaveData {
     runs: [],
     totalRuns: 0,
     bestFloor: 0,
-    seen: { guns: [], melee: [], upgrades: [], enemies: [] },
+    seen: { guns: [], melee: [], consumables: [], upgrades: [], enemies: [] },
     autoPause: true,
     lastCharacter: undefined,
   };
@@ -243,6 +243,7 @@ function nonNegative(x: unknown): number {
 export interface SeenFlags {
   guns: string[];
   melee: string[];
+  consumables: string[];
   upgrades: string[];
   enemies: string[];
 }
@@ -267,6 +268,7 @@ function parseSeenFlags(raw: unknown): SeenFlags {
   return {
     guns: stringArray(seen.guns),
     melee: stringArray(seen.melee),
+    consumables: stringArray(seen.consumables),
     upgrades: stringArray(seen.upgrades),
     enemies: stringArray(seen.enemies),
   };
