@@ -40,6 +40,11 @@ export default class KeycardLock extends BaseEntity implements Entity {
     // The reader sits on the door itself, and coming at it along the wall
     // would put the wall's end in the way
     this.interactable.needsLineOfSight = false;
+    this.interactable.highlightRadius = 0.6;
+    this.interactable.prompt = (human) =>
+      this.findKeycardHolder(human)
+        ? { title: "Card reader" }
+        : { title: "Card reader", hint: "needs a keycard" };
 
     // A little red light on the hallway side, like a card reader
     this.sprite = new Container();
@@ -64,9 +69,14 @@ export default class KeycardLock extends BaseEntity implements Entity {
     this.glow.alpha = 0.6 + 0.4 * Math.sin(this.game.elapsedTime * 3);
   }
 
-  handleInteract(human: Human) {
+  /** Whoever's keycard `human` would use: their own, or someone else's in the party */
+  private findKeycardHolder(human: Human): Human | undefined {
     const partyMembers = getPartyManager(this.game)?.partyMembers ?? [];
-    const holder = [human, ...partyMembers].find((h) => h.keycards > 0);
+    return [human, ...partyMembers].find((h) => h.keycards > 0);
+  }
+
+  handleInteract(human: Human) {
+    const holder = this.findKeycardHolder(human);
     if (!holder) {
       this.game.addEntity(
         new PositionalSound("dryFire1", this.interactable.position),

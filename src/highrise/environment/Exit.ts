@@ -8,11 +8,14 @@ import { on } from "../../core/entity/handler";
 import { createRigid2D } from "../../core/physics/body/bodyFactories";
 import { Box } from "../../core/physics/shapes/Box";
 import { V } from "../../core/Vector";
+import Interactable from "./Interactable";
 import { OverheadLight } from "./lighting/OverheadLight";
 import { getPartyLeader } from "./PartyManager";
 
 export default class Exit extends BaseEntity implements Entity {
   sprite: Sprite & GameSprite;
+  /** Only there to say what the stairs are when they're the nearest thing */
+  interactable: Interactable;
 
   constructor(
     x1: number,
@@ -55,6 +58,13 @@ export default class Exit extends BaseEntity implements Entity {
     );
 
     this.addChild(new OverheadLight(position));
+
+    // You take the stairs by walking onto them, so E doesn't use them
+    this.interactable = this.addChild(
+      new Interactable(position, undefined, Math.max(w, h) / 2 + 1.5),
+    );
+    this.interactable.passive = true;
+    this.interactable.prompt = () => ({ title: "Stairs up" });
   }
 
   @on("beginContact")

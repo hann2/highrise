@@ -13,6 +13,7 @@ import Exit from "../environment/Exit";
 import Interactable from "../environment/Interactable";
 import Human from "../human/Human";
 import PlayerHumanController from "../human/PlayerHumanController";
+import InteractPrompt from "../hud/InteractPrompt";
 import CellGrid from "../levels/level-generation/CellGrid";
 import { generateLobby } from "../levels/level-generation/lobbyGeneration";
 import {
@@ -33,7 +34,6 @@ import { generateRunPlan, RunPlan } from "../run/RunPlan";
 import { Direction } from "../utils/directions";
 import DirectoryBoard from "./DirectoryBoard";
 import LobbyCharacterController from "./LobbyCharacterController";
-import LobbyPrompt from "./LobbyPrompt";
 import ReceptionistBob from "./ReceptionistBob";
 
 /** Offset from the base seed for the lobby and the run plan (levels use 0 up) */
@@ -101,19 +101,24 @@ export default class Lobby extends BaseEntity implements Entity {
       title: "Encyclopedia",
       action: "to read",
     });
+    const exit = new Exit(
+      stairs.x - half,
+      stairs.y - half,
+      stairs.x + half,
+      stairs.y + half,
+      Direction.UP.angle,
+      (human) => {
+        if (human === this.player) {
+          this.startRun();
+        }
+      },
+    );
+    exit.interactable.prompt = () => ({
+      title: "Stairs up",
+      hint: "Start the run",
+    });
     this.addChildren(
-      new Exit(
-        stairs.x - half,
-        stairs.y - half,
-        stairs.x + half,
-        stairs.y + half,
-        Direction.UP.angle,
-        (human) => {
-          if (human === this.player) {
-            this.startRun();
-          }
-        },
-      ),
+      exit,
       new DirectoryBoard(at(DIRECTORY_BOARD_POSITION), this.plan),
       new ReceptionistBob(at(RECEPTIONIST_POSITION), () => this.player),
       bookcase,
@@ -122,9 +127,10 @@ export default class Lobby extends BaseEntity implements Entity {
         () => this.player,
         () => this.isInputBlocked(),
       ),
-      new LobbyPrompt(
+      new InteractPrompt(
         () => this.player,
         () => !this.arrived || this.leaving || isTitleScreenOpen(this.game),
+        "large",
       ),
     );
 

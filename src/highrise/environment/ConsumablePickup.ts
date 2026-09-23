@@ -29,6 +29,13 @@ export default class ConsumablePickup extends BaseEntity implements Entity {
     interactable.canInteract = (human) =>
       (human.consumable && human.consumable !== stats) ||
       human.consumableCount < stats.maxCarry;
+    interactable.prompt = (human) => ({
+      title: count > 1 ? `${stats.name} ×${count}` : stats.name,
+      detail:
+        human.consumable && human.consumable !== stats
+          ? `replaces ${human.consumable.name}`
+          : undefined,
+    });
 
     // One drawn per item, side by side
     this.sprite = new Container();

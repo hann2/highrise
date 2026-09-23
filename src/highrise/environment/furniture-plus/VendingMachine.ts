@@ -92,6 +92,16 @@ export default class VendingMachine
     this.interactable = this.addChild(
       new Interactable(position, () => this.buy(), 1.2),
     );
+    this.interactable.highlightRadius = 0.85;
+    // Busy dispensing, or broken: pressing E wouldn't do anything
+    this.interactable.canInteract = () => !this.dead && !this.vending;
+    this.interactable.prompt = () =>
+      (getPartyManager(this.game)?.quarters ?? 0) >= VENDING_MACHINE_PRICE
+        ? {
+            title: "Snack machine",
+            detail: `${VENDING_MACHINE_PRICE} quarters`,
+          }
+        : { title: "Snack machine", hint: "not enough quarters" };
   }
 
   /** A point on the floor just in front of the machine, where things come out */

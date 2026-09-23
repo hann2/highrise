@@ -1,3 +1,4 @@
+import { SoundName } from "../../../resources/resources";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
@@ -25,6 +26,8 @@ interface PartyEvent {
 const MAKE_IT_OUT_DISTANCE = 3;
 // How long someone who made it out takes to fade away on the stairs
 const MAKE_IT_OUT_FADE_TIME = 0.8;
+// Seconds between the relief lines of everyone who made it out, so they don't talk over each other
+const RELIEF_STAGGER = 0.6;
 
 /**
  * Keeps track of who's in the party: the leader, who the player controls, and
@@ -96,19 +99,31 @@ export default class PartyManager extends BaseEntity implements Entity {
       this.leaveUpTheStairs(ally, exit);
     }
 
-    // Not positional, and outlives the floor, so it isn't cut off by the level change
-    const reliefLines = madeItOut[0].character.sounds.relief;
-    if (reliefLines.length > 0) {
-      this.game.addEntity(
-        new SoundInstance(choose(...reliefLines), {
-          persistenceLevel: Persistence.Game,
-        }),
-      );
-    } else {
+    // Everyone who has a line says it, one after another. Chosen now so that
+    // what's said doesn't depend on when the next floor is generated.
+    const reliefLines = madeItOut
+      .map((ally) => ally.character.sounds.relief)
+      .filter((lines) => lines.length > 0)
+      .map((lines) => choose(...lines));
+    if (reliefLines.length === 0) {
       this.leader.voice.speak("relief");
     }
+    reliefLines.forEach((line, i) => this.sayRelief(line, i * RELIEF_STAGGER));
     this.game.addEntity(
       new SurvivorToast(madeItOut.map((ally) => ally.character.name)),
+    );
+  }
+
+  /**
+   * Plays a relief line after `delay` seconds. Not positional, and outlives
+   * the floor, so it isn't cut off by the level change.
+   */
+  private async sayRelief(line: SoundName, delay: number) {
+    if (delay > 0) {
+      await this.wait(delay);
+    }
+    this.game.addEntity(
+      new SoundInstance(line, { persistenceLevel: Persistence.Game }),
     );
   }
 
@@ -132,6 +147,8 @@ export default class PartyManager extends BaseEntity implements Entity {
     if (exit) {
       controller?.leaveVia(exit.getPosition());
     }
+    // Their light would stay behind on the stairs as they fade
+    ally.flashlight.light.enabled = false;
     const sprite = ally.humanSprite.sprite;
     this.wait(MAKE_IT_OUT_FADE_TIME, (_, t) => {
       if (!ally.isDestroyed) {

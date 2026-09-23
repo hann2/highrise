@@ -15,7 +15,7 @@ import {
   degToRad,
   polarToVec,
 } from "../../core/util/MathUtil";
-import { rNormal } from "../../core/util/Random";
+import { rDirection, rNormal, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
 import { Character, randomCharacter } from "../characters/Character";
 import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants/constants";
@@ -53,6 +53,8 @@ const SPEED = 5.0; // meters / second
 const HURT_SPEED = 3.0; // Speed while hurt
 // How close to an interactable a wall hit can be and still count as reaching it
 const REACH_TOLERANCE = 0.5; // meters
+// How far from where a human died each of their two weapons lands
+const DROP_SCATTER = 0.35; // meters
 
 export const PUSH_RANGE = 0.8; // meters
 export const PUSH_ANGLE = degToRad(70);
@@ -385,7 +387,10 @@ export default class Human extends BaseEntity implements Entity {
     this.game.addEntity(new ThrownConsumable(stats, position, velocity, this));
   }
 
-  // Return a list of all usable interactables within range and not behind a wall
+  /**
+   * All usable interactables within range and not behind a wall, nearest
+   * first, with the passive ones (which only say what they are) after the rest
+   */
   getNearbyInteractables(): Interactable[] {
     return [...this.game.entities.getByFilter(isInteractable)]
       .filter(
@@ -396,8 +401,9 @@ export default class Human extends BaseEntity implements Entity {
       )
       .sort(
         (i1, i2) =>
+          Number(i1.passive) - Number(i2.passive) ||
           i1.getPosition().distanceTo(this.body.position) -
-          i2.getPosition().distanceTo(this.body.position),
+            i2.getPosition().distanceTo(this.body.position),
       );
   }
 
@@ -422,13 +428,12 @@ export default class Human extends BaseEntity implements Entity {
 
   // Interacts with the nearest interactable within range if there is one
   interactWithNearest(): Interactable | null {
-    const interactables = this.getNearbyInteractables();
-    if (interactables.length > 0) {
-      interactables[0].interact(this);
-      return interactables[0];
-    } else {
+    const nearest = this.getNearbyInteractables()[0];
+    if (!nearest || nearest.passive) {
       return null;
     }
+    nearest.interact(this);
+    return nearest;
   }
 
   // Inflict damage on the human
@@ -460,11 +465,23 @@ export default class Human extends BaseEntity implements Entity {
     this.game.dispatch("humanDied", { human: this });
     this.game.addEntity(new FleshImpact(this.getPosition(), 6));
 
-    for (const weapon of [this.primary, this.secondary]) {
-      if (weapon) {
-        this.game.addEntity(new WeaponPickup(this.getPosition(), weapon));
-      }
-    }
+    // Scattered a little apart, rather than one on top of the other
+    const weapons = [this.primary, this.secondary].filter(
+      (weapon): weapon is Gun | MeleeWeapon => weapon !== undefined,
+    );
+    const scatterAngle = rDirection();
+    weapons.forEach((weapon, i) => {
+      const offset =
+        weapons.length > 1
+          ? polarToVec(
+              scatterAngle + i * Math.PI + rUniform(-0.4, 0.4),
+              rUniform(DROP_SCATTER * 0.7, DROP_SCATTER),
+            )
+          : V(0, 0);
+      this.game.addEntity(
+        new WeaponPickup(this.getPosition().iadd(offset), weapon),
+      );
+    });
     this.destroy();
   }
 
