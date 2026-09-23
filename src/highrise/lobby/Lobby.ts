@@ -21,7 +21,6 @@ import {
   ARRIVAL_ELEVATOR,
   BOOKCASE_POSITION,
   CHARACTER_SPOTS,
-  DIRECTORY_BOARD_POSITION,
   LOBBY_SIZE,
   RECEPTIONIST_POSITION,
   STAIRS_CELL,
@@ -35,7 +34,6 @@ import TitleScreen, { isTitleScreenOpen } from "../menu/TitleScreen";
 import { loadSaveData, updateSaveData } from "../persistence/SaveData";
 import { generateRunPlan, RunPlan } from "../run/RunPlan";
 import { Direction } from "../utils/directions";
-import DirectoryBoard from "./DirectoryBoard";
 import LobbyCharacterController from "./LobbyCharacterController";
 import ReceptionistBob from "./ReceptionistBob";
 
@@ -57,14 +55,14 @@ const at = (cell: V2d) => CellGrid.levelCoordToWorldCoord(cell);
 /**
  * The hub between runs, and the diegetic main menu. The player arrives in an
  * elevator (behind the title when the game boots), walks out into the lobby,
- * picks who to be by walking up to them, reads the directory board to see the
- * run ahead, and takes the stairs to start it.
+ * picks who to be by walking up to them, and takes the stairs to start the
+ * run. (What the run holds is a mystery until the second floor's directory.)
  */
 export default class Lobby extends BaseEntity implements Entity {
   id = "lobby";
   persistenceLevel = Persistence.Game;
 
-  /** The run the stairs lead to, shown on the directory board */
+  /** The run the stairs lead to */
   plan!: RunPlan;
   /** Who the player is right now */
   player!: Human;
@@ -134,7 +132,6 @@ export default class Lobby extends BaseEntity implements Entity {
     });
     this.addChildren(
       exit,
-      new DirectoryBoard(at(DIRECTORY_BOARD_POSITION), this.plan),
       new ReceptionistBob(at(RECEPTIONIST_POSITION), () => this.player),
       bookcase,
       new CameraController(game.camera, () => this.player),

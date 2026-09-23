@@ -10,7 +10,7 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "429:28395690";
+const LEVEL_2_FINGERPRINT = "430:-1900366570";
 // What the upgrade screen offers after level 1 with this seed, in order.
 // Changes when the upgrade pool, the rarities, or level generation change.
 const UPGRADE_OFFER = ["Flashbangs", "Steady Aim", "Hollow Points"];
@@ -124,29 +124,17 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.screenshot({ path: "tests/output/lobby-arrival.png" });
   expectNoIssues(issues);
 
-  // --- The directory board lists the run ahead, top floor first ---
-  const board = await page.evaluate(() => {
+  // --- The run ahead is planned, but nothing in the lobby gives it away ---
+  const plan = await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const lobby = game.entities.getById("lobby") as any;
-    const board = game.entities.getTagged("directory_board")[0] as any;
-    const [x, y] = board.getPosition();
-    // Stand in front of it to have a look
-    lobby.player.body.position.set([x, y + 2.5]);
     return {
-      rows: board.rows as string[],
-      plan: lobby.plan.map((floor: any) => floor.name) as string[],
+      floors: lobby.plan.map((floor: any) => floor.name) as string[],
+      plaques: game.entities.getTagged("directory_plaque").length,
     };
   });
-  expect(board.plan).toEqual(["Shops", "Maintenance", "Generator", "Chapel"]);
-  expect(board.rows).toEqual([
-    "4 Chapel Boss",
-    "3 Generator",
-    "2 Maintenance Dark",
-    "1 Shops",
-    "L Lobby",
-  ]);
-  await page.waitForTimeout(800); // let the camera settle
-  await page.screenshot({ path: "tests/output/lobby-directory.png" });
+  expect(plan.floors).toEqual(["Shops", "Maintenance", "Generator", "Chapel"]);
+  expect(plan.plaques).toBe(0);
 
   // --- Walk up to someone unlocked and press E to play as them ---
   /** Stands the player just below the waiting character called `name` */
@@ -1611,6 +1599,48 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(floor2Party.size).toBe(1);
   expect(floor2Party.leader).toBe("Nancy");
   expect(floor2Party.humans).not.toContain(stairwell.allyName);
+
+  // --- The second floor's spawn room has the building directory on the wall ---
+  // (The first floor has none: the run ahead is a mystery until then)
+  const directory = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const plaque = game.entities.getTagged("directory_plaque")[0] as any;
+    if (!plaque) {
+      return { plaques: 0 };
+    }
+    const [x, y] = plaque.position;
+    leader.body.position.set([x, y + 0.9]);
+    leader.body.velocity.set(0, 0);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return {
+      plaques: game.entities.getTagged("directory_plaque").length,
+      prompt: document.querySelector(".interact-prompt__title")?.textContent,
+    };
+  });
+  expect(directory.plaques).toBe(1);
+  expect(directory.prompt).toBe("Directory");
+  await page.keyboard.press("KeyE");
+  await expect(page.locator(".floor-directory")).toHaveCount(1);
+  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
+  expect(await page.locator(".pause-menu__background").count()).toBe(0);
+  await expect(page.locator(".floor-directory__row")).toHaveText([
+    /4\s*Chapel\s*Boss/,
+    /3\s*Generator/,
+    /2\s*Maintenance.*You are here/,
+    /1\s*Shops/,
+    /L\s*Lobby/,
+  ]);
+  await page.screenshot({ path: "tests/output/floor-directory.png" });
+  await page.waitForTimeout(400);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".floor-directory")).toHaveCount(0);
+  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
+  expectNoIssues(issues);
 
   // --- The upgrade stuck: the leader's shots spread less ---
   const upgraded = await page.evaluate(() => {

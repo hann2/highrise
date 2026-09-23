@@ -18,6 +18,7 @@ import {
   MenuButtons,
   MuteButton,
 } from "./MenuButtons";
+import { isFloorDirectoryOpen } from "./FloorDirectory";
 import { isUpgradeSelectOpen } from "./UpgradeSelect";
 
 /**
@@ -107,6 +108,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
   private get takingInput(): boolean {
     return (
       !isUpgradeSelectOpen(this.game) &&
+      !isFloorDirectoryOpen(this.game) &&
       !isEncyclopediaOpen(this.game) &&
       !isCreditsOpen(this.game)
     );

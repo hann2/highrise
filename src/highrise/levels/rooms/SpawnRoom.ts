@@ -7,6 +7,7 @@ import { fontName } from "../../../core/resources/resourceUtils";
 import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { cementFloor } from "../../environment/decorations/decorations";
+import DirectoryPlaque from "../../environment/DirectoryPlaque";
 import HealthPickup from "../../environment/HealthPickup";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
@@ -45,8 +46,20 @@ export default class SpawnRoom implements RoomTemplate {
   generateEntities({
     roomToWorldPosition,
     roomToWorldDimensions,
+    roomToWorldAngle,
   }: RoomTransformer): Entity[] {
     const entities: Entity[] = [];
+
+    // The building directory, on the wall: not on the first floor, so the run
+    // ahead is a mystery until a floor has been cleared
+    if (this.levelIndex > 1) {
+      entities.push(
+        new DirectoryPlaque(
+          roomToWorldPosition(V(0, -0.38)),
+          roomToWorldAngle(0),
+        ),
+      );
+    }
 
     entities.push(
       new OverheadLight(roomToWorldPosition(V(1, 1)), {

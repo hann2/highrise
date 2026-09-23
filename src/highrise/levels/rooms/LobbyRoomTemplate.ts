@@ -122,9 +122,6 @@ const STAIRWELL_DOOR: WallID = [V(7, 1), true];
 /** Where the stairs up are: stepping on them starts the run */
 export const STAIRS_CELL = V(9, 0);
 
-/** The middle of the top edge of the directory board, against the top wall between the elevators and the stairwell */
-export const DIRECTORY_BOARD_POSITION = V(6.5, -0.45);
-
 /** Behind the reception desk */
 export const RECEPTIONIST_POSITION = V(2.5, 2.98);
 
