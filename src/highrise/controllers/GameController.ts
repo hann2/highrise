@@ -7,6 +7,7 @@ import EncyclopediaTracker from "../encyclopedia/EncyclopediaTracker";
 import PartyManager from "../environment/PartyManager";
 import { AmmoOverlay } from "../hud/AmmoOverlay";
 import { DamagedOverlay } from "../hud/DamagedOverlay";
+import { HealthBar } from "../hud/HealthBar";
 import { KeycardOverlay } from "../hud/KeycardOverlay";
 import { QuarterCounter } from "../hud/QuarterCounter";
 import PlayerHumanController from "../human/PlayerHumanController";
@@ -51,6 +52,7 @@ export class GameController extends BaseEntity implements Entity {
       new VisionController(getPlayer),
       new DamagedOverlay(getPlayer),
       new AmmoOverlay(getPlayer),
+      new HealthBar(getPlayer),
       new QuarterCounter(),
       new KeycardOverlay(getPlayer),
       new PauseMenu(),

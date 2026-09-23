@@ -11,10 +11,11 @@
   white-space: nowrap;
 }
 
+/* Above the health bar */
 .hud-quarters {
   position: fixed;
   left: 12px;
-  bottom: 10px;
+  bottom: 48px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -46,7 +47,7 @@
 .hud-keycards {
   position: fixed;
   left: 12px;
-  bottom: 44px;
+  bottom: 84px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -87,7 +88,7 @@
   color: #d04030;
 }
 
-/* Other weapon slot and consumables, above the shells */
+/* Both weapon slots and the consumables, above the shells */
 .hud-inventory {
   position: fixed;
   right: 10px;
@@ -95,7 +96,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 6px;
   font-family: oswald;
   font-size: 15px;
   color: #e8e0c8;
@@ -105,14 +106,144 @@
   white-space: nowrap;
 }
 
-.hud-inventory__row {
+/* An icon with a name and a count under it */
+.hud-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 4px 10px 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: rgba(10, 10, 12, 0.45);
 }
 
-.hud-inventory__other {
-  opacity: 0.65;
+.hud-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 32px;
+  border-radius: 3px;
+  background: rgba(232, 224, 200, 0.12);
+}
+
+/* A light outline so black guns show up on dark floors */
+.hud-item__icon img,
+.hud-item__icon svg {
+  max-width: 64px;
+  max-height: 32px;
+  filter: drop-shadow(0 0 0.5px #e8e0c8) drop-shadow(0 0 1px #e8e0c8);
+}
+
+/* Laid on its side, so its width is the height the box allows */
+.hud-item__icon img.hud-item__img--rotated {
+  max-width: 32px;
+  max-height: 64px;
+  transform: rotate(90deg);
+}
+
+.hud-item__icon svg {
+  width: 44px;
+}
+
+.hud-item__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 90px;
+  line-height: 1.15;
+}
+
+.hud-item__count {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.hud-weapon {
+  opacity: 0.55;
+  transition:
+    opacity 0.15s,
+    border-color 0.15s;
+}
+
+.hud-weapon--active {
+  opacity: 1;
+  border-color: rgba(232, 224, 200, 0.75);
+  background: rgba(10, 10, 12, 0.6);
+}
+
+.hud-weapon--empty {
+  opacity: 0.3;
+  border-style: dashed;
+  border-color: rgba(232, 224, 200, 0.4);
+  text-transform: capitalize;
+}
+
+/* Health, bottom left */
+.hud-health {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: oswald;
+  font-size: 18px;
+  line-height: 1;
+  color: #e8e0c8;
+  text-shadow: 0 1px 2px black;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.hud-health__bar {
+  position: relative;
+  width: 200px;
+  height: 14px;
+  border: 1px solid rgba(232, 224, 200, 0.6);
+  border-radius: 3px;
+  background: rgba(10, 10, 12, 0.6);
+  overflow: hidden;
+  box-shadow: 0 1px 3px black;
+}
+
+.hud-health__fill,
+.hud-health__trail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.hud-health__fill {
+  background: linear-gradient(#d84a3a, #9c2418);
+  transition: width 0.1s;
+}
+
+/* Catches up with the health a moment after a hit */
+.hud-health__trail {
+  background: #f2e6b8;
+  transition: width 0.4s ease-in 0.35s;
+}
+
+.hud-health__max {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.hud-health--low .hud-health__bar {
+  animation: hud-health-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes hud-health-pulse {
+  from {
+    border-color: rgba(232, 224, 200, 0.6);
+  }
+  to {
+    border-color: #ff3020;
+    box-shadow: 0 0 8px #ff3020;
+  }
 }
 
 /* The key or button that does something, like a keycap */

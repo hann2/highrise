@@ -1,4 +1,5 @@
 import { Container, Sprite } from "pixi.js";
+import { RESOURCES } from "../../../resources/resources";
 import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -9,7 +10,11 @@ import { V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
-import { Weapon } from "../weapons/weapons";
+import { ConsumableStats } from "../weapons/consumables/ConsumableStats";
+import MeleeWeapon from "../weapons/melee/MeleeWeapon";
+import { Weapon, WeaponSlot } from "../weapons/weapons";
+
+const WEAPON_SLOTS: WeaponSlot[] = ["primary", "secondary"];
 import "./hud.css";
 
 /** Pixels between the right edge of the screen and the shells, to make room for the reserve count */
@@ -17,8 +22,8 @@ const RESERVE_WIDTH = 64;
 
 /**
  * Bottom right of the screen: the rounds in the gun as shells (Pixi), the
- * reserve next to them, and above them the other slot's weapon and the
- * consumables carried (HTML).
+ * reserve next to them, and above them both weapon slots (the one in hand
+ * highlighted) and the consumables carried (HTML).
  */
 export class AmmoOverlay extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -58,26 +63,31 @@ export class AmmoOverlay extends BaseEntity implements Entity {
       }
     }
 
-    const other = human.otherWeapon;
     const consumable = human.consumable;
 
     return (
       <>
         <div className="hud-inventory">
           {consumable && human.consumableCount > 0 && (
-            <div className="hud-inventory__row">
+            <div className="hud-item hud-item--consumable">
               <span className="hud-key">{gamepad ? "LB" : "G"}</span>
-              {consumable.name} ×{human.consumableCount}
+              <div className="hud-item__icon">
+                <ConsumableIcon stats={consumable} />
+              </div>
+              <div className="hud-item__text">
+                <div className="hud-item__name">{consumable.name}</div>
+                <div className="hud-item__count">×{human.consumableCount}</div>
+              </div>
             </div>
           )}
-          {other && (
-            <div className="hud-inventory__row hud-inventory__other">
-              <span className="hud-key">{gamepad ? "Y" : "Q"}</span>
-              {other.stats.name}
-              {other instanceof Gun &&
-                ` ${other.ammo}/${formatReserve(human.getReserve(other.stats.ammoClass))}`}
-            </div>
-          )}
+          {WEAPON_SLOTS.map((slot) => (
+            <WeaponCard
+              key={slot}
+              human={human}
+              slot={slot}
+              swapKey={gamepad ? "Y" : "Q"}
+            />
+          ))}
         </div>
         {reserveText !== undefined && (
           <div
@@ -149,6 +159,106 @@ export class AmmoOverlay extends BaseEntity implements Entity {
       }
     }
   }
+}
+
+/** One weapon slot: what's in it, its ammo, and whether it's in hand */
+function WeaponCard({
+  human,
+  slot,
+  swapKey,
+}: {
+  human: Human;
+  slot: WeaponSlot;
+  swapKey: string;
+}) {
+  const weapon = human.getWeaponInSlot(slot);
+  const active = slot === human.activeSlot;
+  const classes = [
+    "hud-item",
+    "hud-weapon",
+    active ? "hud-weapon--active" : "",
+    weapon ? "" : "hud-weapon--empty",
+  ];
+  if (!weapon) {
+    return (
+      <div className={classes.join(" ")}>
+        <div className="hud-item__text">
+          <div className="hud-item__name">No {slot}</div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className={classes.join(" ")}>
+      <span
+        className="hud-key"
+        style={{
+          visibility: !active && human.otherWeapon ? "visible" : "hidden",
+        }}
+      >
+        {swapKey}
+      </span>
+      <div className="hud-item__icon">
+        <img
+          src={RESOURCES.images[weapon.stats.textures.pickup]}
+          // Melee weapons are drawn pointing up; guns point right
+          className={
+            weapon instanceof MeleeWeapon ? "hud-item__img--rotated" : ""
+          }
+        />
+      </div>
+      <div className="hud-item__text">
+        <div className="hud-item__name">{weapon.stats.name}</div>
+        {weapon instanceof Gun && (
+          <div className="hud-item__count">
+            {weapon.ammo} /{" "}
+            {formatReserve(human.getReserve(weapon.stats.ammoClass))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Same shape as `drawConsumable`, as an SVG */
+function ConsumableIcon({ stats }: { stats: ConsumableStats }) {
+  const [length, width] = stats.size;
+  const pad = width * 0.4;
+  return (
+    <svg
+      viewBox={`${-length / 2 - pad} ${-width / 2 - pad} ${length + pad * 2} ${width + pad * 2}`}
+    >
+      <rect
+        x={-length / 2}
+        y={-width / 2}
+        width={length}
+        height={width}
+        rx={width / 2}
+        fill={cssColor(stats.color)}
+        stroke="rgba(0, 0, 0, 0.6)"
+        stroke-width={width * 0.06}
+      />
+      <rect
+        x={length / 2 - width * 0.35}
+        y={-width * 0.3}
+        width={width * 0.35}
+        height={width * 0.6}
+        fill={cssColor(stats.accentColor)}
+      />
+      <circle
+        cx={length / 2 + width * 0.1}
+        cy={width * 0.35}
+        r={width * 0.18}
+        fill="none"
+        stroke={cssColor(stats.accentColor)}
+        stroke-width={width * 0.07}
+      />
+    </svg>
+  );
+}
+
+function cssColor(color: number): string {
+  return "#" + color.toString(16).padStart(6, "0");
 }
 
 function formatReserve(reserve: number): string {
