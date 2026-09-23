@@ -10,6 +10,9 @@ import {
 
 // See the "Seeded levels are reproducible" assertion
 const LEVEL_2_FINGERPRINT = "315:1038549143";
+// What the upgrade screen offers after level 1 with this seed, in order.
+// Changes when the upgrade pool or rarities change.
+const UPGRADE_OFFER = ["Steady Aim", "Quick Hands", "Vitamins"];
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
@@ -313,7 +316,76 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
 
   // --- Level transitions work (KeyL is a dev cheat) ---
+  const statsBefore = await page.evaluate(
+    () =>
+      (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "PartyManager",
+        ) as any
+      ).leader.stats,
+  );
   await page.keyboard.press("KeyL");
+
+  // --- Between floors the leader picks one of three upgrades ---
+  await page.waitForFunction(
+    () =>
+      [...window.DEBUG.game!.entities.all].some(
+        (e) => e.constructor.name === "UpgradeSelect",
+      ),
+    null,
+    { timeout: 15000 },
+  );
+  const offer = await page.evaluate(() => {
+    const screen = [...window.DEBUG.game!.entities.all].find(
+      (e) => e.constructor.name === "UpgradeSelect",
+    ) as any;
+    return {
+      names: screen.choices.map((u: any) => u.name) as string[],
+      paused: window.DEBUG.game!.paused,
+      cards: document.querySelectorAll(".upgrade-select__card").length,
+      pauseMenuShown: !!document.querySelector(".pause-menu__background"),
+    };
+  });
+  // Seeded, and drawn after the level is generated, so always the same offer
+  expect(offer.names).toEqual(UPGRADE_OFFER);
+  expect(offer.paused).toBe(true);
+  expect(offer.cards).toBe(3);
+  expect(offer.pauseMenuShown).toBe(false);
+  // Escape doesn't unpause behind the upgrade screen's back
+  await page.keyboard.press("Escape");
+  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: "tests/output/upgrade-select.png" });
+  // Take Vitamins with the keyboard
+  const hpBefore = await page.evaluate(
+    () =>
+      (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "PartyManager",
+        ) as any
+      ).leader.hp as number,
+  );
+  const pick = offer.names.indexOf("Vitamins");
+  // The card under the mouse is selected when the screen appears, so get the
+  // mouse out of the way and step from wherever the selection is
+  await page.mouse.move(1, 1);
+  const selected = await page.evaluate(
+    () =>
+      (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "UpgradeSelect",
+        ) as any
+      ).selected as number,
+  );
+  for (let i = 0; i < (pick - selected + 3) % 3; i++) {
+    await page.keyboard.press("ArrowRight");
+  }
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => !window.DEBUG.game!.paused, null, {
+    timeout: 5000,
+  });
+  expectNoIssues(issues);
+
   await page.waitForFunction(
     () => {
       const entities = window.DEBUG.game!.entities;
@@ -362,6 +434,53 @@ test("game boots, plays, and changes levels without errors", async ({
     return `${rows.length}:${hash}`;
   });
   expect(fingerprint).toBe(LEVEL_2_FINGERPRINT);
+
+  // --- The upgrade stuck: the leader has more health than before ---
+  const upgraded = await page.evaluate(() => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    return {
+      stats: leader.stats,
+      upgrades: leader.upgrades.map((u: any) => u.name),
+      maxHp: leader.maxHp,
+      hp: leader.hp,
+    };
+  });
+  expect(upgraded.upgrades).toEqual(["Vitamins"]);
+  expect(upgraded.maxHp).toBe(statsBefore.maxHp + 20);
+  // Healed by as much, unless a zombie got a bite in since
+  expect(upgraded.hp).toBeGreaterThan(hpBefore);
+  // Nothing else changed
+  expect({ ...upgraded.stats, maxHp: statsBefore.maxHp }).toEqual(statsBefore);
+
+  // --- Stats are read at use time: bigger magazine, instant reload, and
+  // vision and flashlight ranges that rebuild their textures ---
+  const reloaded = await page.evaluate(() => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    leader.stats.visionRange = 1.3;
+    leader.stats.flashlightRange = 1.5;
+    const gun = leader.weapon;
+    if (gun?.constructor.name !== "Gun") {
+      return undefined;
+    }
+    leader.stats.magazineSize = 1.5;
+    leader.stats.instantEmptyReload = true;
+    gun.ammo = 0;
+    leader.reload();
+    return { ammo: gun.ammo, baseCapacity: gun.stats.ammoCapacity };
+  });
+  expect(reloaded).toBeDefined();
+  expect(reloaded!.ammo).toBe(Math.round(reloaded!.baseCapacity * 1.5));
+  await page.waitForTimeout(1000);
+  await page.screenshot({ path: "tests/output/level-2-upgraded.png" });
+  expectNoIssues(issues);
 
   // --- Zoomed out overview with the vision mask off (KeyV is a dev cheat) ---
   // Mostly useful as a visual reference for level generation and lighting.

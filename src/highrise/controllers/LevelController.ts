@@ -5,7 +5,10 @@ import Game from "../../core/Game";
 import { reseedIfSeeded } from "../../core/util/Random";
 import { Persistence } from "../constants/constants";
 import FadeEffect from "../effects/FadeEffect";
+import { getPartyLeader } from "../environment/PartyManager";
 import { Level } from "../levels/Level";
+import UpgradeSelect from "../menu/UpgradeSelect";
+import { drawUpgrades, takeUpgrade } from "../upgrades/upgrades";
 import {
   chooseTemplate,
   generateLevel,
@@ -22,6 +25,8 @@ export default class LevelController extends BaseEntity implements Entity {
   currentLevel: number = 0;
   /** What was generated for the current level */
   level?: Level;
+  /** Between reaching an exit and starting the next level */
+  private changingLevel = false;
 
   @on("add")
   async onAdd() {
@@ -40,6 +45,10 @@ export default class LevelController extends BaseEntity implements Entity {
   // We just got to the exit
   @on("levelComplete")
   async onLevelComplete() {
+    if (this.changingLevel) {
+      return;
+    }
+    this.changingLevel = true;
     if (this.currentLevel === 0) {
       localStorage.setItem("tutorialComplete", "true");
     }
@@ -55,9 +64,36 @@ export default class LevelController extends BaseEntity implements Entity {
 
     if (this.currentLevel <= MAX_LEVEL) {
       const level = this.generateLevel();
+      // Not after the tutorial, which isn't part of the run
+      if (this.currentLevel > 1) {
+        // Drawn after generating, so the level doesn't depend on the draw
+        // and seeded runs get the same offers
+        await this.offerUpgrades();
+        if (this.isDestroyed) {
+          return;
+        }
+      }
       this.game.dispatch("startLevel", { level });
     } else {
       this.game.dispatch("gameOver", { victory: true });
+    }
+    this.changingLevel = false;
+  }
+
+  /** Lets the leader pick one of a few upgrades, with the game paused */
+  private async offerUpgrades() {
+    const leader = getPartyLeader(this.game);
+    if (!leader) {
+      return;
+    }
+    const choices = drawUpgrades(leader, 3);
+    if (choices.length === 0) {
+      return;
+    }
+    const screen = this.game.addEntity(new UpgradeSelect(choices));
+    const upgrade = await screen.picked;
+    if (!leader.isDestroyed) {
+      takeUpgrade(leader, upgrade);
     }
   }
 

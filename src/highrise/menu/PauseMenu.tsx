@@ -13,6 +13,7 @@ import {
   MenuButtons,
   MuteButton,
 } from "./MenuButtons";
+import { isUpgradeSelectOpen } from "./UpgradeSelect";
 
 // Shows the menu when paused, invisible otherwise
 export default class PauseMenu extends ReactEntity implements Entity {
@@ -25,7 +26,8 @@ export default class PauseMenu extends ReactEntity implements Entity {
   }
 
   renderContent() {
-    if (!this.visible) {
+    // The upgrade screen pauses the game too, but isn't a pause
+    if (!this.visible || isUpgradeSelectOpen(this.game)) {
       return null;
     }
     const game = this.game;
@@ -86,14 +88,14 @@ export default class PauseMenu extends ReactEntity implements Entity {
 
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
-    if (key === "Escape") {
+    if (key === "Escape" && !isUpgradeSelectOpen(this.game)) {
       this.game.togglePause();
     }
   }
 
   @on("buttonDown")
   onButtonDown({ button }: { button: ControllerButton }) {
-    if (button === ControllerButton.START) {
+    if (button === ControllerButton.START && !isUpgradeSelectOpen(this.game)) {
       this.game.togglePause();
     }
   }

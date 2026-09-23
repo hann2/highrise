@@ -2,7 +2,7 @@
 
 Playwright end-to-end tests that run the real game in headless Chrome (with GPU).
 
-- `npm test` — smoke test. Run this after any non-trivial change; it is the main way to tell "compiles" from "works". It boots the game, moves, picks up a gun and shoots a zombie, swings the doors, checks physics sanity, pauses, and changes levels.
+- `npm test` — smoke test. Run this after any non-trivial change; it is the main way to tell "compiles" from "works". It boots the game, moves, picks up a gun and shoots a zombie, swings the doors, checks physics sanity, pauses, changes levels (picking an upgrade on the way), and checks that player stats take effect.
 - `npm run test:physics` — node tests for `src/core/physics` (`tests/physics/`). No browser, runs in about a second. Several tests pin exact numeric results; if you change solver/integration behavior on purpose, re-record them with `PHYSICS_RECORD_PINS=1 npm run test:physics` and paste the output into `PINS`. If you didn't mean to change behavior and a pin fails, you broke something.
 - `npm run test:vision` — node tests for the vision polygon and mesh (`tests/vision/`). They build small scenes of boxes and check what is visible, so add a case there when you touch `visibility.ts` or `visionMesh.ts`.
 - `npm run benchmark` — seeded frame-time benchmark. Writes `tests/output/benchmark.json` with `loopCpuMs` percentiles and a `profile` breakdown (per section and per entity class, ms per frame) and prints the breakdown as a table. Numbers are only comparable on the same machine. `captureProfile(page, ms)` in `helpers.ts` gets the same breakdown from any test or script.
@@ -13,6 +13,7 @@ The Playwright tests start their own dev server on port 3456, so they can run wh
 
 - `?seed=123` in the URL seeds `core/util/Random.ts`, making level generation reproducible.
 - Levels are reseeded with `seed + levelNumber` right before generation, so everything generated for a level is reproducible regardless of what happened earlier in the run. The smoke test asserts a fingerprint of `LevelController.level.entities` for level 2 against `LEVEL_2_FINGERPRINT`; when you change level generation on purpose, paste the new value from the failure message. If it changes when you didn't touch level generation, something is consuming randomness nondeterministically (see the randomness note in the root `CLAUDE.md`).
+- The upgrades offered between floors are drawn right after the next level is generated, so they are seeded too. `UPGRADE_OFFER` pins what level 1 offers; it changes when the pool or rarity weights change (paste the new value, and pick a different upgrade in the test if Vitamins is no longer offered).
 - `window.DEBUG.game` exposes the `Game`. Tests find things with `entities.getById(...)` (`main_menu`, `party_manager`, `level_controller`) and `entities.getTagged(...)` (`human`, `zombie`).
 - Tests reach into entities by class name (`e.constructor.name === "Door"`), which only works in development builds where names aren't minified.
 - Dev-only cheat keys from `CheatController` are used for flow control: `KeyL` completes the level, `KeyV` toggles the vision mask.
