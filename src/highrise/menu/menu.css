@@ -78,6 +78,16 @@
   color: #dddddd;
 }
 
+/* The title and pause menus' secondary options are quieter than the stencil */
+.menu-buttons .menu-button {
+  font-family: oswald;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 44px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
 .menu-button:hover {
   color: #ffffff;
 }

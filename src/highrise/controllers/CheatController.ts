@@ -1,9 +1,7 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
-import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
-import { lerp } from "../../core/util/MathUtil";
 import { CHARACTERS } from "../characters/Character";
 import { Persistence } from "../constants/constants";
 import { getPartyManager } from "../environment/PartyManager";
@@ -78,17 +76,6 @@ export default class CheatController extends BaseEntity implements Entity {
         }
         break;
       }
-    }
-  }
-
-  @on("tick")
-  onTick() {
-    const io = this.game.io;
-    if (io.usingGamepad) {
-      const t = io.getButton(ControllerButton.LT);
-      this.game.slowMo = lerp(1.0, 0.5, t);
-    } else {
-      this.game.slowMo = io.isKeyDown("ShiftLeft") ? 0.2 : 1.0;
     }
   }
 }
