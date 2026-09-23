@@ -13,6 +13,7 @@ import FleshImpact from "../../effects/FleshImpact";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange, makeSimpleEnemyBody } from "../base/enemyUtils";
+import { inflictDamageFrom } from "../../run/damageSources";
 import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import HeavySprite from "./HeavySprite";
@@ -73,7 +74,7 @@ export default class Heavy extends BaseEnemy {
             this.body.angle,
             ATTACK_RANGE,
           )) {
-            human.inflictDamage(rInteger(30, 45));
+            inflictDamageFrom(human, rInteger(30, 45), this);
 
             this.game.addEntity(
               new PositionalSound(hitSoundRing.getNext(), this.getPosition(), {

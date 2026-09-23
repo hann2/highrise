@@ -23,6 +23,10 @@ test("game boots, plays, and changes levels without errors", async ({
   const game = () => page.evaluate(() => window.DEBUG.game!.ticknumber);
 
   // --- Boot to main menu ---
+  // Broken save data must not stop the game (it gets replaced at game over)
+  await page.addInitScript(() => {
+    window.localStorage.setItem("highriseSaveData", "{not json");
+  });
   await loadGame(page, 12345);
   expect(await game()).toBeGreaterThan(0);
   expectNoIssues(issues);
@@ -206,10 +210,6 @@ test("game boots, plays, and changes levels without errors", async ({
   // Stand the player beside a door that is at rest, on the side it opens away from
   const doorMidpoint = await page.evaluate(() => {
     const game = window.DEBUG.game!;
-    // A zombie wandering into the doorway would stop the door
-    for (const zombie of game.entities.getTagged("zombie")) {
-      zombie.destroy();
-    }
     const leader = (
       [...game.entities.all].find(
         (e) => e.constructor.name === "PartyManager",
@@ -218,6 +218,13 @@ test("game boots, plays, and changes levels without errors", async ({
     const door = [...game.entities.all].find(
       (e) => e.constructor.name === "Door" && (e as any).maxAngle > 1,
     ) as any;
+    // A zombie wandering into the doorway would stop the door. (Copy the
+    // list, because destroying a zombie removes it from the tagged list.)
+    for (const zombie of [...game.entities.getTagged("zombie")] as any[]) {
+      if (zombie.getPosition().distanceTo(door.hingePoint) < 10) {
+        zombie.destroy();
+      }
+    }
     door.body.angle = door.restingAngle;
     door.body.angularVelocity = 0;
     const angle = door.restingAngle;
@@ -305,6 +312,144 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.waitForTimeout(500);
   expectNoIssues(issues);
 
+  // --- Quarters drop and get picked up by walking over them ---
+  // In front of a vending machine, because that is known to be open floor
+  const quarterDrop = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const find = (name: string) =>
+      [...game.entities.all].find((e) => e.constructor.name === name) as any;
+    const partyManager = find("PartyManager");
+    const leader = partyManager.leader;
+    const machine = find("VendingMachine");
+    const before = partyManager.quarters;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    leader.body.position.set(machine.getFrontPosition(1.8));
+    leader.body.velocity.set(0, 0);
+    await wait(100);
+    const quarter = find("QuarterDropper").dropQuarter(
+      machine.getFrontPosition(0.6),
+    );
+    await wait(300);
+    const whileAway = partyManager.quarters;
+    leader.body.position.set(machine.getFrontPosition(1.0));
+    leader.body.velocity.set(0, 0);
+    await wait(300);
+    return {
+      before,
+      whileAway,
+      after: partyManager.quarters,
+      quarterGone: quarter.isDestroyed,
+    };
+  });
+  expect(quarterDrop.whileAway).toBe(quarterDrop.before);
+  expect(quarterDrop.after).toBe(quarterDrop.before + 1);
+  expect(quarterDrop.quarterGone).toBe(true);
+  await expect(page.locator(".hud-quarters")).toHaveText(
+    String(quarterDrop.after),
+  );
+
+  // --- Vending machines sell health for quarters ---
+  await page.keyboard.press("KeyK"); // dev cheat: +5 quarters
+  const machineFront = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const find = (name: string) =>
+      [...game.entities.all].find((e) => e.constructor.name === name) as any;
+    const leader = find("PartyManager").leader;
+    const machine = find("VendingMachine");
+    const standAt = machine.getFrontPosition(1.0);
+    const pin = () => {
+      if (!(window as any).testMachine) return;
+      leader.body.position.set(standAt);
+      leader.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    (window as any).testMachine = machine;
+    pin();
+    return [...machine.getFrontPosition()];
+  });
+  await page.waitForTimeout(800); // let the camera settle
+  const countHealthPickups = () =>
+    page.evaluate(
+      () =>
+        [...window.DEBUG.game!.entities.all].filter(
+          (e) => e.constructor.name === "HealthPickup",
+        ).length,
+    );
+  const getQuarters = () =>
+    page.evaluate(
+      () =>
+        (
+          [...window.DEBUG.game!.entities.all].find(
+            (e) => e.constructor.name === "PartyManager",
+          ) as any
+        ).quarters as number,
+    );
+  const quartersBeforeBuying = await getQuarters();
+  expect(quartersBeforeBuying).toBe(quarterDrop.after + 5);
+  const healthPickupsBefore = await countHealthPickups();
+  await page.keyboard.press("KeyE");
+  await page.waitForTimeout(1000);
+  expect(await getQuarters()).toBe(quartersBeforeBuying - 3);
+  expect(await countHealthPickups()).toBe(healthPickupsBefore + 1);
+  const dispensedDistance = await page.evaluate((front) => {
+    const pickups = [...window.DEBUG.game!.entities.all].filter(
+      (e) => e.constructor.name === "HealthPickup",
+    ) as any[];
+    return Math.min(
+      ...pickups.map((p) =>
+        Math.hypot(
+          p.sprite.position.x - front[0],
+          p.sprite.position.y - front[1],
+        ),
+      ),
+    );
+  }, machineFront);
+  expect(dispensedDistance).toBeLessThan(0.01);
+  await page.screenshot({ path: "tests/output/vending-machine.png" });
+
+  // Without enough quarters it doesn't dispense
+  const brokeBuy = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const partyManager = [...game.entities.all].find(
+      (e) => e.constructor.name === "PartyManager",
+    ) as any;
+    const machine = (window as any).testMachine;
+    const quarters = partyManager.quarters;
+    partyManager.quarters = 2;
+    machine.buy();
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    const quartersAfter = partyManager.quarters;
+    partyManager.quarters = quarters;
+    return quartersAfter;
+  });
+  expect(brokeBuy).toBe(2);
+  expect(await countHealthPickups()).toBe(healthPickupsBefore + 1);
+
+  // Breaking a machine spills some quarters, once
+  const spilled = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const machine = (window as any).testMachine;
+    (window as any).testMachine = undefined; // unpin, so nobody collects them
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    leader.body.position.set(machine.getFrontPosition(4));
+    const countQuarters = () =>
+      [...game.entities.all].filter((e) => e.constructor.name === "Quarter")
+        .length;
+    const before = countQuarters();
+    machine.die();
+    machine.die();
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    return countQuarters() - before;
+  });
+  await page.screenshot({ path: "tests/output/broken-vending-machine.png" });
+  expect(spilled).toBeGreaterThanOrEqual(2);
+  expect(spilled).toBeLessThanOrEqual(4);
+  expectNoIssues(issues);
+
   // --- Pausing stops the clock ---
   await page.keyboard.press("Escape");
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
@@ -376,5 +521,56 @@ test("game boots, plays, and changes levels without errors", async ({
   const tickBefore = await game();
   await page.waitForTimeout(3000);
   expect(await game()).toBeGreaterThan(tickBefore + 60);
+  expectNoIssues(issues);
+
+  // --- Quitting from the pause menu shows the run summary and saves the run ---
+  await page.keyboard.press("Escape");
+  await page.locator(".menu-button", { hasText: "Main Menu" }).click();
+  await page.waitForFunction(
+    () =>
+      (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "GameOverScreen",
+        ) as any
+      )?.ready,
+    null,
+    { timeout: 15000 },
+  );
+  const summaryText = await page.locator(".run-summary").innerText();
+  expect(summaryText).toContain("Run Over");
+  expect(summaryText).toContain("Floor reached");
+  expect(summaryText).toContain("Santa");
+  await page.screenshot({ path: "tests/output/run-summary.png" });
+  const saved = await page.evaluate(() =>
+    JSON.parse(window.localStorage.getItem("highriseSaveData")!),
+  );
+  expect(saved.version).toBe(1);
+  expect(saved.runs.length).toBe(1);
+  const run = saved.runs[0];
+  expect(run.outcome).toBe("quit");
+  expect(run.character).toBe("Santa");
+  expect(run.floorReached).toBe(2);
+  expect(saved.bestFloor).toBe(2);
+  expect(run.kills.Zombie).toBeGreaterThan(0);
+  expect(run.quartersSpent).toBe(3);
+  expect(run.quartersCollected).toBeGreaterThanOrEqual(6);
+  expect(run.timeSeconds).toBeGreaterThan(5);
+  // The game is cleared away behind the summary
+  expect(
+    await page.evaluate(
+      () => window.DEBUG.game!.entities.getTagged("human").length,
+    ),
+  ).toBe(0);
+
+  // Continuing goes back to the main menu
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(
+    () =>
+      [...window.DEBUG.game!.entities.all].some(
+        (e) => e.constructor.name === "MainMenu",
+      ),
+    null,
+    { timeout: 15000 },
+  );
   expectNoIssues(issues);
 });

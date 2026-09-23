@@ -33,6 +33,10 @@ export type CustomEvents = {
   // Environment
   lightsOn: { position: V2d };
 
+  // Economy
+  quartersCollected: { amount: number };
+  quartersSpent: { amount: number };
+
   // Settings
   toggleGraphicsQuality: void;
   graphicsQualityChanged: { quality: GraphicsQuality };

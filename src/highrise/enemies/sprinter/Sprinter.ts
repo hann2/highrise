@@ -11,6 +11,7 @@ import { createAttackAction } from "../../creature-stuff/AttackAction";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange, makeSimpleEnemyBody } from "../base/enemyUtils";
+import { inflictDamageFrom } from "../../run/damageSources";
 import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import { SPRINTER_VARIANTS, ZombieVariant } from "../zombie/ZombieVariants";
@@ -68,7 +69,7 @@ export default class Sprinter extends BaseEnemy {
             ATTACK_RANGE,
             ATTACK_ANGLE_RANGE,
           )) {
-            human.inflictDamage(rInteger(10, 15));
+            inflictDamageFrom(human, rInteger(10, 15), this);
             this.game.addEntity(
               new PositionalSound(hitSoundRing.getNext(), this.getPosition(), {
                 speed: rNormal(1, 0.05),

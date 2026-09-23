@@ -6,14 +6,18 @@ import { Persistence } from "../constants/constants";
 import PartyManager from "../environment/PartyManager";
 import { AmmoOverlay } from "../hud/AmmoOverlay";
 import { DamagedOverlay } from "../hud/DamagedOverlay";
+import { QuarterCounter } from "../hud/QuarterCounter";
 import PlayerHumanController from "../human/PlayerHumanController";
 import LightingManager from "../lighting-and-vision/LightingManager";
 import VisionController from "../lighting-and-vision/VisionController";
 import GameOverScreen from "../menu/GameOverScreen";
 import MainMenu from "../menu/MainMenu";
 import PauseMenu from "../menu/PauseMenu";
+import { loadSaveData } from "../persistence/SaveData";
+import RunStats from "../run/RunStats";
 import CameraController from "./CameraController";
 import LevelController from "./LevelController";
+import QuarterDropper from "./QuarterDropper";
 
 // The most top level class for deciding control flow
 export class GameController extends BaseEntity implements Entity {
@@ -34,12 +38,15 @@ export class GameController extends BaseEntity implements Entity {
     const partyManager = game.addEntity(new PartyManager(character));
     const getPlayer = () => partyManager.leader;
     game.addEntities(
+      new RunStats(character),
+      new QuarterDropper(),
       new LevelController(),
       new CameraController(game.camera, getPlayer),
       new PlayerHumanController(getPlayer),
       new VisionController(getPlayer),
       new DamagedOverlay(getPlayer),
       new AmmoOverlay(getPlayer),
+      new QuarterCounter(),
       new PauseMenu(),
     );
   }
@@ -48,7 +55,12 @@ export class GameController extends BaseEntity implements Entity {
   async onGameOver({ victory }: { victory: boolean }) {
     const game = this.game;
 
-    const gameOverScreen = game.addEntity(new GameOverScreen(victory));
+    // The summary has to be taken before the game is cleared away
+    const previousBestFloor = loadSaveData().bestFloor;
+    const summary = game.entities.getSingleton(RunStats).finish(victory);
+    const gameOverScreen = game.addEntity(
+      new GameOverScreen(summary, previousBestFloor),
+    );
     await this.waitUntil(() => gameOverScreen.opacity > 0.99);
     game.clearScene(Persistence.Game);
     await this.waitUntil(() => gameOverScreen.isDestroyed);

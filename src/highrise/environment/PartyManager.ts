@@ -104,6 +104,24 @@ export default class PartyManager extends BaseEntity implements Entity {
     }
   }
 
+  /** Quarters are shared by the whole party */
+  quarters = 0;
+
+  addQuarters(amount: number) {
+    this.quarters += amount;
+    this.game.dispatch("quartersCollected", { amount });
+  }
+
+  /** Takes `amount` quarters if the party has that many. */
+  spendQuarters(amount: number): boolean {
+    if (this.quarters < amount) {
+      return false;
+    }
+    this.quarters -= amount;
+    this.game.dispatch("quartersSpent", { amount });
+    return true;
+  }
+
   hasMember(human: Human) {
     return this.partyMembers.includes(human);
   }
