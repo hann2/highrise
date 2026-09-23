@@ -43,7 +43,7 @@ Current: nothing is a choice. Every floor has the same closet contents (health, 
 - Pool:
   - Stat cards (feature 1).
   - Rule cards, which make builds feel different: kills sometimes drop ammo; reloading from empty is instant; melee kills heal a little; pushes chain stuns; crawlers die in one hit; allies deal more damage.
-  - Weapon offers: a specific gun, possibly with a gun-attached upgrade (extended mag, laser, choke).
+  - Weapon offers: a specific gun, possibly with a gun-attached upgrade (extended mag, laser, choke). **Guns done 2026-09-23 (`upgrades/weaponOffers.ts`): at most one per offer, from the floor's closet tier or the one above; no gun-attached upgrades yet.**
   - Consumables (feature 7) and quarters.
 - Rarity tiers, and boss/landmark floors offer a guaranteed rare.
 - Data model: `Upgrade = { name, description, rarity, apply(human) }`, collected in one index file like `gunStats.ts`. The encyclopedia (feature 11) reads the same list.
@@ -152,7 +152,7 @@ Current: 5 fixed templates in fixed order, 14×14 grid of 2 m cells, exit at the
 
 ### 11. Encyclopedia (S–M)
 
-**Done 2026-09-22 (`encyclopedia/`, `menu/Encyclopedia.tsx`; `E`/`Y` from the main menu, pause menu and run summary; seen flags in `SaveData.seen`). Consumables section not yet listed.**
+**Done 2026-09-22 (`encyclopedia/`, `menu/Encyclopedia.tsx`; `E`/`Y` from the main menu, pause menu and run summary; seen flags in `SaveData.seen`). Consumables section added 2026-09-23.**
 
 - A screen listing all guns, melee weapons, consumables, upgrades, characters and enemies, with the ones found/unlocked revealed and the rest as "???". Viewable from the pause menu during a run and from the lobby.
 - Reads the same data indexes (`gunStats.ts`, `weapons.ts`, the upgrade list, `Character.ts`, enemy variants) so it stays in sync automatically. "Found" flags persist (feature 14).

@@ -13,7 +13,7 @@ import {
 const LEVEL_2_FINGERPRINT = "429:28395690";
 // What the upgrade screen offers after level 1 with this seed, in order.
 // Changes when the upgrade pool, the rarities, or level generation change.
-const UPGRADE_OFFER = ["Hollow Points", "Grenade Pack", "Steady Aim"];
+const UPGRADE_OFFER = ["Flashbangs", "Steady Aim", "Hollow Points"];
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
@@ -1351,8 +1351,25 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.locator(".encyclopedia__entry--unknown").first().click();
   await expect(page.locator(".encyclopedia__detail-name")).toHaveText("???");
   expect(await detail.innerText()).not.toContain("Magazine");
-  // Guns → Melee → Upgrades → Enemies, where the zombie shot earlier is known
-  for (let i = 0; i < 3; i++) {
+  // Guns → Melee → Consumables, where the frag grenades carried earlier are
+  // known and flashbangs aren't
+  for (let i = 0; i < 2; i++) {
+    await page.keyboard.press("ArrowRight");
+  }
+  await expect(selectedTab).toContainText("Consumables");
+  await expect(selectedTab).toContainText("1 / 2");
+  await expect(gunEntries).toHaveCount(2);
+  await expect(gunEntries.nth(0)).toContainText("Frag Grenade");
+  await expect(gunEntries.nth(1)).toHaveText("???");
+  await gunEntries.nth(0).click();
+  await expect(detail).toContainText("Blast radius");
+  await expect(
+    page.locator(".encyclopedia__detail-image img[src^='data:image/svg']"),
+  ).toHaveCount(1);
+  await page.mouse.move(1, 1);
+  await page.screenshot({ path: "tests/output/encyclopedia-consumables.png" });
+  // → Upgrades → Enemies, where the zombie shot earlier is known
+  for (let i = 0; i < 2; i++) {
     await page.keyboard.press("ArrowRight");
   }
   await expect(selectedTab).toContainText("Enemies");
@@ -1371,6 +1388,7 @@ test("game boots, plays, and changes levels without errors", async ({
   );
   expect(seen.guns).toContain(heldGun);
   expect(seen.enemies).toContain("Zombie");
+  expect(seen.consumables).toEqual(["Frag Grenade"]);
   expectNoIssues(issues);
 
   await page.screenshot({ path: "tests/output/paused.png" });
@@ -1444,6 +1462,8 @@ test("game boots, plays, and changes levels without errors", async ({
     const screen = [...window.DEBUG.game!.entities.all].find(
       (e) => e.constructor.name === "UpgradeSelect",
     ) as any;
+    // For making one later, to check how cards show stacks
+    (window as any).testUpgradeSelect = screen.constructor;
     return {
       names: screen.choices.map((u: any) => u.name) as string[],
       paused: window.DEBUG.game!.paused,
@@ -1623,6 +1643,172 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.screenshot({ path: "tests/output/level-2-upgraded.png" });
   expectNoIssues(issues);
 
+  // --- Weapon cards: at most one per offer, for a gun from this floor's
+  // closet tier or the one above (tiers 2 and 3 on floor 2) that the leader
+  // isn't carrying. (Drawing uses up randomness, so this comes after
+  // everything that depends on the seed.) ---
+  const draws = await page.evaluate(() => {
+    const entities = [...window.DEBUG.game!.entities.all] as any[];
+    const levelController = entities.find(
+      (e) => e.constructor.name === "LevelController",
+    );
+    const leader = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    ).leader;
+    const offers: any[][] = [];
+    for (let i = 0; i < 100; i++) {
+      offers.push(levelController.drawOffer(leader));
+    }
+    const weaponCards = offers.flatMap((offer) =>
+      offer.filter((u) => u.weapon),
+    );
+    return {
+      held: [leader.primary, leader.secondary]
+        .filter((w) => w?.constructor.name === "Gun")
+        .map((gun) => gun.stats.name as string),
+      offerSizes: [...new Set(offers.map((offer) => offer.length))],
+      mostWeaponCards: Math.max(
+        ...offers.map((offer) => offer.filter((u) => u.weapon).length),
+      ),
+      weaponNames: [...new Set(weaponCards.map((u) => u.name as string))],
+      weaponDescriptions: [
+        ...new Set(weaponCards.map((u) => u.description as string)),
+      ],
+    };
+  });
+  expect(draws.offerSizes).toEqual([3]);
+  expect(draws.mostWeaponCards).toBe(1);
+  expect(draws.weaponNames.length).toBeGreaterThan(0);
+  for (const name of draws.weaponNames) {
+    expect([
+      "Desert Eagle",
+      "AR-15",
+      "Sawn Off Shotgun",
+      "Remington Shotgun",
+    ]).toContain(name);
+    expect(draws.held).not.toContain(name);
+  }
+  for (const description of draws.weaponDescriptions) {
+    expect(description).toMatch(
+      /^Tier [23] · \d+ (rounds|shells) · (semi auto|full auto|pump action)$/,
+    );
+  }
+
+  // Taking one puts the gun in its slot, loaded, with the new-gun reserve
+  // bonus, and drops what was there; after that neither it nor a maxed-out
+  // upgrade is offered again
+  const tookWeapon = await page.evaluate(async () => {
+    const entities = [...window.DEBUG.game!.entities.all] as any[];
+    const levelController = entities.find(
+      (e) => e.constructor.name === "LevelController",
+    );
+    const leader = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    ).leader;
+    let card: any;
+    let oneStack: any;
+    for (let i = 0; i < 200 && !(card && oneStack); i++) {
+      for (const upgrade of levelController.drawOffer(leader)) {
+        if (upgrade.weapon && (!card || card.weapon.ammoClass === "pistol")) {
+          card = upgrade;
+        } else if (!upgrade.weapon && upgrade.maxStacks === 1) {
+          oneStack = upgrade;
+        }
+      }
+    }
+    const ammoClass = card.weapon.ammoClass;
+    const slot = ammoClass === "pistol" ? "secondary" : "primary";
+    const replaced = leader[slot]?.stats.name;
+    if (ammoClass !== "pistol") {
+      leader.reserve[ammoClass] = 0;
+    }
+    levelController.giveUpgrade(leader, card);
+    levelController.giveUpgrade(leader, oneStack);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const gun = leader[slot];
+    const offeredAgain = new Set<string>();
+    for (let i = 0; i < 100; i++) {
+      for (const upgrade of levelController.drawOffer(leader)) {
+        offeredAgain.add(upgrade.name);
+      }
+    }
+    const dropped = [...window.DEBUG.game!.entities.all].some(
+      (e: any) =>
+        e.constructor.name === "WeaponPickup" &&
+        e.weapon.stats.name === replaced,
+    );
+    return {
+      name: card.name,
+      ammoClass,
+      replaced,
+      dropped,
+      inSlot: gun?.stats.name,
+      inHand: leader.weapon === gun,
+      full: gun?.ammo === gun?.getCapacity(leader),
+      reserve: leader.getReserve(ammoClass),
+      oneStack: oneStack.name,
+      offeredAgain: [...offeredAgain],
+      upgrades: leader.upgrades.map((u: any) => u.name),
+    };
+  });
+  expect(tookWeapon.inSlot).toBe(tookWeapon.name);
+  expect(tookWeapon.inHand).toBe(true);
+  expect(tookWeapon.full).toBe(true);
+  if (tookWeapon.ammoClass !== "pistol") {
+    expect(tookWeapon.reserve).toBe(
+      tookWeapon.ammoClass === "rifle" ? 15 : 4, // NEW_GUN_RESERVE_BONUS
+    );
+  }
+  if (tookWeapon.replaced) {
+    expect(tookWeapon.dropped).toBe(true);
+  }
+  expect(tookWeapon.offeredAgain).not.toContain(tookWeapon.name);
+  expect(tookWeapon.offeredAgain).not.toContain(tookWeapon.oneStack);
+  expect(tookWeapon.upgrades).toEqual([
+    "Steady Aim",
+    tookWeapon.name,
+    tookWeapon.oneStack,
+  ]);
+
+  // Cards say how many of an upgrade the leader already has
+  await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const entities = [...game.entities.all] as any[];
+    const levelController = entities.find(
+      (e) => e.constructor.name === "LevelController",
+    );
+    const leader = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    ).leader;
+    let weaponCard: any;
+    for (let i = 0; i < 200 && !weaponCard; i++) {
+      weaponCard = levelController.drawOffer(leader).find((u: any) => u.weapon);
+    }
+    const UpgradeSelect = (window as any).testUpgradeSelect;
+    (window as any).testUpgradeScreen = game.addEntity(
+      new UpgradeSelect(
+        [leader.upgrades[0], leader.upgrades[2], weaponCard],
+        leader,
+      ),
+    );
+  });
+  const cards = page.locator(".upgrade-select__card");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.nth(0)).toContainText("1 taken");
+  await expect(cards.nth(1)).toContainText("1 / 1 taken");
+  await expect(cards.nth(2)).not.toContainText("taken");
+  await expect(cards.nth(2).locator(".upgrade-select__image")).toHaveCount(1);
+  await expect(cards.nth(2)).toContainText(/Tier \d/);
+  await page.mouse.move(1, 1);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: "tests/output/upgrade-select-stacks.png" });
+  await page.evaluate(() => {
+    (window as any).testUpgradeScreen.destroy();
+    window.DEBUG.game!.unpause();
+  });
+  await expect(cards).toHaveCount(0);
+  expectNoIssues(issues);
+
   // --- Zoomed out overview with the vision mask off (KeyV is a dev cheat) ---
   // Mostly useful as a visual reference for level generation and lighting.
   await page.keyboard.press("KeyV");
@@ -1689,16 +1875,28 @@ test("game boots, plays, and changes levels without errors", async ({
     const carried = [leader.primary, leader.secondary].filter((w) => w);
     result.weaponsCarried = carried.length;
     leader.hp = 1;
+    // The ally would keep pushing and shooting the zombie, which can stall
+    // its attack for a long time; this is about the leader dying with the
+    // ally alive, so keep the ally out of it
+    ally.primary = undefined;
+    ally.secondary = undefined;
     const pin = () => {
       if (leader.isDestroyed) return;
       if (zombie.isDestroyed) zombie = findZombie();
-      zombie.body.position.set(leader.getPosition().add([0.8, 0]));
+      // Well inside its attack range (0.8 m), not right on the edge of it
+      zombie.body.position.set(leader.getPosition().add([0.6, 0]));
       zombie.body.velocity.set(0, 0);
+      // Facing the leader, since a pinned zombie keeps its shambling direction
+      // and its bite only lands in front of it
+      zombie.setTargetDirection(Math.PI);
+      zombie.body.angle = Math.PI;
+      ally.body.position.set(leader.getPosition().add([-2.5, 0]));
+      ally.body.velocity.set(0, 0);
       requestAnimationFrame(pin);
     };
     pin();
     const start = performance.now();
-    while (!leader.isDestroyed && performance.now() - start < 10000) {
+    while (!leader.isDestroyed && performance.now() - start < 15000) {
       await wait(100);
     }
     result.leaderDead = leader.isDestroyed;

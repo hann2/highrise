@@ -323,6 +323,25 @@
   color: #dddddd;
 }
 
+/* A weapon card's gun. Some pickup images are square with the gun across the
+   middle, so the box is taller than it looks and eats into the gaps. */
+.upgrade-select__image {
+  width: 180px;
+  height: 96px;
+  margin: -20px 0;
+  object-fit: contain;
+}
+
+.upgrade-select__stacks {
+  margin-top: auto;
+  font-family: oswald;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #aaaaaa;
+}
+
 .upgrade-select__hint {
   font-family: oswald;
   font-weight: 300;

@@ -23,6 +23,7 @@ import {
   Vitamins,
 } from "./statUpgrades";
 import { RARITY_WEIGHTS, Upgrade } from "./Upgrade";
+import { drawWeaponOffer } from "./weaponOffers";
 
 // Every upgrade that can be offered
 export const UPGRADES: ReadonlyArray<Upgrade> = [
@@ -46,15 +47,43 @@ export const UPGRADES: ReadonlyArray<Upgrade> = [
   FlashbangPack,
 ];
 
-/** Whether `human` can take `upgrade` (again) */
-export function canTake(human: Human, upgrade: Upgrade): boolean {
-  const taken = human.upgrades.filter((u) => u === upgrade).length;
-  return taken < (upgrade.maxStacks ?? Infinity);
+/** How many times `human` has taken `upgrade` */
+export function timesTaken(human: Human, upgrade: Upgrade): number {
+  return human.upgrades.filter((u) => u === upgrade).length;
 }
 
-/** Picks `count` different upgrades that `human` can take, rarer ones less often */
-export function drawUpgrades(human: Human, count: number = 3): Upgrade[] {
+/** Whether `human` can take `upgrade` (again) */
+export function canTake(human: Human, upgrade: Upgrade): boolean {
+  return timesTaken(human, upgrade) < (upgrade.maxStacks ?? Infinity);
+}
+
+/** What an offer depends on besides the human */
+export interface OfferContext {
+  /**
+   * The best gun tier (index into `GUN_TIERS`) in the coming floor's normal
+   * closets (`LevelTemplate.getBestGunTier`). Weapon cards offer that tier or
+   * the one above. No weapon cards when left out.
+   */
+  bestGunTier?: number;
+}
+
+/**
+ * Picks `count` different upgrades that `human` can take, rarer ones less
+ * often. At most one of them is a weapon card, never for a gun `human` holds.
+ */
+export function drawUpgrades(
+  human: Human,
+  count: number = 3,
+  context: OfferContext = {},
+): Upgrade[] {
   const pool = UPGRADES.filter((upgrade) => canTake(human, upgrade));
+  if (context.bestGunTier !== undefined) {
+    // Only one gun goes in the pool, with its tier's rarity like any other card
+    const weaponOffer = drawWeaponOffer(human, context.bestGunTier);
+    if (weaponOffer) {
+      pool.push(weaponOffer);
+    }
+  }
   const drawn: Upgrade[] = [];
   while (drawn.length < count && pool.length > 0) {
     const total = pool.reduce((sum, u) => sum + RARITY_WEIGHTS[u.rarity], 0);
@@ -76,5 +105,17 @@ export function drawUpgrades(human: Human, count: number = 3): Upgrade[] {
 export function takeUpgrade(human: Human, upgrade: Upgrade) {
   upgrade.apply(human);
   human.upgrades.push(upgrade);
-  markSeen("upgrades", upgrade.name);
+  markUpgradeSeen(upgrade);
+}
+
+/**
+ * Records an offered or taken card for the encyclopedia. A weapon card counts
+ * as seeing its gun; it isn't an upgrade the encyclopedia lists.
+ */
+export function markUpgradeSeen(upgrade: Upgrade) {
+  if (upgrade.weapon) {
+    markSeen("guns", upgrade.weapon.name);
+  } else {
+    markSeen("upgrades", upgrade.name);
+  }
 }

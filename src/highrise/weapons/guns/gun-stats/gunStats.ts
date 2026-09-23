@@ -39,10 +39,10 @@ export const GUN_TIERS = [
 ];
 
 export function getGunTier(gun: Gun): number {
-  for (let i = 0; i < GUN_TIERS.length; i++) {
-    if (GUN_TIERS[i].includes(gun.stats)) {
-      return i;
-    }
-  }
-  return -1;
+  return gunTierOf(gun.stats);
+}
+
+/** Index into `GUN_TIERS` (shown to players as one more), or -1 if it isn't in one */
+export function gunTierOf(stats: GunStats): number {
+  return GUN_TIERS.findIndex((tier) => tier.includes(stats));
 }

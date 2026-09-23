@@ -40,6 +40,8 @@ export const SecondWind: Upgrade = {
   maxStacks: 1,
   apply: (human) => {
     human.stats.floorHeal += 25;
+    // Upgrades are taken once the floor has started, so this one counts too
+    human.heal(25, false);
   },
 };
 

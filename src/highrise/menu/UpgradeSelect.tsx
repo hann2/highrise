@@ -4,9 +4,11 @@ import Game from "../../core/Game";
 import { ControllerAxis, ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import ReactEntity from "../../core/ReactEntity";
+import { RESOURCES } from "../../../resources/resources";
 import { Persistence } from "../constants/constants";
-import { markSeen } from "../persistence/SaveData";
+import type Human from "../human/Human";
 import { Upgrade } from "../upgrades/Upgrade";
+import { markUpgradeSeen, timesTaken } from "../upgrades/upgrades";
 import "./menu.css";
 
 // How far the stick has to go to move the selection, and how far back it has
@@ -31,7 +33,11 @@ export default class UpgradeSelect extends ReactEntity implements Entity {
   private shownAt = 0;
   private stickHeld = false;
 
-  constructor(readonly choices: ReadonlyArray<Upgrade>) {
+  /** `human` is who picks, for showing how many of each they already have */
+  constructor(
+    readonly choices: ReadonlyArray<Upgrade>,
+    readonly human?: Human,
+  ) {
     super(() => this.renderContent());
     this.picked = new Promise((resolve) => (this.resolvePick = resolve));
   }
@@ -43,31 +49,57 @@ export default class UpgradeSelect extends ReactEntity implements Entity {
       <div className="menu-screen upgrade-select">
         <div className="upgrade-select__title">Take one</div>
         <div className="upgrade-select__cards">
-          {this.choices.map((upgrade, i) => (
-            <div
-              key={upgrade.name}
-              className={`upgrade-select__card upgrade-select__card--${upgrade.rarity} ${
-                i === this.selected ? "upgrade-select__card--selected" : ""
-              }`}
-              onMouseEnter={() => this.select(i)}
-              onClick={() => {
-                this.select(i);
-                this.confirm();
-              }}
-            >
-              <div className="upgrade-select__rarity">{upgrade.rarity}</div>
-              <div className="upgrade-select__name">{upgrade.name}</div>
-              <div className="upgrade-select__description">
-                {upgrade.description}
-              </div>
-            </div>
-          ))}
+          {this.choices.map((upgrade, i) => this.renderCard(upgrade, i))}
         </div>
         <div className="upgrade-select__hint">
           {confirmButton} to take it · the others are gone for good
         </div>
       </div>
     );
+  }
+
+  private renderCard(upgrade: Upgrade, index: number) {
+    const classes = [
+      "upgrade-select__card",
+      `upgrade-select__card--${upgrade.rarity}`,
+      index === this.selected ? "upgrade-select__card--selected" : "",
+    ];
+    const stacks = this.stacksText(upgrade);
+    return (
+      <div
+        key={upgrade.name}
+        className={classes.join(" ")}
+        onMouseEnter={() => this.select(index)}
+        onClick={() => {
+          this.select(index);
+          this.confirm();
+        }}
+      >
+        <div className="upgrade-select__rarity">
+          {upgrade.weapon ? `${upgrade.rarity} weapon` : upgrade.rarity}
+        </div>
+        {upgrade.weapon && (
+          <img
+            className="upgrade-select__image"
+            src={RESOURCES.images[upgrade.weapon.textures.pickup]}
+          />
+        )}
+        <div className="upgrade-select__name">{upgrade.name}</div>
+        <div className="upgrade-select__description">{upgrade.description}</div>
+        {stacks && <div className="upgrade-select__stacks">{stacks}</div>}
+      </div>
+    );
+  }
+
+  /** "2 / 3 taken" for an upgrade the human already has some of */
+  private stacksText(upgrade: Upgrade): string | undefined {
+    const taken = this.human ? timesTaken(this.human, upgrade) : 0;
+    if (taken === 0) {
+      return undefined;
+    }
+    return upgrade.maxStacks === undefined
+      ? `${taken} taken`
+      : `${taken} / ${upgrade.maxStacks} taken`;
   }
 
   @on("add")
@@ -77,7 +109,7 @@ export default class UpgradeSelect extends ReactEntity implements Entity {
     data.game.pause();
     // Reading an offer is enough for the encyclopedia
     for (const upgrade of this.choices) {
-      markSeen("upgrades", upgrade.name);
+      markUpgradeSeen(upgrade);
     }
   }
 
