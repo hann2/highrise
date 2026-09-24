@@ -1,0 +1,121 @@
+{
+  "name": "Cindy",
+  "description": "",
+  "textures": {
+    "head": "cindyHead",
+    "leftArm": "cindyLeftArm",
+    "leftHand": "cindyLeftHand",
+    "rightArm": "cindyRightArm",
+    "rightHand": "cindyRightHand",
+    "torso": "cindyTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "cindy-join-party-1.flac",
+      "text": "Oh my God, please tell me you have vodka",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-new-level-1.flac",
+      "text": "I could kill for some vodka right now [laughs]. Get it? 'Cause of all the zombies",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-misc-1.flac",
+      "text": "This is seriously, like, the worst senior prank anyone has ever done",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-look-here-1.flac",
+      "text": "Oh my God, look over here",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-look-here-2.flac",
+      "text": "Oh my God. Look over here",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-pickup-1.flac",
+      "text": "Ooh, shiny",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-taunt-1.flac",
+      "text": "I am so not drunk enough for this",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-taunt-2.flac",
+      "text": "Take that, you freaking pervert",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-worried-1.flac",
+      "text": "Oh, I knew I should have rushed Alpha Phi",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-hurt-1.flac",
+      "text": "Ow, that freaking hurt",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-hurt-2.flac",
+      "text": "Oh.",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-hurt-3.flac",
+      "text": "[sniffs] Ow, it hurts. Pour some vodka on it",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-near-death-1.flac",
+      "text": "Oh, am I really gonna die sober?",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-death-1.flac",
+      "text": "At least I died a Theta",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "cindy-relief-1.flac",
+      "text": "Thank God. Is the hazing over yet?",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

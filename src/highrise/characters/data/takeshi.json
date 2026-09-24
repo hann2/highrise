@@ -1,0 +1,191 @@
+{
+  "name": "Takeshi",
+  "description": "",
+  "textures": {
+    "head": "takeshiHead",
+    "leftArm": "takeshiLeftArm",
+    "leftHand": "takeshiLeftHand",
+    "rightArm": "takeshiRightArm",
+    "rightHand": "takeshiRightHand",
+    "torso": "takeshiTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "takeshi-join-party-1.flac",
+      "text": "見つけた。ありがとう。ごめん",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-join-party-2.flac",
+      "text": "I didn't know I can't go out there canoe",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-new-level-1.flac",
+      "text": "みんな始まるでしょ？",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-misc-1.flac",
+      "text": "Oi,皆さん。日本語が話しますか？わかりますか？皆",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-look-here-1.flac",
+      "text": "Oi, Mina.",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-pickup-1.flac",
+      "text": "Oh,いいね。これは好きよ",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-pickup-2.flac",
+      "text": "I don't want to die in my salary",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-taunt-1.flac",
+      "text": "Oh? Huh. Moi tequita zo",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-taunt-2.flac",
+      "text": "Zombie guy UI Sumana desu ne",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-taunt-3.flac",
+      "text": "[scoffs] [speaking Japanese]",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-taunt-4.flac",
+      "text": "[foreign language]",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-worried-1.flac",
+      "text": "Eh?",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-worried-2.flac",
+      "text": "[foreign language]",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-worried-3.flac",
+      "text": "何かこれ？",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-hurt-1.flac",
+      "text": "Ah.",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-hurt-2.flac",
+      "text": "Ah, tsa tsa tsa",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-hurt-3.flac",
+      "text": "Ah, it die",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-hurt-4.flac",
+      "text": "[grunts]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-hurt-6.flac",
+      "text": "[grunts]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-hurt-7.flac",
+      "text": "Yeah",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-hurt-8.flac",
+      "text": "[coughs]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-near-death-1.flac",
+      "text": "Ah, Kisama!",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-death-1.flac",
+      "text": "[foreign language]",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-level-complete-1.flac",
+      "text": "よかった。",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "takeshi-level-complete-2.flac",
+      "text": "明日は明日の風が吹く",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

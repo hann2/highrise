@@ -1,0 +1,1767 @@
+{
+  "name": "Andy",
+  "description": "Software engineer. Deadpan, dry, never raises his voice, treats the apocalypse like a badly run sprint. Jokes constantly, never smiles.",
+  "textures": {
+    "head": "andyHead",
+    "leftArm": "andyLeftArm",
+    "leftHand": "andyLeftHand",
+    "rightArm": "andyRightArm",
+    "rightHand": "andyRightHand",
+    "torso": "andyTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "andy-join-party-1.flac",
+      "text": "I suppose you lot'll do",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-join-party-2.flac",
+      "text": "At least you don't smell like rotten meat",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-join-party-3.flac",
+      "text": "You're better company than these corpses",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-join-party-4.mp3",
+      "text": "Fine. I'll come. Not because I like you.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-join-party-5.mp3",
+      "text": "Fine. I'll come. Not because I like you.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-join-party-6.mp3",
+      "text": "Fine. I'll come. Not because I like you.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-join-party-7.mp3",
+      "text": "Great. A rescue. I'm sure this will go smoothly.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-join-party-8.mp3",
+      "text": "Great. A rescue. I'm sure this will go smoothly.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-join-party-9.mp3",
+      "text": "Great. A rescue. I'm sure this will go smoothly.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-join-party-10.mp3",
+      "text": "You're here. I suppose that's marginally better than zombies.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-join-party-11.mp3",
+      "text": "You're here. I suppose that's marginally better than zombies.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-join-party-12.mp3",
+      "text": "You're here. I suppose that's marginally better than zombies.",
+      "categories": ["joinParty"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-1.flac",
+      "text": "I get older, but zombies always stay the same age",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-new-level-2.flac",
+      "text": "Are we there yet?",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-new-level-3.mp3",
+      "text": "New floor. Same zombies. Different carpet.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-4.mp3",
+      "text": "New floor. Same zombies. Different carpet.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-5.mp3",
+      "text": "New floor. Same zombies. Different carpet.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-6.mp3",
+      "text": "Another floor. Statistically, this is where one of us dies.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-7.mp3",
+      "text": "Another floor. Statistically, this is where one of us dies.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-8.mp3",
+      "text": "Another floor. Statistically, this is where one of us dies.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-9.mp3",
+      "text": "I'd like it noted that I was against coming up here.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-10.mp3",
+      "text": "I'd like it noted that I was against coming up here.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-new-level-11.mp3",
+      "text": "I'd like it noted that I was against coming up here.",
+      "categories": ["newLevel"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-1.flac",
+      "text": "My therapist always did tell me to avoid stressful situations",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-misc-2.flac",
+      "text": "I don't know why I bother with all this",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-misc-3.flac",
+      "text": "They said it was just going to be a bad flu and now look",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-misc-4.mp3",
+      "text": "I left a standup for this.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-5.mp3",
+      "text": "I left a standup for this.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-6.mp3",
+      "text": "I left a standup for this.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-7.mp3",
+      "text": "This building has the worst onboarding I've ever seen.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-8.mp3",
+      "text": "This building has the worst onboarding I've ever seen.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-9.mp3",
+      "text": "This building has the worst onboarding I've ever seen.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-10.mp3",
+      "text": "If I die, delete my browser history. All of it.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-11.mp3",
+      "text": "If I die, delete my browser history. All of it.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-misc-12.mp3",
+      "text": "If I die, delete my browser history. All of it.",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-look-here-1.flac",
+      "text": "This is intriguing",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-look-here-2.flac",
+      "text": "What do we have here?",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-look-here-3.mp3",
+      "text": "Hey. Look at this.",
+      "categories": ["lookHere"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-look-here-4.mp3",
+      "text": "Hey. Look at this.",
+      "categories": ["lookHere"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-look-here-5.mp3",
+      "text": "Hey. Look at this.",
+      "categories": ["lookHere"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-look-here-6.mp3",
+      "text": "Over here. Something useful, for once.",
+      "categories": ["lookHere"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-look-here-7.mp3",
+      "text": "Over here. Something useful, for once.",
+      "categories": ["lookHere"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-look-here-8.mp3",
+      "text": "Over here. Something useful, for once.",
+      "categories": ["lookHere"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-1.flac",
+      "text": "This should do the trick",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-pickup-2.flac",
+      "text": "Fantastic",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-pickup-3.flac",
+      "text": "Wonderful",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-pickup-4.flac",
+      "text": "Wonderful",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-pickup-5.flac",
+      "text": "Oh boy",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-pickup-gun-1.mp3",
+      "text": "Finally. A tool that does what it says.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-gun-2.mp3",
+      "text": "Finally. A tool that does what it says.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-gun-3.mp3",
+      "text": "Finally. A tool that does what it says.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-gun-4.mp3",
+      "text": "Point and click. My specialty.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-gun-5.mp3",
+      "text": "Point and click. My specialty.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-gun-6.mp3",
+      "text": "Point and click. My specialty.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-gun-7.mp3",
+      "text": "Ooh. Upgrade.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-gun-8.mp3",
+      "text": "Ooh. Upgrade.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-gun-9.mp3",
+      "text": "Ooh. Upgrade.",
+      "categories": ["pickupGun"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-1.mp3",
+      "text": "Hm. Blunt force. Low tech, but it scales.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-2.mp3",
+      "text": "Hm. Blunt force. Low tech, but it scales.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-3.mp3",
+      "text": "Hm. Blunt force. Low tech, but it scales.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-4.mp3",
+      "text": "A manual solution. Fine.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-5.mp3",
+      "text": "A manual solution. Fine.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-6.mp3",
+      "text": "A manual solution. Fine.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-7.mp3",
+      "text": "Artisanal violence.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-8.mp3",
+      "text": "Artisanal violence.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-melee-9.mp3",
+      "text": "Artisanal violence.",
+      "categories": ["pickupMelee"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-1.mp3",
+      "text": "Patched.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-2.mp3",
+      "text": "Patched.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-3.mp3",
+      "text": "Patched.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-4.mp3",
+      "text": "Hotfix applied.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-5.mp3",
+      "text": "Hotfix applied.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-6.mp3",
+      "text": "Hotfix applied.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-7.mp3",
+      "text": "That's better. Marginally.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-8.mp3",
+      "text": "That's better. Marginally.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-health-9.mp3",
+      "text": "That's better. Marginally.",
+      "categories": ["pickupHealth"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-item-1.mp3",
+      "text": "Mine now.",
+      "categories": ["pickupItem"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-item-2.mp3",
+      "text": "Mine now.",
+      "categories": ["pickupItem"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-item-3.mp3",
+      "text": "Mine now.",
+      "categories": ["pickupItem"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-item-4.mp3",
+      "text": "I'll take that.",
+      "categories": ["pickupItem"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-item-5.mp3",
+      "text": "I'll take that.",
+      "categories": ["pickupItem"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-pickup-item-6.mp3",
+      "text": "I'll take that.",
+      "categories": ["pickupItem"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-1.flac",
+      "text": "Better you than me, I suppose",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-taunt-2.flac",
+      "text": "Another one bites the dust",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-taunt-3.mp3",
+      "text": "Deprecated.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-4.mp3",
+      "text": "Deprecated.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-5.mp3",
+      "text": "Deprecated.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-6.mp3",
+      "text": "You've been garbage collected.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-7.mp3",
+      "text": "You've been garbage collected.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-8.mp3",
+      "text": "You've been garbage collected.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-9.mp3",
+      "text": "Closed. Won't fix.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-10.mp3",
+      "text": "Closed. Won't fix.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-11.mp3",
+      "text": "Closed. Won't fix.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-12.mp3",
+      "text": "I've killed worse processes than you.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-13.mp3",
+      "text": "I've killed worse processes than you.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-14.mp3",
+      "text": "I've killed worse processes than you.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-15.mp3",
+      "text": "Rest in pieces.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-16.mp3",
+      "text": "Rest in pieces.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-taunt-17.mp3",
+      "text": "Rest in pieces.",
+      "categories": ["taunts"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-1.flac",
+      "text": "I guess it can get worse",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-worried-2.flac",
+      "text": "Really?",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-worried-3.flac",
+      "text": "Ugh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-worried-4.flac",
+      "text": "Fine",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-worried-5.flac",
+      "text": "That's disturbing",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-worried-6.mp3",
+      "text": "[nervous] That's a lot of them.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-7.mp3",
+      "text": "[nervous] That's a lot of them.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-8.mp3",
+      "text": "[nervous] That's a lot of them.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-9.mp3",
+      "text": "[quietly] I don't love this.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-10.mp3",
+      "text": "[quietly] I don't love this.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-11.mp3",
+      "text": "[quietly] I don't love this.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-12.mp3",
+      "text": "[uneasy] There's a nonzero chance this goes badly.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-13.mp3",
+      "text": "[uneasy] There's a nonzero chance this goes badly.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-worried-14.mp3",
+      "text": "[uneasy] There's a nonzero chance this goes badly.",
+      "categories": ["worried"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-1.flac",
+      "text": "Oof",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-hurt-2.flac",
+      "text": "Oh, bother",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-hurt-3.flac",
+      "text": "Ouch",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-hurt-4.flac",
+      "text": "Ow",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-hurt-5.flac",
+      "text": "Ow",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-hurt-6.flac",
+      "text": "",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-hurt-7.flac",
+      "text": "Hey",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-hurt-8.flac",
+      "text": "Back off",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-hurt-9.mp3",
+      "text": "[grunts] Ow.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-10.mp3",
+      "text": "[grunts] Ow.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-11.mp3",
+      "text": "[grunts] Ow.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-12.mp3",
+      "text": "[pained] Rude.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-13.mp3",
+      "text": "[pained] Rude.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-14.mp3",
+      "text": "[pained] Rude.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-15.mp3",
+      "text": "[grunts] Unacceptable.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-16.mp3",
+      "text": "[grunts] Unacceptable.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-17.mp3",
+      "text": "[grunts] Unacceptable.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-18.mp3",
+      "text": "[hisses] That's going in the incident report.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-19.mp3",
+      "text": "[hisses] That's going in the incident report.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-20.mp3",
+      "text": "[hisses] That's going in the incident report.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-21.mp3",
+      "text": "[groans] Cool. Love that.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-22.mp3",
+      "text": "[groans] Cool. Love that.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-23.mp3",
+      "text": "[groans] Cool. Love that.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-24.mp3",
+      "text": "[grunts] Hey.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-25.mp3",
+      "text": "[grunts] Hey.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-hurt-26.mp3",
+      "text": "[grunts] Hey.",
+      "categories": ["hurt"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-1.flac",
+      "text": "It's just a scratch",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-near-death-2.flac",
+      "text": "It's just a flesh wound",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-near-death-3.flac",
+      "text": "Getting cold",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-near-death-4.flac",
+      "text": "Ugh.",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-near-death-5.mp3",
+      "text": "[pained] I'm running on one core here.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-6.mp3",
+      "text": "[pained] I'm running on one core here.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-7.mp3",
+      "text": "[pained] I'm running on one core here.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-8.mp3",
+      "text": "[weakly] Battery at two percent.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-9.mp3",
+      "text": "[weakly] Battery at two percent.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-10.mp3",
+      "text": "[weakly] Battery at two percent.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-11.mp3",
+      "text": "[breathing heavily] This is fine. Nothing is fine.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-12.mp3",
+      "text": "[breathing heavily] This is fine. Nothing is fine.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-13.mp3",
+      "text": "[breathing heavily] This is fine. Nothing is fine.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-14.mp3",
+      "text": "[groans] I've had better uptime.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-15.mp3",
+      "text": "[groans] I've had better uptime.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-near-death-16.mp3",
+      "text": "[groans] I've had better uptime.",
+      "categories": ["nearDeath"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-1.flac",
+      "text": "F-finally",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-death-2.flac",
+      "text": "[sighs]",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-death-3.flac",
+      "text": "I thought this would be more painful",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-death-4.flac",
+      "text": "No more suffering",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-death-5.mp3",
+      "text": "[groans] Of course. [weakly] Should've written tests.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-6.mp3",
+      "text": "[groans] Of course. [weakly] Should've written tests.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-7.mp3",
+      "text": "[groans] Of course. [weakly] Should've written tests.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-8.mp3",
+      "text": "[pained] Tell them... it was a hardware failure.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-9.mp3",
+      "text": "[pained] Tell them... it was a hardware failure.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-10.mp3",
+      "text": "[pained] Tell them... it was a hardware failure.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-11.mp3",
+      "text": "[gasps] Well. That's a fatal error.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-12.mp3",
+      "text": "[gasps] Well. That's a fatal error.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-13.mp3",
+      "text": "[gasps] Well. That's a fatal error.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-14.mp3",
+      "text": "[coughs] Don't... restart me.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-15.mp3",
+      "text": "[coughs] Don't... restart me.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-death-16.mp3",
+      "text": "[coughs] Don't... restart me.",
+      "categories": ["death"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-1.flac",
+      "text": "Yay",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-relief-2.flac",
+      "text": "Woo",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-relief-3.flac",
+      "text": "We did it",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-relief-4.flac",
+      "text": "Yay",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-relief-5.flac",
+      "text": "Yeah",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-relief-6.flac",
+      "text": "Whoa",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "andy-relief-7.mp3",
+      "text": "[exhales] Made it. Against all available evidence.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-8.mp3",
+      "text": "[exhales] Made it. Against all available evidence.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-9.mp3",
+      "text": "[exhales] Made it. Against all available evidence.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-10.mp3",
+      "text": "Survived. Don't make it weird.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-11.mp3",
+      "text": "Survived. Don't make it weird.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-12.mp3",
+      "text": "Survived. Don't make it weird.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-13.mp3",
+      "text": "[sighs] Deployed to production. Nothing's on fire.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-14.mp3",
+      "text": "[sighs] Deployed to production. Nothing's on fire.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-15.mp3",
+      "text": "[sighs] Deployed to production. Nothing's on fire.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-16.mp3",
+      "text": "Huh. That actually worked.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-17.mp3",
+      "text": "Huh. That actually worked.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    },
+    {
+      "file": "andy-relief-18.mp3",
+      "text": "Huh. That actually worked.",
+      "categories": ["relief"],
+      "enabled": false,
+      "source": "elevenlabs",
+      "voiceId": "m6VE4DGM9Uz4WEIA636u",
+      "model": "eleven_v3",
+      "created": "2026-09-23"
+    }
+  ],
+  "voice": {
+    "elevenLabsVoiceId": "m6VE4DGM9Uz4WEIA636u"
+  }
+}

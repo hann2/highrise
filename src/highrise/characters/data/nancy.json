@@ -1,0 +1,219 @@
+{
+  "name": "Nancy",
+  "description": "",
+  "textures": {
+    "head": "nancyHead",
+    "leftArm": "nancyLeftArm",
+    "leftHand": "nancyLeftHand",
+    "rightArm": "nancyRightArm",
+    "rightHand": "nancyRightHand",
+    "torso": "nancyTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "nancy-hurt-4.flac",
+      "text": "[sniffs]",
+      "categories": ["joinParty", "hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-join-party-1.flac",
+      "text": "How's it going?",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-join-party-2.flac",
+      "text": "Thanks for finding me",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-join-party-3.flac",
+      "text": "Hi",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-new-level-3.flac",
+      "text": "Here we go",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-misc-1.flac",
+      "text": "I think we're all being a little bit dramatic here. Can we just chill out a little bit maybe?",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-misc-2.flac",
+      "text": "I'm happy, I'm thriving, everything's fine, and I'm really not too worried about anything right now",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-look-here-1.flac",
+      "text": "Come over here right now",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-look-here-2.flac",
+      "text": "You guys, you have to see this",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-look-here-3.flac",
+      "text": "Check this out",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-pickup-1.flac",
+      "text": "Ooh",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-pickup-2.flac",
+      "text": "Woo-hoo",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-pickup-3.flac",
+      "text": "Woo, woo, woo, woo",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": false,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-taunt-1.flac",
+      "text": "Take that",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-taunt-2.flac",
+      "text": "And stay there",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-worried-1.flac",
+      "text": "Oh, no",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-worried-2.flac",
+      "text": "",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-worried-3.flac",
+      "text": "Oh my God",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-hurt-1.flac",
+      "text": "Ouch",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-hurt-2.flac",
+      "text": "Ow",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-hurt-3.flac",
+      "text": "",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-hurt-5.flac",
+      "text": "Ouch",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-hurt-6.flac",
+      "text": "[clears throat]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-near-death-1.flac",
+      "text": "It's gonna be fine. Don't worry about it",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-near-death-2.flac",
+      "text": "It's totally fine",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-death-3.flac",
+      "text": "No",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-relief-1.flac",
+      "text": "Woo!",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-relief-2.flac",
+      "text": "Glad we got that over with",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "nancy-relief-3.flac",
+      "text": "No worries",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

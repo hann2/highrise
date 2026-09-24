@@ -1,0 +1,261 @@
+{
+  "name": "Chad",
+  "description": "",
+  "textures": {
+    "head": "chadHead",
+    "leftArm": "chadLeftArm",
+    "leftHand": "chadLeftHand",
+    "rightArm": "chadRightArm",
+    "rightHand": "chadRightHand",
+    "torso": "chadTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "chad-join-party-1.flac",
+      "text": "Sick rager bro. Beer me",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-new-level-1.flac",
+      "text": "The party's not over yet",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-new-level-2.flac",
+      "text": "New floor, new party, bro",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-new-level-3.flac",
+      "text": "Maybe we'll find some snacks on this floor, bro",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-new-level-4.flac",
+      "text": "Hey bro, you think they have a keg up here?",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-misc-1.flac",
+      "text": "This is what happens when you don't hydrate, bro",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-misc-2.flac",
+      "text": "That rager last night must have been way more lit than I thought, bro",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-look-here-1.flac",
+      "text": "Check this out",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-look-here-2.flac",
+      "text": "Check this out",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-look-here-3.flac",
+      "text": "Hey, bro",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-pickup-1.flac",
+      "text": "Bro",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-pickup-2.flac",
+      "text": "Sick",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-pickup-3.flac",
+      "text": "Heck yeah",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-taunt-1.flac",
+      "text": "Shotgun some beers, shotgun some zombies",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-taunt-2.flac",
+      "text": "Yeah, bro",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-taunt-3.flac",
+      "text": "Yeah",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-taunt-4.flac",
+      "text": "Take a nap, bro",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-taunt-5.flac",
+      "text": "Alpha Sigma Sigma for life, bro",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-taunt-6.flac",
+      "text": "Can't handle a few shots, bro?",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-worried-1.flac",
+      "text": "Bro, you seeing this?",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-worried-2.flac",
+      "text": "Bro",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-worried-3.flac",
+      "text": "This is creeping me out, bro",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-hurt-1.flac",
+      "text": "Oof!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-hurt-2.flac",
+      "text": "Ow",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-hurt-3.flac",
+      "text": "Ugh!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-hurt-4.flac",
+      "text": "Ah",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-hurt-5.flac",
+      "text": "Not again!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-hurt-6.flac",
+      "text": "Oh no",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-hurt-7.flac",
+      "text": "Ugh!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-near-death-1.flac",
+      "text": "Party foul, bro",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-near-death-2.flac",
+      "text": "Not cool, bro",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-death-1.flac",
+      "text": "Crack a cold one in my memory, bro",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-level-complete-1.flac",
+      "text": "Nice work, bro",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-level-complete-2.flac",
+      "text": "Another floor down, bro",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "chad-level-complete-3.flac",
+      "text": "Where are the beers?",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

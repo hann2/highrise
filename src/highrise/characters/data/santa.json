@@ -1,0 +1,198 @@
+{
+  "name": "Santa",
+  "description": "",
+  "textures": {
+    "head": "santaHead",
+    "leftArm": "santaLeftArm",
+    "leftHand": "santaLeftHand",
+    "rightArm": "santaRightArm",
+    "rightHand": "santaRightHand",
+    "torso": "santaTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "santa-join-1.flac",
+      "text": "I came here to deliver presents and kick ass, and I'm all out of presents",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-new-level-1.flac",
+      "text": "All right, let's deck these halls with the blood of zombies",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-new-level-2.flac",
+      "text": "You better watch out. I'm coming to town",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-ho-ho-ho-3.flac",
+      "text": "Ho, ho, ho!",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-pickup-gun-1.flac",
+      "text": "Looks like I've been a very good boy",
+      "categories": ["pickupGun"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-ho-ho-ho-1.flac",
+      "text": "[laughs]",
+      "categories": ["pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-ho-ho-ho-2.flac",
+      "text": "Ho, ho, ho!",
+      "categories": ["pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-pickup-2.flac",
+      "text": "Hey",
+      "categories": ["pickupMelee", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-taunt-1.flac",
+      "text": "You've been naughty",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-taunt-2.flac",
+      "text": "I'm all out of coal. How about a little hot lead?",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-taunt-3.flac",
+      "text": "I'll show you fat and jolly",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-taunt-4.flac",
+      "text": "I'm sorry, you were on the wrong list",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-taunt-5.flac",
+      "text": "I'm all out of coal. How about some hot lead?",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-taunt-6.flac",
+      "text": "How's this for a cup of cheer?",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-taunt-7.flac",
+      "text": "Put that in your stocking and smoke it",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-worried-1.flac",
+      "text": "Hey, this ain't no milk and cookies",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-worried-2.flac",
+      "text": "Uh-oh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-hurt-1.flac",
+      "text": "You just made my naughty list",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-hurt-2.flac",
+      "text": "Yeah",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-hurt-3.flac",
+      "text": "Oh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-hurt-4.flac",
+      "text": "[grunts]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-hurt-5.flac",
+      "text": "[yawns]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-hurt-6.flac",
+      "text": "Ah!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-hurt-7.flac",
+      "text": "Hey, get out of my sack",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-hurt-8.flac",
+      "text": "Hey, get away from my toy bag",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "santa-death-1.flac",
+      "text": "Merry Christmas to all and to all a good night",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

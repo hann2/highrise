@@ -1,0 +1,366 @@
+{
+  "name": "Wendy",
+  "description": "",
+  "textures": {
+    "head": "wendyHead",
+    "leftArm": "wendyLeftArm",
+    "leftHand": "wendyLeftHand",
+    "rightArm": "wendyRightArm",
+    "rightHand": "wendyRightHand",
+    "torso": "wendyTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "wendy-join-party-1.flac",
+      "text": "[gasps] You're a human",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-join-party-2.flac",
+      "text": "Are you my sister's friend?",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-join-party-3.flac",
+      "text": "My sis, can you help me?",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-join-party-4.flac",
+      "text": "My big sis, she's gone",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-new-level-1.flac",
+      "text": "Please, no more zombies",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-new-level-2.flac",
+      "text": "Ugh, I'm going to take the longest shower after this",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-new-level-3.flac",
+      "text": "I think we're almost there, you guys",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-new-level-4.flac",
+      "text": "Okay, so what's the plan?",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-misc-1.flac",
+      "text": "Sis once told me to be my strongest when everything seems to be going wrong. I wonder what she'd say now",
+      "categories": ["misc"],
+      "enabled": false,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-misc-2.flac",
+      "text": "Hmm. Do you think vegans are still vegans as zombies?",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-misc-3.flac",
+      "text": "Boy, I should have watched more zombie movies",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-look-here-1.flac",
+      "text": "I found something",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-look-here-2.flac",
+      "text": "Hey, this could be handy",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-look-here-3.flac",
+      "text": "Ooh, look at this",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-pickup-1.flac",
+      "text": "Whoa.",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-pickup-2.flac",
+      "text": "Well",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-pickup-3.flac",
+      "text": "Ooh, awesome",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-pickup-4.flac",
+      "text": "Hmm, neato",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-pickup-5.flac",
+      "text": "Hell yeah",
+      "categories": ["pickupGun", "pickupMelee", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-pickup-6.flac",
+      "text": "This will be useful",
+      "categories": ["pickupGun", "pickupMelee", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-pickup-7.flac",
+      "text": "Sis taught me how to use this",
+      "categories": ["pickupGun", "pickupMelee", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-taunt-1.flac",
+      "text": "Bad zombie",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-taunt-2.flac",
+      "text": "No more zombies",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-taunt-4.flac",
+      "text": "For my sis",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-taunt-5.flac",
+      "text": "Girl power",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-taunt3.flac",
+      "text": "Hey, I'm getting good at this",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-worried-1.flac",
+      "text": "",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-worried-2.flac",
+      "text": "What the",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-worried-3.flac",
+      "text": "Uh-oh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-worried-4.flac",
+      "text": "Tell me that's not real",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-hurt-1.flac",
+      "text": "Oh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-hurt-2.flac",
+      "text": "Oof",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-hurt-3.flac",
+      "text": "",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-hurt-4.flac",
+      "text": "",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-hurt-6.flac",
+      "text": "[sniffs]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-hurt-7.flac",
+      "text": "[gasps]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-near-death-1.flac",
+      "text": "Ugh, I should have stayed home",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-near-death-2.flac",
+      "text": "",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-near-death-4.flac",
+      "text": "Ugh, this hurts",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-near-death-5.flac",
+      "text": "Oh man, this ain't good",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-death-1.flac",
+      "text": "Oh, Jesus",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-death-2.flac",
+      "text": "So blurry",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-death-3.flac",
+      "text": "",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-death-4.flac",
+      "text": "No, please. I'm too young",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-relief-1.flac",
+      "text": "I'm okay. I'm okay",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-relief-2.flac",
+      "text": "Phew, that was scary",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-relief-3.flac",
+      "text": "Wow, you're like Batman",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-relief-4.flac",
+      "text": "Oh, that was close",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-relief-5.flac",
+      "text": "Phew. Thanks for watching over me, sis",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "wendy-relief-6.flac",
+      "text": "Ugh, I'm going to take the longest shower after this",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

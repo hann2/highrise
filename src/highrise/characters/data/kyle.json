@@ -1,0 +1,184 @@
+{
+  "name": "Kyle",
+  "description": "",
+  "textures": {
+    "head": "kyleHead",
+    "leftArm": "kyleLeftArm",
+    "leftHand": "kyleLeftHand",
+    "rightArm": "kyleRightArm",
+    "rightHand": "kyleRightHand",
+    "torso": "kyleTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "kyle-join-party-1.flac",
+      "text": "Hey, what's up?",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-new-level-1.flac",
+      "text": "Here we go again",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-look-here-1.flac",
+      "text": "Hey, look at this",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-look-here-2.flac",
+      "text": "Hey, look at this",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-pickup-1.flac",
+      "text": "",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-pickup-2.flac",
+      "text": "Nice",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-taunt-1.flac",
+      "text": "In your face",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-worried-1.flac",
+      "text": "Uh-oh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-worried-2.flac",
+      "text": "Uh-oh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-worried-3.flac",
+      "text": "Oh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-hurt-1.flac",
+      "text": "[whimpers]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-hurt-2.flac",
+      "text": "[groans]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-hurt-4.flac",
+      "text": "[groans]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-hurt-5.flac",
+      "text": "[grunts]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-hurt-6.flac",
+      "text": "Uh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-hurt-7.flac",
+      "text": "Ooh!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-hurt-8.flac",
+      "text": "Ooh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-hurt-9.flac",
+      "text": "[whimpers]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-near-death-1.flac",
+      "text": "Oh, no",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-near-death-2.flac",
+      "text": "Oh no",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-death-1.flac",
+      "text": "[yawns]",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-death-2.flac",
+      "text": "[yawns]",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-death-3.flac",
+      "text": "[yawns]",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "kyle-relief-1.flac",
+      "text": "[sighs] We're done",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import Gun from "../Gun";
+import type Gun from "../Gun";
 import { GunStats } from "../GunStats";
 import { AK47 } from "./AK-47";
 import { AR15 } from "./AR-15";

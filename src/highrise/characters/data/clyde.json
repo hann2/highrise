@@ -1,0 +1,170 @@
+{
+  "name": "Clyde",
+  "description": "",
+  "textures": {
+    "head": "mikeHead",
+    "leftArm": "mikeLeftArm",
+    "leftHand": "mikeLeftHand",
+    "rightArm": "mikeRightArm",
+    "rightHand": "mikeRightHand",
+    "torso": "mikeTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "clyde-join-party-1.flac",
+      "text": "The drinks are on me",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-new-level-1.flac",
+      "text": "Let's go",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-new-level-2.flac",
+      "text": "Come on",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-new-level-3.flac",
+      "text": "99 floors to clear, 99 floors to clear. Shoot them down, run around, 98 floors to clear",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-new-level-4.flac",
+      "text": "Let's get 'em",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-misc-1.flac",
+      "text": "I think the bees are causing all this. You know how the bees are all going extinct? This is their revenge",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-look-here-1.flac",
+      "text": "Found something",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-look-here-2.flac",
+      "text": "What's this?",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-pickup-1.flac",
+      "text": "It's all right",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-taunt-1.flac",
+      "text": "He's not getting back up",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-taunt-2.flac",
+      "text": "She's not getting back up",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-worried-1.flac",
+      "text": "What the hell?",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-worried-2.flac",
+      "text": "What the hell?",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-worried-3.flac",
+      "text": "I don't like the sound of that",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-worried-4.flac",
+      "text": "I don't like the sound of that",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-hurt-1.flac",
+      "text": "Oh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-hurt-2.flac",
+      "text": "[grunts]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-near-death.flac",
+      "text": "[coughs]",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-death-1.flac",
+      "text": "[vomiting]",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-relief-1.flac",
+      "text": "Safe at last",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-relief-2.flac",
+      "text": "Finally",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "clyde-relief-3.flac",
+      "text": "Safe at last",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

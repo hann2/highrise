@@ -1,0 +1,478 @@
+{
+  "name": "Dusty Rusty",
+  "description": "",
+  "textures": {
+    "head": "dustyRustyHead",
+    "leftArm": "dustyRustyLeftArm",
+    "leftHand": "dustyRustyLeftHand",
+    "rightArm": "dustyRustyRightArm",
+    "rightHand": "dustyRustyRightHand",
+    "torso": "dustyRustyTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "dusty-rusty-join-party-1.flac",
+      "text": "Well, slap my ass and call me crazy. You ain't dead. Mind if I help keep it that way?",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-join-party-2.flac",
+      "text": "Well, butter my biscuit and call me toast. You ain't dead. Mind if I help keep you that way?",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-1.flac",
+      "text": "Here we go",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-2.flac",
+      "text": "How about on this one you let me have the big gun?",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-3.flac",
+      "text": "Don't forget to reload this time",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-4.flac",
+      "text": "I'll cover your ass, you cover mine. Deal?",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-5.flac",
+      "text": "Betcha I could do this one blindfolded",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-6.flac",
+      "text": "Stick with me and you'll be fine",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-7.flac",
+      "text": "My mama didn't raise no coward. Let's go",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-8.flac",
+      "text": "Time to hit him where it hurts",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-9.flac",
+      "text": "You ain't scared, right? Me neither",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-10.flac",
+      "text": "Time to show these zombies what Southern hospitality can do",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-11.flac",
+      "text": "Time to show these zombies some Southern hospitality",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-new-level-12.flac",
+      "text": "You ready to pop some more heads? Darn tootin' you are",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-misc-1.flac",
+      "text": "I ever tell you about the time I fought a bear with one arm?",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-misc-2.flac",
+      "text": "I ever tell you about the time I beat Chuck Norris in a thumb wrestling match?",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-misc-3.flac",
+      "text": "I ever tell you about the time I lassoed two cows at once?",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-misc-4.flac",
+      "text": "You hear about why they made this building so wide? It's a long story",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-look-here-1.flac",
+      "text": "Hey kid, point your peepers on this",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-look-here-2.flac",
+      "text": "You see in this",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-look-here-3.flac",
+      "text": "Holy hell, take a gander at this",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-look-here-4.flac",
+      "text": "Take a gander over yander",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-1.flac",
+      "text": "Well, drizzle me in syrup and call me breakfast. That's a good gun",
+      "categories": ["pickupGun"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-3.flac",
+      "text": "Well, floss my teeth and call me hygienic. That's a powerful mamma jamma",
+      "categories": ["pickupGun"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-4.flac",
+      "text": "Well, shave my legs and call me Marilyn. That's a sweet piece",
+      "categories": ["pickupGun"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-6.flac",
+      "text": "Well, foreclose my house and call him a bankrupt. That's a hefty canon",
+      "categories": ["pickupGun"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-7.flac",
+      "text": "Well, milk my cow and call me Betsy. That's a hell of a heater",
+      "categories": ["pickupGun"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-8.flac",
+      "text": "Well, button my shirt and call me mister. I got a new blaster",
+      "categories": ["pickupGun"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-2.flac",
+      "text": "Well, bury me in dirt and call me fertilizer. That's a shiny slammer",
+      "categories": ["pickupMelee"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-5.flac",
+      "text": "Well, file my taxes and call me compliant. This is gonna pop some heads",
+      "categories": ["pickupMelee"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-9-health.flac",
+      "text": "All right, fit as a fiddle",
+      "categories": ["pickupHealth"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-10-health.flac",
+      "text": "I ain't complaining, but you should taste the health packs my wife makes at home",
+      "categories": ["pickupHealth"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-pickup-11-health.flac",
+      "text": "It's just a scratch, but I'll take one anyway",
+      "categories": ["pickupHealth"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-taunt-1.flac",
+      "text": "A yee-haw",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-taunt-2.flac",
+      "text": "Oh, yee-haw",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-taunt-3.flac",
+      "text": "Go to hell, brain sucker",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-taunt-4.flac",
+      "text": "No brains for you, buddy",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-taunt-5.flac",
+      "text": "How's my lead taste, bucko?",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-taunt-6.flac",
+      "text": "I got some medicine for you. Suck on this bullet",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-taunt-7.flac",
+      "text": "Kiss my ass, dirty zombie",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-taunt-8.flac",
+      "text": "Tell Satan I said hello, maggot",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-worried-1.flac",
+      "text": "Uh-oh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-worried-2.flac",
+      "text": "Oh, hell",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-worried-3.flac",
+      "text": "What in tarnation?",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-worried-4.flac",
+      "text": "I got a bad feeling about this",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-worried-5.flac",
+      "text": "You smell that?",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-worried-6.flac",
+      "text": "Don't look now, but, uh, a- actually look now",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-1.flac",
+      "text": "Oh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-2.flac",
+      "text": "Whoa!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-3.flac",
+      "text": "Oh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-4.flac",
+      "text": "[laughs]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-5.flac",
+      "text": "[inhales] Ooh, ooh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-6.flac",
+      "text": "[grunts]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-7.flac",
+      "text": "Oh, sweet Jesus!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-8.flac",
+      "text": "Oh, good heavens",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-9.flac",
+      "text": "Oh.",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-hurt-10.flac",
+      "text": "Oh hell, that was my nicest flannel",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-near-death-1.flac",
+      "text": "Oh, no reason to panic. I'm just dying",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-near-death-2.flac",
+      "text": "Damn it. Blood on my new boots. Not like this",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-death-1.flac",
+      "text": "I'm gonna meet my sweet maker. Here we go. Here we go. Seeing the light, seeing the light. Oh, nope, it's just a skylight. Ooh. Oh, God, it's going dark. It's, there's no light. Oh, damn it",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-death-2.flac",
+      "text": "Tell my wife I love her cooking",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-level-complete-1.flac",
+      "text": "Now is a good time to reload, kid",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-level-complete-2.flac",
+      "text": "Keep it up",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-level-complete-3.flac",
+      "text": "No syrup off my pancakes",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-level-complete-4.flac",
+      "text": "I didn't even break a sweat",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "dusty-rusty-level-complete-5.flac",
+      "text": "Nothing an experienced gunslinger like me couldn't handle",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

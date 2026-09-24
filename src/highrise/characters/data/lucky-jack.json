@@ -1,0 +1,170 @@
+{
+  "name": "Lucky Jack",
+  "description": "",
+  "textures": {
+    "head": "luckyJackHead",
+    "leftArm": "luckyJackLeftArm",
+    "leftHand": "luckyJackLeftHand",
+    "rightArm": "luckyJackRightArm",
+    "rightHand": "luckyJackRightHand",
+    "torso": "luckyJackTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "lucky-jack-join-party-1.flac",
+      "text": "Ahoy, mateys. Ye sure are a sight for sore eyes",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-new-level-1.flac",
+      "text": "Heave ho, me hearties. Let's blow them all down",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-new-level-2.flac",
+      "text": "Best batten down the hatches, mateys. A storm's a-coming",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-new-level-3.flac",
+      "text": "Another deck? How many does this ship have?",
+      "categories": ["newLevel"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-misc-1.flac",
+      "text": "There's no mystery surrounding these blighters. 'Tis a classic case of scurvy",
+      "categories": ["misc"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-look-here.flac",
+      "text": "Avast ye!",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-pickup-1.flac",
+      "text": "That's some good booty",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-taunt-1.flac",
+      "text": "Yar, you're Shark Bait now",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-taunt-2.flac",
+      "text": "I warn thee, I give no quarter",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-taunt-3.flac",
+      "text": "Dead zombies tell no tales",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-taunt-4.flac",
+      "text": "Eat lead, you scurvy dog",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-taunt-5.flac",
+      "text": "Give me best to Davy Jones",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-worried-1.flac",
+      "text": "Shiver me timbers",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-hurt-1.flac",
+      "text": "Blimey!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-hurt-2.flac",
+      "text": "Ah, you scallywag",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-hurt-3.flac",
+      "text": "[grunts]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-hurt-4.flac",
+      "text": "Yo!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-hurt-6.flac",
+      "text": "Yar!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-near-death-1.flac",
+      "text": "[coughs] I'm walking the plank here",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-death-1.flac",
+      "text": "[coughs] I'm off to Davy Jones' locker. Yar.",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-death-2.flac",
+      "text": "I'm fish feed.",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "lucky-jack-relief-1.flac",
+      "text": "Argh, time for some grog",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}

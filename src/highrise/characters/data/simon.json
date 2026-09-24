@@ -1,0 +1,163 @@
+{
+  "name": "Simon",
+  "description": "",
+  "textures": {
+    "head": "simonHead",
+    "leftArm": "simonLeftArm",
+    "leftHand": "simonLeftHand",
+    "rightArm": "simonRightArm",
+    "rightHand": "simonRightHand",
+    "torso": "simonTorso"
+  },
+  "stats": {},
+  "startingWeapons": [],
+  "clips": [
+    {
+      "file": "simon-join-party-1.flac",
+      "text": "Wow, so glad to see you",
+      "categories": ["joinParty"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-look-here-1.flac",
+      "text": "Hey, look over here",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-look-here-2.flac",
+      "text": "Check this out",
+      "categories": ["lookHere"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-pickup-item-1.flac",
+      "text": "Sweet",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-pickup-item-2.flac",
+      "text": "Cool",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-pickup-item-3.flac",
+      "text": "Nice",
+      "categories": ["pickupGun", "pickupMelee", "pickupHealth", "pickupItem"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-taunt-1.flac",
+      "text": "Take that",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-taunt-2.flac",
+      "text": "And stay dead",
+      "categories": ["taunts"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-worried-1.flac",
+      "text": "Uh-oh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-worried-2.flac",
+      "text": "Oh, no",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-worried-3.flac",
+      "text": "Uh",
+      "categories": ["worried"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-hurt-1.flac",
+      "text": "[grunts]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-hurt-2.flac",
+      "text": "Ah!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-hurt-3.flac",
+      "text": "Ah!",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-hurt-4.flac",
+      "text": "Oh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-hurt-5.flac",
+      "text": "[growls]",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-hurt-6.flac",
+      "text": "Uh",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-hurt-7.flac",
+      "text": "Oh.",
+      "categories": ["hurt"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-near-death-2.flac",
+      "text": "I don't feel so good",
+      "categories": ["nearDeath"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-death-1.flac",
+      "text": "So long, cruel world. [groaning]",
+      "categories": ["death"],
+      "enabled": true,
+      "source": "recorded"
+    },
+    {
+      "file": "simon-relief-1.flac",
+      "text": "Whew",
+      "categories": ["relief"],
+      "enabled": true,
+      "source": "recorded"
+    }
+  ]
+}
