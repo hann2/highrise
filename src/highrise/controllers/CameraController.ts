@@ -24,7 +24,7 @@ export default class CameraController extends BaseEntity implements Entity {
 
   @on("add")
   onAdd() {
-    this.camera.z = 65;
+    this.camera.z = 75;
   }
 
   /** Cut straight to the player instead of panning across the new level */

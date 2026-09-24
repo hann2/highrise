@@ -40,7 +40,7 @@ const VISION_SOURCE_RADIUS = 0.2;
 const EDGE_ANTIALIAS_WIDTH = 0.05;
 /** How dark explored places are when the player can't currently see them */
 export const EXPLORED_DARKNESS = 0.6;
-/** Pixels per meter of the darkness texture. The screen is about 65 px/m at the default zoom. */
+/** Pixels per meter of the darkness texture. The screen is about 75 px/m at the default zoom. */
 const DARKNESS_RESOLUTION = 48;
 /** Vision starts fading out at this fraction of the vision range and is gone at the limit */
 const RANGE_FADE_START = 0.65;
