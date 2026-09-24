@@ -1,8 +1,8 @@
-import camelcase from "camelcase";
 import chokidar from "chokidar";
 import fs from "fs";
 import { globSync } from "glob";
 import path from "path";
+import { resourceName } from "../src/core/resources/resourceName";
 
 /*
  * Generates resources/resources.ts, a manifest of every asset in the resources
@@ -26,11 +26,6 @@ const EXTENSIONS = {
 type ResourceType = keyof typeof EXTENSIONS;
 const RESOURCE_TYPES = Object.keys(EXTENSIONS) as ResourceType[];
 const ALL_EXTENSIONS = RESOURCE_TYPES.flatMap((type) => EXTENSIONS[type]);
-
-/** The name that a resource is referred to by in code. */
-function resourceName(fileName: string): string {
-  return camelcase(path.basename(fileName).split(".")[0]);
-}
 
 function generateManifest() {
   const fileNames = globSync(
