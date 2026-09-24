@@ -58,7 +58,7 @@ export default class LobbyCharacterController
     this.interactable.highlightRadius = HUMAN_RADIUS + 0.2;
     this.interactable.prompt = () => ({
       title: this.human.character.name,
-      action: "to play as",
+      action: "Select",
     });
   }
 

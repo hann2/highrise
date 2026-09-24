@@ -12,7 +12,7 @@ import InteractHighlight from "./InteractHighlight";
  * Says what the nearest thing the player could interact with is, and what the
  * interact button does with it ("E AR-15 · replaces Glock", "Card reader ·
  * needs a keycard"), and rings it on the floor. Used in the lobby, where it's
- * big ("Nancy / E to play as"), and during a run, where it's small.
+ * big ("Nancy / E Select"), and during a run, where it's small.
  */
 export default class InteractPrompt extends ReactEntity implements Entity {
   persistenceLevel = Persistence.Game;

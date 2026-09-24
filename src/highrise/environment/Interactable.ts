@@ -9,7 +9,7 @@ export interface InteractPromptContent {
   title: string;
   /** A short note after the title: "45", "replaces Glock" */
   detail?: string;
-  /** What interacting does, shown after the interact button: "to play as" */
+  /** What interacting does, shown after the interact button: "Select" */
   action?: string;
   /**
    * Shown instead of the interact button when interacting won't do anything
