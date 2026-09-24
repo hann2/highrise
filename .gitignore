@@ -11,3 +11,6 @@ tests/output/
 test-results/
 playwright-report/
 .claude/worktrees/
+
+# Local secrets (ElevenLabs API key, ...)
+.env
