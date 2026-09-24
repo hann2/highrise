@@ -14,6 +14,8 @@ Other useful commands:
 - `npm run tsc` runs the type checker
 - `npm test` runs the end-to-end smoke test (it plays the real game in a headless browser)
 - `npm run test:physics` runs the physics engine tests
+- `npm run test:vision` runs the fog of war geometry tests
+- `npm run prettier` formats `src/`
 - `npm run benchmark` runs a seeded performance benchmark
 
 ## Structure

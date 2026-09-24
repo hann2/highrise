@@ -2,7 +2,7 @@
 
 Written 2026-09-22 from a design conversation. The game started as a Left 4 Dead-style run-and-gun; the base gameplay alone won't carry it, so the direction is a modern roguelike: a run through a building, progression through a few simple choices ("pick one of three"), resources to manage, and unlocks between runs. Features should be diegetic where possible.
 
-The "Current state" notes describe the code as of 2026-09-22 (5 fixed floors, no stats, infinite ammo, one weapon slot, survivors auto-join and follow, vending machines do nothing, nothing persists except the tutorial flag).
+Each feature's "Current" note describes the code before the feature was built (as of 2026-09-22 unless it says otherwise: 5 fixed floors, no stats, infinite ammo, one weapon slot, survivors auto-join and follow, vending machines do nothing, nothing persists except the tutorial flag). This doc is the backlog: the unfinished features, the open questions and the leftovers at the end are what's next.
 
 ## Decisions so far
 
@@ -118,29 +118,19 @@ Current: one survivor per floor in a closet, auto-joins at 2 m with line of sigh
 
 ### 9. Lobby hub: character select and floor directory (M–L)
 
-**Done 2026-09-23 (`lobby/`, `run/RunPlan.ts`, `menu/TitleScreen.tsx`; `CharacterSelect` and `MainMenu` are gone).** Decisions:
+**Done 2026-09-23 (`lobby/`, `run/RunPlan.ts`, `menu/TitleScreen.tsx`, `environment/DirectoryPlaque.ts`, `menu/FloorDirectory.tsx`; `CharacterSelect` and `MainMenu` are gone).** Decisions:
 
-- The game boots into the lobby with the player in a closed elevator (the only lit one) behind the HIGHRISE title; Enter/START fades the title, the elevator dings open (`ElevatorDoor.open`), and the player walks out. The rest of the bank stays shut and can't be opened. After a run the summary's "Back to the lobby" does the same without the title.
-- The lobby is hand-built (`LobbyRoomTemplate` + `generateLobby`, no maze): elevator bank, reception desk, sitting area, piano, the directory board, the stairwell, and two bookcases that open the encyclopedia. Lobby ambient light, no enemies, no fog of war, no run HUD. The pause menu has Credits there instead of Quit Run.
+- The game boots into the lobby with the player in a closed elevator (the only lit one) behind the HIGHRISE title; Enter/START fades the title, the elevator dings open (`ElevatorDoor.open`), and the player walks out. The rest of the bank stays shut. After a run the summary's "Back to the lobby" does the same without the title.
+- The lobby is hand-built (`LobbyRoomTemplate` + `generateLobby`, no maze): elevator bank, reception desk, sitting area, piano, the stairwell, and two bookcases that open the encyclopedia. Lobby ambient light, no enemies, no run HUD. Fog of war is on: the explored map is unexplored the first time and then kept in `SaveData.lobbyExplored` between visits and page loads. The pause menu has Credits there instead of Quit Run.
 - Bob stays as a joke: `ReceptionistBob` is a heavy's body behind the desk that turns to watch you and groans when you press E on him. He's not an enemy.
-- Every rescued character except the one you are stands around the lobby (2026-09-23: Simon decided characters not rescued yet simply aren't there, rather than standing around as silhouettes; and the lobby has fog of war whose explored map is remembered between visits and page loads, unexplored the first time; and the directory board is gone from the lobby: the run ahead is a mystery until floor 2, whose spawn room has a wall plaque that opens an HTML directory popup with "You are here", as does every floor after). They mill about near their spot and turn to look at you when you're close; they never fight. E swaps you into them, and who you were stays where you left them. An HTML prompt names whoever is nearest. You arrive as the last character you started a run with (`SaveData.lastCharacter`), or the first unlocked one.
-- The directory board by the stairs lists the `RunPlan` top floor first ("4 Chapel · Boss" ... "L Lobby · You are here"). The plan is made when you arrive in the lobby: Shops → Maintenance → Generator → Chapel. The lobby is no longer a floor, so the level number is the floor number and every floor is one level easier than before (Shops is now level 1). Templates carry `floorName`/`floorNotes` (Maintenance: "Dark", Chapel: "Boss").
+- Every rescued character except the one you are stands around the lobby. Characters not rescued yet aren't there at all (not silhouettes), and newly rescued ones turn up while the lobby is open. They mill about near their spot and turn to look at you when you're close; they never fight. E swaps you into them, and who you were stays where you left them. An HTML prompt names whoever is nearest. You arrive as the last character you started a run with (`SaveData.lastCharacter`), or the first unlocked one.
+- The run ahead is deliberately not shown in the lobby. From floor 2 on, the spawn room has a wall plaque that opens an HTML directory popup (game paused) listing the `RunPlan` top floor first, with "You are here". The plan is made when you arrive in the lobby: Shops → Maintenance → Generator → Chapel. The lobby is not a floor: the level number is the floor number, and each floor carries a separate `difficulty` (floor number + 1, so the tuning from when the lobby was level 1 still applies). Templates carry `floorName`/`floorNotes` (Maintenance: "Dark", Chapel: "Boss").
 - The stairwell has a one-way door; stepping on the stairs starts the run as whoever you are.
-- Not done: character traits/starting weapons, store/infirmary/survivor icons on the board (the plan doesn't know about them yet), a run history in the lobby.
-
-Current (before): the lobby is level 1 (a room with cosmetic elevators, a desk, a piano and Bob the Heavy). The main menu is HTML. Character is random from a shuffle ring.
-
-- Done 2026-09-22: a character select screen (`menu/CharacterSelect.tsx`) between the main menu and the game, all 13 characters, no unlocking yet. The lobby version below can replace it later.
-- The lobby becomes the between-runs hub, not a floor. It is the diegetic main menu.
-- Character select: unlocked characters stand in the lobby; walk to one and interact to pick them. Each starting character has unique stats and a starting weapon (and maybe one trait: Takeshi has the katana and fast melee, Santa has a toy bag that hands out consumables, etc.). Locked characters could be visible as silhouettes/empty chairs so the player knows there's more.
-- Floor directory: the building directory board by the stairs shows the run: each floor's theme and icons for what's notable (store, infirmary, survivor, siege, boss). This is the see-what's-coming run map, not a level select. Whether there is ever a "start at floor 5" unlock is an open question.
-- Encyclopedia (feature 11) and settings are also lobby objects (a bookshelf, the reception desk). A keyboard shortcut still opens them.
-- The stairwell door is the start button.
-- Bob stays as a joke.
+- Not done: character traits/starting weapons (stats only, or one rule-like trait each? Santa's toy bag is the obvious first one), store/infirmary/survivor icons on the directory (the plan doesn't know about them yet), a run history in the lobby. Open: whether a "start at floor N" unlock should ever exist, or the directory stays a preview.
 
 ### 10. Run structure, building generation, landmark floors (L)
 
-Current: 5 fixed templates in fixed order, 14×14 grid of 2 m cells, exit at the furthest dead end. The Necromancer arena is on floor 5 but is optional (the exit is placed independently). Enemy count is `20 + 10×level`; nothing else scales.
+Current (2026-09-23): `run/RunPlan.ts` fixes the run as Shops → Maintenance → Generator → Chapel, each floor with a difficulty of its number + 1. Floors are a 14×14 grid of 2 m cells with the exit at the furthest dead end. The Necromancer arena is on the Chapel floor but optional (the exit is placed independently). Enemy count is `20 + 10×difficulty`, and difficulty also picks the specials and the closet gun tiers; nothing else scales.
 
 - The building is the run: a fixed skeleton with random blanks. Something like 3 blocks of 2–3 themed floors plus a landmark floor, ~10 floors, 20–30 minutes. `level-ideas.txt` has the 100-floor theme list; use it as the pool (shops, maintenance, apartments, offices, gym, arcade, spa, penthouse, roof with helicopter as the end).
 - Landmark floors:
@@ -197,3 +187,17 @@ Each step is playable and testable on its own.
 - Should any "start at floor N" unlock exist, or is the directory purely a preview?
 - Floor size and count.
 - Starting-character traits: stats only, or one rule-like trait each?
+
+## Leftovers
+
+Small things noticed while building the features, plus what was still relevant in the old `simon-random-todos.txt` (folded in here 2026-09-23):
+
+- Many zombies playing the same sound at once stack into one loud sound.
+- The human collision shape doesn't match the sprite.
+- The baseball bat uses a sword sound.
+- Light switches are drawn in the wrong place in rotated rooms (fixing it changes `LEVEL_2_FINGERPRINT`).
+- Grenades vanish when their carrier dies instead of dropping.
+- Survivor relief lines wait in game time, so they play late after a pause.
+- The `glowStick1-3` images are unused (feature 13).
+- Ammo vending machines and stores (feature 5).
+- Gun-attached upgrades and molotovs/pipe bombs (features 2 and 7).

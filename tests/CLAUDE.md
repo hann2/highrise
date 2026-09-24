@@ -17,7 +17,7 @@ The Playwright tests start their own dev server on port 3456, so they can run wh
 - `window.DEBUG.game` exposes the `Game`. Tests find things with `entities.getById(...)` (`lobby`), `entities.getTagged(...)` (`human`, `zombie`, `lobby_character`, `directory_plaque`), and by class name (see below).
 - `loadGame` waits for the lobby; `arriveInLobby` presses Enter past the title if it's up and waits for the elevator to open; `startGame` does that and then puts the player on the lobby's stairs, which starts a run as whoever they are (the first unlocked character, Andy, in a new save), and waits for a floor with zombies. The benchmarks use it too.
 - Tests reach into entities by class name (`e.constructor.name === "Door"`), which only works in development builds where names aren't minified.
-- Dev-only cheat keys from `CheatController` are used for flow control: `KeyL` completes the level, `KeyV` toggles the vision mask, `KeyK` gives the party 5 quarters, `KeyU` unlocks every character (`Shift+U` locks all but the defaults again), `KeyJ` drops an AR-15 at the leader's feet, `KeyN` / `KeyB` give the leader frag grenades / flashbangs, `KeyI` fills the leader's ammo reserves.
+- Dev-only cheat keys from `CheatController` are used for flow control: `KeyL` completes the level, `KeyV` toggles the vision mask, `KeyK` gives the party 5 quarters, `KeyU` unlocks every character (`Shift+U` locks all but the defaults again), `KeyJ` drops an AR-15 at the leader's feet, `KeyN` / `KeyB` give the leader frag grenades / flashbangs, `KeyI` fills the leader's ammo reserves, `KeyH` heals every human.
 - Any `pageerror` or `console.error` fails the test. Don't log errors for non-error conditions.
 
 ## Philosophy
