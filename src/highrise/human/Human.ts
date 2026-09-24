@@ -116,6 +116,9 @@ export default class Human extends BaseEntity implements Entity {
   ) {
     super();
 
+    Object.assign(this.stats, character.stats);
+    this.hp = this.stats.maxHp;
+
     this.humanSprite = this.addChild(new HumanSprite(this));
     this.voice = this.addChild(new HumanVoice(this));
     this.flashlight = this.addChild(new Flashlight(this));
@@ -269,6 +272,15 @@ export default class Human extends BaseEntity implements Entity {
       weapon.playSound("pickup", this.getPosition());
       await this.wait(0.5);
       this.voice.speak(weapon instanceof Gun ? "pickupGun" : "pickupMelee");
+    }
+  }
+
+  /** Arms them with their character's starting weapons, if they have any */
+  giveStartingWeapons() {
+    for (const stats of this.character.startingWeapons) {
+      const weapon =
+        "ammoClass" in stats ? new Gun(stats) : new MeleeWeapon(stats);
+      this.giveWeapon(weapon, false);
     }
   }
 

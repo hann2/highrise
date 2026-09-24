@@ -52,6 +52,7 @@ export default class PartyManager extends BaseEntity implements Entity {
 
     this.leader = game.addEntity(new Human(undefined, this.startingCharacter));
     this.leader.persistenceLevel = Persistence.Game;
+    this.leader.giveStartingWeapons();
     this.partyMembers = [this.leader];
     setCharactersInUse([this.startingCharacter]);
   }

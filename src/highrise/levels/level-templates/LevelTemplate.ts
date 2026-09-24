@@ -182,7 +182,11 @@ export default class LevelTemplate {
       (l) => new WeaponPickup(l, new MeleeWeapon(choose(...MELEE_WEAPONS))),
       (l) => {
         const survivor = new Human(l, randomSurvivorCharacter());
-        survivor.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
+        if (survivor.character.startingWeapons.length > 0) {
+          survivor.giveStartingWeapons();
+        } else {
+          survivor.giveWeapon(new Gun(choose(Glock, M1911, FiveSeven)), false);
+        }
         return [survivor, new SurvivorHumanController(survivor)];
       },
       (l) => new AmmoPickup(l, choose(...LIMITED_AMMO_CLASSES)),
