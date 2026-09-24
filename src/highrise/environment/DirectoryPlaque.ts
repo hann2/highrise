@@ -41,7 +41,7 @@ export default class DirectoryPlaque extends BaseEntity implements Entity {
       new Interactable(position, (human) => this.handleInteract(human), 2),
     );
     interactable.highlightRadius = 0.55;
-    interactable.prompt = () => ({ title: "Directory", action: "to read" });
+    interactable.prompt = () => ({ title: "Directory", action: "Read" });
   }
 
   handleInteract(_human: Human) {

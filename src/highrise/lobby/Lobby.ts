@@ -134,7 +134,7 @@ export default class Lobby extends BaseEntity implements Entity {
     );
     bookcase.prompt = () => ({
       title: "Encyclopedia",
-      action: "to read",
+      action: "Read",
     });
     const exit = new Exit(
       stairs.x - half,

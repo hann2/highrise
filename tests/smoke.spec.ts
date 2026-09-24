@@ -192,7 +192,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await standBy("Nancy")).toBeLessThan(1.5);
   await expect(page.locator(".interact-prompt__title")).toHaveText("Nancy");
   await expect(page.locator(".interact-prompt__action")).toContainText(
-    "to play as",
+    "Select",
   );
   const andyLeftAt = await getLobbyPlayerPosition(page);
   await page.keyboard.press("KeyE");
