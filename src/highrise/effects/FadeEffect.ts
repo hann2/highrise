@@ -21,7 +21,8 @@ export default class FadeEffect extends BaseEntity implements Entity {
 
     this.sprite = createGraphics(Layer.HUD);
     this.sprite.rect(-5000, -5000, 10000, 10000).fill(color);
-    this.sprite.alpha = 0;
+    // Starting black already, if there's no fading out to do
+    this.sprite.alpha = outDuration > 0 ? 0 : 1;
   }
 
   @on("add")

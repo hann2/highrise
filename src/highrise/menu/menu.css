@@ -227,17 +227,7 @@
   background: rgba(0, 0, 0, 0.85);
 }
 
-/* Behind the title, dimming the lobby it's shown over */
-.title-screen__background {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 0, 0, 0.75) 0%,
-    rgba(0, 0, 0, 0.45) 70%
-  );
-}
-
+/* Behind the title: there is no world yet */
 .title-screen__blackout {
   position: absolute;
   inset: 0;

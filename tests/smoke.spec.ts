@@ -26,7 +26,7 @@ test("game boots, plays, and changes levels without errors", async ({
   const issues = collectIssues(page);
   const game = () => page.evaluate(() => window.DEBUG.game!.ticknumber);
 
-  // --- Boot into the lobby, standing in a closed elevator behind the title ---
+  // --- Boot to the title, on black, with no world behind it yet ---
   // Broken save data must not stop the game (it gets replaced at game over)
   await page.addInitScript(() => {
     window.localStorage.setItem("highriseSaveData", "{not json");
@@ -34,6 +34,21 @@ test("game boots, plays, and changes levels without errors", async ({
   await loadGame(page, 12345);
   expect(await game()).toBeGreaterThan(0);
   await expect(page.locator(".menu-title")).toHaveText("HIGHRISE");
+  expect(
+    await page.evaluate(() => !!window.DEBUG.game!.entities.getById("lobby")),
+  ).toBe(false);
+  await page.waitForTimeout(1000); // let the title fade in
+  await page.screenshot({ path: "tests/output/title.png" });
+  expectNoIssues(issues);
+
+  // --- Enter: the title goes, and the player rides up to the lobby in a closed elevator ---
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(
+    () => !!window.DEBUG.game!.entities.getById("lobby"),
+    null,
+    { timeout: 10000 },
+  );
+  await expect(page.locator(".menu-title")).toHaveCount(0);
   const inElevator = await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const lobby = game.entities.getById("lobby") as any;
@@ -70,6 +85,7 @@ test("game boots, plays, and changes levels without errors", async ({
         game.camera.x - lobby.player.getPosition()[0],
         game.camera.y - lobby.player.getPosition()[1],
       ),
+      exploredDarkness: lobby.vision.exploredDarkness as number,
     };
   });
   expect(inElevator.character).toBe("Andy");
@@ -84,6 +100,8 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(inElevator.visionControllers).toBe(1);
   expect(inElevator.lobbyExploredSaved).toBe(false);
   expect(inElevator.cameraOnPlayer).toBeLessThan(0.5);
+  // What's been seen outside stays hidden until the doors open
+  expect(inElevator.exploredDarkness).toBe(1);
   // Walking into the shut doors goes nowhere
   const beforeWalking = await getLobbyPlayerPosition(page);
   await page.keyboard.down("KeyD");
@@ -91,20 +109,34 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.keyboard.up("KeyD");
   const afterWalking = await getLobbyPlayerPosition(page);
   expect(Math.abs(afterWalking[0] - beforeWalking[0])).toBeLessThan(0.05);
-  await page.waitForTimeout(1000); // let the title fade in
-  await page.screenshot({ path: "tests/output/title.png" });
+  // The elevator is moving
+  expect(
+    await page.evaluate(() => {
+      const [x, y] = window.DEBUG.game!.camera.shakeOffset;
+      return Math.hypot(x, y);
+    }),
+  ).toBeGreaterThan(0);
+  await page.screenshot({ path: "tests/output/lobby-ride.png" });
   expectNoIssues(issues);
 
-  // --- Enter: the title goes, the elevator dings open, and out you walk ---
-  await page.keyboard.press("Enter");
+  // --- The elevator stops, dings open, and out you walk ---
   await page.waitForFunction(
     () =>
       (window.DEBUG.game!.entities.getById("lobby") as any).arrivalDoor
         .openPercentage === 1,
     null,
-    { timeout: 10000 },
+    { timeout: 15000 },
   );
-  await expect(page.locator(".menu-title")).toHaveCount(0);
+  const arrived = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const lobby = game.entities.getById("lobby") as any;
+    return {
+      shake: Math.hypot(...(game.camera.shakeOffset as [number, number])),
+      exploredDarkness: lobby.vision.exploredDarkness as number,
+    };
+  });
+  expect(arrived.shake).toBe(0);
+  expect(arrived.exploredDarkness).toBeCloseTo(0.6);
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(500);
   await page.keyboard.up("KeyD");

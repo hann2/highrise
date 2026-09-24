@@ -39,7 +39,7 @@ const VISION_SOURCE_RADIUS = 0.2;
 /** Softness of edges that aren't shadows (walls, the range limit), in meters */
 const EDGE_ANTIALIAS_WIDTH = 0.05;
 /** How dark explored places are when the player can't currently see them */
-const EXPLORED_DARKNESS = 0.6;
+export const EXPLORED_DARKNESS = 0.6;
 /** Pixels per meter of the darkness texture. The screen is about 65 px/m at the default zoom. */
 const DARKNESS_RESOLUTION = 48;
 /** Vision starts fading out at this fraction of the vision range and is gone at the limit */
@@ -98,6 +98,21 @@ export default class VisionController extends BaseEntity implements Entity {
   private eye: V2d = V(0, 0);
   /** What can be seen from there, sorted by angle */
   private samples: VisibilitySample[] = [];
+
+  private _exploredDarkness = EXPLORED_DARKNESS;
+  /**
+   * How dark explored places are when the player can't currently see them.
+   * 1 hides them completely, like places never seen.
+   */
+  get exploredDarkness() {
+    return this._exploredDarkness;
+  }
+  set exploredDarkness(value: number) {
+    this._exploredDarkness = value;
+    if (this.unseenSprite) {
+      this.unseenSprite.alpha = value;
+    }
+  }
 
   private _enabled = true;
   /** When disabled, everything is visible (for cheats and benchmarks). */
@@ -193,7 +208,7 @@ export default class VisionController extends BaseEntity implements Entity {
   onAdd({ game }: { game: Game }) {
     this.unseen = this.makeUnseenTexture();
     this.unseenSprite = new Sprite(this.unseen);
-    this.unseenSprite.alpha = EXPLORED_DARKNESS;
+    this.unseenSprite.alpha = this.exploredDarkness;
     this.sprite.addChildAt(this.unseenSprite, 0);
 
     this.explored = new ExploredMap(this.renderer, this.range, this.darkness);

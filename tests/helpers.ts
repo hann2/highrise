@@ -12,7 +12,7 @@ export function collectIssues(page: Page): string[] {
   return issues;
 }
 
-/** Loads the game with a fixed seed and waits for the lobby (and its title screen). */
+/** Loads the game with a fixed seed and waits for the title screen. */
 export async function loadGame(page: Page, seed: number) {
   // Skip the tutorial level so we get a normal generated level
   await page.addInitScript(() => {
@@ -22,9 +22,12 @@ export async function loadGame(page: Page, seed: number) {
   await page.waitForFunction(() => window.DEBUG?.game, null, {
     timeout: 60000,
   });
-  // The lobby only shows up once preloading is done
+  // The title only shows up once preloading is done
   await page.waitForFunction(
-    () => window.DEBUG.game!.entities.getById("lobby"),
+    () =>
+      [...window.DEBUG.game!.entities.all].some(
+        (e) => e.constructor.name === "TitleScreen",
+      ),
     null,
     { timeout: 120000 },
   );

@@ -12,12 +12,12 @@ import "./menu.css";
 import { FeedbackButton, MenuButton, MenuButtons } from "./MenuButtons";
 
 const FADE_IN_TIME = 1;
-const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.5;
+const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
 
 /**
- * The title, shown over the lobby when the game boots, with the player waiting
- * in the elevator behind it. Starting fades it away and calls `onStart`, which
- * opens the elevator.
+ * The title, shown on black when the game boots, before there's any world.
+ * Starting fades it away, leaving the black, and then calls `onStart`, which
+ * builds the lobby with the player riding up to it in the elevator.
  */
 export default class TitleScreen extends ReactEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -28,9 +28,6 @@ export default class TitleScreen extends ReactEntity implements Entity {
   titleOpacity = 1;
   startOpacity = 0;
   buttonsOpacity = 0;
-  backgroundOpacity = 1;
-  /** Black over the lobby, so it fades up from the black loading screen */
-  blackoutOpacity = 1;
   inTransition: boolean = false;
 
   constructor(private onStart: () => void) {
@@ -52,14 +49,7 @@ export default class TitleScreen extends ReactEntity implements Entity {
       <div
         className={`menu-screen ${this.inTransition ? "menu-screen--inactive" : ""}`}
       >
-        <div
-          className="title-screen__background"
-          style={{ opacity: this.backgroundOpacity }}
-        />
-        <div
-          className="title-screen__blackout"
-          style={{ opacity: this.blackoutOpacity }}
-        />
+        <div className="title-screen__blackout" />
         <div className="menu-title" style={{ opacity: this.titleOpacity }}>
           HIGHRISE
         </div>
@@ -88,7 +78,6 @@ export default class TitleScreen extends ReactEntity implements Entity {
       if (!this.inTransition) {
         this.startOpacity = smoothStep(t);
         this.buttonsOpacity = smoothStep(t);
-        this.blackoutOpacity = smoothStep(1 - t);
       }
     });
   }
@@ -112,16 +101,14 @@ export default class TitleScreen extends ReactEntity implements Entity {
         title: this.titleOpacity,
         start: this.startOpacity,
         buttons: this.buttonsOpacity,
-        blackout: this.blackoutOpacity,
       };
-      this.onStart();
       await this.wait(FADE_OUT_TIME, (_, t) => {
         this.titleOpacity = from.title * smoothStep(1 - t);
         this.startOpacity = from.start * smoothStep(1 - 2 * t);
         this.buttonsOpacity = from.buttons * smoothStep(1 - 2 * t);
-        this.backgroundOpacity = smoothStep(1 - t);
-        this.blackoutOpacity = from.blackout * smoothStep(1 - t);
       });
+      // The world fades up from black from here
+      this.onStart();
       this.destroy();
     }
   }
@@ -153,11 +140,4 @@ export default class TitleScreen extends ReactEntity implements Entity {
       this.openEncyclopedia();
     }
   }
-}
-
-/** Whether the title is up, in which case the lobby behind it waits */
-export function isTitleScreenOpen(game: Game): boolean {
-  return game.entities
-    .getByConstructor(TitleScreen)
-    .some((screen) => !screen.isDestroyed);
 }

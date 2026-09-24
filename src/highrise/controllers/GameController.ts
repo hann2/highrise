@@ -17,6 +17,7 @@ import VisionController from "../lighting-and-vision/VisionController";
 import GameOverScreen from "../menu/GameOverScreen";
 import PauseMenu from "../menu/PauseMenu";
 import Lobby from "../lobby/Lobby";
+import TitleScreen from "../menu/TitleScreen";
 import { loadSaveData, setLastCharacter } from "../persistence/SaveData";
 import { RunPlan } from "../run/RunPlan";
 import RunStats from "../run/RunStats";
@@ -29,12 +30,18 @@ import QuarterDropper from "./QuarterDropper";
 export class GameController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Permanent;
 
-  /** Between runs: the lobby, which is also the main menu */
+  /** Between runs: the lobby, which is also the main menu. At boot, the title comes first. */
   @on("goToLobby")
   onGoToLobby({ showTitle }: { showTitle: boolean }) {
     const game = this.game;
     game.clearScene(Persistence.Menu);
-    game.addEntity(new Lobby(showTitle));
+    if (showTitle) {
+      game.addEntity(
+        new TitleScreen(() => game.addEntity(new Lobby("fromTitle"))),
+      );
+    } else {
+      game.addEntity(new Lobby("afterRun"));
+    }
   }
 
   @on("newGame")

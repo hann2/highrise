@@ -2,6 +2,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
+import { clamp, lerp, smoothStep } from "../../core/util/MathUtil";
 import { reseedIfSeeded } from "../../core/util/Random";
 import { Texture } from "pixi.js";
 import { V2d } from "../../core/Vector";
@@ -26,11 +27,12 @@ import {
   STAIRS_CELL,
 } from "../levels/rooms/LobbyRoomTemplate";
 import LightingManager from "../lighting-and-vision/LightingManager";
-import VisionController from "../lighting-and-vision/VisionController";
+import VisionController, {
+  EXPLORED_DARKNESS,
+} from "../lighting-and-vision/VisionController";
 import { isCreditsOpen } from "../menu/CreditsScreen";
 import Encyclopedia, { isEncyclopediaOpen } from "../menu/Encyclopedia";
 import PauseMenu from "../menu/PauseMenu";
-import TitleScreen, { isTitleScreenOpen } from "../menu/TitleScreen";
 import { loadSaveData, updateSaveData } from "../persistence/SaveData";
 import { generateRunPlan, RunPlan } from "../run/RunPlan";
 import { Direction } from "../utils/directions";
@@ -39,9 +41,27 @@ import ReceptionistBob from "./ReceptionistBob";
 
 /** Offset from the base seed for the lobby and the run plan (levels use 0 up) */
 const LOBBY_SEED_OFFSET = 1000;
-/** After a run, how long the player stands in the elevator before it opens */
-const RETURN_OPEN_DELAY = 0.8;
-const RETURN_FADE_IN_TIME = 1.0;
+/**
+ * The elevator ride up to the lobby, in seconds: fading in from black, and
+ * riding (including the fade) before the car settles and the doors open.
+ * Coming back from a run is the same ride, shorter.
+ */
+const RIDES = {
+  fromTitle: { fadeIn: 2.0, ride: 4.0 },
+  afterRun: { fadeIn: 1.0, ride: 1.8 },
+};
+export type LobbyArrival = keyof typeof RIDES;
+/** How far the camera shakes while the elevator moves, in meters */
+const RIDE_SHAKE = 0.025;
+/** How long the shake takes to build up and to die down as the car slows */
+const RIDE_SHAKE_RAMP_UP = 0.4;
+const RIDE_SHAKE_RAMP_DOWN = 1.0;
+/** The bump as the car stops: how big (meters), how long, and how fast it wobbles (Hz) */
+const SETTLE_SHAKE = 0.05;
+const SETTLE_TIME = 0.5;
+const SETTLE_FREQUENCY = 5;
+/** From the car stopping to the ding */
+const SETTLE_PAUSE = 0.4;
 const START_RUN_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 0.8;
 /** How far the elevator doors have to be open before the player can move */
 const DOORS_OPEN_ENOUGH = 0.4;
@@ -53,8 +73,8 @@ const EXPLORED_SAVE_INTERVAL = 10;
 const at = (cell: V2d) => CellGrid.levelCoordToWorldCoord(cell);
 
 /**
- * The hub between runs, and the diegetic main menu. The player arrives in an
- * elevator (behind the title when the game boots), walks out into the lobby,
+ * The hub between runs, and the diegetic main menu. The player rides up in an
+ * elevator (after the title when the game boots), walks out into the lobby,
  * picks who to be by walking up to them, and takes the stairs to start the
  * run. (What the run holds is a mystery until the second floor's directory.)
  */
@@ -78,7 +98,7 @@ export default class Lobby extends BaseEntity implements Entity {
   private vision!: VisionController;
   private exploredSaveTime = EXPLORED_SAVE_INTERVAL;
 
-  constructor(private showTitle: boolean) {
+  constructor(private arrival: LobbyArrival) {
     super();
   }
 
@@ -101,6 +121,8 @@ export default class Lobby extends BaseEntity implements Entity {
     this.player.body.angle = Direction[ARRIVAL_ELEVATOR.openDirection].angle;
     this.addWaitingCharacters(character);
     this.vision = this.addChild(new VisionController(() => this.player));
+    // Nothing outside the elevator shows until its doors open
+    this.vision.exploredDarkness = 1;
     this.restoreExplored();
 
     const stairs = at(STAIRS_CELL);
@@ -141,16 +163,12 @@ export default class Lobby extends BaseEntity implements Entity {
       ),
       new InteractPrompt(
         () => this.player,
-        () => !this.arrived || this.leaving || isTitleScreenOpen(this.game),
+        () => !this.arrived || this.leaving,
         "large",
       ),
     );
 
-    if (this.showTitle) {
-      this.addChild(new TitleScreen(() => this.openElevator()));
-    } else {
-      this.arriveAfterRun();
-    }
+    this.rideUp();
   }
 
   /** Everyone rescued so far stands around the lobby; the rest aren't here yet */
@@ -262,16 +280,27 @@ export default class Lobby extends BaseEntity implements Entity {
     );
   }
 
-  private async arriveAfterRun() {
-    this.game.addEntity(new FadeEffect(0, 0, RETURN_FADE_IN_TIME));
-    await this.wait(RETURN_OPEN_DELAY);
-    this.openElevator();
+  /** Fades up on the player in the moving elevator; it stops, dings, and out you come */
+  private async rideUp() {
+    const { fadeIn, ride } = RIDES[this.arrival];
+    this.addChild(new PauseMenu("lobby"));
+    this.game.addEntity(new FadeEffect(0, 0, fadeIn));
+    await this.wait(ride, (_, t) => this.setShake(rideShake(t * ride, ride)));
+    await this.wait(SETTLE_TIME, (_, t) =>
+      this.setShake(settleShake(t * SETTLE_TIME)),
+    );
+    this.setShake([0, 0]);
+    await this.wait(SETTLE_PAUSE);
+    await this.arrivalDoor.open();
   }
 
-  /** Ding, and out you come */
-  async openElevator() {
-    this.addChild(new PauseMenu("lobby"));
-    await this.arrivalDoor.open();
+  private setShake([x, y]: [number, number]) {
+    this.game.camera.shakeOffset.set(x, y);
+  }
+
+  @on("destroy")
+  onDestroy({ game }: { game: Game }) {
+    game.camera.shakeOffset.set(0, 0);
   }
 
   openEncyclopedia() {
@@ -282,6 +311,12 @@ export default class Lobby extends BaseEntity implements Entity {
 
   @on("tick")
   onTick(dt: number) {
+    // What's been seen of the lobby comes into view as the doors part
+    this.vision.exploredDarkness = lerp(
+      1,
+      EXPLORED_DARKNESS,
+      this.arrivalDoor.openPercentage,
+    );
     if (!this.arrived && this.arrivalDoor.openPercentage > DOORS_OPEN_ENOUGH) {
       this.arrived = true;
     }
@@ -320,6 +355,28 @@ export default class Lobby extends BaseEntity implements Entity {
     game.clearScene(Persistence.Game);
     game.dispatch("newGame", { character, plan });
   }
+}
+
+/**
+ * The elevator moving: a small wobble from a few sines (not `Random`, so it
+ * doesn't use up the seed), building up at the start and dying down as the
+ * car slows. `time` is into a ride of `duration` seconds.
+ */
+function rideShake(time: number, duration: number): [number, number] {
+  const envelope =
+    smoothStep(clamp(time / RIDE_SHAKE_RAMP_UP)) *
+    smoothStep(clamp((duration - time) / RIDE_SHAKE_RAMP_DOWN));
+  const x = Math.sin(time * 41) + 0.6 * Math.sin(time * 73 + 1.3);
+  const y = Math.sin(time * 47 + 2.1) + 0.6 * Math.sin(time * 67 + 0.4);
+  const amplitude = (RIDE_SHAKE * envelope) / 1.6;
+  return [x * amplitude, y * amplitude];
+}
+
+/** The car stopping: one bump that wobbles out, `time` seconds after it */
+function settleShake(time: number): [number, number] {
+  const decay = 1 - time / SETTLE_TIME;
+  const wobble = Math.sin(time * SETTLE_FREQUENCY * 2 * Math.PI);
+  return [0, SETTLE_SHAKE * decay * decay * wobble];
 }
 
 /** The characters rescued so far, in the order they're listed */
