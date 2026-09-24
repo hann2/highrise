@@ -20,6 +20,11 @@ export class Camera2d extends BaseEntity implements Entity {
   z: number;
   angle: number;
   velocity: V2d;
+  /**
+   * Added to the position when drawing, in world units, for screen shake.
+   * Kept apart from `position` so whatever moves the camera doesn't fight it.
+   */
+  shakeOffset: V2d = V(0, 0);
 
   paralaxScale = 0.1;
 
@@ -158,7 +163,9 @@ export class Camera2d extends BaseEntity implements Entity {
     [ax, ay]: V2d = V(0, 0),
   ): Matrix {
     const [w, h] = this.getViewportSize();
-    const { x: cx, y: cy, z, angle } = this;
+    const { z, angle } = this;
+    const cx = this.x + this.shakeOffset.x;
+    const cy = this.y + this.shakeOffset.y;
 
     return (
       new Matrix()
