@@ -8,14 +8,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "node:test";
-import { globSync } from "glob";
-import { resourceName } from "../../src/core/resources/resourceName";
+import { CharacterStore } from "../../bin/character-editor/CharacterStore";
 import {
   CharacterData,
   characterDataProblems,
 } from "../../src/highrise/characters/CharacterData";
-import { GUNS } from "../../src/highrise/weapons/guns/gun-stats/gunStats";
-import { MELEE_WEAPONS } from "../../src/highrise/weapons/melee/melee-weapons/meleeWeapons";
 
 const ROOT = path.resolve(__dirname, "../..");
 const DATA_DIR = path.join(ROOT, "src/highrise/characters/data");
@@ -32,11 +29,6 @@ const characters = fs
     ) as CharacterData,
   }));
 
-function namesOf(extensions: string[]): Set<string> {
-  const files = globSync(`${ROOT}/resources/**/*.@(${extensions.join("|")})`);
-  return new Set(files.map(resourceName));
-}
-
 function filesIn(dir: string): string[] {
   return fs.existsSync(dir)
     ? fs.readdirSync(dir).filter((file) => !file.startsWith("."))
@@ -44,11 +36,8 @@ function filesIn(dir: string): string[] {
 }
 
 test("character data refers only to things that exist", () => {
-  const context = {
-    imageNames: namesOf(["bmp", "gif", "jpg", "png", "svg"]),
-    soundNames: namesOf(["flac", "mp3", "ogg", "wav"]),
-    weaponNames: new Set([...GUNS, ...MELEE_WEAPONS].map((w) => w.name)),
-  };
+  const noSpeech = {} as ConstructorParameters<typeof CharacterStore>[1];
+  const context = new CharacterStore(ROOT, noSpeech).context();
   const problems = characters.flatMap(({ id, data }) =>
     characterDataProblems(id, data, context),
   );

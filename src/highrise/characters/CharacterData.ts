@@ -68,6 +68,8 @@ export interface VoiceClip {
   voiceId?: string;
   model?: string;
   created?: string;
+  /** ElevenLabs stability it was generated with: 0 is the most expressive, 1 the steadiest */
+  stability?: number;
   /** The file of the clip this one was regenerated from */
   basedOn?: string;
 }

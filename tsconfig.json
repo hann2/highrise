@@ -21,6 +21,7 @@
   },
   "include": [
     "src",
+    "bin",
     "tests",
     "resources",
     "playwright.config.ts"
