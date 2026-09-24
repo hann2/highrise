@@ -18,6 +18,13 @@ import {
 } from "../../src/highrise/characters/CharacterData";
 import { GUNS } from "../../src/highrise/weapons/guns/gun-stats/gunStats";
 import { MELEE_WEAPONS } from "../../src/highrise/weapons/melee/melee-weapons/meleeWeapons";
+import {
+  CharacterChanges,
+  ClipChanges,
+  GenerateRequest,
+} from "../../src/tools/character-editor/apiTypes";
+
+export type { CharacterChanges, ClipChanges, GenerateRequest };
 
 /** What makes new clips' audio; the real one is in `elevenLabs.ts` */
 export interface SpeechGenerator {
@@ -29,29 +36,6 @@ export interface SpeechGenerator {
   }): Promise<{ audio: Buffer; extension: string }>;
   transcribe(file: string): Promise<string>;
 }
-
-export interface GenerateRequest {
-  text: string;
-  categories: CharacterSoundClass[];
-  count: number;
-  stability?: number;
-  basedOn?: string;
-}
-
-/** The part of a clip the editor can change directly */
-export type ClipChanges = Partial<
-  Pick<VoiceClip, "text" | "categories" | "enabled">
->;
-
-/**
- * The part of a character the editor can change directly (clips have their
- * own calls). A `voice` of null removes it.
- */
-export type CharacterChanges = Partial<
-  Omit<CharacterData, "clips" | "voice"> & {
-    voice: CharacterData["voice"] | null;
-  }
->;
 
 const CHARACTER_FIELDS = [
   "name",
@@ -310,7 +294,9 @@ export class CharacterStore {
     if (problems.length > 0) {
       throw new BadRequest(problems.join("\n"));
     }
-    const json = await prettier.format(JSON.stringify(data), {
+    // Indented first, so prettier keeps objects expanded the way they are in
+    // the files, and an edit only changes the lines it touches
+    const json = await prettier.format(JSON.stringify(data, null, 2), {
       parser: "json",
     });
     fs.writeFileSync(path.join(this.dataDir, `${id}.json`), json);

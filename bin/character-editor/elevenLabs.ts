@@ -5,18 +5,10 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { Voice } from "../../src/tools/character-editor/apiTypes";
 import { SpeechGenerator } from "./CharacterStore";
 
 const API = "https://api.elevenlabs.io";
-
-export interface Voice {
-  voiceId: string;
-  name: string;
-  description: string;
-  category: string;
-  previewUrl?: string;
-  labels: Record<string, string>;
-}
 
 export function readApiKey(root: string): string | undefined {
   if (process.env.ELEVENLABS_API_KEY) {
