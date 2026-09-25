@@ -54,3 +54,13 @@ export const Scavenger: Upgrade = {
     human.stats.killAmmoDropChance += SCAVENGER_DROP_CHANCE;
   },
 };
+
+export const IncendiaryRounds: Upgrade = {
+  name: "Incendiary Rounds",
+  description: "Bullets set enemies on fire.",
+  rarity: "rare",
+  maxStacks: 1,
+  apply: (human) => {
+    human.stats.incendiaryRounds = true;
+  },
+};

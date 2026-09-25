@@ -4,8 +4,10 @@ import { on } from "../../core/entity/handler";
 import { KeyCode } from "../../core/io/Keys";
 import { CHARACTERS } from "../characters/Character";
 import { Persistence } from "../constants/constants";
+import { isEnemy } from "../enemies/base/Enemy";
 import { getPartyManager } from "../environment/PartyManager";
 import WeaponPickup from "../environment/WeaponPickup";
+import { ignite } from "../fire/Burning";
 import { isHuman } from "../human/Human";
 import VisionController from "../lighting-and-vision/VisionController";
 import {
@@ -69,6 +71,16 @@ export default class CheatController extends BaseEntity implements Entity {
       case "KeyB":
         getPartyManager(this.game)?.leader.giveConsumable(Flashbang, 3);
         break;
+      case "KeyT": {
+        // Set fire to the enemies near the cursor
+        const cursor = this.game.camera.toWorld(this.game.io.mousePosition);
+        for (const enemy of this.game.entities.getByFilter(isEnemy)) {
+          if (enemy.getPosition().distanceTo(cursor) < 2) {
+            ignite(enemy);
+          }
+        }
+        break;
+      }
       case "KeyI": {
         const leader = getPartyManager(this.game)?.leader;
         for (const ammoClass of LIMITED_AMMO_CLASSES) {

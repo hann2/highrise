@@ -49,4 +49,6 @@ export class PlayerStats {
   floorHeal = 0;
   /** Extra chance that a kill drops an ammo box */
   killAmmoDropChance = 0;
+  /** Bullets set what they hit on fire */
+  incendiaryRounds = false;
 }

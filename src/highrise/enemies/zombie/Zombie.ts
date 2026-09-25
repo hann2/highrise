@@ -8,6 +8,7 @@ import {
   ZOMBIE_RADIUS,
 } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
+import { ignite } from "../../fire/Burning";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange } from "../base/enemyUtils";
@@ -84,13 +85,16 @@ export default class Zombie extends BaseEnemy {
     super.handleDeath();
 
     if (rBool(CRAWLER_CHANCE)) {
-      this.game.addEntity(
-        new Crawler(
-          this.getPosition(),
-          this.body.angle,
-          this.zombieVariant.crawlerTextures,
-        ),
+      const crawler = new Crawler(
+        this.getPosition(),
+        this.body.angle,
+        this.zombieVariant.crawlerTextures,
       );
+      // Still on fire
+      if (this.burning) {
+        ignite(crawler, this.burning.source, this.burning.timeLeft);
+      }
+      this.game.addEntity(crawler);
     }
   }
 }

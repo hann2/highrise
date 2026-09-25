@@ -22,6 +22,13 @@ import { HUMAN_RADIUS, ZOMBIE_RADIUS } from "../constants/constants";
 import { WalkSpring } from "../creature-stuff/WalkSpring";
 import FleshImpact from "../effects/FleshImpact";
 import { isEnemy } from "../enemies/base/Enemy";
+import Burning, { Flammable } from "../fire/Burning";
+import {
+  HUMAN_BURN_DPS,
+  HUMAN_BURN_INTERVAL,
+  HUMAN_BURN_TIME,
+} from "../fire/fireConstants";
+import { inflictDamageFrom } from "../run/damageSources";
 import Door from "../environment/Door";
 import Interactable, { isInteractable } from "../environment/Interactable";
 import ConsumablePickup from "../environment/ConsumablePickup";
@@ -84,7 +91,7 @@ export const PUSH_SOUNDS: SoundName[] = [
 
 const pushSoundRing = new ShuffleRing(PUSH_SOUNDS);
 
-export default class Human extends BaseEntity implements Entity {
+export default class Human extends BaseEntity implements Entity, Flammable {
   body: Body;
   tags = ["human"];
   /** Modifiers from upgrades; neutral for anyone who hasn't picked any */
@@ -109,6 +116,10 @@ export default class Human extends BaseEntity implements Entity {
   flashlight: Flashlight;
   /** Keycards carried, for opening locked rooms (see `KeycardLock`) */
   keycards: number = 0;
+  burning?: Burning;
+  burnTime = HUMAN_BURN_TIME;
+  burnDps = HUMAN_BURN_DPS;
+  burnDamageInterval = HUMAN_BURN_INTERVAL;
 
   constructor(
     position: V2d = V(0, 0),
@@ -448,18 +459,25 @@ export default class Human extends BaseEntity implements Entity {
     return nearest;
   }
 
-  // Inflict damage on the human
-  async inflictDamage(amount: number) {
+  /**
+   * Inflict damage on the human. `quiet` leaves out the blood and the pained
+   * noises, for damage that keeps coming (burning).
+   */
+  async inflictDamage(amount: number, quiet: boolean = false) {
     if (this.isDestroyed) {
       return;
     }
     this.hp -= amount;
 
-    this.game.addEntity(new FleshImpact(this.getPosition(), 1));
+    if (!quiet) {
+      this.game.addEntity(new FleshImpact(this.getPosition(), 1));
+    }
     this.game.dispatch("humanInjured", { human: this, amount });
 
     if (this.hp <= 0) {
       this.die();
+    } else if (quiet) {
+      return;
     } else if (this.hp < 30) {
       await this.wait(0.2);
       this.voice.speak("nearDeath", true);
@@ -467,6 +485,14 @@ export default class Human extends BaseEntity implements Entity {
       await this.wait(0.2);
       this.voice.speak("hurt");
     }
+  }
+
+  handleIgnite() {
+    this.voice.speak("hurt");
+  }
+
+  takeBurnDamage(amount: number) {
+    inflictDamageFrom(this, amount, "Fire", true);
   }
 
   die() {

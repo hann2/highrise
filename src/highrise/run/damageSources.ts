@@ -7,14 +7,18 @@ export type DamageSource = BaseEnemy | string;
 // Who hurt each human last, so a death can be blamed on someone
 const lastDamageSources = new WeakMap<Human, DamageSource>();
 
-/** Hurts a human and remembers who did it, for the run summary's cause of death. */
+/**
+ * Hurts a human and remembers who did it, for the run summary's cause of
+ * death. See `Human.inflictDamage` for `quiet`.
+ */
 export function inflictDamageFrom(
   human: Human,
   amount: number,
   source: DamageSource,
+  quiet: boolean = false,
 ) {
   lastDamageSources.set(human, source);
-  human.inflictDamage(amount);
+  human.inflictDamage(amount, quiet);
 }
 
 export function getLastDamageSource(human: Human): DamageSource | undefined {

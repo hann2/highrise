@@ -5,6 +5,7 @@ import { FlashbangPack, GrenadePack } from "./consumableUpgrades";
 import {
   Bloodthirsty,
   CurbStomp,
+  IncendiaryRounds,
   Scavenger,
   SecondWind,
   SpeedLoader,
@@ -43,6 +44,7 @@ export const UPGRADES: ReadonlyArray<Upgrade> = [
   CurbStomp,
   SecondWind,
   Scavenger,
+  IncendiaryRounds,
   GrenadePack,
   FlashbangPack,
 ];

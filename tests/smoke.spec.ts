@@ -712,6 +712,62 @@ test("game boots, plays, and changes levels without errors", async ({
     leader.hp = leader.maxHp;
   });
 
+  // --- Fire: with incendiary rounds, a bullet sets a zombie alight, and it
+  // burns for a while without blood or flinching, then goes out ---
+  const lit = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const zombie = game.entities
+      .getTagged("zombie")
+      .find((e) => e.constructor.name === "Zombie") as any;
+    zombie.stun(20);
+    zombie.hp = 1000; // so it outlives the fire
+    (window as any).testZombie = zombie;
+    const shot = (shooter: any) => {
+      const origin = zombie.getPosition();
+      zombie.hitByBullet(
+        { damage: 1, velocity: origin.mul(0), stats: { mass: 0 }, shooter },
+        origin,
+        origin.mul(0),
+      );
+      return !!zombie.burning;
+    };
+    const litWithout = shot(leader);
+    leader.stats.incendiaryRounds = true;
+    const litWith = shot(leader);
+    leader.stats.incendiaryRounds = false;
+    return { litWithout, litWith, hp: zombie.hp as number };
+  });
+  expect(lit.litWithout).toBe(false);
+  expect(lit.litWith).toBe(true);
+  await page.waitForTimeout(2000);
+  const burnt = await page.evaluate(() => {
+    const zombie = (window as any).testZombie;
+    return { hp: zombie.hp as number, burning: !!zombie.burning };
+  });
+  expect(burnt.burning).toBe(true);
+  expect(lit.hp - burnt.hp).toBeGreaterThan(10);
+  await page.waitForTimeout(3000); // enemies burn for 4 seconds
+  expect(
+    await page.evaluate(() => {
+      const zombie = (window as any).testZombie;
+      (window as any).testZombie = undefined;
+      const burning = !!zombie.burning;
+      zombie.destroy();
+      return {
+        burning,
+        fires: [...window.DEBUG.game!.entities.all].filter(
+          (e) => e.constructor.name === "Burning",
+        ).length,
+      };
+    }),
+  ).toEqual({ burning: false, fires: 0 });
+  expectNoIssues(issues);
+
   // --- Ammo boxes in closets restock the reserve ---
   const ammoBox = await page.evaluate(async () => {
     const game = window.DEBUG.game!;

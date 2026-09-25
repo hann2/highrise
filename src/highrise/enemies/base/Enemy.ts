@@ -16,6 +16,12 @@ import { Creature } from "../../creature-stuff/Creature";
 import { WalkSpring } from "../../creature-stuff/WalkSpring";
 import FleshImpact from "../../effects/FleshImpact";
 import Hittable from "../../environment/Hittable";
+import Burning, { Flammable, ignite } from "../../fire/Burning";
+import {
+  ENEMY_BURN_DPS,
+  ENEMY_BURN_INTERVAL,
+  ENEMY_BURN_TIME,
+} from "../../fire/fireConstants";
 import Human from "../../human/Human";
 import VisionController from "../../lighting-and-vision/VisionController";
 import Bullet from "../../projectiles/Bullet";
@@ -27,8 +33,12 @@ import EnemyVoice from "./EnemyVoice";
 /** Seconds for an enemy to fade in or out at the edge of the player's vision */
 const VISIBILITY_FADE_TIME = 0.15;
 
-export class BaseEnemy extends Creature implements Hittable {
+export class BaseEnemy extends Creature implements Hittable, Flammable {
   hp: number = 100;
+  burning?: Burning;
+  burnTime = ENEMY_BURN_TIME;
+  burnDps = ENEMY_BURN_DPS;
+  burnDamageInterval = ENEMY_BURN_INTERVAL;
   aimSpring!: AimSpring;
   walkSpring: WalkSpring;
   body: Body & WithOwner;
@@ -160,6 +170,10 @@ export class BaseEnemy extends Creature implements Hittable {
 
     this.makeBlood(position, bullet.damage, normal);
 
+    if (bullet.shooter?.stats.incendiaryRounds) {
+      ignite(this, bullet.shooter);
+    }
+
     if (this.diesInOneHitFrom(bullet.shooter)) {
       this.hp = 0;
     }
@@ -242,6 +256,20 @@ export class BaseEnemy extends Creature implements Hittable {
       this.die(attacker);
     } else {
       this.voice.speak("hit");
+    }
+  }
+
+  handleIgnite() {
+    this.voice.speak("hit");
+  }
+
+  takeBurnDamage(amount: number, source?: Human) {
+    if (this.isDestroyed) {
+      return;
+    }
+    this.hp -= amount;
+    if (this.hp <= 0) {
+      this.die(source);
     }
   }
 
