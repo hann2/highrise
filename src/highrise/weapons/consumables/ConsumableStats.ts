@@ -26,8 +26,12 @@ export interface ConsumableStats {
   readonly throwSpeed: number;
   /** Seconds from leaving the hand to going off */
   readonly fuseTime: number;
+  /** Goes off as soon as it hits a wall, an enemy or the floor, fuse or not */
+  readonly breaksOnImpact?: boolean;
 
   // --- Looks ---
+  /** A grenade (the default: a can with a pin) or a bottle with a rag */
+  readonly shape?: "grenade" | "bottle";
   /** Length and width in meters */
   readonly size: [number, number];
   readonly color: number;
@@ -51,6 +55,13 @@ export interface ConsumableStats {
     readonly intensity: number;
     /** Seconds to fade out */
     readonly duration: number;
+  };
+  /** Burning fuel spilled around where it goes off (see `FireGrid.spillFuel`) */
+  readonly fire?: {
+    /** Meters */
+    readonly radius: number;
+    /** Seconds the middle of it burns for */
+    readonly fuel: number;
   };
   /** An expanding ring drawn on the floor */
   readonly blastRing?: {

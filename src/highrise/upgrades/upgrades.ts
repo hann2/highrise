@@ -1,7 +1,7 @@
 import { rUniform } from "../../core/util/Random";
 import type Human from "../human/Human";
 import { markSeen } from "../persistence/SaveData";
-import { FlashbangPack, GrenadePack } from "./consumableUpgrades";
+import { FlashbangPack, GrenadePack, MolotovPack } from "./consumableUpgrades";
 import {
   Bloodthirsty,
   CurbStomp,
@@ -47,6 +47,7 @@ export const UPGRADES: ReadonlyArray<Upgrade> = [
   IncendiaryRounds,
   GrenadePack,
   FlashbangPack,
+  MolotovPack,
 ];
 
 /** How many times `human` has taken `upgrade` */

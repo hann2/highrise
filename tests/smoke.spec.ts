@@ -13,7 +13,7 @@ import {
 const LEVEL_2_FINGERPRINT = "430:-1900366570";
 // What the upgrade screen offers after level 1 with this seed, in order.
 // Changes when the upgrade pool, the rarities, or level generation change.
-const UPGRADE_OFFER = ["Flashbangs", "Steady Aim", "Hollow Points"];
+const UPGRADE_OFFER = ["Molotovs", "Linebacker", "Hair Trigger"];
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
@@ -766,6 +766,127 @@ test("game boots, plays, and changes levels without errors", async ({
       };
     }),
   ).toEqual({ burning: false, fires: 0 });
+
+  // --- Fire on the floor spreads along fuel, and not through walls ---
+  const spread = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const grid = [...game.entities.all].find(
+      (e) => e.constructor.name === "FireGrid",
+    ) as any;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    // Both faces of the first wall to the right of the spawn room
+    const home = (window as any).testHome;
+    const walls = { collisionMask: 1 };
+    const nearFace = game.world.raycast(home, home.add([30, 0]), walls)!;
+    const nearX = nearFace.point[0];
+    const farFace = game.world.raycast(
+      home.add([nearX - home[0] + 3, 0]),
+      home.add([nearX - home[0] - 0.1, 0]),
+      walls,
+    )!;
+    const near = home.add([nearX - home[0] - 0.3, 0]);
+    const far = home.add([farFace.point[0] - home[0] + 0.3, 0]);
+    // A trail of fuel along the wall, and a puddle at it that doesn't leak
+    // through it
+    grid.addFuelAlong(near.add([0, -1.5]), near.add([0, 1.5]), 5);
+    grid.spillFuel(near, 1.5, 5);
+    const leaked = grid.fuelAt(far);
+    // A puddle right across the wall that isn't lit
+    grid.spillFuel(far, 1, 5);
+    const lit = grid.igniteAt(near.add([0, -1.5]));
+    await wait(1000);
+    const result = {
+      lit,
+      leaked,
+      trailEnd: grid.isBurningAt(near.add([0, 1.5])),
+      acrossWall: grid.isBurningAt(far),
+    };
+    grid.clear();
+    return result;
+  });
+  expect(spread).toEqual({
+    lit: true,
+    leaked: 0,
+    trailEnd: true,
+    acrossWall: false,
+  });
+
+  // --- A molotov breaks where it lands and sets whoever is there alight ---
+  await page.keyboard.press("KeyX"); // dev cheat: molotovs
+  await expect(page.locator(".hud-inventory")).toContainText("Molotov");
+  await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const zombie = game.entities
+      .getTagged("zombie")
+      .find((e) => e.constructor.name === "Zombie") as any;
+    zombie.hp = 1000;
+    (window as any).testZombie = zombie;
+    // Thrown in a direction with no wall for a while
+    const home = leader.getPosition().clone();
+    let angle = 0;
+    for (let i = 0; i < 16; i++) {
+      angle = (i / 16) * Math.PI * 2;
+      const to = home.add([Math.cos(angle) * 5, Math.sin(angle) * 5]);
+      if (!game.world.raycast(home, to, { collisionMask: 1 | 2 })) break;
+    }
+    const pin = () => {
+      if (
+        zombie.isDestroyed ||
+        leader.isDestroyed ||
+        !(window as any).testZombie
+      )
+        return;
+      leader.hp = leader.maxHp;
+      leader.body.position.set(home);
+      leader.body.velocity.set(0, 0);
+      leader.body.angle = angle;
+      zombie.body.position.set(
+        home.add([Math.cos(angle) * 3, Math.sin(angle) * 3]),
+      );
+      zombie.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    pin();
+  });
+  await page.waitForTimeout(300);
+  await page.evaluate(() =>
+    (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader.useConsumable(),
+  );
+  await page.waitForTimeout(1000);
+  await page.screenshot({ path: "tests/output/molotov.png" });
+  const molotov = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const zombie = (window as any).testZombie;
+    const grid = [...game.entities.all].find(
+      (e) => e.constructor.name === "FireGrid",
+    ) as any;
+    (window as any).testZombie = undefined; // unpin
+    const result = {
+      zombieBurning: !!zombie.burning,
+      floorBurning: grid.isBurningAt(zombie.getPosition()),
+      thrown: [...game.entities.all].filter(
+        (e) => e.constructor.name === "ThrownConsumable",
+      ).length,
+    };
+    zombie.destroy();
+    // Put it all out, so the rest of the test isn't on fire
+    grid.clear();
+    return result;
+  });
+  expect(molotov).toEqual({
+    zombieBurning: true,
+    floorBurning: true,
+    thrown: 0,
+  });
   expectNoIssues(issues);
 
   // --- Ammo boxes in closets restock the reserve ---
@@ -1461,16 +1582,17 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.locator(".encyclopedia__entry--unknown").first().click();
   await expect(page.locator(".encyclopedia__detail-name")).toHaveText("???");
   expect(await detail.innerText()).not.toContain("Magazine");
-  // Guns → Melee → Consumables, where the frag grenades carried earlier are
-  // known and flashbangs aren't
+  // Guns → Melee → Consumables, where the frag grenades and molotovs carried
+  // earlier are known and flashbangs aren't
   for (let i = 0; i < 2; i++) {
     await page.keyboard.press("ArrowRight");
   }
   await expect(selectedTab).toContainText("Consumables");
-  await expect(selectedTab).toContainText("1 / 2");
-  await expect(gunEntries).toHaveCount(2);
+  await expect(selectedTab).toContainText("2 / 3");
+  await expect(gunEntries).toHaveCount(3);
   await expect(gunEntries.nth(0)).toContainText("Frag Grenade");
   await expect(gunEntries.nth(1)).toHaveText("???");
+  await expect(gunEntries.nth(2)).toContainText("Molotov");
   await gunEntries.nth(0).click();
   await expect(detail).toContainText("Blast radius");
   await expect(
@@ -1498,7 +1620,7 @@ test("game boots, plays, and changes levels without errors", async ({
   );
   expect(seen.guns).toContain(heldGun);
   expect(seen.enemies).toContain("Zombie");
-  expect(seen.consumables).toEqual(["Frag Grenade"]);
+  expect(seen.consumables).toEqual(["Frag Grenade", "Molotov"]);
   expectNoIssues(issues);
 
   await page.screenshot({ path: "tests/output/paused.png" });
@@ -1616,8 +1738,8 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
   await page.waitForTimeout(600);
   await page.screenshot({ path: "tests/output/upgrade-select.png" });
-  // Take Steady Aim with the keyboard
-  const pick = offer.names.indexOf("Steady Aim");
+  // Take Hair Trigger with the keyboard
+  const pick = offer.names.indexOf("Hair Trigger");
   // The card under the mouse is selected when the screen appears, so get the
   // mouse out of the way and step from wherever the selection is
   await page.mouse.move(1, 1);
@@ -1746,7 +1868,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
   expectNoIssues(issues);
 
-  // --- The upgrade stuck: the leader's shots spread less ---
+  // --- The upgrade stuck: the leader's guns fire faster ---
   const upgraded = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
@@ -1760,12 +1882,12 @@ test("game boots, plays, and changes levels without errors", async ({
       hp: leader.hp,
     };
   });
-  expect(upgraded.upgrades).toEqual(["Steady Aim"]);
-  expect(upgraded.stats.spread).toBeCloseTo(statsBefore.spread * 0.6);
+  expect(upgraded.upgrades).toEqual(["Hair Trigger"]);
+  expect(upgraded.stats.fireRate).toBeCloseTo(statsBefore.fireRate * 1.2);
   expect(upgraded.maxHp).toBe(statsBefore.maxHp);
   expect(upgraded.hp).toBeLessThanOrEqual(upgraded.maxHp);
   // Nothing else changed
-  expect({ ...upgraded.stats, spread: statsBefore.spread }).toEqual(
+  expect({ ...upgraded.stats, fireRate: statsBefore.fireRate }).toEqual(
     statsBefore,
   );
 
@@ -1917,7 +2039,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(tookWeapon.offeredAgain).not.toContain(tookWeapon.name);
   expect(tookWeapon.offeredAgain).not.toContain(tookWeapon.oneStack);
   expect(tookWeapon.upgrades).toEqual([
-    "Steady Aim",
+    "Hair Trigger",
     tookWeapon.name,
     tookWeapon.oneStack,
   ]);

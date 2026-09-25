@@ -9,6 +9,7 @@ import { V2d } from "../../core/Vector";
 import type Human from "../human/Human";
 import { PointLight } from "../lighting-and-vision/PointLight";
 import { BURN_FADE_TIME, flicker } from "./fireConstants";
+import { getFireGrid } from "./FireGrid";
 
 /** Something that can catch fire: enemies and humans */
 export interface Flammable extends BaseEntity {
@@ -119,7 +120,12 @@ export default class Burning extends BaseEntity implements Entity {
       // Can destroy the target, and this with it
       this.target.takeBurnDamage(damage, this.source);
     }
-    if (this.timeLeft <= 0 && !this.isDestroyed) {
+    if (this.isDestroyed) {
+      return;
+    }
+    // Lights the fuel it's standing in
+    getFireGrid(this.game)?.igniteAt(this.target.getPosition(), this.source);
+    if (this.timeLeft <= 0) {
       this.destroy();
     }
   }

@@ -28,7 +28,10 @@ const GRAVITY = 9.8; // meters / second²
 /** How quickly it stops sliding once it's on the floor, per second */
 const FLOOR_FRICTION = 3;
 
-/** A grenade (or similar) in flight or lying on the floor with its fuse burning */
+/**
+ * A grenade (or similar) in flight or lying on the floor with its fuse
+ * burning. One that `breaksOnImpact` goes off when it first hits something.
+ */
 export default class ThrownConsumable extends BaseEntity implements Entity {
   body: Body;
   sprite: Graphics & GameSprite;
@@ -74,6 +77,13 @@ export default class ThrownConsumable extends BaseEntity implements Entity {
   @on("add")
   async onAdd() {
     await this.wait(this.stats.fuseTime);
+    this.goOff();
+  }
+
+  private goOff() {
+    if (this.isDestroyed) {
+      return;
+    }
     this.game.addEntity(
       new Detonation(
         this.stats,
@@ -92,7 +102,9 @@ export default class ThrownConsumable extends BaseEntity implements Entity {
       this.body.angularVelocity *= friction;
     } else if (this.z < 0) {
       this.z = 0;
-      if (Math.abs(this.zVelocity) > MIN_BOUNCE_SPEED) {
+      if (this.stats.breaksOnImpact) {
+        this.goOff();
+      } else if (Math.abs(this.zVelocity) > MIN_BOUNCE_SPEED) {
         this.playBounceSound(clamp(Math.abs(this.zVelocity) / 10) * 2);
         this.zVelocity *= -BOUNCE_RESTITUTION;
         this.body.angularVelocity *= 0.5;
@@ -109,6 +121,10 @@ export default class ThrownConsumable extends BaseEntity implements Entity {
 
   @on("impact")
   onImpact() {
+    if (this.stats.breaksOnImpact) {
+      this.goOff();
+      return;
+    }
     this.playBounceSound(clamp(this.body.velocity.magnitude / 5));
   }
 
@@ -131,6 +147,26 @@ export default class ThrownConsumable extends BaseEntity implements Entity {
 export function drawConsumable(stats: ConsumableStats): Graphics & GameSprite {
   const [length, width] = stats.size;
   const graphics = new Graphics();
+  if (stats.shape === "bottle") {
+    // The body, the neck, and a rag stuffed in it
+    const bodyLength = length * 0.65;
+    const neckWidth = width * 0.4;
+    graphics
+      .roundRect(-length / 2, -width / 2, bodyLength, width, width / 4)
+      .fill({ color: stats.color, alpha: 0.9 })
+      .stroke({ width: 0.01, color: 0x000000, alpha: 0.6 })
+      .rect(-length / 2 + bodyLength, -neckWidth / 2, length * 0.2, neckWidth)
+      .fill({ color: stats.color, alpha: 0.9 })
+      .roundRect(
+        length / 2 - length * 0.18,
+        -neckWidth * 0.7,
+        length * 0.18,
+        neckWidth * 1.4,
+        neckWidth / 3,
+      )
+      .fill(stats.accentColor);
+    return graphics;
+  }
   graphics
     .roundRect(-length / 2, -width / 2, length, width, width / 2)
     .fill(stats.color)

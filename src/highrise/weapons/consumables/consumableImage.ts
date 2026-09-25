@@ -3,7 +3,7 @@ import { ConsumableStats } from "./ConsumableStats";
 /**
  * A picture of a consumable for HTML, as an SVG data URL: the same shape
  * `drawConsumable` draws in the world (a rounded body with a band and a pin
- * ring), since consumables have no image files.
+ * ring, or a bottle with a rag), since consumables have no image files.
  */
 export function consumableImageUrl(stats: ConsumableStats): string {
   const [length, width] = stats.size;
@@ -15,11 +15,26 @@ export function consumableImageUrl(stats: ConsumableStats): string {
     length + pad * 2,
     width + pad * 2,
   ].join(" ");
+  const color = cssColor(stats.color);
+  const stroke = `stroke="rgba(0,0,0,0.6)" stroke-width="${width * 0.06}"`;
+  let shapes: string;
+  if (stats.shape === "bottle") {
+    // The body, the neck, and a rag stuffed in it
+    const bodyLength = length * 0.65;
+    const neckWidth = width * 0.4;
+    shapes =
+      `<rect x="${-length / 2}" y="${-width / 2}" width="${bodyLength}" height="${width}" rx="${width / 4}" fill="${color}" ${stroke}/>` +
+      `<rect x="${-length / 2 + bodyLength}" y="${-neckWidth / 2}" width="${length * 0.2}" height="${neckWidth}" fill="${color}"/>` +
+      `<rect x="${length / 2 - length * 0.18}" y="${-neckWidth * 0.7}" width="${length * 0.18}" height="${neckWidth * 1.4}" rx="${neckWidth / 3}" fill="${accent}"/>`;
+  } else {
+    shapes =
+      `<rect x="${-length / 2}" y="${-width / 2}" width="${length}" height="${width}" rx="${width / 2}" fill="${color}" ${stroke}/>` +
+      `<rect x="${length / 2 - width * 0.35}" y="${-width * 0.3}" width="${width * 0.35}" height="${width * 0.6}" fill="${accent}"/>` +
+      `<circle cx="${length / 2 + width * 0.1}" cy="${width * 0.35}" r="${width * 0.18}" fill="none" stroke="${accent}" stroke-width="${width * 0.07}"/>`;
+  }
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${(length + pad * 2) * 400}" height="${(width + pad * 2) * 400}">` +
-    `<rect x="${-length / 2}" y="${-width / 2}" width="${length}" height="${width}" rx="${width / 2}" fill="${cssColor(stats.color)}" stroke="rgba(0,0,0,0.6)" stroke-width="${width * 0.06}"/>` +
-    `<rect x="${length / 2 - width * 0.35}" y="${-width * 0.3}" width="${width * 0.35}" height="${width * 0.6}" fill="${accent}"/>` +
-    `<circle cx="${length / 2 + width * 0.1}" cy="${width * 0.35}" r="${width * 0.18}" fill="none" stroke="${accent}" stroke-width="${width * 0.07}"/>` +
+    shapes +
     `</svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

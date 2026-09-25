@@ -5,6 +5,7 @@ import { Character } from "../characters/Character";
 import { Persistence } from "../constants/constants";
 import EncyclopediaTracker from "../encyclopedia/EncyclopediaTracker";
 import PartyManager from "../environment/PartyManager";
+import FireGrid from "../fire/FireGrid";
 import { AmmoOverlay } from "../hud/AmmoOverlay";
 import { DamagedOverlay } from "../hud/DamagedOverlay";
 import { HealthBar } from "../hud/HealthBar";
@@ -57,6 +58,8 @@ export class GameController extends BaseEntity implements Entity {
       new EncyclopediaTracker(),
       new QuarterDropper(),
       new AmmoDropper(),
+      // Before the level starts, so it's sized to it
+      new FireGrid(),
       new LevelController(plan),
       new CameraController(game.camera, getPlayer),
       new PlayerHumanController(getPlayer),

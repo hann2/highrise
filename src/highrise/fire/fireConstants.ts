@@ -1,3 +1,12 @@
+// --- Fire on the floor (see `FireGrid.ts`) ---
+
+/** Meters across a cell of the fire grid */
+export const FIRE_CELL_SIZE = 0.5;
+/** Seconds a cell burns before it lights its neighbors that have fuel */
+export const FIRE_SPREAD_DELAY = 0.12;
+/** Cells across a block of the grid that shares one light */
+export const FIRE_LIGHT_BLOCK = 6;
+
 // --- Burning (see `Burning.ts`) ---
 
 /** Seconds an enemy keeps burning after it was last lit */

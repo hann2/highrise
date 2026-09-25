@@ -1,6 +1,8 @@
 # Fire
 
-Written 2026-09-25 from a design conversation. Fire is its own mechanic, not part of the roguelike loop: things catch fire and take damage over time, fire comes from incendiary ammo, molotovs, the level itself and maybe a flamethrower, and it's drawn entirely procedurally. Nothing here is built yet.
+Written 2026-09-25 from a design conversation. Fire is its own mechanic, not part of the roguelike loop: things catch fire and take damage over time, fire comes from incendiary ammo, molotovs, the level itself and maybe a flamethrower, and it's drawn entirely procedurally.
+
+**Built 2026-09-25 (`src/highrise/fire/`), mechanics first with placeholder looks:** burning (enemies and humans), the fire grid, incendiary rounds and molotovs. Not built: the look (heat buffer, flame shader, embers, smoke, scorch texture), fire sounds (stand-ins for now), level fires and the flamethrower.
 
 ## Decisions so far
 
@@ -68,6 +70,8 @@ Everything that burns draws into one heat buffer, and one shader turns heat into
 **Sound:** a looping positional crackle per burning region, a whoosh on ignition, burning zombie screams. The ElevenLabs sound-effects skill can make these.
 
 ## Order
+
+Built so far: 2 and 3, apart from their looks and sounds (mechanics came first).
 
 1. **The look.** A cheat key that drops heat blobs; iterate on the heat buffer and the shader until it looks right, with no gameplay.
 2. **Burning status + incendiary rounds**, with the shader on burning enemies. The smallest playable version.

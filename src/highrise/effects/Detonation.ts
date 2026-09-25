@@ -10,6 +10,7 @@ import { clamp } from "../../core/util/MathUtil";
 import { rNormal } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { BaseEnemy, isEnemy } from "../enemies/base/Enemy";
+import { getFireGrid } from "../fire/FireGrid";
 import type Human from "../human/Human";
 import { PointLight } from "../lighting-and-vision/PointLight";
 import { ConsumableStats } from "../weapons/consumables/ConsumableStats";
@@ -65,6 +66,13 @@ export default class Detonation extends BaseEntity implements Entity {
     }
 
     this.hitEnemies();
+
+    const { fire } = this.stats;
+    const grid = getFireGrid(this.game);
+    if (fire && grid) {
+      const cells = grid.spillFuel(this.position, fire.radius, fire.fuel);
+      grid.igniteCells(cells, this.attacker);
+    }
 
     const { flash } = this.stats;
     this.light = this.addChild(
