@@ -337,6 +337,29 @@ function ClipRow({
           ✎
         </button>
         <button
+          class="icon-button"
+          title="Trim the silence off the ends and set the loudness (replaces the file)"
+          onClick={() => {
+            const warning =
+              "This replaces the recording. If it's committed, git still has the original.";
+            if (
+              clip.source !== "recorded" ||
+              confirm(`Clean up ${clip.file}?\n\n${warning}`)
+            ) {
+              run("Trimming and leveling…", () => api.cleanUp(id, clip.file));
+            }
+          }}
+        >
+          ✂
+        </button>
+        <button
+          class="icon-button"
+          title="Open in Ocenaudio. Save there, then play it here again."
+          onClick={() => run("Opening…", () => api.openInEditor(id, clip.file))}
+        >
+          ↗
+        </button>
+        <button
           class="icon-button icon-button--danger"
           title="Delete this clip and its audio file"
           onClick={() => {

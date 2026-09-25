@@ -5,6 +5,7 @@
  * data the game would refuse.
  */
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { globSync } from "glob";
 import prettier from "prettier";
@@ -46,6 +47,9 @@ const CHARACTER_FIELDS = [
   "voice",
 ] as const;
 
+/** Writes a cleaned-up copy of an audio file (see `audioProcessing.ts`) */
+export type AudioCleanUp = (input: string, output: string) => Promise<unknown>;
+
 export const GENERATION_MODEL = "eleven_v3";
 
 /** How clip file names start, after the character's id, by their first category */
@@ -73,13 +77,24 @@ export class CharacterStore {
   readonly dataDir: string;
   private queue: Promise<unknown> = Promise.resolve();
 
+  private regenerateManifest: () => Promise<void>;
+  private cleanUpAudio: AudioCleanUp;
+
   constructor(
     readonly root: string,
     private speech: SpeechGenerator,
-    /** Called after clip files are added to or removed from resources/ */
-    private regenerateManifest: () => Promise<void> = async () => {},
+    options: {
+      /** Called after clip files are added to or removed from resources/ */
+      regenerateManifest?: () => Promise<void>;
+      /** Trims and levels audio; copies it unchanged by default */
+      cleanUpAudio?: AudioCleanUp;
+    } = {},
   ) {
     this.dataDir = path.join(root, "src/highrise/characters/data");
+    this.regenerateManifest = options.regenerateManifest ?? (async () => {});
+    this.cleanUpAudio =
+      options.cleanUpAudio ??
+      (async (input, output) => fs.copyFileSync(input, output));
   }
 
   /** Folder of a character's enabled (shipped) or disabled clips */
@@ -204,32 +219,58 @@ export class CharacterStore {
       throw new BadRequest("A clip needs at least one category");
     }
     const count = Math.max(1, Math.min(10, Math.floor(request.count)));
-    // The slow part runs in parallel, outside the queue
-    const takes = await Promise.all(
-      Array.from({ length: count }, () =>
-        this.speech.generate({
-          text: request.text,
-          voiceId: voice.elevenLabsVoiceId,
-          model: GENERATION_MODEL,
-          stability: request.stability,
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), "generate-"));
+    try {
+      // The slow part runs in parallel, outside the queue: generating, then
+      // trimming and leveling each take into a flac like the recordings
+      const takes = await Promise.all(
+        Array.from({ length: count }, async (_, i) => {
+          const { audio, extension } = await this.speech.generate({
+            text: request.text,
+            voiceId: voice.elevenLabsVoiceId,
+            model: GENERATION_MODEL,
+            stability: request.stability,
+          });
+          const raw = path.join(temp, `${i}.${extension}`);
+          const cleaned = path.join(temp, `${i}-cleaned.flac`);
+          fs.writeFileSync(raw, audio);
+          await this.cleanUpAudio(raw, cleaned);
+          return cleaned;
         }),
-      ),
-    );
+      );
+      return await this.addGeneratedClips(
+        id,
+        request,
+        voice.elevenLabsVoiceId,
+        takes,
+      );
+    } finally {
+      fs.rmSync(temp, { recursive: true, force: true });
+    }
+  }
+
+  private addGeneratedClips(
+    id: string,
+    request: GenerateRequest,
+    voiceId: string,
+    takes: string[],
+  ): Promise<VoiceClip[]> {
     return this.serially(async () => {
       const data = this.read(id);
-      const created = new Date().toISOString().slice(0, 10);
+      // Today where you are, not in UTC
+      const created = new Date().toLocaleDateString("sv-SE");
       const dir = this.audioDir(id, false);
       fs.mkdirSync(dir, { recursive: true });
-      const clips = takes.map(({ audio, extension }) => {
-        const file = this.nextFileName(id, request.categories[0], extension);
-        fs.writeFileSync(path.join(dir, file), audio);
+      const clips = takes.map((take) => {
+        const file = this.nextFileName(id, request.categories[0], "flac");
+        fs.copyFileSync(take, path.join(dir, file));
         const clip: VoiceClip = {
           file,
           text: request.text,
           categories: request.categories,
           enabled: false,
           source: "elevenlabs",
-          voiceId: voice.elevenLabsVoiceId,
+          voiceId,
           model: GENERATION_MODEL,
           created,
         };
@@ -244,6 +285,29 @@ export class CharacterStore {
       data.clips.push(...clips);
       await this.write(id, data);
       return clips;
+    });
+  }
+
+  /**
+   * Trims the silence off a clip's ends and sets its loudness, replacing its
+   * file. Same name and format, so nothing else changes.
+   */
+  cleanUp(id: string, file: string) {
+    return this.serially(async () => {
+      const clip = findClip(this.read(id), file);
+      const filePath = this.clipPath(id, file);
+      if (!filePath) {
+        throw new NotFound(`${file} has no audio file`);
+      }
+      const temp = fs.mkdtempSync(path.join(os.tmpdir(), "clean-up-"));
+      try {
+        const cleaned = path.join(temp, file);
+        await this.cleanUpAudio(filePath, cleaned);
+        fs.copyFileSync(cleaned, filePath);
+      } finally {
+        fs.rmSync(temp, { recursive: true, force: true });
+      }
+      return clip;
     });
   }
 

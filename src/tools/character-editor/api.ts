@@ -57,6 +57,10 @@ export const api = {
   deleteClip: (id: string, file: string) => call<{}>("DELETE", clip(id, file)),
   transcribe: (id: string, file: string) =>
     call<VoiceClip>("POST", `${clip(id, file)}/transcribe`),
+  cleanUp: (id: string, file: string) =>
+    call<VoiceClip>("POST", `${clip(id, file)}/clean-up`),
+  openInEditor: (id: string, file: string) =>
+    call<{}>("POST", `${clip(id, file)}/open`),
   generate: (id: string, request: GenerateRequest) =>
     call<VoiceClip[]>("POST", `${character(id)}/generate`, request),
   audioUrl: (id: string, file: string) =>

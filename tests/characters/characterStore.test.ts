@@ -88,8 +88,13 @@ beforeEach(() => {
   writeFile("src/highrise/characters/data/tess.json", JSON.stringify(data));
   manifestRegenerations = 0;
   generated = [];
-  store = new CharacterStore(root, fakeSpeech, async () => {
-    manifestRegenerations++;
+  store = new CharacterStore(root, fakeSpeech, {
+    regenerateManifest: async () => {
+      manifestRegenerations++;
+    },
+    cleanUpAudio: async (input, output) => {
+      fs.writeFileSync(output, `cleaned ${fs.readFileSync(input, "utf8")}`);
+    },
   });
 });
 
@@ -123,7 +128,7 @@ test("changing a clip's text or categories doesn't move it", async () => {
   assert.equal(manifestRegenerations, 0);
 });
 
-test("generating makes disabled clips with free file names", async () => {
+test("generating makes cleaned-up, disabled flac clips with free file names", async () => {
   const clips = await store.generate("tess", {
     text: "[pained] Not again",
     categories: ["hurt"],
@@ -133,7 +138,14 @@ test("generating makes disabled clips with free file names", async () => {
   });
   assert.deepEqual(
     clips.map((clip) => clip.file),
-    ["tess-hurt-3.mp3", "tess-hurt-4.mp3"],
+    ["tess-hurt-3.flac", "tess-hurt-4.flac"],
+  );
+  assert.equal(
+    fs.readFileSync(
+      path.join(root, "assets/source/voices/tess/tess-hurt-3.flac"),
+      "utf8",
+    ),
+    "cleaned audio of [pained] Not again",
   );
   assert.equal(generated.length, 2);
   assert.equal(generated[0].stability, 0.5);
@@ -214,6 +226,19 @@ test("character changes keep the clips, and ignore unknown fields", async () => 
   assert.deepEqual(data.stats, { moveSpeed: 1.2 });
   assert.deepEqual(data.startingWeapons, ["Glock"]);
   assert.equal(data.clips.length, 2);
+});
+
+test("cleaning up replaces a clip's audio in place", async () => {
+  await store.cleanUp("tess", "tess-hurt-1.flac");
+  assert.equal(
+    fs.readFileSync(
+      path.join(root, "resources/audio/characters/tess/tess-hurt-1.flac"),
+      "utf8",
+    ),
+    "cleaned x",
+  );
+  assert.equal(manifestRegenerations, 0);
+  assert.equal(readData().clips.length, 2);
 });
 
 test("transcribing replaces a clip's text", async () => {

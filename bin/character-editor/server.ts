@@ -19,6 +19,7 @@ import {
   GenerateRequest,
   NotFound,
 } from "./CharacterStore";
+import { cleanUpAudio } from "./audioProcessing";
 import { ElevenLabs, readApiKey } from "./elevenLabs";
 
 const ROOT = path.resolve(__dirname, "../..");
@@ -32,13 +33,19 @@ const AUDIO_TYPES: Record<string, string> = {
 };
 
 const elevenLabs = new ElevenLabs(readApiKey(ROOT));
-const store = new CharacterStore(ROOT, elevenLabs, async () => {
-  await promisify(execFile)(
-    path.join(ROOT, "node_modules/.bin/tsx"),
-    ["bin/generate-manifest.ts"],
-    { cwd: ROOT },
-  );
+const store = new CharacterStore(ROOT, elevenLabs, {
+  regenerateManifest: async () => {
+    await promisify(execFile)(
+      path.join(ROOT, "node_modules/.bin/tsx"),
+      ["bin/generate-manifest.ts"],
+      { cwd: ROOT },
+    );
+  },
+  cleanUpAudio,
 });
+
+/** The app "Open in audio editor" opens clips with (macOS `open -a`) */
+const AUDIO_EDITOR = process.env.AUDIO_EDITOR ?? "ocenaudio";
 
 type Handler = (
   params: string[],
@@ -81,6 +88,26 @@ const ROUTES: [method: string, pattern: RegExp, handler: Handler][] = [
     ([id, file]) => store.transcribe(id, file),
   ],
   [
+    "POST",
+    /^\/api\/characters\/([\w-]+)\/clips\/([^/]+)\/clean-up$/,
+    ([id, file]) => store.cleanUp(id, file),
+  ],
+  [
+    "POST",
+    /^\/api\/characters\/([\w-]+)\/clips\/([^/]+)\/open$/,
+    async ([id, file]) => {
+      const filePath = store.clipPath(id, file);
+      if (!filePath) {
+        throw new NotFound(`No audio for ${file}`);
+      }
+      if (process.platform !== "darwin") {
+        throw new BadRequest("Opening in an audio editor only works on macOS");
+      }
+      await promisify(execFile)("open", ["-a", AUDIO_EDITOR, filePath]);
+      return {};
+    },
+  ],
+  [
     "GET",
     /^\/api\/characters\/([\w-]+)\/audio\/([^/]+)$/,
     async ([id, file], _, response) => {
@@ -91,7 +118,8 @@ const ROUTES: [method: string, pattern: RegExp, handler: Handler][] = [
       response.writeHead(200, {
         "Content-Type":
           AUDIO_TYPES[path.extname(file)] ?? "application/octet-stream",
-        "Cache-Control": "no-cache",
+        // Clips change in place (clean-up, an audio editor)
+        "Cache-Control": "no-store",
       });
       fs.createReadStream(filePath).pipe(response);
     },
