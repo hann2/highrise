@@ -20,6 +20,8 @@ import {
   FIRE_CELL_SIZE,
   CELL_LIGHT_INTENSITY,
   CELL_LIGHT_RADIUS,
+  CELL_LIGHT_WANDER,
+  FIRE_LIGHT_WANDER,
   FIRE_LIGHT_EXTRA_RADIUS,
   FIRE_LIGHT_FULL_PATCH,
   FIRE_LIGHT_MIN_RADIUS,
@@ -69,7 +71,7 @@ export default class FireGrid extends BaseEntity implements Entity {
    * How fire on the floor is lit: one light per patch of fire, or (to see
    * what it costs) one per burning cell. An experiment; one will go.
    */
-  lightMode: "patches" | "cells" | "none" = "patches";
+  lightMode: "patches" | "cells" | "none" = "cells";
   /** One light per patch of fire (see `updateLights`) */
   private lights: FireLight[] = [];
   private nextLightPhase = 0;
@@ -375,7 +377,14 @@ export default class FireGrid extends BaseEntity implements Entity {
         );
         this.cellLights.set(cell, light);
       }
-      const { intensity, color } = fireLightFlicker(t, cell * 0.37);
+      // Wandering about the cell, so shadows flicker too
+      const { intensity, color, offset } = fireLightFlicker(t, cell * 0.37);
+      light.setPosition(
+        this.cellCenter(cell).iadd([
+          (offset[0] * CELL_LIGHT_WANDER) / FIRE_LIGHT_WANDER,
+          (offset[1] * CELL_LIGHT_WANDER) / FIRE_LIGHT_WANDER,
+        ]),
+      );
       light.setIntensity(CELL_LIGHT_INTENSITY * intensity);
       light.setColor(color);
     }

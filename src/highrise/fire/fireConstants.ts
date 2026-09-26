@@ -39,6 +39,8 @@ export const FIRE_LIGHT_EXTRA_RADIUS = 6;
 export const CELL_LIGHT_RADIUS = 5;
 /** How bright the light of one burning cell is, in the "cells" light mode */
 export const CELL_LIGHT_INTENSITY = 0.1;
+/** Meters the light of one burning cell wanders from its middle, in the "cells" light mode */
+export const CELL_LIGHT_WANDER = 0.25;
 /** Meters the light of a burning enemy reaches */
 export const BURNING_LIGHT_RADIUS = 4;
 /** How bright the light of a burning enemy is, next to a fire on the floor */
