@@ -27,12 +27,13 @@ import Keycard from "../../environment/Keycard";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import { quarterPile } from "../../environment/Quarter";
 import RepeatingFloor from "../../environment/RepeatingFloor";
+import UsablePickup from "../../environment/UsablePickup";
 import WeaponPickup from "../../environment/WeaponPickup";
 import Human from "../../human/Human";
 import SurvivorHumanController from "../../human/SurvivorHumanController";
 import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import { CONSUMABLES } from "../../weapons/consumables/consumable-stats/consumableStats";
-import { LIMITED_AMMO_CLASSES } from "../../weapons/guns/ammo";
+import { AMMO_CLASSES } from "../../weapons/guns/ammo";
 import Gun from "../../weapons/guns/Gun";
 import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
 import { Glock } from "../../weapons/guns/gun-stats/Glock";
@@ -40,6 +41,7 @@ import { GUN_TIERS } from "../../weapons/guns/gun-stats/gunStats";
 import { M1911 } from "../../weapons/guns/gun-stats/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
+import { USABLES } from "../../weapons/usables/usables";
 import CellGrid, { Closet } from "../level-generation/CellGrid";
 import {
   QUARTER_PILES_PER_FLOOR,
@@ -48,7 +50,7 @@ import {
 import type { Shelf } from "../../items/shelf";
 import RoomTemplate from "../rooms/RoomTemplate";
 import { CLOSET_DECORATORS } from "./helpers/closetHelpers";
-import { NUBBY_DECORATORS } from "./helpers/nubbyHelpers";
+import { vendingMachineIn, waterCoolerIn } from "./helpers/nubbyHelpers";
 
 /** Makes what goes in a closet. `alongBackWall` is a unit vector along the closet's back wall. */
 export type PickupMaker = (
@@ -104,7 +106,15 @@ export default class LevelTemplate {
     return CLOSET_DECORATORS[closetIndex % CLOSET_DECORATORS.length](closet);
   }
 
-  getNubbyDecorations(cell: V2d, wallDirection: V2d): Entity[] {
+  /**
+   * What goes in a nubby (a dead end one cell deep): a vending machine if
+   * `hasMachine` (see `MACHINES_PER_FLOOR`), else usually a water cooler
+   */
+  getNubbyDecorations(
+    cell: V2d,
+    wallDirection: V2d,
+    hasMachine: boolean,
+  ): Entity[] {
     const entities = [];
 
     if (rBool(0.5)) {
@@ -115,8 +125,10 @@ export default class LevelTemplate {
       );
     }
 
-    if (rBool(0.8)) {
-      entities.push(...choose(...NUBBY_DECORATORS)(cell, wallDirection));
+    if (hasMachine) {
+      entities.push(...vendingMachineIn(cell, wallDirection));
+    } else if (rBool(0.8)) {
+      entities.push(...waterCoolerIn(cell, wallDirection));
     }
 
     return entities;
@@ -187,10 +199,10 @@ export default class LevelTemplate {
     return new AmbientLight(0x060606);
   }
 
+  /** What goes in the floor's closets. No guns: guns are bought in stores. */
   getPickups(): PickupMaker[] {
     const pickups: PickupMaker[] = [
       (l) => new HealthPickup(l),
-      (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[0]))),
       (l) => new WeaponPickup(l, new MeleeWeapon(choose(...MELEE_WEAPONS))),
       (l) => {
         const survivor = new Human(l, randomSurvivorCharacter());
@@ -201,30 +213,17 @@ export default class LevelTemplate {
         }
         return [survivor, new SurvivorHumanController(survivor)];
       },
-      (l) => new AmmoPickup(l, choose(...LIMITED_AMMO_CLASSES)),
+      (l) => new AmmoPickup(l, choose(...AMMO_CLASSES)),
     ];
 
     if (this.difficulty >= 3) {
-      pickups.push((l) => new AmmoPickup(l, choose(...LIMITED_AMMO_CLASSES)));
+      pickups.push((l) => new AmmoPickup(l, choose(...AMMO_CLASSES)));
     }
     if (this.levelIndex % 2 === 0) {
       pickups.push((l) => new ConsumablePickup(l, choose(...CONSUMABLES)));
     }
-
-    if (this.difficulty >= 2) {
-      pickups.push(
-        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[1]))),
-      );
-    }
-    if (this.difficulty >= 4) {
-      pickups.push(
-        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[2]))),
-      );
-    }
-    if (this.difficulty >= 5) {
-      pickups.push(
-        (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[3]))),
-      );
+    if (this.levelIndex % 3 === 0) {
+      pickups.push((l) => new UsablePickup(l, choose(...USABLES)));
     }
 
     // Some of the floor's quarters, last so that they only take closets
@@ -237,7 +236,10 @@ export default class LevelTemplate {
     return pickups;
   }
 
-  /** The best gun tier that shows up in this floor's normal closets */
+  /**
+   * How good this floor's guns are: the arrival room's store deals from this
+   * tier and the one above, and the armory from the one above
+   */
   getBestGunTier(): number {
     if (this.difficulty >= 5) {
       return 3;
@@ -279,7 +281,7 @@ export default class LevelTemplate {
           new HealthPickup(l),
           new AmmoPickup(
             l.addScaled(alongBackWall, -0.5),
-            choose(...LIMITED_AMMO_CLASSES),
+            choose(...AMMO_CLASSES),
           ),
         ],
       },

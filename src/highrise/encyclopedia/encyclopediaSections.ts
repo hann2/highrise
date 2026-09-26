@@ -4,6 +4,8 @@ import { isCharacterUnlocked, SaveData } from "../persistence/SaveData";
 import { ITEMS } from "../items/items";
 import { itemPrice } from "../items/prices";
 import { consumableImageUrl } from "../weapons/consumables/consumableImage";
+import { usableImageUrl } from "../weapons/usables/usableImage";
+import { USABLES } from "../weapons/usables/usables";
 import { CONSUMABLES } from "../weapons/consumables/consumable-stats/consumableStats";
 import { GUNS, gunTierOf } from "../weapons/guns/gun-stats/gunStats";
 import {
@@ -85,8 +87,8 @@ const melee: EncyclopediaSection = {
 
 const consumables: EncyclopediaSection = {
   title: "Consumables",
-  getEntries: (save) =>
-    CONSUMABLES.map((consumable) => {
+  getEntries: (save) => [
+    ...CONSUMABLES.map((consumable): EncyclopediaEntry => {
       const stats: [string, string][] = [
         ["Carry", String(consumable.maxCarry)],
         ["Fuse", seconds(consumable.fuseTime)],
@@ -109,6 +111,15 @@ const consumables: EncyclopediaSection = {
         stats,
       };
     }),
+    // Usables: health packs and the like, in the same section
+    ...USABLES.map((usable): EncyclopediaEntry => ({
+      name: usable.name,
+      found: save.seen.consumables.includes(usable.name),
+      image: usableImageUrl(usable),
+      description: usable.description,
+      stats: [["Uses", String(usable.charges)]],
+    })),
+  ],
 };
 
 const items: EncyclopediaSection = {

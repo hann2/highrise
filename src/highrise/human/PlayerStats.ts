@@ -11,6 +11,8 @@ export class PlayerStats {
   moveSpeed = 1;
   /** Maximum hit points */
   maxHp = 100;
+  /** Multiplier on damage taken: less is tougher */
+  damageTaken = 1;
 
   // --- Weapons ---
   /** Multiplier on damage dealt by bullets and melee weapons */
@@ -52,3 +54,8 @@ export class PlayerStats {
   /** Bullets set what they hit on fire */
   incendiaryRounds = false;
 }
+
+/** The stats that are numbers (multipliers and amounts), not rule flags */
+export type NumericStat = {
+  [K in keyof PlayerStats]: PlayerStats[K] extends number ? K : never;
+}[keyof PlayerStats];

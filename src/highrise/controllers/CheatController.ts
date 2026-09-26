@@ -18,7 +18,8 @@ import {
 import { Flashbang } from "../weapons/consumables/consumable-stats/Flashbang";
 import { FragGrenade } from "../weapons/consumables/consumable-stats/FragGrenade";
 import { Molotov } from "../weapons/consumables/consumable-stats/Molotov";
-import { LIMITED_AMMO_CLASSES, MAX_RESERVE } from "../weapons/guns/ammo";
+import { AMMO_CLASSES, MAX_RESERVE } from "../weapons/guns/ammo";
+import { HealthPack, StimPack } from "../weapons/usables/usables";
 import Gun from "../weapons/guns/Gun";
 import { AR15 } from "../weapons/guns/gun-stats/AR-15";
 
@@ -58,7 +59,7 @@ export default class CheatController extends BaseEntity implements Entity {
         }
         break;
       case "KeyJ": {
-        // A primary gun at the leader's feet
+        // An AR-15 at the leader's feet
         const leader = getPartyManager(this.game)?.leader;
         if (leader) {
           this.game.addEntity(
@@ -75,6 +76,14 @@ export default class CheatController extends BaseEntity implements Entity {
         break;
       case "KeyX":
         getPartyManager(this.game)?.leader.giveConsumable(Molotov, 3);
+        break;
+      case "KeyZ": // A health pack; with shift, a stim pack
+        getPartyManager(this.game)?.leader.giveUsable(
+          this.game.io.isKeyDown("ShiftLeft") ||
+            this.game.io.isKeyDown("ShiftRight")
+            ? StimPack
+            : HealthPack,
+        );
         break;
       case "KeyT": {
         // Set fire to the enemies near the cursor, and to any fuel there
@@ -107,7 +116,7 @@ export default class CheatController extends BaseEntity implements Entity {
       }
       case "KeyI": {
         const leader = getPartyManager(this.game)?.leader;
-        for (const ammoClass of LIMITED_AMMO_CLASSES) {
+        for (const ammoClass of AMMO_CLASSES) {
           leader?.addReserve(ammoClass, MAX_RESERVE[ammoClass]);
         }
         break;

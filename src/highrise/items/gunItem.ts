@@ -4,7 +4,6 @@ import type Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
 import { GUN_TIERS, gunTierOf } from "../weapons/guns/gun-stats/gunStats";
 import { fireModeName, GunStats } from "../weapons/guns/GunStats";
-import { slotFor } from "../weapons/weapons";
 import type { Item, Rarity } from "./Item";
 import { GUN_PRICE_BY_TIER, TRADE_IN } from "./prices";
 
@@ -48,7 +47,7 @@ export function gunItem(gun: GunStats): Item {
     weapon: gun,
     apply: (human) => {
       const weapon = new Gun(gun);
-      const slot = slotFor(weapon);
+      const slot = human.slotForNewWeapon();
       const replaced = human.getWeaponInSlot(slot);
       if (replaced instanceof Gun) {
         human.removeWeapon(slot);
@@ -72,9 +71,7 @@ export function dealGunItem(
   bestGunTier: number,
   excluded: readonly GunStats[] = [],
 ): Item | undefined {
-  const held = [human.primary, human.secondary]
-    .filter((weapon) => weapon instanceof Gun)
-    .map((gun) => gun.stats);
+  const held = human.guns.map((gun) => gun.stats);
   const candidates = GUN_TIERS.slice(
     Math.max(0, bestGunTier),
     Math.max(0, bestGunTier + 2),

@@ -295,6 +295,8 @@ Tests: `UPGRADE_OFFER` becomes `STORE_SHELF` (the four names, the gun or `null`,
 
 ### 16. Weapon slots, ammo as a cost, floor machines, the usable slot (M)
 
+**Built 2026-09-26 on the brief 15 branch, not playtested yet.** Differences from the brief below: the usable key is C, not V (V is the vision cheat); `Human.consumable` keeps its name rather than becoming `throwable`; slots are `weapons: [a, b]` with `slotForNewWeapon`; the keycard armory still has a gun (brief 18 replaces it); the ammo machine sells a box onto the floor like the snack machine does; dev cheat `Z` gives a health pack (`Shift+Z` a stim). Starting kits stay the pistols from brief 15.
+
 Current: `Human.primary?: Gun` / `secondary?: Gun | MeleeWeapon` / `activeSlot`, `slotFor` (`weapons/weapons.ts`), `giveWeapon` (drops what's in the slot, gives `NEW_GUN_RESERVE_BONUS` once), `reserve: Record<LimitedAmmoClass, number>` with `getReserve` returning `Infinity` for pistols, `ammo.ts` constants (rifle 60/240, shotgun 14/48, pickup 45/12, drop 3%), `AmmoDropper`, `AmmoPickup`, `Human.consumable`/`consumableCount`/`useConsumable` (G / LB), `ConsumableStats.maxCarry`, `hud/AmmoOverlay.tsx` (∞ for pistols, a `WeaponCard` per slot, consumable card), `furniture-plus/VendingMachine.ts` (health for 3, breakable, spills quarters) placed on ~80% of nubbies by `nubbyHelpers.ts`, `SpawnRoom` starter pickups (a melee or tier 0 gun at `levelIndex > 0`, a second gun by difficulty, health), `LevelTemplate.getPickups` closets (tier 0 gun, melee, ammo, survivor, health, consumable every other floor, higher-tier guns by difficulty). Characters: `startingWeapons` (none set yet); `PartyManager` gives the leader theirs.
 
 In:

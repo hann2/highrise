@@ -56,6 +56,9 @@ export default class PlayerHumanController
       case ControllerButton.LB:
         this.human.useConsumable();
         break;
+      case ControllerButton.RB:
+        this.human.useUsable();
+        break;
       case ControllerButton.X:
         this.human.reload();
         break;
@@ -91,6 +94,9 @@ export default class PlayerHumanController
         break;
       case "KeyG":
         this.human.useConsumable();
+        break;
+      case "KeyC":
+        this.human.useUsable();
         break;
     }
   }
