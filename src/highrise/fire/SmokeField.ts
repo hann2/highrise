@@ -188,7 +188,7 @@ export default class SmokeField extends BaseEntity implements Entity {
       touched.add(cell);
       const give = (neighbor: number, wallEdge: number) => {
         const difference = d - density[neighbor];
-        if (difference > 0 && !this.wallAt(wallEdge)) {
+        if (difference > 0 && !this.wallAlong(wallEdge)) {
           const flow = difference * rate;
           change[cell] -= flow;
           change[neighbor] += flow;
@@ -214,8 +214,16 @@ export default class SmokeField extends BaseEntity implements Entity {
     }
   }
 
-  /** Whether a wall is along edge `edge` (see `walls`) */
-  private wallAt(edge: number): boolean {
+  /** How many cells have smoke in them */
+  get activeCount(): number {
+    return this.active.size;
+  }
+
+  /**
+   * Whether a wall is along edge `edge`: a cell's index times two for its
+   * right edge, plus one for its bottom edge (see `walls`)
+   */
+  wallAlong(edge: number): boolean {
     let wall = this.walls[edge];
     if (wall < 0) {
       const cell = edge >> 1;

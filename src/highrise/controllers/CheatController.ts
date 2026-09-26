@@ -8,6 +8,7 @@ import { isEnemy } from "../enemies/base/Enemy";
 import { getPartyManager } from "../environment/PartyManager";
 import WeaponPickup from "../environment/WeaponPickup";
 import { ignite } from "../fire/Burning";
+import FireDebugOverlay from "../fire/FireDebugOverlay";
 import { getFireGrid } from "../fire/FireGrid";
 import { isHuman } from "../human/Human";
 import VisionController from "../lighting-and-vision/VisionController";
@@ -102,6 +103,16 @@ export default class CheatController extends BaseEntity implements Entity {
           }
         } else {
           grid?.spillFuel(cursor, 1.5, 6);
+        }
+        break;
+      }
+      case "Backquote": {
+        // The fire debug overlay, on and off
+        const overlay = this.game.entities.getById("fireDebugOverlay");
+        if (overlay) {
+          overlay.destroy();
+        } else {
+          this.game.addEntity(new FireDebugOverlay());
         }
         break;
       }
