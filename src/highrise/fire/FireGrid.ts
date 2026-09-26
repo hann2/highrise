@@ -18,7 +18,11 @@ import { PointLight } from "../lighting-and-vision/PointLight";
 import { ignite } from "./Burning";
 import {
   FIRE_CELL_SIZE,
-  FIRE_LIGHT_BLOCK,
+  FIRE_LIGHT_EXTRA_RADIUS,
+  FIRE_LIGHT_FULL_PATCH,
+  FIRE_LIGHT_MIN_RADIUS,
+  FIRE_LIGHT_PATCH_RADIUS,
+  fireLightFlicker,
   FIRE_SPREAD_DELAY,
   flicker,
 } from "./fireConstants";
@@ -59,8 +63,9 @@ export default class FireGrid extends BaseEntity implements Entity {
   private sources = new Map<number, Human | undefined>();
   /** Indexes of the cells that are burning */
   private burningCells = new Set<number>();
-  /** One light per block of burning cells, keyed by block index */
-  private lights = new Map<number, PointLight>();
+  /** One light per patch of fire (see `updateLights`) */
+  private lights: FireLight[] = [];
+  private nextLightPhase = 0;
 
   /** Fuel stains and scorch marks, redrawn only when they change */
   private floorGraphics = new Graphics();
@@ -109,12 +114,12 @@ export default class FireGrid extends BaseEntity implements Entity {
     this.scorched.fill(0);
     this.sources.clear();
     this.burningCells.clear();
-    for (const light of this.lights.values()) {
+    for (const { light } of this.lights) {
       if (!light.isDestroyed) {
         light.destroy();
       }
     }
-    this.lights.clear();
+    this.lights = [];
     this.floorDirty = true;
   }
 
@@ -359,49 +364,82 @@ export default class FireGrid extends BaseEntity implements Entity {
     }
   }
 
-  /** One light per block of burning cells, at the middle of its fire */
+  /**
+   * One light per patch of fire: burning cells are gathered into patches
+   * about `FIRE_LIGHT_PATCH_RADIUS` across, each lit from its middle, and each
+   * patch keeps the light (and flicker) of the nearest patch last frame. Few
+   * big lights rather than many small ones, because overlapping lights add up
+   * to white.
+   */
   private updateLights() {
-    const blocks = new Map<number, { x: number; y: number; count: number }>();
-    const blockColumns = Math.ceil(this.columns / FIRE_LIGHT_BLOCK);
+    const patches: {
+      x: number;
+      y: number;
+      count: number;
+      sx: number;
+      sy: number;
+    }[] = [];
     for (const cell of this.burningCells) {
-      const column = cell % this.columns;
-      const row = Math.floor(cell / this.columns);
-      const block =
-        Math.floor(row / FIRE_LIGHT_BLOCK) * blockColumns +
-        Math.floor(column / FIRE_LIGHT_BLOCK);
       const [x, y] = this.cellCenter(cell);
-      const sum = blocks.get(block) ?? { x: 0, y: 0, count: 0 };
-      sum.x += x;
-      sum.y += y;
-      sum.count += 1;
-      blocks.set(block, sum);
-    }
-
-    for (const [block, light] of this.lights) {
-      if (!blocks.has(block)) {
-        light.destroy();
-        this.lights.delete(block);
+      let patch = patches.find(
+        (p) => Math.hypot(p.sx - x, p.sy - y) < FIRE_LIGHT_PATCH_RADIUS,
+      );
+      if (!patch) {
+        patch = { x: 0, y: 0, count: 0, sx: x, sy: y };
+        patches.push(patch);
       }
+      patch.x += x;
+      patch.y += y;
+      patch.count += 1;
     }
 
     const t = this.game.elapsedUnpausedTime;
-    const fullBlock = FIRE_LIGHT_BLOCK * FIRE_LIGHT_BLOCK;
-    for (const [block, { x, y, count }] of blocks) {
-      let light = this.lights.get(block);
-      if (!light) {
-        light = this.addChild(
-          new PointLight({ radius: 6, color: 0xff8030, intensity: 0 }),
-        );
-        this.lights.set(block, light);
+    const unmatched = new Set(this.lights);
+    const lights: FireLight[] = [];
+    for (const { x, y, count } of patches) {
+      const center = V(x / count, y / count);
+      let nearest: FireLight | undefined;
+      for (const light of unmatched) {
+        const distance = light.center.distanceTo(center);
+        if (
+          distance < FIRE_LIGHT_PATCH_RADIUS &&
+          (!nearest || distance < nearest.center.distanceTo(center))
+        ) {
+          nearest = light;
+        }
       }
-      const amount = Math.sqrt(count / fullBlock);
-      light.setPosition([x / count, y / count]);
-      light.setRadius(3 + 4 * amount);
-      light.setIntensity(
-        (0.4 + 0.5 * amount) * (1 + 0.15 * flicker(t, block * 0.61)),
+      const fireLight = nearest ?? {
+        light: this.addChild(new PointLight({ intensity: 0 })),
+        center,
+        phase: (this.nextLightPhase += 2.3),
+      };
+      unmatched.delete(fireLight);
+      fireLight.center = center;
+      lights.push(fireLight);
+
+      const amount = Math.sqrt(count / FIRE_LIGHT_FULL_PATCH);
+      const { intensity, color, offset } = fireLightFlicker(t, fireLight.phase);
+      fireLight.light.setPosition(center.add(offset));
+      fireLight.light.setRadius(
+        FIRE_LIGHT_MIN_RADIUS + FIRE_LIGHT_EXTRA_RADIUS * Math.min(amount, 1),
       );
+      fireLight.light.setIntensity(intensity);
+      fireLight.light.setColor(color);
     }
+    for (const { light } of unmatched) {
+      light.destroy();
+    }
+    this.lights = lights;
   }
+}
+
+/** The light of a patch of fire */
+interface FireLight {
+  light: PointLight;
+  /** The middle of its patch, without the flicker */
+  center: V2d;
+  /** So that patches don't flicker in step */
+  phase: number;
 }
 
 /** The fire grid of the run, or undefined outside of one (in the lobby) */

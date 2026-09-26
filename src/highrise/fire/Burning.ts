@@ -8,7 +8,13 @@ import { clamp } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import type Human from "../human/Human";
 import { PointLight } from "../lighting-and-vision/PointLight";
-import { BURN_FADE_TIME, flicker } from "./fireConstants";
+import {
+  BURN_FADE_TIME,
+  BURNING_LIGHT_INTENSITY,
+  BURNING_LIGHT_RADIUS,
+  fireLightFlicker,
+  flicker,
+} from "./fireConstants";
 import { getFireGrid } from "./FireGrid";
 
 /** Something that can catch fire: enemies and humans */
@@ -49,6 +55,9 @@ export function ignite(
   return burning;
 }
 
+/** Different for each fire, so they don't flicker in step */
+let nextPhase = 0;
+
 /** How many flame blobs the placeholder look has */
 const FLAME_COUNT = 4;
 
@@ -64,6 +73,7 @@ export default class Burning extends BaseEntity implements Entity {
   /** Damage owed but not dealt yet, dealt every `burnDamageInterval` */
   private pendingDamage = 0;
   private damageTimer = 0;
+  private phase = (nextPhase += 1.7);
 
   constructor(
     public target: Flammable,
@@ -92,9 +102,8 @@ export default class Burning extends BaseEntity implements Entity {
   onAdd() {
     this.light = this.addChild(
       new PointLight({
-        radius: 4,
-        intensity: 0.6,
-        color: 0xff8833,
+        radius: BURNING_LIGHT_RADIUS,
+        intensity: 0,
         position: this.target.getPosition(),
       }),
     );
@@ -144,8 +153,10 @@ export default class Burning extends BaseEntity implements Entity {
       );
       flame.scale.set(size * (1 + 0.2 * flicker(t, i * 3.1 + 2.2)));
     });
-    this.light?.setPosition(position);
-    this.light?.setIntensity(0.6 * size * (1 + 0.15 * flicker(t, 0.7)));
+    const light = fireLightFlicker(t, this.phase);
+    this.light?.setPosition(position.add(light.offset));
+    this.light?.setIntensity(BURNING_LIGHT_INTENSITY * size * light.intensity);
+    this.light?.setColor(light.color);
   }
 
   @on("destroy")

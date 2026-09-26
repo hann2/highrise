@@ -1,11 +1,11 @@
+import { colorLerp } from "../../core/util/ColorUtils";
+
 // --- Fire on the floor (see `FireGrid.ts`) ---
 
 /** Meters across a cell of the fire grid */
 export const FIRE_CELL_SIZE = 0.5;
 /** Seconds a cell burns before it lights its neighbors that have fuel */
 export const FIRE_SPREAD_DELAY = 0.12;
-/** Cells across a block of the grid that shares one light */
-export const FIRE_LIGHT_BLOCK = 6;
 
 // --- Burning (see `Burning.ts`) ---
 
@@ -22,6 +22,45 @@ export const HUMAN_BURN_TIME = 1.5;
 export const HUMAN_BURN_DPS = 8;
 /** Seconds between chunks of burn damage to a human. Each one flashes the screen red. */
 export const HUMAN_BURN_INTERVAL = 0.5;
+
+// --- Light from fire ---
+
+/** The two colors a fire's light wavers between */
+export const FIRE_LIGHT_COLORS = [0xff6420, 0xff9440] as const;
+/** Meters from the first cell of a patch of fire that share its light */
+export const FIRE_LIGHT_PATCH_RADIUS = 2.5;
+/** Burning cells in a patch whose light reaches the furthest */
+export const FIRE_LIGHT_FULL_PATCH = 60;
+/** Meters a fire's light reaches: this much for a little fire... */
+export const FIRE_LIGHT_MIN_RADIUS = 6;
+/** ...plus up to this much for a big one */
+export const FIRE_LIGHT_EXTRA_RADIUS = 6;
+/** Meters the light of a burning enemy reaches */
+export const BURNING_LIGHT_RADIUS = 4;
+/** How bright the light of a burning enemy is, next to a fire on the floor */
+export const BURNING_LIGHT_INTENSITY = 0.7;
+/** Meters a fire's light wanders from where it should be, as it flickers */
+export const FIRE_LIGHT_WANDER = 0.12;
+
+/**
+ * Where a fire's light is at time `t`: how bright (0 to 1), which color, and
+ * how far it's moved from the fire, for fires with different `phase`s to
+ * flicker differently.
+ */
+export function fireLightFlicker(
+  t: number,
+  phase: number,
+): { intensity: number; color: number; offset: [number, number] } {
+  const f = flicker(t * 0.8, phase);
+  return {
+    intensity: 0.88 + 0.12 * f,
+    color: colorLerp(FIRE_LIGHT_COLORS[0], FIRE_LIGHT_COLORS[1], 0.5 + 0.5 * f),
+    offset: [
+      FIRE_LIGHT_WANDER * flicker(t * 0.6, phase + 5.1),
+      FIRE_LIGHT_WANDER * flicker(t * 0.6, phase + 9.7),
+    ],
+  };
+}
 
 /** Seconds over which a fire going out shrinks away */
 export const BURN_FADE_TIME = 0.5;
