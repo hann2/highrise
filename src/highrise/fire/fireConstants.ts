@@ -47,6 +47,30 @@ export const FUEL_STAIN_ALPHA = 0.9;
 /** Seconds of fuel in a cell for its stain to be as dark as it gets */
 export const FUEL_STAIN_FULL = 5;
 
+// --- Embers and smoke (see `FireParticles.ts`) ---
+
+/** Embers a second from each burning cell, at full heat */
+export const EMBERS_PER_CELL = 1.2;
+/** Embers a second from each burning enemy or human */
+export const EMBERS_PER_BURNING = 4;
+/** Embers flung out by a cell as it catches */
+export const EMBERS_WHEN_LIT = 3;
+/** Meters per second an ember leaves the fire at, roughly */
+export const EMBER_SPEED = 1.2;
+/** The color of a new ember, and of one about to go out */
+export const EMBER_COLORS = [0xffd070, 0xc02000] as const;
+export const MAX_EMBERS = 400;
+/** Puffs of smoke a second from each burning cell, at full heat */
+export const SMOKE_PER_CELL = 0.2;
+/** Puffs of smoke a second from each burning enemy or human */
+export const SMOKE_PER_BURNING = 1.2;
+export const SMOKE_COLOR = 0x46403a;
+/** How dark a puff of smoke is at its thickest */
+export const SMOKE_ALPHA = 0.5;
+/** Which way smoke drifts, in meters per second per second */
+export const SMOKE_DRAUGHT = [0.15, -0.1] as const;
+export const MAX_SMOKE = 200;
+
 // --- Burning (see `Burning.ts`) ---
 
 /** Seconds an enemy keeps burning after it was last lit */

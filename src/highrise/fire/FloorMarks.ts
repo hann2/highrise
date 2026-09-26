@@ -163,7 +163,7 @@ export default class FloorMarks extends BaseEntity implements Entity {
  * A white blob with a lumpy, soft edge, different for each `variant`. Made
  * without the seeded random numbers, which mustn't be used for looks.
  */
-function makeIrregularBlobTexture(variant: number): Texture {
+export function makeIrregularBlobTexture(variant: number): Texture {
   const size = 64;
   const canvas = document.createElement("canvas");
   canvas.width = size;
