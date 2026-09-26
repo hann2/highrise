@@ -13,6 +13,7 @@ import {
 import RepeatingFloor from "../environment/RepeatingFloor";
 import Wall from "../environment/Wall";
 import Human from "../human/Human";
+import PlayerHumanController from "../human/PlayerHumanController";
 import { AmbientLight } from "../lighting-and-vision/AmbientLight";
 import LightingManager from "../lighting-and-vision/LightingManager";
 import VisionController from "../lighting-and-vision/VisionController";
@@ -34,7 +35,8 @@ const PLAYER_POSITION = V(2.5, 4.5);
  * who can't die, a strip of fuel along the bottom wall that keeps burning, and
  * a short wall sticking out of the top one. Over and over it puts out the
  * fire, has the player throw a molotov to the right, and sends zombies from
- * the right through it. `?ambient=777777` sets the ambient light (the default
+ * the right through it. The player can walk around and throw more (they
+ * never run out), and the cheat keys work. `?ambient=777777` sets the ambient light (the default
  * is dim; the floors go from 000000 to 777777) and `?floor=wood` the floor.
  * `cycles` counts the molotovs, so a recording can wait for one (see
  * `bin/record-clip.ts`).
@@ -67,6 +69,7 @@ export default class FireTestScene extends BaseEntity implements Entity {
       new Wall([9, 0], [9, 2.5]),
     );
     this.player = this.addChild(new Human(PLAYER_POSITION, CHARACTERS[0]));
+    this.addChild(new PlayerHumanController(() => this.player));
     // Enemies ask it whether they can be seen; no fog of war here
     const vision = this.addChild(new VisionController(() => this.player));
     vision.enabled = false;
@@ -83,6 +86,9 @@ export default class FireTestScene extends BaseEntity implements Entity {
   @on("tick")
   onTick(dt: number) {
     this.player.hp = this.player.maxHp;
+    if (this.player.consumableCount === 0) {
+      this.player.giveConsumable(Molotov, 3);
+    }
     for (const enemy of [...this.game.entities.getByFilter(isEnemy)]) {
       if (
         enemy.getPosition().distanceTo(this.player.getPosition()) <
@@ -110,12 +116,13 @@ export default class FireTestScene extends BaseEntity implements Entity {
     this.grid.addFuelAlong(V(1, HEIGHT - 0.6), V(7, HEIGHT - 0.6), 1e9);
     this.grid.igniteAt(V(1, HEIGHT - 0.6));
 
+    // Thrown to the right from wherever the player is; the aim goes back to
+    // the mouse next tick
     const player = this.player;
-    player.setPosition(PLAYER_POSITION);
-    player.body.velocity.set(0, 0);
     player.body.angle = 0;
-    player.giveConsumable(Molotov, 1);
+    player.giveConsumable(Molotov, 3);
     player.useConsumable();
+    player.giveConsumable(Molotov, 3);
 
     // Zombies from the right, walking back through the fire
     await this.wait(0.8);
