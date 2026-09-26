@@ -18,6 +18,10 @@ import {
   SMOKE_ALPHA,
   SMOKE_COLOR,
   SMOKE_DRAUGHT,
+  SMOKE_GROWTH,
+  SMOKE_LIFE,
+  SMOKE_SIZE,
+  SMOKE_WHEN_LIT,
   SMOKE_PER_BURNING,
   SMOKE_PER_CELL,
 } from "./fireConstants";
@@ -92,7 +96,7 @@ export default class FireParticles extends BaseEntity implements Entity {
       p.vy *= 1 - 0.6 * dt;
       const sprite = p.sprite;
       sprite.alpha = SMOKE_ALPHA * Math.sin(Math.PI * Math.sqrt(t));
-      sprite.scale.set((p.size * (0.5 + 1.5 * t)) / 64);
+      sprite.scale.set((p.size * (1 + (SMOKE_GROWTH - 1) * t)) / 128);
       sprite.rotation = p.spin + p.age * 0.3;
     });
   }
@@ -108,8 +112,8 @@ export default class FireParticles extends BaseEntity implements Entity {
         for (let i = 0; i < EMBERS_WHEN_LIT; i++) {
           this.addEmber(x, y, 1.6);
         }
-        if (random() < 0.3) {
-          this.addSmoke(x, y, 1.3);
+        if (random() < SMOKE_WHEN_LIT) {
+          this.addSmoke(x, y, 1);
         }
       }
     }
@@ -191,8 +195,8 @@ export default class FireParticles extends BaseEntity implements Entity {
       vx: Math.cos(angle) * v,
       vy: Math.sin(angle) * v,
       age: 0,
-      life: 2 + random() * 2.5,
-      size: (1 + random() * 1) * size,
+      life: SMOKE_LIFE[0] + random() * (SMOKE_LIFE[1] - SMOKE_LIFE[0]),
+      size: (SMOKE_SIZE[0] + random() * (SMOKE_SIZE[1] - SMOKE_SIZE[0])) * size,
       spin: random() * Math.PI * 2,
       sprite,
     });
@@ -270,4 +274,58 @@ function makeRandom(seed: number): () => number {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+/**
+ * A puff of smoke: a soft disc with billows in it (a few octaves of value
+ * noise), so overlapping puffs keep some shape instead of making a flat fog.
+ * Made without the seeded random numbers.
+ */
+export function makeSmokeTexture(): Texture {
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d")!;
+  const image = context.createImageData(size, size);
+  const hash = (x: number, y: number) => {
+    const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+    return h - Math.floor(h);
+  };
+  const noise = (x: number, y: number) => {
+    const ix = Math.floor(x);
+    const iy = Math.floor(y);
+    const fx = x - ix;
+    const fy = y - iy;
+    const sx = fx * fx * (3 - 2 * fx);
+    const sy = fy * fy * (3 - 2 * fy);
+    const top = hash(ix, iy) + (hash(ix + 1, iy) - hash(ix, iy)) * sx;
+    const bottom =
+      hash(ix, iy + 1) + (hash(ix + 1, iy + 1) - hash(ix, iy + 1)) * sx;
+    return top + (bottom - top) * sy;
+  };
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const u = (x + 0.5) / size - 0.5;
+      const v = (y + 0.5) / size - 0.5;
+      let billows = 0;
+      let amplitude = 0.5;
+      for (let octave = 0; octave < 4; octave++) {
+        const scale = 4 * 2 ** octave;
+        billows += amplitude * noise(u * scale + 10, v * scale + 10);
+        amplitude /= 2;
+      }
+      const r = Math.hypot(u, v) * 2;
+      // Lumpy at the edge, and thinner and thicker inside
+      const edge = clamp((1 - r) * 2.2 + (billows - 0.47) * 1.6);
+      const value = edge * edge * (0.45 + 0.9 * billows);
+      const i = (y * size + x) * 4;
+      image.data[i] = 255;
+      image.data[i + 1] = 255;
+      image.data[i + 2] = 255;
+      image.data[i + 3] = Math.round(clamp(value) * 255);
+    }
+  }
+  context.putImageData(image, 0, 0);
+  return Texture.from(canvas);
 }

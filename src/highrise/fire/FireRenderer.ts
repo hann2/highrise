@@ -29,9 +29,9 @@ import {
   FLAME_WARP,
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
-import FireParticles from "./FireParticles";
+import FireParticles, { makeSmokeTexture } from "./FireParticles";
 import frag_flames from "./flames.frag";
-import { makeIrregularBlobTexture } from "./FloorMarks";
+
 import vert_flames from "./flames.vert";
 
 /**
@@ -99,7 +99,7 @@ export default class FireRenderer extends BaseEntity implements Entity {
     this.sprite.addChild(this.mesh);
 
     this.addChild(
-      new FireParticles(grid, this.blobTexture, makeIrregularBlobTexture(0)),
+      new FireParticles(grid, this.blobTexture, makeSmokeTexture()),
     );
   }
 

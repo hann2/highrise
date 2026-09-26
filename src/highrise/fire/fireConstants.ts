@@ -61,15 +61,23 @@ export const EMBER_SPEED = 1.2;
 export const EMBER_COLORS = [0xffd070, 0xc02000] as const;
 export const MAX_EMBERS = 400;
 /** Puffs of smoke a second from each burning cell, at full heat */
-export const SMOKE_PER_CELL = 0.2;
+export const SMOKE_PER_CELL = 1;
 /** Puffs of smoke a second from each burning enemy or human */
-export const SMOKE_PER_BURNING = 1.2;
-export const SMOKE_COLOR = 0x46403a;
-/** How dark a puff of smoke is at its thickest */
-export const SMOKE_ALPHA = 0.5;
+export const SMOKE_PER_BURNING = 5;
+/** Chance that a cell puffs out smoke as it catches */
+export const SMOKE_WHEN_LIT = 1;
+export const SMOKE_COLOR = 0xb4aca4;
+/** How thick a puff of smoke is at its thickest (its alpha) */
+export const SMOKE_ALPHA = 0.85;
+/** Meters across a new puff of smoke: the least and the most */
+export const SMOKE_SIZE = [2, 3.5] as const;
+/** How many times its size a puff grows to by the time it's gone */
+export const SMOKE_GROWTH = 3;
+/** Seconds a puff of smoke lasts: the least and the most */
+export const SMOKE_LIFE = [4, 8] as const;
 /** Which way smoke drifts, in meters per second per second */
-export const SMOKE_DRAUGHT = [0.15, -0.1] as const;
-export const MAX_SMOKE = 200;
+export const SMOKE_DRAUGHT = [0.4, -0.25] as const;
+export const MAX_SMOKE = 800;
 
 // --- Burning (see `Burning.ts`) ---
 
