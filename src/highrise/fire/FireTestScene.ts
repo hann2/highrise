@@ -19,6 +19,8 @@ import { AmbientLight } from "../lighting-and-vision/AmbientLight";
 import LightingManager from "../lighting-and-vision/LightingManager";
 import VisionController from "../lighting-and-vision/VisionController";
 import { Molotov } from "../weapons/consumables/consumable-stats/Molotov";
+import Gun from "../weapons/guns/Gun";
+import { M1911 } from "../weapons/guns/gun-stats/M1911";
 import FireGrid from "./FireGrid";
 
 /** The room, in meters: about what the camera shows */
@@ -36,8 +38,8 @@ const PLAYER_POSITION = V(2.5, 4.5);
  * who can't die, a strip of fuel along the bottom wall that keeps burning, and
  * a short wall sticking out of the top one. Over and over it puts out the
  * fire, has the player throw a molotov to the right, and sends zombies from
- * the right through it. The player can walk around and throw more (they
- * never run out), and the cheat keys work. `?ambient=777777` sets the ambient light (the default
+ * the right through it. The player can walk around, shoot a pistol and throw
+ * more molotovs (they never run out), and the cheat keys work. `?ambient=777777` sets the ambient light (the default
  * is dim; the floors go from 000000 to 777777) and `?floor=wood` the floor.
  * `cycles` counts the molotovs, so a recording can wait for one (see
  * `bin/record-clip.ts`).
@@ -71,6 +73,8 @@ export default class FireTestScene extends BaseEntity implements Entity {
     );
     this.player = this.addChild(new Human(PLAYER_POSITION, CHARACTERS[0]));
     this.addChild(new PlayerHumanController(() => this.player));
+    // For seeing muzzle flashes by firelight; pistols never run out
+    this.player.giveWeapon(new Gun(M1911), false);
     // Enemies ask it whether they can be seen; no fog of war here
     const vision = this.addChild(new VisionController(() => this.player));
     vision.enabled = false;
