@@ -8,6 +8,7 @@ import FadeEffect from "../effects/FadeEffect";
 import { getPartyLeader } from "../environment/PartyManager";
 import type Human from "../human/Human";
 import { dealShelf, Shelf } from "../items/shelf";
+import type { GunStats } from "../weapons/guns/GunStats";
 import { Level } from "../levels/Level";
 import { generateLevel } from "../levels/level-generation/levelGeneration";
 import LevelTemplate from "../levels/level-templates/LevelTemplate";
@@ -30,6 +31,8 @@ export default class LevelController extends BaseEntity implements Entity {
   level?: Level;
   /** What the current level was generated from */
   template?: LevelTemplate;
+  /** Every gun a store has had this run, so none turns up twice */
+  gunsDealt: GunStats[] = [];
   /** Between reaching an exit and starting the next level */
   private changingLevel = false;
 
@@ -113,14 +116,25 @@ export default class LevelController extends BaseEntity implements Entity {
     // what the leader carried out of the last floor.
     const leader = getPartyLeader(this.game);
     if (this.currentLevel > 1 && leader) {
-      this.template.shelf = this.dealShelf(leader);
+      const shelf = this.dealShelf(leader);
+      if (shelf.gun?.weapon) {
+        this.gunsDealt.push(shelf.gun.weapon);
+      }
+      this.template.shelf = shelf;
     }
     return this.level;
   }
 
-  /** Deals a store shelf for `human` suited to the current floor */
+  /**
+   * Deals a store shelf for `human` suited to the current floor, with none of
+   * the guns earlier stores had
+   */
   dealShelf(human: Human): Shelf {
-    return dealShelf(human, this.template?.getBestGunTier() ?? 0);
+    return dealShelf(
+      human,
+      this.template?.getBestGunTier() ?? 0,
+      this.gunsDealt,
+    );
   }
 
   private makeTemplate(): LevelTemplate {

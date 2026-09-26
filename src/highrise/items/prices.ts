@@ -19,9 +19,6 @@ export const TRADE_IN = 0.5;
 export const CONSUMABLE_COUNT = 2;
 export const CONSUMABLE_PRICE = 6;
 
-/** Chance that a shelf has a gun on it */
-export const GUN_ON_SHELF_CHANCE = 0.5;
-
 /** What `item` costs */
 export function itemPrice(item: { price?: number; rarity: Rarity }): number {
   return item.price ?? PRICE_BY_RARITY[item.rarity];

@@ -63,12 +63,14 @@ export function gunItem(gun: GunStats): Item {
 
 /**
  * Picks a gun for a shelf on a floor whose normal closets have guns up to
- * `bestGunTier`: one from that tier or the one above, and never one `human`
- * is already carrying. Undefined if there's nothing left to deal.
+ * `bestGunTier`: one from that tier or the one above, never one `human` is
+ * already carrying or one in `excluded`. Undefined if there's nothing left to
+ * deal.
  */
 export function dealGunItem(
   human: Human,
   bestGunTier: number,
+  excluded: readonly GunStats[] = [],
 ): Item | undefined {
   const held = [human.primary, human.secondary]
     .filter((weapon) => weapon instanceof Gun)
@@ -78,7 +80,7 @@ export function dealGunItem(
     Math.max(0, bestGunTier + 2),
   )
     .flat()
-    .filter((gun) => !held.includes(gun));
+    .filter((gun) => !held.includes(gun) && !excluded.includes(gun));
   return candidates.length > 0 ? gunItem(choose(...candidates)) : undefined;
 }
 

@@ -1,11 +1,11 @@
-import { choose, rBool, rUniform } from "../../core/util/Random";
+import { choose, rUniform } from "../../core/util/Random";
 import type Human from "../human/Human";
+import type { GunStats } from "../weapons/guns/GunStats";
 import { CONSUMABLES } from "../weapons/consumables/consumable-stats/consumableStats";
 import { consumableItem } from "./consumableItem";
 import { dealGunItem } from "./gunItem";
 import { RARITY_WEIGHTS, type Item } from "./Item";
 import { canTake, ITEMS } from "./items";
-import { GUN_ON_SHELF_CHANCE } from "./prices";
 
 /** How many item slots a store has, above the gun and the consumable */
 export const SHELF_SLOTS = 4;
@@ -22,19 +22,23 @@ export interface Shelf {
 
 /**
  * Deals a shelf for `human`: different items they can take, rarer ones less
- * often; sometimes a gun (`bestGunTier` or the one above, never one they hold);
+ * often; a gun (`bestGunTier` or the one above, never one they hold or one in
+ * `excludedGuns`, so only missing if that rules out every candidate);
  * always one consumable. Uses the shared random stream, so call it during level
  * generation to keep seeded runs reproducible.
  */
-export function dealShelf(human: Human, bestGunTier: number): Shelf {
+export function dealShelf(
+  human: Human,
+  bestGunTier: number,
+  /** Guns that can't be dealt (ones earlier stores had) */
+  excludedGuns: readonly GunStats[] = [],
+): Shelf {
   const pool = ITEMS.filter((item) => canTake(human, item));
   const slots: (Item | null)[] = [];
   while (slots.length < SHELF_SLOTS) {
     slots.push(pool.length > 0 ? takeWeighted(pool) : null);
   }
-  const gun = rBool(GUN_ON_SHELF_CHANCE)
-    ? (dealGunItem(human, bestGunTier) ?? null)
-    : null;
+  const gun = dealGunItem(human, bestGunTier, excludedGuns) ?? null;
   const consumable = consumableItem(choose(...CONSUMABLES));
   return { slots, gun, consumable };
 }

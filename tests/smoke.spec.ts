@@ -15,7 +15,7 @@ const LEVEL_2_FINGERPRINT = "438:-79514360";
 // the item pool, the rarities, or level generation change.
 const STORE_SHELF = {
   slots: ["Running Shoes", "Linebacker", "Steady Aim", "Night Eyes"],
-  gun: "Remington Shotgun",
+  gun: "Desert Eagle",
   consumable: "Molotov ×2",
 };
 // Every quarter on a floor, in closets and carried by enemies (QUARTERS_PER_FLOOR)
@@ -2171,9 +2171,9 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.screenshot({ path: "tests/output/level-2-stats.png" });
   expectNoIssues(issues);
 
-  // --- Dealing: four different items, a gun about half the time (one from
+  // --- Dealing: four different items, a gun every time (one from
   // this floor's closet tier or the one above, tiers 2 and 3 on floor 2, that
-  // the leader isn't carrying), and always a consumable; never an item the
+  // the leader isn't carrying and no store has had this run), and always a consumable; never an item the
   // leader can't take again. (Dealing uses up randomness, so this comes after
   // everything that depends on the seed.) ---
   const deals = await page.evaluate(() => {
@@ -2227,8 +2227,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(deals.allDifferent).toBe(true);
   expect(deals.allFull).toBe(true);
   expect(deals.allConsumables).toBe(true);
-  expect(deals.gunCount).toBeGreaterThan(20);
-  expect(deals.gunCount).toBeLessThan(80);
+  expect(deals.gunCount).toBe(100);
   for (const name of deals.gunNames) {
     expect([
       "Desert Eagle",
@@ -2237,6 +2236,7 @@ test("game boots, plays, and changes levels without errors", async ({
       "Remington Shotgun",
     ]).toContain(name);
     expect(deals.held).not.toContain(name);
+    expect(name).not.toBe(STORE_SHELF.gun);
   }
   for (const description of deals.gunDescriptions) {
     expect(description).toMatch(
