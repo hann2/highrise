@@ -19,6 +19,7 @@ import {
   FIRE_CELL_SIZE,
   SMOKE_ALPHA,
   SMOKE_CLEAR_TIME,
+  SMOKE_FADE_RATE,
   SMOKE_COLOR,
   SMOKE_DARK_COLOR,
   SMOKE_DARK_DENSITY,
@@ -36,7 +37,7 @@ import frag_smoke from "./smoke.frag";
 import vert_flames from "./flames.vert";
 
 /** Below this, a cell has no smoke */
-const EMPTY = 0.002;
+const EMPTY = 0.005;
 
 /**
  * Smoke as a density in each cell of the fire grid. Fire and burning things
@@ -301,9 +302,13 @@ export default class SmokeField extends BaseEntity implements Entity {
       if (row + 1 < rows) give(cell + columns, cell * 2 + 1);
       if (row > 0) give(cell - columns, (cell - columns) * 2 + 1);
     }
+    // Thinning out: a fraction of what's there (which thins thick smoke) and
+    // a fixed amount (which finishes off thin smoke, rather than letting it
+    // linger and creep through the level forever)
     const keep = Math.exp(-dt / SMOKE_CLEAR_TIME);
+    const fade = SMOKE_FADE_RATE * dt;
     for (const cell of touched) {
-      const d = (density[cell] + change[cell]) * keep;
+      const d = (density[cell] + change[cell]) * keep - fade;
       change[cell] = 0;
       if (d < EMPTY) {
         density[cell] = 0;

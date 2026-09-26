@@ -95,8 +95,16 @@ export const SMOKE_FROM_BURNING = 3;
  * difference that flows each second (capped for stability)
  */
 export const SMOKE_SPREAD = 8;
-/** Seconds for smoke to thin out to about a third, wherever it is */
+/**
+ * Smoke thins out two ways at once: a fraction of it (this many seconds for
+ * a third to be left, which is what thins out thick smoke)...
+ */
 export const SMOKE_CLEAR_TIME = 10;
+/**
+ * ...and a fixed amount a second from every cell, which barely matters for
+ * thick smoke but finishes off thin smoke. Smoke this thin is about invisible.
+ */
+export const SMOKE_FADE_RATE = 0.03;
 /** The density at which the density texture maxes out */
 export const SMOKE_MAX_DENSITY = 4;
 /** The color of light, wispy smoke... */
