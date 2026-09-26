@@ -23,10 +23,6 @@ uniform float uAlpha;
 uniform float uMaxDensity;
 // How far the density is pushed around, in meters
 uniform float uWarp;
-// The size of a cell of the density texture, in texture coordinates
-uniform vec2 uTexel;
-// Meters per second the look flows away from where the smoke is thickest
-uniform float uFlowSpeed;
 
 // --- Noise (the same as flames.frag) ---
 
@@ -66,24 +62,6 @@ float fbm(vec3 p) {
   return sum / 0.9375;
 }
 
-// The noise at `p`, carried along `flow` (how far it moves in one cycle, in
-// noise units): three copies, each sliding for one cycle and then jumping
-// back, on staggered cycles and cross-faded so none is ever seen jumping.
-// Keep `flow` small next to the size of the noise's features (a fifth or so),
-// or the cross-fades show as the smoke flicking back the other way.
-float flowingNoise(vec3 p, vec2 flow, float time) {
-  float total = 0.0;
-  float weights = 0.0;
-  for (int i = 0; i < 3; i++) {
-    float phase = fract(time + float(i) / 3.0);
-    // Fully in halfway through its slide, fully out as it jumps
-    float weight = 1.0 - abs(phase * 2.0 - 1.0);
-    total += weight * fbm(vec3(p.xy - flow * phase + float(i) * 13.3, p.z));
-    weights += weight;
-  }
-  return total / weights;
-}
-
 void main(void) {
   vec2 world = uRect.xy + vUV * uRect.zw;
 
@@ -95,24 +73,9 @@ void main(void) {
   vec2 uv = vUV + warp * 2.0 * uWarp / uRect.zw;
   float density = texture(uDensity, uv).r * uMaxDensity;
 
-  // Which way is away from the thick smoke, and how steeply it thins: the
-  // look pours that way, faster where it thins faster
-  vec2 slope = vec2(
-    texture(uDensity, uv + vec2(uTexel.x, 0.0)).r - texture(uDensity, uv - vec2(uTexel.x, 0.0)).r,
-    texture(uDensity, uv + vec2(0.0, uTexel.y)).r - texture(uDensity, uv - vec2(0.0, uTexel.y)).r
-  ) * uMaxDensity;
-  vec2 outward = -slope / (length(slope) + 0.15);
-  // Short cycles, so each copy of the noise only slides a little way before
-  // it's swapped for another
-  float cycle = 0.4;
-  vec2 flow = outward * uFlowSpeed * cycle;
 
   // Billows: thicker and thinner patches that drift and change
-  float billows = flowingNoise(
-    vec3(world * 0.7 + warp * 1.5, uTime * 0.2),
-    flow * 0.7,
-    uTime / cycle
-  );
+  float billows = fbm(vec3(world * 0.7 + warp * 1.5, uTime * 0.2));
   billows = smoothstep(0.25, 0.75, billows);
   float thickness = 1.0 - exp(-density * (0.15 + 1.4 * billows));
   // Tunnels bullets left, where they went: not pushed around like the rest,
@@ -122,11 +85,7 @@ void main(void) {
 
   // Light and dark: big, slow patches of soot drifting through (a second,
   // larger noise), and the thickest smoke, near the fire, darker still
-  float soot = flowingNoise(
-    vec3(world * 0.28 - warp * 0.8 + 41.0, uTime * 0.09),
-    flow * 0.28,
-    uTime / cycle + 0.25
-  );
+  float soot = fbm(vec3(world * 0.28 - warp * 0.8 + 41.0, uTime * 0.09));
   soot = smoothstep(0.35, 0.65, soot);
   float dark = clamp(soot * 0.75 + density / uDarkDensity * 0.45, 0.0, 1.0);
   vec3 color = mix(uSmokeColor, uDarkColor, dark);

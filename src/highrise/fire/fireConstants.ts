@@ -113,8 +113,6 @@ export const SMOKE_TUNNEL_PUSH = 0.6;
 export const SMOKE_TUNNEL_TIME = 1.5;
 /** How much of the smoke just beside a bullet's path is hidden too, 0 to 1 */
 export const SMOKE_TUNNEL_EDGE = 0.6;
-/** Meters per second the smoke's look flows away from where it's thickest */
-export const SMOKE_FLOW_SPEED = 0.5;
 /** Meters the smoke shader pushes the density around by */
 export const SMOKE_WARP = 0.3;
 

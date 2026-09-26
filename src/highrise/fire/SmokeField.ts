@@ -23,7 +23,6 @@ import {
   SMOKE_DARK_COLOR,
   SMOKE_DARK_DENSITY,
   SMOKE_FROM_BURNING,
-  SMOKE_FLOW_SPEED,
   SMOKE_FROM_CELL,
   SMOKE_MAX_DENSITY,
   SMOKE_SPREAD,
@@ -119,8 +118,6 @@ export default class SmokeField extends BaseEntity implements Entity {
           uAlpha: { value: SMOKE_ALPHA, type: "f32" },
           uMaxDensity: { value: SMOKE_MAX_DENSITY, type: "f32" },
           uWarp: { value: SMOKE_WARP, type: "f32" },
-          uTexel: { value: new Float32Array([1, 1]), type: "vec2<f32>" },
-          uFlowSpeed: { value: SMOKE_FLOW_SPEED, type: "f32" },
         },
       },
     });
@@ -151,9 +148,6 @@ export default class SmokeField extends BaseEntity implements Entity {
     const width = columns * FIRE_CELL_SIZE;
     const height = rows * FIRE_CELL_SIZE;
     this.rect.set([0, 0, width, height]);
-    const texel = this.shader.resources.smokeUniforms.uniforms.uTexel;
-    texel[0] = 1 / columns;
-    texel[1] = 1 / rows;
     this.mesh.scale.set(width, height);
     this.texturesDirty = true;
   }
