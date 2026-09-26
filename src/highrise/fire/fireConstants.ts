@@ -104,7 +104,7 @@ export const SMOKE_CLEAR_TIME = 10;
  * ...and a fixed amount a second from every cell, which barely matters for
  * thick smoke but finishes off thin smoke. Smoke this thin is about invisible.
  */
-export const SMOKE_FADE_RATE = 0.03;
+export const SMOKE_FADE_RATE = 0.06;
 /** The density at which the density texture maxes out */
 export const SMOKE_MAX_DENSITY = 4;
 /** The color of light, wispy smoke... */
