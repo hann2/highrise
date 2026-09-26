@@ -25,6 +25,7 @@ import {
   HEAT_RESOLUTION,
   BURNING_HEAT_RADIUS,
   BURNING_TAIL,
+  DEAD_BURNING_FADE_TIME,
   FLAME_WARP,
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
@@ -49,6 +50,11 @@ export default class FireRenderer extends BaseEntity implements Entity {
   /** Reused from frame to frame; the unused ones are hidden */
   private blobs: Sprite[] = [];
   private blobTexture = makeBlobTexture();
+  /** Where each burning thing was last frame, and how hot */
+  private lastBurning = new Map<
+    Burning,
+    { x: number; y: number; heat: number }
+  >();
   /** The part of the world the heat buffer covers: x, y, width, height */
   private rect = new Float32Array(4);
 
@@ -92,15 +98,15 @@ export default class FireRenderer extends BaseEntity implements Entity {
   }
 
   @on("render")
-  onRender() {
-    const blobCount = this.drawHeat();
+  onRender(dt: number) {
+    const blobCount = this.drawHeat(dt);
     this.mesh.visible = blobCount > 0;
     const uniforms = this.shader.resources.flameUniforms.uniforms;
     uniforms.uTime = this.game.elapsedUnpausedTime;
   }
 
   /** Draws the heat buffer; returns how many blobs went into it */
-  private drawHeat(): number {
+  private drawHeat(dt: number): number {
     const camera = this.game.camera;
     const viewport = camera.getWorldViewport();
     const x = viewport.left - HEAT_MARGIN;
@@ -153,6 +159,7 @@ export default class FireRenderer extends BaseEntity implements Entity {
       const [px, py] = burning.target.getPosition();
       const heat = clamp(burning.timeLeft / BURN_FADE_TIME);
       addBlob(px, py, BURNING_HEAT_RADIUS, heat);
+      this.lastBurning.set(burning, { x: px, y: py, heat });
       const velocity = burning.target.body?.velocity;
       if (velocity) {
         for (let i = 1; i <= 3; i++) {
@@ -163,6 +170,19 @@ export default class FireRenderer extends BaseEntity implements Entity {
             BURNING_HEAT_RADIUS * (1 - i * 0.2),
             heat * (1 - i * 0.22),
           );
+        }
+      }
+    }
+
+    // Things that died burning: their fire dies down where they fell
+    const fade = (this.game.paused ? 0 : dt) / DEAD_BURNING_FADE_TIME;
+    for (const [burning, last] of this.lastBurning) {
+      if (burning.isDestroyed) {
+        last.heat -= fade;
+        if (last.heat <= 0) {
+          this.lastBurning.delete(burning);
+        } else {
+          addBlob(last.x, last.y, BURNING_HEAT_RADIUS, last.heat);
         }
       }
     }
@@ -216,7 +236,7 @@ export default class FireRenderer extends BaseEntity implements Entity {
  * Where a cell's blob of heat sits, relative to the cell's middle: the same
  * for the same cell every frame, between -1 and 1 on each axis
  */
-function cellJitter(cell: number): [number, number] {
+export function cellJitter(cell: number): [number, number] {
   const a = Math.sin(cell * 12.9898) * 43758.5453;
   const b = Math.sin(cell * 78.233) * 12543.123;
   return [(a - Math.floor(a)) * 2 - 1, (b - Math.floor(b)) * 2 - 1];

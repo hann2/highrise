@@ -25,8 +25,27 @@ export const HEAT_DIE_DOWN_FUEL = 1.5;
 export const BURNING_HEAT_RADIUS = 0.45;
 /** Seconds of movement the heat of a moving burning thing trails behind it */
 export const BURNING_TAIL = 0.12;
+/** Seconds the fire of something that died burning takes to die down */
+export const DEAD_BURNING_FADE_TIME = 0.7;
 /** Meters the flame shader pushes heat around by */
 export const FLAME_WARP = 0.25;
+
+// --- Marks on the floor (see `FloorMarks.ts`) ---
+
+/** Pixels per meter of the fuel stains and scorch marks */
+export const FLOOR_MARK_RESOLUTION = 12;
+/** Meters across a blob of stain or scorch (half of it) */
+export const MARK_BLOB_RADIUS = 0.5;
+/** Seconds a cell burns before it's as scorched as it gets */
+export const SCORCH_TIME = 4;
+export const SCORCH_COLOR = 0x0c0906;
+/** How dark the worst scorch is */
+export const SCORCH_ALPHA = 0.8;
+export const FUEL_STAIN_COLOR = 0x221c0c;
+/** How dark the fuel stains are at most */
+export const FUEL_STAIN_ALPHA = 0.9;
+/** Seconds of fuel in a cell for its stain to be as dark as it gets */
+export const FUEL_STAIN_FULL = 5;
 
 // --- Burning (see `Burning.ts`) ---
 

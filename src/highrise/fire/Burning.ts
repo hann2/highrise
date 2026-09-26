@@ -1,8 +1,5 @@
-import { Container, Graphics } from "pixi.js";
-import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
 import { clamp } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
@@ -13,7 +10,6 @@ import {
   BURNING_LIGHT_INTENSITY,
   BURNING_LIGHT_RADIUS,
   fireLightFlicker,
-  flicker,
 } from "./fireConstants";
 import { getFireGrid } from "./FireGrid";
 
