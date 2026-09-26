@@ -167,6 +167,43 @@ export default class SmokeField extends BaseEntity implements Entity {
     return this.density[cell] ?? 0;
   }
 
+  /**
+   * A burst of smoke around `center`: `amount` in the middle, less towards
+   * `radius` meters out, spreading out from the middle but not through walls
+   */
+  puff(center: V2d, radius: number, amount: number) {
+    const grid = this.grid;
+    const start = grid.cellAt(center);
+    if (start < 0 || amount <= 0) {
+      return;
+    }
+    const { columns, rows } = grid;
+    const seen = new Set([start]);
+    const queue = [start];
+    while (queue.length > 0) {
+      const cell = queue.shift()!;
+      const distance = grid.cellCenter(cell).distanceTo(center);
+      if (cell !== start && distance > radius) {
+        continue;
+      }
+      this.add(cell, amount * (1 - 0.7 * clamp(distance / radius)));
+      const column = cell % columns;
+      const row = (cell - column) / columns;
+      const neighbors: [number, number][] = [];
+      if (column + 1 < columns) neighbors.push([cell + 1, cell * 2]);
+      if (column > 0) neighbors.push([cell - 1, (cell - 1) * 2]);
+      if (row + 1 < rows) neighbors.push([cell + columns, cell * 2 + 1]);
+      if (row > 0) neighbors.push([cell - columns, (cell - columns) * 2 + 1]);
+      for (const [neighbor, edge] of neighbors) {
+        if (!seen.has(neighbor) && !this.wallAlong(edge)) {
+          seen.add(neighbor);
+          queue.push(neighbor);
+        }
+      }
+    }
+    this.texturesDirty = true;
+  }
+
   /** Puts `amount` of smoke into `cell` */
   add(cell: number, amount: number) {
     if (cell >= 0 && amount > 0) {

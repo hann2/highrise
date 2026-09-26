@@ -104,7 +104,7 @@ export const SMOKE_CLEAR_TIME = 10;
  * ...and a fixed amount a second from every cell, which barely matters for
  * thick smoke but finishes off thin smoke. Smoke this thin is about invisible.
  */
-export const SMOKE_FADE_RATE = 0.06;
+export const SMOKE_FADE_RATE = 0.1;
 /** The density at which the density texture maxes out */
 export const SMOKE_MAX_DENSITY = 4;
 /** The color of light, wispy smoke... */
@@ -115,6 +115,17 @@ export const SMOKE_DARK_COLOR = 0x2a2622;
 export const SMOKE_DARK_DENSITY = 4;
 /** How thick the thickest smoke is (its alpha) */
 export const SMOKE_ALPHA = 0.85;
+// --- Smoke from guns and explosions ---
+
+/** Smoke from one shot of a gun with one bullet per shot */
+export const GUN_SMOKE_PER_SHOT = 6;
+/** How much more smoke each extra pellet makes, as a fraction of a shot's */
+export const GUN_SMOKE_PER_PELLET = 0.15;
+/** Meters in front of the muzzle a shot's smoke is centered */
+export const GUN_SMOKE_DISTANCE = 0.35;
+/** Meters across (half of it) a shot's puff of smoke */
+export const GUN_SMOKE_RADIUS = 0.6;
+
 /** Fraction of the smoke in its way that a bullet pushes out to the sides */
 export const SMOKE_TUNNEL_PUSH = 0.6;
 /** Seconds the tunnel a bullet leaves through smoke takes to close up */

@@ -67,11 +67,14 @@ export default class Detonation extends BaseEntity implements Entity {
 
     this.hitEnemies();
 
-    const { fire } = this.stats;
+    const { fire, smoke } = this.stats;
     const grid = getFireGrid(this.game);
     if (fire && grid) {
       const cells = grid.spillFuel(this.position, fire.radius, fire.fuel);
       grid.igniteCells(cells, this.attacker);
+    }
+    if (smoke && grid) {
+      grid.smoke.puff(this.position, smoke.radius, smoke.amount);
     }
 
     const { flash } = this.stats;

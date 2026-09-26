@@ -63,6 +63,13 @@ export interface ConsumableStats {
     /** Seconds the middle of it burns for */
     readonly fuel: number;
   };
+  /** A burst of smoke where it goes off (see `SmokeField.puff`) */
+  readonly smoke?: {
+    /** Meters */
+    readonly radius: number;
+    /** How thick it is in the middle */
+    readonly amount: number;
+  };
   /** An expanding ring drawn on the floor */
   readonly blastRing?: {
     readonly radius: number;
