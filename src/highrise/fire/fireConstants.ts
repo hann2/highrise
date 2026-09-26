@@ -94,12 +94,17 @@ export const SMOKE_FROM_BURNING = 3;
  * How fast smoke evens out between neighboring cells: the fraction of the
  * difference that flows each second (capped for stability)
  */
-export const SMOKE_SPREAD = 3;
+export const SMOKE_SPREAD = 8;
 /** Seconds for smoke to thin out to about a third, wherever it is */
 export const SMOKE_CLEAR_TIME = 25;
 /** The density at which the density texture maxes out */
 export const SMOKE_MAX_DENSITY = 4;
+/** The color of light, wispy smoke... */
 export const SMOKE_COLOR = 0xa8a098;
+/** ...and of dark, sooty smoke (patches of it, and the thickest smoke) */
+export const SMOKE_DARK_COLOR = 0x2a2622;
+/** Smoke this dense leans dark */
+export const SMOKE_DARK_DENSITY = 4;
 /** How thick the thickest smoke is (its alpha) */
 export const SMOKE_ALPHA = 0.85;
 /** Meters the smoke shader pushes the density around by */

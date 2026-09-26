@@ -19,6 +19,8 @@ import {
   SMOKE_ALPHA,
   SMOKE_CLEAR_TIME,
   SMOKE_COLOR,
+  SMOKE_DARK_COLOR,
+  SMOKE_DARK_DENSITY,
   SMOKE_FROM_BURNING,
   SMOKE_FROM_CELL,
   SMOKE_MAX_DENSITY,
@@ -81,11 +83,12 @@ export default class SmokeField extends BaseEntity implements Entity {
   }
 
   private makeShader(): Shader {
-    const color = [
-      ((SMOKE_COLOR >> 16) & 0xff) / 255,
-      ((SMOKE_COLOR >> 8) & 0xff) / 255,
-      (SMOKE_COLOR & 0xff) / 255,
-    ];
+    const rgb = (color: number) =>
+      new Float32Array([
+        ((color >> 16) & 0xff) / 255,
+        ((color >> 8) & 0xff) / 255,
+        (color & 0xff) / 255,
+      ]);
     return new Shader({
       glProgram: GlProgram.from({
         vertex: vert_flames,
@@ -97,7 +100,9 @@ export default class SmokeField extends BaseEntity implements Entity {
         smokeUniforms: {
           uRect: { value: this.rect, type: "vec4<f32>" },
           uTime: { value: 0, type: "f32" },
-          uSmokeColor: { value: new Float32Array(color), type: "vec3<f32>" },
+          uSmokeColor: { value: rgb(SMOKE_COLOR), type: "vec3<f32>" },
+          uDarkColor: { value: rgb(SMOKE_DARK_COLOR), type: "vec3<f32>" },
+          uDarkDensity: { value: SMOKE_DARK_DENSITY, type: "f32" },
           uAlpha: { value: SMOKE_ALPHA, type: "f32" },
           uMaxDensity: { value: SMOKE_MAX_DENSITY, type: "f32" },
           uWarp: { value: SMOKE_WARP, type: "f32" },

@@ -12,7 +12,11 @@ uniform sampler2D uDensity;
 // x, y, width, height of the density texture, in meters
 uniform vec4 uRect;
 uniform float uTime;
+// Light, wispy smoke, and dark, sooty smoke
 uniform vec3 uSmokeColor;
+uniform vec3 uDarkColor;
+// Smoke this dense leans dark
+uniform float uDarkDensity;
 // How thick the smoke gets at most (its alpha)
 uniform float uAlpha;
 // The density a texture value of 1 stands for
@@ -75,5 +79,12 @@ void main(void) {
   float thickness = 1.0 - exp(-density * (0.15 + 1.4 * billows));
   float alpha = thickness * uAlpha;
 
-  finalColor = vec4(uSmokeColor * alpha, alpha);
+  // Light and dark: big, slow patches of soot drifting through (a second,
+  // larger noise), and the thickest smoke, near the fire, darker still
+  float soot = fbm(vec3(world * 0.28 - warp * 0.8 + 41.0, uTime * 0.09));
+  soot = smoothstep(0.35, 0.65, soot);
+  float dark = clamp(soot * 0.75 + density / uDarkDensity * 0.45, 0.0, 1.0);
+  vec3 color = mix(uSmokeColor, uDarkColor, dark);
+
+  finalColor = vec4(color * alpha, alpha);
 }
