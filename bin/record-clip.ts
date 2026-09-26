@@ -50,7 +50,7 @@ async function main() {
   });
 
   await page.goto(
-    `http://localhost:${port}/?scene=${scene}&seed=1${query ? `&${query}` : ""}`,
+    `http://localhost:${port}/?scene=${scene}&auto&seed=1${query ? `&${query}` : ""}`,
   );
   // The start of the second cycle
   await page.waitForFunction(

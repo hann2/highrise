@@ -36,13 +36,16 @@ const PLAYER_POSITION = V(2.5, 4.5);
  * A dev-only scene for looking at fire (`?scene=fire`), instead of the title
  * and the lobby: one room with the camera still on it, a player on the left
  * who can't die, a strip of fuel along the bottom wall that keeps burning, and
- * a short wall sticking out of the top one. Over and over it puts out the
- * fire, has the player throw a molotov to the right, and sends zombies from
- * the right through it. The player can walk around, shoot a pistol and throw
- * more molotovs (they never run out), and the cheat keys work. `?ambient=777777` sets the ambient light (the default
- * is dim; the floors go from 000000 to 777777) and `?floor=wood` the floor.
- * `cycles` counts the molotovs, so a recording can wait for one (see
- * `bin/record-clip.ts`).
+ * a short wall sticking out of the top one. The player can walk around, shoot
+ * a pistol and throw molotovs (they never run out), Z sends zombies in from
+ * the right, and the cheat keys work.
+ *
+ * `?auto` plays it by itself for recordings (see `bin/record-clip.ts`): over
+ * and over it puts out the fire, has the player throw a molotov to the right,
+ * and sends zombies through it, taking them away before they reach the
+ * player. `cycles` counts the molotovs, so a recording can wait for one.
+ * `?ambient=777777` sets the ambient light (the default is dim; the floors go
+ * from 000000 to 777777) and `?floor=wood` the floor.
  */
 export default class FireTestScene extends BaseEntity implements Entity {
   id = "fireTestScene";
@@ -53,12 +56,15 @@ export default class FireTestScene extends BaseEntity implements Entity {
   cycleTime = 0;
   private player!: Human;
   private grid!: FireGrid;
+  /** Whether it plays by itself (`?auto`) */
+  private auto = false;
 
   @on("add")
   async onAdd() {
     const params = new URLSearchParams(window.location.search);
     const ambient = parseInt(params.get("ambient") ?? "303036", 16);
     const floor = params.get("floor") === "wood" ? woodFloor1 : cementFloor;
+    this.auto = params.has("auto");
 
     // Humans carry lights, so this has to exist before anyone is added
     this.addChild(new LightingManager());
@@ -92,17 +98,25 @@ export default class FireTestScene extends BaseEntity implements Entity {
     this.game.camera.z = 75;
     this.game.camera.center(V(WIDTH / 2, HEIGHT / 2));
 
-    await this.wait(0.5);
-    this.throwMolotov();
+    this.lightStrip();
+    if (this.auto) {
+      await this.wait(0.5);
+      this.throwMolotov();
+    }
   }
 
-  /** C switches how fire is lit (see `FireGrid.lightMode`) */
+  /**
+   * C switches how fire is lit (see `FireGrid.lightMode`), and Z sends in
+   * zombies
+   */
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyC") {
       this.grid.setLightMode(
         this.grid.lightMode === "cells" ? "patches" : "cells",
       );
+    } else if (key === "KeyZ") {
+      this.sendZombies();
     }
   }
 
@@ -111,6 +125,9 @@ export default class FireTestScene extends BaseEntity implements Entity {
     this.player.hp = this.player.maxHp;
     if (this.player.consumableCount === 0) {
       this.player.giveConsumable(Molotov, 3);
+    }
+    if (!this.auto) {
+      return;
     }
     for (const enemy of [...this.game.entities.getByFilter(isEnemy)]) {
       if (
@@ -135,9 +152,7 @@ export default class FireTestScene extends BaseEntity implements Entity {
     for (const enemy of [...this.game.entities.getByFilter(isEnemy)]) {
       enemy.destroy();
     }
-    // The fire that doesn't go out
-    this.grid.addFuelAlong(V(1, HEIGHT - 0.6), V(7, HEIGHT - 0.6), 1e9);
-    this.grid.igniteAt(V(1, HEIGHT - 0.6));
+    this.lightStrip();
 
     // Thrown to the right from wherever the player is; the aim goes back to
     // the mouse next tick
@@ -149,6 +164,17 @@ export default class FireTestScene extends BaseEntity implements Entity {
 
     // Zombies from the right, walking back through the fire
     await this.wait(0.8);
+    this.sendZombies();
+  }
+
+  /** The fire along the bottom wall that doesn't go out */
+  private lightStrip() {
+    this.grid.addFuelAlong(V(1, HEIGHT - 0.6), V(7, HEIGHT - 0.6), 1e9);
+    this.grid.igniteAt(V(1, HEIGHT - 0.6));
+  }
+
+  /** Three zombies from the right, coming for the player */
+  private sendZombies() {
     for (let i = 0; i < 3; i++) {
       const position = V(WIDTH - 1.5 - i * 0.6, 3.3 + i * 1.1);
       this.game.addEntity(new Zombie(position));
