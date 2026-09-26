@@ -52,7 +52,7 @@ From a second design conversation, which replaced the "pick one of three" loop (
 
 - Rare: 3–4 encounters a run, all bought from the machine's gun row, priced by tier, with a trade-in (the gun you replace sells back). Never three guns side by side, never known ahead of time.
 - Families are the ammo types: pistol, rifle, shotgun, and melee on its own. Attachments fit by family (a choke on shotguns, a scope on rifles and revolvers), so staying in a family is rewarded and holding two families is an ammo advantage that costs attachment focus.
-- Re-bucket `GUN_TIERS` to one gun per family per tier. Tier 3 needs filling and pistols need a ladder (Revolver and Five-seveN move up).
+- Tiers are by power, not one per family (Simon, 2026-09-26): pistols are naturally lower tier than long guns, and a semi-auto shotgun like the SPAS12 is hard to beat. `GUN_TIERS` stays as it is for now; more guns and tier balance come after the mechanics are in.
 - Two free weapon slots, no primary/secondary. You start with a pistol; taking two pricier guns means giving up the cheap fallback, which is a deliberate choice. Melee takes a slot.
 - Characters' starting weapons are the one chosen gun, the build's seed, so characters should spread across families.
 
@@ -320,19 +320,14 @@ Current: family is `GunStats.ammoClass` (`PISTOLS`/`RIFLES`/`SHOTGUNS` lists in 
 In:
 
 - **Family = `ammoClass`.** No new field. `gunFamilyName(class)` for cards ("pistols", "rifles", "shotguns").
-- **Re-bucket `GUN_TIERS`** to one gun per family per tier for the shelf, plus the starting pistols:
-  - Tier 0 (starting kit only, never on a shelf): M1911, Glock.
-  - Tier 1 (act 2): Five Seven, AR-15, Sawn Off.
-  - Tier 2 (act 3): S&W Revolver, P90, Remington.
-  - Tier 3 (act 4): Desert Eagle, AK-47, SPAS12.
-  - Retune the moved guns so the ladder holds (Revolver and Five Seven damage/capacity up a notch; first guesses in their files). `getGunTier`/`gunTierOf` unchanged. The encyclopedia tag stays "Tier N".
+- **`GUN_TIERS` stays as it is** (decided 2026-09-26: tiers are by power, and pistols sit low). No re-bucketing or retuning in this brief; more guns and balance later.
 - **Attachments** (`items/attachments.ts`): `interface Attachment extends Item { category: "attachment"; slot: "magazine" | "ammo" | "rail"; fits: AmmoClass[]; modify?(stats: GunStats): Partial<GunStats> }`. Owned in `Human.attachments: Attachment[]`, at most one per (family, slot): buying a second for the same family and slot replaces it (the shelf never offers a duplicate pair). `Human.attachmentsFor(gun): Attachment[]` returns the ones whose `fits` includes the gun's class; `Gun` reads its effective stats through `gun.effectiveStats(shooter)` = `stats` overlaid with each attachment's `modify` (capacity, spread, fire rate, `laserSightColor`, `bulletStats`), cached per gun and invalidated when `attachments` changes. Rule attachments read `human.attachmentsFor(weapon)` at use time (a bayonet in `push`, ammo types in `Bullet`/`Enemy`). Remove `PlayerStats.magazineSize` and `incendiaryRounds` (they become attachments; Big Magazines from brief 15 becomes the Extended Magazine attachment).
 - **Starting attachments** (prices by rarity; "Fits" on the card and in the encyclopedia):
   - Magazine: Extended Magazine (capacity ×1.5, fits all; one per family so it's three items: Extended Pistol Mag, Rifle Drum, Shell Tube), common.
   - Ammo: Hollow Points moves here (damage ×1.2, fits all, one per family), uncommon; Incendiary Rounds (the existing flag, fits rifles and pistols), rare; Dragon's Breath (incendiary, shotguns), rare; Armor Piercing (bullets pass through the first enemy, rifles and pistols), uncommon; Exploding Rounds (a small `Detonation`, 30 damage in 1 m, on every 4th hit, rifles), rare.
   - Rail: Laser Sight (sets `laserSightColor`, spread ×0.7, fits all), common; Bayonet (push damage +25 while that gun is in hand, rifles and shotguns), uncommon; Choke (spread ×0.5, shotguns), uncommon; Compensator (recoil ×0.5, fire rate ×1.1, pistols), uncommon.
 - **Family-dependent equipment** (`equipment.ts`, the items that make a dealt gun a build): Buckshot Bounce (pellets ricochet once off walls; shotguns), Last Round (the last round in a magazine does ×3 damage), Quick Draw (pistol kills refund the shot), Marksman (rifle bullets do +30% beyond 8 m). All uncommon.
-- **The shelf leans toward your families.** `dealShelf`: an attachment or family item for a family the human holds has weight ×1, one for a family they don't hold ×0.25. The gun row: one gun of the act's tier, family random among the two the human doesn't hold in that slot's sense (never a gun already held). Gun cards say which of your attachments fit ("2 of your attachments fit").
+- **The shelf leans toward your families.** `dealShelf`: an attachment or family item for a family the human holds has weight ×1, one for a family they don't hold ×0.25. The gun row: one gun from the floor's tiers, leaning toward families the human doesn't hold (never a gun already held, never one an earlier store had this run). Gun cards say which of your attachments fit ("2 of your attachments fit").
 - **Trade-in** finishes: buying a gun with both slots full sells the active one back at `TRADE_IN` of its tier price. Attachments stay with the human, not the gun.
 
 Out: attachment management UI, combining/evolutions, melee mods, art per attachment (cards are text plus the gun's family icon).
