@@ -96,7 +96,7 @@ export const SMOKE_FROM_BURNING = 3;
  */
 export const SMOKE_SPREAD = 8;
 /** Seconds for smoke to thin out to about a third, wherever it is */
-export const SMOKE_CLEAR_TIME = 25;
+export const SMOKE_CLEAR_TIME = 10;
 /** The density at which the density texture maxes out */
 export const SMOKE_MAX_DENSITY = 4;
 /** The color of light, wispy smoke... */
