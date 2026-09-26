@@ -31,6 +31,9 @@ const CYCLE_TIME = 8;
 /** Zombies this close to the player are taken away before they attack */
 const ZOMBIE_REMOVE_DISTANCE = 1.3;
 const PLAYER_POSITION = V(2.5, 4.5);
+/** When in a cycle the player shoots through the smoke, and for how long (seconds) */
+const SHOOT_START = 5.5;
+const SHOOT_DURATION = 1.5;
 
 /**
  * A dev-only scene for looking at fire (`?scene=fire`), instead of the title
@@ -43,8 +46,8 @@ const PLAYER_POSITION = V(2.5, 4.5);
  *
  * `?auto` plays it by itself for recordings (see `bin/record-clip.ts`): over
  * and over it puts out the fire, has the player throw a molotov to the right,
- * and sends zombies through it, taking them away before they reach the
- * player. `cycles` counts the molotovs, so a recording can wait for one.
+ * sends zombies through it (taking them away before they reach the player),
+ * and has the player shoot a sweep of shots through the smoke. `cycles` counts the molotovs, so a recording can wait for one.
  * `?ambient=777777` sets the ambient light (the default is dim; the floors go
  * from 000000 to 777777) and `?floor=wood` the floor.
  */
@@ -145,7 +148,20 @@ export default class FireTestScene extends BaseEntity implements Entity {
       if (this.cycleTime >= CYCLE_TIME) {
         this.throwMolotov();
       }
+      this.shootThroughSmoke();
     }
+  }
+
+  /** Partway through a cycle, a sweep of shots through the smoke */
+  private shootThroughSmoke() {
+    const t = (this.cycleTime - SHOOT_START) / SHOOT_DURATION;
+    const gun = this.player.weapon;
+    if (t < 0 || t > 1 || !(gun instanceof Gun)) {
+      return;
+    }
+    gun.ammo = gun.stats.ammoCapacity;
+    this.player.body.angle = -0.3 + 0.6 * t;
+    gun.pullTrigger(this.player);
   }
 
   private async throwMolotov() {

@@ -107,6 +107,14 @@ export const SMOKE_DARK_COLOR = 0x2a2622;
 export const SMOKE_DARK_DENSITY = 4;
 /** How thick the thickest smoke is (its alpha) */
 export const SMOKE_ALPHA = 0.85;
+/** Fraction of the smoke in its way that a bullet pushes out to the sides */
+export const SMOKE_TUNNEL_PUSH = 0.6;
+/** Seconds the tunnel a bullet leaves through smoke takes to close up */
+export const SMOKE_TUNNEL_TIME = 1.5;
+/** How much of the smoke just beside a bullet's path is hidden too, 0 to 1 */
+export const SMOKE_TUNNEL_EDGE = 0.6;
+/** Meters per second the smoke's look flows away from where it's thickest */
+export const SMOKE_FLOW_SPEED = 0.5;
 /** Meters the smoke shader pushes the density around by */
 export const SMOKE_WARP = 0.3;
 

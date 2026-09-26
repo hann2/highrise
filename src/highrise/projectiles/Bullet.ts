@@ -7,6 +7,7 @@ import { on } from "../../core/entity/handler";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { isHittable } from "../environment/Hittable";
+import { getFireGrid } from "../fire/FireGrid";
 import Human from "../human/Human";
 import Light from "../lighting-and-vision/Light";
 import { BulletStats } from "../weapons/guns/BulletStats";
@@ -45,6 +46,15 @@ export default class Bullet extends Projectile implements Entity {
       (this.shooter?.stats.damage ?? 1) *
       (this.velocity.magnitude / this.stats.muzzleVelocity)
     );
+  }
+
+  /** Also carves the bullet's path through any smoke */
+  checkForCollision(dt: number): HitResult | undefined {
+    const from = (this.sweepFrom ?? this.position).clone();
+    const hit = super.checkForCollision(dt);
+    const to = hit?.hitPosition ?? this.position.addScaled(this.velocity, dt);
+    getFireGrid(this.game)?.smoke.disturb(from, to);
+    return hit;
   }
 
   handleHit({ hitPosition, hitNormal, hit }: HitResult) {
