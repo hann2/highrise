@@ -5,6 +5,7 @@ import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import { BaseEnemy } from "../enemies/base/Enemy";
+import { getPartyLeader } from "../environment/PartyManager";
 import Quarter from "../environment/Quarter";
 
 /** Makes dead enemies drop the quarters they were given at generation. */
@@ -13,7 +14,10 @@ export default class QuarterDropper extends BaseEntity implements Entity {
 
   @on("zombieDied")
   async onZombieDied({ zombie }: { zombie: BaseEnemy }) {
-    const count = zombie.quarters;
+    const leader = getPartyLeader(this.game);
+    const count = Math.round(
+      zombie.quarters * (leader?.stats.quarterMultiplier ?? 1),
+    );
     if (count > 0) {
       const position = zombie.getPosition().clone();
       // Melee kills happen in the middle of a physics step, which is no time

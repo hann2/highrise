@@ -34,6 +34,7 @@ import Interactable, { isInteractable } from "../environment/Interactable";
 import ConsumablePickup from "../environment/ConsumablePickup";
 import UsablePickup from "../environment/UsablePickup";
 import { UsableStats } from "../weapons/usables/UsableStats";
+import { STIM_EFFECT } from "../weapons/usables/usables";
 import WeaponPickup from "../environment/WeaponPickup";
 import { PhasedAction } from "../utils/PhasedAction";
 import { ShuffleRing } from "../utils/ShuffleRing";
@@ -73,6 +74,9 @@ export const PUSH_DOOR_IMPULSE = 12; // newton-seconds, enough to fling a door o
 
 /** Seconds between weapon swaps, so a mouse wheel flick doesn't swap back and forth */
 export const SWAP_COOLDOWN = 0.25;
+/** Health, and seconds of not being hurt, after a second chance at death */
+const SECOND_CHANCE_HP = 50;
+const SECOND_CHANCE_INVULNERABILITY = 2;
 /** Seconds between uses of a usable */
 const USE_COOLDOWN = 1;
 /** Seconds between throwing consumables */
@@ -110,6 +114,8 @@ export default class Human extends BaseEntity implements Entity, Flammable {
   /** Grenades and the like, one type at a time (the throwable slot) */
   consumable?: ConsumableStats;
   consumableCount: number = 0;
+  /** Not hurt by anything until this (game time, unpaused) */
+  invulnerableUntil = -Infinity;
   /** A health pack or the like, used on yourself a charge at a time */
   usable?: { stats: UsableStats; charges: number };
   humanSprite: HumanSprite;
@@ -167,6 +173,9 @@ export default class Human extends BaseEntity implements Entity, Flammable {
   onStartLevel(_: { level: Level }) {
     if (this.stats.floorHeal > 0 && this.hp < this.maxHp) {
       this.heal(this.stats.floorHeal, false);
+    }
+    if (this.stats.floorStimSeconds > 0) {
+      this.applyTimedStats(STIM_EFFECT, this.stats.floorStimSeconds);
     }
   }
 
@@ -542,11 +551,21 @@ export default class Human extends BaseEntity implements Entity, Flammable {
    * noises, for damage that keeps coming (burning).
    */
   async inflictDamage(amount: number, quiet: boolean = false) {
-    if (this.isDestroyed) {
+    if (
+      this.isDestroyed ||
+      this.game.elapsedUnpausedTime < this.invulnerableUntil
+    ) {
       return;
     }
     amount *= this.stats.damageTaken;
     this.hp -= amount;
+    // A second chance (Second Heart): back up, and untouchable for a moment
+    if (this.hp <= 0 && this.stats.extraLives > 0) {
+      this.stats.extraLives -= 1;
+      this.hp = SECOND_CHANCE_HP;
+      this.invulnerableUntil =
+        this.game.elapsedUnpausedTime + SECOND_CHANCE_INVULNERABILITY;
+    }
 
     if (!quiet) {
       this.game.addEntity(new FleshImpact(this.getPosition(), 1));

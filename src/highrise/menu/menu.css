@@ -273,6 +273,11 @@
     0 12px 40px rgba(0, 0, 0, 0.7);
 }
 
+/* A big store's four columns of items */
+.store__machine--big {
+  width: 860px;
+}
+
 /* Shrunk to fit short windows */
 @media (max-height: 680px) {
   .store__machine {
@@ -734,7 +739,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 16px;
   background: rgba(17, 17, 17, 0.6);
   white-space: normal;
   animation: menu-fade-in 0.2s ease-out;
@@ -743,7 +748,11 @@
 .floor-directory__plaque {
   box-sizing: border-box;
   min-width: 420px;
-  padding: 28px 36px 24px;
+  /* A whole run's floors: scrolls if the window is too short for them */
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  pointer-events: auto;
+  padding: 20px 36px 18px;
   border: 4px solid #c9a45c;
   border-radius: 6px;
   background: #121212;
@@ -763,16 +772,16 @@
   color: #c9a45c;
   text-align: center;
   border-bottom: 1px solid #7a6230;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .floor-directory__rows {
   display: grid;
   grid-template-columns: auto 1fr auto;
   column-gap: 20px;
-  row-gap: 6px;
-  font-size: 22px;
+  row-gap: 2px;
+  font-size: 19px;
   font-weight: 400;
 }
 

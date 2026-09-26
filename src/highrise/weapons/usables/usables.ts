@@ -1,4 +1,11 @@
+import type { NumericStat } from "../../human/PlayerStats";
 import { UsableStats } from "./UsableStats";
+
+/** What a stim does to `PlayerStats` while it lasts */
+export const STIM_EFFECT: Partial<Record<NumericStat, number>> = {
+  moveSpeed: 1.3,
+  damageTaken: 0.6,
+};
 
 // Every usable. First guesses; tune in playtest.
 
@@ -24,7 +31,7 @@ export const StimPack: UsableStats = {
   color: 0x2a3a4a,
   accentColor: 0x44ddff,
   use: (human) => {
-    human.applyTimedStats({ moveSpeed: 1.3, damageTaken: 0.6 }, 8);
+    human.applyTimedStats(STIM_EFFECT, 8);
     return true;
   },
 };

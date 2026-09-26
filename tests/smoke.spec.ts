@@ -10,14 +10,33 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "440:1666357832";
+const LEVEL_2_FINGERPRINT = "347:-291100383";
 // What the store in level 2's arrival room sells with this seed. Changes when
 // the item pool, the rarities, or level generation change.
 const STORE_SHELF = {
-  slots: ["Quick Hands", "Fresh Batteries", "Hair Trigger", "Vitamins"],
-  gun: "Desert Eagle",
-  consumable: "Flashbang ×2",
+  slots: ["Curb Stomp", "Vitamins", "Linebacker", "Hollow Points"],
+  gun: "Sawn Off Shotgun",
+  consumable: "Frag Grenade ×2",
 };
+// The run's floors with this seed (from the lobby's plan). Changes when the
+// themes, the landmarks or anything random before the plan changes.
+const RUN_PLAN = [
+  "Maintenance",
+  "Offices",
+  "Shops",
+  "Generator",
+  "Shops",
+  "Maintenance",
+  "Shops",
+  "Chapel",
+  "Maintenance",
+  "Shops",
+  "Offices",
+  "Generator",
+  "Maintenance",
+  "Offices",
+  "Chapel",
+];
 // Every quarter on a floor, in closets and carried by enemies (QUARTERS_PER_FLOOR)
 const QUARTERS_PER_FLOOR = 20;
 
@@ -163,15 +182,44 @@ test("game boots, plays, and changes levels without errors", async ({
   expectNoIssues(issues);
 
   // --- The run ahead is planned, but nothing in the lobby gives it away ---
+  // 15 floors in acts of 4 (13 to 15 are act 4), with a landmark ending each
+  // of the first three acts and the run, a keycard floor in each act, and
+  // big stores right after the landmarks
   const plan = await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const lobby = game.entities.getById("lobby") as any;
+    const floors = lobby.plan as any[];
+    const numbers = (test: (floor: any) => boolean) =>
+      floors.filter(test).map((floor) => floor.number as number);
     return {
-      floors: lobby.plan.map((floor: any) => floor.name) as string[],
+      names: floors.map((floor) => floor.name) as string[],
+      acts: floors.map((floor) => floor.act) as number[],
+      gunTiers: floors.map((floor) => floor.gunTier) as number[],
+      sieges: numbers((floor) => floor.landmark === "siege"),
+      bosses: numbers((floor) => floor.landmark === "boss"),
+      bigStores: numbers((floor) => floor.bigStore),
+      keycardActs: floors
+        .filter((floor) => floor.keycard)
+        .map((floor) => [floor.act, !!floor.landmark]),
       plaques: game.entities.getTagged("directory_plaque").length,
     };
   });
-  expect(plan.floors).toEqual(["Shops", "Maintenance", "Generator", "Chapel"]);
+  expect(plan.names).toEqual(RUN_PLAN);
+  expect(plan.acts).toEqual([1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4]);
+  expect(plan.gunTiers).toEqual(plan.acts.map((act) => act - 1));
+  expect(plan.sieges).toEqual([4, 12]);
+  expect(plan.bosses).toEqual([8, 15]);
+  expect(plan.bigStores).toEqual([5, 9, 13]);
+  expect(plan.keycardActs).toEqual([
+    [1, false],
+    [2, false],
+    [3, false],
+    [4, false],
+  ]);
+  // No theme twice in a row
+  for (let i = 1; i < plan.names.length; i++) {
+    expect(plan.names[i]).not.toBe(plan.names[i - 1]);
+  }
   expect(plan.plaques).toBe(0);
 
   // --- Walk up to someone unlocked and press E to play as them ---
@@ -297,7 +345,7 @@ test("game boots, plays, and changes levels without errors", async ({
     { timeout: 30000 },
   );
 
-  // --- The run starts on its first floor, the Shops, as Nancy ---
+  // --- The run starts on its first floor, as Nancy ---
   const startLevel = await getLevelNumber(page);
   expect(startLevel).toBe(1);
   const runStart = await page.evaluate(() => {
@@ -346,7 +394,7 @@ test("game boots, plays, and changes levels without errors", async ({
     arrivalRooms: 1,
     gunsInArrivalRoom: 0,
     quarters: QUARTERS_PER_FLOOR,
-    floor: "Shops",
+    floor: RUN_PLAN[0],
     lastCharacter: "Nancy",
   });
   // let the fade in finish and lighting settle
@@ -1142,142 +1190,16 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(doorPush.maxAngularVelocity).toBeGreaterThan(4);
   expect(doorPush.swing).toBeGreaterThan(1);
 
-  // --- A keycard opens one of the locked rooms ---
-  const keycards = await page.evaluate(async () => {
-    const game = window.DEBUG.game!;
-    const entities = [...game.entities.all] as any[];
-    const leader = entities.find(
-      (e) => e.constructor.name === "PartyManager",
-    ).leader;
-    const wait = async (ms: number) => {
-      const start = performance.now();
-      while (performance.now() - start < ms) {
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-      }
-    };
-    // Keeps the leader where window.testPinAt says until it's cleared
-    const pin = () => {
-      const at = (window as any).testPinAt;
-      if (!at) return;
-      leader.body.position.set(at);
-      leader.body.velocity.set(0, 0);
-      requestAnimationFrame(pin);
-    };
-    const standAt = async (position: any) => {
-      const wasPinned = !!(window as any).testPinAt;
-      (window as any).testPinAt = position;
-      if (!wasPinned) pin();
-      await wait(200);
-    };
-    /** Tries to swing a door open on whichever side it has room to, and returns how far it went */
-    const trySwing = async (door: any) => {
-      door.body.angularVelocity = door.maxAngle > 1 ? 6 : -6;
-      await wait(300);
-      return Math.abs(door.getOpenAngle());
-    };
-
-    const keycardPickups = entities.filter(
-      (e) => e.constructor.name === "Keycard",
-    );
-    const locks = entities.filter((e) => e.constructor.name === "KeycardLock");
-    (window as any).testLocks = locks;
-    const result = {
-      keycardCount: keycardPickups.length,
-      lockCount: locks.length,
-      lockedDoorsStayShut: 0,
-      openedWithoutKeycard: false,
-      promptWithoutKeycard: "",
-      keycardsPickedUp: 0,
-      hudShown: false,
-      reachableThroughDoor: [] as string[],
-    };
-    if (keycardPickups.length !== 1 || locks.length !== 2) {
-      return result;
-    }
-
-    for (const lock of locks) {
-      if ((await trySwing(lock.door)) < 0.1) {
-        result.lockedDoorsStayShut++;
-      }
-    }
-
-    // Without a keycard the lock does nothing, and says so
-    await standAt(locks[0].outsidePosition);
-    result.promptWithoutKeycard =
-      document.querySelector(".interact-prompt")?.textContent ?? "";
-    leader.interactWithNearest();
-    await wait(100);
-    result.openedWithoutKeycard = !locks[0].door.locked;
-
-    await standAt(keycardPickups[0].getPosition());
-    leader.interactWithNearest();
-    await wait(100);
-    result.keycardsPickedUp = leader.keycards;
-    result.hudShown = !!document.querySelector(".hud-keycards");
-
-    // Right outside the locked door, the lock is usable but the closet's
-    // contents behind the door are not, even though they're within range
-    const doorway = locks[0].door.getDoorwayCenter();
-    await standAt(doorway.lerp(locks[0].outsidePosition, 0.6));
-    result.reachableThroughDoor = leader
-      .getNearbyInteractables()
-      .map((i: any) => i.parent?.constructor.name);
-
-    // Stays pinned here for the screenshot, then uses the lock from here
-    await standAt(doorway.lerp(locks[0].outsidePosition, 1.6));
-    return result;
-  });
-  expect(keycards.reachableThroughDoor).toContain("KeycardLock");
-  expect(keycards.reachableThroughDoor).not.toContain("WeaponPickup");
-  expect(keycards.reachableThroughDoor).not.toContain("HealthPickup");
-  expect(keycards.reachableThroughDoor).not.toContain("AmmoPickup");
-  expect(keycards.reachableThroughDoor).not.toContain("ConsumablePickup");
-  expect(keycards.keycardCount).toBe(1);
-  expect(keycards.lockCount).toBe(2);
-  expect(keycards.lockedDoorsStayShut).toBe(2);
-  expect(keycards.openedWithoutKeycard).toBe(false);
-  expect(keycards.promptWithoutKeycard).toBe("Card reader · needs a keycard");
-  expect(keycards.keycardsPickedUp).toBe(1);
-  expect(keycards.hudShown).toBe(true);
-  await page.waitForTimeout(800); // let the camera settle
-  await page.screenshot({ path: "tests/output/level-1-locked-door.png" });
-
-  const unlocking = await page.evaluate(async () => {
-    const game = window.DEBUG.game!;
-    const leader = (
-      [...game.entities.all].find(
-        (e) => e.constructor.name === "PartyManager",
-      ) as any
-    ).leader;
-    const locks = (window as any).testLocks;
-    const wait = async (ms: number) => {
-      const start = performance.now();
-      while (performance.now() - start < ms) {
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-      }
-    };
-    leader.interactWithNearest();
-    await wait(100);
-    const door = locks[0].door;
-    const result = {
-      unlocked: !door.locked,
-      keycardsLeft: leader.keycards,
-      lockRemoved: locks[0].isDestroyed,
-      unlockedSwing: 0,
-      otherStillLocked: locks[1].door.locked,
-    };
-    door.body.angularVelocity = door.maxAngle > 1 ? 6 : -6;
-    await wait(300);
-    result.unlockedSwing = Math.abs(door.getOpenAngle());
-    (window as any).testPinAt = undefined;
-    return result;
-  });
-  expect(unlocking.unlocked).toBe(true);
-  expect(unlocking.keycardsLeft).toBe(0);
-  expect(unlocking.lockRemoved).toBe(true);
-  expect(unlocking.unlockedSwing).toBeGreaterThan(0.3);
-  expect(unlocking.otherStillLocked).toBe(true);
-  expectNoIssues(issues);
+  // --- Only one floor per act has the keycard and its locked rooms, and
+  // with this seed it's floor 3, not this one (see run.spec.ts) ---
+  expect(
+    await page.evaluate(
+      () =>
+        [...window.DEBUG.game!.entities.all].filter((e) =>
+          ["Keycard", "KeycardLock"].includes(e.constructor.name),
+        ).length,
+    ),
+  ).toBe(0);
 
   // --- Physics hasn't blown up ---
   const nonFiniteBodies = await page.evaluate(() => {
@@ -1989,13 +1911,16 @@ test("game boots, plays, and changes levels without errors", async ({
   await expect(page.locator(".floor-directory")).toHaveCount(1);
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
   expect(await page.locator(".pause-menu__background").count()).toBe(0);
-  await expect(page.locator(".floor-directory__row")).toHaveText([
-    /4\s*Chapel\s*Boss/,
-    /3\s*Generator/,
-    /2\s*Maintenance.*You are here/,
-    /1\s*Shops/,
-    /L\s*Lobby/,
-  ]);
+  // The whole run, top floor first, with this one marked and the rest noted
+  const directoryRows = page.locator(".floor-directory__row");
+  await expect(directoryRows).toHaveCount(16);
+  await expect(directoryRows.nth(0)).toHaveText(/15\s*Chapel\s*Boss/);
+  await expect(directoryRows.nth(3)).toHaveText(/12\s*Generator\s*Landmark/);
+  await expect(directoryRows.nth(10)).toHaveText(/5\s*Shops\s*Store/);
+  await expect(directoryRows.nth(13)).toHaveText(
+    new RegExp(`2\\s*${RUN_PLAN[1]}.*You are here`),
+  );
+  await expect(directoryRows.nth(15)).toHaveText(/L\s*Lobby/);
   await page.screenshot({ path: "tests/output/floor-directory.png" });
   await page.waitForTimeout(400);
   await page.keyboard.press("Escape");
@@ -2110,8 +2035,8 @@ test("game boots, plays, and changes levels without errors", async ({
   await expect(page.locator(".store")).toHaveCount(0);
 
   // A gun from the bottom row goes in its slot, loaded and in hand, and the
-  // gun it replaces is traded in. (The shelf is made to have a shotgun, which
-  // replaces the AR-15 from the first floor, and to show an item the leader
+  // gun it replaces is traded in. (The shelf is given another gun, which
+  // replaces the AR-15 from the first floor in hand, and an item the leader
   // already has.)
   const gunOffer = await page.evaluate(() => {
     const entities = [...window.DEBUG.game!.entities.all] as any[];
@@ -2125,7 +2050,7 @@ test("game boots, plays, and changes levels without errors", async ({
     let card: any;
     for (let i = 0; i < 200 && !card; i++) {
       const gun = levelController.dealShelf(leader).gun;
-      if (gun?.weapon.ammoClass === "shotgun") {
+      if (gun) {
         card = gun;
       }
     }
@@ -2309,7 +2234,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expectNoIssues(issues);
 
   // --- Dealing: four different items, a gun every time (one from
-  // this floor's closet tier or the one above, tiers 2 and 3 on floor 2, that
+  // this floor's closet tier or the one above, tiers 1 and 2 in act 1, that
   // the leader isn't carrying and no store has had this run), and always a consumable; never an item the
   // leader can't take again. (Dealing uses up randomness, so this comes after
   // everything that depends on the seed.) ---
@@ -2365,17 +2290,20 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(deals.gunCount).toBe(100);
   for (const name of deals.gunNames) {
     expect([
+      "M1911",
+      "Glock",
+      "S&W Revolver",
+      "Five Seven",
       "Desert Eagle",
       "AR-15",
       "Sawn Off Shotgun",
-      "Remington Shotgun",
     ]).toContain(name);
     expect(deals.held).not.toContain(name);
     expect(name).not.toBe(STORE_SHELF.gun);
   }
   for (const description of deals.gunDescriptions) {
     expect(description).toMatch(
-      /^Tier [23] · \d+ (rounds|shells) · (semi auto|full auto|pump action)$/,
+      /^Tier [12] · \d+ (rounds|shells) · (semi auto|full auto|pump action)$/,
     );
   }
   for (const name of deals.maxedOut) {

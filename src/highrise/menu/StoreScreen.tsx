@@ -12,7 +12,7 @@ import type Human from "../human/Human";
 import type { Item } from "../items/Item";
 import { giveItem, markItemSeen, timesTaken } from "../items/items";
 import { itemPrice } from "../items/prices";
-import { SHELF_SLOTS, Shelf } from "../items/shelf";
+import { Shelf } from "../items/shelf";
 import { consumableImageUrl } from "../weapons/consumables/consumableImage";
 import "./menu.css";
 
@@ -28,16 +28,11 @@ export const DROP_TIME = 0.35;
 // Seconds the display says why it didn't sell something
 const MESSAGE_TIME = 1.5;
 
-// The slots in the order the selection moves through them: the 2×2 grid,
-// then the bottom row (the gun on the left, the consumable on the right)
-const COLUMNS = 2;
-export const GUN_INDEX = SHELF_SLOTS;
-export const CONSUMABLE_INDEX = SHELF_SLOTS + 1;
-const SLOT_COUNT = SHELF_SLOTS + 2;
-
 /**
  * The store's vending machine, seen from the front: the quarters on an LED
- * display, a 2×2 of items, and a bottom row with a gun and a consumable. Buying
+ * display, a 2×2 of items (4×2 in a big store), and a bottom row with a gun
+ * and a consumable. Slots are numbered row by row, then the gun and the
+ * consumable. Buying
  * something makes it wiggle and drop, and then it's yours; the slot is empty
  * for the rest of the floor. The game is paused while it's up.
  */
@@ -62,20 +57,35 @@ export default class StoreScreen extends ReactEntity implements Entity {
     super(() => this.renderContent());
   }
 
+  /** Where the gun and the consumable are in the numbering, after the items */
+  get gunIndex(): number {
+    return this.shelf.slots.length;
+  }
+  get consumableIndex(): number {
+    return this.shelf.slots.length + 1;
+  }
+  get slotCount(): number {
+    return this.shelf.slots.length + 2;
+  }
+  /** Columns of items: two, or four in a big store */
+  get columns(): number {
+    return this.shelf.slots.length > 4 ? 4 : 2;
+  }
+
   /** What's in slot `index` now (null once it's sold) */
   itemAt(index: number): Item | null {
-    if (index === GUN_INDEX) {
+    if (index === this.gunIndex) {
       return this.shelf.gun;
-    } else if (index === CONSUMABLE_INDEX) {
+    } else if (index === this.consumableIndex) {
       return this.shelf.consumable;
     }
     return this.shelf.slots[index] ?? null;
   }
 
   private emptySlot(index: number) {
-    if (index === GUN_INDEX) {
+    if (index === this.gunIndex) {
       this.shelf.gun = null;
-    } else if (index === CONSUMABLE_INDEX) {
+    } else if (index === this.consumableIndex) {
       this.shelf.consumable = null;
     } else {
       this.shelf.slots[index] = null;
@@ -103,19 +113,24 @@ export default class StoreScreen extends ReactEntity implements Entity {
       this.message !== undefined && this.game.elapsedTime < this.message.until;
     return (
       <div className="menu-screen store">
-        <div className="store__machine">
+        <div
+          className={`store__machine ${this.columns > 2 ? "store__machine--big" : ""}`}
+        >
           <div
             className={`store__display ${flashing ? "store__display--message" : ""}`}
           >
             {this.displayText}
           </div>
           <div className="store__window">
-            <div className="store__grid">
+            <div
+              className="store__grid"
+              style={{ gridTemplateColumns: `repeat(${this.columns}, 1fr)` }}
+            >
               {this.shelf.slots.map((_, i) => this.renderSlot(i))}
             </div>
             <div className="store__grid">
-              {this.renderSlot(GUN_INDEX)}
-              {this.renderSlot(CONSUMABLE_INDEX)}
+              {this.renderSlot(this.gunIndex)}
+              {this.renderSlot(this.consumableIndex)}
             </div>
           </div>
           <div className="store__label">
@@ -156,9 +171,9 @@ export default class StoreScreen extends ReactEntity implements Entity {
       classes.push("store__slot--vending");
     }
     const kind =
-      index === GUN_INDEX
+      index === this.gunIndex
         ? `${item.rarity} gun`
-        : index === CONSUMABLE_INDEX
+        : index === this.consumableIndex
           ? "throwable"
           : item.rarity;
     const image = item.weapon
@@ -198,14 +213,14 @@ export default class StoreScreen extends ReactEntity implements Entity {
     this.shownAt = data.game.elapsedTime;
     data.game.pause();
     // Seeing it on the shelf is enough for the encyclopedia
-    for (let i = 0; i < SLOT_COUNT; i++) {
+    for (let i = 0; i < this.slotCount; i++) {
       const item = this.itemAt(i);
       if (item) {
         markItemSeen(item);
       }
     }
     // Start on something that's for sale
-    const firstForSale = [...Array(SLOT_COUNT).keys()].find((i) =>
+    const firstForSale = [...Array(this.slotCount).keys()].find((i) =>
       this.itemAt(i),
     );
     this.selected = firstForSale ?? 0;
@@ -217,17 +232,30 @@ export default class StoreScreen extends ReactEntity implements Entity {
 
   select(index: number) {
     if (!this.done && !this.vending) {
-      this.selected = (index + SLOT_COUNT) % SLOT_COUNT;
+      this.selected = (index + this.slotCount) % this.slotCount;
     }
   }
 
-  /** Moves the selection around the grid, wrapping at the edges */
+  /**
+   * Moves the selection around the grid, wrapping at the edges. The bottom
+   * row's two slots each cover half the columns.
+   */
   move(dx: number, dy: number) {
-    const rows = SLOT_COUNT / COLUMNS;
-    const column = (this.selected % COLUMNS) + dx;
-    const row = Math.floor(this.selected / COLUMNS) + dy;
+    const columns = this.columns;
+    const itemRows = this.shelf.slots.length / columns;
+    const half = columns / 2;
+    // The row and (leftmost) column of what's selected
+    const bottom = this.selected >= this.gunIndex;
+    let row = bottom ? itemRows : Math.floor(this.selected / columns);
+    let column = bottom
+      ? (this.selected - this.gunIndex) * half
+      : this.selected % columns;
+    row = (row + dy + itemRows + 1) % (itemRows + 1);
+    column = (column + dx * (row === itemRows ? half : 1) + columns) % columns;
     this.select(
-      ((row + rows) % rows) * COLUMNS + ((column + COLUMNS) % COLUMNS),
+      row === itemRows
+        ? this.gunIndex + Math.floor(column / half)
+        : row * columns + column,
     );
   }
 

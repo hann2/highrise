@@ -1,3 +1,8 @@
+import {
+  ENEMY_DAMAGE_SCALE,
+  ENEMY_HP_SCALE,
+  getCurrentAct,
+} from "../../run/acts";
 import type Entity from "../../../core/entity/Entity";
 import { on } from "../../../core/entity/handler";
 import type { WithOwner } from "../../../core/entity/WithOwner";
@@ -35,6 +40,8 @@ const VISIBILITY_FADE_TIME = 0.15;
 
 export class BaseEnemy extends Creature implements Hittable, Flammable {
   hp: number = 100;
+  /** Multiplier on the damage it does (see `inflictDamageFrom`), set by act */
+  damageScale = 1;
   /** Quarters dropped on death, handed out when the level is generated */
   quarters: number = 0;
   burning?: Burning;
@@ -92,6 +99,11 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
 
   @on("add")
   onAdd() {
+    // Tougher and harder-hitting in later acts of the run
+    const act = getCurrentAct(this.game);
+    this.hp *= ENEMY_HP_SCALE[act - 1];
+    this.damageScale = ENEMY_DAMAGE_SCALE[act - 1];
+
     this.voice = this.addChild(this.makeVoice());
     this.aimSpring = new AimSpring(this.body);
     this.springs = [this.aimSpring];

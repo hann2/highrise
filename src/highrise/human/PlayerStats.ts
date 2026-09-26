@@ -53,6 +53,12 @@ export class PlayerStats {
   killAmmoDropChance = 0;
   /** Bullets set what they hit on fire */
   incendiaryRounds = false;
+  /** Multiplier on the quarters enemies drop for the leader */
+  quarterMultiplier = 1;
+  /** Times dying becomes a second chance instead (see `Human.inflictDamage`) */
+  extraLives = 0;
+  /** Seconds of a stim's effect at the start of every floor */
+  floorStimSeconds = 0;
 }
 
 /** The stats that are numbers (multipliers and amounts), not rule flags */

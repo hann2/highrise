@@ -7,7 +7,7 @@ import { Persistence } from "../constants/constants";
 import FadeEffect from "../effects/FadeEffect";
 import { getPartyLeader } from "../environment/PartyManager";
 import type Human from "../human/Human";
-import { dealShelf, Shelf } from "../items/shelf";
+import { BIG_SHELF_SLOTS, dealShelf, Shelf, SHELF_SLOTS } from "../items/shelf";
 import type { GunStats } from "../weapons/guns/GunStats";
 import { Level } from "../levels/Level";
 import { generateLevel } from "../levels/level-generation/levelGeneration";
@@ -26,6 +26,8 @@ const FORCE_TUTORIAL = process.env.NODE_ENV === "development" && false;
  */
 export default class LevelController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
+  // Found by tag where importing this class would make an import cycle
+  tags = ["level_controller"];
   currentLevel: number = 0;
   /** What was generated for the current level */
   level?: Level;
@@ -134,14 +136,18 @@ export default class LevelController extends BaseEntity implements Entity {
       human,
       this.template?.getBestGunTier() ?? 0,
       this.gunsDealt,
+      this.floor?.bigStore ? BIG_SHELF_SLOTS : SHELF_SLOTS,
     );
   }
 
   private makeTemplate(): LevelTemplate {
     const floor = this.floor;
-    return floor
-      ? new floor.template(floor.number, floor.difficulty)
-      : new TutorialLevel(this.currentLevel);
+    if (!floor) {
+      return new TutorialLevel(this.currentLevel);
+    }
+    const template = new floor.template(floor.number, floor.difficulty);
+    template.floor = floor;
+    return template;
   }
 }
 

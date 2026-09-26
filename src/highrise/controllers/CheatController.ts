@@ -30,8 +30,17 @@ export default class CheatController extends BaseEntity implements Entity {
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     switch (key) {
-      case "KeyL":
-        this.game.dispatch("levelComplete", undefined);
+      case "KeyL": // Finish the level; with shift, kill every enemy instead
+        if (
+          this.game.io.isKeyDown("ShiftLeft") ||
+          this.game.io.isKeyDown("ShiftRight")
+        ) {
+          for (const enemy of [...this.game.entities.getByFilter(isEnemy)]) {
+            enemy.die();
+          }
+        } else {
+          this.game.dispatch("levelComplete", undefined);
+        }
         break;
       case "KeyV":
         for (const visionController of this.game.entities.getByFilter(

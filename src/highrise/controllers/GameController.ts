@@ -26,6 +26,7 @@ import AmmoDropper from "./AmmoDropper";
 import CameraController from "./CameraController";
 import LevelController from "./LevelController";
 import QuarterDropper from "./QuarterDropper";
+import BossRewards from "./BossRewards";
 
 // The most top level class for deciding control flow
 export class GameController extends BaseEntity implements Entity {
@@ -57,6 +58,7 @@ export class GameController extends BaseEntity implements Entity {
       new RunStats(character),
       new EncyclopediaTracker(),
       new QuarterDropper(),
+      new BossRewards(),
       new AmmoDropper(),
       // Before the level starts, so it's sized to it
       new FireGrid(),

@@ -9,6 +9,8 @@ import { canTake, ITEMS } from "./items";
 
 /** How many item slots a store has, above the gun and the consumable */
 export const SHELF_SLOTS = 4;
+/** ...and a big store (on the floor after a landmark) */
+export const BIG_SHELF_SLOTS = 8;
 
 /**
  * What a store has for sale on one floor. A slot is null once it's been
@@ -32,10 +34,11 @@ export function dealShelf(
   bestGunTier: number,
   /** Guns that can't be dealt (ones earlier stores had) */
   excludedGuns: readonly GunStats[] = [],
+  slotCount: number = SHELF_SLOTS,
 ): Shelf {
   const pool = ITEMS.filter((item) => canTake(human, item));
   const slots: (Item | null)[] = [];
-  while (slots.length < SHELF_SLOTS) {
+  while (slots.length < slotCount) {
     slots.push(pool.length > 0 ? takeWeighted(pool) : null);
   }
   const gun = dealGunItem(human, bestGunTier, excludedGuns) ?? null;

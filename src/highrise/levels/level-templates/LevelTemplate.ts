@@ -37,11 +37,14 @@ import { AMMO_CLASSES } from "../../weapons/guns/ammo";
 import Gun from "../../weapons/guns/Gun";
 import { FiveSeven } from "../../weapons/guns/gun-stats/FiveSeven";
 import { Glock } from "../../weapons/guns/gun-stats/Glock";
-import { GUN_TIERS } from "../../weapons/guns/gun-stats/gunStats";
 import { M1911 } from "../../weapons/guns/gun-stats/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
-import { USABLES } from "../../weapons/usables/usables";
+import { HealthPack, USABLES } from "../../weapons/usables/usables";
+import ItemPickup from "../../environment/ItemPickup";
+import { ITEMS } from "../../items/items";
+import type { FloorPlan } from "../../run/RunPlan";
+import { ENEMY_BASE, ENEMY_PER_FLOOR } from "../../run/acts";
 import CellGrid, { Closet } from "../level-generation/CellGrid";
 import {
   QUARTER_PILES_PER_FLOOR,
@@ -72,16 +75,22 @@ export default class LevelTemplate {
   static floorNotes: readonly string[] = [];
 
   /**
-   * @param levelIndex the level number, for labels
-   * @param difficulty the level number the floor is tuned like: how many
-   *   enemies of which kinds, and which gun tiers turn up
-   */
-  /**
    * What the arrival room's store sells. Dealt by `LevelController` once the
    * level is generated; none on the first floor.
    */
   shelf?: Shelf;
 
+  /**
+   * Where this floor is in the run (act, keycard, big store). Set by
+   * `LevelController` before generating; none in the tutorial.
+   */
+  floor?: FloorPlan;
+
+  /**
+   * @param levelIndex the level number, for labels
+   * @param difficulty how hard the floor is: how many enemies of which kinds.
+   *   The floor number in a run.
+   */
   constructor(
     public levelIndex: number,
     public difficulty: number = levelIndex,
@@ -155,43 +164,42 @@ export default class LevelTemplate {
     return floor;
   }
 
-  // Puts enemies at the places they might go
+  /**
+   * Puts enemies at the places they might go: more of them, and more of the
+   * nasty kinds, the higher the floor. Stops early if it runs out of places.
+   */
   generateEnemies(locations: V2d[], seed: number): Entity[] {
-    const entities: Entity[] = [];
     const shuffled = [...seededShuffle(locations, seed)];
+    const floor = this.difficulty;
+    const total = ENEMY_BASE + ENEMY_PER_FLOOR * floor;
+    const sprinters = floor >= 2 ? 2 + floor : 0;
+    const spitters = floor >= 5 ? Math.ceil((floor - 4) / 2) : 0;
+    const heavies = floor >= 8 ? floor - 7 : 0;
+    const shamblers = Math.max(0, total - sprinters - spitters - heavies);
 
-    function nextLocation() {
-      const result = shuffled.pop();
-      if (!result) {
-        throw new Error("Not enough room for all the enemies");
+    const makers: ((at: V2d) => Entity)[] = [];
+    for (let i = 0; i < shamblers; i++) {
+      makers.push(
+        rBool(0.75) ? (at) => new Zombie(at) : (at) => new Crawler(at),
+      );
+    }
+    for (let i = 0; i < sprinters; i++) {
+      makers.push((at) => new Sprinter(at));
+    }
+    for (let i = 0; i < spitters; i++) {
+      makers.push((at) => new Spitter(at));
+    }
+    for (let i = 0; i < heavies; i++) {
+      makers.push((at) => new Heavy(at));
+    }
+    const entities: Entity[] = [];
+    for (const make of makers) {
+      const at = shuffled.pop();
+      if (!at) {
+        break;
       }
-      return result;
+      entities.push(make(at));
     }
-
-    const numZombies = 20 + this.difficulty * 10;
-    for (let i = 0; i < numZombies && shuffled.length > 0; i++) {
-      if (rBool(0.75)) {
-        entities.push(new Zombie(nextLocation()));
-      } else {
-        entities.push(new Crawler(nextLocation()));
-      }
-    }
-
-    if (this.difficulty > 1) {
-      const numSprinters = 5;
-      for (let i = 0; i < numSprinters; i++) {
-        entities.push(new Sprinter(nextLocation()));
-      }
-    }
-    if (this.difficulty > 2) {
-      entities.push(new Spitter(nextLocation()));
-      entities.push(new Spitter(nextLocation()));
-    }
-    if (this.difficulty > 3) {
-      entities.push(new Spitter(nextLocation()));
-      entities.push(new Heavy(nextLocation()));
-    }
-
     return entities;
   }
 
@@ -241,14 +249,7 @@ export default class LevelTemplate {
    * tier and the one above, and the armory from the one above
    */
   getBestGunTier(): number {
-    if (this.difficulty >= 5) {
-      return 3;
-    } else if (this.difficulty >= 4) {
-      return 2;
-    } else if (this.difficulty >= 2) {
-      return 1;
-    }
-    return 0;
+    return this.floor?.gunTier ?? 0;
   }
 
   /**
@@ -256,41 +257,39 @@ export default class LevelTemplate {
    * ones. There's only one keycard per floor, so the player picks one.
    */
   getLockedRooms(): LockedRoom[] {
-    const armoryTier = Math.min(
-      this.getBestGunTier() + 1,
-      GUN_TIERS.length - 1,
-    );
+    // Only on the act's keycard floor
+    if (!this.floor?.keycard) {
+      return [];
+    }
     return [
       {
         label: "ARMORY",
+        // Ammo for every gun, and an item (an attachment, once those exist)
         makePickups: (l, alongBackWall) => [
-          new WeaponPickup(
-            l.addScaled(alongBackWall, 0.3),
-            new Gun(choose(...GUN_TIERS[armoryTier])),
+          ...AMMO_CLASSES.map(
+            (ammoClass, i) =>
+              new AmmoPickup(
+                l.addScaled(alongBackWall, 0.5 - i * 0.3),
+                ammoClass,
+              ),
           ),
-          new ConsumablePickup(
-            l.addScaled(alongBackWall, -0.45),
-            choose(...CONSUMABLES),
-          ),
+          new ItemPickup(l.addScaled(alongBackWall, -0.45), choose(...ITEMS)),
         ],
       },
       {
-        label: "SUPPLY",
+        label: "INFIRMARY",
         makePickups: (l, alongBackWall) => [
           new HealthPickup(l.addScaled(alongBackWall, 0.5)),
           new HealthPickup(l),
-          new AmmoPickup(
-            l.addScaled(alongBackWall, -0.5),
-            choose(...AMMO_CLASSES),
-          ),
+          new UsablePickup(l.addScaled(alongBackWall, -0.5), HealthPack),
         ],
       },
     ];
   }
 
-  /** The keycard that opens one of the locked rooms */
+  /** The keycard that opens one of the locked rooms, if there are any */
   getKeycardPickup(): PickupMaker | undefined {
-    return (l) => new Keycard(l);
+    return this.floor?.keycard ? (l) => new Keycard(l) : undefined;
   }
 
   generateHallwayLight(positionLevelCoords: V2d): OverheadLight | undefined {

@@ -1,6 +1,7 @@
 import { RESOURCES } from "../../../resources/resources";
 import { CHARACTERS } from "../characters/Character";
 import { isCharacterUnlocked, SaveData } from "../persistence/SaveData";
+import { BOSS_ITEMS } from "../items/bossItems";
 import { ITEMS } from "../items/items";
 import { itemPrice } from "../items/prices";
 import { consumableImageUrl } from "../weapons/consumables/consumableImage";
@@ -125,13 +126,15 @@ const consumables: EncyclopediaSection = {
 const items: EncyclopediaSection = {
   title: "Items",
   getEntries: (save) =>
-    ITEMS.map((item) => ({
+    [...ITEMS, ...BOSS_ITEMS].map((item) => ({
       name: item.name,
       found: save.seen.items.includes(item.name),
-      tag: item.rarity,
+      tag: item.category === "boss" ? "boss" : item.rarity,
       description: item.description,
       stats: [
-        ["Price", `${itemPrice(item)} quarters`],
+        item.category === "boss"
+          ? (["From", "bosses"] as [string, string])
+          : (["Price", `${itemPrice(item)} quarters`] as [string, string]),
         ...(item.maxStacks === undefined
           ? []
           : [["Max stacks", String(item.maxStacks)] as [string, string]]),

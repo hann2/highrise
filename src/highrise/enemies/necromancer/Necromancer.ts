@@ -7,6 +7,7 @@ import { SPITTER_SOUNDS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import DeathOrb from "../../projectiles/DeathOrb";
 import Phlegm from "../../projectiles/Phlegm";
+import type Human from "../../human/Human";
 import { BaseEnemy } from "../base/Enemy";
 import { makeSimpleEnemyBody } from "../base/enemyUtils";
 import NecromancerController from "./NecromancerController";
@@ -56,6 +57,17 @@ export default class Necromancer extends BaseEnemy {
 
     this.aimSpring.stiffness = 50;
     this.aimSpring.damping = 5;
+  }
+
+  die(killer?: Human) {
+    if (this.isDestroyed) {
+      return;
+    }
+    this.game.dispatch("bossDied", {
+      boss: this,
+      position: this.getPosition().clone(),
+    });
+    super.die(killer);
   }
 
   // Override this because we do something more complicatd than a single attack
