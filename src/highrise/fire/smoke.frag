@@ -66,14 +66,22 @@ float fbm(vec3 p) {
   return sum / 0.9375;
 }
 
-// The noise at `p`, carried along `flow` (meters): two copies scrolling on
-// staggered cycles and cross-faded, so it moves forever without stretching
+// The noise at `p`, carried along `flow` (how far it moves in one cycle, in
+// noise units): three copies, each sliding for one cycle and then jumping
+// back, on staggered cycles and cross-faded so none is ever seen jumping.
+// Keep `flow` small next to the size of the noise's features (a fifth or so),
+// or the cross-fades show as the smoke flicking back the other way.
 float flowingNoise(vec3 p, vec2 flow, float time) {
-  float phaseA = fract(time);
-  float phaseB = fract(time + 0.5);
-  float a = fbm(vec3(p.xy - flow * phaseA, p.z));
-  float b = fbm(vec3(p.xy - flow * phaseB + 13.3, p.z));
-  return mix(a, b, abs(phaseA * 2.0 - 1.0));
+  float total = 0.0;
+  float weights = 0.0;
+  for (int i = 0; i < 3; i++) {
+    float phase = fract(time + float(i) / 3.0);
+    // Fully in halfway through its slide, fully out as it jumps
+    float weight = 1.0 - abs(phase * 2.0 - 1.0);
+    total += weight * fbm(vec3(p.xy - flow * phase + float(i) * 13.3, p.z));
+    weights += weight;
+  }
+  return total / weights;
 }
 
 void main(void) {
@@ -94,8 +102,9 @@ void main(void) {
     texture(uDensity, uv + vec2(0.0, uTexel.y)).r - texture(uDensity, uv - vec2(0.0, uTexel.y)).r
   ) * uMaxDensity;
   vec2 outward = -slope / (length(slope) + 0.15);
-  // How far the noise travels in one flow cycle (two seconds), in noise units
-  float cycle = 2.0;
+  // Short cycles, so each copy of the noise only slides a little way before
+  // it's swapped for another
+  float cycle = 0.4;
   vec2 flow = outward * uFlowSpeed * cycle;
 
   // Billows: thicker and thinner patches that drift and change
