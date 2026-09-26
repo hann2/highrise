@@ -38,16 +38,17 @@ const SHOOT_DURATION = 1.5;
 /**
  * A dev-only scene for looking at fire (`?scene=fire`), instead of the title
  * and the lobby: one room with the camera still on it, a player on the left
- * who can't die, a strip of fuel along the bottom wall that keeps burning, a
- * short wall sticking out of the top one, and a wall on the right with a
- * doorway at the bottom, making a second room. The player can walk around, shoot
- * a pistol and throw molotovs (they never run out), Z sends zombies in from
- * the right, and the cheat keys work.
+ * who can't die, a short wall sticking out of the top one, and a wall on the
+ * right with a doorway at the bottom, making a second room. The player can
+ * walk around, shoot a pistol and throw molotovs (they never run out), Z sends
+ * zombies in from the right, and the cheat keys work. `?strip` adds a strip of
+ * fire along the bottom wall that never goes out.
  *
- * `?auto` plays it by itself for recordings (see `bin/record-clip.ts`): over
- * and over it puts out the fire, has the player throw a molotov to the right,
- * sends zombies through it (taking them away before they reach the player),
- * and has the player shoot a sweep of shots through the smoke. `cycles` counts the molotovs, so a recording can wait for one.
+ * `?auto` plays it by itself for recordings (see `bin/record-clip.ts`), with
+ * the strip: over and over it puts out the fire, has the player throw a
+ * molotov to the right, sends zombies through it (taking them away before they
+ * reach the player), and has the player shoot a sweep of shots through the
+ * smoke. `cycles` counts the molotovs, so a recording can wait for one.
  * `?ambient=777777` sets the ambient light (the default is dim; the floors go
  * from 000000 to 777777) and `?floor=wood` the floor.
  */
@@ -62,6 +63,8 @@ export default class FireTestScene extends BaseEntity implements Entity {
   private grid!: FireGrid;
   /** Whether it plays by itself (`?auto`) */
   private auto = false;
+  /** Whether there's a fire along the bottom wall that never goes out */
+  private strip = false;
 
   @on("add")
   async onAdd() {
@@ -69,6 +72,7 @@ export default class FireTestScene extends BaseEntity implements Entity {
     const ambient = parseInt(params.get("ambient") ?? "303036", 16);
     const floor = params.get("floor") === "wood" ? woodFloor1 : cementFloor;
     this.auto = params.has("auto");
+    this.strip = this.auto || params.has("strip");
 
     // Humans carry lights, so this has to exist before anyone is added
     this.addChild(new LightingManager());
@@ -188,6 +192,9 @@ export default class FireTestScene extends BaseEntity implements Entity {
 
   /** The fire along the bottom wall that doesn't go out */
   private lightStrip() {
+    if (!this.strip) {
+      return;
+    }
     this.grid.addFuelAlong(V(1, HEIGHT - 0.6), V(7, HEIGHT - 0.6), 1e9);
     this.grid.igniteAt(V(1, HEIGHT - 0.6));
   }
