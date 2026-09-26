@@ -35,8 +35,9 @@ const PLAYER_POSITION = V(2.5, 4.5);
 /**
  * A dev-only scene for looking at fire (`?scene=fire`), instead of the title
  * and the lobby: one room with the camera still on it, a player on the left
- * who can't die, a strip of fuel along the bottom wall that keeps burning, and
- * a short wall sticking out of the top one. The player can walk around, shoot
+ * who can't die, a strip of fuel along the bottom wall that keeps burning, a
+ * short wall sticking out of the top one, and a wall on the right with a
+ * doorway at the bottom, making a second room. The player can walk around, shoot
  * a pistol and throw molotovs (they never run out), Z sends zombies in from
  * the right, and the cheat keys work.
  *
@@ -76,6 +77,8 @@ export default class FireTestScene extends BaseEntity implements Entity {
       new Wall([WIDTH, 0], [WIDTH, HEIGHT]),
       new Wall([0, HEIGHT], [WIDTH, HEIGHT]),
       new Wall([9, 0], [9, 2.5]),
+      // A second room, through a doorway
+      new Wall([12, 0], [12, 5.5]),
     );
     this.player = this.addChild(new Human(PLAYER_POSITION, CHARACTERS[0]));
     this.addChild(new PlayerHumanController(() => this.player));
@@ -176,7 +179,7 @@ export default class FireTestScene extends BaseEntity implements Entity {
   /** Three zombies from the right, coming for the player */
   private sendZombies() {
     for (let i = 0; i < 3; i++) {
-      const position = V(WIDTH - 1.5 - i * 0.6, 3.3 + i * 1.1);
+      const position = V(WIDTH - 1.5 - i * 0.6, 6.2 + i * 0.7);
       this.game.addEntity(new Zombie(position));
     }
   }

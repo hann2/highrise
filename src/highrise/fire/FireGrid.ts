@@ -15,6 +15,7 @@ import { PointLight } from "../lighting-and-vision/PointLight";
 import { ignite } from "./Burning";
 import FireRenderer from "./FireRenderer";
 import FloorMarks from "./FloorMarks";
+import SmokeField from "./SmokeField";
 import {
   FIRE_CELL_SIZE,
   CELL_LIGHT_INTENSITY,
@@ -83,9 +84,13 @@ export default class FireGrid extends BaseEntity implements Entity {
   /** One light per burning cell, in the "cells" light mode */
   private cellLights = new Map<number, PointLight>();
 
+  /** The smoke from the fire */
+  smoke: SmokeField;
+
   constructor() {
     super();
     this.marks = this.addChild(new FloorMarks(this));
+    this.smoke = this.addChild(new SmokeField(this));
   }
 
   @on("add")
@@ -109,6 +114,7 @@ export default class FireGrid extends BaseEntity implements Entity {
     this.burnAge = new Float32Array(count);
     this.scorch = new Float32Array(count);
     this.marks.reset(width, height);
+    this.smoke.reset();
     this.clear();
   }
 
@@ -120,6 +126,7 @@ export default class FireGrid extends BaseEntity implements Entity {
     this.cellsWithFuel.clear();
     this.fuelVersion += 1;
     this.marks.clear();
+    this.smoke.clear();
     this.sources.clear();
     this.burningCells.clear();
     this.removeLights();

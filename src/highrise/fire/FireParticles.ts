@@ -14,16 +14,17 @@ import {
   EMBERS_PER_CELL,
   EMBERS_WHEN_LIT,
   MAX_EMBERS,
-  MAX_SMOKE,
-  SMOKE_ALPHA,
-  SMOKE_COLOR,
-  SMOKE_DRAUGHT,
-  SMOKE_GROWTH,
-  SMOKE_LIFE,
-  SMOKE_SIZE,
-  SMOKE_WHEN_LIT,
-  SMOKE_PER_BURNING,
-  SMOKE_PER_CELL,
+  MAX_PUFFS,
+  PUFF_ALPHA,
+  PUFF_COLOR,
+  PUFF_DRAUGHT,
+  PUFF_GROWTH,
+  PUFF_LIFE,
+  PUFF_SIZE,
+  PUFF_WHEN_LIT,
+  SMOKE_PUFFS,
+  PUFFS_PER_BURNING,
+  PUFFS_PER_CELL,
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
 
@@ -90,13 +91,13 @@ export default class FireParticles extends BaseEntity implements Entity {
       sprite.scale.set((p.size * (1 + 0.8 * t)) / 64);
     });
     this.update(this.smoke, this.spareSmoke, dt, (p, t) => {
-      p.vx += SMOKE_DRAUGHT[0] * dt;
-      p.vy += SMOKE_DRAUGHT[1] * dt;
+      p.vx += PUFF_DRAUGHT[0] * dt;
+      p.vy += PUFF_DRAUGHT[1] * dt;
       p.vx *= 1 - 0.6 * dt;
       p.vy *= 1 - 0.6 * dt;
       const sprite = p.sprite;
-      sprite.alpha = SMOKE_ALPHA * Math.sin(Math.PI * Math.sqrt(t));
-      sprite.scale.set((p.size * (1 + (SMOKE_GROWTH - 1) * t)) / 128);
+      sprite.alpha = PUFF_ALPHA * Math.sin(Math.PI * Math.sqrt(t));
+      sprite.scale.set((p.size * (1 + (PUFF_GROWTH - 1) * t)) / 128);
       sprite.rotation = p.spin + p.age * 0.3;
     });
   }
@@ -112,7 +113,7 @@ export default class FireParticles extends BaseEntity implements Entity {
         for (let i = 0; i < EMBERS_WHEN_LIT; i++) {
           this.addEmber(x, y, 1.6);
         }
-        if (random() < SMOKE_WHEN_LIT) {
+        if (SMOKE_PUFFS && random() < PUFF_WHEN_LIT) {
           this.addSmoke(x, y, 1);
         }
       }
@@ -126,7 +127,7 @@ export default class FireParticles extends BaseEntity implements Entity {
       (cells.length * EMBERS_PER_CELL + burning.length * EMBERS_PER_BURNING) *
       dt;
     this.smokeDebt +=
-      (cells.length * SMOKE_PER_CELL + burning.length * SMOKE_PER_BURNING) * dt;
+      (cells.length * PUFFS_PER_CELL + burning.length * PUFFS_PER_BURNING) * dt;
     const pickSource = (): [number, number, number] | undefined => {
       const total = cells.length + burning.length;
       if (total === 0) {
@@ -146,6 +147,9 @@ export default class FireParticles extends BaseEntity implements Entity {
       if (source && random() < source[2]) {
         this.addEmber(source[0], source[1], 1);
       }
+    }
+    if (!SMOKE_PUFFS) {
+      this.smokeDebt = 0;
     }
     for (; this.smokeDebt >= 1; this.smokeDebt -= 1) {
       const source = pickSource();
@@ -177,7 +181,7 @@ export default class FireParticles extends BaseEntity implements Entity {
   }
 
   private addSmoke(x: number, y: number, size: number) {
-    if (this.smoke.length >= MAX_SMOKE) {
+    if (this.smoke.length >= MAX_PUFFS) {
       return;
     }
     const random = this.random;
@@ -188,15 +192,15 @@ export default class FireParticles extends BaseEntity implements Entity {
       this.smokeTexture,
       "normal",
     );
-    sprite.tint = SMOKE_COLOR;
+    sprite.tint = PUFF_COLOR;
     this.smoke.push({
       x: x + (random() - 0.5) * 0.5,
       y: y + (random() - 0.5) * 0.5,
       vx: Math.cos(angle) * v,
       vy: Math.sin(angle) * v,
       age: 0,
-      life: SMOKE_LIFE[0] + random() * (SMOKE_LIFE[1] - SMOKE_LIFE[0]),
-      size: (SMOKE_SIZE[0] + random() * (SMOKE_SIZE[1] - SMOKE_SIZE[0])) * size,
+      life: PUFF_LIFE[0] + random() * (PUFF_LIFE[1] - PUFF_LIFE[0]),
+      size: (PUFF_SIZE[0] + random() * (PUFF_SIZE[1] - PUFF_SIZE[0])) * size,
       spin: random() * Math.PI * 2,
       sprite,
     });

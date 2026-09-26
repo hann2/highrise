@@ -60,24 +60,50 @@ export const EMBER_SPEED = 1.2;
 /** The color of a new ember, and of one about to go out */
 export const EMBER_COLORS = [0xffd070, 0xc02000] as const;
 export const MAX_EMBERS = 400;
+/**
+ * Whether puffs of smoke come off fire. Off while the smoke field
+ * (`SmokeField`) is being tried out on its own.
+ */
+export const SMOKE_PUFFS = false;
 /** Puffs of smoke a second from each burning cell, at full heat */
-export const SMOKE_PER_CELL = 1;
+export const PUFFS_PER_CELL = 1;
 /** Puffs of smoke a second from each burning enemy or human */
-export const SMOKE_PER_BURNING = 5;
+export const PUFFS_PER_BURNING = 5;
 /** Chance that a cell puffs out smoke as it catches */
-export const SMOKE_WHEN_LIT = 1;
-export const SMOKE_COLOR = 0xb4aca4;
+export const PUFF_WHEN_LIT = 1;
+export const PUFF_COLOR = 0xb4aca4;
 /** How thick a puff of smoke is at its thickest (its alpha) */
-export const SMOKE_ALPHA = 0.85;
+export const PUFF_ALPHA = 0.85;
 /** Meters across a new puff of smoke: the least and the most */
-export const SMOKE_SIZE = [2, 3.5] as const;
+export const PUFF_SIZE = [2, 3.5] as const;
 /** How many times its size a puff grows to by the time it's gone */
-export const SMOKE_GROWTH = 3;
+export const PUFF_GROWTH = 3;
 /** Seconds a puff of smoke lasts: the least and the most */
-export const SMOKE_LIFE = [4, 8] as const;
+export const PUFF_LIFE = [4, 8] as const;
 /** Which way smoke drifts, in meters per second per second */
-export const SMOKE_DRAUGHT = [0.4, -0.25] as const;
-export const MAX_SMOKE = 800;
+export const PUFF_DRAUGHT = [0.4, -0.25] as const;
+export const MAX_PUFFS = 800;
+
+// --- The smoke field (see `SmokeField.ts` and `smoke.frag`) ---
+
+/** Smoke a second a burning cell puts into its cell, at full heat */
+export const SMOKE_FROM_CELL = 4;
+/** Smoke a second a burning enemy or human puts into its cell */
+export const SMOKE_FROM_BURNING = 3;
+/**
+ * How fast smoke evens out between neighboring cells: the fraction of the
+ * difference that flows each second (capped for stability)
+ */
+export const SMOKE_SPREAD = 3;
+/** Seconds for smoke to thin out to about a third, wherever it is */
+export const SMOKE_CLEAR_TIME = 25;
+/** The density at which the density texture maxes out */
+export const SMOKE_MAX_DENSITY = 4;
+export const SMOKE_COLOR = 0xa8a098;
+/** How thick the thickest smoke is (its alpha) */
+export const SMOKE_ALPHA = 0.85;
+/** Meters the smoke shader pushes the density around by */
+export const SMOKE_WARP = 0.3;
 
 // --- Burning (see `Burning.ts`) ---
 
