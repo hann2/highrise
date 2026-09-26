@@ -35,6 +35,10 @@ export const FIRE_LIGHT_FULL_PATCH = 60;
 export const FIRE_LIGHT_MIN_RADIUS = 6;
 /** ...plus up to this much for a big one */
 export const FIRE_LIGHT_EXTRA_RADIUS = 6;
+/** Meters the light of one burning cell reaches, in the "cells" light mode */
+export const CELL_LIGHT_RADIUS = 5;
+/** How bright the light of one burning cell is, in the "cells" light mode */
+export const CELL_LIGHT_INTENSITY = 0.1;
 /** Meters the light of a burning enemy reaches */
 export const BURNING_LIGHT_RADIUS = 4;
 /** How bright the light of a burning enemy is, next to a fire on the floor */

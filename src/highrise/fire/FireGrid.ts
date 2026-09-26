@@ -18,6 +18,8 @@ import { PointLight } from "../lighting-and-vision/PointLight";
 import { ignite } from "./Burning";
 import {
   FIRE_CELL_SIZE,
+  CELL_LIGHT_INTENSITY,
+  CELL_LIGHT_RADIUS,
   FIRE_LIGHT_EXTRA_RADIUS,
   FIRE_LIGHT_FULL_PATCH,
   FIRE_LIGHT_MIN_RADIUS,
@@ -63,9 +65,16 @@ export default class FireGrid extends BaseEntity implements Entity {
   private sources = new Map<number, Human | undefined>();
   /** Indexes of the cells that are burning */
   private burningCells = new Set<number>();
+  /**
+   * How fire on the floor is lit: one light per patch of fire, or (to see
+   * what it costs) one per burning cell. An experiment; one will go.
+   */
+  lightMode: "patches" | "cells" | "none" = "patches";
   /** One light per patch of fire (see `updateLights`) */
   private lights: FireLight[] = [];
   private nextLightPhase = 0;
+  /** One light per burning cell, in the "cells" light mode */
+  private cellLights = new Map<number, PointLight>();
 
   /** Fuel stains and scorch marks, redrawn only when they change */
   private floorGraphics = new Graphics();
@@ -114,13 +123,31 @@ export default class FireGrid extends BaseEntity implements Entity {
     this.scorched.fill(0);
     this.sources.clear();
     this.burningCells.clear();
+    this.removeLights();
+    this.floorDirty = true;
+  }
+
+  private removeLights() {
     for (const { light } of this.lights) {
       if (!light.isDestroyed) {
         light.destroy();
       }
     }
     this.lights = [];
-    this.floorDirty = true;
+    for (const light of this.cellLights.values()) {
+      if (!light.isDestroyed) {
+        light.destroy();
+      }
+    }
+    this.cellLights.clear();
+  }
+
+  /** Switches between the light modes (see `lightMode`) */
+  setLightMode(mode: "patches" | "cells" | "none") {
+    if (mode !== this.lightMode) {
+      this.removeLights();
+      this.lightMode = mode;
+    }
   }
 
   /** The index of the cell at `position`, or -1 outside the grid */
@@ -320,7 +347,38 @@ export default class FireGrid extends BaseEntity implements Entity {
       this.drawFloor();
     }
     this.drawFire();
-    this.updateLights();
+    if (this.lightMode === "cells") {
+      this.updateCellLights();
+    } else if (this.lightMode === "patches") {
+      this.updateLights();
+    }
+  }
+
+  /** One small, dim light per burning cell, each flickering on its own */
+  private updateCellLights() {
+    for (const [cell, light] of this.cellLights) {
+      if (this.burnAge[cell] < 0) {
+        light.destroy();
+        this.cellLights.delete(cell);
+      }
+    }
+    const t = this.game.elapsedUnpausedTime;
+    for (const cell of this.burningCells) {
+      let light = this.cellLights.get(cell);
+      if (!light) {
+        light = this.addChild(
+          new PointLight({
+            radius: CELL_LIGHT_RADIUS,
+            intensity: 0,
+            position: this.cellCenter(cell),
+          }),
+        );
+        this.cellLights.set(cell, light);
+      }
+      const { intensity, color } = fireLightFlicker(t, cell * 0.37);
+      light.setIntensity(CELL_LIGHT_INTENSITY * intensity);
+      light.setColor(color);
+    }
   }
 
   private drawFloor() {

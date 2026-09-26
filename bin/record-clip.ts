@@ -3,6 +3,7 @@
  * playing the game. Needs a dev server running (`npm run dev-server`).
  *
  *   npm run clip -- [--scene fire] [--seconds 6] [--port 1234] [--out file.mp4]
+ *     [--query "profile=1&fireLights=cells"]
  *
  * Waits for the scene's second cycle (so the first-time costs of compiling
  * shaders and loading are out of the way), records `seconds` of it at
@@ -26,6 +27,8 @@ const scene = arg("scene", "fire");
 const seconds = Number(arg("seconds", "6"));
 const port = arg("port", "1234");
 const out = arg("out", `tests/output/${scene}.mp4`);
+// More of the URL, like "profile=1&fireLights=cells"
+const query = arg("query", "");
 
 async function main() {
   const videoDir = mkdtempSync(path.join(tmpdir(), "highrise-clip-"));
@@ -41,7 +44,9 @@ async function main() {
   const recordingStart = Date.now();
   page.on("pageerror", (error) => console.error("pageerror:", error.message));
 
-  await page.goto(`http://localhost:${port}/?scene=${scene}&seed=1`);
+  await page.goto(
+    `http://localhost:${port}/?scene=${scene}&seed=1${query ? `&${query}` : ""}`,
+  );
   // The start of the second cycle
   await page.waitForFunction(
     () =>

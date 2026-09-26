@@ -1,6 +1,7 @@
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
+import { KeyCode } from "../../core/io/Keys";
 import { V } from "../../core/Vector";
 import { CHARACTERS } from "../characters/Character";
 import { Persistence } from "../constants/constants";
@@ -75,12 +76,30 @@ export default class FireTestScene extends BaseEntity implements Entity {
     vision.enabled = false;
     this.grid = this.addChild(new FireGrid());
     this.grid.reset(WIDTH, HEIGHT);
+    const lightMode = params.get("fireLights");
+    if (
+      lightMode === "cells" ||
+      lightMode === "patches" ||
+      lightMode === "none"
+    ) {
+      this.grid.setLightMode(lightMode);
+    }
 
     this.game.camera.z = 75;
     this.game.camera.center(V(WIDTH / 2, HEIGHT / 2));
 
     await this.wait(0.5);
     this.throwMolotov();
+  }
+
+  /** C switches how fire is lit (see `FireGrid.lightMode`) */
+  @on("keyDown")
+  onKeyDown({ key }: { key: KeyCode }) {
+    if (key === "KeyC") {
+      this.grid.setLightMode(
+        this.grid.lightMode === "cells" ? "patches" : "cells",
+      );
+    }
   }
 
   @on("tick")
