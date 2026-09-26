@@ -19,7 +19,8 @@
     "watch-manifest": "tsx ./bin/generate-manifest.ts watch",
     "test:physics": "tsx --test tests/physics/*.test.ts",
     "test:vision": "tsx --test tests/vision/*.test.ts",
-    "test:characters": "tsx --test tests/characters/*.test.ts"
+    "test:characters": "tsx --test tests/characters/*.test.ts",
+    "clip": "tsx bin/record-clip.ts"
   },
   "author": "Philip Hann, Simon Baumgardt-Wellander",
   "license": "MIT",

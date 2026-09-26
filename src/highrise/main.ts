@@ -16,6 +16,7 @@ import { GameController } from "./controllers/GameController";
 import { GraphicsQualityController } from "./controllers/GraphicsQualityController";
 import MusicController from "./controllers/MusicController";
 import VolumeController from "./controllers/VolumeController";
+import FireTestScene from "./fire/FireTestScene";
 import { isHuman } from "./human/Human";
 import { loadSaveData } from "./persistence/SaveData";
 import Preloader from "./preloader/Preloader";
@@ -77,6 +78,15 @@ export async function main() {
 
   if (process.env.NODE_ENV === "development") {
     game.addEntity(new CheatController());
+  }
+
+  // ?scene=fire (development only) skips the menus for a fire test scene
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "fire"
+  ) {
+    game.addEntity(new FireTestScene());
+    return;
   }
 
   game.dispatch("goToLobby", { showTitle: true });
