@@ -49,7 +49,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - `assets/` — not shipped: `assets/source` (design files), `assets/unused` (audio/images not currently used)
 - `bin/generate-manifest.ts` — generates `resources/resources.ts`
 - `tests/` — Playwright e2e (`*.spec.ts`), physics node tests (`physics/`), reference screenshots
-- `notes/` — design notes. `roguelike-redesign.md` is the design doc and the backlog (unfinished features, open questions and leftovers); the other files are idea lists
+- `notes/` — design notes. `roguelike-redesign.md` is the design doc and the backlog (unfinished features, open questions and leftovers), `fire.md` is the fire design, `lighting-ideas.md` holds tabled lighting features; the other files are idea lists
 
 ## Architecture conventions
 
