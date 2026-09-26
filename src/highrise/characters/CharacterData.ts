@@ -44,7 +44,7 @@ export interface CharacterData {
   description: string;
   /** Image names from the manifest */
   textures: Record<(typeof CHARACTER_TEXTURE_PARTS)[number], string>;
-  /** Changes to the neutral `PlayerStats`, applied before any upgrades */
+  /** Changes to the neutral `PlayerStats`, applied before any items */
   stats: Partial<PlayerStats>;
   /** Weapon names (`WeaponStats.name`), given at the start of a run and to them as a survivor */
   startingWeapons: string[];

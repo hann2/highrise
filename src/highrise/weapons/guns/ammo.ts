@@ -39,7 +39,7 @@ export const MAX_RESERVE: Record<LimitedAmmoClass, number> = {
 
 /** Chance that an enemy drops an ammo box when it dies */
 export const AMMO_DROP_CHANCE = 0.03;
-/** Chance per kill with the Scavenger upgrade, on top of `AMMO_DROP_CHANCE` */
+/** Chance per kill with the Scavenger item, on top of `AMMO_DROP_CHANCE` */
 export const SCAVENGER_DROP_CHANCE = 0.15;
 
 export function isLimitedAmmo(

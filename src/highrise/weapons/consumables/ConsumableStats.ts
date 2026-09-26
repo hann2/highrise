@@ -16,7 +16,7 @@ export interface DetonationSound {
  */
 export interface ConsumableStats {
   readonly name: string;
-  /** One line for upgrade cards and pickups */
+  /** One line for store cards and pickups */
   readonly description: string;
   /** Most of these one human can carry */
   readonly maxCarry: number;

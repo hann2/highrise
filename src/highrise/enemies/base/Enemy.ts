@@ -35,6 +35,8 @@ const VISIBILITY_FADE_TIME = 0.15;
 
 export class BaseEnemy extends Creature implements Hittable, Flammable {
   hp: number = 100;
+  /** Quarters dropped on death, handed out when the level is generated */
+  quarters: number = 0;
   burning?: Burning;
   burnTime = ENEMY_BURN_TIME;
   burnDps = ENEMY_BURN_DPS;

@@ -4,32 +4,48 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { GameSprite } from "../../../core/entity/GameSprite";
 import { fontName } from "../../../core/resources/resourceUtils";
-import { choose, rBool } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import ArrivalRoom from "../../environment/ArrivalRoom";
 import { cementFloor } from "../../environment/decorations/decorations";
 import DirectoryPlaque from "../../environment/DirectoryPlaque";
+import Door from "../../environment/Door";
 import HealthPickup from "../../environment/HealthPickup";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import SpawnLocation from "../../environment/SpawnLocation";
-import WeaponPickup from "../../environment/WeaponPickup";
-import Gun from "../../weapons/guns/Gun";
-import { GUN_TIERS } from "../../weapons/guns/gun-stats/gunStats";
-import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
-import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
+import StoreMachine from "../../environment/StoreMachine";
+import type { Shelf } from "../../items/shelf";
+import { Direction } from "../../utils/directions";
 import { DoorBuilder, WallBuilder, WallID } from "../level-generation/CellGrid";
 import { RoomTransformer } from "./ElementTransformer";
 import RoomTemplate from "./RoomTemplate";
 import { defaultDoors, defaultOccupiedCells, defaultWalls } from "./roomUtils";
 
 const DIMENSIONS = V(3, 3);
+// The only way out, on the right of the upper right cell
 const DOORS: WallID[] = [[V(2, 0), true]];
+// Against the bottom wall of the lower right cell, facing into the room
+const STORE_POSITION = V(2, 2.05);
 
+/**
+ * Where a floor starts. On the floors of a run (not the tutorial) it's an
+ * `ArrivalRoom`, whose door swings out and locks once the leader leaves, and
+ * from the second floor on it has the store and the directory plaque.
+ */
 export default class SpawnRoom implements RoomTemplate {
+  private door?: Door;
+
   constructor(
     private levelIndex: number,
     private difficulty: number = levelIndex,
+    /** What the store sells, once it's been dealt */
+    private getShelf: () => Shelf | undefined = () => undefined,
   ) {}
+
+  /** The tutorial's spawn room is an ordinary room */
+  private get isRunFloor(): boolean {
+    return this.levelIndex > 0;
+  }
 
   getOccupiedCells(): V2d[] {
     return defaultOccupiedCells(DIMENSIONS, DOORS);
@@ -40,7 +56,15 @@ export default class SpawnRoom implements RoomTemplate {
   }
 
   generateDoors(): DoorBuilder[] {
-    return defaultDoors(DOORS);
+    if (!this.isRunFloor) {
+      return defaultDoors(DOORS);
+    }
+    return defaultDoors(DOORS).map((d) => ({
+      ...d,
+      // Swings out into the hallway, never back in
+      opensToward: Direction.RIGHT,
+      onBuilt: (door: Door) => (this.door = door),
+    }));
   }
 
   generateEntities({
@@ -73,52 +97,16 @@ export default class SpawnRoom implements RoomTemplate {
     entities.push(new SpawnLocation(roomToWorldPosition(V(1, 1))));
     entities.push(new SpawnLocation(roomToWorldPosition(V(2, 1))));
 
-    if (this.levelIndex > 0) {
-      const starterWeapon = rBool(0.5)
-        ? new MeleeWeapon(choose(...MELEE_WEAPONS))
-        : new Gun(choose(...GUN_TIERS[0]));
+    // The store, from the second floor on: the first floor's quarters are
+    // spent at the start of the second
+    if (this.levelIndex > 1) {
       entities.push(
-        new WeaponPickup(roomToWorldPosition(V(0.5, 0.25)), starterWeapon),
+        new StoreMachine(
+          roomToWorldPosition(STORE_POSITION),
+          roomToWorldAngle(0),
+          this.getShelf,
+        ),
       );
-    }
-
-    // Better guns on harder floors
-    switch (this.difficulty) {
-      case 1:
-        // Only starter
-        break;
-      case 2:
-        entities.push(
-          new WeaponPickup(
-            roomToWorldPosition(V(1.5, 0.25)),
-            new Gun(choose(...GUN_TIERS[1])),
-          ),
-        );
-        break;
-      case 3:
-        entities.push(
-          new WeaponPickup(
-            roomToWorldPosition(V(1.5, 0.25)),
-            new Gun(choose(...GUN_TIERS[1], ...GUN_TIERS[2])),
-          ),
-        );
-        break;
-      case 4:
-        entities.push(
-          new WeaponPickup(
-            roomToWorldPosition(V(1.5, 0.25)),
-            new Gun(choose(...GUN_TIERS[2])),
-          ),
-        );
-        break;
-      case 5:
-        entities.push(
-          new WeaponPickup(
-            roomToWorldPosition(V(1.5, 0.25)),
-            new Gun(choose(...GUN_TIERS[3])),
-          ),
-        );
-      default:
     }
 
     if (this.difficulty > 1) {
@@ -133,13 +121,22 @@ export default class SpawnRoom implements RoomTemplate {
       DIMENSIONS.sub(V(1, 1)).mul(0.5),
     );
     const dimensionsWorldCoords = roomToWorldDimensions(DIMENSIONS);
-    entities.push(
-      new RepeatingFloor(
-        cementFloor,
-        centerWorldCoords.sub(dimensionsWorldCoords.mul(0.5)),
-        dimensionsWorldCoords,
-      ),
+    const cornerWorldCoords = centerWorldCoords.sub(
+      dimensionsWorldCoords.mul(0.5),
     );
+    entities.push(
+      new RepeatingFloor(cementFloor, cornerWorldCoords, dimensionsWorldCoords),
+    );
+
+    if (this.isRunFloor) {
+      entities.push(
+        new ArrivalRoom(
+          cornerWorldCoords,
+          cornerWorldCoords.add(dimensionsWorldCoords),
+          () => this.door,
+        ),
+      );
+    }
 
     return entities;
   }

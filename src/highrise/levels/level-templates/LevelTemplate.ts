@@ -25,6 +25,7 @@ import ConsumablePickup from "../../environment/ConsumablePickup";
 import HealthPickup from "../../environment/HealthPickup";
 import Keycard from "../../environment/Keycard";
 import { OverheadLight } from "../../environment/lighting/OverheadLight";
+import { quarterPile } from "../../environment/Quarter";
 import RepeatingFloor from "../../environment/RepeatingFloor";
 import WeaponPickup from "../../environment/WeaponPickup";
 import Human from "../../human/Human";
@@ -40,6 +41,11 @@ import { M1911 } from "../../weapons/guns/gun-stats/M1911";
 import { MELEE_WEAPONS } from "../../weapons/melee/melee-weapons/meleeWeapons";
 import MeleeWeapon from "../../weapons/melee/MeleeWeapon";
 import CellGrid, { Closet } from "../level-generation/CellGrid";
+import {
+  QUARTER_PILES_PER_FLOOR,
+  QUARTERS_PER_PILE,
+} from "../../items/quarters";
+import type { Shelf } from "../../items/shelf";
 import RoomTemplate from "../rooms/RoomTemplate";
 import { CLOSET_DECORATORS } from "./helpers/closetHelpers";
 import { NUBBY_DECORATORS } from "./helpers/nubbyHelpers";
@@ -68,6 +74,12 @@ export default class LevelTemplate {
    * @param difficulty the level number the floor is tuned like: how many
    *   enemies of which kinds, and which gun tiers turn up
    */
+  /**
+   * What the arrival room's store sells. Dealt by `LevelController` once the
+   * level is generated; none on the first floor.
+   */
+  shelf?: Shelf;
+
   constructor(
     public levelIndex: number,
     public difficulty: number = levelIndex,
@@ -213,6 +225,13 @@ export default class LevelTemplate {
       pickups.push(
         (l) => new WeaponPickup(l, new Gun(choose(...GUN_TIERS[3]))),
       );
+    }
+
+    // Some of the floor's quarters, last so that they only take closets
+    // nothing else needs. Enemies carry the rest, including any that didn't
+    // fit (see `entityPlacement`).
+    for (let i = 0; i < QUARTER_PILES_PER_FLOOR; i++) {
+      pickups.push((l, along) => quarterPile(l, along, QUARTERS_PER_PILE));
     }
 
     return pickups;

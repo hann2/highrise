@@ -10,7 +10,7 @@
     "torso": "andyTorso"
   },
   "stats": {},
-  "startingWeapons": [],
+  "startingWeapons": ["M1911"],
   "clips": [
     {
       "file": "andy-join-party-1.flac",

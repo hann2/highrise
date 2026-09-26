@@ -26,8 +26,8 @@ export default class RunStats extends BaseEntity implements Entity {
   partyDead = false;
   /** What killed the leader */
   lastDeathCause?: string;
-  /** Names of upgrades taken, in order. Filled in by the upgrade system. */
-  upgrades: string[] = [];
+  /** Names of items bought, in order. Filled in by `giveItem`. */
+  items: string[] = [];
   /** Names of characters unlocked during this run */
   charactersUnlocked: string[] = [];
 
@@ -90,8 +90,8 @@ export default class RunStats extends BaseEntity implements Entity {
     this.quartersSpent += amount;
   }
 
-  recordUpgrade(name: string) {
-    this.upgrades.push(name);
+  recordItem(name: string) {
+    this.items.push(name);
   }
 
   recordCharacterUnlocked(name: string) {
@@ -118,7 +118,7 @@ export default class RunStats extends BaseEntity implements Entity {
         causeOfDeath: this.partyDead
           ? (this.lastDeathCause ?? "Unknown")
           : undefined,
-        upgrades: [...this.upgrades],
+        items: [...this.items],
         charactersUnlocked: [...this.charactersUnlocked],
       };
       recordRun(this.summary);

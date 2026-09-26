@@ -1,8 +1,11 @@
 import Entity from "../../../core/entity/Entity";
-import { rInteger } from "../../../core/util/Random";
+import { rInteger, shuffle } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
 import { CELL_SIZE } from "../../constants/constants";
+import { isEnemy } from "../../enemies/base/Enemy";
 import Exit from "../../environment/Exit";
+import Quarter from "../../environment/Quarter";
+import { QUARTERS_PER_FLOOR } from "../../items/quarters";
 import { DIAGONAL_DIRECTIONS, Direction } from "../../utils/directions";
 import LevelTemplate from "../level-templates/LevelTemplate";
 import CellGrid from "./CellGrid";
@@ -49,6 +52,11 @@ export function generateLevelEntities(
   ];
 
   const enemies = levelTemplate.generateEnemies(potentialEnemyLocations, seed);
+  // The tutorial's quarters are whatever it puts down itself
+  if (levelTemplate.levelIndex > 0) {
+    const inCloset = closetEntities.filter((e) => e instanceof Quarter).length;
+    giveEnemiesQuarters(enemies, QUARTERS_PER_FLOOR - inCloset);
+  }
 
   const subFloor = levelTemplate.makeSubfloor([
     cellGrid.width * CELL_SIZE,
@@ -71,6 +79,14 @@ export function generateLevelEntities(
   ];
 
   return entities;
+}
+
+/** Hands `count` quarters out to random enemies, one each while they last */
+function giveEnemiesQuarters(entities: Entity[], count: number) {
+  const carriers = shuffle(entities.filter(isEnemy));
+  for (let i = 0; i < count && carriers.length > 0; i++) {
+    carriers[i % carriers.length].quarters += 1;
+  }
 }
 
 function addExit(exitPoint: V2d, openDirection: V2d): Entity[] {

@@ -7,7 +7,7 @@ import { DirectionalLight } from "../lighting-and-vision/DirectionalLight";
 import Gun from "../weapons/guns/Gun";
 import Human from "./Human";
 
-/** How far the flashlight reaches with no upgrades, in meters */
+/** How far the flashlight reaches with no items, in meters */
 const BASE_LENGTH = 8;
 
 /** How far back from the muzzle the flashlight is mounted, in meters */

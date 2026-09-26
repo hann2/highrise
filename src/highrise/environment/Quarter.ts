@@ -15,11 +15,14 @@ import { getPartyManager } from "./PartyManager";
 
 /** Bigger than a real quarter so it can be seen from a top-down camera */
 const QUARTER_RADIUS = 0.1; // meters
-/** How close a party member has to walk to pick it up */
+/** How close the leader has to walk to pick it up */
 const PICKUP_RADIUS = 0.35; // meters
 const POP_TIME = 0.25; // seconds
 
-/** A quarter lying on the floor. Any party member walking over it collects it. */
+/**
+ * A quarter lying on the floor. The leader collects it by walking over it;
+ * allies leave it be.
+ */
 export default class Quarter extends BaseEntity implements Entity {
   sprites: (Container & GameSprite)[];
   private coin: Graphics & GameSprite;
@@ -105,7 +108,7 @@ export default class Quarter extends BaseEntity implements Entity {
     if (
       !this.collected &&
       other instanceof Human &&
-      partyManager?.hasMember(other)
+      other === partyManager?.leader
     ) {
       this.collected = true;
       partyManager.addQuarters(1);
@@ -117,4 +120,28 @@ export default class Quarter extends BaseEntity implements Entity {
       this.destroy();
     }
   }
+}
+
+/**
+ * A little pile of quarters at `location`, spread along `alongBackWall` (a
+ * unit vector), for a closet. Silent, since they were always there.
+ */
+export function quarterPile(
+  location: V2d,
+  alongBackWall: V2d,
+  count: number,
+): Quarter[] {
+  const quarters: Quarter[] = [];
+  for (let i = 0; i < count; i++) {
+    const along = (i - (count - 1) / 2) * 0.22;
+    const out = i % 2 === 0 ? 0 : 0.15;
+    const inward = alongBackWall.rotate90cw();
+    quarters.push(
+      new Quarter(
+        location.addScaled(alongBackWall, along).iaddScaled(inward, out),
+        false,
+      ),
+    );
+  }
+  return quarters;
 }

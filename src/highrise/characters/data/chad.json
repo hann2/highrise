@@ -10,7 +10,7 @@
     "torso": "chadTorso"
   },
   "stats": {},
-  "startingWeapons": [],
+  "startingWeapons": ["M1911"],
   "clips": [
     {
       "file": "chad-join-party-1.flac",

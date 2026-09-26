@@ -1,8 +1,8 @@
 /**
  * Per-human modifiers on top of the constants in `Human` and the shared,
  * read-only `GunStats`. Everything defaults to neutral (1× or 0/off), so a
- * human who never picked an upgrade (allies, survivors) plays exactly as
- * before. Upgrades change these; the code that uses them reads them at use
+ * human who never bought an item (allies, survivors) plays exactly as
+ * before. Items change these; the code that uses them reads them at use
  * time, so changes take effect immediately.
  */
 export class PlayerStats {
@@ -38,7 +38,7 @@ export class PlayerStats {
   /** Multiplier on how far the player can see (fog of war). Only matters for the leader. */
   visionRange = 1;
 
-  // --- Rules (see `upgrades/ruleUpgrades.ts`) ---
+  // --- Rules (see `items/equipment.ts`) ---
   /** HP healed on killing an enemy with a melee weapon */
   meleeKillHeal = 0;
   /** Reloading an empty gun is instant */

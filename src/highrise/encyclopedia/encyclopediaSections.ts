@@ -1,7 +1,8 @@
 import { RESOURCES } from "../../../resources/resources";
 import { CHARACTERS } from "../characters/Character";
 import { isCharacterUnlocked, SaveData } from "../persistence/SaveData";
-import { UPGRADES } from "../upgrades/upgrades";
+import { ITEMS } from "../items/items";
+import { itemPrice } from "../items/prices";
 import { consumableImageUrl } from "../weapons/consumables/consumableImage";
 import { CONSUMABLES } from "../weapons/consumables/consumable-stats/consumableStats";
 import { GUNS, gunTierOf } from "../weapons/guns/gun-stats/gunStats";
@@ -110,18 +111,20 @@ const consumables: EncyclopediaSection = {
     }),
 };
 
-const upgrades: EncyclopediaSection = {
-  title: "Upgrades",
+const items: EncyclopediaSection = {
+  title: "Items",
   getEntries: (save) =>
-    UPGRADES.map((upgrade) => ({
-      name: upgrade.name,
-      found: save.seen.upgrades.includes(upgrade.name),
-      tag: upgrade.rarity,
-      description: upgrade.description,
-      stats:
-        upgrade.maxStacks === undefined
+    ITEMS.map((item) => ({
+      name: item.name,
+      found: save.seen.items.includes(item.name),
+      tag: item.rarity,
+      description: item.description,
+      stats: [
+        ["Price", `${itemPrice(item)} quarters`],
+        ...(item.maxStacks === undefined
           ? []
-          : [["Max stacks", String(upgrade.maxStacks)]],
+          : [["Max stacks", String(item.maxStacks)] as [string, string]]),
+      ],
     })),
 };
 
@@ -148,7 +151,7 @@ export const ENCYCLOPEDIA_SECTIONS: ReadonlyArray<EncyclopediaSection> = [
   guns,
   melee,
   consumables,
-  upgrades,
+  items,
   enemies,
 ];
 

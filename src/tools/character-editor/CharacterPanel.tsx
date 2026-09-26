@@ -145,7 +145,7 @@ export function CharacterPanel({
         <section class="card card--stats">
           <h2>Stats</h2>
           <p class="muted small">
-            Blank is the same as everyone else. Upgrades apply on top.
+            Blank is the same as everyone else. Items apply on top.
           </p>
           <StatsEditor
             stats={data.stats}

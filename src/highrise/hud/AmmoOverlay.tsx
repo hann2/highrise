@@ -158,7 +158,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
   onRender() {
     const human = this.getHuman();
     const weapon = human.weapon;
-    // Upgrades can change the magazine size of the gun in hand
+    // Items can change the magazine size of the gun in hand
     const capacity = weapon instanceof Gun ? weapon.getCapacity(human) : 0;
 
     if (weapon != this.lastWeapon || capacity != this.lastCapacity) {

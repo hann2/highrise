@@ -52,7 +52,7 @@ import HumanSprite from "./HumanSprite";
 import Flashlight from "./Flashlight";
 import HumanVoice from "./HumanVoice";
 import { PlayerStats } from "./PlayerStats";
-import type { Upgrade } from "../upgrades/Upgrade";
+import type { Item } from "../items/Item";
 import type { Level } from "../levels/Level";
 
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
@@ -94,10 +94,10 @@ const pushSoundRing = new ShuffleRing(PUSH_SOUNDS);
 export default class Human extends BaseEntity implements Entity, Flammable {
   body: Body;
   tags = ["human"];
-  /** Modifiers from upgrades; neutral for anyone who hasn't picked any */
+  /** Modifiers from items; neutral for anyone who hasn't bought any */
   stats = new PlayerStats();
-  /** Upgrades picked so far this run, in order */
-  upgrades: Upgrade[] = [];
+  /** Items bought so far this run, in order */
+  items: Item[] = [];
   hp: number = this.stats.maxHp;
   /** Rifles and shotguns: limited ammo */
   primary?: Gun;
@@ -308,6 +308,23 @@ export default class Human extends BaseEntity implements Entity, Flammable {
       } else {
         this.secondary = undefined;
       }
+      this.refreshWeaponSprite();
+    }
+  }
+
+  /** Takes the weapon in `slot` away for good (sold as a trade-in) */
+  removeWeapon(slot: WeaponSlot) {
+    const weapon = this.getWeaponInSlot(slot);
+    if (weapon) {
+      if (weapon instanceof Gun) {
+        weapon.cancelReload();
+      }
+      if (slot === "primary") {
+        this.primary = undefined;
+      } else {
+        this.secondary = undefined;
+      }
+      weapon.destroy();
       this.refreshWeaponSprite();
     }
   }

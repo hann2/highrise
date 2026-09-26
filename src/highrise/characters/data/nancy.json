@@ -10,7 +10,7 @@
     "torso": "nancyTorso"
   },
   "stats": {},
-  "startingWeapons": [],
+  "startingWeapons": ["M1911"],
   "clips": [
     {
       "file": "nancy-hurt-4.flac",

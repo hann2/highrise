@@ -10,7 +10,7 @@
     "torso": "luckyJackTorso"
   },
   "stats": {},
-  "startingWeapons": [],
+  "startingWeapons": ["M1911"],
   "clips": [
     {
       "file": "lucky-jack-join-party-1.flac",

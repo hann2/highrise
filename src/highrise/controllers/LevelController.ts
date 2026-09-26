@@ -7,11 +7,8 @@ import { Persistence } from "../constants/constants";
 import FadeEffect from "../effects/FadeEffect";
 import { getPartyLeader } from "../environment/PartyManager";
 import type Human from "../human/Human";
+import { dealShelf, Shelf } from "../items/shelf";
 import { Level } from "../levels/Level";
-import UpgradeSelect from "../menu/UpgradeSelect";
-import { getRunStats } from "../run/RunStats";
-import type { Upgrade } from "../upgrades/Upgrade";
-import { drawUpgrades, takeUpgrade } from "../upgrades/upgrades";
 import { generateLevel } from "../levels/level-generation/levelGeneration";
 import LevelTemplate from "../levels/level-templates/LevelTemplate";
 import TutorialLevel from "../levels/level-templates/TutorialLevel";
@@ -86,59 +83,11 @@ export default class LevelController extends BaseEntity implements Entity {
 
     if (this.currentLevel <= this.maxLevel) {
       const level = this.generateLevel();
-      // Not after the tutorial, which isn't part of the run. Drawn after
-      // generating, so the level doesn't depend on the draw and seeded runs
-      // get the same offers.
-      const pick =
-        this.currentLevel > 1 ? await this.offerUpgrades() : undefined;
-      if (this.isDestroyed) {
-        return;
-      }
       this.game.dispatch("startLevel", { level });
-      // Taken once the party is in the new level, so anything it drops (the
-      // weapon a new gun replaces, a different type of grenade) lands there
-      if (pick) {
-        this.giveUpgrade(pick.leader, pick.upgrade);
-      }
     } else {
       this.game.dispatch("gameOver", { victory: true });
     }
     this.changingLevel = false;
-  }
-
-  /**
-   * Lets the leader pick one of a few upgrades for the coming floor, with the
-   * game paused. Resolves with what they picked, for the caller to hand over.
-   */
-  private async offerUpgrades(): Promise<
-    { leader: Human; upgrade: Upgrade } | undefined
-  > {
-    const leader = getPartyLeader(this.game);
-    if (!leader) {
-      return undefined;
-    }
-    const choices = this.drawOffer(leader);
-    if (choices.length === 0) {
-      return undefined;
-    }
-    const screen = this.game.addEntity(new UpgradeSelect(choices, leader));
-    const upgrade = await screen.picked;
-    return { leader, upgrade };
-  }
-
-  /** Draws an offer for `human` suited to the current floor */
-  drawOffer(human: Human, count: number = 3): Upgrade[] {
-    return drawUpgrades(human, count, {
-      bestGunTier: this.template?.getBestGunTier(),
-    });
-  }
-
-  /** Hands a picked upgrade over to `human` and keeps score of it */
-  giveUpgrade(human: Human, upgrade: Upgrade) {
-    if (!human.isDestroyed) {
-      takeUpgrade(human, upgrade);
-      getRunStats(this.game)?.recordUpgrade(upgrade.name);
-    }
   }
 
   // We just started a new level
@@ -158,7 +107,20 @@ export default class LevelController extends BaseEntity implements Entity {
     reseedIfSeeded(this.currentLevel);
     this.template = this.makeTemplate();
     this.level = generateLevel(this.template);
+    // The store in the arrival room, from the second floor on. Dealt after
+    // the level, whose layout mustn't depend on what the leader holds, but
+    // still before the floor starts, so it's a function of the seed and of
+    // what the leader carried out of the last floor.
+    const leader = getPartyLeader(this.game);
+    if (this.currentLevel > 1 && leader) {
+      this.template.shelf = this.dealShelf(leader);
+    }
     return this.level;
+  }
+
+  /** Deals a store shelf for `human` suited to the current floor */
+  dealShelf(human: Human): Shelf {
+    return dealShelf(human, this.template?.getBestGunTier() ?? 0);
   }
 
   private makeTemplate(): LevelTemplate {

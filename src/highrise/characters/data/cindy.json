@@ -10,7 +10,7 @@
     "torso": "cindyTorso"
   },
   "stats": {},
-  "startingWeapons": [],
+  "startingWeapons": ["M1911"],
   "clips": [
     {
       "file": "cindy-join-party-1.flac",
