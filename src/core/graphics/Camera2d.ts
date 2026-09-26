@@ -136,8 +136,8 @@ export class Camera2d extends BaseEntity implements Entity {
     width: number;
     height: number;
   } {
-    const [top, left] = this.toWorld(V(0, 0));
-    const [bottom, right] = this.toWorld(this.getViewportSize());
+    const [left, top] = this.toWorld(V(0, 0));
+    const [right, bottom] = this.toWorld(this.getViewportSize());
     const width = right - left;
     const height = bottom - top;
     return { top, bottom, left, right, width, height };

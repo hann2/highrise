@@ -43,6 +43,11 @@ async function main() {
   const page = await context.newPage();
   const recordingStart = Date.now();
   page.on("pageerror", (error) => console.error("pageerror:", error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error" || message.type() === "warning") {
+      console.error(`console.${message.type()}:`, message.text());
+    }
+  });
 
   await page.goto(
     `http://localhost:${port}/?scene=${scene}&seed=1${query ? `&${query}` : ""}`,

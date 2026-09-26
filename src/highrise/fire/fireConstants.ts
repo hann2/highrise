@@ -7,6 +7,27 @@ export const FIRE_CELL_SIZE = 0.5;
 /** Seconds a cell burns before it lights its neighbors that have fuel */
 export const FIRE_SPREAD_DELAY = 0.12;
 
+// --- How fire looks (see `FireRenderer.ts` and `flames.frag`) ---
+
+/** Pixels per meter of the heat buffer */
+export const HEAT_RESOLUTION = 16;
+/** Meters the heat buffer reaches past each edge of the screen */
+export const HEAT_MARGIN = 1.5;
+/** Meters across the blob of heat of one burning cell (half of it) */
+export const HEAT_BLOB_RADIUS = 0.6;
+/** Meters a cell's blob of heat sits off the cell's middle, at most */
+export const HEAT_BLOB_JITTER = 0.15;
+/** Seconds a cell's fire takes to grow to full size after it catches */
+export const HEAT_GROW_TIME = 0.3;
+/** Seconds of fuel left when a cell's fire starts dying down */
+export const HEAT_DIE_DOWN_FUEL = 1.5;
+/** Meters across the blob of heat of a burning enemy or human (half of it) */
+export const BURNING_HEAT_RADIUS = 0.45;
+/** Seconds of movement the heat of a moving burning thing trails behind it */
+export const BURNING_TAIL = 0.12;
+/** Meters the flame shader pushes heat around by */
+export const FLAME_WARP = 0.25;
+
 // --- Burning (see `Burning.ts`) ---
 
 /** Seconds an enemy keeps burning after it was last lit */
