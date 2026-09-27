@@ -21,6 +21,13 @@ import {
 import { V, V2d } from "../../../core/Vector";
 import MuzzleFlash from "../../effects/MuzzleFlash";
 import ShellCasing from "../../effects/ShellCasing";
+import {
+  GUN_SMOKE_DISTANCE,
+  GUN_SMOKE_PER_PELLET,
+  GUN_SMOKE_PER_SHOT,
+  GUN_SMOKE_RADIUS,
+} from "../../fire/fireConstants";
+import { getFireGrid } from "../../fire/FireGrid";
 import Human from "../../human/Human";
 import Bullet from "../../projectiles/Bullet";
 import { PhasedAction } from "../../utils/PhasedAction";
@@ -175,6 +182,7 @@ export default class Gun extends BaseEntity implements Entity {
     // Various effects
     this.playSound("shoot", position);
     this.game.addEntity(new MuzzleFlash(position, direction));
+    this.makeSmoke(position, direction);
 
     if (this.stats.ejectionType === EjectionType.AUTOMATIC) {
       this.makeShellCasing(shooter);
@@ -233,6 +241,23 @@ export default class Gun extends BaseEntity implements Entity {
         this.stats.bulletStats.dropSounds,
       ),
     );
+  }
+
+  /** A puff of gun smoke just in front of the muzzle */
+  private makeSmoke(position: V2d, direction: number) {
+    const smoke = getFireGrid(this.game)?.smoke;
+    if (smoke) {
+      const amount =
+        this.stats.smoke ??
+        GUN_SMOKE_PER_SHOT *
+          (1 +
+            GUN_SMOKE_PER_PELLET * (this.stats.bulletStats.bulletsPerShot - 1));
+      smoke.puff(
+        position.add(polarToVec(direction, GUN_SMOKE_DISTANCE)),
+        GUN_SMOKE_RADIUS,
+        amount,
+      );
+    }
   }
 
   makeProjectile(position: V2d, direction: number, shooter: Human) {

@@ -17,6 +17,7 @@ export const Flashbang: ConsumableStats = {
   knockback: 0,
   stunRadius: 5,
   stunDuration: 4,
+  smoke: { radius: 1.8, amount: 2.5 },
   flash: { radius: 16, color: 0xffffff, intensity: 3, duration: 0.8 },
   blastRing: { radius: 5, color: 0xffffff },
   sounds: {

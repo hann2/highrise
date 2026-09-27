@@ -1,9 +1,6 @@
-import { Container, Graphics } from "pixi.js";
 import { CollisionGroups } from "../../config/CollisionGroups";
-import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
 import type Game from "../../core/Game";
 import { clamp } from "../../core/util/MathUtil";
@@ -16,11 +13,19 @@ import { isHuman } from "../human/Human";
 import type { Level } from "../levels/Level";
 import { PointLight } from "../lighting-and-vision/PointLight";
 import { ignite } from "./Burning";
+import FireRenderer from "./FireRenderer";
+import FloorMarks from "./FloorMarks";
+import SmokeField from "./SmokeField";
 import {
   FIRE_CELL_SIZE,
-  FIRE_LIGHT_BLOCK,
+  CELL_LIGHT_INTENSITY,
+  CELL_LIGHT_RADIUS,
+  CELL_LIGHT_WANDER,
+  fireLightFlicker,
   FIRE_SPREAD_DELAY,
-  flicker,
+  HEAT_DIE_DOWN_FUEL,
+  HEAT_GROW_TIME,
+  SCORCH_TIME,
 } from "./fireConstants";
 
 /** The four neighbors of a cell, as [dx, dy] */
@@ -39,12 +44,11 @@ const NEIGHBORS = [
  * was spilled. Anything standing in a burning cell catches fire; anything
  * burning lights the fuel it walks over (see `Burning`).
  *
- * The look is a placeholder: fuel is a dark stain, fire is flickering orange
- * squares, burnt-out cells are scorched, and each burning patch has a light.
+ * `FireRenderer` draws the flames and the fire's lights are here. Fuel stains
+ * and scorch marks are still placeholder squares.
  */
 export default class FireGrid extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
-  sprites: (Container & GameSprite)[];
 
   /** Cells across and down */
   columns = 0;
@@ -53,37 +57,34 @@ export default class FireGrid extends BaseEntity implements Entity {
   private fuel = new Float32Array(0);
   /** Seconds each burning cell has been burning, or -1 when it isn't */
   private burnAge = new Float32Array(0);
-  /** Cells that have burnt out, for the scorch marks */
-  private scorched = new Uint8Array(0);
+  /** How scorched each cell is, 0 to 1 (see `FloorMarks`) */
+  private scorch = new Float32Array(0);
+  /** Cells with fuel in them */
+  private cellsWithFuel = new Set<number>();
+  /** Goes up whenever the fuel changes, so the stains know to repaint */
+  fuelVersion = 0;
+  private marks: FloorMarks;
   /** Who lit each burning cell, so kills are credited to them */
   private sources = new Map<number, Human | undefined>();
   /** Indexes of the cells that are burning */
   private burningCells = new Set<number>();
-  /** One light per block of burning cells, keyed by block index */
+  /** One light per burning cell (see `updateLights`) */
   private lights = new Map<number, PointLight>();
 
-  /** Fuel stains and scorch marks, redrawn only when they change */
-  private floorGraphics = new Graphics();
-  private floorDirty = false;
-  /** The flames, redrawn every frame */
-  private fireGraphics = new Graphics();
+  /** The smoke from the fire */
+  smoke: SmokeField;
 
   constructor() {
     super();
-    const floor: Container & GameSprite = new Container();
-    floor.layerName = Layer.FLOOR_DECALS;
-    floor.addChild(this.floorGraphics);
-    const fire: Container & GameSprite = new Container();
-    fire.layerName = Layer.EMISSIVES;
-    this.fireGraphics.blendMode = "add";
-    fire.addChild(this.fireGraphics);
-    this.sprites = [floor, fire];
+    this.marks = this.addChild(new FloorMarks(this));
+    this.smoke = this.addChild(new SmokeField(this));
   }
 
   @on("add")
   onAdd({ game }: { game: Game }) {
     game.entities.addFilter(isEnemy);
     game.entities.addFilter(isHuman);
+    this.addChild(new FireRenderer(this));
   }
 
   @on("startLevel")
@@ -98,7 +99,9 @@ export default class FireGrid extends BaseEntity implements Entity {
     const count = this.columns * this.rows;
     this.fuel = new Float32Array(count);
     this.burnAge = new Float32Array(count);
-    this.scorched = new Uint8Array(count);
+    this.scorch = new Float32Array(count);
+    this.marks.reset(width, height);
+    this.smoke.reset();
     this.clear();
   }
 
@@ -106,16 +109,23 @@ export default class FireGrid extends BaseEntity implements Entity {
   clear() {
     this.fuel.fill(0);
     this.burnAge.fill(-1);
-    this.scorched.fill(0);
+    this.scorch.fill(0);
+    this.cellsWithFuel.clear();
+    this.fuelVersion += 1;
+    this.marks.clear();
+    this.smoke.clear();
     this.sources.clear();
     this.burningCells.clear();
+    this.removeLights();
+  }
+
+  private removeLights() {
     for (const light of this.lights.values()) {
       if (!light.isDestroyed) {
         light.destroy();
       }
     }
     this.lights.clear();
-    this.floorDirty = true;
   }
 
   /** The index of the cell at `position`, or -1 outside the grid */
@@ -150,6 +160,46 @@ export default class FireGrid extends BaseEntity implements Entity {
     return this.burningCells.size;
   }
 
+  /** The cells that are burning */
+  get burning(): ReadonlySet<number> {
+    return this.burningCells;
+  }
+
+  /** The cells with fuel in them, burning or not */
+  get fuelCells(): ReadonlySet<number> {
+    return this.cellsWithFuel;
+  }
+
+  /** Seconds of burning left in `cell` */
+  fuelInCell(cell: number): number {
+    return this.fuel[cell];
+  }
+
+  /** How scorched `cell` is, 0 to 1 */
+  scorchAt(cell: number): number {
+    return this.scorch[cell];
+  }
+
+  private addFuel(cell: number, amount: number) {
+    this.fuel[cell] += amount;
+    this.cellsWithFuel.add(cell);
+    this.fuelVersion += 1;
+  }
+
+  /**
+   * How much a burning cell is burning, from 0 to 1: growing just after it
+   * catches, and dying down as its fuel runs out
+   */
+  cellHeat(cell: number): number {
+    const age = this.burnAge[cell];
+    if (age < 0) {
+      return 0;
+    }
+    // Eases out, so it dies down smoothly to nothing as the fuel runs out
+    const fuel = clamp(this.fuel[cell] / HEAT_DIE_DOWN_FUEL);
+    return clamp(age / HEAT_GROW_TIME) * fuel * (2 - fuel);
+  }
+
   /**
    * Spills `amount` seconds of fuel into the cells within `radius` meters of
    * `center` that fuel can flow to from there without crossing a wall. Less
@@ -171,7 +221,7 @@ export default class FireGrid extends BaseEntity implements Entity {
       if (cell !== start && distance > reach) {
         continue;
       }
-      this.fuel[cell] += amount * (1 - 0.5 * clamp(distance / radius));
+      this.addFuel(cell, amount * (1 - 0.5 * clamp(distance / radius)));
       spilled.push(cell);
       for (const neighbor of this.neighbors(cell)) {
         if (!seen.has(neighbor)) {
@@ -182,7 +232,6 @@ export default class FireGrid extends BaseEntity implements Entity {
         }
       }
     }
-    this.floorDirty = true;
     return spilled;
   }
 
@@ -208,9 +257,8 @@ export default class FireGrid extends BaseEntity implements Entity {
       }
     }
     for (const cell of cells) {
-      this.fuel[cell] += amount;
+      this.addFuel(cell, amount);
     }
-    this.floorDirty = true;
   }
 
   /** Sets fire to the cell at `position` if it has fuel. Returns whether it's burning. */
@@ -248,6 +296,7 @@ export default class FireGrid extends BaseEntity implements Entity {
       const age = this.burnAge[cell];
       this.burnAge[cell] = age + dt;
       this.fuel[cell] -= dt;
+      this.scorch[cell] = Math.min(1, this.scorch[cell] + dt / SCORCH_TIME);
       if (age < FIRE_SPREAD_DELAY && age + dt >= FIRE_SPREAD_DELAY) {
         const source = this.sources.get(cell);
         for (const neighbor of this.neighbors(cell)) {
@@ -265,10 +314,10 @@ export default class FireGrid extends BaseEntity implements Entity {
         this.burnAge[cell] = -1;
         this.burningCells.delete(cell);
         this.sources.delete(cell);
-        this.scorched[cell] = 1;
-        this.floorDirty = true;
+        this.cellsWithFuel.delete(cell);
       }
     }
+    this.fuelVersion += 1;
 
     // Anything standing in it catches fire
     for (const enemy of this.game.entities.getByFilter(isEnemy)) {
@@ -310,96 +359,45 @@ export default class FireGrid extends BaseEntity implements Entity {
 
   @on("render")
   onRender() {
-    if (this.floorDirty) {
-      this.floorDirty = false;
-      this.drawFloor();
-    }
-    this.drawFire();
     this.updateLights();
   }
 
-  private drawFloor() {
-    const g = this.floorGraphics.clear();
-    const size = FIRE_CELL_SIZE;
-    for (let cell = 0; cell < this.fuel.length; cell++) {
-      const fuel = this.fuel[cell];
-      if (fuel <= 0 && !this.scorched[cell]) {
-        continue;
-      }
-      const [x, y] = this.cellCenter(cell);
-      if (fuel > 0) {
-        g.rect(x - size / 2, y - size / 2, size, size).fill({
-          color: 0x2a2410,
-          alpha: 0.25 + 0.3 * clamp(fuel / 8),
-        });
-      } else {
-        g.rect(x - size / 2, y - size / 2, size, size).fill({
-          color: 0x000000,
-          alpha: 0.45,
-        });
-      }
-    }
-  }
-
-  private drawFire() {
-    const g = this.fireGraphics.clear();
-    const t = this.game.elapsedUnpausedTime;
-    for (const cell of this.burningCells) {
-      const [x, y] = this.cellCenter(cell);
-      // Grows in over the first moments, and shrinks as the fuel runs out
-      const size =
-        FIRE_CELL_SIZE *
-        clamp(this.burnAge[cell] / 0.15) *
-        (0.5 + 0.5 * clamp(this.fuel[cell] / 1.5)) *
-        (1.1 + 0.25 * flicker(t, cell * 0.37));
-      g.rect(x - size / 2, y - size / 2, size, size)
-        .fill({ color: 0xff4400, alpha: 0.6 })
-        .rect(x - size / 4, y - size / 4, size / 2, size / 2)
-        .fill({ color: 0xffcc55, alpha: 0.5 });
-    }
-  }
-
-  /** One light per block of burning cells, at the middle of its fire */
+  /**
+   * One small, dim light per burning cell, each flickering on its own. Lots
+   * of little lights light a fire the shape it is, with shadows from all of
+   * it (they cost well under a millisecond a frame for a molotov's worth).
+   */
   private updateLights() {
-    const blocks = new Map<number, { x: number; y: number; count: number }>();
-    const blockColumns = Math.ceil(this.columns / FIRE_LIGHT_BLOCK);
-    for (const cell of this.burningCells) {
-      const column = cell % this.columns;
-      const row = Math.floor(cell / this.columns);
-      const block =
-        Math.floor(row / FIRE_LIGHT_BLOCK) * blockColumns +
-        Math.floor(column / FIRE_LIGHT_BLOCK);
-      const [x, y] = this.cellCenter(cell);
-      const sum = blocks.get(block) ?? { x: 0, y: 0, count: 0 };
-      sum.x += x;
-      sum.y += y;
-      sum.count += 1;
-      blocks.set(block, sum);
-    }
-
-    for (const [block, light] of this.lights) {
-      if (!blocks.has(block)) {
+    for (const [cell, light] of this.lights) {
+      if (this.burnAge[cell] < 0) {
         light.destroy();
-        this.lights.delete(block);
+        this.lights.delete(cell);
       }
     }
-
     const t = this.game.elapsedUnpausedTime;
-    const fullBlock = FIRE_LIGHT_BLOCK * FIRE_LIGHT_BLOCK;
-    for (const [block, { x, y, count }] of blocks) {
-      let light = this.lights.get(block);
+    for (const cell of this.burningCells) {
+      let light = this.lights.get(cell);
       if (!light) {
         light = this.addChild(
-          new PointLight({ radius: 6, color: 0xff8030, intensity: 0 }),
+          new PointLight({
+            radius: CELL_LIGHT_RADIUS,
+            intensity: 0,
+            position: this.cellCenter(cell),
+          }),
         );
-        this.lights.set(block, light);
+        this.lights.set(cell, light);
       }
-      const amount = Math.sqrt(count / fullBlock);
-      light.setPosition([x / count, y / count]);
-      light.setRadius(3 + 4 * amount);
-      light.setIntensity(
-        (0.4 + 0.5 * amount) * (1 + 0.15 * flicker(t, block * 0.61)),
+      // Wandering about the cell, so shadows flicker too
+      const { intensity, color, offset } = fireLightFlicker(
+        t,
+        cell * 0.37,
+        CELL_LIGHT_WANDER,
       );
+      light.setPosition(this.cellCenter(cell).iadd(offset));
+      light.setIntensity(
+        CELL_LIGHT_INTENSITY * intensity * this.cellHeat(cell),
+      );
+      light.setColor(color);
     }
   }
 }
