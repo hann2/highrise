@@ -15,8 +15,7 @@ export interface GunStats extends BaseWeaponStats {
   readonly fireMode: FireMode;
   // Maximum number of rounds in the gun
   readonly ammoCapacity: number;
-  // Which reserve it reloads from. Also decides its slot: pistols are
-  // secondaries, everything else is a primary.
+  // Which reserve it reloads from. Also its family, for attachments.
   readonly ammoClass: AmmoClass;
   // Whether you load rounds one-at-a-time or all-at-once
   readonly reloadingStyle: ReloadingStyle;
@@ -31,6 +30,11 @@ export interface GunStats extends BaseWeaponStats {
   readonly bulletStats: BulletStats;
   // The maximum spread of bullets fired
   readonly bulletSpread: number;
+  /**
+   * Smoke put into the air in front of the muzzle with each shot (see
+   * `SmokeField`). Left out, it comes from the number of bullets per shot.
+   */
+  readonly smoke?: number;
 
   // Whether the shells eject after each shot or on reload
   readonly ejectionType: EjectionType;

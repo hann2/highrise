@@ -1021,16 +1021,22 @@ test("game boots, plays, and changes levels without errors", async ({
       leaked,
       trailEnd: grid.isBurningAt(near.add([0, 1.5])),
       acrossWall: grid.isBurningAt(far),
+      // The fire's smoke stays on its side of the wall
+      smokeNear: grid.smoke.densityAt(grid.cellAt(near)),
+      smokeFar: grid.smoke.densityAt(grid.cellAt(far)),
     };
     grid.clear();
     return result;
   });
-  expect(spread).toEqual({
+  const { smokeNear, smokeFar, ...fireSpread } = spread;
+  expect(fireSpread).toEqual({
     lit: true,
     leaked: 0,
     trailEnd: true,
     acrossWall: false,
   });
+  expect(smokeNear).toBeGreaterThan(0.3);
+  expect(smokeFar).toBeLessThan(smokeNear * 0.1);
 
   // --- A molotov breaks where it lands and sets whoever is there alight ---
   await page.keyboard.press("KeyX"); // dev cheat: molotovs
@@ -1094,6 +1100,7 @@ test("game boots, plays, and changes levels without errors", async ({
     const result = {
       zombieBurning: !!zombie.burning,
       floorBurning: grid.isBurningAt(zombie.getPosition()),
+      smoky: grid.smoke.activeCount > 0,
       thrown: [...game.entities.all].filter(
         (e) => e.constructor.name === "ThrownConsumable",
       ).length,
@@ -1106,6 +1113,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(molotov).toEqual({
     zombieBurning: true,
     floorBurning: true,
+    smoky: true,
     thrown: 0,
   });
   expectNoIssues(issues);

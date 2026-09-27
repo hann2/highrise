@@ -8,10 +8,11 @@ import { polarToVec } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import { isEnemy } from "../enemies/base/Enemy";
 import { isHittable } from "../environment/Hittable";
-import type Gun from "../weapons/guns/Gun";
+import { getFireGrid } from "../fire/FireGrid";
 import Human from "../human/Human";
 import Light from "../lighting-and-vision/Light";
 import { BulletStats, LONG_RANGE } from "../weapons/guns/BulletStats";
+import type Gun from "../weapons/guns/Gun";
 import { HitResult, Projectile, projectileRaycast } from "./Projectile";
 
 export default class Bullet extends Projectile implements Entity {
@@ -54,8 +55,7 @@ export default class Bullet extends Projectile implements Entity {
     this.sprite.layerName = Layer.WEAPONS;
 
     this.lightGraphics = new Graphics();
-    this.light = this.addChild(new Light());
-    this.light.lightSprite.addChild(this.lightGraphics);
+    this.light = this.addChild(new Light(this.lightGraphics));
   }
 
   makeCollisionMask() {
@@ -78,16 +78,23 @@ export default class Bullet extends Projectile implements Entity {
     );
   }
 
+  /**
+   * Like any projectile's, but going straight through the enemies it's
+   * already pierced, and carving its path through any smoke
+   */
   checkForCollision(dt: number): HitResult | undefined {
-    const from = this.sweepFrom ?? this.position;
+    const from = (this.sweepFrom ?? this.position).clone();
     this.sweepFrom = undefined;
-    return projectileRaycast(
+    const hit = projectileRaycast(
       this.game,
       from,
       this.position.addScaled(this.velocity, dt),
       this.makeCollisionMask(),
       this.pierced,
     );
+    const to = hit?.hitPosition ?? this.position.addScaled(this.velocity, dt);
+    getFireGrid(this.game)?.smoke.disturb(from, to);
+    return hit;
   }
 
   handleHit({ hitPosition, hitNormal, hit }: HitResult) {
@@ -141,6 +148,6 @@ export default class Bullet extends Projectile implements Entity {
       .stroke({ width: 0.2, color: this.stats.color, alpha: 1.0 });
 
     this.sprite.position.copyFrom(this.renderPosition);
-    this.light.lightSprite.position.copyFrom(this.renderPosition);
+    this.lightGraphics.position.copyFrom(this.renderPosition);
   }
 }

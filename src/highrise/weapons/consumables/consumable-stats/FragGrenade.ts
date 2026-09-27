@@ -19,6 +19,7 @@ export const FragGrenade: ConsumableStats = {
   stunDuration: 0.6,
   flash: { radius: 9, color: 0xffb060, intensity: 1.5, duration: 0.35 },
   blastRing: { radius: 2.5, color: 0xffa040 },
+  smoke: { radius: 2.5, amount: 4 },
   sounds: {
     detonate: [
       { name: "shotgunShot1", speed: 0.45, gain: 1 },

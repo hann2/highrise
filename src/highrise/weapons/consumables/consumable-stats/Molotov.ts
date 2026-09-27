@@ -20,7 +20,7 @@ export const Molotov: ConsumableStats = {
   knockback: 0,
   stunRadius: 0,
   stunDuration: 0,
-  flash: { radius: 7, color: 0xff8030, intensity: 1.2, duration: 0.5 },
+  flash: { radius: 11, color: 0xffa050, intensity: 1, duration: 0.6 },
   fire: { radius: 1.8, fuel: 7 },
   sounds: {
     // Stand-ins until there are glass and fire sounds

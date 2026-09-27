@@ -1,14 +1,17 @@
-import { Container, Graphics } from "pixi.js";
-import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
-import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
 import { clamp } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import type Human from "../human/Human";
 import { PointLight } from "../lighting-and-vision/PointLight";
-import { BURN_FADE_TIME, flicker } from "./fireConstants";
+import {
+  BURN_FADE_TIME,
+  BURNING_LIGHT_INTENSITY,
+  BURNING_LIGHT_RADIUS,
+  BURNING_LIGHT_WANDER,
+  fireLightFlicker,
+} from "./fireConstants";
 import { getFireGrid } from "./FireGrid";
 
 /** Something that can catch fire: enemies and humans */
@@ -49,21 +52,20 @@ export function ignite(
   return burning;
 }
 
-/** How many flame blobs the placeholder look has */
-const FLAME_COUNT = 4;
+/** Different for each fire, so they don't flicker in step */
+let nextPhase = 0;
 
 /**
  * The fire on something that's burning, as its child: hurts it over time and
- * goes out on its own. The look is a placeholder: flickering blobs and a
- * light.
+ * goes out on its own, with a flickering light. `FireRenderer` draws the
+ * flames.
  */
 export default class Burning extends BaseEntity implements Entity {
-  sprite: Container & GameSprite;
-  private flames: Graphics[] = [];
   private light?: PointLight;
   /** Damage owed but not dealt yet, dealt every `burnDamageInterval` */
   private pendingDamage = 0;
   private damageTimer = 0;
+  private phase = (nextPhase += 1.7);
 
   constructor(
     public target: Flammable,
@@ -71,30 +73,14 @@ export default class Burning extends BaseEntity implements Entity {
     public source?: Human,
   ) {
     super();
-
-    this.sprite = new Container();
-    this.sprite.layerName = Layer.EMISSIVES;
-    for (let i = 0; i < FLAME_COUNT; i++) {
-      const flame = new Graphics()
-        .circle(0, 0, 0.3)
-        .fill({ color: 0xff5500, alpha: 0.5 })
-        .circle(0, 0, 0.18)
-        .fill({ color: 0xffaa33, alpha: 0.6 })
-        .circle(0, 0, 0.08)
-        .fill({ color: 0xffeeaa, alpha: 0.7 });
-      flame.blendMode = "add";
-      this.flames.push(flame);
-      this.sprite.addChild(flame);
-    }
   }
 
   @on("add")
   onAdd() {
     this.light = this.addChild(
       new PointLight({
-        radius: 4,
-        intensity: 0.6,
-        color: 0xff8833,
+        radius: BURNING_LIGHT_RADIUS,
+        intensity: 0,
         position: this.target.getPosition(),
       }),
     );
@@ -133,19 +119,13 @@ export default class Burning extends BaseEntity implements Entity {
   @on("render")
   onRender() {
     const position = this.target.getPosition();
-    this.sprite.position.copyFrom(position);
-    // Shrinks away over the last moments
+    // Dims over the last moments
     const size = clamp(this.timeLeft / BURN_FADE_TIME);
     const t = this.game.elapsedUnpausedTime;
-    this.flames.forEach((flame, i) => {
-      flame.position.set(
-        0.15 * flicker(t, i * 3.1),
-        0.15 * flicker(t, i * 3.1 + 1.3),
-      );
-      flame.scale.set(size * (1 + 0.2 * flicker(t, i * 3.1 + 2.2)));
-    });
-    this.light?.setPosition(position);
-    this.light?.setIntensity(0.6 * size * (1 + 0.15 * flicker(t, 0.7)));
+    const light = fireLightFlicker(t, this.phase, BURNING_LIGHT_WANDER);
+    this.light?.setPosition(position.add(light.offset));
+    this.light?.setIntensity(BURNING_LIGHT_INTENSITY * size * light.intensity);
+    this.light?.setColor(light.color);
   }
 
   @on("destroy")
