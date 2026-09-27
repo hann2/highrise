@@ -26,7 +26,8 @@ export default class Light extends BaseEntity implements Entity {
   public size: number;
 
   constructor(
-    public lightSprite: Sprite = new Sprite(),
+    /** What the light looks like (its brightness and color get applied to it); any display object */
+    public lightSprite: Container = new Container(),
     public shadowsEnabled: boolean = false,
     public shadowRadius: number = 1,
     /** Radius of the light source in meters; bigger means softer shadows, 0 means hard */

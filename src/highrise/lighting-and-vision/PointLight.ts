@@ -26,14 +26,9 @@ export class PointLight extends Light {
     sourceRadius = softShadows ? radius * SOFTNESS : 0,
     position,
   }: PointLightOptions) {
-    super(
-      Sprite.from("pointLight"),
-      shadowsEnabled,
-      radius,
-      sourceRadius,
-      radius * 2,
-    );
-    this.lightSprite.anchor.set(0.5, 0.5);
+    const sprite = Sprite.from("pointLight");
+    super(sprite, shadowsEnabled, radius, sourceRadius, radius * 2);
+    sprite.anchor.set(0.5, 0.5);
     this.lightSprite.blendMode = "add";
 
     this.setRadius(radius);

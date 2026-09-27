@@ -30,8 +30,7 @@ export default class Bullet extends Projectile implements Entity {
     this.sprite.layerName = Layer.WEAPONS;
 
     this.lightGraphics = new Graphics();
-    this.light = this.addChild(new Light());
-    this.light.lightSprite.addChild(this.lightGraphics);
+    this.light = this.addChild(new Light(this.lightGraphics));
   }
 
   makeCollisionMask() {
@@ -91,6 +90,6 @@ export default class Bullet extends Projectile implements Entity {
       .stroke({ width: 0.2, color: this.stats.color, alpha: 1.0 });
 
     this.sprite.position.copyFrom(this.renderPosition);
-    this.light.lightSprite.position.copyFrom(this.renderPosition);
+    this.lightGraphics.position.copyFrom(this.renderPosition);
   }
 }
