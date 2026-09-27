@@ -47,7 +47,7 @@ export const FUEL_STAIN_ALPHA = 0.9;
 /** Seconds of fuel in a cell for its stain to be as dark as it gets */
 export const FUEL_STAIN_FULL = 5;
 
-// --- Embers and smoke (see `FireParticles.ts`) ---
+// --- Embers (see `FireEmbers.ts`) ---
 
 /** Embers a second from each burning cell, at full heat */
 export const EMBERS_PER_CELL = 1.2;
@@ -60,29 +60,6 @@ export const EMBER_SPEED = 1.2;
 /** The color of a new ember, and of one about to go out */
 export const EMBER_COLORS = [0xffd070, 0xc02000] as const;
 export const MAX_EMBERS = 400;
-/**
- * Whether puffs of smoke come off fire. Off while the smoke field
- * (`SmokeField`) is being tried out on its own.
- */
-export const SMOKE_PUFFS = false;
-/** Puffs of smoke a second from each burning cell, at full heat */
-export const PUFFS_PER_CELL = 1;
-/** Puffs of smoke a second from each burning enemy or human */
-export const PUFFS_PER_BURNING = 5;
-/** Chance that a cell puffs out smoke as it catches */
-export const PUFF_WHEN_LIT = 1;
-export const PUFF_COLOR = 0xb4aca4;
-/** How thick a puff of smoke is at its thickest (its alpha) */
-export const PUFF_ALPHA = 0.85;
-/** Meters across a new puff of smoke: the least and the most */
-export const PUFF_SIZE = [2, 3.5] as const;
-/** How many times its size a puff grows to by the time it's gone */
-export const PUFF_GROWTH = 3;
-/** Seconds a puff of smoke lasts: the least and the most */
-export const PUFF_LIFE = [4, 8] as const;
-/** Which way smoke drifts, in meters per second per second */
-export const PUFF_DRAUGHT = [0.4, -0.25] as const;
-export const MAX_PUFFS = 800;
 
 // --- The smoke field (see `SmokeField.ts` and `smoke.frag`) ---
 
@@ -155,43 +132,36 @@ export const HUMAN_BURN_INTERVAL = 0.5;
 
 /** The two colors a fire's light wavers between */
 export const FIRE_LIGHT_COLORS = [0xff6420, 0xff9440] as const;
-/** Meters from the first cell of a patch of fire that share its light */
-export const FIRE_LIGHT_PATCH_RADIUS = 2.5;
-/** Burning cells in a patch whose light reaches the furthest */
-export const FIRE_LIGHT_FULL_PATCH = 60;
-/** Meters a fire's light reaches: this much for a little fire... */
-export const FIRE_LIGHT_MIN_RADIUS = 6;
-/** ...plus up to this much for a big one */
-export const FIRE_LIGHT_EXTRA_RADIUS = 6;
-/** Meters the light of one burning cell reaches, in the "cells" light mode */
+/** Meters the light of one burning cell reaches (each has its own light) */
 export const CELL_LIGHT_RADIUS = 5;
-/** How bright the light of one burning cell is, in the "cells" light mode */
+/** How bright the light of one burning cell is */
 export const CELL_LIGHT_INTENSITY = 0.1;
-/** Meters the light of one burning cell wanders from its middle, in the "cells" light mode */
+/** Meters the light of one burning cell wanders from its middle, so its shadows flicker */
 export const CELL_LIGHT_WANDER = 0.25;
 /** Meters the light of a burning enemy reaches */
 export const BURNING_LIGHT_RADIUS = 4;
 /** How bright the light of a burning enemy is, next to a fire on the floor */
 export const BURNING_LIGHT_INTENSITY = 0.7;
-/** Meters a fire's light wanders from where it should be, as it flickers */
-export const FIRE_LIGHT_WANDER = 0.12;
+/** Meters the light of a burning enemy wanders from it, as it flickers */
+export const BURNING_LIGHT_WANDER = 0.12;
 
 /**
  * Where a fire's light is at time `t`: how bright (0 to 1), which color, and
- * how far it's moved from the fire, for fires with different `phase`s to
- * flicker differently.
+ * how far (up to `wander` meters) it's moved from the fire, for fires with
+ * different `phase`s to flicker differently.
  */
 export function fireLightFlicker(
   t: number,
   phase: number,
+  wander: number,
 ): { intensity: number; color: number; offset: [number, number] } {
   const f = flicker(t * 0.8, phase);
   return {
     intensity: 0.88 + 0.12 * f,
     color: colorLerp(FIRE_LIGHT_COLORS[0], FIRE_LIGHT_COLORS[1], 0.5 + 0.5 * f),
     offset: [
-      FIRE_LIGHT_WANDER * flicker(t * 0.6, phase + 5.1),
-      FIRE_LIGHT_WANDER * flicker(t * 0.6, phase + 9.7),
+      wander * flicker(t * 0.6, phase + 5.1),
+      wander * flicker(t * 0.6, phase + 9.7),
     ],
   };
 }

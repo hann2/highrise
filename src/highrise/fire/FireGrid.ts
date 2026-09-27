@@ -21,11 +21,6 @@ import {
   CELL_LIGHT_INTENSITY,
   CELL_LIGHT_RADIUS,
   CELL_LIGHT_WANDER,
-  FIRE_LIGHT_WANDER,
-  FIRE_LIGHT_EXTRA_RADIUS,
-  FIRE_LIGHT_FULL_PATCH,
-  FIRE_LIGHT_MIN_RADIUS,
-  FIRE_LIGHT_PATCH_RADIUS,
   fireLightFlicker,
   FIRE_SPREAD_DELAY,
   HEAT_DIE_DOWN_FUEL,
@@ -73,16 +68,8 @@ export default class FireGrid extends BaseEntity implements Entity {
   private sources = new Map<number, Human | undefined>();
   /** Indexes of the cells that are burning */
   private burningCells = new Set<number>();
-  /**
-   * How fire on the floor is lit: one light per patch of fire, or (to see
-   * what it costs) one per burning cell. An experiment; one will go.
-   */
-  lightMode: "patches" | "cells" | "none" = "cells";
-  /** One light per patch of fire (see `updateLights`) */
-  private lights: FireLight[] = [];
-  private nextLightPhase = 0;
-  /** One light per burning cell, in the "cells" light mode */
-  private cellLights = new Map<number, PointLight>();
+  /** One light per burning cell (see `updateLights`) */
+  private lights = new Map<number, PointLight>();
 
   /** The smoke from the fire */
   smoke: SmokeField;
@@ -133,26 +120,12 @@ export default class FireGrid extends BaseEntity implements Entity {
   }
 
   private removeLights() {
-    for (const { light } of this.lights) {
+    for (const light of this.lights.values()) {
       if (!light.isDestroyed) {
         light.destroy();
       }
     }
-    this.lights = [];
-    for (const light of this.cellLights.values()) {
-      if (!light.isDestroyed) {
-        light.destroy();
-      }
-    }
-    this.cellLights.clear();
-  }
-
-  /** Switches between the light modes (see `lightMode`) */
-  setLightMode(mode: "patches" | "cells" | "none") {
-    if (mode !== this.lightMode) {
-      this.removeLights();
-      this.lightMode = mode;
-    }
+    this.lights.clear();
   }
 
   /** The index of the cell at `position`, or -1 outside the grid */
@@ -386,24 +359,24 @@ export default class FireGrid extends BaseEntity implements Entity {
 
   @on("render")
   onRender() {
-    if (this.lightMode === "cells") {
-      this.updateCellLights();
-    } else if (this.lightMode === "patches") {
-      this.updateLights();
-    }
+    this.updateLights();
   }
 
-  /** One small, dim light per burning cell, each flickering on its own */
-  private updateCellLights() {
-    for (const [cell, light] of this.cellLights) {
+  /**
+   * One small, dim light per burning cell, each flickering on its own. Lots
+   * of little lights light a fire the shape it is, with shadows from all of
+   * it (they cost well under a millisecond a frame for a molotov's worth).
+   */
+  private updateLights() {
+    for (const [cell, light] of this.lights) {
       if (this.burnAge[cell] < 0) {
         light.destroy();
-        this.cellLights.delete(cell);
+        this.lights.delete(cell);
       }
     }
     const t = this.game.elapsedUnpausedTime;
     for (const cell of this.burningCells) {
-      let light = this.cellLights.get(cell);
+      let light = this.lights.get(cell);
       if (!light) {
         light = this.addChild(
           new PointLight({
@@ -412,99 +385,21 @@ export default class FireGrid extends BaseEntity implements Entity {
             position: this.cellCenter(cell),
           }),
         );
-        this.cellLights.set(cell, light);
+        this.lights.set(cell, light);
       }
       // Wandering about the cell, so shadows flicker too
-      const { intensity, color, offset } = fireLightFlicker(t, cell * 0.37);
-      light.setPosition(
-        this.cellCenter(cell).iadd([
-          (offset[0] * CELL_LIGHT_WANDER) / FIRE_LIGHT_WANDER,
-          (offset[1] * CELL_LIGHT_WANDER) / FIRE_LIGHT_WANDER,
-        ]),
+      const { intensity, color, offset } = fireLightFlicker(
+        t,
+        cell * 0.37,
+        CELL_LIGHT_WANDER,
       );
+      light.setPosition(this.cellCenter(cell).iadd(offset));
       light.setIntensity(
         CELL_LIGHT_INTENSITY * intensity * this.cellHeat(cell),
       );
       light.setColor(color);
     }
   }
-
-  /**
-   * One light per patch of fire: burning cells are gathered into patches
-   * about `FIRE_LIGHT_PATCH_RADIUS` across, each lit from its middle, and each
-   * patch keeps the light (and flicker) of the nearest patch last frame. Few
-   * big lights rather than many small ones, because overlapping lights add up
-   * to white.
-   */
-  private updateLights() {
-    const patches: {
-      x: number;
-      y: number;
-      count: number;
-      sx: number;
-      sy: number;
-    }[] = [];
-    for (const cell of this.burningCells) {
-      const [x, y] = this.cellCenter(cell);
-      let patch = patches.find(
-        (p) => Math.hypot(p.sx - x, p.sy - y) < FIRE_LIGHT_PATCH_RADIUS,
-      );
-      if (!patch) {
-        patch = { x: 0, y: 0, count: 0, sx: x, sy: y };
-        patches.push(patch);
-      }
-      patch.x += x;
-      patch.y += y;
-      patch.count += 1;
-    }
-
-    const t = this.game.elapsedUnpausedTime;
-    const unmatched = new Set(this.lights);
-    const lights: FireLight[] = [];
-    for (const { x, y, count } of patches) {
-      const center = V(x / count, y / count);
-      let nearest: FireLight | undefined;
-      for (const light of unmatched) {
-        const distance = light.center.distanceTo(center);
-        if (
-          distance < FIRE_LIGHT_PATCH_RADIUS &&
-          (!nearest || distance < nearest.center.distanceTo(center))
-        ) {
-          nearest = light;
-        }
-      }
-      const fireLight = nearest ?? {
-        light: this.addChild(new PointLight({ intensity: 0 })),
-        center,
-        phase: (this.nextLightPhase += 2.3),
-      };
-      unmatched.delete(fireLight);
-      fireLight.center = center;
-      lights.push(fireLight);
-
-      const amount = Math.sqrt(count / FIRE_LIGHT_FULL_PATCH);
-      const { intensity, color, offset } = fireLightFlicker(t, fireLight.phase);
-      fireLight.light.setPosition(center.add(offset));
-      fireLight.light.setRadius(
-        FIRE_LIGHT_MIN_RADIUS + FIRE_LIGHT_EXTRA_RADIUS * Math.min(amount, 1),
-      );
-      fireLight.light.setIntensity(intensity);
-      fireLight.light.setColor(color);
-    }
-    for (const { light } of unmatched) {
-      light.destroy();
-    }
-    this.lights = lights;
-  }
-}
-
-/** The light of a patch of fire */
-interface FireLight {
-  light: PointLight;
-  /** The middle of its patch, without the flicker */
-  center: V2d;
-  /** So that patches don't flicker in step */
-  phase: number;
 }
 
 /** The fire grid of the run, or undefined outside of one (in the lobby) */

@@ -3,7 +3,7 @@
  * playing the game. Needs a dev server running (`npm run dev-server`).
  *
  *   npm run clip -- [--scene fire] [--seconds 6] [--port 1234] [--out file.mp4]
- *     [--query "profile=1&fireLights=cells"]
+ *     [--query "profile=1&floor=wood"]
  *
  * Waits for the scene's second cycle (so the first-time costs of compiling
  * shaders and loading are out of the way), records `seconds` of it at
@@ -27,7 +27,7 @@ const scene = arg("scene", "fire");
 const seconds = Number(arg("seconds", "6"));
 const port = arg("port", "1234");
 const out = arg("out", `tests/output/${scene}.mp4`);
-// More of the URL, like "profile=1&fireLights=cells"
+// More of the URL, like "profile=1&floor=wood"
 const query = arg("query", "");
 
 async function main() {

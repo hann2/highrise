@@ -96,14 +96,6 @@ export default class FireTestScene extends BaseEntity implements Entity {
     vision.enabled = false;
     this.grid = this.addChild(new FireGrid());
     this.grid.reset(WIDTH, HEIGHT);
-    const lightMode = params.get("fireLights");
-    if (
-      lightMode === "cells" ||
-      lightMode === "patches" ||
-      lightMode === "none"
-    ) {
-      this.grid.setLightMode(lightMode);
-    }
 
     this.game.camera.z = 75;
     this.game.camera.center(V(WIDTH / 2, HEIGHT / 2));
@@ -115,17 +107,10 @@ export default class FireTestScene extends BaseEntity implements Entity {
     }
   }
 
-  /**
-   * C switches how fire is lit (see `FireGrid.lightMode`), and Z sends in
-   * zombies
-   */
+  /** Z sends in zombies */
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
-    if (key === "KeyC") {
-      this.grid.setLightMode(
-        this.grid.lightMode === "cells" ? "patches" : "cells",
-      );
-    } else if (key === "KeyZ") {
+    if (key === "KeyZ") {
       this.sendZombies();
     }
   }

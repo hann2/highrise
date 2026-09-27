@@ -9,6 +9,7 @@ import {
   BURN_FADE_TIME,
   BURNING_LIGHT_INTENSITY,
   BURNING_LIGHT_RADIUS,
+  BURNING_LIGHT_WANDER,
   fireLightFlicker,
 } from "./fireConstants";
 import { getFireGrid } from "./FireGrid";
@@ -121,7 +122,7 @@ export default class Burning extends BaseEntity implements Entity {
     // Dims over the last moments
     const size = clamp(this.timeLeft / BURN_FADE_TIME);
     const t = this.game.elapsedUnpausedTime;
-    const light = fireLightFlicker(t, this.phase);
+    const light = fireLightFlicker(t, this.phase, BURNING_LIGHT_WANDER);
     this.light?.setPosition(position.add(light.offset));
     this.light?.setIntensity(BURNING_LIGHT_INTENSITY * size * light.intensity);
     this.light?.setColor(light.color);

@@ -29,7 +29,7 @@ import {
   FLAME_WARP,
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
-import FireParticles, { makeSmokeTexture } from "./FireParticles";
+import FireEmbers from "./FireEmbers";
 import frag_flames from "./flames.frag";
 
 import vert_flames from "./flames.vert";
@@ -98,9 +98,7 @@ export default class FireRenderer extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.EMISSIVES;
     this.sprite.addChild(this.mesh);
 
-    this.addChild(
-      new FireParticles(grid, this.blobTexture, makeSmokeTexture()),
-    );
+    this.addChild(new FireEmbers(grid, this.blobTexture));
   }
 
   @on("render")
