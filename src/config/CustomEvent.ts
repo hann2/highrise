@@ -32,6 +32,8 @@ export type CustomEvents = {
 
   // Enemies
   zombieDied: { zombie: BaseEnemy; killer?: Human };
+  /** A boss is dead, at `position`: `controllers/BossRewards` drops the loot */
+  bossDied: { boss: BaseEnemy; position: V2d };
 
   // Environment
   lightsOn: { position: V2d };

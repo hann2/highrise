@@ -9,7 +9,8 @@ const lastDamageSources = new WeakMap<Human, DamageSource>();
 
 /**
  * Hurts a human and remembers who did it, for the run summary's cause of
- * death. See `Human.inflictDamage` for `quiet`.
+ * death, scaled by the enemy's `damageScale`. See `Human.inflictDamage` for
+ * `quiet`.
  */
 export function inflictDamageFrom(
   human: Human,
@@ -18,7 +19,9 @@ export function inflictDamageFrom(
   quiet: boolean = false,
 ) {
   lastDamageSources.set(human, source);
-  human.inflictDamage(amount, quiet);
+  // Enemies hit harder in later acts
+  const scale = typeof source === "string" ? 1 : source.damageScale;
+  human.inflictDamage(amount * scale, quiet);
 }
 
 export function getLastDamageSource(human: Human): DamageSource | undefined {

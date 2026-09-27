@@ -103,8 +103,8 @@ export default class GameOverScreen extends ReactEntity implements Entity {
       "Quarters",
       `${summary.quartersCollected} found, ${summary.quartersSpent} spent`,
     ]);
-    if (summary.upgrades.length > 0) {
-      stats.push(["Upgrades", summary.upgrades.join(", ")]);
+    if (summary.items.length > 0) {
+      stats.push(["Items", summary.items.join(", ")]);
     }
     return stats;
   }

@@ -86,3 +86,6 @@ export const TwelveGuageBuckshot: BulletStats = {
   bulletsPerShot: 9,
   dropSounds: ["shotgunCasingDrop1"],
 };
+
+/** Meters a rifle bullet has to travel for `PlayerStats.rifleLongRangeDamage` (Marksman) */
+export const LONG_RANGE = 8;

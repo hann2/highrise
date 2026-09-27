@@ -30,7 +30,7 @@ import {
 } from "./visibility";
 import { buildPenumbraMesh, buildVisionMesh, MeshData } from "./visionMesh";
 
-/** How far the player can see with no upgrades (see `PlayerStats.visionRange`), in meters */
+/** How far the player can see with no items (see `PlayerStats.visionRange`), in meters */
 export const BASE_VISION_RANGE = 10;
 /** How far past the vision range the vision mesh hands over to the static darkness beyond it */
 const OUTER_MARGIN = 1;
@@ -179,7 +179,7 @@ export default class VisionController extends BaseEntity implements Entity {
       .cut();
   }
 
-  /** Changes how far the player can see (an upgrade, or a new leader) */
+  /** Changes how far the player can see (an item, or a new leader) */
   private setRange(range: number) {
     this.range = range;
     this.sizeToRange();

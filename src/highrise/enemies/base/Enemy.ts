@@ -1,3 +1,10 @@
+import Detonation from "../../effects/Detonation";
+import { EXPLODING_ROUND } from "../../projectiles/explodingRound";
+import {
+  ENEMY_DAMAGE_SCALE,
+  ENEMY_HP_SCALE,
+  getCurrentAct,
+} from "../../run/acts";
 import type Entity from "../../../core/entity/Entity";
 import { on } from "../../../core/entity/handler";
 import type { WithOwner } from "../../../core/entity/WithOwner";
@@ -35,6 +42,10 @@ const VISIBILITY_FADE_TIME = 0.15;
 
 export class BaseEnemy extends Creature implements Hittable, Flammable {
   hp: number = 100;
+  /** Multiplier on the damage it does (see `inflictDamageFrom`), set by act */
+  damageScale = 1;
+  /** Quarters dropped on death, handed out when the level is generated */
+  quarters: number = 0;
   burning?: Burning;
   burnTime = ENEMY_BURN_TIME;
   burnDps = ENEMY_BURN_DPS;
@@ -90,6 +101,11 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
 
   @on("add")
   onAdd() {
+    // Tougher and harder-hitting in later acts of the run
+    const act = getCurrentAct(this.game);
+    this.hp *= ENEMY_HP_SCALE[act - 1];
+    this.damageScale = ENEMY_DAMAGE_SCALE[act - 1];
+
     this.voice = this.addChild(this.makeVoice());
     this.aimSpring = new AimSpring(this.body);
     this.springs = [this.aimSpring];
@@ -170,12 +186,26 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
 
     this.makeBlood(position, bullet.damage, normal);
 
-    if (bullet.shooter?.stats.incendiaryRounds) {
+    if (bullet.incendiary) {
       ignite(this, bullet.shooter);
+    }
+    // Exploding Rounds: every so many of the gun's hits
+    const gun = bullet.gun;
+    if (gun && bullet.explodeEvery) {
+      gun.enemyHits += 1;
+      if (gun.enemyHits % bullet.explodeEvery === 0) {
+        this.game.addEntity(
+          new Detonation(EXPLODING_ROUND, position.clone(), bullet.shooter),
+        );
+      }
     }
 
     if (this.diesInOneHitFrom(bullet.shooter)) {
       this.hp = 0;
+    }
+    // Quick Draw: a kill puts the round back
+    if (this.hp <= 0 && bullet.refundOnKill && gun && bullet.shooter) {
+      gun.ammo = Math.min(gun.ammo + 1, gun.getCapacity(bullet.shooter));
     }
     if (this.hp <= 0) {
       this.die(bullet.shooter);

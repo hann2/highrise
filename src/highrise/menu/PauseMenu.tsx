@@ -19,7 +19,7 @@ import {
   MuteButton,
 } from "./MenuButtons";
 import { isFloorDirectoryOpen } from "./FloorDirectory";
-import { isUpgradeSelectOpen } from "./UpgradeSelect";
+import { isStoreOpen } from "./StoreScreen";
 
 /**
  * Shows the menu when paused, invisible otherwise. In a run it can end the
@@ -35,7 +35,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
   }
 
   renderContent() {
-    // The upgrade screen pauses the game too, but isn't a pause. The
+    // The store pauses the game too, but isn't a pause. The
     // encyclopedia and credits cover the menu and give it back when they close.
     if (!this.visible || !this.takingInput) {
       return null;
@@ -107,7 +107,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
   /** Whether this menu is showing and in charge of the keys */
   private get takingInput(): boolean {
     return (
-      !isUpgradeSelectOpen(this.game) &&
+      !isStoreOpen(this.game) &&
       !isFloorDirectoryOpen(this.game) &&
       !isEncyclopediaOpen(this.game) &&
       !isCreditsOpen(this.game)

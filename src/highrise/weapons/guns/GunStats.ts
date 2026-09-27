@@ -15,8 +15,7 @@ export interface GunStats extends BaseWeaponStats {
   readonly fireMode: FireMode;
   // Maximum number of rounds in the gun
   readonly ammoCapacity: number;
-  // Which reserve it reloads from. Also decides its slot: pistols are
-  // secondaries, everything else is a primary.
+  // Which reserve it reloads from. Also its family, for attachments.
   readonly ammoClass: AmmoClass;
   // Whether you load rounds one-at-a-time or all-at-once
   readonly reloadingStyle: ReloadingStyle;

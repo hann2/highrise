@@ -7,11 +7,11 @@ import { Persistence } from "../constants/constants";
 import { BaseEnemy } from "../enemies/base/Enemy";
 import AmmoPickup from "../environment/AmmoPickup";
 import Human from "../human/Human";
+import Gun from "../weapons/guns/Gun";
 import {
+  AMMO_CLASSES,
   AMMO_DROP_CHANCE,
-  isLimitedAmmo,
-  LIMITED_AMMO_CLASSES,
-  LimitedAmmoClass,
+  AmmoClass,
 } from "../weapons/guns/ammo";
 
 /** Makes dead enemies occasionally drop a box of ammo (more often with Scavenger). */
@@ -37,18 +37,18 @@ export default class AmmoDropper extends BaseEntity implements Entity {
     }
   }
 
-  dropAmmo(position: V2d, ammoClass: LimitedAmmoClass) {
+  dropAmmo(position: V2d, ammoClass: AmmoClass) {
     return this.game.addEntity(
       new AmmoPickup(position, ammoClass, undefined, true),
     );
   }
 }
 
-/** Ammo for the killer's primary if they have one, so drops are useful */
-function ammoClassFor(killer?: Human): LimitedAmmoClass {
-  const ammoClass = killer?.primary?.stats.ammoClass;
-  if (ammoClass && isLimitedAmmo(ammoClass)) {
-    return ammoClass;
-  }
-  return choose(...LIMITED_AMMO_CLASSES);
+/**
+ * Ammo for the killer's gun in hand, or else another gun they carry, so drops
+ * are useful
+ */
+function ammoClassFor(killer?: Human): AmmoClass {
+  const gun = killer?.weapon instanceof Gun ? killer.weapon : killer?.guns[0];
+  return gun?.stats.ammoClass ?? choose(...AMMO_CLASSES);
 }

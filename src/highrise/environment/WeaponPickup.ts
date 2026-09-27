@@ -7,7 +7,6 @@ import { V2d } from "../../core/Vector";
 import Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
-import { slotFor } from "../weapons/weapons";
 import Interactable from "./Interactable";
 
 export default class WeaponPickup extends BaseEntity {
@@ -25,7 +24,7 @@ export default class WeaponPickup extends BaseEntity {
       new Interactable(position, this.handleInteract.bind(this)),
     );
     this.interactable.prompt = (human) => {
-      const replaced = human.getWeaponInSlot(slotFor(weapon));
+      const replaced = human.getWeaponInSlot(human.slotForNewWeapon());
       return {
         title: weapon.stats.name,
         detail: replaced && `replaces ${replaced.stats.name}`,

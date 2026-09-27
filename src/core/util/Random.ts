@@ -131,3 +131,15 @@ export function seededShuffle<T>(a: T[], seed: number): T[] {
   }
   return a;
 }
+
+/** Removes and returns one element of `pool`, each as likely as its `weight` */
+export function takeWeighted<T>(pool: T[], weight: (t: T) => number): T {
+  const total = pool.reduce((sum, t) => sum + weight(t), 0);
+  let roll = rUniform(0, total);
+  let index = 0;
+  while (index < pool.length - 1 && roll >= weight(pool[index])) {
+    roll -= weight(pool[index]);
+    index++;
+  }
+  return pool.splice(index, 1)[0];
+}

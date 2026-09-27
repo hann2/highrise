@@ -1,8 +1,8 @@
 /**
  * Per-human modifiers on top of the constants in `Human` and the shared,
  * read-only `GunStats`. Everything defaults to neutral (1× or 0/off), so a
- * human who never picked an upgrade (allies, survivors) plays exactly as
- * before. Upgrades change these; the code that uses them reads them at use
+ * human who never bought an item (allies, survivors) plays exactly as
+ * before. Items change these; the code that uses them reads them at use
  * time, so changes take effect immediately.
  */
 export class PlayerStats {
@@ -11,6 +11,12 @@ export class PlayerStats {
   moveSpeed = 1;
   /** Maximum hit points */
   maxHp = 100;
+  /** Multiplier on damage taken: less is tougher */
+  damageTaken = 1;
+  /** Multiplier on how much faster sprinting is (see `SPRINT_MULTIPLIER`) */
+  sprintSpeed = 1;
+  /** Sprinting doesn't stop you shooting or reloading */
+  canShootWhileSprinting = false;
 
   // --- Weapons ---
   /** Multiplier on damage dealt by bullets and melee weapons */
@@ -21,8 +27,6 @@ export class PlayerStats {
   fireRate = 1;
   /** Multiplier on a gun's bullet spread: less is more accurate */
   spread = 1;
-  /** Multiplier on a gun's magazine size (rounded, never below the gun's own) */
-  magazineSize = 1;
 
   // --- Push ---
   /** Damage a push does, before the `damage` multiplier */
@@ -38,7 +42,7 @@ export class PlayerStats {
   /** Multiplier on how far the player can see (fog of war). Only matters for the leader. */
   visionRange = 1;
 
-  // --- Rules (see `upgrades/ruleUpgrades.ts`) ---
+  // --- Rules (see `items/equipment.ts`) ---
   /** HP healed on killing an enemy with a melee weapon */
   meleeKillHeal = 0;
   /** Reloading an empty gun is instant */
@@ -49,6 +53,23 @@ export class PlayerStats {
   floorHeal = 0;
   /** Extra chance that a kill drops an ammo box */
   killAmmoDropChance = 0;
-  /** Bullets set what they hit on fire */
-  incendiaryRounds = false;
+  /** Times a shotgun pellet bounces off walls */
+  shotgunRicochets = 0;
+  /** Multiplier on the damage of the last round in a magazine */
+  lastRoundDamage = 1;
+  /** A kill with a pistol puts the round back in the magazine */
+  pistolKillRefund = false;
+  /** Multiplier on rifle damage beyond `LONG_RANGE` (see `Bullet`) */
+  rifleLongRangeDamage = 1;
+  /** Multiplier on the quarters enemies drop for the leader */
+  quarterMultiplier = 1;
+  /** Times dying becomes a second chance instead (see `Human.inflictDamage`) */
+  extraLives = 0;
+  /** Seconds of a stim's effect at the start of every floor */
+  floorStimSeconds = 0;
 }
+
+/** The stats that are numbers (multipliers and amounts), not rule flags */
+export type NumericStat = {
+  [K in keyof PlayerStats]: PlayerStats[K] extends number ? K : never;
+}[keyof PlayerStats];

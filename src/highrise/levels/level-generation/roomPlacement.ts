@@ -261,7 +261,11 @@ export function addRooms(
   roomInfos.push(
     addRoom(
       cellGrid,
-      new SpawnRoom(levelIndex, levelTemplate.difficulty),
+      new SpawnRoom(
+        levelIndex,
+        levelTemplate.difficulty,
+        () => levelTemplate.shelf,
+      ),
       seed,
       cellGrid.spawnLocation,
     ),

@@ -12,9 +12,8 @@ import Human from "../human/Human";
 import Gun from "../weapons/guns/Gun";
 import { ConsumableStats } from "../weapons/consumables/ConsumableStats";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
-import { Weapon, WeaponSlot } from "../weapons/weapons";
-
-const WEAPON_SLOTS: WeaponSlot[] = ["primary", "secondary"];
+import { usableImageUrl } from "../weapons/usables/usableImage";
+import { Weapon, WEAPON_SLOTS, WeaponSlot } from "../weapons/weapons";
 import "./hud.css";
 
 /** Pixels between the right edge of the screen and the shells, to make room for the reserve count */
@@ -23,7 +22,8 @@ const RESERVE_WIDTH = 64;
 /**
  * Bottom right of the screen: the rounds in the gun as shells (Pixi), the
  * reserve next to them, and above them both weapon slots (the one in hand
- * highlighted), the consumables carried, and the flashlight (HTML).
+ * highlighted), the consumables and the usable carried, and the flashlight
+ * (HTML).
  */
 export class AmmoOverlay extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -56,7 +56,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     let warning: string | undefined;
     if (weapon instanceof Gun) {
       const reserve = human.getReserve(weapon.stats.ammoClass);
-      reserveText = reserve === Infinity ? "∞" : String(reserve);
+      reserveText = String(reserve);
       if (weapon.ammo == 0) {
         warning =
           reserve > 0 ? `Press ${gamepad ? "X" : "R"} To Reload` : "No Ammo";
@@ -64,6 +64,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
     }
 
     const consumable = human.consumable;
+    const usable = human.usable;
 
     return (
       <>
@@ -94,6 +95,18 @@ export class AmmoOverlay extends BaseEntity implements Entity {
               <div className="hud-item__text">
                 <div className="hud-item__name">{consumable.name}</div>
                 <div className="hud-item__count">×{human.consumableCount}</div>
+              </div>
+            </div>
+          )}
+          {usable && (
+            <div className="hud-item hud-item--usable">
+              <span className="hud-key">{gamepad ? "RB" : "C"}</span>
+              <div className="hud-item__icon">
+                <img src={usableImageUrl(usable.stats)} />
+              </div>
+              <div className="hud-item__text">
+                <div className="hud-item__name">{usable.stats.name}</div>
+                <div className="hud-item__count">×{usable.charges}</div>
               </div>
             </div>
           )}
@@ -158,7 +171,7 @@ export class AmmoOverlay extends BaseEntity implements Entity {
   onRender() {
     const human = this.getHuman();
     const weapon = human.weapon;
-    // Upgrades can change the magazine size of the gun in hand
+    // Items can change the magazine size of the gun in hand
     const capacity = weapon instanceof Gun ? weapon.getCapacity(human) : 0;
 
     if (weapon != this.lastWeapon || capacity != this.lastCapacity) {
@@ -218,8 +231,7 @@ function WeaponCard({
         <div className="hud-item__name">{weapon.stats.name}</div>
         {weapon instanceof Gun && (
           <div className="hud-item__count">
-            {weapon.ammo} /{" "}
-            {formatReserve(human.getReserve(weapon.stats.ammoClass))}
+            {weapon.ammo} / {human.getReserve(weapon.stats.ammoClass)}
           </div>
         )}
       </div>
@@ -293,8 +305,4 @@ function FlashlightIcon() {
 
 function cssColor(color: number): string {
   return "#" + color.toString(16).padStart(6, "0");
-}
-
-function formatReserve(reserve: number): string {
-  return reserve === Infinity ? "∞" : String(reserve);
 }

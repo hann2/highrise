@@ -10,7 +10,7 @@
     "torso": "dustyRustyTorso"
   },
   "stats": {},
-  "startingWeapons": [],
+  "startingWeapons": ["S&W Revolver"],
   "clips": [
     {
       "file": "dusty-rusty-join-party-1.flac",

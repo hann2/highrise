@@ -10,7 +10,7 @@
     "torso": "santaTorso"
   },
   "stats": {},
-  "startingWeapons": [],
+  "startingWeapons": ["M1911"],
   "clips": [
     {
       "file": "santa-join-1.flac",

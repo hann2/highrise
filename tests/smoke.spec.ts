@@ -10,10 +10,35 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "430:-1900366570";
-// What the upgrade screen offers after level 1 with this seed, in order.
-// Changes when the upgrade pool, the rarities, or level generation change.
-const UPGRADE_OFFER = ["Molotovs", "Linebacker", "Hair Trigger"];
+const LEVEL_2_FINGERPRINT = "347:-291100383";
+// What the store in level 2's arrival room sells with this seed. Changes when
+// the item pool, the rarities, or level generation change.
+const STORE_SHELF = {
+  slots: ["Armor Piercing", "Steady Aim", "Tennis Shoes", "Scavenger"],
+  gun: "Sawn Off Shotgun",
+  consumable: "Frag Grenade ×2",
+};
+// The run's floors with this seed (from the lobby's plan). Changes when the
+// themes, the landmarks or anything random before the plan changes.
+const RUN_PLAN = [
+  "Maintenance",
+  "Offices",
+  "Shops",
+  "Generator",
+  "Shops",
+  "Maintenance",
+  "Shops",
+  "Chapel",
+  "Maintenance",
+  "Shops",
+  "Offices",
+  "Generator",
+  "Maintenance",
+  "Offices",
+  "Chapel",
+];
+// Every quarter on a floor, in closets and carried by enemies (QUARTERS_PER_FLOOR)
+const QUARTERS_PER_FLOOR = 20;
 
 /**
  * E2E tests are slow because of browser startup and asset preloading, so we
@@ -157,15 +182,44 @@ test("game boots, plays, and changes levels without errors", async ({
   expectNoIssues(issues);
 
   // --- The run ahead is planned, but nothing in the lobby gives it away ---
+  // 15 floors in acts of 4 (13 to 15 are act 4), with a landmark ending each
+  // of the first three acts and the run, a keycard floor in each act, and
+  // big stores right after the landmarks
   const plan = await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const lobby = game.entities.getById("lobby") as any;
+    const floors = lobby.plan as any[];
+    const numbers = (test: (floor: any) => boolean) =>
+      floors.filter(test).map((floor) => floor.number as number);
     return {
-      floors: lobby.plan.map((floor: any) => floor.name) as string[],
+      names: floors.map((floor) => floor.name) as string[],
+      acts: floors.map((floor) => floor.act) as number[],
+      gunTiers: floors.map((floor) => floor.gunTier) as number[],
+      sieges: numbers((floor) => floor.landmark === "siege"),
+      bosses: numbers((floor) => floor.landmark === "boss"),
+      bigStores: numbers((floor) => floor.bigStore),
+      keycardActs: floors
+        .filter((floor) => floor.keycard)
+        .map((floor) => [floor.act, !!floor.landmark]),
       plaques: game.entities.getTagged("directory_plaque").length,
     };
   });
-  expect(plan.floors).toEqual(["Shops", "Maintenance", "Generator", "Chapel"]);
+  expect(plan.names).toEqual(RUN_PLAN);
+  expect(plan.acts).toEqual([1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4]);
+  expect(plan.gunTiers).toEqual(plan.acts.map((act) => act - 1));
+  expect(plan.sieges).toEqual([4, 12]);
+  expect(plan.bosses).toEqual([8, 15]);
+  expect(plan.bigStores).toEqual([5, 9, 13]);
+  expect(plan.keycardActs).toEqual([
+    [1, false],
+    [2, false],
+    [3, false],
+    [4, false],
+  ]);
+  // No theme twice in a row
+  for (let i = 1; i < plan.names.length; i++) {
+    expect(plan.names[i]).not.toBe(plan.names[i - 1]);
+  }
   expect(plan.plaques).toBe(0);
 
   // --- Walk up to someone unlocked and press E to play as them ---
@@ -291,14 +345,39 @@ test("game boots, plays, and changes levels without errors", async ({
     { timeout: 30000 },
   );
 
-  // --- The run starts on its first floor, the Shops, as Nancy ---
+  // --- The run starts on its first floor, as Nancy ---
   const startLevel = await getLevelNumber(page);
   expect(startLevel).toBe(1);
   const runStart = await page.evaluate(() => {
-    const entities = [...window.DEBUG.game!.entities.all] as any[];
+    const game = window.DEBUG.game!;
+    const entities = [...game.entities.all] as any[];
+    const partyManager = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    );
+    const arrivalRoom = entities.find(
+      (e) => e.constructor.name === "ArrivalRoom",
+    );
     return {
-      leader: entities.find((e) => e.constructor.name === "PartyManager").leader
-        .character.name as string,
+      leader: partyManager.leader.character.name as string,
+      startingGun: partyManager.leader.weapon?.stats.name as string,
+      stores: game.entities.getTagged("store_machine").length,
+      arrivalRooms: entities.filter((e) => e.constructor.name === "ArrivalRoom")
+        .length,
+      gunsInArrivalRoom: entities.filter(
+        (e) =>
+          e.constructor.name === "WeaponPickup" &&
+          arrivalRoom?.contains(e.getPosition()),
+      ).length,
+      // Lying in closets, and carried by enemies
+      quarters:
+        entities.filter((e) => e.constructor.name === "Quarter").length +
+        entities
+          .filter(
+            (e) =>
+              e.constructor.name !== "PartyManager" &&
+              typeof e.quarters === "number",
+          )
+          .reduce((sum, e) => sum + e.quarters, 0),
       floor: entities.find((e) => e.constructor.name === "LevelController")
         .floor.name as string,
       lastCharacter: JSON.parse(
@@ -306,9 +385,16 @@ test("game boots, plays, and changes levels without errors", async ({
       ).lastCharacter as string,
     };
   });
+  // Nancy starts with her own pistol, and the arrival room has no guns in it,
+  // and no store on the first floor. The floor's quarters were all placed.
   expect(runStart).toEqual({
     leader: "Nancy",
-    floor: "Shops",
+    startingGun: "M1911",
+    stores: 0,
+    arrivalRooms: 1,
+    gunsInArrivalRoom: 0,
+    quarters: QUARTERS_PER_FLOOR,
+    floor: RUN_PLAN[0],
     lastCharacter: "Nancy",
   });
   // let the fade in finish and lighting settle
@@ -375,8 +461,10 @@ test("game boots, plays, and changes levels without errors", async ({
   expectNoIssues(issues);
 
   // --- Guns can be picked up and bullets hurt zombies ---
-  // Pin the player and a zombie in place so that the shots can't miss
-  const pickupName = await page.evaluate(() => {
+  // (Guns are only bought now, so none are lying around: KeyJ is a dev cheat
+  // that drops an AR-15 at the leader's feet.) Pin the player and a zombie in
+  // place so that the shots can't miss.
+  await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const leader = (
       [...game.entities.all].find(
@@ -390,22 +478,16 @@ test("game boots, plays, and changes levels without errors", async ({
       .map((e) => e.position.clone())
       .sort((a, b) => a[0] - b[0])[0];
     (window as any).testHome = home;
-    const pickup = ([...game.entities.all] as any[])
-      .filter(
-        (e) =>
-          e.constructor.name === "WeaponPickup" &&
-          e.weapon.constructor.name === "Gun",
-      )
-      .sort(
-        (a, b) =>
-          a.getPosition().distanceTo(home) - b.getPosition().distanceTo(home),
-      )[0];
-    leader.body.position.set(pickup.getPosition());
-    return pickup.weapon.stats.name as string;
+    leader.body.position.set(home);
+    leader.body.velocity.set(0, 0);
   });
   await page.waitForTimeout(300);
-  // Standing on it, the prompt says what E picks up, and it's ringed on the floor
-  await expect(page.locator(".interact-prompt")).toContainText(pickupName);
+  await page.keyboard.press("KeyJ");
+  await page.waitForTimeout(300);
+  // Standing on it, the prompt says what E picks up (with a slot free, it
+  // replaces nothing), and it's ringed on the floor
+  await expect(page.locator(".interact-prompt")).toContainText("AR-15");
+  await expect(page.locator(".interact-prompt")).not.toContainText("replaces");
   await expect(page.locator(".interact-prompt__key")).toHaveText("E");
   expect(
     await page.evaluate(() => {
@@ -468,7 +550,8 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.evaluate(() => (window as any).testZombie.die());
   expectNoIssues(issues);
 
-  // --- Two weapon slots: a primary gun fills the other slot, and Q swaps ---
+  // --- Two free weapon slots: a new weapon goes in the empty one, Q swaps,
+  // and with both full a new one replaces the one in hand ---
   const getSlots = () =>
     page.evaluate(() => {
       const leader = (
@@ -477,55 +560,23 @@ test("game boots, plays, and changes levels without errors", async ({
         ) as any
       ).leader;
       return {
-        primary: leader.primary?.stats.name as string | undefined,
-        secondary: leader.secondary?.stats.name as string | undefined,
-        active: leader.activeSlot as string,
+        slots: leader.weapons.map((w: any) => w?.stats.name ?? null),
+        active: leader.activeSlot as number,
         inHand: leader.weapon?.stats.name as string | undefined,
+        pistolReserve: leader.reserve.pistol as number,
       };
     });
-  // What Santa holds by now depends on what was in reach of the E presses
-  // above, so first make sure there's a pistol in the secondary slot
-  const pistolName = await page.evaluate(async () => {
-    const game = window.DEBUG.game!;
-    const leader = (
-      [...game.entities.all].find(
-        (e) => e.constructor.name === "PartyManager",
-      ) as any
-    ).leader;
-    if (leader.secondary?.stats.ammoClass !== "pistol") {
-      const pickup = [...game.entities.all].find(
-        (e: any) =>
-          e.constructor.name === "WeaponPickup" &&
-          e.weapon.stats.ammoClass === "pistol",
-      ) as any;
-      const home = leader.getPosition().clone();
-      leader.body.position.set(pickup.getPosition());
-      leader.body.velocity.set(0, 0);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      leader.interactWithNearest();
-      leader.body.position.set(home);
-      leader.body.velocity.set(0, 0);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-    return leader.secondary?.stats.name as string | undefined;
-  });
-  expect(pistolName).toBeDefined();
-  // A rifle goes in the other slot, leaving the pistol where it is
-  await page.keyboard.press("KeyJ"); // dev cheat: an AR-15 at the leader's feet
-  await page.waitForTimeout(200);
-  await page.keyboard.press("KeyE");
-  await page.waitForTimeout(300);
+  // Nancy's own pistol, and the AR-15 from above in the other slot, in hand
   const slots = await getSlots();
-  expect(slots.primary).toBe("AR-15");
-  expect(slots.secondary).toBe(pistolName);
+  expect(slots.slots).toEqual(["M1911", "AR-15"]);
   expect(slots.inHand).toBe("AR-15");
-  await expect(page.locator(".hud-inventory")).toContainText(pistolName!);
+  await expect(page.locator(".hud-inventory")).toContainText("M1911");
   // Q used to throw glowsticks; now it swaps weapons, and glowsticks are gone
   await page.keyboard.press("KeyQ");
   await page.waitForTimeout(350);
   const swapped = await getSlots();
-  expect(swapped.active).toBe("secondary");
-  expect(swapped.inHand).toBe(pistolName);
+  expect(swapped.active).toBe(0);
+  expect(swapped.inHand).toBe("M1911");
   expect(
     await page.evaluate(
       () =>
@@ -534,7 +585,10 @@ test("game boots, plays, and changes levels without errors", async ({
         ).length,
     ),
   ).toBe(0);
-  await expect(page.locator(".hud-reserve")).toHaveText("∞");
+  // Pistol ammo runs out like the rest now
+  await expect(page.locator(".hud-reserve")).toHaveText(
+    String(swapped.pistolReserve),
+  );
   await expect(page.locator(".hud-inventory")).toContainText("AR-15");
   // The mouse wheel swaps too
   await page.mouse.wheel(0, 100);
@@ -542,10 +596,28 @@ test("game boots, plays, and changes levels without errors", async ({
   expect((await getSlots()).inHand).toBe("AR-15");
   await page.mouse.wheel(0, -100);
   await page.waitForTimeout(350);
-  expect((await getSlots()).inHand).toBe(pistolName);
-  await page.keyboard.press("KeyQ");
-  await page.waitForTimeout(350);
-  expect((await getSlots()).inHand).toBe("AR-15");
+  expect((await getSlots()).inHand).toBe("M1911");
+  // Both full: another AR-15 replaces the pistol in hand, which is dropped...
+  await page.keyboard.press("KeyJ");
+  await page.waitForTimeout(300);
+  await expect(page.locator(".interact-prompt")).toContainText(
+    "replaces M1911",
+  );
+  await page.keyboard.press("KeyE");
+  await page.waitForTimeout(700);
+  expect(await getSlots()).toMatchObject({
+    slots: ["AR-15", "AR-15"],
+    active: 0,
+  });
+  // ...where it can be picked up again, replacing the new AR-15
+  await expect(page.locator(".interact-prompt")).toContainText("M1911");
+  await page.keyboard.press("KeyE");
+  await page.waitForTimeout(700);
+  expect(await getSlots()).toMatchObject({
+    slots: ["M1911", "AR-15"],
+    active: 0,
+    inHand: "M1911",
+  });
 
   // --- Reloading takes from the reserve, and does nothing when it's empty ---
   const reserveReload = await page.evaluate(async () => {
@@ -560,30 +632,34 @@ test("game boots, plays, and changes levels without errors", async ({
         await new Promise((resolve) => requestAnimationFrame(resolve));
       }
     };
+    // The pistol in hand: pistols reload from the reserve too now
     const gun = leader.weapon;
+    const ammoClass = gun.stats.ammoClass;
     const capacity = gun.getCapacity(leader);
     gun.ammo = 0;
-    leader.reserve.rifle = capacity + 5;
+    leader.reserve[ammoClass] = capacity + 5;
     leader.reload();
     const start = performance.now();
     while (gun.isReloading && performance.now() - start < 6000) {
       await wait(50);
     }
     const result = {
+      ammoClass,
       capacity,
       reloadedAmmo: gun.ammo,
-      reserveLeft: leader.reserve.rifle,
+      reserveLeft: leader.reserve[ammoClass],
       emptyReloadStarted: false,
       ammoAfterEmptyReload: -1,
     };
     gun.ammo = 0;
-    leader.reserve.rifle = 0;
+    leader.reserve[ammoClass] = 0;
     leader.reload();
     await wait(100);
     result.emptyReloadStarted = gun.isReloading;
     result.ammoAfterEmptyReload = gun.ammo;
     return result;
   });
+  expect(reserveReload.ammoClass).toBe("pistol");
   expect(reserveReload.reloadedAmmo).toBe(reserveReload.capacity);
   expect(reserveReload.reserveLeft).toBe(5);
   expect(reserveReload.emptyReloadStarted).toBe(false);
@@ -604,6 +680,146 @@ test("game boots, plays, and changes levels without errors", async ({
         ).leader.weapon.isReloading,
     ),
   ).toBe(true);
+  expectNoIssues(issues);
+
+  // --- The usable slot: C uses a charge of a health pack, which heals over a
+  // couple of seconds; a stim swaps it out and makes the leader faster and
+  // tougher for a while (KeyZ is a dev cheat: a health pack, or with shift a
+  // stim pack) ---
+  const usableState = () =>
+    page.evaluate(() => {
+      const leader = (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "PartyManager",
+        ) as any
+      ).leader;
+      return {
+        name: leader.usable?.stats.name as string | undefined,
+        charges: leader.usable?.charges as number | undefined,
+        hp: leader.hp as number,
+        moveSpeed: leader.stats.moveSpeed as number,
+        damageTaken: leader.stats.damageTaken as number,
+      };
+    });
+  await page.keyboard.press("KeyZ");
+  await expect(page.locator(".hud-item--usable")).toContainText("Health Pack");
+  await expect(page.locator(".hud-item--usable")).toContainText("×3");
+  const setLeader = (hp: number, damageTaken: number) =>
+    page.evaluate(
+      ([hp, damageTaken]) => {
+        const leader = (
+          [...window.DEBUG.game!.entities.all].find(
+            (e) => e.constructor.name === "PartyManager",
+          ) as any
+        ).leader;
+        leader.hp = hp;
+        leader.stats.damageTaken = damageTaken;
+      },
+      [hp, damageTaken],
+    );
+  // (Nothing hurts the leader meanwhile, so the heal is all that changes hp)
+  await setLeader(50, 0);
+  await page.keyboard.press("KeyC");
+  await expect.poll(async () => (await usableState()).hp).toBeCloseTo(90, 0);
+  const healed = await usableState();
+  expect(healed.charges).toBe(2);
+  await setLeader(healed.hp, 1);
+  await page.keyboard.down("ShiftLeft");
+  await page.keyboard.press("KeyZ");
+  await page.keyboard.up("ShiftLeft");
+  expect((await usableState()).name).toBe("Stim Pack");
+  // The health pack it replaced is on the floor, with what was left in it
+  expect(
+    await page.evaluate(() =>
+      ([...window.DEBUG.game!.entities.all] as any[])
+        .filter((e) => e.constructor.name === "UsablePickup")
+        .map((e) => [e.stats.name, e.charges]),
+    ),
+  ).toContainEqual(["Health Pack", 2]);
+  await page.keyboard.press("KeyC");
+  await page.waitForTimeout(200);
+  const stimmed = await usableState();
+  expect(stimmed.charges).toBe(1);
+  expect(stimmed.moveSpeed).toBeCloseTo(healed.moveSpeed * 1.3);
+  expect(stimmed.damageTaken).toBeCloseTo(0.6);
+  await page.screenshot({ path: "tests/output/usable.png" });
+  expectNoIssues(issues);
+
+  // --- Sprint: holding Shift while moving is faster, but there's no shooting
+  // or reloading, and starting to sprint cancels a reload ---
+  const sprintState = () =>
+    page.evaluate(() => {
+      const leader = (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "PartyManager",
+        ) as any
+      ).leader;
+      return {
+        sprinting: leader.sprinting as boolean,
+        speed: leader.walkSpring.speed as number,
+        ammo: leader.weapon.ammo as number,
+        reloading: leader.weapon.isReloading as boolean,
+      };
+    });
+  // Held where they are, so the keys only change the walk speed they ask for
+  await page.evaluate(() => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const at = leader.getPosition().clone();
+    (window as any).testSprintPin = true;
+    const pin = () => {
+      if (!(window as any).testSprintPin) return;
+      leader.body.position.set(at);
+      leader.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    pin();
+  });
+  await page.mouse.move(900, 300);
+  await page.keyboard.down("KeyD");
+  await page.waitForTimeout(200);
+  const walking = await sprintState();
+  await page.keyboard.down("ShiftLeft");
+  await page.waitForTimeout(200);
+  const running = await sprintState();
+  expect(walking.sprinting).toBe(false);
+  expect(running.sprinting).toBe(true);
+  expect(running.speed / walking.speed).toBeCloseTo(1.6);
+  await page.mouse.down();
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+  expect((await sprintState()).ammo).toBe(running.ammo);
+  await page.keyboard.up("ShiftLeft");
+  await page.keyboard.up("KeyD");
+  await page.waitForTimeout(200);
+  expect((await sprintState()).sprinting).toBe(false);
+  // A reload in progress stops when the sprint starts
+  await page.evaluate(() => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    leader.weapon.ammo = 0;
+    leader.reload();
+  });
+  expect((await sprintState()).reloading).toBe(true);
+  await page.keyboard.down("KeyA");
+  await page.keyboard.down("ShiftLeft");
+  await page.waitForTimeout(200);
+  const cancelled = await sprintState();
+  await page.keyboard.up("ShiftLeft");
+  await page.keyboard.up("KeyA");
+  expect(cancelled.reloading).toBe(false);
+  expect(cancelled.ammo).toBe(0);
+  // Walking again, reloading works
+  await page.waitForTimeout(200);
+  await page.keyboard.press("KeyR");
+  expect((await sprintState()).reloading).toBe(true);
+  await page.evaluate(() => ((window as any).testSprintPin = false));
   expectNoIssues(issues);
 
   // --- The push hurts (a little), and a grenade hurts a lot ---
@@ -727,19 +943,24 @@ test("game boots, plays, and changes levels without errors", async ({
     zombie.stun(20);
     zombie.hp = 1000; // so it outlives the fire
     (window as any).testZombie = zombie;
-    const shot = (shooter: any) => {
+    // (A bullet from a gun with an incendiary attachment is marked incendiary)
+    const shot = (shooter: any, incendiary: boolean) => {
       const origin = zombie.getPosition();
       zombie.hitByBullet(
-        { damage: 1, velocity: origin.mul(0), stats: { mass: 0 }, shooter },
+        {
+          damage: 1,
+          velocity: origin.mul(0),
+          stats: { mass: 0 },
+          shooter,
+          incendiary,
+        },
         origin,
         origin.mul(0),
       );
       return !!zombie.burning;
     };
-    const litWithout = shot(leader);
-    leader.stats.incendiaryRounds = true;
-    const litWith = shot(leader);
-    leader.stats.incendiaryRounds = false;
+    const litWithout = shot(leader, false);
+    const litWith = shot(leader, true);
     return { litWithout, litWith, hp: zombie.hp as number };
   });
   expect(lit.litWithout).toBe(false);
@@ -1059,142 +1280,16 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(doorPush.maxAngularVelocity).toBeGreaterThan(4);
   expect(doorPush.swing).toBeGreaterThan(1);
 
-  // --- A keycard opens one of the locked rooms ---
-  const keycards = await page.evaluate(async () => {
-    const game = window.DEBUG.game!;
-    const entities = [...game.entities.all] as any[];
-    const leader = entities.find(
-      (e) => e.constructor.name === "PartyManager",
-    ).leader;
-    const wait = async (ms: number) => {
-      const start = performance.now();
-      while (performance.now() - start < ms) {
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-      }
-    };
-    // Keeps the leader where window.testPinAt says until it's cleared
-    const pin = () => {
-      const at = (window as any).testPinAt;
-      if (!at) return;
-      leader.body.position.set(at);
-      leader.body.velocity.set(0, 0);
-      requestAnimationFrame(pin);
-    };
-    const standAt = async (position: any) => {
-      const wasPinned = !!(window as any).testPinAt;
-      (window as any).testPinAt = position;
-      if (!wasPinned) pin();
-      await wait(200);
-    };
-    /** Tries to swing a door open on whichever side it has room to, and returns how far it went */
-    const trySwing = async (door: any) => {
-      door.body.angularVelocity = door.maxAngle > 1 ? 6 : -6;
-      await wait(300);
-      return Math.abs(door.getOpenAngle());
-    };
-
-    const keycardPickups = entities.filter(
-      (e) => e.constructor.name === "Keycard",
-    );
-    const locks = entities.filter((e) => e.constructor.name === "KeycardLock");
-    (window as any).testLocks = locks;
-    const result = {
-      keycardCount: keycardPickups.length,
-      lockCount: locks.length,
-      lockedDoorsStayShut: 0,
-      openedWithoutKeycard: false,
-      promptWithoutKeycard: "",
-      keycardsPickedUp: 0,
-      hudShown: false,
-      reachableThroughDoor: [] as string[],
-    };
-    if (keycardPickups.length !== 1 || locks.length !== 2) {
-      return result;
-    }
-
-    for (const lock of locks) {
-      if ((await trySwing(lock.door)) < 0.1) {
-        result.lockedDoorsStayShut++;
-      }
-    }
-
-    // Without a keycard the lock does nothing, and says so
-    await standAt(locks[0].outsidePosition);
-    result.promptWithoutKeycard =
-      document.querySelector(".interact-prompt")?.textContent ?? "";
-    leader.interactWithNearest();
-    await wait(100);
-    result.openedWithoutKeycard = !locks[0].door.locked;
-
-    await standAt(keycardPickups[0].getPosition());
-    leader.interactWithNearest();
-    await wait(100);
-    result.keycardsPickedUp = leader.keycards;
-    result.hudShown = !!document.querySelector(".hud-keycards");
-
-    // Right outside the locked door, the lock is usable but the closet's
-    // contents behind the door are not, even though they're within range
-    const doorway = locks[0].door.getDoorwayCenter();
-    await standAt(doorway.lerp(locks[0].outsidePosition, 0.6));
-    result.reachableThroughDoor = leader
-      .getNearbyInteractables()
-      .map((i: any) => i.parent?.constructor.name);
-
-    // Stays pinned here for the screenshot, then uses the lock from here
-    await standAt(doorway.lerp(locks[0].outsidePosition, 1.6));
-    return result;
-  });
-  expect(keycards.reachableThroughDoor).toContain("KeycardLock");
-  expect(keycards.reachableThroughDoor).not.toContain("WeaponPickup");
-  expect(keycards.reachableThroughDoor).not.toContain("HealthPickup");
-  expect(keycards.reachableThroughDoor).not.toContain("AmmoPickup");
-  expect(keycards.reachableThroughDoor).not.toContain("ConsumablePickup");
-  expect(keycards.keycardCount).toBe(1);
-  expect(keycards.lockCount).toBe(2);
-  expect(keycards.lockedDoorsStayShut).toBe(2);
-  expect(keycards.openedWithoutKeycard).toBe(false);
-  expect(keycards.promptWithoutKeycard).toBe("Card reader · needs a keycard");
-  expect(keycards.keycardsPickedUp).toBe(1);
-  expect(keycards.hudShown).toBe(true);
-  await page.waitForTimeout(800); // let the camera settle
-  await page.screenshot({ path: "tests/output/level-1-locked-door.png" });
-
-  const unlocking = await page.evaluate(async () => {
-    const game = window.DEBUG.game!;
-    const leader = (
-      [...game.entities.all].find(
-        (e) => e.constructor.name === "PartyManager",
-      ) as any
-    ).leader;
-    const locks = (window as any).testLocks;
-    const wait = async (ms: number) => {
-      const start = performance.now();
-      while (performance.now() - start < ms) {
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-      }
-    };
-    leader.interactWithNearest();
-    await wait(100);
-    const door = locks[0].door;
-    const result = {
-      unlocked: !door.locked,
-      keycardsLeft: leader.keycards,
-      lockRemoved: locks[0].isDestroyed,
-      unlockedSwing: 0,
-      otherStillLocked: locks[1].door.locked,
-    };
-    door.body.angularVelocity = door.maxAngle > 1 ? 6 : -6;
-    await wait(300);
-    result.unlockedSwing = Math.abs(door.getOpenAngle());
-    (window as any).testPinAt = undefined;
-    return result;
-  });
-  expect(unlocking.unlocked).toBe(true);
-  expect(unlocking.keycardsLeft).toBe(0);
-  expect(unlocking.lockRemoved).toBe(true);
-  expect(unlocking.unlockedSwing).toBeGreaterThan(0.3);
-  expect(unlocking.otherStillLocked).toBe(true);
-  expectNoIssues(issues);
+  // --- Only one floor per act has the keycard and its locked rooms, and
+  // with this seed it's floor 3, not this one (see run.spec.ts) ---
+  expect(
+    await page.evaluate(
+      () =>
+        [...window.DEBUG.game!.entities.all].filter((e) =>
+          ["Keycard", "KeycardLock"].includes(e.constructor.name),
+        ).length,
+    ),
+  ).toBe(0);
 
   // --- Physics hasn't blown up ---
   const nonFiniteBodies = await page.evaluate(() => {
@@ -1273,6 +1368,8 @@ test("game boots, plays, and changes levels without errors", async ({
       [...game.entities.all].find((e) => e.constructor.name === name) as any;
     const leader = find("PartyManager").leader;
     const machine = find("VendingMachine");
+    // Whatever kind it was placed as, it starts out as a snack machine here
+    machine.kind = "snack";
     const standAt = machine.getFrontPosition(1.0);
     const pin = () => {
       if (!(window as any).testMachine) return;
@@ -1338,7 +1435,7 @@ test("game boots, plays, and changes levels without errors", async ({
     const machine = (window as any).testMachine;
     const quarters = partyManager.quarters;
     partyManager.quarters = 2;
-    machine.buy();
+    machine.buy(partyManager.leader);
     await new Promise((resolve) => setTimeout(resolve, 800));
     const quartersAfter = partyManager.quarters;
     partyManager.quarters = quarters;
@@ -1346,6 +1443,77 @@ test("game boots, plays, and changes levels without errors", async ({
   });
   expect(brokeBuy).toBe(2);
   expect(await countHealthPickups()).toBe(healthPickupsBefore + 1);
+
+  // The same machine as the other kinds (switched in place: a floor has only
+  // two machines, so it may not have all three)
+  const otherKinds = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const entities = () => [...game.entities.all] as any[];
+    const partyManager = entities().find(
+      (e) => e.constructor.name === "PartyManager",
+    );
+    const leader = partyManager.leader;
+    const machine = (window as any).testMachine;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const count = (name: string) =>
+      entities().filter((e) => e.constructor.name === name).length;
+    partyManager.quarters = 20;
+
+    // Ammo: a box for the gun in hand
+    machine.kind = "ammo";
+    const gunClass = leader.weapon.stats.ammoClass;
+    const ammoPrompt = machine.interactable.prompt(leader);
+    // With a melee weapon (or nothing) in hand there's nothing to sell
+    const meleePrompt = machine.interactable.prompt({ weapon: undefined });
+    const boxesBefore = count("AmmoPickup");
+    machine.buy(leader);
+    await wait(1200);
+    const ammo = {
+      gunClass,
+      ammoPrompt,
+      meleePrompt,
+      quarters: partyManager.quarters,
+      boxes: count("AmmoPickup") - boxesBefore,
+      boxClass: entities()
+        .filter((e) => e.constructor.name === "AmmoPickup")
+        .map((e) => e.ammoClass)
+        .pop(),
+    };
+
+    // Grenade: one of the kind it was stocked with
+    machine.kind = "grenade";
+    const grenadePrompt = machine.interactable.prompt(leader);
+    const grenadesBefore = count("ConsumablePickup");
+    const quartersBefore = partyManager.quarters;
+    machine.buy(leader);
+    await wait(1200);
+    const grenade = {
+      grenadePrompt,
+      name: machine.grenade.name,
+      spent: quartersBefore - partyManager.quarters,
+      pickups: count("ConsumablePickup") - grenadesBefore,
+    };
+    machine.kind = "snack";
+    return { ammo, grenade };
+  });
+  expect(otherKinds.ammo.gunClass).toBe("pistol");
+  expect(otherKinds.ammo.ammoPrompt).toEqual({
+    title: "Ammo machine",
+    detail: "30 pistol rounds · 2 quarters",
+  });
+  expect(otherKinds.ammo.meleePrompt).toEqual({
+    title: "Ammo machine",
+    hint: "nothing fits",
+  });
+  expect(otherKinds.ammo.quarters).toBe(18);
+  expect(otherKinds.ammo.boxes).toBe(1);
+  expect(otherKinds.ammo.boxClass).toBe("pistol");
+  expect(otherKinds.grenade.grenadePrompt).toEqual({
+    title: "Grenade machine",
+    detail: `${otherKinds.grenade.name} · 4 quarters`,
+  });
+  expect(otherKinds.grenade.spent).toBe(4);
+  expect(otherKinds.grenade.pickups).toBe(1);
 
   // Breaking a machine spills some quarters, once
   const spilled = await page.evaluate(async () => {
@@ -1437,6 +1605,7 @@ test("game boots, plays, and changes levels without errors", async ({
       survivorJoined: false,
       allyInsideWhenSealed: false,
       allyName: "",
+      allyLeftQuarter: false,
     };
     if (!door || exits.length !== 1) {
       return result;
@@ -1446,6 +1615,13 @@ test("game boots, plays, and changes levels without errors", async ({
     );
     result.levelBefore = levelController.currentLevel;
     result.exitInside = stairwell.contains(exits[0].getPosition());
+    // Zombies nearby would keep the ally busy fighting instead of following
+    // the leader in. (Copy the list, because destroying removes from it.)
+    for (const zombie of [...game.entities.getTagged("zombie")] as any[]) {
+      if (zombie.getPosition().distanceTo(door.getDoorwayCenter()) < 15) {
+        zombie.destroy();
+      }
+    }
     result.hasOneWayDoor = door.oneWay === 1 || door.oneWay === -1;
     result.lockedWhenPartyAway = door.locked;
 
@@ -1478,6 +1654,23 @@ test("game boots, plays, and changes levels without errors", async ({
       result.survivorJoined =
         partyManager.partyMembers.includes(survivor) &&
         survivorControllers[0].isDestroyed;
+
+      // An ally walking over a quarter leaves it for the leader
+      const quartersBefore = partyManager.quarters;
+      // (further from the leader than the survivor was, so only the survivor is on it)
+      const spot = doorway.add(inward.map((x) => x * -0.3));
+      const quarter = entities
+        .find((e) => e.constructor.name === "QuarterDropper")
+        .dropQuarter(spot, false);
+      for (let i = 0; i < 20; i++) {
+        survivor.body.position.set(spot);
+        survivor.body.velocity.set(0, 0);
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+      result.allyLeftQuarter =
+        !quarter.isDestroyed && partyManager.quarters === quartersBefore;
+      quarter.destroy();
+      survivor.body.position.set(doorway.add(inward.map((x) => x * -0.5)));
     }
 
     // Stand inside, away from the doorway and off the stairs
@@ -1516,6 +1709,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(stairwell.stairwellCount).toBe(1);
   expect(stairwell.survivorCount).toBe(1);
   expect(stairwell.survivorJoined).toBe(true);
+  expect(stairwell.allyLeftQuarter).toBe(true);
   expect(stairwell.allyInsideWhenSealed).toBe(true);
   expect(stairwell.exitCount).toBe(1);
   expect(stairwell.exitInside).toBe(true);
@@ -1590,14 +1784,15 @@ test("game boots, plays, and changes levels without errors", async ({
   await page.locator(".encyclopedia__entry--unknown").first().click();
   await expect(page.locator(".encyclopedia__detail-name")).toHaveText("???");
   expect(await detail.innerText()).not.toContain("Magazine");
-  // Guns → Melee → Consumables, where the frag grenades and molotovs carried
-  // earlier are known and flashbangs aren't
+  // Guns → Melee → Consumables, where the frag grenades, molotovs, health
+  // pack and stim pack carried earlier are known and flashbangs aren't
   for (let i = 0; i < 2; i++) {
     await page.keyboard.press("ArrowRight");
   }
   await expect(selectedTab).toContainText("Consumables");
-  await expect(selectedTab).toContainText("2 / 3");
-  await expect(gunEntries).toHaveCount(3);
+  // (and after them the usables, both carried earlier)
+  await expect(selectedTab).toContainText("4 / 5");
+  await expect(gunEntries).toHaveCount(5);
   await expect(gunEntries.nth(0)).toContainText("Frag Grenade");
   await expect(gunEntries.nth(1)).toHaveText("???");
   await expect(gunEntries.nth(2)).toContainText("Molotov");
@@ -1608,7 +1803,7 @@ test("game boots, plays, and changes levels without errors", async ({
   ).toHaveCount(1);
   await page.mouse.move(1, 1);
   await page.screenshot({ path: "tests/output/encyclopedia-consumables.png" });
-  // → Upgrades → Enemies, where the zombie shot earlier is known
+  // → Items → Enemies, where the zombie shot earlier is known
   for (let i = 0; i < 2; i++) {
     await page.keyboard.press("ArrowRight");
   }
@@ -1628,7 +1823,12 @@ test("game boots, plays, and changes levels without errors", async ({
   );
   expect(seen.guns).toContain(heldGun);
   expect(seen.enemies).toContain("Zombie");
-  expect(seen.consumables).toEqual(["Frag Grenade", "Molotov"]);
+  expect([...seen.consumables].sort()).toEqual([
+    "Frag Grenade",
+    "Health Pack",
+    "Molotov",
+    "Stim Pack",
+  ]);
   expectNoIssues(issues);
 
   await page.screenshot({ path: "tests/output/paused.png" });
@@ -1669,14 +1869,6 @@ test("game boots, plays, and changes levels without errors", async ({
   ).toBe(false);
 
   // --- Level transitions work (KeyL is a dev cheat) ---
-  const statsBefore = await page.evaluate(
-    () =>
-      (
-        [...window.DEBUG.game!.entities.all].find(
-          (e) => e.constructor.name === "PartyManager",
-        ) as any
-      ).leader.stats,
-  );
   // Whoever is in the stairwell with the leader makes it out
   const exitingFlashlightsOn = await page.evaluate(() => {
     const allies = (
@@ -1688,34 +1880,6 @@ test("game boots, plays, and changes levels without errors", async ({
     return allies.filter((a: any) => a.flashlight.light.enabled).length;
   });
   await page.keyboard.press("KeyL");
-
-  // --- Between floors the leader picks one of three upgrades ---
-  await page.waitForFunction(
-    () =>
-      [...window.DEBUG.game!.entities.all].some(
-        (e) => e.constructor.name === "UpgradeSelect",
-      ),
-    null,
-    { timeout: 15000 },
-  );
-  const offer = await page.evaluate(() => {
-    const screen = [...window.DEBUG.game!.entities.all].find(
-      (e) => e.constructor.name === "UpgradeSelect",
-    ) as any;
-    // For making one later, to check how cards show stacks
-    (window as any).testUpgradeSelect = screen.constructor;
-    return {
-      names: screen.choices.map((u: any) => u.name) as string[],
-      paused: window.DEBUG.game!.paused,
-      cards: document.querySelectorAll(".upgrade-select__card").length,
-      pauseMenuShown: !!document.querySelector(".pause-menu__background"),
-    };
-  });
-  // Seeded, and drawn after the level is generated, so always the same offer
-  expect(offer.names).toEqual(UPGRADE_OFFER);
-  expect(offer.paused).toBe(true);
-  expect(offer.cards).toBe(3);
-  expect(offer.pauseMenuShown).toBe(false);
 
   // --- The ally in the stairwell made it out, and is unlocked for good ---
   await expect(page.locator(".survivor-toast")).toContainText(
@@ -1741,31 +1905,6 @@ test("game boots, plays, and changes levels without errors", async ({
     "Nancy",
     stairwell.allyName,
   ]);
-  // Escape doesn't unpause behind the upgrade screen's back
-  await page.keyboard.press("Escape");
-  expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
-  await page.waitForTimeout(600);
-  await page.screenshot({ path: "tests/output/upgrade-select.png" });
-  // Take Hair Trigger with the keyboard
-  const pick = offer.names.indexOf("Hair Trigger");
-  // The card under the mouse is selected when the screen appears, so get the
-  // mouse out of the way and step from wherever the selection is
-  await page.mouse.move(1, 1);
-  const selected = await page.evaluate(
-    () =>
-      (
-        [...window.DEBUG.game!.entities.all].find(
-          (e) => e.constructor.name === "UpgradeSelect",
-        ) as any
-      ).selected as number,
-  );
-  for (let i = 0; i < (pick - selected + 3) % 3; i++) {
-    await page.keyboard.press("ArrowRight");
-  }
-  await page.keyboard.press("Enter");
-  await page.waitForFunction(() => !window.DEBUG.game!.paused, null, {
-    timeout: 5000,
-  });
   expectNoIssues(issues);
 
   await page.waitForFunction(
@@ -1862,13 +2001,16 @@ test("game boots, plays, and changes levels without errors", async ({
   await expect(page.locator(".floor-directory")).toHaveCount(1);
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(true);
   expect(await page.locator(".pause-menu__background").count()).toBe(0);
-  await expect(page.locator(".floor-directory__row")).toHaveText([
-    /4\s*Chapel\s*Boss/,
-    /3\s*Generator/,
-    /2\s*Maintenance.*You are here/,
-    /1\s*Shops/,
-    /L\s*Lobby/,
-  ]);
+  // The whole run, top floor first, with this one marked and the rest noted
+  const directoryRows = page.locator(".floor-directory__row");
+  await expect(directoryRows).toHaveCount(16);
+  await expect(directoryRows.nth(0)).toHaveText(/15\s*Chapel\s*Boss/);
+  await expect(directoryRows.nth(3)).toHaveText(/12\s*Generator\s*Landmark/);
+  await expect(directoryRows.nth(10)).toHaveText(/5\s*Shops\s*Store/);
+  await expect(directoryRows.nth(13)).toHaveText(
+    new RegExp(`2\\s*${RUN_PLAN[1]}.*You are here`),
+  );
+  await expect(directoryRows.nth(15)).toHaveText(/L\s*Lobby/);
   await page.screenshot({ path: "tests/output/floor-directory.png" });
   await page.waitForTimeout(400);
   await page.keyboard.press("Escape");
@@ -1876,31 +2018,288 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(await page.evaluate(() => window.DEBUG.game!.paused)).toBe(false);
   expectNoIssues(issues);
 
-  // --- The upgrade stuck: the leader's guns fire faster ---
-  const upgraded = await page.evaluate(() => {
+  // --- The second floor's arrival room has the store: a vending machine
+  // with a shelf dealt for this floor. (The first floor has none.) ---
+  const store = await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const machines = game.entities.getTagged("store_machine") as any[];
+    const arrivalRoom = [...game.entities.all].find(
+      (e) => e.constructor.name === "ArrivalRoom",
+    ) as any;
+    const shelf = machines[0]?.shelf;
+    return {
+      machines: machines.length,
+      inArrivalRoom: !!arrivalRoom?.contains(machines[0]?.position),
+      shelf: shelf && {
+        slots: shelf.slots.map((item: any) => item?.name ?? null),
+        gun: shelf.gun?.name ?? null,
+        consumable: shelf.consumable?.name ?? null,
+      },
+    };
+  });
+  expect(store.machines).toBe(1);
+  expect(store.inArrivalRoom).toBe(true);
+  // Seeded, and dealt after the level is generated, so always the same shelf
+  expect(store.shelf).toEqual(STORE_SHELF);
+
+  const storeState = () =>
+    page.evaluate(() => {
+      const entities = [...window.DEBUG.game!.entities.all] as any[];
+      const partyManager = entities.find(
+        (e) => e.constructor.name === "PartyManager",
+      );
+      const screen = entities.find((e) => e.constructor.name === "StoreScreen");
+      return {
+        items: partyManager.leader.items.map((i: any) => i.name) as string[],
+        quarters: partyManager.quarters as number,
+        paused: window.DEBUG.game!.paused,
+        selected: screen?.selected as number | undefined,
+      };
+    });
+  // In front of the machine, with no quarters, and the mouse out of the way
+  // (hovering a slot selects it)
+  await page.mouse.move(1, 1);
+  const storePrompt = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const partyManager = [...game.entities.all].find(
+      (e) => e.constructor.name === "PartyManager",
+    ) as any;
+    const leader = partyManager.leader;
+    partyManager.quarters = 0;
+    const machine = game.entities.getTagged("store_machine")[0] as any;
+    // It faces into the room, along its local -y
+    const r = machine.sprite.rotation;
+    leader.body.position.set(
+      machine.position.add([Math.sin(r) * 1.1, -Math.cos(r) * 1.1]),
+    );
+    leader.body.velocity.set(0, 0);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return document.querySelector(".interact-prompt__title")?.textContent;
+  });
+  expect(storePrompt).toBe("Vending machine");
+  await page.keyboard.press("KeyE");
+  await expect(page.locator(".store")).toHaveCount(1);
+  await expect(page.locator(".store__slot")).toHaveCount(6);
+  expect((await storeState()).paused).toBe(true);
+  expect(await page.locator(".pause-menu__background").count()).toBe(0);
+  // The E that opened it doesn't count for a moment (game time, which is
+  // slower than the clock when frames are slow)
+  await page.waitForTimeout(1000);
+  // Can't afford it: the display says so, and nothing is sold
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".store__display")).toHaveText(
+    "INSUFFICIENT FUNDS",
+  );
+  await page.screenshot({ path: "tests/output/store.png" });
+  expect((await storeState()).items).toEqual([]);
+  // Escape closes it, and the game goes on
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".store")).toHaveCount(0);
+  expect((await storeState()).paused).toBe(false);
+
+  // With some quarters, buying the first slot: it wiggles, drops, and is theirs
+  for (let i = 0; i < 5; i++) {
+    await page.keyboard.press("KeyK"); // dev cheat: +5 quarters
+  }
+  await page.keyboard.press("KeyE");
+  await expect(page.locator(".store")).toHaveCount(1);
+  await page.waitForTimeout(1000);
+  const firstSlot = page.locator(".store__slot").nth(0);
+  const firstPrice = Number(
+    await firstSlot.locator(".store__price").innerText(),
+  );
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".store__slot--vending")).toHaveCount(1);
+  await expect(page.locator(".store__display")).toHaveText("VENDING");
+  await expect(firstSlot).toHaveClass(/store__slot--empty/);
+  await expect(firstSlot).toContainText("Sold out");
+  const afterBuying = await storeState();
+  expect(afterBuying.items).toEqual([STORE_SHELF.slots[0]]);
+  expect(afterBuying.quarters).toBe(25 - firstPrice);
+  expect(afterBuying.paused).toBe(true);
+  // A sold-out slot sells nothing
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(300);
+  expect((await storeState()).items).toEqual([STORE_SHELF.slots[0]]);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".store")).toHaveCount(0);
+
+  // A gun from the bottom row goes in its slot, loaded and in hand, and the
+  // gun it replaces is traded in. (The shelf is given another gun, which
+  // replaces the AR-15 from the first floor in hand, and an item the leader
+  // already has.)
+  const gunOffer = await page.evaluate(() => {
+    const entities = [...window.DEBUG.game!.entities.all] as any[];
+    const levelController = entities.find(
+      (e) => e.constructor.name === "LevelController",
+    );
+    const partyManager = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    );
+    const leader = partyManager.leader;
+    let card: any;
+    for (let i = 0; i < 200 && !card; i++) {
+      const gun = levelController.dealShelf(leader).gun;
+      if (gun) {
+        card = gun;
+      }
+    }
+    const shelf = levelController.template.shelf;
+    shelf.gun = card;
+    shelf.slots[1] = leader.items[0];
+    partyManager.quarters = 100;
+    // Both slots are full, so it replaces the one in hand: the AR-15
+    leader.activeSlot = leader.weapons.findIndex(
+      (w: any) => w?.stats.name === "AR-15",
+    );
+    (window as any).testGunSlot = leader.activeSlot;
+    return {
+      name: card.name as string,
+      price: card.price as number,
+      replaced: leader.weapon?.stats.name as string | undefined,
+    };
+  });
+  expect(gunOffer.replaced).toBe("AR-15");
+  await page.keyboard.press("KeyE");
+  await expect(page.locator(".store")).toHaveCount(1);
+  await expect(page.locator(".store__slot").nth(1)).toContainText(/Own 1/);
+  await expect(page.locator(".store__slot").nth(4)).toContainText(
+    gunOffer.name,
+  );
+  await expect(
+    page.locator(".store__slot").nth(4).locator(".store__image"),
+  ).toHaveCount(1);
+  await page.waitForTimeout(1000);
+  // From the first slot for sale (the top right), down to the bottom row and
+  // left to the gun
+  expect((await storeState()).selected).toBe(1);
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowLeft");
+  expect((await storeState()).selected).toBe(4);
+  await page.screenshot({ path: "tests/output/store-gun.png" });
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".store__slot").nth(4)).toHaveClass(
+    /store__slot--empty/,
+  );
+  const boughtGun = await page.evaluate(() => {
+    const entities = [...window.DEBUG.game!.entities.all] as any[];
+    const partyManager = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    );
+    const leader = partyManager.leader;
+    const gun = leader.weapons[(window as any).testGunSlot];
+    return {
+      inSlot: gun?.stats.name,
+      inHand: leader.weapon === gun,
+      full: gun?.ammo === gun?.getCapacity(leader),
+      quarters: partyManager.quarters,
+      // Sold, not dropped
+      dropped: entities.some(
+        (e) =>
+          e.constructor.name === "WeaponPickup" &&
+          e.weapon.stats.name === "AR-15",
+      ),
+    };
+  });
+  expect(boughtGun).toEqual({
+    inSlot: gunOffer.name,
+    inHand: true,
+    full: true,
+    // The AR-15 is tier 2, which sells for 20: half of that back
+    quarters: 100 - gunOffer.price + 10,
+    dropped: false,
+  });
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".store")).toHaveCount(0);
+  expectNoIssues(issues);
+
+  // --- What was bought stuck: the first slot's item (an attachment, Armor
+  // Piercing, with this seed) is on the leader, and so is the gun ---
+  const afterStore = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
         (e) => e.constructor.name === "PartyManager",
       ) as any
     ).leader;
     return {
-      stats: leader.stats,
-      upgrades: leader.upgrades.map((u: any) => u.name),
-      maxHp: leader.maxHp,
-      hp: leader.hp,
+      items: leader.items.map((i: any) => i.name),
+      attachments: leader.attachments.map((a: any) => a.name),
     };
   });
-  expect(upgraded.upgrades).toEqual(["Hair Trigger"]);
-  expect(upgraded.stats.fireRate).toBeCloseTo(statsBefore.fireRate * 1.2);
-  expect(upgraded.maxHp).toBe(statsBefore.maxHp);
-  expect(upgraded.hp).toBeLessThanOrEqual(upgraded.maxHp);
-  // Nothing else changed
-  expect({ ...upgraded.stats, fireRate: statsBefore.fireRate }).toEqual(
-    statsBefore,
-  );
+  expect(afterStore.items).toEqual([STORE_SHELF.slots[0], gunOffer.name]);
+  expect(afterStore.attachments).toEqual([STORE_SHELF.slots[0]]);
 
-  // --- Stats are read at use time: bigger magazine, instant reload, and
-  // vision and flashlight ranges that rebuild their textures ---
+  // --- Leaving the arrival room: its door swings out, and locks for good once
+  // the leader is out, so it won't swing back in ---
+  const arrival = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const entities = [...game.entities.all] as any[];
+    const leader = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    ).leader;
+    const room = entities.find((e) => e.constructor.name === "ArrivalRoom");
+    const door = room.door;
+    const wait = async (ms: number) => {
+      const start = performance.now();
+      while (performance.now() - start < ms) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    };
+    const result = {
+      oneWay: door.oneWay === 1 || door.oneWay === -1,
+      lockedWhileInside: door.locked,
+      sealedWhileInside: room.sealed,
+      sealed: false,
+      locked: false,
+      inwardSwing: 1,
+    };
+    // Which way is out? The doorway is on the edge of the room's box.
+    const doorway = door.getDoorwayCenter();
+    const { min, max } = room;
+    const outward =
+      Math.abs(doorway[0] - min[0]) < 0.01
+        ? [-1, 0]
+        : Math.abs(doorway[0] - max[0]) < 0.01
+          ? [1, 0]
+          : Math.abs(doorway[1] - min[1]) < 0.01
+            ? [0, -1]
+            : [0, 1];
+    const outside = doorway.add(outward.map((x) => x * 2));
+    const start = performance.now();
+    while (performance.now() - start < 2000) {
+      leader.hp = leader.maxHp;
+      leader.body.position.set(outside);
+      leader.body.velocity.set(0, 0);
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    result.sealed = room.sealed;
+    result.locked = door.locked;
+    // Shoved inwards (against the way it opens), it barely moves
+    door.body.angle = door.restingAngle;
+    door.body.angularVelocity = -6 * door.oneWay;
+    await wait(300);
+    result.inwardSwing = -door.getOpenAngle() * door.oneWay;
+    // Back inside, where it's safe now, for the rest of the test (the hallway
+    // outside tends to fill up with zombies)
+    // A little right of the middle, with room either side for what's next
+    leader.body.position.set(min.add(max).mul(0.5).add([1, 0]));
+    leader.body.velocity.set(0, 0);
+    return result;
+  });
+  expect(arrival).toEqual({
+    oneWay: true,
+    lockedWhileInside: false,
+    sealedWhileInside: false,
+    sealed: true,
+    locked: true,
+    inwardSwing: expect.any(Number),
+  });
+  expect(arrival.inwardSwing).toBeLessThan(0.1);
+  expectNoIssues(issues);
+
+  // --- Stats are read at use time: instant reload, and vision and
+  // flashlight ranges that rebuild their textures ---
   const reloaded = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
@@ -1913,23 +2312,23 @@ test("game boots, plays, and changes levels without errors", async ({
     if (gun?.constructor.name !== "Gun") {
       return undefined;
     }
-    leader.stats.magazineSize = 1.5;
     leader.stats.instantEmptyReload = true;
     gun.ammo = 0;
     leader.reload();
-    return { ammo: gun.ammo, baseCapacity: gun.stats.ammoCapacity };
+    return { ammo: gun.ammo, capacity: gun.getCapacity(leader) };
   });
   expect(reloaded).toBeDefined();
-  expect(reloaded!.ammo).toBe(Math.round(reloaded!.baseCapacity * 1.5));
+  expect(reloaded!.ammo).toBe(reloaded!.capacity);
   await page.waitForTimeout(1000);
-  await page.screenshot({ path: "tests/output/level-2-upgraded.png" });
+  await page.screenshot({ path: "tests/output/level-2-stats.png" });
   expectNoIssues(issues);
 
-  // --- Weapon cards: at most one per offer, for a gun from this floor's
-  // closet tier or the one above (tiers 2 and 3 on floor 2) that the leader
-  // isn't carrying. (Drawing uses up randomness, so this comes after
+  // --- Dealing: four different items, a gun every time (one from
+  // this floor's closet tier or the one above, tiers 1 and 2 in act 1, that
+  // the leader isn't carrying and no store has had this run), and always a consumable; never an item the
+  // leader can't take again. (Dealing uses up randomness, so this comes after
   // everything that depends on the seed.) ---
-  const draws = await page.evaluate(() => {
+  const deals = await page.evaluate(() => {
     const entities = [...window.DEBUG.game!.entities.all] as any[];
     const levelController = entities.find(
       (e) => e.constructor.name === "LevelController",
@@ -1937,49 +2336,74 @@ test("game boots, plays, and changes levels without errors", async ({
     const leader = entities.find(
       (e) => e.constructor.name === "PartyManager",
     ).leader;
-    const offers: any[][] = [];
+    const shelves: any[] = [];
     for (let i = 0; i < 100; i++) {
-      offers.push(levelController.drawOffer(leader));
+      shelves.push(levelController.dealShelf(leader));
     }
-    const weaponCards = offers.flatMap((offer) =>
-      offer.filter((u) => u.weapon),
-    );
+    const guns = shelves.map((shelf) => shelf.gun).filter(Boolean);
     return {
-      held: [leader.primary, leader.secondary]
-        .filter((w) => w?.constructor.name === "Gun")
-        .map((gun) => gun.stats.name as string),
-      offerSizes: [...new Set(offers.map((offer) => offer.length))],
-      mostWeaponCards: Math.max(
-        ...offers.map((offer) => offer.filter((u) => u.weapon).length),
+      slotCounts: [...new Set(shelves.map((shelf) => shelf.slots.length))],
+      allDifferent: shelves.every(
+        (shelf) =>
+          new Set(shelf.slots.map((item: any) => item?.name)).size ===
+          shelf.slots.length,
       ),
-      weaponNames: [...new Set(weaponCards.map((u) => u.name as string))],
-      weaponDescriptions: [
-        ...new Set(weaponCards.map((u) => u.description as string)),
+      allFull: shelves.every((shelf) => shelf.slots.every(Boolean)),
+      allConsumables: shelves.every((shelf) => shelf.consumable),
+      gunCount: guns.length,
+      gunNames: [...new Set(guns.map((gun: any) => gun.name as string))],
+      gunDescriptions: [
+        ...new Set(guns.map((gun: any) => gun.description as string)),
       ],
+      held: leader.guns.map((gun: any) => gun.stats.name as string),
+      dealtItems: [
+        ...new Set(
+          shelves.flatMap((shelf) =>
+            shelf.slots.map((item: any) => item.name as string),
+          ),
+        ),
+      ],
+      maxedOut: leader.items
+        .filter(
+          (item: any) =>
+            item.maxStacks !== undefined &&
+            leader.items.filter((i: any) => i === item).length >=
+              item.maxStacks,
+        )
+        .map((item: any) => item.name as string),
     };
   });
-  expect(draws.offerSizes).toEqual([3]);
-  expect(draws.mostWeaponCards).toBe(1);
-  expect(draws.weaponNames.length).toBeGreaterThan(0);
-  for (const name of draws.weaponNames) {
+  expect(deals.slotCounts).toEqual([4]);
+  expect(deals.allDifferent).toBe(true);
+  expect(deals.allFull).toBe(true);
+  expect(deals.allConsumables).toBe(true);
+  expect(deals.gunCount).toBe(100);
+  for (const name of deals.gunNames) {
     expect([
+      "M1911",
+      "Glock",
+      "S&W Revolver",
+      "Five Seven",
       "Desert Eagle",
       "AR-15",
       "Sawn Off Shotgun",
-      "Remington Shotgun",
     ]).toContain(name);
-    expect(draws.held).not.toContain(name);
+    expect(deals.held).not.toContain(name);
+    expect(name).not.toBe(STORE_SHELF.gun);
   }
-  for (const description of draws.weaponDescriptions) {
+  for (const description of deals.gunDescriptions) {
     expect(description).toMatch(
-      /^Tier [23] · \d+ (rounds|shells) · (semi auto|full auto|pump action)$/,
+      /^Tier [12] · \d+ (rounds|shells) · (semi auto|full auto|pump action)$/,
     );
   }
+  for (const name of deals.maxedOut) {
+    expect(deals.dealtItems).not.toContain(name);
+  }
+  expectNoIssues(issues);
 
-  // Taking one puts the gun in its slot, loaded, with the new-gun reserve
-  // bonus, and drops what was there; after that neither it nor a maxed-out
-  // upgrade is offered again
-  const tookWeapon = await page.evaluate(async () => {
+  // --- Attachments: they go on the guns of the families they fit, and for
+  // each slot a gun uses the newest one that fits it ---
+  const attached = await page.evaluate(() => {
     const entities = [...window.DEBUG.game!.entities.all] as any[];
     const levelController = entities.find(
       (e) => e.constructor.name === "LevelController",
@@ -1987,108 +2411,56 @@ test("game boots, plays, and changes levels without errors", async ({
     const leader = entities.find(
       (e) => e.constructor.name === "PartyManager",
     ).leader;
-    let card: any;
-    let oneStack: any;
-    for (let i = 0; i < 200 && !(card && oneStack); i++) {
-      for (const upgrade of levelController.drawOffer(leader)) {
-        if (upgrade.weapon && (!card || card.weapon.ammoClass === "pistol")) {
-          card = upgrade;
-        } else if (!upgrade.weapon && upgrade.maxStacks === 1) {
-          oneStack = upgrade;
+    // Attachments are only dealt, so deal until each one turns up
+    const find = (name: string) => {
+      for (let i = 0; i < 500; i++) {
+        for (const item of levelController.dealShelf(leader).slots) {
+          if (item?.name === name) {
+            return item;
+          }
         }
       }
-    }
-    const ammoClass = card.weapon.ammoClass;
-    const slot = ammoClass === "pistol" ? "secondary" : "primary";
-    const replaced = leader[slot]?.stats.name;
-    if (ammoClass !== "pistol") {
-      leader.reserve[ammoClass] = 0;
-    }
-    levelController.giveUpgrade(leader, card);
-    levelController.giveUpgrade(leader, oneStack);
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const gun = leader[slot];
-    const offeredAgain = new Set<string>();
-    for (let i = 0; i < 100; i++) {
-      for (const upgrade of levelController.drawOffer(leader)) {
-        offeredAgain.add(upgrade.name);
-      }
-    }
-    const dropped = [...window.DEBUG.game!.entities.all].some(
-      (e: any) =>
-        e.constructor.name === "WeaponPickup" &&
-        e.weapon.stats.name === replaced,
+      throw new Error(`${name} was never dealt`);
+    };
+    const pistol = leader.weapons.find(
+      (w: any) => w?.stats.ammoClass === "pistol",
     );
+    leader.activeSlot = leader.weapons.indexOf(pistol);
+    leader.refreshWeaponSprite();
+    const base = pistol.getCapacity(leader);
+    find("Rifle Drum").apply(leader);
+    const withDrum = pistol.getCapacity(leader);
+    find("Extended Pistol Mag").apply(leader);
+    const withMag = pistol.getCapacity(leader);
+    find("Laser Sight").apply(leader);
+    const laser = !!leader.humanSprite.laserSight;
+    find("Compensator").apply(leader);
     return {
-      name: card.name,
-      ammoClass,
-      replaced,
-      dropped,
-      inSlot: gun?.stats.name,
-      inHand: leader.weapon === gun,
-      full: gun?.ammo === gun?.getCapacity(leader),
-      reserve: leader.getReserve(ammoClass),
-      oneStack: oneStack.name,
-      offeredAgain: [...offeredAgain],
-      upgrades: leader.upgrades.map((u: any) => u.name),
+      base,
+      withDrum,
+      withMag,
+      laser,
+      laserAfterCompensator:
+        pistol.effectiveStats(leader).laserSightColor ===
+        pistol.stats.laserSightColor,
+      onPistol: leader
+        .attachmentsFor(pistol)
+        .map((a: any) => a.name)
+        .sort(),
     };
   });
-  expect(tookWeapon.inSlot).toBe(tookWeapon.name);
-  expect(tookWeapon.inHand).toBe(true);
-  expect(tookWeapon.full).toBe(true);
-  if (tookWeapon.ammoClass !== "pistol") {
-    expect(tookWeapon.reserve).toBe(
-      tookWeapon.ammoClass === "rifle" ? 15 : 4, // NEW_GUN_RESERVE_BONUS
-    );
-  }
-  if (tookWeapon.replaced) {
-    expect(tookWeapon.dropped).toBe(true);
-  }
-  expect(tookWeapon.offeredAgain).not.toContain(tookWeapon.name);
-  expect(tookWeapon.offeredAgain).not.toContain(tookWeapon.oneStack);
-  expect(tookWeapon.upgrades).toEqual([
-    "Hair Trigger",
-    tookWeapon.name,
-    tookWeapon.oneStack,
+  // A rifle drum doesn't fit a pistol
+  expect(attached.withDrum).toBe(attached.base);
+  expect(attached.withMag).toBe(Math.round(attached.base * 1.5));
+  expect(attached.laser).toBe(true);
+  // The compensator took the rail from the laser sight, on pistols. (The
+  // Armor Piercing from the store fits pistols too.)
+  expect(attached.laserAfterCompensator).toBe(true);
+  expect(attached.onPistol).toEqual([
+    "Armor Piercing",
+    "Compensator",
+    "Extended Pistol Mag",
   ]);
-
-  // Cards say how many of an upgrade the leader already has
-  await page.evaluate(() => {
-    const game = window.DEBUG.game!;
-    const entities = [...game.entities.all] as any[];
-    const levelController = entities.find(
-      (e) => e.constructor.name === "LevelController",
-    );
-    const leader = entities.find(
-      (e) => e.constructor.name === "PartyManager",
-    ).leader;
-    let weaponCard: any;
-    for (let i = 0; i < 200 && !weaponCard; i++) {
-      weaponCard = levelController.drawOffer(leader).find((u: any) => u.weapon);
-    }
-    const UpgradeSelect = (window as any).testUpgradeSelect;
-    (window as any).testUpgradeScreen = game.addEntity(
-      new UpgradeSelect(
-        [leader.upgrades[0], leader.upgrades[2], weaponCard],
-        leader,
-      ),
-    );
-  });
-  const cards = page.locator(".upgrade-select__card");
-  await expect(cards).toHaveCount(3);
-  await expect(cards.nth(0)).toContainText("1 taken");
-  await expect(cards.nth(1)).toContainText("1 / 1 taken");
-  await expect(cards.nth(2)).not.toContainText("taken");
-  await expect(cards.nth(2).locator(".upgrade-select__image")).toHaveCount(1);
-  await expect(cards.nth(2)).toContainText(/Tier \d/);
-  await page.mouse.move(1, 1);
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: "tests/output/upgrade-select-stacks.png" });
-  await page.evaluate(() => {
-    (window as any).testUpgradeScreen.destroy();
-    window.DEBUG.game!.unpause();
-  });
-  await expect(cards).toHaveCount(0);
   expectNoIssues(issues);
 
   // --- Zoomed out overview with the vision mask off (KeyV is a dev cheat) ---
@@ -2107,7 +2479,7 @@ test("game boots, plays, and changes levels without errors", async ({
   expectNoIssues(issues);
 
   // --- The leader dying ends the run, even with an ally alive ---
-  // This floor's survivor joins (tried on each side of the leader until one
+  // This floor's survivor joins (if they haven't) (tried on each side of the leader until one
   // is in sight), then a zombie finishes off the leader
   const death = await page.evaluate(async () => {
     const game = window.DEBUG.game!;
@@ -2133,7 +2505,8 @@ test("game boots, plays, and changes levels without errors", async ({
       weaponsCarried: 0,
       droppedWeapons: [] as [number, number][],
     };
-    const ally = survivorController?.human;
+    // (They may have joined already, while the leader was out in the hallway)
+    const ally = survivorController?.human ?? partyManager.getAllies()[0];
     if (!ally) {
       return result;
     }
@@ -2154,14 +2527,13 @@ test("game boots, plays, and changes levels without errors", async ({
         .getTagged("zombie")
         .find((e) => e.constructor.name === "Zombie") as any;
     let zombie = findZombie();
-    const carried = [leader.primary, leader.secondary].filter((w) => w);
+    const carried = leader.weapons.filter((w: any) => w);
     result.weaponsCarried = carried.length;
     leader.hp = 1;
     // The ally would keep pushing and shooting the zombie, which can stall
     // its attack for a long time; this is about the leader dying with the
     // ally alive, so keep the ally out of it
-    ally.primary = undefined;
-    ally.secondary = undefined;
+    ally.weapons = [undefined, undefined];
     const pin = () => {
       if (leader.isDestroyed) return;
       if (zombie.isDestroyed) zombie = findZombie();
@@ -2223,7 +2595,7 @@ test("game boots, plays, and changes levels without errors", async ({
   const saved = await page.evaluate(() =>
     JSON.parse(window.localStorage.getItem("highriseSaveData")!),
   );
-  expect(saved.version).toBe(1);
+  expect(saved.version).toBe(2);
   expect(saved.runs.length).toBe(1);
   const run = saved.runs[0];
   expect(run.outcome).toBe("died");
@@ -2236,11 +2608,16 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(run.floorReached).toBe(2);
   expect(saved.bestFloor).toBe(2);
   expect(run.kills.Zombie).toBeGreaterThan(0);
-  expect(run.quartersSpent).toBe(3);
+  // Health, ammo and a grenade from the floor machine, then the item and the
+  // gun from the store
+  expect(run.quartersSpent).toBe(3 + 2 + 4 + firstPrice + gunOffer.price);
+  expect(run.items).toEqual([STORE_SHELF.slots[0], gunOffer.name]);
   expect(run.quartersCollected).toBeGreaterThanOrEqual(6);
   expect(run.timeSeconds).toBeGreaterThan(5);
-  // Offered upgrades count as seen, and saving the run kept the seen flags
-  expect(saved.seen.upgrades).toEqual(expect.arrayContaining(UPGRADE_OFFER));
+  // Items seen on a shelf count as seen, and saving the run kept the seen flags
+  expect(saved.seen.items).toEqual(
+    expect.arrayContaining(STORE_SHELF.slots.filter(Boolean)),
+  );
   expect(saved.seen.guns.length).toBeGreaterThan(0);
   // The game is cleared away behind the summary
   expect(

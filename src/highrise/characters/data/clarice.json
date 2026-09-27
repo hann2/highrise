@@ -10,7 +10,7 @@
     "torso": "clariceTorso"
   },
   "stats": {},
-  "startingWeapons": [],
+  "startingWeapons": ["M1911"],
   "clips": [
     {
       "file": "clarice-join-party-1.flac",

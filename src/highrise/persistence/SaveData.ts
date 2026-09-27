@@ -9,7 +9,7 @@
  */
 
 const STORAGE_KEY = "highriseSaveData";
-export const SAVE_DATA_VERSION = 1;
+export const SAVE_DATA_VERSION = 2;
 /** How many past runs are kept */
 export const MAX_SAVED_RUNS = 20;
 
@@ -43,8 +43,8 @@ export interface RunSummary {
   timeSeconds: number;
   /** Enemy type that killed the leader, if the leader died */
   causeOfDeath?: string;
-  /** Names of the upgrades taken, in order */
-  upgrades: string[];
+  /** Names of the items bought, in order */
+  items: string[];
   /** Names of the characters unlocked during the run */
   charactersUnlocked: string[];
 }
@@ -76,7 +76,7 @@ export function defaultSaveData(): SaveData {
     runs: [],
     totalRuns: 0,
     bestFloor: 0,
-    seen: { guns: [], melee: [], consumables: [], upgrades: [], enemies: [] },
+    seen: { guns: [], melee: [], consumables: [], items: [], enemies: [] },
     autoPause: true,
     lastCharacter: undefined,
     lobbyExplored: undefined,
@@ -173,7 +173,8 @@ export function parseSaveData(raw: unknown): SaveData {
   if (!isObject(raw)) {
     return data;
   }
-  // Migrations from older versions go here, keyed on raw.version
+  // Migrations from older versions go here, keyed on raw.version. Version 1
+  // had upgrades where items are now; the parsers read either name.
   for (const name of stringArray(raw.unlockedCharacters)) {
     if (!data.unlockedCharacters.includes(name)) {
       data.unlockedCharacters.push(name);
@@ -229,7 +230,7 @@ function parseRunSummary(raw: unknown): RunSummary | undefined {
     timeSeconds: nonNegative(raw.timeSeconds),
     causeOfDeath:
       typeof raw.causeOfDeath === "string" ? raw.causeOfDeath : undefined,
-    upgrades: stringArray(raw.upgrades),
+    items: stringArray(raw.items ?? raw.upgrades),
     charactersUnlocked: stringArray(raw.charactersUnlocked),
   };
 }
@@ -253,7 +254,7 @@ export interface SeenFlags {
   guns: string[];
   melee: string[];
   consumables: string[];
-  upgrades: string[];
+  items: string[];
   enemies: string[];
 }
 
@@ -278,7 +279,7 @@ function parseSeenFlags(raw: unknown): SeenFlags {
     guns: stringArray(seen.guns),
     melee: stringArray(seen.melee),
     consumables: stringArray(seen.consumables),
-    upgrades: stringArray(seen.upgrades),
+    items: stringArray(seen.items ?? seen.upgrades),
     enemies: stringArray(seen.enemies),
   };
 }

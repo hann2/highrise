@@ -9,28 +9,30 @@ import { rDirection, rUniform } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import Human from "../human/Human";
 import {
-  AMMO_PICKUP_AMOUNT,
-  LimitedAmmoClass,
+  AMMO_BOX,
+  AmmoClass,
+  ammoClassName,
   MAX_RESERVE,
 } from "../weapons/guns/ammo";
 import Interactable from "./Interactable";
 
 const BOX_SIZE: [number, number] = [0.34, 0.24]; // meters
 
-const BOX_COLORS: Record<LimitedAmmoClass, { box: number; round: number }> = {
+const BOX_COLORS: Record<AmmoClass, { box: number; round: number }> = {
+  pistol: { box: 0x2e3f5a, round: 0xc8a040 },
   rifle: { box: 0x4f5a2e, round: 0xd9b24a },
   shotgun: { box: 0x8c2a22, round: 0xe0c060 },
 };
 
-/** A box of rifle or shotgun rounds. Interact to add them to your reserve. */
+/** A box of rounds for one class of gun. Interact to add them to your reserve. */
 export default class AmmoPickup extends BaseEntity implements Entity {
   sprites: (Container & GameSprite)[];
   private box: Graphics & GameSprite;
 
   constructor(
     private position: V2d,
-    public ammoClass: LimitedAmmoClass,
-    public amount: number = AMMO_PICKUP_AMOUNT[ammoClass],
+    public ammoClass: AmmoClass,
+    public amount: number = AMMO_BOX[ammoClass],
     private dropped = false,
   ) {
     super();
@@ -41,7 +43,7 @@ export default class AmmoPickup extends BaseEntity implements Entity {
     interactable.canInteract = (human) =>
       human.getReserve(ammoClass) < MAX_RESERVE[ammoClass];
     interactable.prompt = () => ({
-      title: ammoClass === "rifle" ? "Rifle ammo" : "Shotgun ammo",
+      title: `${ammoClassName(ammoClass)} ammo`,
       detail: String(this.amount),
     });
 
@@ -95,7 +97,7 @@ export default class AmmoPickup extends BaseEntity implements Entity {
 }
 
 /** A cardboard box of rounds, seen from above */
-function drawAmmoBox(ammoClass: LimitedAmmoClass): Graphics & GameSprite {
+function drawAmmoBox(ammoClass: AmmoClass): Graphics & GameSprite {
   const [w, h] = BOX_SIZE;
   const colors = BOX_COLORS[ammoClass];
   const graphics = new Graphics();
@@ -107,8 +109,10 @@ function drawAmmoBox(ammoClass: LimitedAmmoClass): Graphics & GameSprite {
     .rect(-w / 2 + 0.03, -h / 2 + 0.03, w - 0.06, h - 0.06)
     .fill(0x201a10);
   const rows = 3;
-  const columns = ammoClass === "shotgun" ? 4 : 6;
-  const roundRadius = ammoClass === "shotgun" ? 0.024 : 0.014;
+  const columns = { pistol: 7, rifle: 6, shotgun: 4 }[ammoClass];
+  const roundRadius = { pistol: 0.012, rifle: 0.014, shotgun: 0.024 }[
+    ammoClass
+  ];
   for (let row = 0; row < rows; row++) {
     for (let column = 0; column < columns; column++) {
       const x = -w / 2 + 0.03 + ((column + 0.5) * (w - 0.06)) / columns;

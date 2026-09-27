@@ -15,14 +15,46 @@ import WallImpact from "../../effects/WallImpact";
 import Light from "../../lighting-and-vision/Light";
 import Bullet from "../../projectiles/Bullet";
 import SwingingWeapon from "../../weapons/melee/SwingingWeapon";
+import Human from "../../human/Human";
+import { ConsumableStats } from "../../weapons/consumables/ConsumableStats";
+import { FragGrenade } from "../../weapons/consumables/consumable-stats/FragGrenade";
+import {
+  AMMO_BOX,
+  AMMO_PRICE,
+  AmmoClass,
+  ammoClassName,
+} from "../../weapons/guns/ammo";
+import Gun from "../../weapons/guns/Gun";
+import AmmoPickup from "../AmmoPickup";
+import ConsumablePickup from "../ConsumablePickup";
 import HealthPickup from "../HealthPickup";
 import Hittable from "../Hittable";
 import Interactable from "../Interactable";
 import { getPartyManager } from "../PartyManager";
 import Quarter from "../Quarter";
 
-/** Quarters for one item */
+/**
+ * What a machine sells: health (snack), a box of rounds for the gun in hand
+ * (ammo), or one throwable of a kind chosen when it's placed (grenade)
+ */
+export type VendingMachineKind = "snack" | "ammo" | "grenade";
+
+/** Quarters for a snack (a health pickup) */
 export const VENDING_MACHINE_PRICE = 3;
+/** Quarters for a throwable from a grenade machine. Ammo prices are in `ammo.ts`. */
+export const GRENADE_MACHINE_PRICE = 4;
+
+/** Tints telling the kinds apart, until they have their own art */
+const KIND_TINTS: Record<VendingMachineKind, number> = {
+  snack: 0xffffff,
+  ammo: 0x9ab8ff,
+  grenade: 0xb4ff90,
+};
+const KIND_TITLES: Record<VendingMachineKind, string> = {
+  snack: "Snack machine",
+  ammo: "Ammo machine",
+  grenade: "Grenade machine",
+};
 /** How many quarters spill out when a machine is broken */
 const BROKEN_QUARTERS_MIN = 2;
 const BROKEN_QUARTERS_MAX = 4;
@@ -52,7 +84,13 @@ export default class VendingMachine
   /** In the middle of dispensing something */
   private vending = false;
 
-  constructor(position: V2d, rotation: number) {
+  constructor(
+    position: V2d,
+    rotation: number,
+    readonly kind: VendingMachineKind = "snack",
+    /** What a grenade machine sells */
+    readonly grenade: ConsumableStats = FragGrenade,
+  ) {
     super();
 
     const [machineImage, glowImage] = choose(...VENDING_MACHINES);
@@ -63,6 +101,7 @@ export default class VendingMachine
     this.sprite.width = 1.5;
     this.sprite.height = 1.5;
     this.sprite.rotation = rotation;
+    this.sprite.tint = KIND_TINTS[kind];
 
     this.lightSprite = Sprite.from(glowImage);
     this.lightSprite.anchor.set(0.5, 0.5);
@@ -70,6 +109,7 @@ export default class VendingMachine
     this.lightSprite.width = 1.5;
     this.lightSprite.height = 1.5;
     this.lightSprite.rotation = rotation;
+    this.lightSprite.tint = KIND_TINTS[kind];
 
     this.light = this.addChild(new Light(this.lightSprite, false, 2));
     this.light.setPosition(position);
@@ -90,18 +130,61 @@ export default class VendingMachine
     );
 
     this.interactable = this.addChild(
-      new Interactable(position, () => this.buy(), 1.2),
+      new Interactable(position, (human) => this.buy(human), 1.2),
     );
     this.interactable.highlightRadius = 0.85;
     // Busy dispensing, or broken: pressing E wouldn't do anything
     this.interactable.canInteract = () => !this.dead && !this.vending;
-    this.interactable.prompt = () =>
-      (getPartyManager(this.game)?.quarters ?? 0) >= VENDING_MACHINE_PRICE
-        ? {
-            title: "Snack machine",
-            detail: `${VENDING_MACHINE_PRICE} quarters`,
-          }
-        : { title: "Snack machine", hint: "not enough quarters" };
+    this.interactable.prompt = (human) => {
+      const title = KIND_TITLES[this.kind];
+      const price = this.priceFor(human);
+      if (price === undefined) {
+        return { title, hint: "nothing fits" };
+      }
+      const what = this.describe(human);
+      if ((getPartyManager(this.game)?.quarters ?? 0) < price) {
+        return { title, detail: what, hint: "not enough quarters" };
+      }
+      return {
+        title,
+        detail: [what, `${price} quarters`].filter(Boolean).join(" · "),
+      };
+    };
+  }
+
+  /** The class of ammo an ammo machine would sell `human`: for the gun in hand */
+  private ammoClassFor(human: Human): AmmoClass | undefined {
+    return human.weapon instanceof Gun
+      ? human.weapon.stats.ammoClass
+      : undefined;
+  }
+
+  /** What `human` would pay, or undefined if there's nothing for them */
+  priceFor(human: Human): number | undefined {
+    switch (this.kind) {
+      case "snack":
+        return VENDING_MACHINE_PRICE;
+      case "grenade":
+        return GRENADE_MACHINE_PRICE;
+      case "ammo": {
+        const ammoClass = this.ammoClassFor(human);
+        return ammoClass && AMMO_PRICE[ammoClass];
+      }
+    }
+  }
+
+  /** What it would sell `human`, for the prompt */
+  private describe(human: Human): string | undefined {
+    switch (this.kind) {
+      case "snack":
+        return undefined;
+      case "grenade":
+        return this.grenade.name;
+      case "ammo": {
+        const ammoClass = this.ammoClassFor(human)!;
+        return `${AMMO_BOX[ammoClass]} ${ammoClassName(ammoClass).toLowerCase()} rounds`;
+      }
+    }
   }
 
   /** A point on the floor just in front of the machine, where things come out */
@@ -111,14 +194,15 @@ export default class VendingMachine
     return this.getPosition().add(front);
   }
 
-  /** Dispenses something if the party can pay for it */
-  buy() {
+  /** Dispenses something if there's something for `human` and the party can pay for it */
+  buy(human: Human) {
     if (this.dead || this.vending) {
       return;
     }
     const partyManager = getPartyManager(this.game);
-    if (partyManager?.spendQuarters(VENDING_MACHINE_PRICE)) {
-      this.dispense();
+    const price = this.priceFor(human);
+    if (price !== undefined && partyManager?.spendQuarters(price)) {
+      this.dispense(this.makeGoods(human), price);
     } else {
       // Not enough money
       this.game.addEntity(
@@ -130,9 +214,23 @@ export default class VendingMachine
     }
   }
 
-  async dispense() {
+  /** What comes out, decided when it's paid for: `at` is where it lands */
+  private makeGoods(human: Human): (at: V2d) => Entity {
+    switch (this.kind) {
+      case "snack":
+        return (at) => new HealthPickup(at);
+      case "grenade":
+        return (at) => new ConsumablePickup(at, this.grenade, 1);
+      case "ammo": {
+        const ammoClass = this.ammoClassFor(human)!;
+        return (at) => new AmmoPickup(at, ammoClass);
+      }
+    }
+  }
+
+  async dispense(makeGoods: (at: V2d) => Entity, price: number) {
     this.vending = true;
-    for (let i = 0; i < VENDING_MACHINE_PRICE; i++) {
+    for (let i = 0; i < price; i++) {
       this.game.addEntity(
         new PositionalSound("quarterDrop1", this.getPosition(), {
           speed: rUniform(0.95, 1.1),
@@ -141,7 +239,7 @@ export default class VendingMachine
       await this.wait(0.12);
     }
     await this.flicker(rInteger(1, 2));
-    this.game.addEntity(new HealthPickup(this.getFrontPosition()));
+    this.game.addEntity(makeGoods(this.getFrontPosition()));
     this.vending = false;
   }
 

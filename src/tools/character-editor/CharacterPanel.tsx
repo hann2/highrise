@@ -20,8 +20,8 @@ const NEUTRAL_STATS = new PlayerStats();
 
 /** The stats in the order and groups `PlayerStats` has them */
 const STAT_GROUPS: [string, (keyof PlayerStats)[]][] = [
-  ["Movement and health", ["moveSpeed", "maxHp"]],
-  ["Weapons", ["damage", "reloadSpeed", "fireRate", "spread", "magazineSize"]],
+  ["Movement and health", ["moveSpeed", "maxHp", "damageTaken", "sprintSpeed"]],
+  ["Weapons", ["damage", "reloadSpeed", "fireRate", "spread"]],
   ["Push", ["pushDamage", "pushKnockback", "pushStun"]],
   ["Seeing", ["flashlightRange", "visionRange"]],
   [
@@ -145,7 +145,7 @@ export function CharacterPanel({
         <section class="card card--stats">
           <h2>Stats</h2>
           <p class="muted small">
-            Blank is the same as everyone else. Upgrades apply on top.
+            Blank is the same as everyone else. Items apply on top.
           </p>
           <StatsEditor
             stats={data.stats}

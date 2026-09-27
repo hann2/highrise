@@ -32,6 +32,9 @@ import { inflictDamageFrom } from "../run/damageSources";
 import Door from "../environment/Door";
 import Interactable, { isInteractable } from "../environment/Interactable";
 import ConsumablePickup from "../environment/ConsumablePickup";
+import UsablePickup from "../environment/UsablePickup";
+import { UsableStats } from "../weapons/usables/UsableStats";
+import { STIM_EFFECT } from "../weapons/usables/usables";
 import WeaponPickup from "../environment/WeaponPickup";
 import { PhasedAction } from "../utils/PhasedAction";
 import { ShuffleRing } from "../utils/ShuffleRing";
@@ -39,25 +42,26 @@ import { ConsumableStats } from "../weapons/consumables/ConsumableStats";
 import ThrownConsumable from "../weapons/consumables/ThrownConsumable";
 import {
   AmmoClass,
-  isLimitedAmmo,
-  LimitedAmmoClass,
   MAX_RESERVE,
   NEW_GUN_RESERVE_BONUS,
   STARTING_RESERVE,
 } from "../weapons/guns/ammo";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
-import { otherSlot, slotFor, WeaponSlot } from "../weapons/weapons";
+import { otherSlot, Weapon, WeaponSlot } from "../weapons/weapons";
 import HumanSprite from "./HumanSprite";
 import Flashlight from "./Flashlight";
 import HumanVoice from "./HumanVoice";
-import { PlayerStats } from "./PlayerStats";
-import type { Upgrade } from "../upgrades/Upgrade";
+import { NumericStat, PlayerStats } from "./PlayerStats";
+import type { Attachment } from "../items/attachments";
+import type { Item } from "../items/Item";
 import type { Level } from "../levels/Level";
 
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
 const SPEED = 5.0; // meters / second
 const HURT_SPEED = 3.0; // Speed while hurt
+/** Sprinting multiplies the walking speed by this (and `PlayerStats.sprintSpeed`) */
+export const SPRINT_MULTIPLIER = 1.6;
 // How close to an interactable a wall hit can be and still count as reaching it
 const REACH_TOLERANCE = 0.5; // meters
 // How far from where a human died each of their two weapons lands
@@ -73,6 +77,11 @@ export const PUSH_DOOR_IMPULSE = 12; // newton-seconds, enough to fling a door o
 
 /** Seconds between weapon swaps, so a mouse wheel flick doesn't swap back and forth */
 export const SWAP_COOLDOWN = 0.25;
+/** Health, and seconds of not being hurt, after a second chance at death */
+const SECOND_CHANCE_HP = 50;
+const SECOND_CHANCE_INVULNERABILITY = 2;
+/** Seconds between uses of a usable */
+const USE_COOLDOWN = 1;
 /** Seconds between throwing consumables */
 export const THROW_COOLDOWN = 0.6;
 
@@ -94,22 +103,34 @@ const pushSoundRing = new ShuffleRing(PUSH_SOUNDS);
 export default class Human extends BaseEntity implements Entity, Flammable {
   body: Body;
   tags = ["human"];
-  /** Modifiers from upgrades; neutral for anyone who hasn't picked any */
+  /** Modifiers from items; neutral for anyone who hasn't bought any */
   stats = new PlayerStats();
-  /** Upgrades picked so far this run, in order */
-  upgrades: Upgrade[] = [];
+  /** Items bought so far this run, in order */
+  items: Item[] = [];
+  /** Gun attachments owned, oldest first (see `attachmentsFor`) */
+  attachments: Attachment[] = [];
+  /** Goes up whenever `attachments` changes, so guns know to recompute their stats */
+  attachmentsVersion = 0;
   hp: number = this.stats.maxHp;
-  /** Rifles and shotguns: limited ammo */
-  primary?: Gun;
-  /** Pistols and melee weapons: unlimited */
-  secondary?: Gun | MeleeWeapon;
+  /** Two weapons of any kind (guns or melee), either slot may be empty */
+  weapons: [Weapon | undefined, Weapon | undefined] = [undefined, undefined];
   /** Which slot is in hand */
-  activeSlot: WeaponSlot = "primary";
-  /** Reserve rounds per ammo class; pistol ammo is unlimited */
-  reserve: Record<LimitedAmmoClass, number> = { ...STARTING_RESERVE };
-  /** Grenades and the like, one type at a time */
+  activeSlot: WeaponSlot = 0;
+  /** Reserve rounds per ammo class */
+  reserve: Record<AmmoClass, number> = { ...STARTING_RESERVE };
+  /** Grenades and the like, one type at a time (the throwable slot) */
   consumable?: ConsumableStats;
   consumableCount: number = 0;
+  /**
+   * Running flat out: faster, but no using the weapon or reloading (unless
+   * `stats.canShootWhileSprinting`). Set by the player's controller while
+   * sprint is held and they're moving; allies never sprint.
+   */
+  sprinting = false;
+  /** Not hurt by anything until this (game time, unpaused) */
+  invulnerableUntil = -Infinity;
+  /** A health pack or the like, used on yourself a charge at a time */
+  usable?: { stats: UsableStats; charges: number };
   humanSprite: HumanSprite;
   voice: HumanVoice;
   walkSpring: WalkSpring;
@@ -166,13 +187,19 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     if (this.stats.floorHeal > 0 && this.hp < this.maxHp) {
       this.heal(this.stats.floorHeal, false);
     }
+    if (this.stats.floorStimSeconds > 0) {
+      this.applyTimedStats(STIM_EFFECT, this.stats.floorStimSeconds);
+    }
   }
 
   @on("tick")
   onTick(dt: number) {
     const healthPercent = this.hp / this.maxHp;
     const speed = healthPercent < 0.3 ? HURT_SPEED : SPEED;
-    this.walkSpring.speed = speed * this.stats.moveSpeed;
+    const sprint = this.sprinting
+      ? SPRINT_MULTIPLIER * this.stats.sprintSpeed
+      : 1;
+    this.walkSpring.speed = speed * this.stats.moveSpeed * sprint;
 
     if (this.weapon instanceof Gun) {
       this.weapon.updateWallRetraction(this, dt);
@@ -194,7 +221,25 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     return this.body.angle;
   }
 
+  /** Starts or stops sprinting. Starting cancels a reload it would block. */
+  setSprinting(sprinting: boolean) {
+    if (sprinting && !this.sprinting && this.weapon instanceof Gun) {
+      if (!this.stats.canShootWhileSprinting) {
+        this.weapon.cancelReload();
+      }
+    }
+    this.sprinting = sprinting;
+  }
+
+  /** Whether sprinting keeps the weapon from being used or reloaded right now */
+  get sprintBlocksWeapon(): boolean {
+    return this.sprinting && !this.stats.canShootWhileSprinting;
+  }
+
   useWeapon() {
+    if (this.sprintBlocksWeapon) {
+      return;
+    }
     if (this.weapon instanceof Gun) {
       this.weapon.pullTrigger(this);
     } else if (this.weapon instanceof MeleeWeapon) {
@@ -203,6 +248,9 @@ export default class Human extends BaseEntity implements Entity, Flammable {
   }
 
   reload() {
+    if (this.sprintBlocksWeapon) {
+      return;
+    }
     if (this.weapon instanceof Gun) {
       this.weapon.reload(this);
     }
@@ -218,31 +266,34 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     return this.getWeaponInSlot(otherSlot(this.activeSlot));
   }
 
-  getWeaponInSlot(slot: WeaponSlot): Gun | MeleeWeapon | undefined {
-    return slot === "primary" ? this.primary : this.secondary;
+  getWeaponInSlot(slot: WeaponSlot): Weapon | undefined {
+    return this.weapons[slot];
   }
 
-  private setWeaponInSlot(slot: WeaponSlot, weapon: Gun | MeleeWeapon) {
-    if (slot === "primary") {
-      if (!(weapon instanceof Gun)) {
-        throw new Error(`${weapon.stats.name} can't be a primary`);
-      }
-      this.primary = weapon;
-    } else {
-      this.secondary = weapon;
+  /** The guns carried, in either slot */
+  get guns(): Gun[] {
+    return this.weapons.filter((weapon) => weapon instanceof Gun);
+  }
+
+  /**
+   * Where a new weapon goes: the slot in hand if it's empty, else the other
+   * one if that's empty, else the slot in hand (replacing what's there)
+   */
+  slotForNewWeapon(): WeaponSlot {
+    if (!this.weapons[this.activeSlot]) {
+      return this.activeSlot;
     }
+    const other = otherSlot(this.activeSlot);
+    return this.weapons[other] ? this.activeSlot : other;
   }
 
-  /** Reserve rounds for a class of ammo. Pistol ammo never runs out. */
+  /** Reserve rounds for a class of ammo */
   getReserve(ammoClass: AmmoClass): number {
-    return isLimitedAmmo(ammoClass) ? this.reserve[ammoClass] : Infinity;
+    return this.reserve[ammoClass];
   }
 
   /** Takes up to `amount` rounds out of the reserve and returns how many it got */
   takeReserve(ammoClass: AmmoClass, amount: number): number {
-    if (!isLimitedAmmo(ammoClass)) {
-      return amount;
-    }
     const taken = Math.min(amount, this.reserve[ammoClass]);
     this.reserve[ammoClass] -= taken;
     return taken;
@@ -250,23 +301,20 @@ export default class Human extends BaseEntity implements Entity, Flammable {
 
   /** Adds rounds to the reserve, up to what can be carried. Returns how many fit. */
   addReserve(ammoClass: AmmoClass, amount: number): number {
-    if (!isLimitedAmmo(ammoClass)) {
-      return 0;
-    }
     const before = this.reserve[ammoClass];
     this.reserve[ammoClass] = Math.min(MAX_RESERVE[ammoClass], before + amount);
     return this.reserve[ammoClass] - before;
   }
 
   /**
-   * Equip a weapon in its slot (see `slotFor`), dropping whatever was in that
-   * slot, and take it in hand. `isPickup` is false for weapons a human spawns
-   * holding.
+   * Equip a weapon in a free slot, or in place of the one in hand if both are
+   * full (see `slotForNewWeapon`), dropping whatever was there, and take it in
+   * hand. `isPickup` is false for weapons a human spawns holding.
    */
-  async giveWeapon(weapon: Gun | MeleeWeapon, isPickup: boolean = true) {
-    const slot = slotFor(weapon);
+  async giveWeapon(weapon: Weapon, isPickup: boolean = true) {
+    const slot = this.slotForNewWeapon();
     this.dropWeapon(slot);
-    this.setWeaponInSlot(slot, weapon);
+    this.weapons[slot] = weapon;
     this.activeSlot = slot;
     this.addChild(weapon, true);
     this.refreshWeaponSprite();
@@ -274,9 +322,7 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     if (weapon instanceof Gun && !weapon.reserveBonusGiven) {
       weapon.reserveBonusGiven = true;
       const { ammoClass } = weapon.stats;
-      if (isLimitedAmmo(ammoClass)) {
-        this.addReserve(ammoClass, NEW_GUN_RESERVE_BONUS[ammoClass]);
-      }
+      this.addReserve(ammoClass, NEW_GUN_RESERVE_BONUS[ammoClass]);
     }
 
     if (isPickup) {
@@ -303,11 +349,42 @@ export default class Human extends BaseEntity implements Entity, Flammable {
         weapon.cancelReload();
       }
       this.game.addEntity(new WeaponPickup(this.getPosition(), weapon));
-      if (slot === "primary") {
-        this.primary = undefined;
-      } else {
-        this.secondary = undefined;
+      this.weapons[slot] = undefined;
+      this.refreshWeaponSprite();
+    }
+  }
+
+  /** Adds a gun attachment: it goes on every gun it fits from now on */
+  addAttachment(attachment: Attachment) {
+    this.attachments.push(attachment);
+    this.attachmentsVersion += 1;
+    // It may change how the gun in hand looks (a laser sight)
+    this.refreshWeaponSprite();
+  }
+
+  /**
+   * The attachments on `gun` in this human's hands: for each slot, the most
+   * recently taken one that fits the gun's family
+   */
+  attachmentsFor(gun: Gun): Attachment[] {
+    const bySlot = new Map<string, Attachment>();
+    for (const attachment of this.attachments) {
+      if (attachment.fits.includes(gun.stats.ammoClass)) {
+        bySlot.set(attachment.slot, attachment);
       }
+    }
+    return [...bySlot.values()];
+  }
+
+  /** Takes the weapon in `slot` away for good (sold as a trade-in) */
+  removeWeapon(slot: WeaponSlot) {
+    const weapon = this.getWeaponInSlot(slot);
+    if (weapon) {
+      if (weapon instanceof Gun) {
+        weapon.cancelReload();
+      }
+      this.weapons[slot] = undefined;
+      weapon.destroy();
       this.refreshWeaponSprite();
     }
   }
@@ -345,7 +422,7 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     }
   }
 
-  private refreshWeaponSprite() {
+  refreshWeaponSprite() {
     this.humanSprite.handleDropWeapon();
     const weapon = this.weapon;
     if (weapon) {
@@ -381,6 +458,75 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     }
     this.consumable = undefined;
     this.consumableCount = 0;
+  }
+
+  /**
+   * Takes a usable with `charges` charges. A different kind replaces the one
+   * carried, which is dropped; the same kind tops it up. False if there was
+   * no room for any of it.
+   */
+  giveUsable(stats: UsableStats, charges: number = stats.charges): boolean {
+    const current = this.usable;
+    if (current && current.stats === stats) {
+      if (current.charges >= stats.charges) {
+        return false;
+      }
+      current.charges = Math.min(stats.charges, current.charges + charges);
+      return true;
+    }
+    if (current && current.charges > 0 && this.isAdded) {
+      this.game.addEntity(
+        new UsablePickup(this.getPosition(), current.stats, current.charges),
+      );
+    }
+    this.usable = { stats, charges };
+    return true;
+  }
+
+  private lastUseTime = -Infinity;
+
+  /** Uses a charge of the usable carried, if it would do anything */
+  useUsable() {
+    const usable = this.usable;
+    if (
+      !usable ||
+      this.game.elapsedTime - this.lastUseTime < USE_COOLDOWN ||
+      !usable.stats.use(this)
+    ) {
+      return;
+    }
+    this.lastUseTime = this.game.elapsedTime;
+    usable.charges -= 1;
+    if (usable.charges <= 0) {
+      this.usable = undefined;
+    }
+  }
+
+  /** Heals `amount` spread over `seconds` */
+  async healOverTime(amount: number, seconds: number) {
+    this.voice.speak("pickupHealth");
+    await this.wait(seconds, (dt) => {
+      this.hp = Math.min(this.hp + (amount * dt) / seconds, this.maxHp);
+    });
+    this.game.dispatch("humanHealed", { human: this, amount });
+  }
+
+  /**
+   * Multiplies some of `stats` for `seconds` (a stim), then divides them back,
+   * so it stacks with anything else that multiplies the same stats
+   */
+  async applyTimedStats(
+    multipliers: Partial<Record<NumericStat, number>>,
+    seconds: number,
+  ) {
+    const entries = Object.entries(multipliers) as [NumericStat, number][];
+    for (const [stat, multiplier] of entries) {
+      this.stats[stat] *= multiplier;
+    }
+    await this.wait(seconds);
+    for (const [stat, multiplier] of entries) {
+      this.stats[stat] /= multiplier;
+    }
   }
 
   private lastThrowTime = -Infinity;
@@ -464,10 +610,21 @@ export default class Human extends BaseEntity implements Entity, Flammable {
    * noises, for damage that keeps coming (burning).
    */
   async inflictDamage(amount: number, quiet: boolean = false) {
-    if (this.isDestroyed) {
+    if (
+      this.isDestroyed ||
+      this.game.elapsedUnpausedTime < this.invulnerableUntil
+    ) {
       return;
     }
+    amount *= this.stats.damageTaken;
     this.hp -= amount;
+    // A second chance (Second Heart): back up, and untouchable for a moment
+    if (this.hp <= 0 && this.stats.extraLives > 0) {
+      this.stats.extraLives -= 1;
+      this.hp = SECOND_CHANCE_HP;
+      this.invulnerableUntil =
+        this.game.elapsedUnpausedTime + SECOND_CHANCE_INVULNERABILITY;
+    }
 
     if (!quiet) {
       this.game.addEntity(new FleshImpact(this.getPosition(), 1));
@@ -504,8 +661,8 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     this.game.addEntity(new FleshImpact(this.getPosition(), 6));
 
     // Scattered a little apart, rather than one on top of the other
-    const weapons = [this.primary, this.secondary].filter(
-      (weapon): weapon is Gun | MeleeWeapon => weapon !== undefined,
+    const weapons = this.weapons.filter(
+      (weapon): weapon is Weapon => weapon !== undefined,
     );
     const scatterAngle = rDirection();
     weapons.forEach((weapon, i) => {
@@ -521,6 +678,19 @@ export default class Human extends BaseEntity implements Entity, Flammable {
       );
     });
     this.destroy();
+  }
+
+  /** A push's damage, before `stats.damage`: more with a bayonet on the gun in hand */
+  getPushDamage(): number {
+    const weapon = this.weapon;
+    const bayonets =
+      weapon instanceof Gun
+        ? this.attachmentsFor(weapon).reduce(
+            (sum, attachment) => sum + (attachment.pushDamage ?? 0),
+            0,
+          )
+        : 0;
+    return this.stats.pushDamage + bayonets;
   }
 
   heal(amount: number, speak: boolean = true) {
@@ -560,7 +730,7 @@ export default class Human extends BaseEntity implements Entity, Flammable {
               this.stats.pushKnockback;
             enemy.knockback(relPosition.inormalize().imul(amount));
             enemy.stun(PUSH_STUN * this.stats.pushStun * rNormal(1, 0.2));
-            enemy.takeHit(this.stats.pushDamage * this.stats.damage, this);
+            enemy.takeHit(this.getPushDamage() * this.stats.damage, this);
             this.game.addEntity(
               new PositionalSound(pushSoundRing.getNext(), this.getPosition(), {
                 gain: Math.min(1, amount / PUSH_KNOCKBACK),

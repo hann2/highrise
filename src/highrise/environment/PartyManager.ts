@@ -199,12 +199,15 @@ export default class PartyManager extends BaseEntity implements Entity {
     }
   }
 
-  /** Quarters are shared by the whole party */
+  /** Quarters are shared by the whole party, and only the leader picks them up */
   quarters = 0;
+
+  // The quarter events are bookkeeping, and go out even while the game is
+  // paused: the store pauses it, and trade-ins and purchases happen there
 
   addQuarters(amount: number) {
     this.quarters += amount;
-    this.game.dispatch("quartersCollected", { amount });
+    this.game.dispatch("quartersCollected", { amount }, false);
   }
 
   /** Takes `amount` quarters if the party has that many. */
@@ -213,7 +216,7 @@ export default class PartyManager extends BaseEntity implements Entity {
       return false;
     }
     this.quarters -= amount;
-    this.game.dispatch("quartersSpent", { amount });
+    this.game.dispatch("quartersSpent", { amount }, false);
     return true;
   }
 

@@ -169,15 +169,45 @@ export default class Gun extends BaseEntity implements Entity {
     }
   }
 
+  /** Enemies this gun's bullets have hit, for attachments that count hits */
+  enemyHits = 0;
+  private statsCache?: { shooter: Human; version: number; stats: GunStats };
+
+  /**
+   * The gun's stats with the attachments `shooter` has for it (see
+   * `Human.attachmentsFor`) applied. Cached until their attachments change.
+   */
+  effectiveStats(shooter?: Human): GunStats {
+    if (!shooter || shooter.attachments.length === 0) {
+      return this.stats;
+    }
+    const cache = this.statsCache;
+    if (
+      cache?.shooter === shooter &&
+      cache.version === shooter.attachmentsVersion
+    ) {
+      return cache.stats;
+    }
+    let stats = this.stats;
+    for (const attachment of shooter.attachmentsFor(this)) {
+      if (attachment.modify) {
+        stats = { ...stats, ...attachment.modify(stats) };
+      }
+    }
+    this.statsCache = { shooter, version: shooter.attachmentsVersion, stats };
+    return stats;
+  }
+
   // Called when actually shooting a bullet
   async shoot(position: V2d, direction: number, shooter: Human) {
+    const stats = this.effectiveStats(shooter);
     // Actual shot
     this.makeProjectile(position, direction, shooter);
 
-    this.shootCooldown += 1.0 / (this.stats.fireRate * shooter.stats.fireRate);
+    this.shootCooldown += 1.0 / (stats.fireRate * shooter.stats.fireRate);
     this.ammo -= 1;
     this.shellsToEject += 1;
-    this.aimOffset += rSign() * this.stats.recoilAmount;
+    this.aimOffset += rSign() * stats.recoilAmount;
 
     // Various effects
     this.playSound("shoot", position);
@@ -261,28 +291,43 @@ export default class Gun extends BaseEntity implements Entity {
   }
 
   makeProjectile(position: V2d, direction: number, shooter: Human) {
-    for (let i = 0; i < this.stats.bulletStats.bulletsPerShot; i++) {
-      const maxSpread = this.stats.bulletSpread * shooter.stats.spread;
+    const stats = this.effectiveStats(shooter);
+    const attachments = shooter.attachmentsFor(this);
+    const family = stats.ammoClass;
+    // Before the round is taken out, so 1 means this is the last
+    const lastRound = this.ammo === 1;
+    for (let i = 0; i < stats.bulletStats.bulletsPerShot; i++) {
+      const maxSpread = stats.bulletSpread * shooter.stats.spread;
       const spread = rUniform(-maxSpread / 2, maxSpread / 2);
       const bullet = new Bullet(
         position.clone(),
         direction + spread,
-        this.stats.bulletStats,
+        stats.bulletStats,
         shooter,
       );
+      // What the attachments and the shooter's items do to this bullet
+      bullet.gun = this;
+      bullet.incendiary = attachments.some((a) => a.incendiary);
+      bullet.pierce = attachments.reduce((sum, a) => sum + (a.pierce ?? 0), 0);
+      bullet.explodeEvery = attachments.find(
+        (a) => a.explodeEvery,
+      )?.explodeEvery;
+      bullet.ricochets =
+        family === "shotgun" ? shooter.stats.shotgunRicochets : 0;
+      bullet.damageMultiplier = lastRound ? shooter.stats.lastRoundDamage : 1;
+      bullet.longRangeDamage =
+        family === "rifle" ? shooter.stats.rifleLongRangeDamage : 1;
+      bullet.refundOnKill =
+        family === "pistol" && shooter.stats.pistolKillRefund;
       // Anything between the shooter and the muzzle gets hit too
       bullet.sweepFrom = shooter.getPosition();
       this.game.addEntity(bullet);
     }
   }
 
-  /** How many rounds this gun holds for `shooter`, whose stats can enlarge the magazine */
+  /** How many rounds this gun holds for `shooter`, whose attachments can enlarge the magazine */
   getCapacity(shooter?: Human): number {
-    const multiplier = shooter?.stats.magazineSize ?? 1;
-    return Math.max(
-      this.stats.ammoCapacity,
-      Math.round(this.stats.ammoCapacity * multiplier),
-    );
+    return this.effectiveStats(shooter).ammoCapacity;
   }
 
   /** Whether reloading would do anything: there's room in the gun and rounds in `shooter`'s reserve */

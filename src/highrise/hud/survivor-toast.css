@@ -1,5 +1,5 @@
 /* "Cindy made it out!" when a survivor escapes up the stairs. Low down and on
-   top, because the upgrade screen is usually up at the same time. */
+   top, so that no screen up at the same time hides it. */
 .survivor-toast {
   position: fixed;
   bottom: 8%;

@@ -1,52 +1,57 @@
 /**
  * Reserve ammo is kept per class of ammo rather than per gun, so swapping one
- * rifle for another doesn't cost you your reserve. Pistol ammo is unlimited;
- * the others run out.
+ * rifle for another doesn't cost you your reserve. Every class runs out, and
+ * more is found in boxes or bought from ammo machines: ammo is a running cost.
+ * First guesses; tune in playtest (a floor's quarters should cover a floor's
+ * pistol ammo).
  */
 export type AmmoClass = "pistol" | "rifle" | "shotgun";
 
-/** The classes whose reserves can run out */
-export type LimitedAmmoClass = Exclude<AmmoClass, "pistol">;
-
-export const LIMITED_AMMO_CLASSES: ReadonlyArray<LimitedAmmoClass> = [
+export const AMMO_CLASSES: ReadonlyArray<AmmoClass> = [
+  "pistol",
   "rifle",
   "shotgun",
 ];
 
-/** Reserve rounds every human starts the run with: about two magazines */
-export const STARTING_RESERVE: Record<LimitedAmmoClass, number> = {
-  rifle: 60,
-  shotgun: 14,
+/** Reserve rounds every human starts the run with */
+export const STARTING_RESERVE: Record<AmmoClass, number> = {
+  pistol: 90,
+  rifle: 0,
+  shotgun: 0,
 };
 
-/** Extra reserve a primary gun comes with the first time it's picked up */
-export const NEW_GUN_RESERVE_BONUS: Record<LimitedAmmoClass, number> = {
-  rifle: 15,
-  shotgun: 4,
+/** Extra reserve a gun comes with the first time it's picked up */
+export const NEW_GUN_RESERVE_BONUS: Record<AmmoClass, number> = {
+  pistol: 30,
+  rifle: 30,
+  shotgun: 8,
 };
 
-/** Rounds in an ammo box (`AmmoPickup`) */
-export const AMMO_PICKUP_AMOUNT: Record<LimitedAmmoClass, number> = {
-  rifle: 45,
-  shotgun: 12,
+/** Rounds in an ammo box (`AmmoPickup`), and what an ammo machine sells */
+export const AMMO_BOX: Record<AmmoClass, number> = {
+  pistol: 30,
+  rifle: 30,
+  shotgun: 8,
+};
+
+/** What a box costs at an ammo machine, in quarters */
+export const AMMO_PRICE: Record<AmmoClass, number> = {
+  pistol: 2,
+  rifle: 4,
+  shotgun: 5,
 };
 
 /** Most reserve rounds one human can carry */
-export const MAX_RESERVE: Record<LimitedAmmoClass, number> = {
+export const MAX_RESERVE: Record<AmmoClass, number> = {
+  pistol: 300,
   rifle: 240,
   shotgun: 48,
 };
 
 /** Chance that an enemy drops an ammo box when it dies */
 export const AMMO_DROP_CHANCE = 0.03;
-/** Chance per kill with the Scavenger upgrade, on top of `AMMO_DROP_CHANCE` */
+/** Chance per kill with the Scavenger item, on top of `AMMO_DROP_CHANCE` */
 export const SCAVENGER_DROP_CHANCE = 0.15;
-
-export function isLimitedAmmo(
-  ammoClass: AmmoClass,
-): ammoClass is LimitedAmmoClass {
-  return ammoClass !== "pistol";
-}
 
 export function ammoClassName(ammoClass: AmmoClass): string {
   switch (ammoClass) {
@@ -57,4 +62,23 @@ export function ammoClassName(ammoClass: AmmoClass): string {
     case "shotgun":
       return "Shotgun";
   }
+}
+
+/**
+ * A gun's family is its class of ammo: attachments and some items fit by
+ * family. For cards: "pistols", "rifles", "shotguns".
+ */
+export function gunFamilyName(ammoClass: AmmoClass): string {
+  return `${ammoClassName(ammoClass).toLowerCase()}s`;
+}
+
+/** What a list of families reads as on a card: "shotguns", "pistols and rifles", "all guns" */
+export function fitsText(fits: readonly AmmoClass[]): string {
+  if (AMMO_CLASSES.every((ammoClass) => fits.includes(ammoClass))) {
+    return "all guns";
+  }
+  const names = fits.map(gunFamilyName);
+  return names.length > 1
+    ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`
+    : names.join("");
 }
