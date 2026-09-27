@@ -1,18 +1,20 @@
 import type Human from "../human/Human";
 import { markSeen } from "../persistence/SaveData";
 import { getRunStats } from "../run/RunStats";
+import { ATTACHMENTS } from "./attachments";
 import {
   Bloodthirsty,
+  BuckshotBounce,
   CurbStomp,
-  ExtendedMags,
   FreshBatteries,
   GlassCannon,
   HairTrigger,
   HipFire,
-  HollowPoints,
-  IncendiaryRounds,
+  LastRound,
   Linebacker,
+  Marksman,
   NightEyes,
+  QuickDraw,
   QuickHands,
   RunningShoes,
   Scavenger,
@@ -24,8 +26,9 @@ import {
 } from "./equipment";
 import { Item } from "./Item";
 
-// Every item that can be dealt onto a shelf. Guns and consumables aren't
-// here; they're made up per shelf (`gunItem.ts`, `consumableItem.ts`).
+// Every item that can be dealt onto a shelf: equipment and gun attachments.
+// Guns and consumables aren't here; they're made up per shelf (`gunItem.ts`,
+// `consumableItem.ts`). Boss items are in `bossItems.ts`.
 export const ITEMS: ReadonlyArray<Item> = [
   RunningShoes,
   Vitamins,
@@ -33,19 +36,21 @@ export const ITEMS: ReadonlyArray<Item> = [
   SteadyAim,
   Linebacker,
   FreshBatteries,
-  HollowPoints,
   HairTrigger,
-  ExtendedMags,
   NightEyes,
   GlassCannon,
+  TennisShoes,
   Bloodthirsty,
   SpeedLoader,
   CurbStomp,
   SecondWind,
   Scavenger,
-  IncendiaryRounds,
-  TennisShoes,
   HipFire,
+  BuckshotBounce,
+  LastRound,
+  QuickDraw,
+  Marksman,
+  ...ATTACHMENTS,
 ];
 
 /** How many times `human` has taken `item` */

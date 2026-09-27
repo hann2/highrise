@@ -27,8 +27,6 @@ export class PlayerStats {
   fireRate = 1;
   /** Multiplier on a gun's bullet spread: less is more accurate */
   spread = 1;
-  /** Multiplier on a gun's magazine size (rounded, never below the gun's own) */
-  magazineSize = 1;
 
   // --- Push ---
   /** Damage a push does, before the `damage` multiplier */
@@ -55,8 +53,14 @@ export class PlayerStats {
   floorHeal = 0;
   /** Extra chance that a kill drops an ammo box */
   killAmmoDropChance = 0;
-  /** Bullets set what they hit on fire */
-  incendiaryRounds = false;
+  /** Times a shotgun pellet bounces off walls */
+  shotgunRicochets = 0;
+  /** Multiplier on the damage of the last round in a magazine */
+  lastRoundDamage = 1;
+  /** A kill with a pistol puts the round back in the magazine */
+  pistolKillRefund = false;
+  /** Multiplier on rifle damage beyond `LONG_RANGE` (see `Bullet`) */
+  rifleLongRangeDamage = 1;
   /** Multiplier on the quarters enemies drop for the leader */
   quarterMultiplier = 1;
   /** Times dying becomes a second chance instead (see `Human.inflictDamage`) */

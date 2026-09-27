@@ -1,4 +1,5 @@
 import { SCAVENGER_DROP_CHANCE } from "../weapons/guns/ammo";
+import { LONG_RANGE } from "../weapons/guns/BulletStats";
 import { Item } from "./Item";
 
 // Equipment: items that stay with the human for the rest of the run.
@@ -70,16 +71,6 @@ export const FreshBatteries: Item = {
   },
 };
 
-export const HollowPoints: Item = {
-  name: "Hollow Points",
-  description: "Deal 20% more damage.",
-  rarity: "uncommon",
-  category: "equipment",
-  apply: (human) => {
-    human.stats.damage *= 1.2;
-  },
-};
-
 export const HairTrigger: Item = {
   name: "Hair Trigger",
   description: "Guns fire 20% faster.",
@@ -87,17 +78,6 @@ export const HairTrigger: Item = {
   category: "equipment",
   apply: (human) => {
     human.stats.fireRate *= 1.2;
-  },
-};
-
-export const ExtendedMags: Item = {
-  name: "Extended Mags",
-  description: "Guns hold 50% more rounds.",
-  rarity: "uncommon",
-  category: "equipment",
-  maxStacks: 2,
-  apply: (human) => {
-    human.stats.magazineSize *= 1.5;
   },
 };
 
@@ -195,17 +175,6 @@ export const Scavenger: Item = {
   },
 };
 
-export const IncendiaryRounds: Item = {
-  name: "Incendiary Rounds",
-  description: "Bullets set enemies on fire.",
-  rarity: "rare",
-  category: "equipment",
-  maxStacks: 1,
-  apply: (human) => {
-    human.stats.incendiaryRounds = true;
-  },
-};
-
 export const HipFire: Item = {
   name: "Hip Fire",
   description: "Shoot and reload while sprinting.",
@@ -214,5 +183,54 @@ export const HipFire: Item = {
   maxStacks: 1,
   apply: (human) => {
     human.stats.canShootWhileSprinting = true;
+  },
+};
+
+// --- Items for one family of guns: a dealt gun makes a build ---
+
+export const BuckshotBounce: Item = {
+  name: "Buckshot Bounce",
+  description: "Shotgun pellets bounce off walls once.",
+  rarity: "uncommon",
+  category: "equipment",
+  maxStacks: 1,
+  fits: ["shotgun"],
+  apply: (human) => {
+    human.stats.shotgunRicochets += 1;
+  },
+};
+
+export const LastRound: Item = {
+  name: "Last Round",
+  description: "The last round in a magazine does triple damage.",
+  rarity: "uncommon",
+  category: "equipment",
+  maxStacks: 1,
+  apply: (human) => {
+    human.stats.lastRoundDamage *= 3;
+  },
+};
+
+export const QuickDraw: Item = {
+  name: "Quick Draw",
+  description: "A pistol kill puts the round back in the magazine.",
+  rarity: "uncommon",
+  category: "equipment",
+  maxStacks: 1,
+  fits: ["pistol"],
+  apply: (human) => {
+    human.stats.pistolKillRefund = true;
+  },
+};
+
+export const Marksman: Item = {
+  name: "Marksman",
+  description: `Rifle bullets do 30% more damage beyond ${LONG_RANGE} meters.`,
+  rarity: "uncommon",
+  category: "equipment",
+  maxStacks: 1,
+  fits: ["rifle"],
+  apply: (human) => {
+    human.stats.rifleLongRangeDamage *= 1.3;
   },
 };

@@ -1,4 +1,4 @@
-import { choose, rUniform } from "../../core/util/Random";
+import { choose, takeWeighted } from "../../core/util/Random";
 import type Human from "../human/Human";
 import type { GunStats } from "../weapons/guns/GunStats";
 import { CONSUMABLES } from "../weapons/consumables/consumable-stats/consumableStats";
@@ -6,6 +6,7 @@ import { consumableItem } from "./consumableItem";
 import { dealGunItem } from "./gunItem";
 import { RARITY_WEIGHTS, type Item } from "./Item";
 import { canTake, ITEMS } from "./items";
+import { OTHER_FAMILY_WEIGHT } from "./prices";
 
 /** How many item slots a store has, above the gun and the consumable */
 export const SHELF_SLOTS = 4;
@@ -24,7 +25,7 @@ export interface Shelf {
 
 /**
  * Deals a shelf for `human`: different items they can take, rarer ones less
- * often; a gun (`bestGunTier` or the one above, never one they hold or one in
+ * often and ones for guns they don't hold less often; a gun (`bestGunTier` or the one above, never one they hold or one in
  * `excludedGuns`, so only missing if that rules out every candidate);
  * always one consumable. Uses the shared random stream, so call it during level
  * generation to keep seeded runs reproducible.
@@ -37,29 +38,17 @@ export function dealShelf(
   slotCount: number = SHELF_SLOTS,
 ): Shelf {
   const pool = ITEMS.filter((item) => canTake(human, item));
+  const held = new Set(human.guns.map((gun) => gun.stats.ammoClass));
+  const weight = (item: Item) =>
+    RARITY_WEIGHTS[item.rarity] *
+    (!item.fits || item.fits.some((family) => held.has(family))
+      ? 1
+      : OTHER_FAMILY_WEIGHT);
   const slots: (Item | null)[] = [];
   while (slots.length < slotCount) {
-    slots.push(pool.length > 0 ? takeWeighted(pool) : null);
+    slots.push(pool.length > 0 ? takeWeighted(pool, weight) : null);
   }
   const gun = dealGunItem(human, bestGunTier, excludedGuns) ?? null;
   const consumable = consumableItem(choose(...CONSUMABLES));
   return { slots, gun, consumable };
-}
-
-/** Removes and returns one item from `pool`, weighted by rarity */
-function takeWeighted(pool: Item[]): Item {
-  const total = pool.reduce(
-    (sum, item) => sum + RARITY_WEIGHTS[item.rarity],
-    0,
-  );
-  let roll = rUniform(0, total);
-  let index = 0;
-  while (
-    index < pool.length - 1 &&
-    roll >= RARITY_WEIGHTS[pool[index].rarity]
-  ) {
-    roll -= RARITY_WEIGHTS[pool[index].rarity];
-    index++;
-  }
-  return pool.splice(index, 1)[0];
 }

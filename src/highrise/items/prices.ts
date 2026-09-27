@@ -19,6 +19,13 @@ export const TRADE_IN = 0.5;
 export const CONSUMABLE_COUNT = 2;
 export const CONSUMABLE_PRICE = 6;
 
+/**
+ * Items for gun families the human doesn't hold are dealt this much as often
+ * as the rest, and guns of families they do hold too: stores lean toward the
+ * guns you have for attachments, and toward the ones you don't for guns
+ */
+export const OTHER_FAMILY_WEIGHT = 0.25;
+
 /** What `item` costs */
 export function itemPrice(item: { price?: number; rarity: Rarity }): number {
   return item.price ?? PRICE_BY_RARITY[item.rarity];

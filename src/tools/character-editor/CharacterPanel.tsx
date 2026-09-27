@@ -20,8 +20,8 @@ const NEUTRAL_STATS = new PlayerStats();
 
 /** The stats in the order and groups `PlayerStats` has them */
 const STAT_GROUPS: [string, (keyof PlayerStats)[]][] = [
-  ["Movement and health", ["moveSpeed", "maxHp"]],
-  ["Weapons", ["damage", "reloadSpeed", "fireRate", "spread", "magazineSize"]],
+  ["Movement and health", ["moveSpeed", "maxHp", "damageTaken", "sprintSpeed"]],
+  ["Weapons", ["damage", "reloadSpeed", "fireRate", "spread"]],
   ["Push", ["pushDamage", "pushKnockback", "pushStun"]],
   ["Seeing", ["flashlightRange", "visionRange"]],
   [

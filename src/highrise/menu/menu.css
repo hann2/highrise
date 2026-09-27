@@ -451,6 +451,13 @@
   line-height: 1;
 }
 
+.store__fits {
+  font-family: oswald;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #9fd3a0;
+}
+
 .store__owned {
   font-family: oswald;
   font-weight: 700;

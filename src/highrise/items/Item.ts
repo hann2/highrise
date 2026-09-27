@@ -1,13 +1,14 @@
 import type Human from "../human/Human";
 import type { ConsumableStats } from "../weapons/consumables/ConsumableStats";
+import type { AmmoClass } from "../weapons/guns/ammo";
 import type { GunStats } from "../weapons/guns/GunStats";
 
 export type Rarity = "common" | "uncommon" | "rare";
 
 /**
- * What kind of item it is. Attachments (brief 17) and boss items (brief 18)
- * don't exist yet; they're here so the shelf and the encyclopedia don't change
- * shape when they arrive.
+ * What kind of item it is: equipment (stays with the human), an attachment
+ * (goes on the guns it fits, `attachments.ts`), or a boss item (only bosses
+ * drop them, `bossItems.ts`)
  */
 export type ItemCategory = "equipment" | "attachment" | "boss";
 
@@ -22,6 +23,12 @@ export interface Item {
   readonly price?: number;
   /** How many times one human can take it. Unlimited when left out. */
   readonly maxStacks?: number;
+  /**
+   * The gun families (classes of ammo) it's for, if it only does anything
+   * with some guns: every attachment, and items like Buckshot Bounce. Cards
+   * say "Fits: shotguns", and stores deal these more when you hold one.
+   */
+  readonly fits?: readonly AmmoClass[];
   /**
    * Set on gun items (`gunItem.ts`), which are made up per shelf rather than
    * listed in `ITEMS`: the gun it gives, shown on the card.

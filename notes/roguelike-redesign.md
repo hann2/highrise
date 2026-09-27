@@ -317,6 +317,8 @@ Tests: the smoke test's step 9 (two slots) becomes free slots (pick up a rifle w
 
 ### 17. Gun families, tiers, attachments (M)
 
+**Built 2026-09-26 on the brief 15 branch, not playtested yet.** Differences from the brief below: an attachment isn't replaced when a new one for the same family and slot is taken; instead a gun uses the newest one that fits it per slot, so a Choke takes the rail from a Laser Sight on shotguns only; the three damage ammo attachments are Hollow Points (pistols), Soft Points (rifles) and Magnum Shells (shotguns); rule attachments are read when a bullet is fired and set on it (`Bullet.incendiary`, `pierce`, `explodeEvery`), along with the family items' effects; Last Round fits every gun. `takeWeighted` moved to `core/util/Random.ts`.
+
 Current: family is `GunStats.ammoClass` (`PISTOLS`/`RIFLES`/`SHOTGUNS` lists in `gun-stats/gunStats.ts`), `GUN_TIERS` has 4 pistols at tier 0 and one gun at tier 2; 11 guns (M1911, Glock, S&W Revolver, Five Seven, Desert Eagle, AR-15, Sawn Off, Remington, AK-47, SPAS12, P90). `PlayerStats.magazineSize`/`incendiaryRounds` are stat-level stand-ins for attachments; `GunStats.laserSightColor` draws a `LaserSight`. `Gun.getCapacity(shooter)`, `Gun.makeProjectile` (`bulletsPerShot`, spread), `Bullet.ts` (damage × `stats.damage`), `Enemy.ts` bullet hit (incendiary check), `Human.push` (push damage). `weaponOffers.ts` is gone (brief 15).
 
 In:

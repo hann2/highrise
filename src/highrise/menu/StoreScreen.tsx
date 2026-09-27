@@ -14,6 +14,8 @@ import { giveItem, markItemSeen, timesTaken } from "../items/items";
 import { itemPrice } from "../items/prices";
 import { Shelf } from "../items/shelf";
 import { consumableImageUrl } from "../weapons/consumables/consumableImage";
+import { fitsText } from "../weapons/guns/ammo";
+import type { GunStats } from "../weapons/guns/GunStats";
 import "./menu.css";
 
 // How far the stick has to go to move the selection, and how far back it has
@@ -182,11 +184,19 @@ export default class StoreScreen extends ReactEntity implements Entity {
         ? consumableImageUrl(item.consumable)
         : undefined;
     const owned = this.ownedText(item);
+    const note = item.fits
+      ? `Fits ${fitsText(item.fits)}`
+      : item.weapon
+        ? this.attachmentsFitText(item.weapon)
+        : undefined;
     return (
       <div key={index} className={classes.join(" ")} {...events}>
-        <div className="store__rarity">{kind}</div>
+        <div className="store__rarity">
+          {item.category === "attachment" ? `${item.rarity} attachment` : kind}
+        </div>
         {image && <img className="store__image" src={image} />}
         <div className="store__name">{item.name}</div>
+        {note && <div className="store__fits">{note}</div>}
         {owned && <div className="store__owned">{owned}</div>}
         <div className="store__price">
           <span className="store__coin" />
@@ -194,6 +204,21 @@ export default class StoreScreen extends ReactEntity implements Entity {
         </div>
       </div>
     );
+  }
+
+  /** "2 of your attachments fit" for a gun, if any of them do */
+  private attachmentsFitText(gun: GunStats): string | undefined {
+    const slots = new Set(
+      this.human.attachments
+        .filter((attachment) => attachment.fits.includes(gun.ammoClass))
+        .map((attachment) => attachment.slot),
+    );
+    if (slots.size === 0) {
+      return undefined;
+    }
+    return slots.size === 1
+      ? "1 of your attachments fits"
+      : `${slots.size} of your attachments fit`;
   }
 
   /** "Own 2 / 3" for an item the human already has some of */

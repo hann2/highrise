@@ -84,12 +84,15 @@ export function projectileRaycast(
   from: V2d,
   to: V2d,
   collisionMask: number,
+  /** Things it goes straight through (what a piercing bullet already hit) */
+  ignore?: ReadonlySet<Entity>,
 ): HitResult | undefined {
   const hit = game.world.raycast(from, to, {
     collisionMask,
     // Some things (like fences) opt out of being hit by projectiles
-    filter: (_body, shape) =>
-      (shape.collisionMask & CollisionGroups.Projectiles) !== 0,
+    filter: (body, shape) =>
+      (shape.collisionMask & CollisionGroups.Projectiles) !== 0 &&
+      !(body.owner && ignore?.has(body.owner)),
   });
   const owner = hit?.body.owner;
   if (hit && owner) {

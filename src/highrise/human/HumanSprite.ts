@@ -148,13 +148,15 @@ export default class HumanSprite extends BodySprite {
       this.weaponSprite.position.copyFrom(weapon.getCurrentHoldPosition());
       this.sprite.addChild(this.weaponSprite);
 
-      if (weapon.stats.laserSightColor) {
+      // Its own, or one from a Laser Sight attachment
+      const { laserSightColor } = weapon.effectiveStats(this.human);
+      if (laserSightColor) {
         this.laserSight = this.addChild(
           new LaserSight(
             () => this.getMuzzlePosition(),
             () => weapon.getCurrentHoldAngle() + this.sprite.rotation,
             undefined,
-            weapon.stats.laserSightColor,
+            laserSightColor,
           ),
         );
       }

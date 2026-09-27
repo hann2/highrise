@@ -63,3 +63,22 @@ export function ammoClassName(ammoClass: AmmoClass): string {
       return "Shotgun";
   }
 }
+
+/**
+ * A gun's family is its class of ammo: attachments and some items fit by
+ * family. For cards: "pistols", "rifles", "shotguns".
+ */
+export function gunFamilyName(ammoClass: AmmoClass): string {
+  return `${ammoClassName(ammoClass).toLowerCase()}s`;
+}
+
+/** What a list of families reads as on a card: "shotguns", "pistols and rifles", "all guns" */
+export function fitsText(fits: readonly AmmoClass[]): string {
+  if (AMMO_CLASSES.every((ammoClass) => fits.includes(ammoClass))) {
+    return "all guns";
+  }
+  const names = fits.map(gunFamilyName);
+  return names.length > 1
+    ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`
+    : names.join("");
+}

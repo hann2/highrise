@@ -2,6 +2,7 @@ import { RESOURCES } from "../../../resources/resources";
 import { CHARACTERS } from "../characters/Character";
 import { isCharacterUnlocked, SaveData } from "../persistence/SaveData";
 import { BOSS_ITEMS } from "../items/bossItems";
+import { fitsText } from "../weapons/guns/ammo";
 import { ITEMS } from "../items/items";
 import { itemPrice } from "../items/prices";
 import { consumableImageUrl } from "../weapons/consumables/consumableImage";
@@ -135,6 +136,9 @@ const items: EncyclopediaSection = {
         item.category === "boss"
           ? (["From", "bosses"] as [string, string])
           : (["Price", `${itemPrice(item)} quarters`] as [string, string]),
+        ...(item.fits
+          ? [["Fits", fitsText(item.fits)] as [string, string]]
+          : []),
         ...(item.maxStacks === undefined
           ? []
           : [["Max stacks", String(item.maxStacks)] as [string, string]]),

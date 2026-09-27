@@ -14,7 +14,7 @@ const LEVEL_2_FINGERPRINT = "347:-291100383";
 // What the store in level 2's arrival room sells with this seed. Changes when
 // the item pool, the rarities, or level generation change.
 const STORE_SHELF = {
-  slots: ["Scavenger", "Vitamins", "Fresh Batteries", "Hair Trigger"],
+  slots: ["Armor Piercing", "Steady Aim", "Tennis Shoes", "Scavenger"],
   gun: "Sawn Off Shotgun",
   consumable: "Frag Grenade ×2",
 };
@@ -943,19 +943,24 @@ test("game boots, plays, and changes levels without errors", async ({
     zombie.stun(20);
     zombie.hp = 1000; // so it outlives the fire
     (window as any).testZombie = zombie;
-    const shot = (shooter: any) => {
+    // (A bullet from a gun with an incendiary attachment is marked incendiary)
+    const shot = (shooter: any, incendiary: boolean) => {
       const origin = zombie.getPosition();
       zombie.hitByBullet(
-        { damage: 1, velocity: origin.mul(0), stats: { mass: 0 }, shooter },
+        {
+          damage: 1,
+          velocity: origin.mul(0),
+          stats: { mass: 0 },
+          shooter,
+          incendiary,
+        },
         origin,
         origin.mul(0),
       );
       return !!zombie.burning;
     };
-    const litWithout = shot(leader);
-    leader.stats.incendiaryRounds = true;
-    const litWith = shot(leader);
-    leader.stats.incendiaryRounds = false;
+    const litWithout = shot(leader, false);
+    const litWith = shot(leader, true);
     return { litWithout, litWith, hp: zombie.hp as number };
   });
   expect(lit.litWithout).toBe(false);
@@ -1856,14 +1861,6 @@ test("game boots, plays, and changes levels without errors", async ({
   ).toBe(false);
 
   // --- Level transitions work (KeyL is a dev cheat) ---
-  const statsBefore = await page.evaluate(
-    () =>
-      (
-        [...window.DEBUG.game!.entities.all].find(
-          (e) => e.constructor.name === "PartyManager",
-        ) as any
-      ).leader.stats,
-  );
   // Whoever is in the stairwell with the leader makes it out
   const exitingFlashlightsOn = await page.evaluate(() => {
     const allies = (
@@ -2209,7 +2206,8 @@ test("game boots, plays, and changes levels without errors", async ({
   await expect(page.locator(".store")).toHaveCount(0);
   expectNoIssues(issues);
 
-  // --- The item stuck, and nothing else changed ---
+  // --- What was bought stuck: the first slot's item (an attachment, Armor
+  // Piercing, with this seed) is on the leader, and so is the gun ---
   const afterStore = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
@@ -2217,12 +2215,12 @@ test("game boots, plays, and changes levels without errors", async ({
       ) as any
     ).leader;
     return {
-      stats: leader.stats,
       items: leader.items.map((i: any) => i.name),
+      attachments: leader.attachments.map((a: any) => a.name),
     };
   });
   expect(afterStore.items).toEqual([STORE_SHELF.slots[0], gunOffer.name]);
-  expect(afterStore.stats).not.toEqual(statsBefore);
+  expect(afterStore.attachments).toEqual([STORE_SHELF.slots[0]]);
 
   // --- Leaving the arrival room: its door swings out, and locks for good once
   // the leader is out, so it won't swing back in ---
@@ -2292,8 +2290,8 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(arrival.inwardSwing).toBeLessThan(0.1);
   expectNoIssues(issues);
 
-  // --- Stats are read at use time: bigger magazine, instant reload, and
-  // vision and flashlight ranges that rebuild their textures ---
+  // --- Stats are read at use time: instant reload, and vision and
+  // flashlight ranges that rebuild their textures ---
   const reloaded = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
@@ -2306,14 +2304,13 @@ test("game boots, plays, and changes levels without errors", async ({
     if (gun?.constructor.name !== "Gun") {
       return undefined;
     }
-    leader.stats.magazineSize = 1.5;
     leader.stats.instantEmptyReload = true;
     gun.ammo = 0;
     leader.reload();
-    return { ammo: gun.ammo, baseCapacity: gun.stats.ammoCapacity };
+    return { ammo: gun.ammo, capacity: gun.getCapacity(leader) };
   });
   expect(reloaded).toBeDefined();
-  expect(reloaded!.ammo).toBe(Math.round(reloaded!.baseCapacity * 1.5));
+  expect(reloaded!.ammo).toBe(reloaded!.capacity);
   await page.waitForTimeout(1000);
   await page.screenshot({ path: "tests/output/level-2-stats.png" });
   expectNoIssues(issues);
@@ -2394,6 +2391,68 @@ test("game boots, plays, and changes levels without errors", async ({
   for (const name of deals.maxedOut) {
     expect(deals.dealtItems).not.toContain(name);
   }
+  expectNoIssues(issues);
+
+  // --- Attachments: they go on the guns of the families they fit, and for
+  // each slot a gun uses the newest one that fits it ---
+  const attached = await page.evaluate(() => {
+    const entities = [...window.DEBUG.game!.entities.all] as any[];
+    const levelController = entities.find(
+      (e) => e.constructor.name === "LevelController",
+    );
+    const leader = entities.find(
+      (e) => e.constructor.name === "PartyManager",
+    ).leader;
+    // Attachments are only dealt, so deal until each one turns up
+    const find = (name: string) => {
+      for (let i = 0; i < 500; i++) {
+        for (const item of levelController.dealShelf(leader).slots) {
+          if (item?.name === name) {
+            return item;
+          }
+        }
+      }
+      throw new Error(`${name} was never dealt`);
+    };
+    const pistol = leader.weapons.find(
+      (w: any) => w?.stats.ammoClass === "pistol",
+    );
+    leader.activeSlot = leader.weapons.indexOf(pistol);
+    leader.refreshWeaponSprite();
+    const base = pistol.getCapacity(leader);
+    find("Rifle Drum").apply(leader);
+    const withDrum = pistol.getCapacity(leader);
+    find("Extended Pistol Mag").apply(leader);
+    const withMag = pistol.getCapacity(leader);
+    find("Laser Sight").apply(leader);
+    const laser = !!leader.humanSprite.laserSight;
+    find("Compensator").apply(leader);
+    return {
+      base,
+      withDrum,
+      withMag,
+      laser,
+      laserAfterCompensator:
+        pistol.effectiveStats(leader).laserSightColor ===
+        pistol.stats.laserSightColor,
+      onPistol: leader
+        .attachmentsFor(pistol)
+        .map((a: any) => a.name)
+        .sort(),
+    };
+  });
+  // A rifle drum doesn't fit a pistol
+  expect(attached.withDrum).toBe(attached.base);
+  expect(attached.withMag).toBe(Math.round(attached.base * 1.5));
+  expect(attached.laser).toBe(true);
+  // The compensator took the rail from the laser sight, on pistols. (The
+  // Armor Piercing from the store fits pistols too.)
+  expect(attached.laserAfterCompensator).toBe(true);
+  expect(attached.onPistol).toEqual([
+    "Armor Piercing",
+    "Compensator",
+    "Extended Pistol Mag",
+  ]);
   expectNoIssues(issues);
 
   // --- Zoomed out overview with the vision mask off (KeyV is a dev cheat) ---

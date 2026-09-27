@@ -1,3 +1,5 @@
+import Detonation from "../../effects/Detonation";
+import { EXPLODING_ROUND } from "../../projectiles/explodingRound";
 import {
   ENEMY_DAMAGE_SCALE,
   ENEMY_HP_SCALE,
@@ -184,12 +186,26 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
 
     this.makeBlood(position, bullet.damage, normal);
 
-    if (bullet.shooter?.stats.incendiaryRounds) {
+    if (bullet.incendiary) {
       ignite(this, bullet.shooter);
+    }
+    // Exploding Rounds: every so many of the gun's hits
+    const gun = bullet.gun;
+    if (gun && bullet.explodeEvery) {
+      gun.enemyHits += 1;
+      if (gun.enemyHits % bullet.explodeEvery === 0) {
+        this.game.addEntity(
+          new Detonation(EXPLODING_ROUND, position.clone(), bullet.shooter),
+        );
+      }
     }
 
     if (this.diesInOneHitFrom(bullet.shooter)) {
       this.hp = 0;
+    }
+    // Quick Draw: a kill puts the round back
+    if (this.hp <= 0 && bullet.refundOnKill && gun && bullet.shooter) {
+      gun.ammo = Math.min(gun.ammo + 1, gun.getCapacity(bullet.shooter));
     }
     if (this.hp <= 0) {
       this.die(bullet.shooter);

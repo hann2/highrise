@@ -53,6 +53,7 @@ import HumanSprite from "./HumanSprite";
 import Flashlight from "./Flashlight";
 import HumanVoice from "./HumanVoice";
 import { NumericStat, PlayerStats } from "./PlayerStats";
+import type { Attachment } from "../items/attachments";
 import type { Item } from "../items/Item";
 import type { Level } from "../levels/Level";
 
@@ -106,6 +107,10 @@ export default class Human extends BaseEntity implements Entity, Flammable {
   stats = new PlayerStats();
   /** Items bought so far this run, in order */
   items: Item[] = [];
+  /** Gun attachments owned, oldest first (see `attachmentsFor`) */
+  attachments: Attachment[] = [];
+  /** Goes up whenever `attachments` changes, so guns know to recompute their stats */
+  attachmentsVersion = 0;
   hp: number = this.stats.maxHp;
   /** Two weapons of any kind (guns or melee), either slot may be empty */
   weapons: [Weapon | undefined, Weapon | undefined] = [undefined, undefined];
@@ -349,6 +354,28 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     }
   }
 
+  /** Adds a gun attachment: it goes on every gun it fits from now on */
+  addAttachment(attachment: Attachment) {
+    this.attachments.push(attachment);
+    this.attachmentsVersion += 1;
+    // It may change how the gun in hand looks (a laser sight)
+    this.refreshWeaponSprite();
+  }
+
+  /**
+   * The attachments on `gun` in this human's hands: for each slot, the most
+   * recently taken one that fits the gun's family
+   */
+  attachmentsFor(gun: Gun): Attachment[] {
+    const bySlot = new Map<string, Attachment>();
+    for (const attachment of this.attachments) {
+      if (attachment.fits.includes(gun.stats.ammoClass)) {
+        bySlot.set(attachment.slot, attachment);
+      }
+    }
+    return [...bySlot.values()];
+  }
+
   /** Takes the weapon in `slot` away for good (sold as a trade-in) */
   removeWeapon(slot: WeaponSlot) {
     const weapon = this.getWeaponInSlot(slot);
@@ -395,7 +422,7 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     }
   }
 
-  private refreshWeaponSprite() {
+  refreshWeaponSprite() {
     this.humanSprite.handleDropWeapon();
     const weapon = this.weapon;
     if (weapon) {
@@ -653,6 +680,19 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     this.destroy();
   }
 
+  /** A push's damage, before `stats.damage`: more with a bayonet on the gun in hand */
+  getPushDamage(): number {
+    const weapon = this.weapon;
+    const bayonets =
+      weapon instanceof Gun
+        ? this.attachmentsFor(weapon).reduce(
+            (sum, attachment) => sum + (attachment.pushDamage ?? 0),
+            0,
+          )
+        : 0;
+    return this.stats.pushDamage + bayonets;
+  }
+
   heal(amount: number, speak: boolean = true) {
     if (speak) {
       this.voice.speak("pickupHealth");
@@ -690,7 +730,7 @@ export default class Human extends BaseEntity implements Entity, Flammable {
               this.stats.pushKnockback;
             enemy.knockback(relPosition.inormalize().imul(amount));
             enemy.stun(PUSH_STUN * this.stats.pushStun * rNormal(1, 0.2));
-            enemy.takeHit(this.stats.pushDamage * this.stats.damage, this);
+            enemy.takeHit(this.getPushDamage() * this.stats.damage, this);
             this.game.addEntity(
               new PositionalSound(pushSoundRing.getNext(), this.getPosition(), {
                 gain: Math.min(1, amount / PUSH_KNOCKBACK),
