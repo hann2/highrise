@@ -13,6 +13,10 @@ export class PlayerStats {
   maxHp = 100;
   /** Multiplier on damage taken: less is tougher */
   damageTaken = 1;
+  /** Multiplier on how much faster sprinting is (see `SPRINT_MULTIPLIER`) */
+  sprintSpeed = 1;
+  /** Sprinting doesn't stop you shooting or reloading */
+  canShootWhileSprinting = false;
 
   // --- Weapons ---
   /** Multiplier on damage dealt by bullets and melee weapons */

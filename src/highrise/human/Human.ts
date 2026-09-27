@@ -59,6 +59,8 @@ import type { Level } from "../levels/Level";
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
 const SPEED = 5.0; // meters / second
 const HURT_SPEED = 3.0; // Speed while hurt
+/** Sprinting multiplies the walking speed by this (and `PlayerStats.sprintSpeed`) */
+export const SPRINT_MULTIPLIER = 1.6;
 // How close to an interactable a wall hit can be and still count as reaching it
 const REACH_TOLERANCE = 0.5; // meters
 // How far from where a human died each of their two weapons lands
@@ -114,6 +116,12 @@ export default class Human extends BaseEntity implements Entity, Flammable {
   /** Grenades and the like, one type at a time (the throwable slot) */
   consumable?: ConsumableStats;
   consumableCount: number = 0;
+  /**
+   * Running flat out: faster, but no using the weapon or reloading (unless
+   * `stats.canShootWhileSprinting`). Set by the player's controller while
+   * sprint is held and they're moving; allies never sprint.
+   */
+  sprinting = false;
   /** Not hurt by anything until this (game time, unpaused) */
   invulnerableUntil = -Infinity;
   /** A health pack or the like, used on yourself a charge at a time */
@@ -183,7 +191,10 @@ export default class Human extends BaseEntity implements Entity, Flammable {
   onTick(dt: number) {
     const healthPercent = this.hp / this.maxHp;
     const speed = healthPercent < 0.3 ? HURT_SPEED : SPEED;
-    this.walkSpring.speed = speed * this.stats.moveSpeed;
+    const sprint = this.sprinting
+      ? SPRINT_MULTIPLIER * this.stats.sprintSpeed
+      : 1;
+    this.walkSpring.speed = speed * this.stats.moveSpeed * sprint;
 
     if (this.weapon instanceof Gun) {
       this.weapon.updateWallRetraction(this, dt);
@@ -205,7 +216,25 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     return this.body.angle;
   }
 
+  /** Starts or stops sprinting. Starting cancels a reload it would block. */
+  setSprinting(sprinting: boolean) {
+    if (sprinting && !this.sprinting && this.weapon instanceof Gun) {
+      if (!this.stats.canShootWhileSprinting) {
+        this.weapon.cancelReload();
+      }
+    }
+    this.sprinting = sprinting;
+  }
+
+  /** Whether sprinting keeps the weapon from being used or reloaded right now */
+  get sprintBlocksWeapon(): boolean {
+    return this.sprinting && !this.stats.canShootWhileSprinting;
+  }
+
   useWeapon() {
+    if (this.sprintBlocksWeapon) {
+      return;
+    }
     if (this.weapon instanceof Gun) {
       this.weapon.pullTrigger(this);
     } else if (this.weapon instanceof MeleeWeapon) {
@@ -214,6 +243,9 @@ export default class Human extends BaseEntity implements Entity, Flammable {
   }
 
   reload() {
+    if (this.sprintBlocksWeapon) {
+      return;
+    }
     if (this.weapon instanceof Gun) {
       this.weapon.reload(this);
     }

@@ -150,7 +150,9 @@ class SpawnRoomFloorPaint extends BaseEntity implements Entity {
     super();
 
     const isTutorial = levelIndex < 1;
-    const text = isTutorial ? "WASD = ↑←↓→" : `Level ${levelIndex}`;
+    const text = isTutorial
+      ? "WASD = ↑←↓→\nShift = sprint"
+      : `Level ${levelIndex}`;
     this.sprite = new Text({
       text,
       style: {

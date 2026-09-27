@@ -363,6 +363,8 @@ Tests: plan length 15, act and tier per floor, one keycard floor per act (the 1/
 
 ### 19. Sprint (S)
 
+**Built 2026-09-26 on the brief 15 branch, not playtested yet.** As below; there are no footsteps, so nothing follows the speed. Also fixed while testing it: allies following the leader into the exit stairwell stopped inside the door's swing, and the closing door swept them back out (`AllyController.STAIRWELL_ENTRY_DEPTH` is now past the swing).
+
 Current: `Human` speed 5 m/s (3 hurt) × `stats.moveSpeed` through `WalkSpring`; `PlayerHumanController` binds WASD/stick, Shift unused, gamepad LT/L3/RB/D-pad unused in play.
 
 In:

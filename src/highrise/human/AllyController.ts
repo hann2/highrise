@@ -19,10 +19,11 @@ const AVG_BURST_AMOUNT = 6;
 
 // Getting into the exit stairwell after the leader: from this close to its
 // doorway, line up in front of it (within this far of its middle), then walk
-// this far through it
+// this far through it. That's past the arc the door (a cell wide) swings
+// through: short of it, the door closing behind the leader sweeps them back out.
 const STAIRWELL_APPROACH_DISTANCE = 5; // meters
 const STAIRWELL_DOORWAY_ALIGNMENT = 0.3; // meters
-const STAIRWELL_ENTRY_DEPTH = 0.9; // meters
+const STAIRWELL_ENTRY_DEPTH = 2.0; // meters
 
 /**
  * Controller for a survivor who has joined the party. They follow the leader
@@ -200,7 +201,7 @@ export default class AllyHumanController extends BaseEntity implements Entity {
     // Far enough in to see the leader and follow them normally
     if (
       stairwell!.contains(position) &&
-      (along > STAIRWELL_ENTRY_DEPTH * 0.7 ||
+      (along > STAIRWELL_ENTRY_DEPTH * 0.9 ||
         across > STAIRWELL_DOORWAY_ALIGNMENT)
     ) {
       return undefined;

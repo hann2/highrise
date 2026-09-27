@@ -125,6 +125,17 @@ export const GlassCannon: Item = {
   },
 };
 
+export const TennisShoes: Item = {
+  name: "Tennis Shoes",
+  description: "Sprint 25% faster.",
+  rarity: "common",
+  category: "equipment",
+  maxStacks: 2,
+  apply: (human) => {
+    human.stats.sprintSpeed *= 1.25;
+  },
+};
+
 // --- Rules: how something works rather than how well ---
 
 export const Bloodthirsty: Item = {
@@ -192,5 +203,16 @@ export const IncendiaryRounds: Item = {
   maxStacks: 1,
   apply: (human) => {
     human.stats.incendiaryRounds = true;
+  },
+};
+
+export const HipFire: Item = {
+  name: "Hip Fire",
+  description: "Shoot and reload while sprinting.",
+  rarity: "rare",
+  category: "equipment",
+  maxStacks: 1,
+  apply: (human) => {
+    human.stats.canShootWhileSprinting = true;
   },
 };

@@ -8,6 +8,7 @@ import {
   FreshBatteries,
   GlassCannon,
   HairTrigger,
+  HipFire,
   HollowPoints,
   IncendiaryRounds,
   Linebacker,
@@ -18,6 +19,7 @@ import {
   SecondWind,
   SpeedLoader,
   SteadyAim,
+  TennisShoes,
   Vitamins,
 } from "./equipment";
 import { Item } from "./Item";
@@ -42,6 +44,8 @@ export const ITEMS: ReadonlyArray<Item> = [
   SecondWind,
   Scavenger,
   IncendiaryRounds,
+  TennisShoes,
+  HipFire,
 ];
 
 /** How many times `human` has taken `item` */

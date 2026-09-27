@@ -14,7 +14,7 @@ const LEVEL_2_FINGERPRINT = "347:-291100383";
 // What the store in level 2's arrival room sells with this seed. Changes when
 // the item pool, the rarities, or level generation change.
 const STORE_SHELF = {
-  slots: ["Curb Stomp", "Vitamins", "Linebacker", "Hollow Points"],
+  slots: ["Scavenger", "Vitamins", "Fresh Batteries", "Hair Trigger"],
   gun: "Sawn Off Shotgun",
   consumable: "Frag Grenade ×2",
 };
@@ -743,6 +743,83 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(stimmed.moveSpeed).toBeCloseTo(healed.moveSpeed * 1.3);
   expect(stimmed.damageTaken).toBeCloseTo(0.6);
   await page.screenshot({ path: "tests/output/usable.png" });
+  expectNoIssues(issues);
+
+  // --- Sprint: holding Shift while moving is faster, but there's no shooting
+  // or reloading, and starting to sprint cancels a reload ---
+  const sprintState = () =>
+    page.evaluate(() => {
+      const leader = (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "PartyManager",
+        ) as any
+      ).leader;
+      return {
+        sprinting: leader.sprinting as boolean,
+        speed: leader.walkSpring.speed as number,
+        ammo: leader.weapon.ammo as number,
+        reloading: leader.weapon.isReloading as boolean,
+      };
+    });
+  // Held where they are, so the keys only change the walk speed they ask for
+  await page.evaluate(() => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const at = leader.getPosition().clone();
+    (window as any).testSprintPin = true;
+    const pin = () => {
+      if (!(window as any).testSprintPin) return;
+      leader.body.position.set(at);
+      leader.body.velocity.set(0, 0);
+      requestAnimationFrame(pin);
+    };
+    pin();
+  });
+  await page.mouse.move(900, 300);
+  await page.keyboard.down("KeyD");
+  await page.waitForTimeout(200);
+  const walking = await sprintState();
+  await page.keyboard.down("ShiftLeft");
+  await page.waitForTimeout(200);
+  const running = await sprintState();
+  expect(walking.sprinting).toBe(false);
+  expect(running.sprinting).toBe(true);
+  expect(running.speed / walking.speed).toBeCloseTo(1.6);
+  await page.mouse.down();
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+  expect((await sprintState()).ammo).toBe(running.ammo);
+  await page.keyboard.up("ShiftLeft");
+  await page.keyboard.up("KeyD");
+  await page.waitForTimeout(200);
+  expect((await sprintState()).sprinting).toBe(false);
+  // A reload in progress stops when the sprint starts
+  await page.evaluate(() => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    leader.weapon.ammo = 0;
+    leader.reload();
+  });
+  expect((await sprintState()).reloading).toBe(true);
+  await page.keyboard.down("KeyA");
+  await page.keyboard.down("ShiftLeft");
+  await page.waitForTimeout(200);
+  const cancelled = await sprintState();
+  await page.keyboard.up("ShiftLeft");
+  await page.keyboard.up("KeyA");
+  expect(cancelled.reloading).toBe(false);
+  expect(cancelled.ammo).toBe(0);
+  // Walking again, reloading works
+  await page.waitForTimeout(200);
+  await page.keyboard.press("KeyR");
+  expect((await sprintState()).reloading).toBe(true);
+  await page.evaluate(() => ((window as any).testSprintPin = false));
   expectNoIssues(issues);
 
   // --- The push hurts (a little), and a grenade hurts a lot ---
@@ -1525,6 +1602,13 @@ test("game boots, plays, and changes levels without errors", async ({
     );
     result.levelBefore = levelController.currentLevel;
     result.exitInside = stairwell.contains(exits[0].getPosition());
+    // Zombies nearby would keep the ally busy fighting instead of following
+    // the leader in. (Copy the list, because destroying removes from it.)
+    for (const zombie of [...game.entities.getTagged("zombie")] as any[]) {
+      if (zombie.getPosition().distanceTo(door.getDoorwayCenter()) < 15) {
+        zombie.destroy();
+      }
+    }
     result.hasOneWayDoor = door.oneWay === 1 || door.oneWay === -1;
     result.lockedWhenPartyAway = door.locked;
 
@@ -1573,6 +1657,7 @@ test("game boots, plays, and changes levels without errors", async ({
       result.allyLeftQuarter =
         !quarter.isDestroyed && partyManager.quarters === quartersBefore;
       quarter.destroy();
+      survivor.body.position.set(doorway.add(inward.map((x) => x * -0.5)));
     }
 
     // Stand inside, away from the doorway and off the stairs

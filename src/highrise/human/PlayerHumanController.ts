@@ -119,6 +119,7 @@ export default class PlayerHumanController
 
     if (this.isInputBlocked()) {
       this.human.walkSpring.walkTowards(0, 0);
+      this.human.setSprinting(false);
       return;
     }
 
@@ -165,5 +166,12 @@ export default class PlayerHumanController
     direction.iadd(io.getStick("left")).ilimit(1);
 
     this.human.walkSpring.walkTowards(direction.angle, direction.magnitude);
+
+    // Sprinting: Shift or LT, only while moving
+    const sprintHeld =
+      io.isKeyDown("ShiftLeft") ||
+      io.isKeyDown("ShiftRight") ||
+      io.getButton(ControllerButton.LT) > 0.5;
+    this.human.setSprinting(sprintHeld && direction.magnitude > 0.1);
   }
 }
