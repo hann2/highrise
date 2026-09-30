@@ -15,8 +15,13 @@ import type { RunPlan } from "../highrise/run/RunPlan";
  */
 export type CustomEvents = {
   // Game flow
-  /** Back to the lobby between runs; with the title screen when the game boots */
-  goToLobby: { showTitle: boolean };
+  /**
+   * To the lobby: at boot (with the title screen first, and the tutorial
+   * before the lobby until it's been played), after the tutorial, or after a run
+   */
+  goToLobby: { from: "boot" | "tutorial" | "run" };
+  /** Plays the tutorial, which goes on to the lobby */
+  startTutorial: void;
   /** Starts a run of the planned floors as `character`, from `startFloor` if given (a dev shortcut) */
   newGame: { character: Character; plan: RunPlan; startFloor?: number };
   startLevel: { level: Level };
