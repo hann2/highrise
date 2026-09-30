@@ -40,6 +40,11 @@ import EnemyVoice from "./EnemyVoice";
 
 /** Seconds for an enemy to fade in or out at the edge of the player's vision */
 const VISIBILITY_FADE_TIME = 0.15;
+/**
+ * How far (meters) beyond the edge of the view an enemy still fades in and
+ * out of sight; further out, it doesn't bother (see `onRender`)
+ */
+const FADE_VIEW_MARGIN = 3;
 /** Seconds over which damage taken counts toward the blow that kills */
 const RECENT_DAMAGE_TIME = 0.1;
 
@@ -153,17 +158,34 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
 
   /** How visible the enemy currently is; fades so leaving vision doesn't pop */
   private shownAlpha = 1;
+  /** Whether it was well out of view last frame (and so didn't fade) */
+  private outOfView = true;
 
+  /**
+   * Fades the enemy's sprites in and out as it comes into and leaves the
+   * player's sight. Well out of view, it does nothing, and when it comes back
+   * into view it starts at whatever it should be, without fading (there's
+   * nothing to see pop in, beyond the edge of the view).
+   */
   @on("render")
   onRender(dt: number) {
+    if (!this.game.camera.isInView(this.body.position, FADE_VIEW_MARGIN)) {
+      this.outOfView = true;
+      return;
+    }
     const vision = this.game.entities.getSingleton(VisionController);
     const target = vision.visibilityOf(this.body.position) > 0 ? 1 : 0;
-    const step = dt / VISIBILITY_FADE_TIME;
-    this.shownAlpha = clamp(
-      target,
-      this.shownAlpha - step,
-      this.shownAlpha + step,
-    );
+    if (this.outOfView) {
+      this.outOfView = false;
+      this.shownAlpha = target;
+    } else {
+      const step = dt / VISIBILITY_FADE_TIME;
+      this.shownAlpha = clamp(
+        target,
+        this.shownAlpha - step,
+        this.shownAlpha + step,
+      );
+    }
     for (const child of this.children ?? []) {
       const sprite = child.sprite;
       if (sprite) {

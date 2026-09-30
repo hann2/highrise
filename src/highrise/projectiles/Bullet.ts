@@ -135,6 +135,18 @@ export default class Bullet extends Projectile implements Entity {
   onRender(dt: number) {
     const endPoint = this.getRelativeEndPoint(dt);
 
+    // Out of view, the streak isn't redrawn
+    const middle = endPoint.mul(0.5).iadd(this.renderPosition);
+    const inView = this.game.camera.isInView(
+      middle,
+      endPoint.magnitude / 2 + 0.1,
+    );
+    this.sprite.visible = inView;
+    this.lightGraphics.visible = inView;
+    if (!inView) {
+      return;
+    }
+
     this.sprite
       .clear()
       .moveTo(0, 0)
