@@ -45,7 +45,7 @@ export async function main() {
   }
 
   const game = new Game({
-    ticksPerSecond: 60,
+    ticksPerSecond: 120,
     world: new World({
       // Needed for contact friction to be based on how hard things are pressed together
       solverConfig: { frictionIterations: 2 },
