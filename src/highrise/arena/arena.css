@@ -1,0 +1,200 @@
+/* The arena's setup panel (ArenaPanel), down the right side */
+.arena-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 440px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(10, 10, 12, 0.92);
+  color: #ddd;
+  font-family: sans-serif;
+  font-size: 13px;
+  user-select: none;
+  z-index: 900;
+}
+
+.arena-panel__scroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 16px;
+}
+
+.arena-panel__title {
+  font-family: captureIt;
+  font-size: 32px;
+  color: red;
+  margin-bottom: 8px;
+}
+
+.arena-panel__subtitle {
+  color: #888;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 8px 0 2px;
+}
+
+.arena-panel__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 16px;
+  border-top: 1px solid #333;
+}
+
+.arena-panel button,
+.arena-panel select {
+  background: #222;
+  color: #ddd;
+  border: 1px solid #444;
+  border-radius: 3px;
+  font: inherit;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.arena-panel button:hover:not(:disabled) {
+  background: #333;
+}
+
+.arena-panel button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.arena-panel kbd {
+  font-size: 10px;
+  color: #999;
+  margin-left: 4px;
+}
+
+.arena-panel .arena-primary {
+  background: #6b1010;
+  border-color: #a22;
+}
+
+.arena-section {
+  margin-bottom: 14px;
+}
+
+.arena-section__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: white;
+  border-bottom: 1px solid #333;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+}
+
+.arena-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.arena-row__label {
+  width: 90px;
+  flex-shrink: 0;
+  color: #aaa;
+}
+
+.arena-row__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.arena-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  color: #999;
+}
+
+.arena-item--taken {
+  color: white;
+}
+
+.arena-item__name {
+  flex: 1;
+}
+
+.arena-item__fits {
+  font-size: 11px;
+  color: #777;
+}
+
+.arena-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.arena-stepper button {
+  width: 24px;
+  padding: 1px 0;
+}
+
+.arena-stepper__value {
+  min-width: 20px;
+  text-align: center;
+}
+
+.arena-choices {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.arena-panel .arena-choices--selected {
+  background: #6b1010;
+  border-color: #a22;
+  color: white;
+}
+
+.arena-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  cursor: pointer;
+}
+
+/* The corner box while the panel is closed */
+.arena-hint {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  max-width: 320px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ccc;
+  font-family: sans-serif;
+  font-size: 12px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.arena-hint__title {
+  font-family: captureIt;
+  font-size: 18px;
+  color: red;
+}
+
+.arena-hint__wave {
+  color: white;
+  margin-top: 2px;
+}
+
+.arena-hint__keys {
+  color: #888;
+  font-size: 11px;
+  margin-top: 4px;
+}

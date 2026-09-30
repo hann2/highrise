@@ -16,6 +16,7 @@ import { GameController } from "./controllers/GameController";
 import { GraphicsQualityController } from "./controllers/GraphicsQualityController";
 import MusicController from "./controllers/MusicController";
 import VolumeController from "./controllers/VolumeController";
+import ArenaScene from "./arena/ArenaScene";
 import FireTestScene from "./fire/FireTestScene";
 import { isHuman } from "./human/Human";
 import { getStartingCharacter } from "./lobby/Lobby";
@@ -90,6 +91,15 @@ export async function main() {
     params.get("scene") === "fire"
   ) {
     game.addEntity(new FireTestScene());
+    return;
+  }
+
+  // ?scene=arena (development only) is for trying loadouts against enemies
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "arena"
+  ) {
+    game.addEntity(new ArenaScene());
     return;
   }
 

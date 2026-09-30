@@ -1,0 +1,359 @@
+import BaseEntity from "../../core/entity/BaseEntity";
+import Entity from "../../core/entity/Entity";
+import { on } from "../../core/entity/handler";
+import { KeyCode } from "../../core/io/Keys";
+import { hexToRgb } from "../../core/util/ColorUtils";
+import { rDirection, rUniform, shuffle } from "../../core/util/Random";
+import { polarToVec } from "../../core/util/MathUtil";
+import { V, V2d } from "../../core/Vector";
+import { Persistence } from "../constants/constants";
+import CameraController from "../controllers/CameraController";
+import { BaseEnemy, isEnemy } from "../enemies/base/Enemy";
+import SimpleEnemyController from "../enemies/base/SimpleEnemyController";
+import NecromancerController from "../enemies/necromancer/NecromancerController";
+import SpitterController from "../enemies/spitter/SpitterController";
+import FireGrid from "../fire/FireGrid";
+import { AmmoOverlay } from "../hud/AmmoOverlay";
+import { DamagedOverlay } from "../hud/DamagedOverlay";
+import { HealthBar } from "../hud/HealthBar";
+import Human from "../human/Human";
+import PlayerHumanController from "../human/PlayerHumanController";
+import { AmbientLight } from "../lighting-and-vision/AmbientLight";
+import LightingManager from "../lighting-and-vision/LightingManager";
+import VisionController from "../lighting-and-vision/VisionController";
+import { ActOverride } from "../run/acts";
+import { AMMO_CLASSES, MAX_RESERVE } from "../weapons/guns/ammo";
+import Gun from "../weapons/guns/Gun";
+import MeleeWeapon from "../weapons/melee/MeleeWeapon";
+import { WeaponStats } from "../weapons/WeaponStats";
+import {
+  ARENA_ENEMIES,
+  ArenaConfig,
+  arenaConfigToQuery,
+  ArenaEnemyType,
+  parseArenaConfig,
+} from "./arenaConfig";
+import { ARENA_LAYOUTS, ArenaLayout } from "./arenaLayouts";
+import ArenaPanel from "./ArenaPanel";
+import ArenaRoom, { ArenaLights } from "./ArenaRoom";
+
+/** Ambient light when it's bright (like the lobby) and when it's as dark as a floor */
+const BRIGHT_AMBIENT = 0x777777;
+const DARK_AMBIENT = 0x060606;
+/** Seconds between enemies when they trickle in */
+const TRICKLE_INTERVAL = 0.6;
+/** Enemies surrounding the player don't start closer than this (meters) */
+const SURROUND_MIN_DISTANCE = 7;
+/** Seconds from the player dying to them being back */
+const RESPAWN_DELAY = 1.5;
+
+/** How the current wave is going, for the readout */
+export interface WaveStatus {
+  size: number;
+  /** Still to come in, when they trickle */
+  toCome: number;
+  alive: number;
+  /** Seconds since it was sent, stopped once it's cleared */
+  time: number;
+  cleared: boolean;
+  /** Damage the player took during it */
+  damageTaken: number;
+}
+
+/**
+ * A dev-only scene for trying characters and loadouts against enemies
+ * (`?scene=arena`), instead of the title and the lobby. The whole setup is in
+ * the URL (see `parseArenaConfig`) and is changed with the panel (Tab), which
+ * keeps the URL up to date, so reloading keeps it.
+ *
+ * Enter sends a wave, Backspace clears the enemies away (and the fire and
+ * whatever's on the floor), and Shift-Backspace does that and resets the
+ * player too. The player comes back after dying. Enemies are as tough as in
+ * the chosen act.
+ */
+export default class ArenaScene
+  extends BaseEntity
+  implements Entity, ActOverride
+{
+  id = "arenaScene";
+  tags = ["act_override"];
+  persistenceLevel = Persistence.Permanent;
+  config: ArenaConfig;
+  player?: Human;
+  wave?: WaveStatus;
+  private layout!: ArenaLayout;
+  private room?: ArenaRoom;
+  /** Only when it's dark */
+  private lights?: ArenaLights;
+  private ambient!: AmbientLight;
+  private vision!: VisionController;
+  private grid!: FireGrid;
+  /** Goes up with every wave, so a trickle stops when a new one is sent */
+  private waveNumber = 0;
+
+  constructor() {
+    super();
+    this.config = parseArenaConfig(new URLSearchParams(window.location.search));
+  }
+
+  /** For `getCurrentAct`: enemies are as tough as in this act */
+  get act(): number {
+    return this.config.act;
+  }
+
+  @on("add")
+  onAdd() {
+    const getPlayer = () => this.player;
+    // Humans carry lights, so this has to exist before anyone is added
+    this.addChild(new LightingManager());
+    this.ambient = this.addChild(new AmbientLight(BRIGHT_AMBIENT));
+    this.grid = this.addChild(new FireGrid());
+    // Enemies ask it whether they can be seen, even with the fog off
+    this.vision = this.addChild(new VisionController(getPlayer));
+    this.apply(this.config, true);
+    // After the player exists: the HUD expects there to be one
+    const panel = this.addChild(new ArenaPanel(this));
+    this.addChildren(
+      new CameraController(this.game.camera, getPlayer),
+      new PlayerHumanController(
+        () => this.player!,
+        () => this.player!.isDestroyed || panel.open,
+      ),
+      new DamagedOverlay(getPlayer),
+      new AmmoOverlay(() => this.player!),
+      new HealthBar(() => this.player!),
+    );
+  }
+
+  /**
+   * Switches to `config`: rebuilds the room if the layout changed, clears the
+   * enemies away if the room or the act changed, and always resets the
+   * player with the loadout. Keeps the URL up to date.
+   */
+  apply(config: ArenaConfig, first: boolean = false) {
+    const previous = this.config;
+    this.config = config;
+    window.history.replaceState(null, "", arenaConfigToQuery(config));
+
+    const newRoom = first || config.layout !== previous.layout;
+    if (newRoom) {
+      this.layout = ARENA_LAYOUTS[config.layout];
+      this.room?.destroy();
+      this.room = this.addChild(new ArenaRoom(this.layout));
+      this.grid.reset(this.layout.width, this.layout.height);
+      this.vision.resetExplored(this.layout.width, this.layout.height);
+    }
+    if (newRoom || config.act !== previous.act) {
+      this.clear();
+    }
+
+    this.ambient.color = hexToRgb(config.dark ? DARK_AMBIENT : BRIGHT_AMBIENT);
+    if (newRoom || config.dark !== previous.dark) {
+      this.lights?.destroy();
+      this.lights = config.dark
+        ? this.addChild(new ArenaLights(this.layout))
+        : undefined;
+    }
+    this.vision.enabled = config.fog;
+    if (config.dummies) {
+      for (const enemy of this.game.entities.getByFilter(isEnemy)) {
+        makeDummy(enemy);
+      }
+    }
+
+    // Where they were, unless the room changed under them
+    const position =
+      !newRoom && this.player && !this.player.isDestroyed
+        ? this.player.getPosition()
+        : this.layout.playerStart;
+    this.spawnPlayer(position);
+  }
+
+  /** A fresh player at `position`, carrying the loadout */
+  private spawnPlayer(position: V2d) {
+    const angle = this.player?.getDirection() ?? 0;
+    if (this.player && !this.player.isDestroyed) {
+      this.player.destroy();
+    }
+    const config = this.config;
+    const player = this.addChild(new Human(position.clone(), config.character));
+    player.body.angle = angle;
+    for (const stats of config.weapons) {
+      if (stats) {
+        player.giveWeapon(makeWeapon(stats), false);
+      }
+    }
+    player.activeSlot = 0;
+    player.refreshWeaponSprite();
+    for (const item of config.items) {
+      // Not giveItem, which marks it seen in the encyclopedia
+      item.apply(player);
+      player.items.push(item);
+    }
+    if (config.throwable && config.throwableCount > 0) {
+      player.giveConsumable(config.throwable, config.throwableCount);
+    }
+    if (config.usable) {
+      player.giveUsable(config.usable);
+    }
+    this.player = player;
+  }
+
+  /** Every enemy gone, with the fire, the smoke and whatever's lying on the floor */
+  clear() {
+    this.waveNumber += 1;
+    this.wave = undefined;
+    // Everything the scene didn't make itself (it all lives under the scene)
+    this.game.clearScene(Persistence.Floor);
+    this.grid.clear();
+  }
+
+  /** Sends in the wave the config describes, the way it says */
+  async sendWave() {
+    const waveNumber = ++this.waveNumber;
+    const types = shuffle(
+      ARENA_ENEMIES.flatMap((type) =>
+        Array<ArenaEnemyType>(this.config.wave[type.name] ?? 0).fill(type),
+      ),
+    );
+    const wave: WaveStatus = {
+      size: types.length,
+      toCome: types.length,
+      alive: 0,
+      time: 0,
+      cleared: false,
+      damageTaken: 0,
+    };
+    this.wave = wave;
+
+    const spots = this.surroundSpots();
+    for (const [i, type] of types.entries()) {
+      if (this.config.arrival === "trickle" && i > 0) {
+        await this.wait(TRICKLE_INTERVAL);
+        if (this.waveNumber !== waveNumber) {
+          return;
+        }
+      }
+      const position =
+        this.config.arrival === "surround"
+          ? spots[i % spots.length].add(polarToVec(rDirection(), 0.3))
+          : this.spawnAreaSpot();
+      this.spawnEnemy(type, position);
+      wave.toCome -= 1;
+    }
+  }
+
+  private spawnEnemy(type: ArenaEnemyType, position: V2d) {
+    const room = V(this.layout.width, this.layout.height);
+    const enemy = this.game.addEntity(type.make(position, room));
+    // Facing the player
+    const player = this.player;
+    if (player && !player.isDestroyed) {
+      enemy.body.angle = player.getPosition().sub(position).angle;
+    }
+    if (this.config.dummies) {
+      makeDummy(enemy);
+    }
+  }
+
+  /** Somewhere random in the far end */
+  private spawnAreaSpot(): V2d {
+    const { center, radius } = this.layout.spawnArea;
+    return center.add(
+      polarToVec(rDirection(), radius * Math.sqrt(rUniform(0, 1))),
+    );
+  }
+
+  /** Spots around the edge far enough from the player, in a random order */
+  private surroundSpots(): V2d[] {
+    const at = this.player?.getPosition() ?? this.layout.playerStart;
+    const far = this.layout.edgeSpots.filter(
+      (spot) => spot.distanceTo(at) >= SURROUND_MIN_DISTANCE,
+    );
+    return shuffle(far.length > 0 ? far : [...this.layout.edgeSpots]);
+  }
+
+  @on("tick")
+  onTick(dt: number) {
+    const player = this.player;
+    if (player && !player.isDestroyed) {
+      if (this.config.god) {
+        player.hp = player.maxHp;
+      }
+      if (this.config.infiniteAmmo) {
+        this.refill(player);
+      }
+    }
+
+    const wave = this.wave;
+    if (wave && !wave.cleared) {
+      wave.time += dt;
+      wave.alive = this.game.entities.getByFilter(isEnemy).length;
+      wave.cleared = wave.toCome === 0 && wave.alive === 0;
+    }
+  }
+
+  /** Reserve ammo, throwables and usable charges back up */
+  private refill(player: Human) {
+    for (const ammoClass of AMMO_CLASSES) {
+      player.reserve[ammoClass] = MAX_RESERVE[ammoClass];
+    }
+    const { throwable, throwableCount } = this.config;
+    if (throwable && player.consumableCount < throwableCount) {
+      player.giveConsumable(throwable, throwableCount - player.consumableCount);
+    }
+    if (player.usable) {
+      player.usable.charges = player.usable.stats.charges;
+    }
+  }
+
+  @on("humanInjured")
+  onHumanInjured({ human, amount }: { human: Human; amount: number }) {
+    if (human === this.player && this.wave && !this.wave.cleared) {
+      this.wave.damageTaken += amount;
+    }
+  }
+
+  @on("humanDied")
+  async onHumanDied({ human }: { human: Human }) {
+    if (human !== this.player) {
+      return;
+    }
+    await this.wait(RESPAWN_DELAY);
+    if (this.player === human) {
+      this.spawnPlayer(this.layout.playerStart);
+    }
+  }
+
+  @on("keyDown")
+  onKeyDown({ key }: { key: KeyCode }) {
+    const shift =
+      this.game.io.isKeyDown("ShiftLeft") ||
+      this.game.io.isKeyDown("ShiftRight");
+    if (key === "Enter") {
+      this.sendWave();
+    } else if (key === "Backspace") {
+      this.clear();
+      if (shift) {
+        this.spawnPlayer(this.layout.playerStart);
+      }
+    }
+  }
+}
+
+function makeWeapon(stats: WeaponStats): Gun | MeleeWeapon {
+  return "ammoClass" in stats ? new Gun(stats) : new MeleeWeapon(stats);
+}
+
+/** Takes away what makes an enemy move and attack, so it stands there */
+function makeDummy(enemy: BaseEnemy) {
+  for (const child of [...enemy.children]) {
+    if (
+      child instanceof SimpleEnemyController ||
+      child instanceof SpitterController ||
+      child instanceof NecromancerController
+    ) {
+      child.destroy();
+    }
+  }
+}

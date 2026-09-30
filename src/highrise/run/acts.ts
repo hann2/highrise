@@ -1,3 +1,4 @@
+import type Entity from "../../core/entity/Entity";
 import type Game from "../../core/Game";
 import type LevelController from "../controllers/LevelController";
 
@@ -10,6 +11,7 @@ import type LevelController from "../controllers/LevelController";
 /** Floors in a run, not counting the lobby */
 export const FLOORS = 15;
 export const ACT_LENGTH = 4;
+export const ACT_COUNT = 4;
 /** The top of the building. Floors 4, 8 and 12 are landmarks (see `RunPlan`), and so is this one. */
 export const FINAL_FLOOR = FLOORS;
 /** Floors with a bigger store, right after each landmark */
@@ -17,7 +19,7 @@ export const BIG_STORE_FLOORS: readonly number[] = [5, 9, 13];
 
 /** Which act (1 to 4) a floor is in. Floors 13 to 15 are all act 4. */
 export function actOf(floor: number): number {
-  return Math.min(4, Math.max(1, Math.ceil(floor / ACT_LENGTH)));
+  return Math.min(ACT_COUNT, Math.max(1, Math.ceil(floor / ACT_LENGTH)));
 }
 
 /**
@@ -34,8 +36,24 @@ export const ENEMY_DAMAGE_SCALE: readonly number[] = [1, 1.1, 1.25, 1.4];
 export const ENEMY_BASE = 24;
 export const ENEMY_PER_FLOOR = 4;
 
-/** Which act of the run the current floor is in; 1 outside a run (the lobby) */
+/**
+ * Something outside a run that says which act it is (the arena scene), found
+ * by the tag "act_override"
+ */
+export interface ActOverride extends Entity {
+  act: number;
+}
+
+/**
+ * Which act of the run the current floor is in; 1 outside a run (the lobby),
+ * unless an `ActOverride` says otherwise
+ */
 export function getCurrentAct(game: Game): number {
+  const override = game.entities.getTagged("act_override")[0] as
+    ActOverride | undefined;
+  if (override) {
+    return override.act;
+  }
   const levelController = game.entities.getTagged("level_controller")[0] as
     LevelController | undefined;
   return levelController?.floor?.act ?? 1;
