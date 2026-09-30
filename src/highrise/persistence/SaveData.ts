@@ -63,6 +63,8 @@ export interface SaveData {
   seen: SeenFlags;
   /** Whether the game pauses while its tab is hidden (see AutoPauser) */
   autoPause: boolean;
+  /** The most frames per second the game runs at; undefined is the display's refresh rate */
+  frameRateLimit?: number;
   /** Name of the character the last run started with, who you arrive in the lobby as */
   lastCharacter?: string;
   /** How much of the lobby has been seen, as a PNG data URL of its explored map */
@@ -194,6 +196,9 @@ export function parseSaveData(raw: unknown): SaveData {
   data.seen = parseSeenFlags(raw.seen);
   if (typeof raw.autoPause === "boolean") {
     data.autoPause = raw.autoPause;
+  }
+  if (typeof raw.frameRateLimit === "number" && raw.frameRateLimit > 0) {
+    data.frameRateLimit = raw.frameRateLimit;
   }
   if (typeof raw.lastCharacter === "string") {
     data.lastCharacter = raw.lastCharacter;

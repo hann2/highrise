@@ -22,6 +22,7 @@ import {
   MenuItemConstructorOptions,
   net,
   protocol,
+  screen,
   shell,
 } from "electron";
 
@@ -121,6 +122,11 @@ function queryFromArgs(): string {
   return query ? `?${query}` : "";
 }
 
+/** The refresh rate (Hz) of the display `window` is mostly on, or 0 if it's unknown */
+function displayFrequency(window: BrowserWindow): number {
+  return screen.getDisplayMatching(window.getBounds()).displayFrequency || 0;
+}
+
 function createWindow() {
   const state = loadWindowState();
   const window = new BrowserWindow({
@@ -156,6 +162,21 @@ function createWindow() {
     saveWindowState(window);
   });
   window.on("close", () => saveWindowState(window));
+
+  // The refresh rate of the display the window is on, which the game runs at
+  // (a browser has to measure it). It changes when the window moves to
+  // another display, or the display's settings change.
+  const sendDisplayFrequency = () =>
+    window.webContents.send(
+      "highrise:display-frequency",
+      displayFrequency(window),
+    );
+  window.on("moved", sendDisplayFrequency);
+  window.on("enter-full-screen", sendDisplayFrequency);
+  screen.on("display-metrics-changed", sendDisplayFrequency);
+  window.on("closed", () =>
+    screen.off("display-metrics-changed", sendDisplayFrequency),
+  );
 
   // Renderer console output goes to stdout, so the app can be watched from a
   // terminal (and the smoke test can see the title come up)
@@ -240,6 +261,10 @@ function buildMenu() {
 ipcMain.on("highrise:quit", () => app.quit());
 ipcMain.on("highrise:set-fullscreen", (event, fullscreen: boolean) => {
   BrowserWindow.fromWebContents(event.sender)?.setFullScreen(fullscreen);
+});
+ipcMain.on("highrise:display-frequency", (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender);
+  event.returnValue = window ? displayFrequency(window) : 0;
 });
 ipcMain.on("highrise:is-fullscreen", (event) => {
   event.returnValue =

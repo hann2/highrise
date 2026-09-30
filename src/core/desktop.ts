@@ -13,6 +13,8 @@ export interface DesktopBridge {
   /** Whether the window is fullscreen (the real kind, not the HTML one) */
   isFullscreen(): boolean;
   setFullscreen(fullscreen: boolean): void;
+  /** The refresh rate (Hz) of the display the window is on, or 0 if it's unknown */
+  displayFrequency(): number;
 }
 
 declare global {

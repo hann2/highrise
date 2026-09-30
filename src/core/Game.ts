@@ -5,6 +5,8 @@ import { profile, profiler } from "./util/Profiler";
 import { on } from "./entity/handler";
 import EntityList from "./EntityList";
 import { V } from "./Vector";
+import { desktop } from "./desktop";
+import { FramePacer, RefreshRateEstimator } from "./FramePacing";
 import { BaseGameEvents } from "./entity/BaseGameEvents";
 import Entity, { GameEventMap } from "./entity/Entity";
 import { eventHandlerName } from "./entity/EventHandler";
@@ -17,13 +19,18 @@ import type { Body } from "./physics/body/Body";
 import { createRigid2D } from "./physics/body/bodyFactories";
 import { PhysicsEventMap } from "./physics/events/PhysicsEvents";
 import { World } from "./physics/world/World";
-import { lerp } from "./util/MathUtil";
 
 interface GameOptions {
   audio?: AudioContext;
-  ticksPerSecond?: number;
   world?: World;
 }
+
+/**
+ * Ticks happen at least this often: below it (a frame rate limit of 30, or a
+ * display throttled to 30 by power saving), each frame runs more than one
+ * tick, so the physics steps stay small.
+ */
+const MIN_TICK_RATE = 60;
 
 /**
  * Top Level control structure
@@ -60,19 +67,48 @@ export default class Game {
   framenumber: number = 0;
   /** Readonly. Number of ticks that have gone by */
   ticknumber: number = 0;
-  /** The timestamp when the last frame started */
+  /** The timestamp (ms) of the last animation frame callback */
   lastFrameTime: number = window.performance.now();
-  /** Number of ticks that happen per frame at regular speed */
-  readonly ticksPerSecond: number;
-  /** Number of seconds to simulate per tick */
-  readonly tickDuration: number;
+
+  /**
+   * The display's refresh rate (Hz), as measured, unless `refreshRateOverride`
+   * is set. See `RefreshRateEstimator`.
+   */
+  private readonly refreshRateEstimator = new RefreshRateEstimator(
+    60,
+    desktop?.displayFrequency() || undefined,
+  );
+  private readonly framePacer = new FramePacer();
+  /** Pretends the display runs at this rate instead of measuring it (for tests and benchmarks) */
+  refreshRateOverride: number | undefined;
+  /** The player's frame rate limit, for fast displays on slow machines. Undefined is the display's rate */
+  frameRateLimit: number | undefined;
+
+  /** The display's refresh rate in Hz */
+  get refreshRate(): number {
+    return this.refreshRateOverride ?? this.refreshRateEstimator.rate;
+  }
+  /** Frames per second the game runs at: the display's rate, unless it's limited */
+  get targetFrameRate(): number {
+    return Math.min(this.refreshRate, this.frameRateLimit ?? Infinity);
+  }
+  /** Ticks per rendered frame: 1, unless the frame rate is below `MIN_TICK_RATE` */
+  get ticksPerFrame(): number {
+    return Math.max(1, Math.ceil(MIN_TICK_RATE / this.targetFrameRate));
+  }
+  /** Ticks per second at regular speed */
+  get ticksPerSecond(): number {
+    return this.targetFrameRate * this.ticksPerFrame;
+  }
+  /** Seconds simulated per tick at regular speed */
+  get tickDuration(): number {
+    return 1 / this.ticksPerSecond;
+  }
 
   /** Total amount of game time that has elapsed */
   elapsedTime: number = 0;
   /** Total amount of game time that has elapsed while not paused */
   elapsedUnpausedTime: number = 0;
-  /** Keep track of how long each frame is taking on average */
-  averageFrameDuration = 1 / 60;
 
   /** TODO: Document game.camera */
   get camera() {
@@ -96,7 +132,7 @@ export default class Game {
    * Create a new Game.
    * NOTE: You must call .init() before actually using the game.
    */
-  constructor({ audio, ticksPerSecond = 120, world }: GameOptions = {}) {
+  constructor({ audio, world }: GameOptions = {}) {
     this.entities = new EntityList();
     this.entitiesToRemove = new Set();
 
@@ -106,8 +142,6 @@ export default class Game {
       this.onResize.bind(this),
     );
 
-    this.ticksPerSecond = ticksPerSecond;
-    this.tickDuration = 1.0 / this.ticksPerSecond;
     this.world = world ?? new World();
     this.world.on("beginContact", this.beginContact, null);
     this.world.on("endContact", this.endContact, null);
@@ -302,34 +336,41 @@ export default class Game {
     }
   }
 
-  private timeToSimulate = 0.0;
-  private iterationsRemaining = 0.0;
+  /**
+   * Every animation frame callback: usually runs one frame (a tick and a
+   * render), sometimes none (when the frame rate is limited below the
+   * display's) or a few (to catch up after a dropped frame). See `FramePacer`.
+   */
   private loop(time: number): void {
     window.requestAnimationFrame((t) => this.loop(t));
-    this.nextFrame(time);
+    const elapsed = (time - this.lastFrameTime) / 1000;
+    this.lastFrameTime = time;
+    this.refreshRateEstimator.maxRate =
+      desktop?.displayFrequency() || undefined;
+    this.refreshRateEstimator.addFrame(time / 1000);
+    const frames = this.framePacer.framesFor(
+      elapsed,
+      this.refreshRateOverride
+        ? 1 / this.refreshRateOverride
+        : this.refreshRateEstimator.interval,
+      this.refreshRate,
+      this.targetFrameRate,
+    );
+    if (frames > 0) {
+      this.nextFrame(frames);
+    }
   }
 
-  /** Run one frame of the game. */
+  /**
+   * Runs `frames` frames' worth of ticks at the target frame rate, each
+   * stepping the ideal tick time rather than the time that actually went by,
+   * then renders once.
+   */
   @profile
-  private nextFrame(time: number): void {
+  private nextFrame(frames: number): void {
     this.framenumber += 1;
 
-    const lastFrameDuration = (time - this.lastFrameTime) / 1000;
-    this.lastFrameTime = time;
-
-    // TODO: This honestly doesn't work great
-    // Keep a rolling average
-    if (0 < lastFrameDuration && lastFrameDuration < 0.3) {
-      // Ignore weird durations because they're probably flukes from the user
-      // changing to a different tab/window or loading a new level or something
-      this.averageFrameDuration = lerp(
-        this.averageFrameDuration,
-        lastFrameDuration,
-        0.05,
-      );
-    }
-
-    const renderDt = 1.0 / this.getScreenFps();
+    const renderDt = frames / this.targetFrameRate;
     this.elapsedTime += renderDt;
     if (!this.paused) {
       this.elapsedUnpausedTime += renderDt;
@@ -337,12 +378,12 @@ export default class Game {
 
     this.slowTick(renderDt * this.slowMo);
 
-    this.timeToSimulate += renderDt * this.slowMo;
-    while (this.timeToSimulate >= this.tickDuration) {
-      this.timeToSimulate -= this.tickDuration;
-      this.tick(this.tickDuration);
+    const tickDt = this.tickDuration * this.slowMo;
+    const ticks = frames * this.ticksPerFrame;
+    for (let i = 0; i < ticks; i++) {
+      this.tick(tickDt);
       if (!this.paused) {
-        this.world.step(this.tickDuration);
+        this.world.step(tickDt);
         this.cleanupEntities();
         this.contacts();
       }
@@ -351,15 +392,6 @@ export default class Game {
     this.afterPhysics();
 
     this.render(renderDt);
-  }
-
-  /**
-   * Calculates and returns the current screen frames per second based on average frame duration.
-   * @returns The current FPS rounded to the nearest integer
-   */
-  getScreenFps(): number {
-    const duration = this.averageFrameDuration;
-    return Math.round(1.0 / duration);
   }
 
   /** Actually remove all the entities slated for removal from the game. */

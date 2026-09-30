@@ -21,7 +21,7 @@ const PROFILE_MS = 6000;
  */
 test("benchmark: lighting and vision cost", async ({ page }) => {
   const issues = collectIssues(page);
-  await loadGame(page, 424242);
+  await loadGame(page, 424242, { fps: 120 });
   await startGame(page);
   await page.waitForTimeout(WARMUP_MS);
 

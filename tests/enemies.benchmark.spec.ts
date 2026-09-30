@@ -17,7 +17,7 @@ const MEASURE_MS = 4000;
 const PROFILE_MS = 4000;
 
 const URL =
-  "/?scene=arena&seed=1&char=chad&wave=zombie*0&arrival=spread&layout=hall&god";
+  "/?scene=arena&seed=1&char=chad&wave=zombie*0&arrival=spread&layout=hall&god&fps=120";
 
 /**
  * How the game scales with the number of enemies: waves of more and more

@@ -62,7 +62,7 @@ export class StatsOverlay extends ReactEntity implements Entity {
       <div className="stats-overlay">
         <div className="stats-overlay__header">
           <span>
-            FPS: {ctx.fps} ({ctx.fps2})
+            FPS: {ctx.fps} / {ctx.targetFps} ({ctx.refreshRate} Hz)
           </span>
         </div>
         {panel.render(ctx)}
@@ -74,7 +74,8 @@ export class StatsOverlay extends ReactEntity implements Entity {
     return {
       game: this.game,
       fps: Math.ceil(1000 / this.averageDuration),
-      fps2: this.game.getScreenFps(),
+      targetFps: this.game.targetFrameRate,
+      refreshRate: this.game.refreshRate,
     };
   }
 

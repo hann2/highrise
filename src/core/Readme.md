@@ -12,7 +12,7 @@ Some things that `Game` does:
 
 - Initializes the physics (`game.world`), rendering (`game.renderer`, `game.camera`), input (`game.io`), and audio (`game.audio`) systems
 - Keeps track of entities (`game.entities`)
-- Runs the game loop: a fixed timestep for `tick` (120 per second by default), one `render` per animation frame
+- Runs the game loop: one frame (a `tick` and a `render`) per display refresh, with `dt` the ideal frame time (1 / refresh rate) rather than however long the frame took (see `FramePacing.ts`). The refresh rate is measured from animation frame timestamps (the desktop app reports it exactly), `frameRateLimit` caps it, frames below 60 fps run more than one tick, and a dropped frame is caught up (at most 3 frames, then the game slows down)
 - Runs the event system, dispatching events and calling the appropriate handlers on entities
 - Pauses (`pause()`, `unpause()`, `togglePause()`; entities with `pausable = false` keep ticking), runs in slow motion (`slowMo`), and clears the scene (`clearScene(persistenceThreshold)` removes every entity whose `persistenceLevel` is below the threshold)
 
@@ -67,7 +67,7 @@ Called when added to the game, before dealing with the body, sprite, children, o
 
 #### `onTick(dt)`
 
-If you want an entity to do something every physics step, put that logic in `onTick`.
+If you want an entity to do something every physics step, put that logic in `onTick`. The tick rate follows the display (60, 120, 144 per second...), so anything that changes per tick has to scale with `dt`: a velocity times `dt`, or a smoothing factor as `Math.pow(kept, dt * 60)`, never a fixed amount per tick.
 
 ```TypeScript
   @on("tick")

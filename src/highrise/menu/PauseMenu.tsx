@@ -14,6 +14,7 @@ import {
   AutoPauseButton,
   FeedbackButton,
   FullscreenButton,
+  FrameRateButton,
   GraphicsButton,
   MenuButton,
   MenuButtons,
@@ -69,6 +70,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
           <FeedbackButton />
           <MuteButton game={game} />
           <GraphicsButton game={game} />
+          <FrameRateButton game={game} />
           <FullscreenButton />
           <AutoPauseButton
             enabled={this.autoPauser.enabled}
