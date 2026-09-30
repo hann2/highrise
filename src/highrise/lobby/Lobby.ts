@@ -386,7 +386,7 @@ function getUnlockedCharacters(): Character[] {
 }
 
 /** Who the player arrives as: whoever they last played, if they still can */
-function getStartingCharacter(): Character {
+export function getStartingCharacter(): Character {
   const unlocked = getUnlockedCharacters();
   return (
     unlocked.find((c) => c.name === loadSaveData().lastCharacter) ??

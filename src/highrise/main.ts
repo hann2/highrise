@@ -18,6 +18,10 @@ import MusicController from "./controllers/MusicController";
 import VolumeController from "./controllers/VolumeController";
 import FireTestScene from "./fire/FireTestScene";
 import { isHuman } from "./human/Human";
+import { getStartingCharacter } from "./lobby/Lobby";
+import { generateRunPlan } from "./run/RunPlan";
+import { CHARACTERS } from "./characters/Character";
+import { clamp } from "../core/util/MathUtil";
 import { loadSaveData } from "./persistence/SaveData";
 import Preloader from "./preloader/Preloader";
 
@@ -86,6 +90,21 @@ export async function main() {
     params.get("scene") === "fire"
   ) {
     game.addEntity(new FireTestScene());
+    return;
+  }
+
+  // ?play (development only) skips the title and lobby and starts a run.
+  // ?play=Chad picks the character (else whoever was played last), and
+  // ?floor=5 starts on that floor (0 is the tutorial; else floor 1)
+  if (process.env.NODE_ENV === "development" && params.has("play")) {
+    const name = params.get("play")?.toLowerCase();
+    const character =
+      CHARACTERS.find((c) => c.name.toLowerCase() === name) ??
+      getStartingCharacter();
+    const plan = generateRunPlan();
+    const floor = parseInt(params.get("floor") ?? "1", 10);
+    const startFloor = clamp(isNaN(floor) ? 1 : floor, 0, plan.length);
+    game.dispatch("newGame", { character, plan, startFloor });
     return;
   }
 

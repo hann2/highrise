@@ -47,7 +47,15 @@ export class GameController extends BaseEntity implements Entity {
   }
 
   @on("newGame")
-  onNewGame({ character, plan }: { character: Character; plan: RunPlan }) {
+  onNewGame({
+    character,
+    plan,
+    startFloor,
+  }: {
+    character: Character;
+    plan: RunPlan;
+    startFloor?: number;
+  }) {
     const game = this.game;
     setLastCharacter(character.name);
     // Humans carry lights, so this has to exist before the party does
@@ -62,7 +70,7 @@ export class GameController extends BaseEntity implements Entity {
       new AmmoDropper(),
       // Before the level starts, so it's sized to it
       new FireGrid(),
-      new LevelController(plan),
+      new LevelController(plan, startFloor),
       new CameraController(game.camera, getPlayer),
       new PlayerHumanController(getPlayer),
       new VisionController(getPlayer),

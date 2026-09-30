@@ -38,7 +38,11 @@ export default class LevelController extends BaseEntity implements Entity {
   /** Between reaching an exit and starting the next level */
   private changingLevel = false;
 
-  constructor(readonly plan: RunPlan) {
+  /** `startFloor` skips straight to that floor (0 is the tutorial), for development */
+  constructor(
+    readonly plan: RunPlan,
+    private readonly startFloor?: number,
+  ) {
     super();
   }
 
@@ -54,10 +58,14 @@ export default class LevelController extends BaseEntity implements Entity {
 
   @on("add")
   async onAdd() {
-    this.currentLevel =
-      localStorage.getItem("tutorialComplete") != "true" || FORCE_TUTORIAL
-        ? 0
-        : 1;
+    if (this.startFloor != undefined) {
+      this.currentLevel = this.startFloor;
+    } else {
+      this.currentLevel =
+        localStorage.getItem("tutorialComplete") != "true" || FORCE_TUTORIAL
+          ? 0
+          : 1;
+    }
     const level = this.generateLevel();
 
     await this.wait(0.0); // so that this happens async (why does that matter?)

@@ -17,8 +17,8 @@ export type CustomEvents = {
   // Game flow
   /** Back to the lobby between runs; with the title screen when the game boots */
   goToLobby: { showTitle: boolean };
-  /** Starts a run of the planned floors as `character` */
-  newGame: { character: Character; plan: RunPlan };
+  /** Starts a run of the planned floors as `character`, from `startFloor` if given (a dev shortcut) */
+  newGame: { character: Character; plan: RunPlan; startFloor?: number };
   startLevel: { level: Level };
   levelComplete: void;
   partyDead: void;

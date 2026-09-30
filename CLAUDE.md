@@ -68,7 +68,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - Assets are referred to by name (camelCased file name without extension): `Sprite.from("andyHead")`, `new PositionalSound("wallHit1", position)`, `fontName("captureIt")`. Names are type checked against the manifest (`ImageName`, `SoundName`, `FontName`), so type arrays of them accordingly. Names must be unique per asset type; the manifest generator fails loudly otherwise.
 - Stats-as-data: guns, melee weapons, consumables, decorations, zombie variants, and items are plain objects in their own files, collected in an index (`gunStats.ts`, `weapons.ts`, `consumableStats.ts`, `decorations.ts`, `items.ts`). Characters are JSON (see `characters/data/` above). macOS file names are case-insensitive, so an index can't sit next to an interface of the same name (`GunStats.ts` vs `gun-stats/gunStats.ts`).
 - All randomness goes through `core/util/Random.ts` so that `?seed=123` makes runs reproducible. Don't call `Math.random()` directly, and don't consume randomness at module load time (the seed is applied in `main()`, after modules have run): `ShuffleRing` shuffles lazily for exactly this reason.
-- `process.env.NODE_ENV === "development"` gates `CheatController`. `window.DEBUG.game` and `window.DEBUG.profiler` expose the game and the profiler in the console.
+- `process.env.NODE_ENV === "development"` gates `CheatController`. It also gates `?play`, which skips the title and lobby and starts a run right away (`?play=chad` picks the character, else the last one played; `?floor=5` starts on that floor, 0 being the tutorial). `window.DEBUG.game` and `window.DEBUG.profiler` expose the game and the profiler in the console.
 
 ## Profiling
 
