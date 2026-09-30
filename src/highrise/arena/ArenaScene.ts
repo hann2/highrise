@@ -44,6 +44,8 @@ const DARK_AMBIENT = 0x060606;
 const TRICKLE_INTERVAL = 0.6;
 /** Enemies surrounding the player don't start closer than this (meters) */
 const SURROUND_MIN_DISTANCE = 7;
+/** Enemies spread over the room keep this far (meters) from the walls */
+const SPREAD_WALL_CLEARANCE = 0.8;
 /** Seconds from the player dying to them being back */
 const RESPAWN_DELAY = 1.5;
 
@@ -226,7 +228,10 @@ export default class ArenaScene
     };
     this.wave = wave;
 
-    const spots = this.surroundSpots();
+    const spots =
+      this.config.arrival === "spread"
+        ? this.spreadSpots(types.length)
+        : this.surroundSpots();
     for (const [i, type] of types.entries()) {
       if (this.config.arrival === "trickle" && i > 0) {
         await this.wait(TRICKLE_INTERVAL);
@@ -237,7 +242,9 @@ export default class ArenaScene
       const position =
         this.config.arrival === "surround"
           ? spots[i % spots.length].add(polarToVec(rDirection(), 0.3))
-          : this.spawnAreaSpot();
+          : this.config.arrival === "spread"
+            ? spots[i % spots.length]
+            : this.spawnAreaSpot();
       this.spawnEnemy(type, position);
       wave.toCome -= 1;
     }
@@ -271,6 +278,46 @@ export default class ArenaScene
       (spot) => spot.distanceTo(at) >= SURROUND_MIN_DISTANCE,
     );
     return shuffle(far.length > 0 ? far : [...this.layout.edgeSpots]);
+  }
+
+  /**
+   * `count` spots spread evenly over the room, clear of the walls and not too
+   * close to the player, in a random order. A grid, made finer until enough
+   * spots fit, with a little jitter so it doesn't look like one.
+   */
+  private spreadSpots(count: number): V2d[] {
+    const { width, height, walls } = this.layout;
+    const at = this.player?.getPosition() ?? this.layout.playerStart;
+    const inset = SPREAD_WALL_CLEARANCE;
+    const clear = (spot: V2d) =>
+      spot.distanceTo(at) >= SURROUND_MIN_DISTANCE &&
+      walls.every(
+        ([from, to]) =>
+          distanceToSegment(spot, V(from), V(to)) >= SPREAD_WALL_CLEARANCE,
+      );
+
+    let spacing = Math.sqrt(
+      ((width - 2 * inset) * (height - 2 * inset)) / count,
+    );
+    for (let attempt = 0; attempt < 20; attempt++, spacing *= 0.9) {
+      const spots: V2d[] = [];
+      for (let x = inset + spacing / 2; x < width - inset; x += spacing) {
+        for (let y = inset + spacing / 2; y < height - inset; y += spacing) {
+          const spot = V(x, y);
+          if (clear(spot)) {
+            spots.push(spot);
+          }
+        }
+      }
+      if (spots.length >= count) {
+        const jitter = spacing * 0.25;
+        return shuffle(spots).map((spot) =>
+          spot.iadd(V(rUniform(-jitter, jitter), rUniform(-jitter, jitter))),
+        );
+      }
+    }
+    // More than fit: they'll push each other apart
+    return this.surroundSpots();
   }
 
   @on("tick")
@@ -339,6 +386,17 @@ export default class ArenaScene
       }
     }
   }
+}
+
+/** How far `point` is from the segment `from`-`to` */
+function distanceToSegment(point: V2d, from: V2d, to: V2d): number {
+  const along = to.sub(from);
+  const lengthSquared = along.dot(along);
+  const t =
+    lengthSquared > 0
+      ? Math.min(1, Math.max(0, point.sub(from).dot(along) / lengthSquared))
+      : 0;
+  return point.distanceTo(from.add(along.imul(t)));
 }
 
 function makeWeapon(stats: WeaponStats): Gun | MeleeWeapon {
