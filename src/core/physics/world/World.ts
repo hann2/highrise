@@ -277,17 +277,28 @@ export class World extends EventEmitter<PhysicsEventMap> {
 
     // 6. Build friction equations and flatten all equations
     profiler.start("World.frictionEquations");
+    // With friction bounded by the contact force (frictionIterations > 0),
+    // frictionless contacts would get friction equations that do nothing, so
+    // they get none. (Without it, friction is a constant slip force whatever
+    // the material says.)
+    const frictionFromForce = this.solverConfig.frictionIterations > 0;
     const frictionEquations: FrictionEquation[] =
-      collisionsWithContactEquations.flatMap(([collision, contactEquations]) =>
-        generateFrictionEquationsForCollision(
-          collision,
-          contactEquations,
-          this.contactMaterials.get(
+      collisionsWithContactEquations.flatMap(
+        ([collision, contactEquations]) => {
+          const contactMaterial = this.contactMaterials.get(
             collision.shapeA.material,
             collision.shapeB.material,
-          ),
-          this.frictionReduction,
-        ),
+          );
+          if (frictionFromForce && contactMaterial.friction === 0) {
+            return [];
+          }
+          return generateFrictionEquationsForCollision(
+            collision,
+            contactEquations,
+            contactMaterial,
+            this.frictionReduction,
+          );
+        },
       );
     profiler.end("World.frictionEquations");
 

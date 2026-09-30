@@ -1084,3 +1084,28 @@ test("the simulation is deterministic", () => {
   assert.deepEqual(first, second);
   pin("determinism", first);
 });
+
+test("frictionless contacts get no friction equations when friction comes from the contact force", () => {
+  function equationsFor(frictionIterations: number) {
+    const world = new World({ solverConfig: { frictionIterations } });
+    const slippery = new Material();
+    world.contactMaterials.add(
+      new ContactMaterial(slippery, slippery, { friction: 0 }),
+    );
+    for (const x of [0, 0.9]) {
+      const body = createRigid2D({
+        motion: "dynamic",
+        mass: 1,
+        position: [x, 0],
+      });
+      body.addShape(new Circle({ radius: 0.5, material: slippery }));
+      world.bodies.add(body);
+    }
+    world.step(DT);
+    return world.solverEquationCount;
+  }
+  // Just the contact
+  assert.equal(equationsFor(2), 1);
+  // A constant slip force ignores the material's friction, so it stays
+  assert.equal(equationsFor(0), 2);
+});
