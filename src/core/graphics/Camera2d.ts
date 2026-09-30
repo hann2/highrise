@@ -150,6 +150,67 @@ export class Camera2d extends BaseEntity implements Entity {
     return { top, bottom, left, right, width, height };
   }
 
+  /** The view's bounding box in the world, and what it was worked out from */
+  private viewBounds = {
+    key: [NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN],
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  };
+
+  /**
+   * Whether a circle of `radius` around `[x, y]` might be in view (it's
+   * checked against the view's bounding box in the world, which is bigger
+   * than the view when the camera is rotated). Cheap enough to call for
+   * every sprite every frame: the bounding box is only worked out again when
+   * the camera or the screen changes.
+   */
+  isInView([x, y]: [number, number], radius: number = 0): boolean {
+    const bounds = this.getViewBounds();
+    return (
+      x + radius >= bounds.left &&
+      x - radius <= bounds.right &&
+      y + radius >= bounds.top &&
+      y - radius <= bounds.bottom
+    );
+  }
+
+  private getViewBounds() {
+    const bounds = this.viewBounds;
+    const key = bounds.key;
+    const canvas = this.renderer.canvas;
+    if (
+      key[0] === this.x &&
+      key[1] === this.y &&
+      key[2] === this.z &&
+      key[3] === this.angle &&
+      key[4] === this.shakeOffset.x &&
+      key[5] === this.shakeOffset.y &&
+      key[6] === canvas.width &&
+      key[7] === canvas.height
+    ) {
+      return bounds;
+    }
+    key[0] = this.x;
+    key[1] = this.y;
+    key[2] = this.z;
+    key[3] = this.angle;
+    key[4] = this.shakeOffset.x;
+    key[5] = this.shakeOffset.y;
+    key[6] = canvas.width;
+    key[7] = canvas.height;
+    const [w, h] = this.getViewportSize();
+    const corners = [V(0, 0), V(w, 0), V(0, h), V(w, h)].map((corner) =>
+      this.toWorld(corner),
+    );
+    bounds.left = Math.min(...corners.map(([x]) => x));
+    bounds.right = Math.max(...corners.map(([x]) => x));
+    bounds.top = Math.min(...corners.map(([, y]) => y));
+    bounds.bottom = Math.max(...corners.map(([, y]) => y));
+    return bounds;
+  }
+
   /** Convert screen coordinates to world coordinates */
   toWorld([x, y]: V2d, parallax = V(1.0, 1.0)): V2d {
     let p = new Point(x, y);

@@ -56,12 +56,19 @@ test("benchmark: enemy count scaling", async ({ page }) => {
     await page.waitForTimeout(SETTLE_MS);
     const frames = await measureFrames(page, MEASURE_MS);
     const report = await captureProfile(page, PROFILE_MS);
-    const objectives = await countObjectives(page);
+    const { objectives, inView } = await countObjectives(page);
     const ticksPerSecond = await page.evaluate(
       () => window.DEBUG.game!.ticksPerSecond,
     );
     results.push(
-      summarize(count, frames, report.stats, objectives, ticksPerSecond),
+      summarize(
+        count,
+        frames,
+        report.stats,
+        objectives,
+        inView,
+        ticksPerSecond,
+      ),
     );
   }
   await page.evaluate(() =>
@@ -91,17 +98,23 @@ function sendWave(page: Page, count: number) {
   }, count);
 }
 
-/** How many enemy controllers are doing what, to know what the AI was busy with */
+/**
+ * How many enemy controllers are doing what, to know what the AI was busy
+ * with, and how many zombies are in view (the rest aren't posed or drawn)
+ */
 function countObjectives(page: Page) {
   return page.evaluate(() => {
     const counts: Record<string, number> = {};
+    let inView = 0;
     for (const entity of window.DEBUG.game!.entities.all) {
       if (entity.constructor.name === "SimpleEnemyController") {
         const objective = (entity as any).objective ?? "none";
         counts[objective] = (counts[objective] ?? 0) + 1;
+      } else if (entity.constructor.name === "ZombieSprite") {
+        inView += (entity as any).sprite.renderable ? 1 : 0;
       }
     }
-    return counts;
+    return { objectives: counts, inView };
   });
 }
 
@@ -113,6 +126,7 @@ function summarize(
   frames: Frames,
   stats: Stat[],
   objectives: Record<string, number>,
+  inView: number,
   ticksPerSecond: number,
 ) {
   const find = (label: string) =>
@@ -153,6 +167,7 @@ function summarize(
     count,
     enemies: Object.values(objectives).reduce((a, b) => a + b, 0),
     objectives,
+    inView,
     entities: frames.entities,
     bodies: frames.bodies,
     fps: round(frames.frames / seconds, 1),
@@ -171,7 +186,7 @@ type Result = ReturnType<typeof summarize>;
 
 function formatTable(results: Result[]): string {
   const header =
-    "zombies   fps  tick/t  phys/t  rend/f  frame60   µs/zombie@60  objectives";
+    "zombies   fps  tick/t  phys/t  rend/f  frame60   µs/zombie@60  in view  objectives";
   const rows = results.map((r) => {
     const perZombie = (1000 * r.frame60Ms) / Math.max(1, r.count);
     const objectives = Object.entries(r.objectives)
@@ -185,6 +200,7 @@ function formatTable(results: Result[]): string {
       r.renderMs.toFixed(2).padStart(7),
       r.frame60Ms.toFixed(2).padStart(8),
       perZombie.toFixed(1).padStart(14),
+      String(r.inView).padStart(8),
       " " + objectives,
     ].join(" ");
   });

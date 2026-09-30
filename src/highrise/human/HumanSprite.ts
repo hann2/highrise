@@ -154,7 +154,7 @@ export default class HumanSprite extends BodySprite {
         this.laserSight = this.addChild(
           new LaserSight(
             () => this.getMuzzlePosition(),
-            () => weapon.getCurrentHoldAngle() + this.sprite.rotation,
+            () => weapon.getCurrentHoldAngle() + this.getAngle(),
             undefined,
             laserSightColor,
           ),
@@ -173,12 +173,13 @@ export default class HumanSprite extends BodySprite {
     }
   }
 
+  /** Where the gun's muzzle is in the world (from the body, not the sprite, which isn't posed out of view) */
   getMuzzlePosition() {
     const gun = this.human.weapon;
     if (gun instanceof Gun) {
       const localPosition = gun.getMuzzlePosition();
-      localPosition.angle += this.sprite.rotation;
-      return localPosition.iadd([this.sprite.x, this.sprite.y]);
+      localPosition.angle += this.getAngle();
+      return localPosition.iadd(this.getPosition());
     }
     return V(0, 0);
   }
