@@ -2,10 +2,12 @@
  * Records a short video of a test scene, for looking at effects without
  * playing the game. Needs a dev server running (`npm run dev-server`).
  *
- *   npm run clip -- [--scene fire] [--seconds 6] [--port 1234] [--out file.mp4]
+ *   npm run clip -- [--scene fire|deaths] [--seconds 6] [--port 1234] [--out file.mp4]
  *     [--query "profile=1&floor=wood"]
  *
- * Waits for the scene's second cycle (so the first-time costs of compiling
+ * The scene (`?scene=<scene>&auto`) has to play by itself and be an entity
+ * with the id `<scene>TestScene` that counts its `cycles`. Waits for the
+ * scene's second cycle (so the first-time costs of compiling
  * shaders and loading are out of the way), records `seconds` of it at
  * 1280×720, and writes an mp4 (H.264, so it plays anywhere) to
  * `tests/output/<scene>.mp4` unless `--out` says otherwise, and 12 of its
@@ -54,10 +56,9 @@ async function main() {
   );
   // The start of the second cycle
   await page.waitForFunction(
-    () =>
-      ((window as any).DEBUG?.game?.entities.getById("fireTestScene") as any)
-        ?.cycles >= 2,
-    null,
+    (id) =>
+      ((window as any).DEBUG?.game?.entities.getById(id) as any)?.cycles >= 2,
+    `${scene}TestScene`,
     { timeout: 180000, polling: 50 },
   );
   const clipStart = (Date.now() - recordingStart) / 1000;

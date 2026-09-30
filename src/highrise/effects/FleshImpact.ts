@@ -34,6 +34,8 @@ export default class FleshImpact extends BaseEntity implements Entity {
     amount: number = 3,
     direction?: V2d,
     height: number = 1.0,
+    /** Meters per second the blobs are thrown along `direction` */
+    drift: number = 0,
   ) {
     super();
 
@@ -52,7 +54,10 @@ export default class FleshImpact extends BaseEntity implements Entity {
         position: V(0, 0),
         radius: rUniform(0.1, 0.1 + 0.03 * amount),
         sprite,
-        velocity: polarToVec(rDirection(), rUniform(0.8, 6.0)),
+        velocity: polarToVec(rDirection(), rUniform(0.8, 6.0)).iaddScaled(
+          direction ?? V(0, 0),
+          drift * rUniform(0.5, 1.5),
+        ),
         z: rUniform(height * 0.3, height * 1.5),
         zVelocity: rUniform(-5, 3),
         spin: rUniform(-10, 10),

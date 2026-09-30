@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260">
+  <defs>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4"/>
+      <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.25 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+      <feBlend in="SourceGraphic" mode="multiply"/></filter>
+  </defs>
+  <g filter="url(#grain)">
+    
+    <path d="M 380 60
+             C 250 42, 150 50, 70 58
+             L 70 102
+             C 150 110, 250 118, 380 128 Z"
+          fill="#6b6452" stroke="#00000066" stroke-width="5"/>
+    <path d="M 230 77.6 C 170 78, 200 80, 120 84"
+          stroke="#00000033" stroke-width="4" fill="none"/>
+    <ellipse cx="52" cy="80" rx="34" ry="25"
+             transform="rotate(-20 52 80)"
+             fill="#1f1f22" stroke="#00000088" stroke-width="5"/>
+    <ellipse cx="44" cy="74" rx="12" ry="7"
+             transform="rotate(-20 44 80)" fill="#ffffff22"/>
+    
+    <path d="M 380 132
+             C 250 144, 150 152, 70 160
+             L 70 204
+             C 150 212, 250 220, 380 200 Z"
+          fill="#6b6452" stroke="#00000066" stroke-width="5"/>
+    <path d="M 230 167.6 C 170 180, 200 182, 120 186"
+          stroke="#00000033" stroke-width="4" fill="none"/>
+    <ellipse cx="52" cy="182" rx="34" ry="25"
+             transform="rotate(25 52 182)"
+             fill="#1f1f22" stroke="#00000088" stroke-width="5"/>
+    <ellipse cx="44" cy="176" rx="12" ry="7"
+             transform="rotate(25 44 182)" fill="#ffffff22"/>
+    <!-- The waist -->
+    <rect x="210" y="56" width="186" height="148" rx="30"
+          fill="#6b6452" stroke="#00000066" stroke-width="5"/>
+    <rect x="360" y="60" width="12" height="140" fill="#00000030"/>
+    <path d="M 340 130 L 215 136" stroke="#00000030" stroke-width="4"/>
+  </g>
+</svg>

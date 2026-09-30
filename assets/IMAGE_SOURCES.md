@@ -28,6 +28,7 @@ This was reconstructed in 2026 from git history, the design files in `assets/sou
 | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------ |
 | `zombie-*`, `crawler-*` (heads, torsos, arms, hands, and the combined `zombie-1..3`, `crawler-1..3`) | Simon. Skin texture maybe from `assets/source/Materials_Skin/` | known (texture: ?) |
 | `crawler.png`, `heavy.png`, `necromancer.png`, `spitter.png`                                         | Philip, in `assets/source/enemies.afdesign`                    | known              |
+| `zombie-legs-1..3` (placeholders, for corpses)                                                       | Claude, drawn as SVG in `assets/source/zombie-legs/`           | known              |
 
 ## Weapons (`weapons/`)
 

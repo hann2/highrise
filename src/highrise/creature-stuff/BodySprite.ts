@@ -28,7 +28,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   rightHandSprite: Sprite;
 
   constructor(
-    textures: BodyTextures,
+    readonly textures: BodyTextures,
     private radius: number,
   ) {
     super();
@@ -138,4 +138,50 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   getHandPositions(): [V2d, V2d] {
     return this.getShoulderPositions();
   }
+
+  /** A point in the body's own coordinates, in the world, as of the last render */
+  toWorld(local: V2d): V2d {
+    const { x, y } = this.sprite.position;
+    return local.rotate(this.sprite.rotation).iadd([x, y]);
+  }
+
+  /** Where each part of the body is in the world and which way it points, as of the last render */
+  getPartPoses(): BodyPoses {
+    const pose = (part: Sprite): PartPose => ({
+      position: this.toWorld(V(part.position.x, part.position.y)),
+      angle: this.sprite.rotation + part.rotation,
+    });
+    const [leftShoulder, rightShoulder] = this.getShoulderPositions();
+    return {
+      head: pose(this.headSprite),
+      torso: pose(this.torsoSprite),
+      leftArm: pose(this.leftArmSprite),
+      rightArm: pose(this.rightArmSprite),
+      leftHand: pose(this.leftHandSprite),
+      rightHand: pose(this.rightHandSprite),
+      leftShoulder: this.toWorld(leftShoulder),
+      rightShoulder: this.toWorld(rightShoulder),
+      headRadius: this.headSprite.height / 2,
+      armThickness: this.armThickness,
+    };
+  }
+}
+
+export interface PartPose {
+  position: V2d;
+  angle: number;
+}
+
+/** Where a body's parts were, for taking it apart (see `getPartPoses`) */
+export interface BodyPoses {
+  head: PartPose;
+  torso: PartPose;
+  leftArm: PartPose;
+  rightArm: PartPose;
+  leftHand: PartPose;
+  rightHand: PartPose;
+  leftShoulder: V2d;
+  rightShoulder: V2d;
+  headRadius: number;
+  armThickness: number;
 }

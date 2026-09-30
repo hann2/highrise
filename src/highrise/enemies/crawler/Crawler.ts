@@ -9,6 +9,8 @@ import { BaseEnemy } from "../base/Enemy";
 import { getHumansInRange } from "../base/enemyUtils";
 import { inflictDamageFrom } from "../../run/damageSources";
 import SimpleEnemyController from "../base/SimpleEnemyController";
+import type { DeathBlow } from "../base/DeathBlow";
+import { chooseDeathStyle, comeApart } from "../remains/comeApart";
 import CrawlerSprite from "./CrawlerSprite";
 
 const SPEED = 1.0;
@@ -18,6 +20,7 @@ const ATTACK_ANGLE_RANGE = degToRad(90);
 
 export default class Crawler extends BaseEnemy {
   tags = ["zombie", "crawler"];
+  bodySprite: CrawlerSprite;
   hp: number = rInteger(50, 80);
 
   constructor(
@@ -31,7 +34,24 @@ export default class Crawler extends BaseEnemy {
     this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
 
     this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, ZOMBIE_RADIUS));
-    this.addChild(new CrawlerSprite(this, textures));
+    this.bodySprite = this.addChild(new CrawlerSprite(this, textures));
+  }
+
+  handleDeath(blow: DeathBlow) {
+    this.voice.speak("death", true);
+    comeApart(
+      this.game,
+      blow,
+      chooseDeathStyle(blow, this.bodySprite.getPartPoses(), false),
+      {
+        sprite: this.bodySprite,
+        lying: this.bodySprite.textures,
+        radius: ZOMBIE_RADIUS * 0.9,
+        velocity: this.body.velocity,
+        burning: this.burning,
+        lyingDown: true,
+      },
+    );
   }
 
   diesInOneHitFrom(attacker?: Human): boolean {
