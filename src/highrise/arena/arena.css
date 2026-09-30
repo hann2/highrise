@@ -13,6 +13,8 @@
   font-size: 13px;
   user-select: none;
   z-index: 900;
+  /* The page hides the cursor (index.css) */
+  cursor: default;
 }
 
 .arena-panel__scroll {
