@@ -17,13 +17,19 @@
     "strict": true,
     "target": "ES2022",
     "useDefineForClassFields": false,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "types": [
+      "vite/client",
+      "node"
+    ]
   },
   "include": [
     "src",
     "bin",
     "tests",
     "resources",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "vite.config.mts",
+    "vite-plugins"
   ]
 }

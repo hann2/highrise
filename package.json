@@ -4,14 +4,14 @@
   "description": "A zombie shooter",
   "repository": "github:hann2/highrise",
   "scripts": {
-    "start": "rm -rf .parcel-cache && concurrently -n assets,server,editor \"npm run watch-manifest\" \"npm run dev-server\" \"npm run character-editor\"",
-    "build": "parcel build src/index.html",
+    "start": "concurrently -n assets,server,editor \"npm run watch-manifest\" \"npm run dev-server\" \"npm run character-editor\"",
+    "build": "vite build",
     "deploy": "npx vercel",
     "deploy-prod": "npx vercel --prod",
     "tsc": "tsc --noEmit",
     "tsc-watch": "tsc --noEmit --watch",
     "prettier": "prettier --write src",
-    "dev-server": "parcel --no-hmr --dist-dir .parcel-dev src/index.html src/tools/character-editor/index.html",
+    "dev-server": "vite",
     "character-editor": "tsx bin/character-editor/server.ts",
     "test": "playwright test",
     "benchmark": "BENCHMARK=1 playwright test",
@@ -20,7 +20,8 @@
     "test:physics": "tsx --test tests/physics/*.test.ts",
     "test:vision": "tsx --test tests/vision/*.test.ts",
     "test:characters": "tsx --test tests/characters/*.test.ts",
-    "clip": "tsx bin/record-clip.ts"
+    "clip": "tsx bin/record-clip.ts",
+    "preview": "vite preview --port 4173"
   },
   "author": "Philip Hann, Simon Baumgardt-Wellander",
   "license": "MIT",
@@ -31,7 +32,6 @@
     "preact": "^10.29.8"
   },
   "devDependencies": {
-    "@parcel/transformer-glsl": "^2.16.4",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.13.6",
     "camelcase": "^8.0.0",
@@ -39,14 +39,9 @@
     "concurrently": "^10.0.5",
     "ffmpeg-static": "^5.3.0",
     "glob": "^11.1.0",
-    "parcel": "^2.16.4",
     "prettier": "^3.9.8",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
-    "url": "^0.11.4"
-  },
-  "alias": {
-    "preact/jsx-dev-runtime": "preact/jsx-runtime"
-  },
-  "browserslist": "last 2 Chrome versions, last 2 Firefox versions, last 2 Safari versions"
+    "vite": "^8.3.1"
+  }
 }

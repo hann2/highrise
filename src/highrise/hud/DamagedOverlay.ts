@@ -15,7 +15,7 @@ import Game from "../../core/Game";
 import { smoothStep } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
-import frag_damageFilter from "./damage-filter.frag";
+import frag_damageFilter from "./damage-filter.frag?raw";
 
 const FLASH_ALPHA = 0.4;
 

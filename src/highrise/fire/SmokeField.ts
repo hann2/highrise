@@ -33,8 +33,8 @@ import {
   SMOKE_WARP,
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
-import frag_smoke from "./smoke.frag";
-import vert_flames from "./flames.vert";
+import frag_smoke from "./smoke.frag?raw";
+import vert_flames from "./flames.vert?raw";
 
 /** Below this, a cell has no smoke */
 const EMPTY = 0.005;
