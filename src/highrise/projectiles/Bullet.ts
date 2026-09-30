@@ -15,6 +15,8 @@ import { BulletStats, LONG_RANGE } from "../weapons/guns/BulletStats";
 import type Gun from "../weapons/guns/Gun";
 import { HitResult, Projectile, projectileRaycast } from "./Projectile";
 
+/** The lowest frame rate a bullet's glow is sized for (see `Game.frameRateLimit`) */
+const MIN_FRAME_RATE = 30;
 export default class Bullet extends Projectile implements Entity {
   sprite: Graphics & GameSprite;
   light: Light;
@@ -54,8 +56,13 @@ export default class Bullet extends Projectile implements Entity {
     this.sprite = new Graphics();
     this.sprite.layerName = Layer.WEAPONS;
 
+    // A glow along the streak, centered on its middle. Big enough for the
+    // longest streak: a frame's travel at the lowest frame rate
     this.lightGraphics = new Graphics();
-    this.light = this.addChild(new Light(this.lightGraphics));
+    const lightSize = stats.muzzleVelocity / MIN_FRAME_RATE + 0.5;
+    this.light = this.addChild(
+      new Light(this.lightGraphics, false, 1, 0, lightSize),
+    );
   }
 
   makeCollisionMask() {
@@ -142,7 +149,8 @@ export default class Bullet extends Projectile implements Entity {
       endPoint.magnitude / 2 + 0.1,
     );
     this.sprite.visible = inView;
-    this.lightGraphics.visible = inView;
+    // Off, so its last glow doesn't stay behind at the edge of the view
+    this.light.enabled = inView;
     if (!inView) {
       return;
     }
@@ -153,13 +161,17 @@ export default class Bullet extends Projectile implements Entity {
       .lineTo(endPoint.x, endPoint.y)
       .stroke({ width: 0.03, color: this.stats.color, alpha: 0.6 });
 
+    this.sprite.position.copyFrom(this.renderPosition);
+
+    // The light is where the middle of the streak is, and the glow is drawn
+    // around it
+    const [halfX, halfY] = endPoint.imul(0.5);
     this.lightGraphics
       .clear()
-      .moveTo(0, 0)
-      .lineTo(endPoint.x, endPoint.y)
+      .moveTo(-halfX, -halfY)
+      .lineTo(halfX, halfY)
       .stroke({ width: 0.2, color: this.stats.color, alpha: 1.0 });
-
-    this.sprite.position.copyFrom(this.renderPosition);
-    this.lightGraphics.position.copyFrom(this.renderPosition);
+    this.light.setPosition(middle);
+    this.light.dirty = true;
   }
 }
