@@ -8,29 +8,62 @@ import { Broadphase } from "./Broadphase";
 
 const HUGE_LIMIT = 200;
 const DEFAULT_CELL_SIZE = 6;
-const HUGE: number[] = []; // Sentinel value for huge bodies
 
 /**
- * A spatial hashing broadphase collision detection system that divides
- * space into uniform grid cells. Provides efficient collision pair detection
- * by only checking bodies within the same cells.
+ * A spatial hashing broadphase: space is divided into a grid of cells (which
+ * wraps around, so the grid only has to cover the area where things are
+ * close together), and each body is listed in every cell its AABB overlaps.
+ * Bodies too big for that ("huge") are kept in a list of their own.
+ *
+ * There are two hashes. Static bodies go in one when they're added and stay
+ * there. Everything that moves (dynamic, kinematic and particle bodies) goes
+ * in the other, which is rebuilt from scratch when it's out of date: after
+ * each physics step, since bodies have moved. Bodies added or removed between
+ * steps are put in or taken out of it directly, so queries between steps (like
+ * raycasts during a tick) cost nothing extra however many bodies there are.
+ *
+ * Between steps, the moving hash holds bodies where their AABBs were when it
+ * was built. That's the same as the AABBs themselves: moving a body by hand
+ * doesn't update its AABB either until the next step.
+ *
+ * Each body remembers which cells it was put in, so taking it out never
+ * depends on where it is now.
  */
 export class SpatialHashingBroadphase extends Broadphase {
   pointShapeBodies: Set<Body> = new Set();
   dynamicBodies: Set<Body> = new Set();
   kinematicBodies: Set<Body> = new Set();
+  /** Static bodies too big for the grid */
   hugeBodies: Set<Body> = new Set();
-  partitions: Set<Body>[] = [];
-
-  bodiesAdded: boolean = false;
+  /** The static hash: the static bodies in each cell */
+  partitions: Body[][] = [];
 
   debugData = {
     numCollisions: 0,
+    /** How many times the moving hash has been rebuilt */
+    movingRebuilds: 0,
   };
 
   private cellSize: number;
   private width: number;
   private height: number;
+
+  /** The cells each static body is in (empty for huge ones) */
+  private staticCells = new Map<Body, number[]>();
+
+  /** The moving hash: the moving bodies in each cell */
+  private movingPartitions: Body[][] = [];
+  /** Cells of the moving hash that have had bodies since it was last cleared */
+  private movingUsedCells: number[] = [];
+  /** Moving bodies too big for the grid */
+  private movingHuge: Body[] = [];
+  /** The cells each moving body is in (empty for huge ones) */
+  private movingCells = new Map<Body, number[]>();
+  /** Whether the moving hash has to be rebuilt before it's used */
+  private movingDirty = true;
+
+  /** Marks the bodies a query has already seen (see `Body._queryStamp`) */
+  private stamp = 0;
 
   constructor({
     cellSize = DEFAULT_CELL_SIZE,
@@ -42,10 +75,15 @@ export class SpatialHashingBroadphase extends Broadphase {
     this.cellSize = cellSize;
     this.width = width;
     this.height = height;
+    this.makePartitions();
+  }
 
-    for (let i = 0; i < width * height; i++) {
-      this.partitions.push(new Set());
-    }
+  private makePartitions() {
+    const count = this.width * this.height;
+    this.partitions = Array.from({ length: count }, () => []);
+    this.movingPartitions = Array.from({ length: count }, () => []);
+    this.movingUsedCells = [];
+    this.movingDirty = true;
   }
 
   setWorld(world: World) {
@@ -54,222 +92,320 @@ export class SpatialHashingBroadphase extends Broadphase {
     world.on("addBody", ((e: { body: Body }) => this.onAddBody(e.body)) as any);
     world.on("removeBody", ((e: { body: Body }) =>
       this.onRemoveBody(e.body)) as any);
+    // Everything that moves has moved
+    world.on("postStep", () => {
+      this.movingDirty = true;
+    });
   }
 
   resize(cellSize: number, width: number, height: number) {
     this.cellSize = cellSize;
-    const oldBodies = new Set<Body>();
-    for (const partition of this.partitions) {
-      for (const body of partition) {
-        oldBodies.add(body);
-      }
-    }
-
-    this.partitions = [];
-    for (let i = 0; i < width * height; i++) {
-      this.partitions.push(new Set());
-    }
-
-    for (const body of oldBodies) {
-      this.addBodyToHash(body);
+    this.width = width;
+    this.height = height;
+    const statics = [...this.staticCells.keys()];
+    this.staticCells.clear();
+    this.hugeBodies.clear();
+    this.makePartitions();
+    for (const body of statics) {
+      this.addStatic(body);
     }
   }
 
   onAddBody(body: Body) {
+    if (body.motion === "static") {
+      this.addStatic(body);
+      return;
+    }
     if (body.motion === "dynamic") {
       if (hasOnlyParticleShapes(body)) {
         this.pointShapeBodies.add(body);
       } else {
         this.dynamicBodies.add(body);
       }
-    } else if (body.motion === "kinematic") {
-      this.kinematicBodies.add(body);
     } else {
-      // body is static
-      this.addBodyToHash(body);
+      this.kinematicBodies.add(body);
+    }
+    if (!this.movingDirty) {
+      this.addMoving(body);
     }
   }
 
   onRemoveBody(body: Body) {
-    if (body.motion === "dynamic") {
-      this.dynamicBodies.delete(body);
-      this.pointShapeBodies.delete(body);
-    } else if (body.motion === "kinematic") {
-      this.kinematicBodies.delete(body);
-    } else {
-      // body is static
-      this.removeBodyFromHash(body);
+    if (body.motion === "static") {
+      this.removeStatic(body);
+      return;
+    }
+    this.dynamicBodies.delete(body);
+    this.pointShapeBodies.delete(body);
+    this.kinematicBodies.delete(body);
+    if (!this.movingDirty) {
+      this.removeMoving(body);
     }
   }
 
-  addBodyToHash(body: Body) {
+  bodyShapesChanged(body: Body) {
+    if (body.motion === "static") {
+      if (this.staticCells.has(body)) {
+        this.removeStatic(body);
+        this.addStatic(body);
+      }
+    } else if (body.world) {
+      // It may have become (or stopped being) a particle body
+      this.onRemoveBody(body);
+      this.onAddBody(body);
+    }
+  }
+
+  private addStatic(body: Body) {
     const cells = this.aabbToCells(body.getAABB());
-    if (cells === HUGE) {
+    this.staticCells.set(body, cells ?? []);
+    if (cells === undefined) {
       this.hugeBodies.add(body);
     } else {
       for (const cell of cells) {
-        this.partitions[cell].add(body);
+        this.partitions[cell].push(body);
       }
     }
   }
 
-  addBodiesToHash(bodies: Iterable<Body>) {
-    for (const body of bodies) {
-      this.addBodyToHash(body);
+  private removeStatic(body: Body) {
+    const cells = this.staticCells.get(body);
+    if (cells === undefined) {
+      return;
+    }
+    this.staticCells.delete(body);
+    this.hugeBodies.delete(body);
+    for (const cell of cells) {
+      removeFrom(this.partitions[cell], body);
     }
   }
 
-  removeBodyFromHash(body: Body) {
+  private addMoving(body: Body) {
     const cells = this.aabbToCells(body.getAABB());
-    if (cells === HUGE) {
-      this.hugeBodies.delete(body);
+    this.movingCells.set(body, cells ?? []);
+    if (cells === undefined) {
+      this.movingHuge.push(body);
     } else {
       for (const cell of cells) {
-        this.partitions[cell].delete(body);
+        const list = this.movingPartitions[cell];
+        if (list.length === 0) {
+          this.movingUsedCells.push(cell);
+        }
+        list.push(body);
       }
     }
   }
 
-  removeBodiesFromHash(bodies: Iterable<Body>) {
-    for (const body of bodies) {
-      this.removeBodyFromHash(body);
+  private removeMoving(body: Body) {
+    const cells = this.movingCells.get(body);
+    if (cells === undefined) {
+      return;
+    }
+    this.movingCells.delete(body);
+    if (cells.length === 0) {
+      removeFrom(this.movingHuge, body);
+    }
+    for (const cell of cells) {
+      removeFrom(this.movingPartitions[cell], body);
     }
   }
 
-  addExtraBodies() {
-    for (const kBody of this.kinematicBodies) {
-      this.addBodyToHash(kBody);
+  /** Rebuilds the moving hash, if bodies have moved since it was built */
+  private updateMovingHash() {
+    if (!this.movingDirty) {
+      return;
     }
-    for (const dBody of this.dynamicBodies) {
-      this.addBodyToHash(dBody);
+    this.movingDirty = false;
+    this.debugData.movingRebuilds += 1;
+    for (const cell of this.movingUsedCells) {
+      this.movingPartitions[cell].length = 0;
     }
-    for (const pBody of this.pointShapeBodies) {
-      this.addBodyToHash(pBody);
+    this.movingUsedCells.length = 0;
+    this.movingHuge.length = 0;
+    this.movingCells.clear();
+    for (const body of this.kinematicBodies) {
+      this.addMoving(body);
+    }
+    for (const body of this.dynamicBodies) {
+      this.addMoving(body);
+    }
+    for (const body of this.pointShapeBodies) {
+      this.addMoving(body);
     }
   }
 
-  removeExtraBodies() {
-    for (const kBody of this.kinematicBodies) {
-      this.removeBodyFromHash(kBody);
-    }
-    for (const dBody of this.dynamicBodies) {
-      this.removeBodyFromHash(dBody);
-    }
-    for (const pBody of this.pointShapeBodies) {
-      this.removeBodyFromHash(pBody);
-    }
-  }
-
-  getCollisionPairs(world: World): [Body, Body][] {
+  getCollisionPairs(_world: World): [Body, Body][] {
+    this.updateMovingHash();
     const result: [Body, Body][] = [];
 
-    // Static bodies are already there, we never remove them
-    this.addBodiesToHash(this.kinematicBodies);
-    this.addBodiesToHash(this.dynamicBodies);
-    // Don't add particles because they can't collide with each other, so we just need to check if they're overlapping anything
-
-    for (const pBody of this.pointShapeBodies) {
-      for (const other of this.aabbQuery(world, pBody.getAABB(), false)) {
-        if (bodiesCanCollide(pBody, other)) {
-          result.push([pBody, other]);
-        }
-      }
+    // Every pair has a dynamic body in it (static and kinematic bodies don't
+    // collide with each other), so it's enough to look around each dynamic
+    // body. A pair of two dynamic bodies is found from the one with the lower
+    // id, and a particle body's pairs from the particle body (particles don't
+    // collide with each other).
+    for (const body of this.dynamicBodies) {
+      this.pairsOf(body, false, result);
     }
-
-    // For the rest of collisions, at least one of the bodies must be dynamic,
-    // so we can find all collisions by iterating through just the dynamic bodies
-    for (const dBody of this.dynamicBodies) {
-      this.removeBodyFromHash(dBody); // This will make sure we don't overlap ourselves, and that we don't double count anything
-
-      for (const other of this.aabbQuery(world, dBody.getAABB(), false)) {
-        if (bodiesCanCollide(dBody, other)) {
-          result.push([dBody, other]);
-        }
-      }
+    for (const body of this.pointShapeBodies) {
+      this.pairsOf(body, true, result);
     }
-
-    this.removeBodiesFromHash(this.kinematicBodies);
 
     this.debugData.numCollisions = result.length;
-
     return result;
+  }
+
+  /** Adds the pairs of `body` (see `getCollisionPairs`) to `result` */
+  private pairsOf(body: Body, isParticle: boolean, result: [Body, Body][]) {
+    const aabb = body.getAABB();
+    const stamp = ++this.stamp;
+    body._queryStamp = stamp;
+
+    const consider = (other: Body) => {
+      if (other._queryStamp === stamp) {
+        return;
+      }
+      other._queryStamp = stamp;
+      if (other.motion === "dynamic") {
+        const otherIsParticle = this.pointShapeBodies.has(other);
+        if (
+          isParticle ? otherIsParticle : otherIsParticle || other.id < body.id
+        ) {
+          return;
+        }
+      }
+      if (other.getAABB().overlaps(aabb) && bodiesCanCollide(body, other)) {
+        result.push([body, other]);
+      }
+    };
+
+    const cells = this.queryCells(aabb);
+    for (const cell of cells) {
+      for (const other of this.partitions[cell]) {
+        consider(other);
+      }
+    }
+    for (const other of this.hugeBodies) {
+      consider(other);
+    }
+    for (const cell of cells) {
+      for (const other of this.movingPartitions[cell]) {
+        consider(other);
+      }
+    }
+    for (const other of this.movingHuge) {
+      consider(other);
+    }
   }
 
   xyToCell(x: number, y: number) {
     return mod(x, this.width) + mod(y, this.height) * this.width;
   }
 
-  /** Returns the cells that overlap the aabb. Returns HUGE if the aabb is "huge". */
-  aabbToCells(aabb: AABB, checkHuge = true): number[] {
-    const result: number[] = [];
-
+  /** The cells a body with this AABB goes in, or undefined if it's "huge" */
+  aabbToCells(aabb: AABB): number[] | undefined {
     const lowX = Math.floor(aabb.lowerBound[0] / this.cellSize);
     const lowY = Math.floor(aabb.lowerBound[1] / this.cellSize);
     const highX = Math.floor(aabb.upperBound[0] / this.cellSize);
     const highY = Math.floor(aabb.upperBound[1] / this.cellSize);
     const size = Math.abs(highX - lowX) * Math.abs(highY - lowY);
-
-    // Check for huge
     if (
-      checkHuge &&
-      (!isFinite(lowX) ||
-        !isFinite(lowY) ||
-        !isFinite(highX) ||
-        !isFinite(highY) ||
-        size > HUGE_LIMIT)
+      !isFinite(lowX) ||
+      !isFinite(lowY) ||
+      !isFinite(highX) ||
+      !isFinite(highY) ||
+      size > HUGE_LIMIT
     ) {
-      return HUGE;
+      return undefined;
     }
+    return this.queryCells(aabb);
+  }
 
+  /**
+   * The cells an AABB overlaps, each once: an AABB wider or taller than the
+   * grid covers every column or row
+   */
+  private queryCells(aabb: AABB): number[] {
+    const result: number[] = [];
+    let lowX = Math.floor(aabb.lowerBound[0] / this.cellSize);
+    let lowY = Math.floor(aabb.lowerBound[1] / this.cellSize);
+    let highX = Math.floor(aabb.upperBound[0] / this.cellSize);
+    let highY = Math.floor(aabb.upperBound[1] / this.cellSize);
+    if (!(highX - lowX < this.width)) {
+      lowX = 0;
+      highX = this.width - 1;
+    }
+    if (!(highY - lowY < this.height)) {
+      lowY = 0;
+      highY = this.height - 1;
+    }
     for (let x = lowX; x <= highX; x++) {
       for (let y = lowY; y <= highY; y++) {
         result.push(this.xyToCell(x, y));
+      }
+    }
+    return result;
+  }
+
+  /**
+   * The bodies whose AABBs overlap `aabb`.
+   * @param includeMoving Whether to include dynamic, kinematic and particle
+   *   bodies, or only static ones
+   */
+  aabbQuery(
+    _: World,
+    aabb: AABB,
+    includeMoving: boolean = true,
+  ): Iterable<Body> {
+    const result: Body[] = [];
+    const stamp = ++this.stamp;
+    const consider = (body: Body) => {
+      if (body._queryStamp !== stamp) {
+        body._queryStamp = stamp;
+        if (body.getAABB().overlaps(aabb)) {
+          result.push(body);
+        }
+      }
+    };
+
+    const cells = this.queryCells(aabb);
+    for (const cell of cells) {
+      for (const body of this.partitions[cell]) {
+        consider(body);
+      }
+    }
+    for (const body of this.hugeBodies) {
+      consider(body);
+    }
+
+    if (includeMoving) {
+      this.updateMovingHash();
+      for (const cell of cells) {
+        for (const body of this.movingPartitions[cell]) {
+          consider(body);
+        }
+      }
+      for (const body of this.movingHuge) {
+        consider(body);
       }
     }
 
     return result;
   }
 
-  aabbQuery(
-    _: World,
-    aabb: AABB,
-    shouldAddBodies: boolean = true,
-  ): Iterable<Body> {
-    if (shouldAddBodies) {
-      this.addExtraBodies();
-    }
-
-    // Use Set for O(1) deduplication - return directly without array conversion
-    const resultSet = new Set<Body>();
-
-    for (const cell of this.aabbToCells(aabb, false)) {
-      for (const body of this.partitions[cell]) {
-        if (body.getAABB().overlaps(aabb)) {
-          resultSet.add(body);
-        }
-      }
-    }
-
-    for (const hugeBody of this.hugeBodies) {
-      if (aabb.overlaps(hugeBody.getAABB())) {
-        resultSet.add(hugeBody);
-      }
-    }
-
-    if (shouldAddBodies) {
-      this.removeExtraBodies();
-    }
-
-    return resultSet;
-  }
-
   /** Query all bodies whose cells intersect the ray using DDA grid traversal. */
-  rayQuery(ray: RayLike, shouldAddBodies = true): Iterable<Body> {
-    if (shouldAddBodies) {
-      this.addExtraBodies();
+  rayQuery(ray: RayLike, includeMoving = true): Iterable<Body> {
+    if (includeMoving) {
+      this.updateMovingHash();
     }
 
-    const resultSet = new Set<Body>();
+    const result: Body[] = [];
+    const stamp = ++this.stamp;
+    const consider = (body: Body) => {
+      if (body._queryStamp !== stamp) {
+        body._queryStamp = stamp;
+        result.push(body);
+      }
+    };
 
     const x1 = ray.from[0] / this.cellSize;
     const y1 = ray.from[1] / this.cellSize;
@@ -308,7 +444,12 @@ export class SpatialHashingBroadphase extends Broadphase {
     const addCell = (cx: number, cy: number) => {
       const cell = this.xyToCell(cx, cy);
       for (const body of this.partitions[cell]) {
-        resultSet.add(body);
+        consider(body);
+      }
+      if (includeMoving) {
+        for (const body of this.movingPartitions[cell]) {
+          consider(body);
+        }
       }
     };
 
@@ -327,15 +468,25 @@ export class SpatialHashingBroadphase extends Broadphase {
       addCell(cellX, cellY);
     }
 
-    // Check huge bodies (which aren't in the spatial hash)
-    for (const hugeBody of this.hugeBodies) {
-      resultSet.add(hugeBody);
+    // Huge bodies aren't in the grid
+    for (const body of this.hugeBodies) {
+      consider(body);
+    }
+    if (includeMoving) {
+      for (const body of this.movingHuge) {
+        consider(body);
+      }
     }
 
-    if (shouldAddBodies) {
-      this.removeExtraBodies();
-    }
+    return result;
+  }
+}
 
-    return resultSet;
+/** Removes `item` from `list` if it's there, without keeping the order */
+function removeFrom<T>(list: T[], item: T) {
+  const index = list.indexOf(item);
+  if (index >= 0) {
+    list[index] = list[list.length - 1];
+    list.pop();
   }
 }

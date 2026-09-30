@@ -24,13 +24,16 @@ export abstract class Broadphase {
 
   /**
    * Returns all the bodies within an AABB.
-   * @param shouldAddBodies If true, adds dynamic/kinematic bodies to hash before querying (SpatialHashingBroadphase only)
+   * @param includeMoving If false, only static bodies (SpatialHashingBroadphase only)
    */
   abstract aabbQuery(
     _world: World,
     _aabb: AABB,
-    _shouldAddBodies?: boolean,
+    _includeMoving?: boolean,
   ): Iterable<Body>;
+
+  /** Called when a body in the world gains or loses a shape, which changes its AABB */
+  bodyShapesChanged(_body: Body): void {}
 
   /** Set the world that we are searching for collision pairs in. */
   setWorld(world: World): void {
