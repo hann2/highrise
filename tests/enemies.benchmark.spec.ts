@@ -26,10 +26,11 @@ const URL =
  * off, so what's left is the enemies' own cost. Run with `npm run
  * benchmark:enemies` (or `npm run benchmark`, with the others).
  *
- * Ticks are at a fixed 120 per second, but frames aren't (there's no vsync in
+ * Ticks are at a fixed rate (`Game.ticksPerSecond`), but frames aren't (there's no vsync in
  * benchmarks), so the costs that matter are per tick for the simulation and
  * per frame for rendering. `frame60` puts them together: the CPU time a frame
- * takes at 60 fps (two ticks and a render), which has to stay under 16.7 ms.
+ * takes at 60 fps (a 60th of a second of ticks, and a render), which has to
+ * stay under 16.7 ms.
  */
 test("benchmark: enemy count scaling", async ({ page }) => {
   test.setTimeout(60000 + COUNTS.length * 60000);
@@ -56,7 +57,12 @@ test("benchmark: enemy count scaling", async ({ page }) => {
     const frames = await measureFrames(page, MEASURE_MS);
     const report = await captureProfile(page, PROFILE_MS);
     const objectives = await countObjectives(page);
-    results.push(summarize(count, frames, report.stats, objectives));
+    const ticksPerSecond = await page.evaluate(
+      () => window.DEBUG.game!.ticksPerSecond,
+    );
+    results.push(
+      summarize(count, frames, report.stats, objectives, ticksPerSecond),
+    );
   }
   await page.evaluate(() =>
     (window.DEBUG.game!.entities.getById("arenaScene") as any).clear(),
@@ -107,6 +113,7 @@ function summarize(
   frames: Frames,
   stats: Stat[],
   objectives: Record<string, number>,
+  ticksPerSecond: number,
 ) {
   const find = (label: string) =>
     stats.find((s) => s.label === `Game.nextFrame > ${label}`);
@@ -155,7 +162,7 @@ function summarize(
     tickMs: round(tickMs),
     physicsMs: round(physicsMs),
     renderMs: round(renderMs),
-    frame60Ms: round(2 * (tickMs + physicsMs) + renderMs),
+    frame60Ms: round((ticksPerSecond / 60) * (tickMs + physicsMs) + renderMs),
     top,
   };
 }
@@ -182,7 +189,7 @@ function formatTable(results: Result[]): string {
     ].join(" ");
   });
   return [
-    "Costs in ms of CPU: tick and physics per tick, render per frame, frame60 = 2 ticks + a render",
+    "Costs in ms of CPU: tick and physics per tick, render per frame, frame60 = 1/60 s of ticks + a render",
     header,
     ...rows,
   ].join("\n");

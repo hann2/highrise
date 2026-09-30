@@ -28,7 +28,7 @@
     "tickMs": 0.671,
     "physicsMs": 0.28,
     "renderMs": 0.732,
-    "frame60Ms": 2.636,
+    "frame60Ms": 1.683,
     "top": [
       {
         "label": "Game.tick > main",
@@ -211,7 +211,7 @@
     "tickMs": 1.581,
     "physicsMs": 0.505,
     "renderMs": 0.925,
-    "frame60Ms": 5.098,
+    "frame60Ms": 3.011,
     "top": [
       {
         "label": "Game.tick > main",
@@ -394,7 +394,7 @@
     "tickMs": 4.914,
     "physicsMs": 0.94,
     "renderMs": 1.802,
-    "frame60Ms": 13.51,
+    "frame60Ms": 7.656,
     "top": [
       {
         "label": "Game.tick > main",
@@ -577,7 +577,7 @@
     "tickMs": 16.301,
     "physicsMs": 2.04,
     "renderMs": 4.185,
-    "frame60Ms": 40.867,
+    "frame60Ms": 22.526,
     "top": [
       {
         "label": "Game.tick > main",
@@ -760,7 +760,7 @@
     "tickMs": 62.819,
     "physicsMs": 3.569,
     "renderMs": 8.667,
-    "frame60Ms": 141.443,
+    "frame60Ms": 75.055,
     "top": [
       {
         "label": "Game.tick > main",
