@@ -470,7 +470,16 @@ export default class Game {
   @profile
   private render(dt: number) {
     this.cleanupEntities();
-    this.callHandlers("render", dt);
+    // In the same layers as ticks, so each layer's rendering is timed as a whole
+    for (const layer of TICK_LAYERS) {
+      profiler.measure(layer, () => {
+        this.callHandlers(
+          "render",
+          dt,
+          this.entities.getRenderersOnLayer(layer),
+        );
+      });
+    }
     this.callHandlers("lateRender", dt);
     profiler.measure("Renderer.render", () => this.renderer.render());
   }

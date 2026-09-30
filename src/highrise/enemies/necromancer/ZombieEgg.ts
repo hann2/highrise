@@ -20,6 +20,7 @@ const SPEED = 15; // meters per second
 
 // TODO: Don't go through walls
 export class ZombieEgg extends BaseEntity implements Entity {
+  tickLayer = "enemies" as const;
   sprite: Container & GameSprite;
   eggSprite: Sprite;
   variant: number;

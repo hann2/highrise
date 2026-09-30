@@ -37,6 +37,7 @@ interface Ember {
  * `SmokeField`.)
  */
 export default class FireEmbers extends BaseEntity implements Entity {
+  tickLayer = "fire" as const;
   sprite: Container & GameSprite = new Container();
   private embers: Ember[] = [];
   private spares: Sprite[] = [];

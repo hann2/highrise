@@ -1,5 +1,6 @@
 import { Page, test } from "@playwright/test";
 import * as fs from "fs";
+import { TICK_LAYERS } from "../src/config/tickLayers";
 import {
   captureProfile,
   collectIssues,
@@ -55,7 +56,12 @@ test("benchmark: enemy count scaling", async ({ page }) => {
     await sendWave(page, count);
     await page.waitForTimeout(SETTLE_MS);
     const frames = await measureFrames(page, MEASURE_MS);
-    const report = await captureProfile(page, PROFILE_MS);
+    // Totals without timing each entity, which would add to them, then which
+    // entity class is which
+    const totals = await captureProfile(page, PROFILE_MS, {
+      entityDetail: false,
+    });
+    const detail = await captureProfile(page, PROFILE_MS);
     const { objectives, inView } = await countObjectives(page);
     const ticksPerSecond = await page.evaluate(
       () => window.DEBUG.game!.ticksPerSecond,
@@ -64,7 +70,8 @@ test("benchmark: enemy count scaling", async ({ page }) => {
       summarize(
         count,
         frames,
-        report.stats,
+        totals.stats,
+        detail.stats,
         objectives,
         inView,
         ticksPerSecond,
@@ -81,6 +88,7 @@ test("benchmark: enemy count scaling", async ({ page }) => {
     JSON.stringify(results, null, 2) + "\n",
   );
   console.log(formatTable(results));
+  console.log(formatLayers(results));
   for (const result of results) {
     console.log(formatTop(result));
   }
@@ -125,6 +133,7 @@ function summarize(
   count: number,
   frames: Frames,
   stats: Stat[],
+  detailStats: Stat[],
   objectives: Record<string, number>,
   inView: number,
   ticksPerSecond: number,
@@ -143,19 +152,41 @@ function summarize(
   const round = (n: number, places = 3) =>
     Math.round(n * 10 ** places) / 10 ** places;
 
-  // The biggest sections under the tick, physics and render, per tick or per frame
-  const top = stats
+  // Each tick layer's ticking (per tick) and rendering (per frame)
+  const layers: Record<string, { tick: number; render: number }> = {};
+  for (const s of stats) {
+    const match = /^Game\.nextFrame > Game\.(tick|render) > (\w+)$/.exec(
+      s.label,
+    );
+    if (match) {
+      const layer = (layers[match[2]] ??= { tick: 0, render: 0 });
+      if (match[1] === "tick") {
+        layer.tick = round(perTick(`Game.tick > ${match[2]}`));
+      } else {
+        layer.render = round(s.msPerFrame);
+      }
+    }
+  }
+
+  // The biggest sections under the tick, physics and render, per tick or per
+  // frame, with each entity class timed
+  const detailTicksPerFrame =
+    detailStats.find((s) => s.label === "Game.nextFrame > Game.tick")
+      ?.callsPerFrame || 1;
+  const top = detailStats
     .filter((s) => s.depth >= 2 && s.msPerFrame > 0)
     .map((s) => {
       const label = s.label.replace("Game.nextFrame > ", "");
       const tickLike = /^(Game\.tick|World\.step)/.test(label);
-      const value = tickLike ? s.msPerFrame / ticksPerFrame : s.msPerFrame;
+      const value = tickLike
+        ? s.msPerFrame / detailTicksPerFrame
+        : s.msPerFrame;
       return {
         label,
         per: tickLike ? "tick" : "frame",
         ms: round(value),
         calls: round(
-          tickLike ? s.callsPerFrame / ticksPerFrame : s.callsPerFrame,
+          tickLike ? s.callsPerFrame / detailTicksPerFrame : s.callsPerFrame,
           1,
         ),
       };
@@ -178,6 +209,7 @@ function summarize(
     physicsMs: round(physicsMs),
     renderMs: round(renderMs),
     frame60Ms: round((ticksPerSecond / 60) * (tickMs + physicsMs) + renderMs),
+    layers,
     top,
   };
 }
@@ -220,5 +252,32 @@ function formatTop(result: Result, rows = 12): string {
         (s) =>
           `${s.ms.toFixed(3).padStart(8)} ms/${s.per.padEnd(5)} ${String(s.calls).padStart(7)} calls  ${s.label}`,
       ),
+  ].join("\n");
+}
+
+/** Each tick layer's cost: ms per tick of ticking / ms per frame of rendering */
+function formatLayers(results: Result[]): string {
+  const names = TICK_LAYERS.filter((name) =>
+    results.some(
+      (r) =>
+        (r.layers[name]?.tick ?? 0) + (r.layers[name]?.render ?? 0) >= 0.01,
+    ),
+  );
+  const header = ["zombies", ...names.map((n) => n.padStart(13))].join(" ");
+  const rows = results.map((r) =>
+    [
+      String(r.count).padStart(7),
+      ...names.map((name) => {
+        const layer = r.layers[name] ?? { tick: 0, render: 0 };
+        return `${layer.tick.toFixed(2)}/${layer.render.toFixed(2)}`.padStart(
+          13,
+        );
+      }),
+    ].join(" "),
+  );
+  return [
+    "\nBy tick layer, without per-entity timing: ms per tick ticking / ms per frame rendering",
+    header,
+    ...rows,
   ].join("\n");
 }

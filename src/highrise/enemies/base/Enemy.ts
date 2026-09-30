@@ -49,6 +49,7 @@ const FADE_VIEW_MARGIN = 3;
 const RECENT_DAMAGE_TIME = 0.1;
 
 export class BaseEnemy extends Creature implements Hittable, Flammable {
+  tickLayer = "enemies" as const;
   hp: number = 100;
   /** Multiplier on the damage it does (see `inflictDamageFrom`), set by act */
   damageScale = 1;

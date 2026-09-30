@@ -121,19 +121,29 @@ export async function getLevelNumber(page: Page): Promise<number> {
 
 /**
  * Records where the game loop's CPU time goes for `ms` of play, per section
- * and per entity class, averaged over the window. Format with
- * `JSON.stringify` or look at `label`, `depth` and `msPerFrame`.
+ * (tick and render are split by tick layer) and, with `entityDetail` (the
+ * default), per entity class, averaged over the window. Timing each entity
+ * costs a little per call, which adds up with hundreds of entities, so for
+ * accurate totals capture without it. Format with `JSON.stringify` or look at
+ * `label`, `depth` and `msPerFrame`.
  */
-export async function captureProfile(page: Page, ms: number) {
-  return page.evaluate(async (ms) => {
-    const profiler = window.DEBUG.profiler!;
-    profiler.entityDetail = true;
-    profiler.startCapture();
-    await new Promise((resolve) => setTimeout(resolve, ms));
-    const report = profiler.stopCapture("Game.nextFrame");
-    profiler.entityDetail = false;
-    return report;
-  }, ms);
+export async function captureProfile(
+  page: Page,
+  ms: number,
+  { entityDetail = true }: { entityDetail?: boolean } = {},
+) {
+  return page.evaluate(
+    async ([ms, entityDetail]) => {
+      const profiler = window.DEBUG.profiler!;
+      profiler.entityDetail = entityDetail;
+      profiler.startCapture();
+      await new Promise((resolve) => setTimeout(resolve, ms));
+      const report = profiler.stopCapture("Game.nextFrame");
+      profiler.entityDetail = false;
+      return report;
+    },
+    [ms, entityDetail] as const,
+  );
 }
 
 /** Walks the leader in a square for `ms`, so that lighting and AI have work to do */

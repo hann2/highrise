@@ -10,6 +10,7 @@ const MAX_LIFESPAN = 3.0; // seconds
 export type HitResult = { hit: Entity; hitNormal: V2d; hitPosition: V2d };
 
 export class Projectile extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   hitPosition?: V2d;
   renderPosition: V2d;
   /**

@@ -27,6 +27,7 @@ const BLOB_SHAPES = 6;
  * texture the size of the level.
  */
 export default class FloorMarks extends BaseEntity implements Entity {
+  tickLayer = "fire" as const;
   sprites: (Sprite & GameSprite)[];
   private scorchSprite: Sprite & GameSprite;
   private fuelSprite: Sprite & GameSprite;

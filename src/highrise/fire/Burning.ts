@@ -61,6 +61,7 @@ let nextPhase = 0;
  * flames.
  */
 export default class Burning extends BaseEntity implements Entity {
+  tickLayer = "fire" as const;
   private light?: PointLight;
   /** Damage owed but not dealt yet, dealt every `burnDamageInterval` */
   private pendingDamage = 0;

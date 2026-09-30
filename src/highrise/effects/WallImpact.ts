@@ -11,6 +11,7 @@ import { BLOB_TEXTURES } from "./Splat";
 const FRICTION = 5.0;
 
 export default class WallImpact extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   sprite: Container & GameSprite;
   particles: Particle[] = [];
 

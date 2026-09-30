@@ -43,6 +43,7 @@ import vert_flames from "./flames.vert?raw";
  * fire from different things merges into one.
  */
 export default class FireRenderer extends BaseEntity implements Entity {
+  tickLayer = "fire" as const;
   sprite: Container & GameSprite;
   private mesh: Mesh<MeshGeometry, Shader>;
   private shader: Shader;

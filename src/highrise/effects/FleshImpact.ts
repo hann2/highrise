@@ -26,6 +26,7 @@ interface Particle {
 }
 
 export default class FleshImpact extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   sprite: Container & GameSprite;
   particles: Particle[] = [];
 

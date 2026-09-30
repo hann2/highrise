@@ -9,6 +9,7 @@ import { V2d } from "../../../core/Vector";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 
 export class Spark extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   sprite: Graphics & GameSprite;
   light: PointLight;
 

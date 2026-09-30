@@ -33,6 +33,7 @@ const FLOOR_FRICTION = 3;
  * burning. One that `breaksOnImpact` goes off when it first hits something.
  */
 export default class ThrownConsumable extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   body: Body;
   sprite: Graphics & GameSprite;
   /** Height above the floor, meters. Only for looks and bounces. */

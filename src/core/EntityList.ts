@@ -17,6 +17,10 @@ export default class EntityList implements Iterable<Entity> {
   private handlers = new MultiMap<GameEventName, Entity>();
   /** Maps tick layers to the entities that tick on them */
   private tickLayerEntities = new MultiMap<TickLayerName, Entity>();
+  /** Maps tick layers to the entities that render on them */
+  private renderLayerEntities = new MultiMap<TickLayerName, Entity>();
+  /** The layers each entity was put in when it was added (see `tickLayersOf`) */
+  private entityLayers = new Map<Entity, readonly TickLayerName[]>();
   /** Maps constructors to their instances */
   private byConstructor = new MultiMap<Constructor<Entity>, Entity>();
   /** Maps filters to entities that pass them */
@@ -47,10 +51,15 @@ export default class EntityList implements Iterable<Entity> {
     for (const eventName of getHandlers(entity)) {
       this.handlers.add(eventName, entity);
     }
+    const layers = tickLayersOf(entity);
+    this.entityLayers.set(entity, layers);
     if (this.handlers.has("tick", entity)) {
-      for (const layer of tickLayersOf(entity)) {
+      for (const layer of layers) {
         this.tickLayerEntities.add(layer, entity);
       }
+    }
+    if (this.handlers.has("render", entity)) {
+      this.renderLayerEntities.add(layers[0], entity);
     }
 
     this.byConstructor.add(entity.constructor as Constructor<Entity>, entity);
@@ -75,10 +84,15 @@ export default class EntityList implements Iterable<Entity> {
       }
     }
 
+    const layers = this.entityLayers.get(entity) ?? tickLayersOf(entity);
+    this.entityLayers.delete(entity);
     if (this.handlers.has("tick", entity)) {
-      for (const layer of tickLayersOf(entity)) {
+      for (const layer of layers) {
         this.tickLayerEntities.remove(layer, entity);
       }
+    }
+    if (this.handlers.has("render", entity)) {
+      this.renderLayerEntities.remove(layers[0], entity);
     }
     for (const eventName of getHandlers(entity)) {
       this.handlers.remove(eventName, entity);
@@ -184,6 +198,16 @@ export default class EntityList implements Iterable<Entity> {
     return this.tickLayerEntities.get(layer);
   }
 
+  /** All the entities that render on the given layer (the first of their tick layers). */
+  getRenderersOnLayer(layer: TickLayerName): ReadonlyArray<Entity> {
+    return this.renderLayerEntities.get(layer);
+  }
+
+  /** The layers an entity ticks in (and renders in the first of) */
+  getLayers(entity: Entity): readonly TickLayerName[] {
+    return this.entityLayers.get(entity) ?? tickLayersOf(entity);
+  }
+
   /**
    * Iterate through all the entities.
    */
@@ -194,6 +218,23 @@ export default class EntityList implements Iterable<Entity> {
 
 type Constructor<T> = abstract new (...args: any[]) => T;
 
+/**
+ * The layers an entity ticks in: its own `tickLayers` or `tickLayer`, else
+ * its parent's layer (so an enemy's controller, sprite and voice tick with
+ * it), else the default one
+ */
 function tickLayersOf(entity: Entity): readonly TickLayerName[] {
-  return entity.tickLayers ?? [entity.tickLayer ?? DEFAULT_TICK_LAYER];
+  return entity.tickLayers ?? [ownLayer(entity)];
+}
+
+function ownLayer(entity: Entity): TickLayerName {
+  if (entity.tickLayer) {
+    return entity.tickLayer;
+  }
+  // A parent that ticks in several layers doesn't pass them on: its children
+  // would tick several times a tick
+  if (entity.parent && !entity.parent.tickLayers) {
+    return ownLayer(entity.parent);
+  }
+  return DEFAULT_TICK_LAYER;
 }
