@@ -9,7 +9,12 @@ import { Persistence } from "../constants/constants";
 import CreditsScreen, { isCreditsOpen } from "./CreditsScreen";
 import Encyclopedia, { isEncyclopediaOpen } from "./Encyclopedia";
 import "./menu.css";
-import { FeedbackButton, MenuButton, MenuButtons } from "./MenuButtons";
+import {
+  FeedbackButton,
+  MenuButton,
+  MenuButtons,
+  QuitButton,
+} from "./MenuButtons";
 
 const FADE_IN_TIME = 1;
 const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
@@ -67,6 +72,7 @@ export default class TitleScreen extends ReactEntity implements Entity {
           </MenuButton>
           <MenuButton onClick={() => this.rollCredits()}>Credits</MenuButton>
           <FeedbackButton />
+          <QuitButton />
         </MenuButtons>
       </div>
     );

@@ -14,3 +14,7 @@ playwright-report/
 
 # Local secrets (ElevenLabs API key, ...)
 .env
+
+# Electron Forge: the build and the packaged app
+.vite/
+out/

@@ -1,4 +1,5 @@
 import { ComponentChildren } from "preact";
+import { desktop } from "../../core/desktop";
 import Game from "../../core/Game";
 import { getCurrentGraphicsQuality } from "../controllers/GraphicsQualityController";
 import { getVolumeController } from "../controllers/VolumeController";
@@ -63,6 +64,27 @@ export function GraphicsButton({ game }: { game: Game }) {
       Graphics: {getCurrentGraphicsQuality(game)}
     </MenuButton>
   );
+}
+
+/** Fullscreen or windowed, in the desktop app (a browser has its own ways) */
+export function FullscreenButton() {
+  if (!desktop) {
+    return null;
+  }
+  const fullscreen = desktop.isFullscreen();
+  return (
+    <MenuButton onClick={() => desktop!.setFullscreen(!fullscreen)}>
+      Fullscreen: {fullscreen ? "On" : "Off"}
+    </MenuButton>
+  );
+}
+
+/** Closes the desktop app. A browser tab is closed by the browser. */
+export function QuitButton({ label = "Quit" }: { label?: string }) {
+  if (!desktop) {
+    return null;
+  }
+  return <MenuButton onClick={() => desktop!.quit()}>{label}</MenuButton>;
 }
 
 export function AutoPauseButton({

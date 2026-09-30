@@ -1,5 +1,6 @@
 import { initContactMaterials } from "../config/PhysicsMaterials";
 import AutoPauser from "../core/AutoPauser";
+import { desktop } from "../core/desktop";
 import Game from "../core/Game";
 import { SpatialHashingBroadphase } from "../core/physics/collision/broadphase/SpatialHashingBroadphase";
 import { World } from "../core/physics/world/World";
@@ -124,5 +125,12 @@ export async function main() {
 
   game.dispatch("goToLobby", { from: "boot" });
 
-  game.renderer.requestFullscreen();
+  if (desktop?.smoke) {
+    // The desktop app's smoke test (electron/main.ts) waits for this
+    console.info("[smoke] title-ok");
+  }
+  // The desktop app has a real fullscreen window instead, which Escape doesn't leave
+  if (!desktop) {
+    game.renderer.requestFullscreen();
+  }
 }

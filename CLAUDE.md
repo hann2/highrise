@@ -1,6 +1,6 @@
 # Highrise
 
-Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), a custom 2D physics engine, Web Audio, bundled with Vite. Deployed to Vercel.
+Top-down 2D zombie shooter for the browser and, through Electron, the desktop. TypeScript, Pixi.js v8 (rendering), a custom 2D physics engine, Web Audio, bundled with Vite. The web version is deployed to Vercel.
 
 `src/core/` is Simon's shared game engine, copied per game. It descends from `simonbw/game-engine` (entities, events, rendering, io, sound) plus the physics engine from `simonbw/tack-and-trim`, stripped down to general-purpose 2D. When fixing engine bugs here, consider whether they should be upstreamed.
 
@@ -16,6 +16,9 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - `npm run test:characters` — checks the character JSON against the files on disk, and tests the character editor's file handling. Run after touching `characters/data/`, moving character audio, or changing `bin/character-editor/`
 - `npm run clip -- [--seconds 6] [--port 1234] [--query "floor=wood"] [--out file.mp4]` — records a few seconds of the fire test scene (`?scene=fire&auto`) from a running dev server to an mp4 in `tests/output/`, plus a contact sheet of its frames. For showing effects without playing
 - `npm run benchmark` — seeded frame time benchmark, with a CPU profile of where the loop time goes. Also runs the lighting benchmark, which measures the frame cost with lighting and/or vision turned off. Benchmarks run without vsync, so their frame intervals include GPU time
+- `npm run electron -- [play=chad floor=5]` — the desktop app in development: Forge starts its own Vite dev server (port 1236, so it can run next to `npm start`) and opens the game in an Electron window. `key=value` arguments become the page's query string
+- `npm run package` — packages the desktop app into `out/Highrise-darwin-arm64/Highrise.app` (macOS only for now); `npm run make` also zips it
+- `npm run test:electron` — packages the desktop app, then tests it (`tests/electron/`): the build boots over `app://`, keeps its save across launches, plays and quits; the packaged app gets to the title
 - `npm run prettier` — format `src/`
 - `npm run generate-manifest` — regenerate `resources/resources.ts` after adding/removing assets (`npm start` does this automatically)
 
@@ -51,6 +54,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - `assets/` — not shipped: `assets/source` (design files), `assets/unused` (audio/images not currently used), and `IMAGE_SOURCES.md` (where each shipped image came from, for the credits; add a row when adding an image)
 - `bin/generate-manifest.ts` — generates `resources/resources.ts`
 - `tests/` — Playwright e2e (`*.spec.ts`), physics node tests (`physics/`), reference screenshots
+- `electron/` — the desktop app (Electron Forge, `forge.config.ts`; plan and what's left in `notes/electron.md`). The game in it is the same Vite build as the web version (`electron/vite.renderer.config.mts` only changes the output folder and port). `main.ts` opens one window (fullscreen by default, remembered in `window-state.json` in the user data folder) and serves the build at `app://highrise/`, not `file://`: `fetch()` (sounds) doesn't work on `file://`, and localStorage (the save) is kept per origin, so a fixed origin keeps saves across updates. `preload.ts` gives the page `window.desktop` (quit, fullscreen), which the game reads through `src/core/desktop.ts` and which is undefined on the web, so desktop-only things (the Quit and Fullscreen menu buttons) check for it. `HIGHRISE_HEADLESS=1` runs the app hidden and muted, `HIGHRISE_SMOKE=1` also quits with 0 once the title is up (the game logs `[smoke] title-ok`), and `HIGHRISE_USER_DATA` points it at another save folder. The icon is a placeholder from `bin/make-placeholder-icon.ts`
 - `notes/` — design notes. `roguelike-redesign.md` is the design doc and the backlog (unfinished features, open questions and leftovers), `fire.md` is the fire design and what's left of it, `lighting-ideas.md` holds tabled lighting features; the other files are idea lists
 
 ## Architecture conventions
@@ -100,5 +104,7 @@ Top-down 2D zombie shooter for the browser. TypeScript, Pixi.js v8 (rendering), 
 - `src/index.ts` must import `core/Polyfills` first.
 - The manifest imports each asset with `?url`, which is what gives it a hashed file in a build. In development `vite-plugins/plainManifestUrls.mts` rewrites those imports into plain URLs, because each would otherwise be a module the browser fetches before the game starts (800+ of them).
 - JSX is Preact (`jsxImportSource` in `tsconfig.json`, which Vite reads too).
-- Fullscreen is requested on `document.documentElement`, not the canvas, so the HTML overlays stay visible.
+- Fullscreen is requested on `document.documentElement`, not the canvas, so the HTML overlays stay visible. The desktop app skips that and uses the window's own fullscreen, which Escape doesn't leave.
+- Pixi resolves asset URLs itself and only understands http(s) origins, so under `app://` a root-relative `/assets/x.png` becomes `app://assets/x.png`. The preloader hands it absolute URLs.
+- Playwright can't drive the packaged app, because its fuses (`forge.config.ts`) turn off the debugging Playwright needs; `tests/electron/` drives the built but unpackaged app and only smoke-launches the packaged one.
 - The repo is large (~800MB of git history, mostly binary assets). Avoid broad globbing/searching under `resources/` and `assets/`.

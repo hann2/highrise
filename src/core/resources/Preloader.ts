@@ -132,7 +132,16 @@ export default class Preloader extends BaseEntity implements Entity {
     this.progress.images.loaded = 0;
     this.progress.images.total = Object.values(this.manifest.images).length;
 
-    Pixi.Assets.addBundle("images", this.manifest.images);
+    // Pixi resolves URLs itself, and only knows http(s) origins: under the
+    // desktop app's app://highrise/ it turns /assets/x.png into
+    // app://assets/x.png. Full URLs it leaves alone.
+    const images = Object.fromEntries(
+      Object.entries(this.manifest.images).map(([name, url]) => [
+        name,
+        new URL(url, document.baseURI).href,
+      ]),
+    );
+    Pixi.Assets.addBundle("images", images);
 
     try {
       const textures = await Pixi.Assets.loadBundle(
