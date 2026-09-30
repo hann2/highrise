@@ -19,10 +19,15 @@ const LEVEL_FADE_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
 
 const FORCE_TUTORIAL = process.env.NODE_ENV === "development" && false;
 
+/** Whether the tutorial has been played, so the title goes straight to the lobby */
+export function isTutorialComplete(): boolean {
+  return localStorage.getItem("tutorialComplete") == "true" && !FORCE_TUTORIAL;
+}
+
 /**
- * High level control flow for levels and the party. Plays the tutorial as
- * level 0 the first time, then the floors of the run's plan (made in the
- * lobby) in order, numbered from 1.
+ * High level control flow for levels and the party. Plays the floors of the
+ * run's plan (made in the lobby) in order, numbered from 1. The tutorial is a
+ * run of its own that starts (and ends) at level 0 and then goes to the lobby.
  */
 export default class LevelController extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -38,10 +43,10 @@ export default class LevelController extends BaseEntity implements Entity {
   /** Between reaching an exit and starting the next level */
   private changingLevel = false;
 
-  /** `startFloor` skips straight to that floor (0 is the tutorial), for development */
+  /** `startFloor` 0 is the tutorial; later ones skip ahead, for development */
   constructor(
     readonly plan: RunPlan,
-    private readonly startFloor?: number,
+    private readonly startFloor = 1,
   ) {
     super();
   }
@@ -58,14 +63,7 @@ export default class LevelController extends BaseEntity implements Entity {
 
   @on("add")
   async onAdd() {
-    if (this.startFloor != undefined) {
-      this.currentLevel = this.startFloor;
-    } else {
-      this.currentLevel =
-        localStorage.getItem("tutorialComplete") != "true" || FORCE_TUTORIAL
-          ? 0
-          : 1;
-    }
+    this.currentLevel = this.startFloor;
     const level = this.generateLevel();
 
     await this.wait(0.0); // so that this happens async (why does that matter?)
@@ -82,7 +80,8 @@ export default class LevelController extends BaseEntity implements Entity {
     }
     this.changingLevel = true;
     if (this.currentLevel === 0) {
-      localStorage.setItem("tutorialComplete", "true");
+      await this.finishTutorial();
+      return;
     }
     this.currentLevel += 1;
 
@@ -109,10 +108,31 @@ export default class LevelController extends BaseEntity implements Entity {
     this.game.addEntities(...level.entities);
   }
 
+  /** Out of the tutorial and up to the lobby, which fades up from black itself */
+  private async finishTutorial() {
+    localStorage.setItem("tutorialComplete", "true");
+    this.game.addEntity(new FadeEffect(LEVEL_FADE_TIME, LEVEL_FADE_TIME, 0));
+    await this.wait(LEVEL_FADE_TIME);
+    this.game.dispatch("goToLobby", { from: "tutorial" });
+  }
+
   // The whole party is dead
   @on("partyDead")
-  onPartyDead() {
-    this.game.dispatch("gameOver", { victory: false });
+  async onPartyDead() {
+    if (this.currentLevel !== 0) {
+      this.game.dispatch("gameOver", { victory: false });
+      return;
+    }
+    // Dying in the tutorial starts it over rather than ending a run
+    if (this.changingLevel) {
+      return;
+    }
+    this.changingLevel = true;
+    const game = this.game;
+    game.addEntity(new FadeEffect(LEVEL_FADE_TIME, LEVEL_FADE_TIME, 0));
+    await this.wait(LEVEL_FADE_TIME);
+    game.clearScene(Persistence.Game);
+    game.dispatch("startTutorial", undefined);
   }
 
   generateLevel(): Level {

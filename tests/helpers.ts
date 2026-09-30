@@ -12,12 +12,21 @@ export function collectIssues(page: Page): string[] {
   return issues;
 }
 
-/** Loads the game with a fixed seed and waits for the title screen. */
-export async function loadGame(page: Page, seed: number) {
-  // Skip the tutorial level so we get a normal generated level
-  await page.addInitScript(() => {
-    window.localStorage.setItem("tutorialComplete", "true");
-  });
+/**
+ * Loads the game with a fixed seed and waits for the title screen. Unless
+ * `tutorial` is set, the tutorial counts as played, so the title goes
+ * straight to the lobby.
+ */
+export async function loadGame(
+  page: Page,
+  seed: number,
+  { tutorial = false }: { tutorial?: boolean } = {},
+) {
+  if (!tutorial) {
+    await page.addInitScript(() => {
+      window.localStorage.setItem("tutorialComplete", "true");
+    });
+  }
   await page.goto(`/?seed=${seed}`);
   await page.waitForFunction(() => window.DEBUG?.game, null, {
     timeout: 60000,

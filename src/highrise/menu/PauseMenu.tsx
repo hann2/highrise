@@ -30,7 +30,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
   pausable = false;
   visible = false;
 
-  constructor(private place: "run" | "lobby" = "run") {
+  constructor(private place: "run" | "tutorial" | "lobby" = "run") {
     super(() => this.renderContent());
   }
 
@@ -52,6 +52,11 @@ export default class PauseMenu extends ReactEntity implements Entity {
         <MenuButtons corner="top-left">
           {this.place === "run" && (
             <MenuButton onClick={() => this.quitRun()}>Quit Run</MenuButton>
+          )}
+          {this.place === "tutorial" && (
+            <MenuButton onClick={() => this.skipTutorial()}>
+              Skip Tutorial
+            </MenuButton>
           )}
           <MenuButton onClick={() => this.openEncyclopedia()}>
             Encyclopedia
@@ -75,6 +80,13 @@ export default class PauseMenu extends ReactEntity implements Entity {
   quitRun() {
     this.game.unpause();
     this.game.dispatch("gameOver", { victory: false });
+    this.destroy();
+  }
+
+  /** Finishes the tutorial as if its exit had been reached, which goes to the lobby */
+  skipTutorial() {
+    this.game.unpause();
+    this.game.dispatch("levelComplete", undefined);
     this.destroy();
   }
 

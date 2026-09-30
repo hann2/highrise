@@ -105,7 +105,7 @@ export async function main() {
 
   // ?play (development only) skips the title and lobby and starts a run.
   // ?play=Chad picks the character (else whoever was played last), and
-  // ?floor=5 starts on that floor (0 is the tutorial; else floor 1)
+  // ?floor=5 starts on that floor (else floor 1); ?floor=0 plays the tutorial
   if (process.env.NODE_ENV === "development" && params.has("play")) {
     const name = params.get("play")?.toLowerCase();
     const character =
@@ -114,11 +114,15 @@ export async function main() {
     const plan = generateRunPlan();
     const floor = parseInt(params.get("floor") ?? "1", 10);
     const startFloor = clamp(isNaN(floor) ? 1 : floor, 0, plan.length);
-    game.dispatch("newGame", { character, plan, startFloor });
+    if (startFloor === 0) {
+      game.dispatch("startTutorial", undefined);
+    } else {
+      game.dispatch("newGame", { character, plan, startFloor });
+    }
     return;
   }
 
-  game.dispatch("goToLobby", { showTitle: true });
+  game.dispatch("goToLobby", { from: "boot" });
 
   game.renderer.requestFullscreen();
 }

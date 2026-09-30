@@ -17,7 +17,8 @@ const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
 /**
  * The title, shown on black when the game boots, before there's any world.
  * Starting fades it away, leaving the black, and then calls `onStart`, which
- * builds the lobby with the player riding up to it in the elevator.
+ * builds the lobby with the player riding up to it in the elevator (or, the
+ * first time, starts the tutorial, which ends with that ride).
  */
 export default class TitleScreen extends ReactEntity implements Entity {
   persistenceLevel = Persistence.Game;
