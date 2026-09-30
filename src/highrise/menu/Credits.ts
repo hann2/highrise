@@ -1,5 +1,6 @@
 // Credits to all the people involved in the game and the creators of assets we used
-// If you use an asset from somewhere, make sure the author is credited here
+// If you use an asset from somewhere, make sure the author is credited here,
+// and for images, note which file came from where in assets/IMAGE_SOURCES.md
 export const CREDITS_TEXT = `
 #DESIGN
 Philip Hann
