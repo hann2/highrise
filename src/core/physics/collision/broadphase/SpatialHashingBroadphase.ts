@@ -2,7 +2,8 @@ import { mod } from "../../../util/MathUtil";
 import type { Body } from "../../body/Body";
 import { hasOnlyParticleShapes } from "../../body/body-helpers";
 import { World } from "../../world/World";
-import { RayLike, AABB } from "../AABB";
+import { CompatibleVector } from "../../../Vector";
+import { AABB } from "../AABB";
 import { bodiesCanCollide } from "../CollisionHelpers";
 import { Broadphase } from "./Broadphase";
 
@@ -392,8 +393,28 @@ export class SpatialHashingBroadphase extends Broadphase {
     return result;
   }
 
-  /** Query all bodies whose cells intersect the ray using DDA grid traversal. */
-  rayQuery(ray: RayLike, includeMoving = true): Iterable<Body> {
+  /**
+   * The bodies in the cells a ray from `from` to `to` passes through, found by
+   * walking the grid along the ray (DDA, as in Amanatides & Woo), so a long
+   * diagonal ray only looks at the cells it crosses rather than every cell of
+   * its bounding box. A body is in every cell its AABB overlaps, so anything
+   * the ray could hit is among them; they still need testing against the ray.
+   * @param includeMoving Whether to include dynamic, kinematic and particle
+   *   bodies, or only static ones
+   */
+  rayQuery(
+    world: World,
+    from: CompatibleVector,
+    to: CompatibleVector,
+    includeMoving: boolean = true,
+  ): Iterable<Body> {
+    const x1 = from[0] / this.cellSize;
+    const y1 = from[1] / this.cellSize;
+    const x2 = to[0] / this.cellSize;
+    const y2 = to[1] / this.cellSize;
+    if (![x1, y1, x2, y2].every(Number.isFinite)) {
+      return super.rayQuery(world, from, to, includeMoving);
+    }
     if (includeMoving) {
       this.updateMovingHash();
     }
@@ -406,41 +427,6 @@ export class SpatialHashingBroadphase extends Broadphase {
         result.push(body);
       }
     };
-
-    const x1 = ray.from[0] / this.cellSize;
-    const y1 = ray.from[1] / this.cellSize;
-    const x2 = ray.to[0] / this.cellSize;
-    const y2 = ray.to[1] / this.cellSize;
-
-    let cellX = Math.floor(x1);
-    let cellY = Math.floor(y1);
-    const endCellX = Math.floor(x2);
-    const endCellY = Math.floor(y2);
-
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-
-    const stepX = dx > 0 ? 1 : dx < 0 ? -1 : 0;
-    const stepY = dy > 0 ? 1 : dy < 0 ? -1 : 0;
-
-    // How far along the ray (in t) we move when crossing one cell
-    const tDeltaX = stepX !== 0 ? Math.abs(1 / dx) : Infinity;
-    const tDeltaY = stepY !== 0 ? Math.abs(1 / dy) : Infinity;
-
-    // t value at which we cross the first cell boundary
-    let tMaxX =
-      stepX > 0
-        ? (Math.ceil(x1) - x1) * tDeltaX
-        : stepX < 0
-          ? (x1 - Math.floor(x1)) * tDeltaX
-          : Infinity;
-    let tMaxY =
-      stepY > 0
-        ? (Math.ceil(y1) - y1) * tDeltaY
-        : stepY < 0
-          ? (y1 - Math.floor(y1)) * tDeltaY
-          : Infinity;
-
     const addCell = (cx: number, cy: number) => {
       const cell = this.xyToCell(cx, cy);
       for (const body of this.partitions[cell]) {
@@ -453,17 +439,43 @@ export class SpatialHashingBroadphase extends Broadphase {
       }
     };
 
-    // Check starting cell
-    addCell(cellX, cellY);
+    let cellX = Math.floor(x1);
+    let cellY = Math.floor(y1);
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const stepX = Math.sign(dx);
+    const stepY = Math.sign(dy);
+    // How far along the ray (0 to 1) it takes to cross a whole cell
+    const tDeltaX = stepX !== 0 ? Math.abs(1 / dx) : Infinity;
+    const tDeltaY = stepY !== 0 ? Math.abs(1 / dy) : Infinity;
+    // How far along the ray the next cell boundary is crossed
+    let tMaxX =
+      stepX > 0
+        ? (Math.floor(x1) + 1 - x1) * tDeltaX
+        : stepX < 0
+          ? (x1 - Math.floor(x1)) * tDeltaX
+          : Infinity;
+    let tMaxY =
+      stepY > 0
+        ? (Math.floor(y1) + 1 - y1) * tDeltaY
+        : stepY < 0
+          ? (y1 - Math.floor(y1)) * tDeltaY
+          : Infinity;
 
-    // Traverse until we reach the end cell
-    while (cellX !== endCellX || cellY !== endCellY) {
-      if (tMaxX < tMaxY) {
+    // The walk takes exactly this many steps in each direction, so it always
+    // ends in the end cell, however the rounding goes along the way
+    let stepsX = Math.abs(Math.floor(x2) - cellX);
+    let stepsY = Math.abs(Math.floor(y2) - cellY);
+    addCell(cellX, cellY);
+    while (stepsX > 0 || stepsY > 0) {
+      if (stepsX > 0 && (stepsY === 0 || tMaxX < tMaxY)) {
         tMaxX += tDeltaX;
         cellX += stepX;
+        stepsX -= 1;
       } else {
         tMaxY += tDeltaY;
         cellY += stepY;
+        stepsY -= 1;
       }
       addCell(cellX, cellY);
     }

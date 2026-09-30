@@ -1,7 +1,6 @@
 import { CompatibleVector, V, V2d } from "../../../Vector";
 import type { Body } from "../../body/Body";
 import type { World } from "../../world/World";
-import { AABB } from "../AABB";
 import { RaycastHit, RaycastOptions } from "./RaycastHit";
 
 /** Internal ray data for intersection calculations. */
@@ -20,20 +19,6 @@ function createRay(from: CompatibleVector, to: CompatibleVector): RayData {
   const length = direction.magnitude;
   direction.inormalize();
   return { from: fromV, to: toV, direction, length };
-}
-
-/** Get AABB containing the ray. */
-function getRayAABB(ray: RayData): AABB {
-  const aabb = new AABB();
-  aabb.lowerBound.set(
-    Math.min(ray.from[0], ray.to[0]),
-    Math.min(ray.from[1], ray.to[1]),
-  );
-  aabb.upperBound.set(
-    Math.max(ray.from[0], ray.to[0]),
-    Math.max(ray.from[1], ray.to[1]),
-  );
-  return aabb;
 }
 
 /** Check if ray potentially intersects a body's AABB. */
@@ -58,10 +43,9 @@ export function raycast(
   options?: RaycastOptions,
 ): RaycastHit | null {
   const ray = createRay(from, to);
-  const aabb = getRayAABB(ray);
 
-  // Get candidate bodies from broadphase
-  const candidates = world.broadphase.aabbQuery(world, aabb, true);
+  // Candidates from the broadphase: the bodies along the ray
+  const candidates = world.broadphase.rayQuery(world, ray.from, ray.to);
 
   let closestHit: RaycastHit | null = null;
   let closestFraction = Infinity;
@@ -148,10 +132,9 @@ export function raycastAll(
   options?: RaycastOptions,
 ): RaycastHit[] {
   const ray = createRay(from, to);
-  const aabb = getRayAABB(ray);
 
-  // Get candidate bodies from broadphase
-  const candidates = world.broadphase.aabbQuery(world, aabb, true);
+  // Candidates from the broadphase: the bodies along the ray
+  const candidates = world.broadphase.rayQuery(world, ray.from, ray.to);
 
   const hits: RaycastHit[] = [];
 

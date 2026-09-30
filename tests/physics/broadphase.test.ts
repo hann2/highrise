@@ -11,6 +11,7 @@ import {
   createRigid2D,
 } from "../../src/core/physics/body/bodyFactories";
 import { AABB } from "../../src/core/physics/collision/AABB";
+import { SAPBroadphase } from "../../src/core/physics/collision/broadphase/SAPBroadphase";
 import { SpatialHashingBroadphase } from "../../src/core/physics/collision/broadphase/SpatialHashingBroadphase";
 import { bodiesCanCollide } from "../../src/core/physics/collision/CollisionHelpers";
 import { Box } from "../../src/core/physics/shapes/Box";
@@ -225,6 +226,158 @@ test("huge bodies are found everywhere they are", () => {
   }
   world.bodies.remove(bigBox);
   assert.ok(!query(world, 0, 0).includes(bigBox));
+});
+
+/**
+ * The same scene in two worlds: one with the spatial hash (small cells on a
+ * grid that wraps), and one with SAP, whose ray queries are just its bounding
+ * box, so the hash's walk along the ray can be checked against it
+ */
+function twinWorlds() {
+  const worlds = [
+    makeWorld().world,
+    new World({ broadphase: new SAPBroadphase() }),
+  ];
+  const rand = random(3);
+  const walls: [number, number, number, number][] = [];
+  for (let i = 0; i < 25; i++) {
+    walls.push([rand() * 20, rand() * 20, 0.2 + rand() * 3, 0.2 + rand() * 3]);
+  }
+  const balls: [number, number, number][] = [];
+  for (let i = 0; i < 40; i++) {
+    balls.push([rand() * 20, rand() * 20, 0.1 + rand() * 0.6]);
+  }
+  for (const world of worlds) {
+    for (const [x, y, w, h] of walls) {
+      box(world, "static", [x, y], w, h);
+    }
+    // A huge one, which isn't in the grid
+    box(world, "static", [10, -30], 200, 2);
+    for (const [x, y, r] of balls) {
+      circle(world, [x, y], [0, 0], r);
+    }
+  }
+  return worlds;
+}
+
+/** Rays that are hard to walk a grid along */
+function awkwardRays(): [[number, number], [number, number]][] {
+  const rand = random(11);
+  const rays: [[number, number], [number, number]][] = [
+    // Along grid lines, both ways
+    [
+      [0, 5],
+      [20, 5],
+    ],
+    [
+      [20, 5],
+      [0, 5],
+    ],
+    [
+      [5, 0],
+      [5, 20],
+    ],
+    [
+      [5, 20],
+      [5, 0],
+    ],
+    // Through grid corners
+    [
+      [0, 0],
+      [20, 20],
+    ],
+    [
+      [20, 20],
+      [0, 0],
+    ],
+    [
+      [0, 20],
+      [20, 0],
+    ],
+    // Starting and ending exactly on grid lines
+    [
+      [3, 3.5],
+      [17, 3.5],
+    ],
+    [
+      [2.5, 3],
+      [2.5, 19],
+    ],
+    // Tiny, and zero length
+    [
+      [4.2, 4.2],
+      [4.25, 4.21],
+    ],
+    [
+      [6.5, 6.5],
+      [6.5, 6.5],
+    ],
+    // Longer than the grid, so it wraps around more than once
+    [
+      [-15, 2.3],
+      [35, 17.9],
+    ],
+    [
+      [35, -10],
+      [-15, 30],
+    ],
+    // Down to the huge body
+    [
+      [10.5, 10.5],
+      [10.5, -40],
+    ],
+  ];
+  for (let i = 0; i < 400; i++) {
+    const from: [number, number] = [rand() * 24 - 2, rand() * 24 - 2];
+    // Some rays start and end on whole numbers, which are cell boundaries
+    const to: [number, number] =
+      i % 4 === 0
+        ? [Math.round(rand() * 20), Math.round(rand() * 20)]
+        : [rand() * 24 - 2, rand() * 24 - 2];
+    rays.push([from, to]);
+  }
+  return rays;
+}
+
+test("raycasts walking the grid find what checking the ray's bounding box does", () => {
+  const [hashed, swept] = twinWorlds();
+  // Ids differ between the worlds, but the bodies were added in the same order
+  const index = (body: Body) => [...body.world!.bodies.all].indexOf(body);
+  const describe = (hit: ReturnType<World["raycast"]>) =>
+    hit && { body: index(hit.body), fraction: hit.fraction.toFixed(9) };
+  const describeAll = (hits: ReturnType<World["raycastAll"]>) =>
+    hits.map(describe);
+  let hits = 0;
+  for (const [from, to] of awkwardRays()) {
+    const expected = swept.raycast(from, to);
+    hits += expected ? 1 : 0;
+    const label = `${from} to ${to}`;
+    assert.deepEqual(
+      describe(hashed.raycast(from, to)),
+      describe(expected),
+      label,
+    );
+    assert.deepEqual(
+      describeAll(hashed.raycastAll(from, to)),
+      describeAll(swept.raycastAll(from, to)),
+      label,
+    );
+  }
+  // The rays actually hit things
+  assert.ok(hits > 200, `${hits} hits`);
+});
+
+test("a ray query takes a bounded number of steps whatever the ray", () => {
+  const { world, broadphase } = makeWorld();
+  circle(world, [0.5, 0.5]);
+  // Rays whose ends sit on cell boundaries up to rounding error
+  for (let i = 0; i < 2000; i++) {
+    const a = i * 0.1;
+    const found = [
+      ...broadphase.rayQuery(world, [a, 0.1 * i], [0.3 * i, a + 1e-15]),
+    ];
+    assert.ok(found.length <= world.bodies.all.size);
+  }
 });
 
 function run(world: World, seconds: number) {
