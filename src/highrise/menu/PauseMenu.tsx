@@ -13,10 +13,12 @@ import "./menu.css";
 import {
   AutoPauseButton,
   FeedbackButton,
+  FullscreenButton,
   GraphicsButton,
   MenuButton,
   MenuButtons,
   MuteButton,
+  QuitButton,
 } from "./MenuButtons";
 import { isFloorDirectoryOpen } from "./FloorDirectory";
 import { isStoreOpen } from "./StoreScreen";
@@ -67,10 +69,12 @@ export default class PauseMenu extends ReactEntity implements Entity {
           <FeedbackButton />
           <MuteButton game={game} />
           <GraphicsButton game={game} />
+          <FullscreenButton />
           <AutoPauseButton
             enabled={this.autoPauser.enabled}
             onClick={() => this.toggleAutoPause()}
           />
+          <QuitButton label="Quit to Desktop" />
         </MenuButtons>
       </div>
     );

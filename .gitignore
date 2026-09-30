@@ -1,8 +1,6 @@
 node_modules/
 .cache/
-.parcel-cache/
 dist/
-.parcel-dev/
 .vercel
 *.DS_Store
 yarn.lock
@@ -14,3 +12,7 @@ playwright-report/
 
 # Local secrets (ElevenLabs API key, ...)
 .env
+
+# Electron Forge: the build and the packaged app
+.vite/
+out/

@@ -30,9 +30,9 @@ import {
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
 import FireEmbers from "./FireEmbers";
-import frag_flames from "./flames.frag";
+import frag_flames from "./flames.frag?raw";
 
-import vert_flames from "./flames.vert";
+import vert_flames from "./flames.vert?raw";
 
 /**
  * Draws all the fire: every burning cell of the grid and every burning thing

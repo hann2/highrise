@@ -1,7 +1,7 @@
 /**
  * The character editor's server: a small JSON API over `CharacterStore` and
- * ElevenLabs. `npm start` runs it next to Parcel, which forwards `/api` to it
- * (`.proxyrc.json`), so the editor page at
+ * ElevenLabs. `npm start` runs it next to the dev server, which forwards `/api`
+ * to it (`vite.config.mts`), so the editor page at
  * http://localhost:1234/tools/character-editor/ talks to it on the same origin.
  *
  *   npm run character-editor   # just this server, on CHARACTER_EDITOR_PORT (1235)

@@ -7,8 +7,12 @@ const TEST_PORT = Number(process.env.TEST_PORT ?? 3456);
 export default defineConfig({
   testDir: "./tests",
   timeout: 120000,
-  // Benchmarks are run separately with `npm run benchmark`
-  testIgnore: process.env.BENCHMARK ? [] : ["**/*benchmark.spec.ts"],
+  // Benchmarks are run separately with `npm run benchmark`, and the desktop
+  // app with `npm run test:electron`
+  testIgnore: [
+    "**/electron/**",
+    ...(process.env.BENCHMARK ? [] : ["**/*benchmark.spec.ts"]),
+  ],
   testMatch: process.env.BENCHMARK ? "**/*benchmark.spec.ts" : "**/*.spec.ts",
   workers: 1,
   use: {
@@ -34,9 +38,8 @@ export default defineConfig({
     command: `npm run dev-server -- --port ${TEST_PORT}`,
     url: `http://localhost:${TEST_PORT}`,
     // TEST_REUSE_SERVER=1 runs against a dev server you started yourself on
-    // TEST_PORT, which skips the build and its startup timeout
+    // TEST_PORT
     reuseExistingServer: process.env.TEST_REUSE_SERVER === "1",
-    // The first build has to process ~1400 assets
-    timeout: 300000,
+    timeout: 60000,
   },
 });
