@@ -730,7 +730,12 @@ export default class Human extends BaseEntity implements Entity, Flammable {
               this.stats.pushKnockback;
             enemy.knockback(relPosition.inormalize().imul(amount));
             enemy.stun(PUSH_STUN * this.stats.pushStun * rNormal(1, 0.2));
-            enemy.takeHit(this.getPushDamage() * this.stats.damage, this);
+            enemy.takeHit(
+              this.getPushDamage() * this.stats.damage,
+              this,
+              "push",
+              this.getPosition(),
+            );
             this.game.addEntity(
               new PositionalSound(pushSoundRing.getNext(), this.getPosition(), {
                 gain: Math.min(1, amount / PUSH_KNOCKBACK),

@@ -131,7 +131,12 @@ export default class Detonation extends BaseEntity implements Entity {
         enemy.stun(stunDuration);
       }
       if (damage > 0 && falloff > 0) {
-        enemy.takeHit(damage * falloff, this.attacker);
+        enemy.takeHit(
+          damage * falloff,
+          this.attacker,
+          "explosion",
+          this.position,
+        );
       }
     }
   }

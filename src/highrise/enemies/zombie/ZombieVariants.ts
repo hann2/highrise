@@ -1,7 +1,9 @@
+import { ImageName } from "../../../../resources/resources";
 import {
   CRAWLER_TEXTURES,
   KEVIN_ZOMBIE_SOUNDS,
   RACHEL_ZOMBIE_SOUNDS,
+  ZOMBIE_LEGS,
   ZOMBIE_TEXTURES,
 } from "../../constants/constants";
 import { BodyTextures } from "../../creature-stuff/BodySprite";
@@ -10,7 +12,10 @@ import { EnemySounds } from "../base/EnemyVoice";
 export interface ZombieVariant {
   textures: BodyTextures;
   sounds: EnemySounds;
-  crawlerTextures?: BodyTextures;
+  /** Lying down, from the waist up: as a crawler, and as a corpse */
+  crawlerTextures: BodyTextures;
+  /** Its legs lying down, for its corpse */
+  legs: ImageName;
 }
 
 export const ZOMBIE_VARIANTS: ZombieVariant[] = [];
@@ -19,6 +24,7 @@ for (let i = 0; i < ZOMBIE_TEXTURES.length; i++) {
     textures: ZOMBIE_TEXTURES[i],
     sounds: RACHEL_ZOMBIE_SOUNDS,
     crawlerTextures: CRAWLER_TEXTURES[i],
+    legs: ZOMBIE_LEGS[i],
   });
 }
 
@@ -28,5 +34,6 @@ for (let i = 0; i < ZOMBIE_TEXTURES.length; i++) {
     textures: ZOMBIE_TEXTURES[i],
     sounds: KEVIN_ZOMBIE_SOUNDS,
     crawlerTextures: CRAWLER_TEXTURES[i],
+    legs: ZOMBIE_LEGS[i],
   });
 }

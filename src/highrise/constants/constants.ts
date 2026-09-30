@@ -1,7 +1,7 @@
 // This file exists to avoid circular dependencies causing imports to return as undefined
 // SO DON'T PUT ANY IMPORTS IN THIS FILE EXCEPT TYPES
 
-import type { SoundName } from "../../../resources/resources";
+import type { ImageName, SoundName } from "../../../resources/resources";
 import type { BodyTextures } from "../creature-stuff/BodySprite";
 import type { EnemySounds } from "../enemies/base/EnemyVoice";
 
@@ -74,6 +74,13 @@ export const CRAWLER_TEXTURES: BodyTextures[] = [
     leftHand: "crawlerLeftHand3",
     rightHand: "crawlerRightHand3",
   },
+];
+
+/** Legs lying down, for corpses (one per variant, like `CRAWLER_TEXTURES`) */
+export const ZOMBIE_LEGS: ImageName[] = [
+  "zombieLegs1",
+  "zombieLegs2",
+  "zombieLegs3",
 ];
 
 export const RACHEL_ZOMBIE_SOUNDS: EnemySounds = {

@@ -275,15 +275,18 @@ import images271 from "./images/zombies/zombie-left-arm-3.png?url";
 import images272 from "./images/zombies/zombie-left-hand-1.png?url";
 import images273 from "./images/zombies/zombie-left-hand-2.png?url";
 import images274 from "./images/zombies/zombie-left-hand-3.png?url";
-import images275 from "./images/zombies/zombie-right-arm-1.png?url";
-import images276 from "./images/zombies/zombie-right-arm-2.png?url";
-import images277 from "./images/zombies/zombie-right-arm-3.png?url";
-import images278 from "./images/zombies/zombie-right-hand-1.png?url";
-import images279 from "./images/zombies/zombie-right-hand-2.png?url";
-import images280 from "./images/zombies/zombie-right-hand-3.png?url";
-import images281 from "./images/zombies/zombie-torso-1.png?url";
-import images282 from "./images/zombies/zombie-torso-2.png?url";
-import images283 from "./images/zombies/zombie-torso-3.png?url";
+import images275 from "./images/zombies/zombie-legs-1.png?url";
+import images276 from "./images/zombies/zombie-legs-2.png?url";
+import images277 from "./images/zombies/zombie-legs-3.png?url";
+import images278 from "./images/zombies/zombie-right-arm-1.png?url";
+import images279 from "./images/zombies/zombie-right-arm-2.png?url";
+import images280 from "./images/zombies/zombie-right-arm-3.png?url";
+import images281 from "./images/zombies/zombie-right-hand-1.png?url";
+import images282 from "./images/zombies/zombie-right-hand-2.png?url";
+import images283 from "./images/zombies/zombie-right-hand-3.png?url";
+import images284 from "./images/zombies/zombie-torso-1.png?url";
+import images285 from "./images/zombies/zombie-torso-2.png?url";
+import images286 from "./images/zombies/zombie-torso-3.png?url";
 import sounds0 from "./audio/characters/andy/andy-death-1.flac?url";
 import sounds1 from "./audio/characters/andy/andy-death-2.flac?url";
 import sounds2 from "./audio/characters/andy/andy-death-3.flac?url";
@@ -1108,15 +1111,18 @@ const images = {
   "zombieLeftHand1": images272,
   "zombieLeftHand2": images273,
   "zombieLeftHand3": images274,
-  "zombieRightArm1": images275,
-  "zombieRightArm2": images276,
-  "zombieRightArm3": images277,
-  "zombieRightHand1": images278,
-  "zombieRightHand2": images279,
-  "zombieRightHand3": images280,
-  "zombieTorso1": images281,
-  "zombieTorso2": images282,
-  "zombieTorso3": images283,
+  "zombieLegs1": images275,
+  "zombieLegs2": images276,
+  "zombieLegs3": images277,
+  "zombieRightArm1": images278,
+  "zombieRightArm2": images279,
+  "zombieRightArm3": images280,
+  "zombieRightHand1": images281,
+  "zombieRightHand2": images282,
+  "zombieRightHand3": images283,
+  "zombieTorso1": images284,
+  "zombieTorso2": images285,
+  "zombieTorso3": images286,
 };
 export type ImageName = keyof typeof images;
 const sounds = {

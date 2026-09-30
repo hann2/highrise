@@ -14,6 +14,8 @@ import { getHumansInRange, makeSimpleEnemyBody } from "../base/enemyUtils";
 import { inflictDamageFrom } from "../../run/damageSources";
 import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
+import { chooseDeathStyle, comeApart } from "../remains/comeApart";
+import type { DeathBlow } from "../base/DeathBlow";
 import { SPRINTER_VARIANTS, ZombieVariant } from "../zombie/ZombieVariants";
 import SprinterSprite from "./SprinterSprite";
 
@@ -21,6 +23,8 @@ const SPEED = 8;
 const HEALTH = 60;
 
 export const RUNNER_RADIUS = ZOMBIE_RADIUS * 0.8;
+/** A bit darker than a zombie */
+export const SPRINTER_TINT = 0xdddddd;
 
 const ATTACK_RANGE = RUNNER_RADIUS + HUMAN_RADIUS + 0.1;
 const ATTACK_ANGLE_RANGE = degToRad(90);
@@ -29,6 +33,7 @@ const hitSoundRing = new ShuffleRing(ZOMBIE_ATTACK_HIT_SOUNDS);
 
 export default class Sprinter extends BaseEnemy {
   tags = ["zombie"];
+  bodySprite: SprinterSprite;
   hp: number = rNormal(HEALTH, HEALTH / 5);
 
   constructor(
@@ -40,7 +45,25 @@ export default class Sprinter extends BaseEnemy {
     this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
 
     this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, ZOMBIE_RADIUS));
-    this.addChild(new SprinterSprite(this));
+    this.bodySprite = this.addChild(new SprinterSprite(this));
+  }
+
+  handleDeath(blow: DeathBlow) {
+    this.voice.speak("death", true);
+    comeApart(
+      this.game,
+      blow,
+      chooseDeathStyle(blow, this.bodySprite.getPartPoses(), true),
+      {
+        sprite: this.bodySprite,
+        lying: this.zombieVariant.crawlerTextures,
+        legs: this.zombieVariant.legs,
+        radius: RUNNER_RADIUS * 0.9,
+        velocity: this.body.velocity,
+        tint: SPRINTER_TINT,
+        burning: this.burning,
+      },
+    );
   }
 
   makeVoice() {

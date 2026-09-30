@@ -34,11 +34,14 @@ import VisionController from "../../lighting-and-vision/VisionController";
 import Bullet from "../../projectiles/Bullet";
 import { PhasedAction } from "../../utils/PhasedAction";
 import SwingingWeapon from "../../weapons/melee/SwingingWeapon";
+import { BlowKind, DeathBlow } from "./DeathBlow";
 import { makeSimpleEnemyBody } from "./enemyUtils";
 import EnemyVoice from "./EnemyVoice";
 
 /** Seconds for an enemy to fade in or out at the edge of the player's vision */
 const VISIBILITY_FADE_TIME = 0.15;
+/** Seconds over which damage taken counts toward the blow that kills */
+const RECENT_DAMAGE_TIME = 0.1;
 
 export class BaseEnemy extends Creature implements Hittable, Flammable {
   hp: number = 100;
@@ -54,6 +57,8 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
   walkSpring: WalkSpring;
   body: Body & WithOwner;
   stunnedTimer: number = 0;
+  /** Damage taken lately, fading away over `RECENT_DAMAGE_TIME` (see `DeathBlow.damage`) */
+  recentDamage: number = 0;
   voice!: EnemyVoice;
   attackAction?: PhasedAction<AttackPhases, any>;
 
@@ -143,6 +148,7 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
     if (this.stunnedTimer > 0) {
       this.stunnedTimer -= dt;
     }
+    this.recentDamage *= Math.exp(-dt / RECENT_DAMAGE_TIME);
   }
 
   /** How visible the enemy currently is; fades so leaving vision doesn't pop */
@@ -172,6 +178,7 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
       return true;
     }
     this.hp -= bullet.damage;
+    this.recentDamage += bullet.damage;
 
     const knockback = bullet.velocity.mul(bullet.stats.mass * 30);
     const relativePos = position.sub(this.body.position);
@@ -208,7 +215,12 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
       gun.ammo = Math.min(gun.ammo + 1, gun.getCapacity(bullet.shooter));
     }
     if (this.hp <= 0) {
-      this.die(bullet.shooter);
+      this.die(bullet.shooter, {
+        kind: "bullet",
+        damage: this.recentDamage,
+        position,
+        direction: bullet.velocity.normalize(),
+      });
     } else {
       this.voice.speak("hit");
     }
@@ -239,6 +251,7 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
       const holder = swingingWeapon.holder;
       // The phase's own damage: windups and winddowns hit softer than the swing
       this.hp -= damageAmount * holder.stats.damage;
+      this.recentDamage += damageAmount * holder.stats.damage;
       if (this.diesInOneHitFrom(holder)) {
         this.hp = 0;
       }
@@ -261,7 +274,14 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
     }
 
     if (this.hp <= 0) {
-      this.die(swingingWeapon.holder);
+      this.die(swingingWeapon.holder, {
+        kind: "melee",
+        damage: this.recentDamage,
+        position,
+        direction: position
+          .sub(swingingWeapon.holder.getPosition())
+          .inormalize(),
+      });
     } else {
       this.voice.speak("hit");
     }
@@ -269,21 +289,35 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
 
   /**
    * Damage from something that isn't a bullet or a swing, like a push or an
-   * explosion. Knockback and stun are up to the caller.
+   * explosion. Knockback and stun are up to the caller. `from` is where the
+   * blow came from, which is the way the pieces go if it kills.
    */
-  takeHit(damage: number, attacker?: Human) {
+  takeHit(
+    damage: number,
+    attacker?: Human,
+    kind: BlowKind = "other",
+    from?: V2d,
+  ) {
     if (this.isDestroyed) {
       return;
     }
     if (damage > 0) {
       this.hp -= damage;
+      this.recentDamage += damage;
       if (this.diesInOneHitFrom(attacker)) {
         this.hp = 0;
       }
       this.makeBlood(this.getPosition(), damage);
     }
     if (this.hp <= 0) {
-      this.die(attacker);
+      const position = this.getPosition();
+      const away = from && position.sub(from);
+      this.die(attacker, {
+        kind,
+        damage: this.recentDamage,
+        position: from?.clone(),
+        direction: away && away.magnitude > 0 ? away.inormalize() : undefined,
+      });
     } else {
       this.voice.speak("hit");
     }
@@ -299,7 +333,7 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
     }
     this.hp -= amount;
     if (this.hp <= 0) {
-      this.die(source);
+      this.die(source, { kind: "burn", damage: amount });
     }
   }
 
@@ -324,16 +358,16 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
   }
 
   /** Dying is idempotent: a body that was destroyed this step is still in the physics world */
-  die(killer?: Human) {
+  die(killer?: Human, blow: DeathBlow = { kind: "other", damage: 0 }) {
     if (this.isDestroyed) {
       return;
     }
     this.game.dispatch("zombieDied", { zombie: this, killer });
-    this.handleDeath();
+    this.handleDeath(blow);
     this.destroy();
   }
 
-  handleDeath() {
+  handleDeath(_blow: DeathBlow) {
     this.game.addEntity(new FleshImpact(this.getPosition(), 6));
     this.voice.speak("death", true);
   }

@@ -5,6 +5,7 @@ import { SPITTER_SOUNDS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import GooImpact from "../../effects/GooImpact";
 import Phlegm from "../../projectiles/Phlegm";
+import type { DeathBlow } from "../base/DeathBlow";
 import { BaseEnemy } from "../base/Enemy";
 import EnemyVoice from "../base/EnemyVoice";
 import SpitterController from "./SpitterController";
@@ -76,8 +77,8 @@ export default class Spitter extends BaseEnemy {
     this.game.addEntity(new GooImpact(position, damage / 10, normal));
   }
 
-  handleDeath() {
-    super.handleDeath();
+  handleDeath(blow: DeathBlow) {
+    super.handleDeath(blow);
     this.game.addEntity(new GooImpact(this.getPosition(), 5));
     this.voice.speak("death");
   }

@@ -19,6 +19,7 @@ import MusicController from "./controllers/MusicController";
 import VolumeController from "./controllers/VolumeController";
 import ArenaScene from "./arena/ArenaScene";
 import FireTestScene from "./fire/FireTestScene";
+import DeathsTestScene from "./enemies/remains/DeathsTestScene";
 import { isHuman } from "./human/Human";
 import { getStartingCharacter } from "./lobby/Lobby";
 import { generateRunPlan } from "./run/RunPlan";
@@ -92,6 +93,15 @@ export async function main() {
     params.get("scene") === "fire"
   ) {
     game.addEntity(new FireTestScene());
+    return;
+  }
+
+  // ?scene=deaths (development only) is for looking at how zombies die
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "deaths"
+  ) {
+    game.addEntity(new DeathsTestScene());
     return;
   }
 

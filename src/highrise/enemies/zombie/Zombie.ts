@@ -16,6 +16,8 @@ import { inflictDamageFrom } from "../../run/damageSources";
 import EnemyVoice from "../base/EnemyVoice";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import Crawler from "../crawler/Crawler";
+import type { DeathBlow } from "../base/DeathBlow";
+import { BodyRemains, chooseDeathStyle, comeApart } from "../remains/comeApart";
 import ZombieSprite from "./ZombieSprite";
 import { ZombieVariant, ZOMBIE_VARIANTS } from "./ZombieVariants";
 
@@ -34,6 +36,7 @@ const hitSoundRing = new ShuffleRing(ZOMBIE_ATTACK_HIT_SOUNDS);
 
 export default class Zombie extends BaseEnemy {
   tags = ["zombie"];
+  bodySprite: ZombieSprite;
 
   constructor(
     position: V2d,
@@ -44,7 +47,7 @@ export default class Zombie extends BaseEnemy {
     this.walkSpring.speed = rNormal(SPEED, SPEED / 5);
 
     this.addChild(new SimpleEnemyController(this, ATTACK_RANGE, ZOMBIE_RADIUS));
-    this.addChild(new ZombieSprite(this));
+    this.bodySprite = this.addChild(new ZombieSprite(this));
   }
 
   makeVoice() {
@@ -81,10 +84,28 @@ export default class Zombie extends BaseEnemy {
     });
   }
 
-  handleDeath() {
-    super.handleDeath();
+  handleDeath(blow: DeathBlow) {
+    this.voice.speak("death", true);
 
-    if (rBool(CRAWLER_CHANCE)) {
+    const remains: BodyRemains = {
+      sprite: this.bodySprite,
+      lying: this.zombieVariant.crawlerTextures,
+      legs: this.zombieVariant.legs,
+      radius: ZOMBIE_RADIUS * 0.9,
+      velocity: this.body.velocity,
+      burning: this.burning,
+    };
+    const style = chooseDeathStyle(blow, this.bodySprite.getPartPoses(), true);
+    // Unless its head's gone or it's in pieces, it can get back up without
+    // its legs
+    const crawls =
+      style !== "headPopped" &&
+      style !== "headOff" &&
+      style !== "gibbed" &&
+      rBool(CRAWLER_CHANCE);
+    comeApart(this.game, blow, crawls ? "halved" : style, remains, !crawls);
+
+    if (crawls) {
       const crawler = new Crawler(
         this.getPosition(),
         this.body.angle,
