@@ -93,13 +93,13 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   get needsBaking(): boolean {
-    return this.dirty || Boolean(this.shadows?.dirty);
+    return this.dirty || Boolean(this.shadows?.needsUpdate);
   }
 
   bakeIfNeeded() {
     if (this.needsBaking) {
       profiler.measure("Light.bake", () => {
-        this.shadows?.updateIfDirty();
+        this.shadows?.updateIfNeeded();
 
         const transform = new Matrix();
         transform.translate(this.size * 0.5, this.size * 0.5);

@@ -12,6 +12,7 @@ import { V, V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import { AmbientLight } from "./AmbientLight";
 import Light from "./Light";
+import { ShadowCasters } from "./ShadowCasters";
 
 export default class LightingManager extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
@@ -23,6 +24,8 @@ export default class LightingManager extends BaseEntity implements Entity {
   lights: Set<Light> = new Set();
   ambientLights: Set<AmbientLight> = new Set();
   ambientColor = 0;
+  /** The walls, on the GPU, that lights' shadow masks are drawn from */
+  shadowCasters = new ShadowCasters();
 
   private _enabled = true;
   /** When disabled, the world is drawn unlit (for debugging and benchmarks). */
@@ -64,6 +67,11 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.sprite.layerName = Layer.LIGHTING;
     this.sprite.blendMode = "multiply";
     this.sprite.anchor.set(0, 0);
+  }
+
+  @on("destroy")
+  onDestroy() {
+    this.shadowCasters.destroy();
   }
 
   addAmbientLight(light: AmbientLight) {
@@ -130,6 +138,9 @@ export default class LightingManager extends BaseEntity implements Entity {
 
     const [minX, minY] = camera.toWorld(V(0, 0));
     const [maxX, maxY] = camera.toWorld(camera.getViewportSize());
+
+    // New walls (a new level) mean new shadows for every light
+    this.shadowCasters.update(this.game);
 
     // Make sure all lights are baked, then add them to the render object
     for (const light of this.lights) {

@@ -20,8 +20,6 @@ const URL =
 /** Profiler sections worth showing on their own, wherever they are in the tree */
 const SECTIONS = [
   "Light.bake",
-  "Shadows.geometry",
-  "Shadows.draw",
   "Shadows.renderMask",
   "LightingManager.composite",
   "VisionController",
@@ -131,7 +129,7 @@ function countFireAndLights(page: Page) {
             lightsInView += 1;
             if (light.shadows) {
               shadowedInView += 1;
-              shadowShapes += light.shadows.getShadowGeometry().umbras.length;
+              shadowShapes += light.shadows.countCasterShapes();
             }
           }
         }
