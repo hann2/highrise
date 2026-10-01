@@ -222,14 +222,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     const drawMasks = shadowed.length > 0 && !casters.isEmpty;
     if (drawMasks) {
       measureCpuAndGpu("LightingManager.masks", () => {
-        casters.setLights(shadowed);
-        this.renderer.render({
-          container: casters.mesh,
-          target: page.mask,
-          clear: true,
-          // The default clear color is the renderer's opaque background
-          clearColor: [0, 0, 0, 0],
-        });
+        casters.draw(this.renderer, shadowed, page.mask);
       });
     }
 

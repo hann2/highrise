@@ -1,3 +1,4 @@
+#version 300 es
 // Shadows from the level's walls, drawn once per light (instanced) into
 // that light's square of a page of the shadow mask atlas (see ShadowCasters
 // and LightAtlas). Every wall edge is a quad: its two corners (0 and 1), and
@@ -83,6 +84,15 @@ void main(void) {
     }
   }
   vPosition = position;
+
+#ifdef GL_ANGLE_clip_cull_distance
+  // The edges of the light's square, so the GPU clips what reaches past it
+  // (see ShadowCasters.draw); else the fragment shader throws it away
+  gl_ClipDistance[0] = halfSize + position.x;
+  gl_ClipDistance[1] = halfSize - position.x;
+  gl_ClipDistance[2] = halfSize + position.y;
+  gl_ClipDistance[3] = halfSize - position.y;
+#endif
 
   mat3 mvp = uProjectionMatrix * uWorldTransformMatrix * uTransformMatrix;
   gl_Position = vec4((mvp * vec3(aSlot + position, 1.0)).xy, 0.0, 1.0);

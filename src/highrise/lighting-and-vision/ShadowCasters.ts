@@ -4,6 +4,8 @@ import {
   GlProgram,
   Mesh,
   MeshGeometry,
+  Renderer,
+  RenderTexture,
   Shader,
 } from "pixi.js";
 import Game from "../../core/Game";
@@ -42,16 +44,24 @@ export class ShadowCasters {
     data: new Float32Array(6),
     usage: BufferUsage.VERTEX | BufferUsage.COPY_DST,
   });
+  /** `WEBGL_clip_cull_distance`, once asked for (null where it's missing) */
+  private clipExtension?: { CLIP_DISTANCE0_WEBGL: number } | null;
 
   constructor() {
-    const shader = new Shader({
-      glProgram: GlProgram.from({
-        vertex: vert_shadowMask,
-        fragment: frag_shadowMask,
-        name: "shadowMask",
-      }),
-      resources: {},
+    const glProgram = new GlProgram({
+      vertex: vert_shadowMask,
+      fragment: frag_shadowMask,
+      name: "shadowMask",
     });
+    // Clip planes (see `draw`) need the extension turned on in the shader,
+    // before any code, which Pixi puts its own lines in front of: right
+    // after the version line it adds. Where the extension is missing, this
+    // only warns, and the shader doesn't write the clip distances.
+    (glProgram as { vertex: string }).vertex = glProgram.vertex!.replace(
+      /^#version 300 es\n/,
+      "#version 300 es\n#extension GL_ANGLE_clip_cull_distance : enable\n",
+    );
+    const shader = new Shader({ glProgram, resources: {} });
     this.mesh = new Mesh({ geometry: this.buildGeometry([]), shader });
     this.mesh.blendMode = "add";
   }
@@ -86,8 +96,45 @@ export class ShadowCasters {
     old.destroy();
   }
 
+  /**
+   * Draws the shadow masks of `lights`, which have their slots, into
+   * `target`, a page of the mask atlas.
+   *
+   * Each light's shadows reach well past its square, which a texture of its
+   * own would clip for free (the GPU clips triangles to the render target
+   * before it shades a pixel), but the page doesn't. So with
+   * `WEBGL_clip_cull_distance` the vertex shader gives the GPU four clip
+   * planes per light, the edges of its square, and it clips to those
+   * instead. Without the extension the fragment shader throws those pixels
+   * away itself, which gives the same picture but costs a shader run each.
+   */
+  draw(renderer: Renderer, lights: readonly Light[], target: RenderTexture) {
+    this.setLights(lights);
+    const gl = (renderer as { gl?: WebGL2RenderingContext }).gl;
+    this.clipExtension ??= gl?.getExtension("WEBGL_clip_cull_distance");
+    const clip = this.clipExtension;
+    if (gl && clip) {
+      for (let i = 0; i < 4; i++) {
+        gl.enable(clip.CLIP_DISTANCE0_WEBGL + i);
+      }
+    }
+    renderer.render({
+      container: this.mesh,
+      target,
+      clear: true,
+      // The default clear color is the renderer's opaque background
+      clearColor: [0, 0, 0, 0],
+    });
+    if (gl && clip) {
+      // Off again: they'd apply to every other shader too
+      for (let i = 0; i < 4; i++) {
+        gl.disable(clip.CLIP_DISTANCE0_WEBGL + i);
+      }
+    }
+  }
+
   /** Sets up the mesh to draw the masks of `lights`, which have their slots */
-  setLights(lights: readonly Light[]) {
+  private setLights(lights: readonly Light[]) {
     const needed = lights.length * 6;
     if (this.lightData.length < needed) {
       this.lightData = new Float32Array(

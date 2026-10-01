@@ -1,3 +1,4 @@
+#version 300 es
 // How much of a light one wall edge hides from this point (see
 // shadowMask.vert), added up into the light's shadow mask.
 //
