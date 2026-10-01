@@ -15,7 +15,7 @@ const MEASURE_MS = 4000;
 const PROFILE_MS = 4000;
 
 const URL =
-  "/?scene=arena&seed=1&char=chad&wave=zombie*0&layout=hall&god&dark&fog&fps=120";
+  "/?scene=arena&seed=1&char=chad&wave=zombie*0&layout=offices&god&dark&fog&fps=120";
 
 /** Profiler sections worth showing on their own, wherever they are in the tree */
 const SECTIONS = [
@@ -31,8 +31,9 @@ const SECTIONS = [
 /**
  * How the game scales with fire: more and more molotov-sized pools of fire
  * that never go out (the arena's `fires` option), spread over the arena's
- * hall, dark and with fog of war, as on a floor. The player stands in the
- * middle with no enemies around. For each count it measures the frames with
+ * `offices` (rooms with doorways, as many walls near any spot as on a real
+ * floor, which is what shadows cost by), dark and with fog of war, as on a
+ * floor. The player stands in the middle with no enemies around. For each count it measures the frames with
  * everything on, then with lighting and vision off, which (since benchmarks
  * run without vsync, so frame intervals include GPU time) shows what they
  * cost the GPU as well as the CPU. Run with `npm run benchmark:fire` (or `npm
@@ -103,7 +104,10 @@ function setLightingAndVision(page: Page, enabled: boolean) {
   }, enabled);
 }
 
-/** Burning cells, and lights: all of them, and the ones in view (baked and drawn) */
+/**
+ * Burning cells, and lights: all of them, the ones in view (baked and drawn),
+ * and how many shadow shapes the ones in view have on average
+ */
 function countFireAndLights(page: Page) {
   return page.evaluate(() => {
     const game = window.DEBUG.game!;
@@ -111,6 +115,7 @@ function countFireAndLights(page: Page) {
     let lights = 0;
     let lightsInView = 0;
     let shadowedInView = 0;
+    let shadowShapes = 0;
     for (const entity of game.entities.all) {
       const name = entity.constructor.name;
       if (name === "FireGrid") {
@@ -124,12 +129,17 @@ function countFireAndLights(page: Page) {
           lights += 1;
           if (manager.shouldRenderLight(light, minX, minY, maxX, maxY)) {
             lightsInView += 1;
-            shadowedInView += light.shadows ? 1 : 0;
+            if (light.shadows) {
+              shadowedInView += 1;
+              shadowShapes += light.shadows.getShadowGeometry().umbras.length;
+            }
           }
         }
       }
     }
-    return { burning, lights, lightsInView, shadowedInView };
+    const shadowsPerLight =
+      Math.round((10 * shadowShapes) / Math.max(1, shadowedInView)) / 10;
+    return { burning, lights, lightsInView, shadowedInView, shadowsPerLight };
   });
 }
 
@@ -204,13 +214,14 @@ type Result = ReturnType<typeof summarize>;
 
 function formatTable(results: Result[]): string {
   const header =
-    "fires  burning  lights  in view   fps  interval  cpu/f   unlit: fps  interval  cpu/f   tick/t  rend/f  fire t/r";
+    "fires  burning  lights  in view  shadows/l   fps  interval  cpu/f   unlit: fps  interval  cpu/f   tick/t  rend/f  fire t/r";
   const rows = results.map((r) =>
     [
       String(r.count).padStart(5),
       String(r.burning).padStart(8),
       String(r.lights).padStart(7),
       String(r.lightsInView).padStart(8),
+      r.shadowsPerLight.toFixed(1).padStart(10),
       r.fps.toFixed(0).padStart(5),
       r.frameIntervalMs.mean.toFixed(2).padStart(9),
       r.loopCpuMs.mean.toFixed(2).padStart(6),
@@ -223,7 +234,7 @@ function formatTable(results: Result[]): string {
     ].join(" "),
   );
   return [
-    "Interval = mean ms between frames (GPU included, no vsync), cpu/f = ms of CPU per frame; unlit = lighting and vision off",
+    "Interval = mean ms between frames (GPU included, no vsync), cpu/f = ms of CPU per frame; shadows/l = shadow shapes per light in view; unlit = lighting and vision off",
     header,
     ...rows,
   ].join("\n");
