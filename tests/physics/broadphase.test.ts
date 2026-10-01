@@ -173,15 +173,15 @@ test("queries between steps don't rebuild the moving hash", () => {
     circle(world, [i, i], [1, 0]);
   }
   world.step(DT);
-  const rebuilds = broadphase.debugData.movingRebuilds;
+  const rebuilds = broadphase.debugData.movingUpdates;
   for (let i = 0; i < 50; i++) {
     world.raycast([0, i % 20], [20, 20 - (i % 20)]);
     query(world, i % 20, i % 20);
   }
-  assert.equal(broadphase.debugData.movingRebuilds, rebuilds + 1);
+  assert.equal(broadphase.debugData.movingUpdates, rebuilds + 1);
   world.step(DT);
   assert.equal(
-    broadphase.debugData.movingRebuilds,
+    broadphase.debugData.movingUpdates,
     rebuilds + 1,
     "the step reused it",
   );
@@ -385,3 +385,19 @@ function run(world: World, seconds: number) {
     world.step(DT);
   }
 }
+
+test("bodies that stay in the same cells aren't moved in the hash", () => {
+  const { world, broadphase } = makeWorld();
+  for (let i = 0; i < 20; i++) {
+    circle(world, [i + 0.5, 0.5], [0, 0], 0.2);
+  }
+  const mover = circle(world, [0.5, 5.5], [30, 0], 0.2);
+  world.step(DT);
+  broadphase.getCollisionPairs(world);
+  const before = broadphase.debugData.movingRehashes;
+  run(world, 1);
+  // Only the one moving across cells, once per cell it entered or left
+  const rehashes = broadphase.debugData.movingRehashes - before;
+  assert.ok(rehashes > 0 && rehashes <= 60, `${rehashes} rehashes`);
+  assert.ok(query(world, mover.position[0], mover.position[1]).includes(mover));
+});

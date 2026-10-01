@@ -45,7 +45,7 @@ export class Capsule extends Shape {
       Math.PI * this.radius * this.radius + this.radius * 2 * this.length;
   }
 
-  computeAABB(position: V2d, angle: number): AABB {
+  computeAABB(position: V2d, angle: number, out = new AABB()): AABB {
     const radius = this.radius;
 
     r.set(this.length / 2, 0);
@@ -53,7 +53,6 @@ export class Capsule extends Shape {
       r.irotate(angle);
     }
 
-    const out = new AABB();
     out.upperBound.set(
       Math.max(r[0] + radius, -r[0] + radius),
       Math.max(r[1] + radius, -r[1] + radius),

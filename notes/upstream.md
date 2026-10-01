@@ -75,6 +75,19 @@ Highrise's)
   a real improvement to convergence.
 - Test: "contact equations are reused from step to step".
 
+### AABB updates that allocate nothing, and a moving hash updated incrementally
+(the commit after `da6e5cb`) "Update AABBs without allocating, and only rehash bodies that changed cells"
+
+- `Shape.computeAABB(position, angle, out?)` writes into `out` when it's
+  given (every shape); `updateAABB` uses scratch space and writes the first
+  shape straight into `body.aabb`; `AABB.setFromPoints` no longer allocates
+  a vector per rotated point. 0.34 -> 0.05 us per circle body.
+- The moving hash keeps each body's cell range and only moves bodies whose
+  range changed, rather than rebuilding from scratch after every step; adds
+  and removes go in right away. `debugData.movingRebuilds` is now
+  `movingUpdates`, plus `movingRehashes`.
+- Test: "bodies that stay in the same cells aren't moved in the hash".
+
 ## Core (game-engine)
 
 ### Frame pacing: one tick per display refresh

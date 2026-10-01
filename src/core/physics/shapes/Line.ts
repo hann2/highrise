@@ -34,11 +34,10 @@ export class Line extends Shape {
     this.area = 0;
   }
 
-  computeAABB(position: V2d, angle: number): AABB {
+  computeAABB(position: V2d, angle: number, out = new AABB()): AABB {
     const l2 = this.length / 2;
     points[0].set(-l2, 0);
     points[1].set(l2, 0);
-    const out = new AABB();
     out.setFromPoints(points, position, angle, 0);
     return out;
   }

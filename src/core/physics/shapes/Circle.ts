@@ -34,9 +34,8 @@ export class Circle extends Shape {
     this.area = Math.PI * this.radius * this.radius;
   }
 
-  computeAABB(position: V2d, _angle: number): AABB {
+  computeAABB(position: V2d, _angle: number, out = new AABB()): AABB {
     const r = this.radius;
-    const out = new AABB();
     out.upperBound.set(r, r);
     out.lowerBound.set(-r, -r);
     if (position) {

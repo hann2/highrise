@@ -216,8 +216,7 @@ export class Convex extends Shape {
     }
   }
 
-  computeAABB(position: V2d, angle: number): AABB {
-    const out = new AABB();
+  computeAABB(position: V2d, angle: number, out = new AABB()): AABB {
     out.setFromPoints(this.vertices, position, angle, 0);
     return out;
   }

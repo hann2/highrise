@@ -18,13 +18,15 @@ const DEFAULT_CELL_SIZE = 6;
  *
  * There are two hashes. Static bodies go in one when they're added and stay
  * there. Everything that moves (dynamic, kinematic and particle bodies) goes
- * in the other, which is rebuilt from scratch when it's out of date: after
- * each physics step, since bodies have moved. Bodies added or removed between
- * steps are put in or taken out of it directly, so queries between steps (like
- * raycasts during a tick) cost nothing extra however many bodies there are.
+ * in the other, which is brought up to date when it's needed after each
+ * physics step, since bodies have moved: only bodies whose AABBs now cover
+ * different cells are moved, which for most bodies most steps is none. Bodies
+ * added or removed are put in or taken out of it right away, so queries
+ * between steps (like raycasts during a tick) cost nothing extra however many
+ * bodies there are.
  *
  * Between steps, the moving hash holds bodies where their AABBs were when it
- * was built. That's the same as the AABBs themselves: moving a body by hand
+ * was updated. That's the same as the AABBs themselves: moving a body by hand
  * doesn't update its AABB either until the next step.
  *
  * Each body remembers which cells it was put in, so taking it out never
@@ -41,8 +43,10 @@ export class SpatialHashingBroadphase extends Broadphase {
 
   debugData = {
     numCollisions: 0,
-    /** How many times the moving hash has been rebuilt */
-    movingRebuilds: 0,
+    /** How many times the moving hash has been brought up to date */
+    movingUpdates: 0,
+    /** How many moving bodies have changed cells, all told */
+    movingRehashes: 0,
   };
 
   private cellSize: number;
@@ -54,13 +58,11 @@ export class SpatialHashingBroadphase extends Broadphase {
 
   /** The moving hash: the moving bodies in each cell */
   private movingPartitions: Body[][] = [];
-  /** Cells of the moving hash that have had bodies since it was last cleared */
-  private movingUsedCells: number[] = [];
   /** Moving bodies too big for the grid */
   private movingHuge: Body[] = [];
-  /** The cells each moving body is in (empty for huge ones) */
-  private movingCells = new Map<Body, number[]>();
-  /** Whether the moving hash has to be rebuilt before it's used */
+  /** Where each moving body is in the moving hash */
+  private movingEntries = new Map<Body, HashEntry>();
+  /** Whether bodies may have moved since the moving hash was updated */
   private movingDirty = true;
 
   /** Marks the bodies a query has already seen (see `Body._queryStamp`) */
@@ -83,7 +85,8 @@ export class SpatialHashingBroadphase extends Broadphase {
     const count = this.width * this.height;
     this.partitions = Array.from({ length: count }, () => []);
     this.movingPartitions = Array.from({ length: count }, () => []);
-    this.movingUsedCells = [];
+    this.movingHuge = [];
+    this.movingEntries.clear();
     this.movingDirty = true;
   }
 
@@ -110,6 +113,15 @@ export class SpatialHashingBroadphase extends Broadphase {
     for (const body of statics) {
       this.addStatic(body);
     }
+    for (const body of this.movingBodies()) {
+      this.placeMoving(body);
+    }
+  }
+
+  private *movingBodies(): Iterable<Body> {
+    yield* this.kinematicBodies;
+    yield* this.dynamicBodies;
+    yield* this.pointShapeBodies;
   }
 
   onAddBody(body: Body) {
@@ -126,9 +138,7 @@ export class SpatialHashingBroadphase extends Broadphase {
     } else {
       this.kinematicBodies.add(body);
     }
-    if (!this.movingDirty) {
-      this.addMoving(body);
-    }
+    this.placeMoving(body);
   }
 
   onRemoveBody(body: Body) {
@@ -139,9 +149,7 @@ export class SpatialHashingBroadphase extends Broadphase {
     this.dynamicBodies.delete(body);
     this.pointShapeBodies.delete(body);
     this.kinematicBodies.delete(body);
-    if (!this.movingDirty) {
-      this.removeMoving(body);
-    }
+    this.removeMoving(body);
   }
 
   bodyShapesChanged(body: Body) {
@@ -181,57 +189,70 @@ export class SpatialHashingBroadphase extends Broadphase {
     }
   }
 
-  private addMoving(body: Body) {
-    const cells = this.aabbToCells(body.getAABB());
-    this.movingCells.set(body, cells ?? []);
-    if (cells === undefined) {
+  /**
+   * Puts a moving body in the cells its AABB covers, unless it's already in
+   * exactly those (or is huge, and still is)
+   */
+  private placeMoving(body: Body) {
+    const entry = this.movingEntries.get(body);
+    const aabb = body.getAABB();
+    const lowX = Math.floor(aabb.lowerBound[0] / this.cellSize);
+    const lowY = Math.floor(aabb.lowerBound[1] / this.cellSize);
+    const highX = Math.floor(aabb.upperBound[0] / this.cellSize);
+    const highY = Math.floor(aabb.upperBound[1] / this.cellSize);
+    if (
+      entry &&
+      entry.lowX === lowX &&
+      entry.lowY === lowY &&
+      entry.highX === highX &&
+      entry.highY === highY
+    ) {
+      return;
+    }
+    this.debugData.movingRehashes += 1;
+    if (entry) {
+      this.removeMoving(body);
+    }
+    const huge = isHuge(lowX, lowY, highX, highY);
+    const cells = huge ? [] : this.cellsInRange(lowX, lowY, highX, highY);
+    this.movingEntries.set(body, { lowX, lowY, highX, highY, cells });
+    if (huge) {
       this.movingHuge.push(body);
-    } else {
-      for (const cell of cells) {
-        const list = this.movingPartitions[cell];
-        if (list.length === 0) {
-          this.movingUsedCells.push(cell);
-        }
-        list.push(body);
-      }
+    }
+    for (const cell of cells) {
+      this.movingPartitions[cell].push(body);
     }
   }
 
   private removeMoving(body: Body) {
-    const cells = this.movingCells.get(body);
-    if (cells === undefined) {
+    const entry = this.movingEntries.get(body);
+    if (entry === undefined) {
       return;
     }
-    this.movingCells.delete(body);
-    if (cells.length === 0) {
+    this.movingEntries.delete(body);
+    if (entry.cells.length === 0) {
       removeFrom(this.movingHuge, body);
     }
-    for (const cell of cells) {
+    for (const cell of entry.cells) {
       removeFrom(this.movingPartitions[cell], body);
     }
   }
 
-  /** Rebuilds the moving hash, if bodies have moved since it was built */
+  /** Brings the moving hash up to date, if bodies may have moved since it was */
   private updateMovingHash() {
     if (!this.movingDirty) {
       return;
     }
     this.movingDirty = false;
-    this.debugData.movingRebuilds += 1;
-    for (const cell of this.movingUsedCells) {
-      this.movingPartitions[cell].length = 0;
-    }
-    this.movingUsedCells.length = 0;
-    this.movingHuge.length = 0;
-    this.movingCells.clear();
+    this.debugData.movingUpdates += 1;
     for (const body of this.kinematicBodies) {
-      this.addMoving(body);
+      this.placeMoving(body);
     }
     for (const body of this.dynamicBodies) {
-      this.addMoving(body);
+      this.placeMoving(body);
     }
     for (const body of this.pointShapeBodies) {
-      this.addMoving(body);
+      this.placeMoving(body);
     }
   }
 
@@ -308,29 +329,33 @@ export class SpatialHashingBroadphase extends Broadphase {
     const lowY = Math.floor(aabb.lowerBound[1] / this.cellSize);
     const highX = Math.floor(aabb.upperBound[0] / this.cellSize);
     const highY = Math.floor(aabb.upperBound[1] / this.cellSize);
-    const size = Math.abs(highX - lowX) * Math.abs(highY - lowY);
-    if (
-      !isFinite(lowX) ||
-      !isFinite(lowY) ||
-      !isFinite(highX) ||
-      !isFinite(highY) ||
-      size > HUGE_LIMIT
-    ) {
+    if (isHuge(lowX, lowY, highX, highY)) {
       return undefined;
     }
-    return this.queryCells(aabb);
+    return this.cellsInRange(lowX, lowY, highX, highY);
+  }
+
+  /** The cells an AABB overlaps (see `cellsInRange`) */
+  private queryCells(aabb: AABB): number[] {
+    return this.cellsInRange(
+      Math.floor(aabb.lowerBound[0] / this.cellSize),
+      Math.floor(aabb.lowerBound[1] / this.cellSize),
+      Math.floor(aabb.upperBound[0] / this.cellSize),
+      Math.floor(aabb.upperBound[1] / this.cellSize),
+    );
   }
 
   /**
-   * The cells an AABB overlaps, each once: an AABB wider or taller than the
-   * grid covers every column or row
+   * The cells from column `lowX` to `highX` and row `lowY` to `highY`, each
+   * once: a range wider or taller than the grid covers every column or row
    */
-  private queryCells(aabb: AABB): number[] {
+  private cellsInRange(
+    lowX: number,
+    lowY: number,
+    highX: number,
+    highY: number,
+  ): number[] {
     const result: number[] = [];
-    let lowX = Math.floor(aabb.lowerBound[0] / this.cellSize);
-    let lowY = Math.floor(aabb.lowerBound[1] / this.cellSize);
-    let highX = Math.floor(aabb.upperBound[0] / this.cellSize);
-    let highY = Math.floor(aabb.upperBound[1] / this.cellSize);
     if (!(highX - lowX < this.width)) {
       lowX = 0;
       highX = this.width - 1;
@@ -492,6 +517,26 @@ export class SpatialHashingBroadphase extends Broadphase {
 
     return result;
   }
+}
+
+/** Where a moving body is in the moving hash: the cell range its AABB covered, and those cells (none if it's huge) */
+interface HashEntry {
+  lowX: number;
+  lowY: number;
+  highX: number;
+  highY: number;
+  cells: number[];
+}
+
+/** Whether a body covering this cell range is too big for the grid */
+function isHuge(lowX: number, lowY: number, highX: number, highY: number) {
+  return (
+    !isFinite(lowX) ||
+    !isFinite(lowY) ||
+    !isFinite(highX) ||
+    !isFinite(highY) ||
+    Math.abs(highX - lowX) * Math.abs(highY - lowY) > HUGE_LIMIT
+  );
 }
 
 /** Removes `item` from `list` if it's there, without keeping the order */
