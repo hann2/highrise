@@ -1109,3 +1109,23 @@ test("frictionless contacts get no friction equations when friction comes from t
   // A constant slip force ignores the material's friction, so it stays
   assert.equal(equationsFor(0), 2);
 });
+
+test("contact equations are reused from step to step", () => {
+  const world = new World();
+  staticBox(world, [0, -1], 10, 1);
+  dynamicCircle(world, [0, -0.1], [1, 0], 0.5);
+  let seen: object[] = [];
+  world.on("preSolve", ({ contactEquations }) => {
+    seen = [...seen, ...contactEquations];
+  });
+  world.step(DT);
+  const first = seen;
+  seen = [];
+  world.step(DT);
+  assert.ok(first.length > 0);
+  assert.deepEqual(seen, first);
+  assert.ok(
+    seen.every((eq, i) => eq === first[i]),
+    "the same objects",
+  );
+});

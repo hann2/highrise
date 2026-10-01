@@ -44,6 +44,19 @@ export class PlanarEquation2D extends Equation {
   /** Body B angular component. */
   angBz: number = 0;
 
+  override reset(
+    bodyA: Body,
+    bodyB: Body,
+    minForce?: number,
+    maxForce?: number,
+  ): void {
+    super.reset(bodyA, bodyB, minForce, maxForce);
+    this.linX = 0;
+    this.linY = 0;
+    this.angAz = 0;
+    this.angBz = 0;
+  }
+
   constructor(
     bodyA: Body,
     bodyB: Body,

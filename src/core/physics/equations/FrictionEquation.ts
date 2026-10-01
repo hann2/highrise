@@ -47,6 +47,17 @@ export class FrictionEquation extends PlanarEquation2D {
     this.t = V();
   }
 
+  override reset(bodyA: Body, bodyB: Body, slipForce: number = 0): void {
+    super.reset(bodyA, bodyB, -slipForce, slipForce);
+    this.contactPointA.set(0, 0);
+    this.contactPointB.set(0, 0);
+    this.t.set(0, 0);
+    this.contactEquations.length = 0;
+    this.shapeA = null;
+    this.shapeB = null;
+    this.frictionCoefficient = 0.3;
+  }
+
   /** Set the friction slip bound. */
   setSlipForce(slipForce: number): void {
     this.maxForce = slipForce;

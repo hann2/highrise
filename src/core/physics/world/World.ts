@@ -14,6 +14,7 @@ import { RaycastHit, RaycastOptions } from "../collision/raycast/RaycastHit";
 import { generateContactEquationsForCollision } from "../collision/response/ContactGenerator";
 import { generateFrictionEquationsForCollision } from "../collision/response/FrictionGenerator";
 import { ContactEquation } from "../equations/ContactEquation";
+import { EquationPool } from "../equations/EquationPool";
 import { FrictionEquation } from "../equations/FrictionEquation";
 import { EventEmitter } from "../events/EventEmitter";
 import { PhysicsEventMap } from "../events/PhysicsEvents";
@@ -102,6 +103,14 @@ export class World extends EventEmitter<PhysicsEventMap> {
   emitImpactEvent: boolean = true;
   /** When true, multiple contacts between shapes produce one averaged friction equation instead of many. */
   frictionReduction: boolean = true;
+
+  /** Contact and friction equations, reused from step to step */
+  private contactEquationPool = new EquationPool(
+    (bodyA, bodyB) => new ContactEquation(bodyA, bodyB),
+  );
+  private frictionEquationPool = new EquationPool(
+    (bodyA, bodyB) => new FrictionEquation(bodyA, bodyB),
+  );
   /** @internal */
   _constraintIdCounter: number = 0;
   /** @internal */
@@ -252,7 +261,11 @@ export class World extends EventEmitter<PhysicsEventMap> {
       sensorOverlaps,
     );
 
-    // 5. Build contact equations to resolve overlaps
+    // 5. Build contact equations to resolve overlaps. Last step's contact and
+    // friction equations are reused, so nothing may hold on to them past
+    // the step (events hand them out only for the length of the handler)
+    this.contactEquationPool.releaseAll();
+    this.frictionEquationPool.releaseAll();
     profiler.start("World.contactEquations");
     const collisionsWithContactEquations: [Collision, ContactEquation[]][] =
       collisions.map((collision) => [
@@ -266,6 +279,7 @@ export class World extends EventEmitter<PhysicsEventMap> {
           overlapChanges.newlyOverlappingBodies.has(
             bodyKey(collision.bodyA, collision.bodyB),
           ),
+          this.contactEquationPool,
         ),
       ]);
 
@@ -297,6 +311,7 @@ export class World extends EventEmitter<PhysicsEventMap> {
             contactEquations,
             contactMaterial,
             this.frictionReduction,
+            this.frictionEquationPool,
           );
         },
       );

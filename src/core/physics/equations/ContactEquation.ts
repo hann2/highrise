@@ -54,6 +54,18 @@ export class ContactEquation extends PlanarEquation2D {
     this.normalA = V();
   }
 
+  override reset(bodyA: Body, bodyB: Body): void {
+    super.reset(bodyA, bodyB, 0, Number.MAX_VALUE);
+    this.contactPointA.set(0, 0);
+    this.penetrationVec.set(0, 0);
+    this.contactPointB.set(0, 0);
+    this.normalA.set(0, 0);
+    this.restitution = 0;
+    this.firstImpact = false;
+    this.shapeA = null;
+    this.shapeB = null;
+  }
+
   override computeB(
     a: number,
     b: number,

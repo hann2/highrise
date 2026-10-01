@@ -174,6 +174,46 @@ export class Equation {
   }
 
   /**
+   * Makes this equation as good as a new one between `bodyA` and `bodyB`, for
+   * reusing it rather than making another (see `EquationPool`). Subclasses
+   * that have state of their own reset it too.
+   */
+  reset(
+    bodyA: Body,
+    bodyB: Body,
+    minForce = -Number.MAX_VALUE,
+    maxForce = Number.MAX_VALUE,
+  ): void {
+    this.id = Equation.idCounter++;
+    this.minForce = minForce;
+    this.maxForce = maxForce;
+    this.bodyA = bodyA;
+    this.bodyB = bodyB;
+    this.stiffness = Equation.DEFAULT_STIFFNESS;
+    this.relaxation = Equation.DEFAULT_RELAXATION;
+    this.offset = 0;
+    this.a = 0;
+    this.b = 0;
+    this.epsilon = 0;
+    this.timeStep = 1 / 60;
+    this.needsUpdate = true;
+    this.multiplier = 0;
+    this.relativeVelocity = 0;
+    this.enabled = true;
+    this.warmLambda = 0;
+    this.solverOrder = 0;
+    this.G.fill(0);
+    this[EQ_B] = 0;
+    this[EQ_INV_C] = 0;
+    this[EQ_LAMBDA] = 0;
+    this[EQ_MAX_FORCE_DT] = 0;
+    this[EQ_MIN_FORCE_DT] = 0;
+    this[EQ_INDEX_A] = -1;
+    this[EQ_INDEX_B] = -1;
+    this[EQ_SLOT] = -1;
+  }
+
+  /**
    * Recompute the solver parameters (a, b, epsilon) from stiffness, relaxation,
    * and the current timestep. Called automatically by the solver when the
    * timestep changes or needsUpdate is set.

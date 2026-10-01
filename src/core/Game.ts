@@ -571,7 +571,7 @@ export default class Game {
   @profile
   private contacts() {
     for (const contactInfo of this.contactList.getContacts()) {
-      const { shapeA, shapeB, bodyA, bodyB, contactEquations } = contactInfo;
+      const { shapeA, shapeB, bodyA, bodyB } = contactInfo;
       const ownerA = shapeA.owner || bodyA.owner;
       const ownerB = shapeB.owner || bodyB.owner;
       if (ownerA?.onContacting) {
@@ -579,7 +579,6 @@ export default class Game {
           other: ownerB,
           otherShape: shapeB,
           thisShape: shapeA,
-          contactEquations,
         });
       }
       if (ownerB?.onContacting) {
@@ -587,7 +586,6 @@ export default class Game {
           other: ownerA,
           otherShape: shapeA,
           thisShape: shapeB,
-          contactEquations,
         });
       }
     }
