@@ -10,8 +10,10 @@ import { Shadows } from "./Shadows";
 
 /**
  * A light that gets baked into its own texture, which the LightingManager
- * then composites onto the screen. The bake is cached until something about
- * the light changes, so static lights are almost free.
+ * then composites onto the screen. The bake is cached until the light's shape
+ * or shadows change (it moves, turns or resizes), so static lights are almost
+ * free. Brightness and color aren't baked: they're applied as the bake is
+ * composited, so a flickering light that stays put never re-bakes.
  */
 export default class Light extends BaseEntity implements Entity {
   public shadows?: Shadows;
@@ -85,6 +87,11 @@ export default class Light extends BaseEntity implements Entity {
     }
   }
 
+  /** Whether there's anything to draw: enabled and not at zero brightness */
+  get isLit(): boolean {
+    return this.enabled && this.bakedSprite.alpha > 0;
+  }
+
   get needsBaking(): boolean {
     return this.dirty || Boolean(this.shadows?.dirty);
   }
@@ -146,14 +153,14 @@ export default class Light extends BaseEntity implements Entity {
     }
   }
 
+  /** How bright the light is. Applied when compositing, so it doesn't re-bake. */
   setIntensity(value: number) {
-    this.dirty = true;
-    this.lightSprite.alpha = value;
+    this.bakedSprite.alpha = value;
   }
 
+  /** The light's color. Applied when compositing, so it doesn't re-bake. */
   setColor(value: number) {
-    this.dirty = true;
-    this.lightSprite.tint = value;
+    this.bakedSprite.tint = value;
   }
 
   setSourceRadius(value: number) {
