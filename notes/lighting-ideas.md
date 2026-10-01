@@ -37,4 +37,14 @@ The light texture clamps at 1 and is multiplied over the world, so lit art can n
 - It affects every light in the game, so check it against a ceiling light and the flashlight as well as fire (a test scene like `fire/FireTestScene.ts`).
 - Full HDR (a float scene, exposure, adaptation) isn't needed; only the light buffer needs the range.
 
+## Ambient occlusion for walls and doors
+
+Added 2026-10-01. Many of our sprites have fake ambient occlusion painted in (a darkening where they meet the floor). Walls and doors don't, because shading their edges would mean the shadow overlapping neighboring tiles, and walls join up in too many ways for a baked edge to look right. So walls and doors meet the floor with no contact shadow, and look flatter than everything else.
+
+Do it dynamically instead: draw the occlusion from the actual wall and door geometry, so it follows whatever shape the level ends up with. Some ways, not yet weighed:
+
+- Bake it per level: walls are static, so render a soft darkening along every wall outline into a level-sized texture once when the level is generated (like `ExploredMap` or `FloorMarks`), drawn on the floor under the walls.
+- Doors move, so give them their own soft shadow that moves with them (a blurred sprite or mesh following the door), or fold them into the baked texture when they're closed and draw them separately while swinging.
+- Soft edges as mesh geometry (the way `visionMesh.ts` does penumbras) rather than a blur filter, since filters don't work in render-to-texture passes.
+
 Suggested order when we come back: overbright with (b) first (it fixes the fire washing out), then heights with hard shadows, furniture and ceiling lights, then moving casters starting with option 1.
