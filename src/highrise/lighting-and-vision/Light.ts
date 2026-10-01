@@ -6,11 +6,22 @@ import type { AtlasPage, AtlasSlot } from "./LightAtlas";
 import LightingManager from "./LightingManager";
 
 /**
- * A light. The `LightingManager` draws every light in view each frame, all
- * together: each gets a square of `size` meters in the light atlas, where its
- * `lightSprite` is drawn and then the shadowed part erased with its square of
- * the shadow mask atlas (if it casts shadows), and that square is then added
- * onto the screen with the light's brightness and color.
+ * A light. The `LightingManager` draws the lights in view all together: each
+ * gets a square of `size` meters in a light atlas, where its `lightSprite` is
+ * drawn and then the shadowed part erased with its square of the shadow mask
+ * atlas (if it casts shadows), and every frame that square is added onto the
+ * screen with the light's brightness and color.
+ *
+ * A light is static or `dynamic`. A dynamic one is drawn again every frame,
+ * for lights that change all the time (fire, things that move). A static one
+ * keeps its square, and is only drawn again when something that shows in it
+ * changes: its setters mark it `dirty` (position, size, direction, source
+ * radius, shadows on or off), and so do new walls. Brightness and color
+ * don't, since they're applied as it's added onto the screen, so a static
+ * light can flicker for free. Anything else that changes how it looks (its
+ * `lightSprite`, from outside) has to call `invalidate()`. A static light
+ * that changes every frame still looks right; it just costs what a dynamic
+ * one does.
  */
 export default class Light extends BaseEntity implements Entity {
   private lightManager?: LightingManager;
@@ -22,10 +33,15 @@ export default class Light extends BaseEntity implements Entity {
   readonly container = new Container();
   /** Disabled lights aren't drawn */
   public enabled: boolean = true;
+  /** Drawn again every frame, rather than when it changes (see above) */
+  public dynamic: boolean = false;
+  /** Whether a static light has changed since it was last drawn */
+  public dirty: boolean = true;
   /** Width and height of the square around the light that it lights, in meters */
   public size: number;
   /** Where the light is in the atlas this frame, if it's in view */
   slot?: AtlasSlot;
+  private slotPage?: AtlasPage;
 
   constructor(
     /** What the light looks like (its brightness and color get applied to it); any display object, centered on the light */
@@ -75,9 +91,17 @@ export default class Light extends BaseEntity implements Entity {
     return this.compositeSprite.position.y;
   }
 
+  /** Something about how it looks changed that its setters don't know about */
+  invalidate() {
+    this.dirty = true;
+  }
+
   /** Set the width and height of the square it lights, in meters. */
   setSize(size: number) {
-    this.size = size;
+    if (size !== this.size) {
+      this.size = size;
+      this.dirty = true;
+    }
   }
 
   /** Whether there's anything to draw: enabled and not at zero brightness */
@@ -90,7 +114,18 @@ export default class Light extends BaseEntity implements Entity {
    * in the middle of it, the mask and the composite reading from it
    */
   placeInAtlas(slot: AtlasSlot, page: AtlasPage) {
+    const old = this.slot;
+    if (
+      old &&
+      this.slotPage === page &&
+      old.x === slot.x &&
+      old.y === slot.y &&
+      this.compositeSprite.texture.frame.width === this.size
+    ) {
+      return;
+    }
     this.slot = slot;
+    this.slotPage = page;
     this.container.position.set(slot.x, slot.y);
     this.maskSprite.position.set(slot.x, slot.y);
     viewSlot(this.maskSprite, page.mask.source, slot, this.size);
@@ -98,29 +133,42 @@ export default class Light extends BaseEntity implements Entity {
   }
 
   enableShadows() {
-    this.shadowsEnabled = true;
+    if (!this.shadowsEnabled) {
+      this.shadowsEnabled = true;
+      this.dirty = true;
+    }
   }
 
   disableShadows() {
-    this.shadowsEnabled = false;
+    if (this.shadowsEnabled) {
+      this.shadowsEnabled = false;
+      this.dirty = true;
+    }
   }
 
   setPosition([x, y]: [number, number]) {
-    this.compositeSprite.position.set(x, y);
+    const position = this.compositeSprite.position;
+    if (x !== position.x || y !== position.y) {
+      position.set(x, y);
+      this.dirty = true;
+    }
   }
 
-  /** How bright the light is */
+  /** How bright the light is (free to change: it doesn't make the light dirty) */
   setIntensity(value: number) {
     this.compositeSprite.alpha = value;
   }
 
-  /** The light's color */
+  /** The light's color (free to change: it doesn't make the light dirty) */
   setColor(value: number) {
     this.compositeSprite.tint = value;
   }
 
   setSourceRadius(value: number) {
-    this.sourceRadius = value;
+    if (value !== this.sourceRadius) {
+      this.sourceRadius = value;
+      this.dirty = true;
+    }
   }
 }
 

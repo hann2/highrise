@@ -64,7 +64,13 @@ export default class Phlegm extends Projectile implements Entity {
     this.sprites = [this.mainSprite, this.glowSprite];
 
     this.light = this.addChild(
-      new PointLight({ radius: 1, shadowsEnabled: false, position, color }),
+      new PointLight({
+        radius: 1,
+        shadowsEnabled: false,
+        position,
+        color,
+        dynamic: true,
+      }),
     );
   }
 

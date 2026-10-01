@@ -7,9 +7,11 @@ export interface AtlasSlot {
   page: number;
   x: number;
   y: number;
+  /** Pixels across the square, padding included */
+  side: number;
 }
 
-/** One page of the atlas: the lights' shadow masks, and the lights themselves */
+/** One page of an atlas: the lights' shadow masks, and the lights themselves */
 export interface AtlasPage {
   mask: RenderTexture;
   light: RenderTexture;
@@ -22,12 +24,77 @@ const MIN_PAGE_PIXELS = 512;
 /** Empty pixels around each light's square, so filtering never reads a neighbor */
 const PADDING = 2;
 
+/** Pixels across a light's square in the atlas, padding included */
+function slotSide(light: Light): number {
+  return Math.ceil(light.size * LIGHT_RESOLUTION) + 2 * PADDING;
+}
+
+/** The smallest page (a power of two) for squares adding up to `area` pixels */
+function pageSizeFor(area: number, biggestSide: number): number {
+  // Room to spare, since rows don't pack perfectly
+  return Math.min(
+    MAX_PAGE_PIXELS,
+    Math.max(
+      MIN_PAGE_PIXELS,
+      2 ** Math.ceil(Math.log2(Math.sqrt(area * 1.3))),
+      2 ** Math.ceil(Math.log2(biggestSide)),
+    ),
+  );
+}
+
+function makePage(pixels: number): AtlasPage {
+  const meters = pixels / LIGHT_RESOLUTION;
+  const make = () =>
+    RenderTexture.create({
+      width: meters,
+      height: meters,
+      resolution: LIGHT_RESOLUTION,
+    });
+  return { mask: make(), light: make() };
+}
+
+function destroyPage(page: AtlasPage) {
+  page.mask.destroy(true);
+  page.light.destroy(true);
+}
+
 /**
- * Squares for every light in view, packed into pages of two textures (masks
- * and lights) at `LIGHT_RESOLUTION`, so that all the lights can be drawn in a
- * handful of render passes rather than a couple each. Texture coordinates are
- * in meters, like the world. Packed afresh every frame (it's a few
- * microseconds), in rows from the biggest light down. Pages grow to fit
+ * Packs squares into a page in rows, left to right and top to bottom. Gives
+ * up (returns undefined) when the page is full.
+ */
+class RowPacker {
+  private x = 0;
+  private y = 0;
+  private rowHeight = 0;
+
+  constructor(public pixels: number) {}
+
+  /** The middle of a free square of `side` pixels, in meters */
+  place(side: number): { x: number; y: number } | undefined {
+    if (this.x + side > this.pixels) {
+      this.x = 0;
+      this.y += this.rowHeight;
+      this.rowHeight = 0;
+    }
+    if (side > this.pixels || this.y + side > this.pixels) {
+      return undefined;
+    }
+    const middle = {
+      x: (this.x + side / 2) / LIGHT_RESOLUTION,
+      y: (this.y + side / 2) / LIGHT_RESOLUTION,
+    };
+    this.x += side;
+    this.rowHeight = Math.max(this.rowHeight, side);
+    return middle;
+  }
+}
+
+/**
+ * Squares for the dynamic lights in view, packed into pages of two textures
+ * (masks and lights) at `LIGHT_RESOLUTION`, so that all the lights can be
+ * drawn in a handful of render passes rather than a couple each. Texture
+ * coordinates are in meters, like the world. Packed afresh every frame (it's
+ * a few microseconds), in rows from the biggest light down. Pages grow to fit
  * what's in view, and stay that big.
  */
 export class LightAtlas {
@@ -37,90 +104,128 @@ export class LightAtlas {
   /** Gives each light a slot (see `Light.placeInAtlas`); returns the lights on each page */
   pack(lights: readonly Light[]): Light[][] {
     const sorted = [...lights].sort((a, b) => b.size - a.size);
-    const sides = new Map<Light, number>();
     let area = 0;
     for (const light of sorted) {
-      const side = Math.ceil(light.size * LIGHT_RESOLUTION) + 2 * PADDING;
-      sides.set(light, side);
-      area += side * side;
+      area += slotSide(light) ** 2;
     }
-    // Room to spare, since rows don't pack perfectly
-    const wanted = Math.min(
-      MAX_PAGE_PIXELS,
-      Math.max(
-        MIN_PAGE_PIXELS,
-        2 ** Math.ceil(Math.log2(Math.sqrt(area * 1.3))),
-        2 ** Math.ceil(Math.log2(sides.get(sorted[0]) ?? 0)),
-      ),
-    );
+    const wanted = pageSizeFor(area, slotSide(sorted[0]));
     if (wanted > this.pagePixels) {
-      this.resize(wanted);
+      this.destroy();
+      this.pagePixels = wanted;
     }
 
-    const pageSize = this.pagePixels;
     const perPage: Light[][] = [[]];
-    let x = 0;
-    let y = 0;
-    let rowHeight = 0;
+    let packer = new RowPacker(this.pagePixels);
     for (const light of sorted) {
-      const side = Math.min(sides.get(light)!, pageSize);
-      if (x + side > pageSize) {
-        // Next row
-        x = 0;
-        y += rowHeight;
-        rowHeight = 0;
-      }
-      if (y + side > pageSize) {
-        // Next page
+      const side = Math.min(slotSide(light), this.pagePixels);
+      let middle = packer.place(side);
+      if (!middle) {
         perPage.push([]);
-        x = 0;
-        y = 0;
-        rowHeight = 0;
+        packer = new RowPacker(this.pagePixels);
+        middle = packer.place(side)!;
       }
       const page = perPage.length - 1;
-      this.ensurePage(page);
-      light.placeInAtlas(
-        {
-          page,
-          x: (x + side / 2) / LIGHT_RESOLUTION,
-          y: (y + side / 2) / LIGHT_RESOLUTION,
-        },
-        this.pages[page],
-      );
+      while (this.pages.length <= page) {
+        this.pages.push(makePage(this.pagePixels));
+      }
+      light.placeInAtlas({ page, side, ...middle }, this.pages[page]);
       perPage[page].push(light);
-      x += side;
-      rowHeight = Math.max(rowHeight, side);
     }
     return perPage;
   }
 
-  private resize(pixels: number) {
-    this.pagePixels = pixels;
-    const count = this.pages.length;
-    this.destroy();
-    for (let i = 0; i < count; i++) {
-      this.ensurePage(i);
+  destroy() {
+    this.pages.forEach(destroyPage);
+    this.pages = [];
+  }
+}
+
+/**
+ * Squares for the static lights, which keep them from frame to frame, so a
+ * light that hasn't changed isn't drawn again: one page, filled up in rows as
+ * lights come into view. A light keeps its square while it's out of view, in
+ * case it comes back. When the page is full, it starts over with just the
+ * lights in view (growing if they need it), and they're all drawn again.
+ */
+export class StaticLightAtlas {
+  page?: AtlasPage;
+  private packer = new RowPacker(0);
+  private slots = new Map<Light, AtlasSlot>();
+  /** Set when the page was started over, so it needs clearing */
+  needsClear = false;
+
+  /**
+   * Gives each light in view a slot (see `Light.placeInAtlas`), and returns
+   * the ones that have to be drawn: changed (`dirty`), or in a new square.
+   */
+  update(lights: readonly Light[]): Light[] {
+    const toDraw: Light[] = [];
+    if (!this.placeAll(lights, toDraw)) {
+      // Full: start over with just these, on a page big enough for them
+      let area = 0;
+      let biggest = 0;
+      for (const light of lights) {
+        const side = slotSide(light);
+        area += side * side;
+        biggest = Math.max(biggest, side);
+      }
+      this.startOver(pageSizeFor(area, biggest));
+      toDraw.length = 0;
+      this.placeAll(lights, toDraw);
+    }
+    return toDraw;
+  }
+
+  /** Places each light; false if one didn't fit */
+  private placeAll(lights: readonly Light[], toDraw: Light[]): boolean {
+    for (const light of lights) {
+      const side = slotSide(light);
+      let slot = this.slots.get(light);
+      if (!slot || slot.side < side) {
+        const middle = this.page ? this.packer.place(side) : undefined;
+        if (!middle) {
+          return false;
+        }
+        slot = { page: 0, side, ...middle };
+        this.slots.set(light, slot);
+        light.dirty = true;
+      }
+      light.placeInAtlas(slot, this.page!);
+      if (light.dirty) {
+        toDraw.push(light);
+      }
+    }
+    return true;
+  }
+
+  private startOver(pixels: number) {
+    if (!this.page || pixels > this.packer.pixels) {
+      if (this.page) {
+        destroyPage(this.page);
+      }
+      this.page = makePage(Math.max(pixels, this.packer.pixels));
+    }
+    this.packer = new RowPacker(Math.max(pixels, this.packer.pixels));
+    this.slots.clear();
+    this.needsClear = true;
+  }
+
+  /** Everything has to be drawn again (the walls changed) */
+  invalidateAll() {
+    for (const light of this.slots.keys()) {
+      light.dirty = true;
     }
   }
 
-  private ensurePage(index: number) {
-    while (this.pages.length <= index) {
-      const meters = this.pagePixels / LIGHT_RESOLUTION;
-      const make = () =>
-        RenderTexture.create({
-          width: meters,
-          height: meters,
-          resolution: LIGHT_RESOLUTION,
-        });
-      this.pages.push({ mask: make(), light: make() });
-    }
+  /** A light that's gone, or isn't static any more */
+  forget(light: Light) {
+    this.slots.delete(light);
   }
 
   destroy() {
-    for (const page of this.pages) {
-      page.mask.destroy(true);
-      page.light.destroy(true);
+    if (this.page) {
+      destroyPage(this.page);
     }
-    this.pages = [];
+    this.page = undefined;
   }
 }

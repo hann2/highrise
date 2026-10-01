@@ -246,9 +246,9 @@ export default class VendingMachine
   async flicker(times: number) {
     for (let i = 0; i < times; i++) {
       await this.wait(rUniform(0.04, 0.1), undefined, "flicker");
-      this.lightSprite.alpha = 0;
+      this.light.setIntensity(0);
       await this.wait(rUniform(0.04, 0.1), undefined, "flicker");
-      this.lightSprite.alpha = 1;
+      this.light.setIntensity(1);
     }
   }
 
@@ -277,10 +277,10 @@ export default class VendingMachine
       await this.flicker(rInteger(2, 4));
 
       await this.wait(0.2, (dt, t) => {
-        this.lightSprite.alpha = 1 - t;
+        this.light.setIntensity(1 - t);
       });
 
-      this.lightSprite.visible = false;
+      this.light.setIntensity(0);
 
       this.interactable?.destroy();
       this.interactable = undefined;

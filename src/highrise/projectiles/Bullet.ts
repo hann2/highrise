@@ -63,6 +63,8 @@ export default class Bullet extends Projectile implements Entity {
     this.light = this.addChild(
       new Light(this.lightGraphics, false, 1, 0, lightSize),
     );
+    // The streak is drawn again every frame
+    this.light.dynamic = true;
   }
 
   makeCollisionMask() {

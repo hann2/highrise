@@ -36,6 +36,7 @@ export class Spark extends BaseEntity implements Entity {
         intensity: 0.2,
         shadowsEnabled: true,
         color: 0xfffacd,
+        dynamic: true,
       }),
     );
 

@@ -76,5 +76,6 @@ function makeLight(length: number): DirectionalLight {
     intensity: 0.7,
     color: 0xfff1d6,
     sourceRadius: 0.1,
+    dynamic: true,
   });
 }

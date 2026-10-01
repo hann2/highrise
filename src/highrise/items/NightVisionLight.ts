@@ -20,6 +20,7 @@ export default class NightVisionLight extends BaseEntity implements Entity {
         intensity: INTENSITY,
         color: 0x99ff99,
         position: [...human.getPosition()] as [number, number],
+        dynamic: true,
       }),
     );
   }

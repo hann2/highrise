@@ -38,6 +38,8 @@ export class ShadowCasters {
   readonly mesh: Mesh<MeshGeometry, Shader>;
   /** The casters the mesh was built from */
   private bodies = new Set<Body>();
+  /** Goes up every time the casters change, for lights drawn before to know */
+  version = 0;
   /** Per light: x, y of the light; half the size of its square and its source radius; x, y of the middle of its square in the page */
   private lightData = new Float32Array(0);
   private lightBuffer = new Buffer({
@@ -86,6 +88,7 @@ export class ShadowCasters {
       return;
     }
     this.bodies = new Set(current);
+    this.version += 1;
     const old = this.mesh.geometry;
     this.mesh.geometry = this.buildGeometry(current);
     // All of its buffers but the lights', which the new one shares
@@ -108,7 +111,13 @@ export class ShadowCasters {
    * instead. Without the extension the fragment shader throws those pixels
    * away itself, which gives the same picture but costs a shader run each.
    */
-  draw(renderer: Renderer, lights: readonly Light[], target: RenderTexture) {
+  draw(
+    renderer: Renderer,
+    lights: readonly Light[],
+    target: RenderTexture,
+    /** Clear the page first; else the lights' squares have to be clear already */
+    clear: boolean,
+  ) {
     this.setLights(lights);
     const gl = (renderer as { gl?: WebGL2RenderingContext }).gl;
     this.clipExtension ??= gl?.getExtension("WEBGL_clip_cull_distance");
@@ -121,7 +130,7 @@ export class ShadowCasters {
     renderer.render({
       container: this.mesh,
       target,
-      clear: true,
+      clear,
       // The default clear color is the renderer's opaque background
       clearColor: [0, 0, 0, 0],
     });
