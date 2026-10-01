@@ -7,6 +7,7 @@ import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { rgbToHex } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
+import { measureCpuAndGpu } from "../../core/util/GpuProfiler";
 import { profiler } from "../../core/util/Profiler";
 import { V, V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
@@ -190,7 +191,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     }
 
     // Then add them all onto the ambient light
-    profiler.measure("LightingManager.composite", () => {
+    measureCpuAndGpu("LightingManager.composite", () => {
       this.renderer.render({
         container: this.lightContainer,
         target: this.texture,
@@ -220,7 +221,7 @@ export default class LightingManager extends BaseEntity implements Entity {
     const casters = this.shadowCasters;
     const drawMasks = shadowed.length > 0 && !casters.isEmpty;
     if (drawMasks) {
-      profiler.measure("LightingManager.masks", () => {
+      measureCpuAndGpu("LightingManager.masks", () => {
         casters.setLights(shadowed);
         this.renderer.render({
           container: casters.mesh,
@@ -232,7 +233,7 @@ export default class LightingManager extends BaseEntity implements Entity {
       });
     }
 
-    profiler.measure("LightingManager.lights", () => {
+    measureCpuAndGpu("LightingManager.lights", () => {
       const container = this.atlasContainer;
       for (const light of lights) {
         container.addChild(light.container);

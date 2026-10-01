@@ -126,23 +126,38 @@ export async function getLevelNumber(page: Page): Promise<number> {
  * costs a little per call, which adds up with hundreds of entities, so for
  * accurate totals capture without it. Format with `JSON.stringify` or look at
  * `label`, `depth` and `msPerFrame`.
+ *
+ * `gpu` is the GPU's side, from `GpuProfiler`, in GPU ms per frame: just the
+ * whole render (`Game.render`), unless `gpuDetail` (which defaults to
+ * `entityDetail`), with which it's also split into sections (tick layers,
+ * the stage, the lighting's passes). Splitting adds to the totals the way
+ * entity detail does (see `GpuProfiler`), so take totals from a capture
+ * without it. `gpu.available` is false where WebGL can't time the GPU.
  */
 export async function captureProfile(
   page: Page,
   ms: number,
-  { entityDetail = true }: { entityDetail?: boolean } = {},
+  {
+    entityDetail = true,
+    gpuDetail = entityDetail,
+  }: { entityDetail?: boolean; gpuDetail?: boolean } = {},
 ) {
   return page.evaluate(
-    async ([ms, entityDetail]) => {
+    async ([ms, entityDetail, gpuDetail]) => {
       const profiler = window.DEBUG.profiler!;
+      const gpuProfiler = window.DEBUG.gpuProfiler!;
       profiler.entityDetail = entityDetail;
       profiler.startCapture();
+      gpuProfiler.maxDepth = gpuDetail ? Infinity : 1;
+      gpuProfiler.startCapture();
       await new Promise((resolve) => setTimeout(resolve, ms));
       const report = profiler.stopCapture("Game.nextFrame");
+      const gpu = gpuProfiler.stopCapture();
+      gpuProfiler.enabled = false;
       profiler.entityDetail = false;
-      return report;
+      return { ...report, gpu };
     },
-    [ms, entityDetail] as const,
+    [ms, entityDetail, gpuDetail] as const,
   );
 }
 

@@ -62,9 +62,21 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
     const counts = await countFireAndLights(page);
     await setLightingAndVision(page, false);
     const unlit = await measureFrames(page, MEASURE_MS);
+    const unlitTotals = await captureProfile(page, PROFILE_MS, {
+      entityDetail: false,
+    });
     await setLightingAndVision(page, true);
     results.push(
-      summarize(count, frames, unlit, totals.stats, detail.stats, counts),
+      summarize(
+        count,
+        frames,
+        unlit,
+        totals.stats,
+        totals.gpu,
+        unlitTotals.gpu,
+        detail.stats,
+        counts,
+      ),
     );
   }
   await setFires(page, 0);
@@ -144,12 +156,15 @@ function countFireAndLights(page: Page) {
 
 type Frames = Awaited<ReturnType<typeof measureFrames>>;
 type Stat = Awaited<ReturnType<typeof captureProfile>>["stats"][number];
+type GpuReport = Awaited<ReturnType<typeof captureProfile>>["gpu"];
 
 function summarize(
   count: number,
   frames: Frames,
   unlit: Frames,
   stats: Stat[],
+  gpu: GpuReport,
+  unlitGpu: GpuReport,
   detailStats: Stat[],
   counts: Awaited<ReturnType<typeof countFireAndLights>>,
 ) {
@@ -205,15 +220,24 @@ function summarize(
     fireTickMs: round(ms("Game.tick > fire") / ticksPerFrame),
     fireRenderMs: round(ms("Game.render > fire")),
     sections,
+    // GPU ms per frame for the whole render, with and without lighting and
+    // vision. Timing sections of it separately is unreliable (see
+    // GpuProfiler), so their cost is the difference.
+    gpuMs: round(renderGpuMs(gpu)),
+    unlitGpuMs: round(renderGpuMs(unlitGpu)),
     top,
   };
+}
+
+function renderGpuMs(report: GpuReport): number {
+  return report.stats.find((s) => s.label === "Game.render")?.msPerFrame ?? 0;
 }
 
 type Result = ReturnType<typeof summarize>;
 
 function formatTable(results: Result[]): string {
   const header =
-    "fires  burning  lights  in view  shadows/l   fps  interval  cpu/f   unlit: fps  interval  cpu/f   tick/t  rend/f  fire t/r";
+    "fires  burning  lights  in view  shadows/l   fps  interval  cpu/f  gpu/f   unlit: fps  interval  cpu/f  gpu/f   tick/t  rend/f  fire t/r";
   const rows = results.map((r) =>
     [
       String(r.count).padStart(5),
@@ -224,16 +248,18 @@ function formatTable(results: Result[]): string {
       r.fps.toFixed(0).padStart(5),
       r.frameIntervalMs.mean.toFixed(2).padStart(9),
       r.loopCpuMs.mean.toFixed(2).padStart(6),
+      r.gpuMs.toFixed(2).padStart(6),
       r.unlitFps.toFixed(0).padStart(11),
       r.unlitFrameIntervalMs.mean.toFixed(2).padStart(9),
       r.unlitLoopCpuMs.mean.toFixed(2).padStart(6),
+      r.unlitGpuMs.toFixed(2).padStart(6),
       r.tickMs.toFixed(2).padStart(8),
       r.renderMs.toFixed(2).padStart(7),
       `${r.fireTickMs.toFixed(2)}/${r.fireRenderMs.toFixed(2)}`.padStart(10),
     ].join(" "),
   );
   return [
-    "Interval = mean ms between frames (GPU included, no vsync), cpu/f = ms of CPU per frame; shadows/l = shadow shapes per light in view; unlit = lighting and vision off",
+    "Interval = mean ms between frames (GPU included, no vsync), cpu/f = ms of CPU per frame, gpu/f = ms of GPU per frame (the render, an upper bound); shadows/l = shadow shapes per light in view; unlit = lighting and vision off",
     header,
     ...rows,
   ].join("\n");

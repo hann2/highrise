@@ -1,4 +1,5 @@
 import { SpatialHashingBroadphase } from "../../physics/collision/broadphase/SpatialHashingBroadphase";
+import { gpuProfiler } from "../GpuProfiler";
 import { profiler } from "../Profiler";
 import { ProfileRow } from "./ProfileRow";
 import type { StatsPanel, StatsPanelContext } from "./StatsPanel";
@@ -32,10 +33,13 @@ export function createProfilerPanel(): StatsPanel {
 
     onShow: () => {
       profiler.entityDetail = true;
+      gpuProfiler.enabled = true;
+      gpuProfiler.maxDepth = Infinity;
     },
 
     onHide: () => {
       profiler.entityDetail = false;
+      gpuProfiler.enabled = false;
     },
 
     render: (ctx) => {
@@ -90,6 +94,27 @@ export function createProfilerPanel(): StatsPanel {
               <div className="stats-overlay__empty">No profile data yet</div>
             )}
           </div>
+
+          {gpuProfiler.available && (
+            <div className="stats-overlay__section">
+              <div className="stats-overlay__section-header">
+                <span className="stats-overlay__section-title">GPU</span>
+                <span className="stats-overlay__hint">
+                  sections add up to more than the whole
+                </span>
+              </div>
+              {gpuProfiler
+                .getStats()
+                .filter((stat) => stat.msPerFrame >= 0.01)
+                .map((stat) => (
+                  <ProfileRow
+                    key={stat.label}
+                    stat={{ ...stat, callsPerFrame: 0, maxMs: 0 }}
+                    frameTotalMs={frameTotalMs}
+                  />
+                ))}
+            </div>
+          )}
         </>
       );
     },
@@ -97,6 +122,7 @@ export function createProfilerPanel(): StatsPanel {
     onKeyDown: (_ctx, key) => {
       if (key === "KeyR") {
         profiler.reset();
+        gpuProfiler.reset();
         return true;
       }
       if (key === "KeyP") {

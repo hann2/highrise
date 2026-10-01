@@ -5,6 +5,7 @@ import Game from "../core/Game";
 import { SpatialHashingBroadphase } from "../core/physics/collision/broadphase/SpatialHashingBroadphase";
 import { World } from "../core/physics/world/World";
 import PositionalSoundListener from "../core/sound/PositionalSoundListener";
+import { gpuProfiler } from "../core/util/GpuProfiler";
 import { profiler } from "../core/util/Profiler";
 import { seedRandom } from "../core/util/Random";
 import { createLeanPanel } from "../core/util/stats-overlay/LeanPanel";
@@ -30,7 +31,11 @@ import Preloader from "./preloader/Preloader";
 
 declare global {
   interface Window {
-    DEBUG: { game?: Game; profiler?: typeof profiler };
+    DEBUG: {
+      game?: Game;
+      profiler?: typeof profiler;
+      gpuProfiler?: typeof gpuProfiler;
+    };
   }
 }
 
@@ -64,7 +69,7 @@ export async function main() {
     game.refreshRateOverride = fps;
   }
 
-  window.DEBUG = { game, profiler };
+  window.DEBUG = { game, profiler, gpuProfiler };
   await game.init();
 
   const preloader = game.addEntity(new Preloader());

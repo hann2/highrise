@@ -52,7 +52,16 @@ test("benchmark: lighting and vision cost", async ({ page }) => {
   for (const variant of variants) {
     await setEnabled(variant.lighting, variant.vision);
     const wandering = wander(page, MEASURE_MS);
-    results[variant.name] = await measureFrames(page, MEASURE_MS);
+    // The GPU's time for the whole render over the same window
+    const [frames, profile] = await Promise.all([
+      measureFrames(page, MEASURE_MS),
+      captureProfile(page, MEASURE_MS, { entityDetail: false }),
+    ]);
+    const gpu = profile.gpu.stats.find((s) => s.label === "Game.render");
+    results[variant.name] = {
+      ...frames,
+      gpuMs: Math.round((gpu?.msPerFrame ?? 0) * 100) / 100,
+    };
     await wandering;
   }
   await setEnabled(true, true);
@@ -85,7 +94,7 @@ test("benchmark: lighting and vision cost", async ({ page }) => {
   const rows = Object.entries(results).map(([name, r]: [string, any]) => {
     const f = r.frameIntervalMs;
     const c = r.loopCpuMs;
-    return `${name.padEnd(12)} frame mean ${f.mean.toFixed(2).padStart(6)}  p95 ${f.p95.toFixed(2).padStart(6)}   loop cpu mean ${c.mean.toFixed(2).padStart(5)}  p95 ${c.p95.toFixed(2).padStart(5)}`;
+    return `${name.padEnd(12)} frame mean ${f.mean.toFixed(2).padStart(6)}  p95 ${f.p95.toFixed(2).padStart(6)}   loop cpu mean ${c.mean.toFixed(2).padStart(5)}  p95 ${c.p95.toFixed(2).padStart(5)}   gpu ${r.gpuMs.toFixed(2).padStart(5)}`;
   });
   console.log(rows.join("\n"));
   console.log(
