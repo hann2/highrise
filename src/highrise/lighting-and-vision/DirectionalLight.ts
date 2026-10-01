@@ -38,10 +38,7 @@ export class DirectionalLight extends Light {
   }
 
   setDirection(angle: number) {
-    if (angle !== this.lightSprite.rotation) {
-      this.lightSprite.rotation = angle;
-      this.dirty = true;
-    }
+    this.lightSprite.rotation = angle;
   }
 }
 

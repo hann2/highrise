@@ -19,8 +19,9 @@ const URL =
 
 /** Profiler sections worth showing on their own, wherever they are in the tree */
 const SECTIONS = [
-  "Light.bake",
-  "Shadows.renderMask",
+  "LightingManager.pack",
+  "LightingManager.masks",
+  "LightingManager.lights",
   "LightingManager.composite",
   "VisionController",
   "Renderer.render",
@@ -127,9 +128,9 @@ function countFireAndLights(page: Page) {
           lights += 1;
           if (manager.shouldRenderLight(light, minX, minY, maxX, maxY)) {
             lightsInView += 1;
-            if (light.shadows) {
+            if (light.shadowsEnabled) {
               shadowedInView += 1;
-              shadowShapes += light.shadows.countCasterShapes();
+              shadowShapes += manager.countCasterShapes(light);
             }
           }
         }

@@ -172,6 +172,5 @@ export default class Bullet extends Projectile implements Entity {
       .lineTo(halfX, halfY)
       .stroke({ width: 0.2, color: this.stats.color, alpha: 1.0 });
     this.light.setPosition(middle);
-    this.light.dirty = true;
   }
 }

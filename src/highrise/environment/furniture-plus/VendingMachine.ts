@@ -247,10 +247,8 @@ export default class VendingMachine
     for (let i = 0; i < times; i++) {
       await this.wait(rUniform(0.04, 0.1), undefined, "flicker");
       this.lightSprite.alpha = 0;
-      this.light.dirty = true;
       await this.wait(rUniform(0.04, 0.1), undefined, "flicker");
       this.lightSprite.alpha = 1;
-      this.light.dirty = true;
     }
   }
 
@@ -280,7 +278,6 @@ export default class VendingMachine
 
       await this.wait(0.2, (dt, t) => {
         this.lightSprite.alpha = 1 - t;
-        this.light.dirty = true;
       });
 
       this.lightSprite.visible = false;
