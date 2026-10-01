@@ -76,7 +76,7 @@ Highrise's)
 - Test: "contact equations are reused from step to step".
 
 ### AABB updates that allocate nothing, and a moving hash updated incrementally
-(the commit after `da6e5cb`) "Update AABBs without allocating, and only rehash bodies that changed cells"
+`49beb81` "Update AABBs without allocating, and only rehash bodies that changed cells"
 
 - `Shape.computeAABB(position, angle, out?)` writes into `out` when it's
   given (every shape); `updateAABB` uses scratch space and writes the first
