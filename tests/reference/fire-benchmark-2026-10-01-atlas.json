@@ -1,0 +1,982 @@
+[
+  {
+    "count": 0,
+    "burning": 0,
+    "lights": 25,
+    "lightsInView": 8,
+    "shadowedInView": 8,
+    "shadowsPerLight": 19,
+    "entities": 243,
+    "fps": 118,
+    "unlitFps": 117.8,
+    "frameIntervalMs": {
+      "mean": 8.46,
+      "p50": 8.4,
+      "p95": 10.2,
+      "p99": 10.9,
+      "max": 25
+    },
+    "unlitFrameIntervalMs": {
+      "mean": 8.47,
+      "p50": 8.3,
+      "p95": 10.2,
+      "p99": 22.5,
+      "max": 24.4
+    },
+    "loopCpuMs": {
+      "mean": 2.24,
+      "p50": 2.7,
+      "p95": 5.1,
+      "p99": 5.4,
+      "max": 5.6
+    },
+    "unlitLoopCpuMs": {
+      "mean": 0.39,
+      "p50": 0.2,
+      "p95": 2.4,
+      "p99": 2.6,
+      "max": 2.7
+    },
+    "tickMs": 0.05,
+    "renderMs": 2.145,
+    "fireTickMs": 0.004,
+    "fireRenderMs": 0.013,
+    "sections": {
+      "LightingManager.pack": {
+        "ms": 0.005,
+        "calls": 1
+      },
+      "LightingManager.masks": {
+        "ms": 0.023,
+        "calls": 1
+      },
+      "LightingManager.lights": {
+        "ms": 0.08,
+        "calls": 1
+      },
+      "LightingManager.composite": {
+        "ms": 0.08,
+        "calls": 1
+      },
+      "VisionController": {
+        "ms": 1.529,
+        "calls": 6
+      },
+      "Renderer.render": {
+        "ms": 0.325,
+        "calls": 1
+      }
+    },
+    "top": [
+      {
+        "label": "Game.render > main",
+        "ms": 1.631,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController",
+        "ms": 1.57,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.explored",
+        "ms": 0.97,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.darkness",
+        "ms": 0.316,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > Renderer.render",
+        "ms": 0.27,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager",
+        "ms": 0.199,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.composite",
+        "ms": 0.111,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.occluders",
+        "ms": 0.092,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.visibility",
+        "ms": 0.078,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.unseen",
+        "ms": 0.062,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.mesh",
+        "ms": 0.042,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.lights",
+        "ms": 0.033,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main",
+        "ms": 0.029,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.masks",
+        "ms": 0.027,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input",
+        "ms": 0.024,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input > PlayerHumanController",
+        "ms": 0.019,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > ReactEntity",
+        "ms": 0.015,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire",
+        "ms": 0.015,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > ArenaPanel",
+        "ms": 0.013,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > HumanSprite",
+        "ms": 0.012,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Human",
+        "ms": 0.011,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.pack",
+        "ms": 0.007,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > fire",
+        "ms": 0.006,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > camera",
+        "ms": 0.006,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireRenderer",
+        "ms": 0.005,
+        "calls": 1
+      }
+    ]
+  },
+  {
+    "count": 4,
+    "burning": 202,
+    "lights": 227,
+    "lightsInView": 27,
+    "shadowedInView": 27,
+    "shadowsPerLight": 12.1,
+    "entities": 445,
+    "fps": 120,
+    "unlitFps": 119.3,
+    "frameIntervalMs": {
+      "mean": 8.34,
+      "p50": 8.5,
+      "p95": 9.8,
+      "p99": 10.6,
+      "max": 11
+    },
+    "unlitFrameIntervalMs": {
+      "mean": 8.37,
+      "p50": 8.3,
+      "p95": 10.6,
+      "p99": 11.7,
+      "max": 24.1
+    },
+    "loopCpuMs": {
+      "mean": 3.64,
+      "p50": 3.5,
+      "p95": 5.4,
+      "p99": 5.8,
+      "max": 6.4
+    },
+    "unlitLoopCpuMs": {
+      "mean": 1.97,
+      "p50": 2.1,
+      "p95": 2.9,
+      "p99": 4,
+      "max": 5.4
+    },
+    "tickMs": 0.414,
+    "renderMs": 3.038,
+    "fireTickMs": 0.37,
+    "fireRenderMs": 0.63,
+    "sections": {
+      "LightingManager.pack": {
+        "ms": 0.014,
+        "calls": 1
+      },
+      "LightingManager.masks": {
+        "ms": 0.05,
+        "calls": 1
+      },
+      "LightingManager.lights": {
+        "ms": 0.178,
+        "calls": 1
+      },
+      "LightingManager.composite": {
+        "ms": 0.213,
+        "calls": 1
+      },
+      "VisionController": {
+        "ms": 1.124,
+        "calls": 6
+      },
+      "Renderer.render": {
+        "ms": 0.73,
+        "calls": 1
+      }
+    },
+    "top": [
+      {
+        "label": "Game.render > main",
+        "ms": 1.207,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController",
+        "ms": 1.144,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire",
+        "ms": 0.773,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > Renderer.render",
+        "ms": 0.767,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager",
+        "ms": 0.449,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FloorMarks",
+        "ms": 0.397,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.darkness",
+        "ms": 0.391,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > fire",
+        "ms": 0.386,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > fire > SmokeField",
+        "ms": 0.379,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.explored",
+        "ms": 0.348,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.unseen",
+        "ms": 0.193,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.lights",
+        "ms": 0.19,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.composite",
+        "ms": 0.15,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireGrid",
+        "ms": 0.141,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireEmbers",
+        "ms": 0.101,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.occluders",
+        "ms": 0.092,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > SmokeField",
+        "ms": 0.09,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.visibility",
+        "ms": 0.076,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.masks",
+        "ms": 0.069,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireRenderer",
+        "ms": 0.039,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.mesh",
+        "ms": 0.034,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main",
+        "ms": 0.03,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input",
+        "ms": 0.019,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input > PlayerHumanController",
+        "ms": 0.016,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > ReactEntity",
+        "ms": 0.014,
+        "calls": 1
+      }
+    ]
+  },
+  {
+    "count": 8,
+    "burning": 254,
+    "lights": 279,
+    "lightsInView": 63,
+    "shadowedInView": 63,
+    "shadowsPerLight": 11.2,
+    "entities": 497,
+    "fps": 119.8,
+    "unlitFps": 120,
+    "frameIntervalMs": {
+      "mean": 8.33,
+      "p50": 8.5,
+      "p95": 9.6,
+      "p99": 10.7,
+      "max": 11.1
+    },
+    "unlitFrameIntervalMs": {
+      "mean": 8.33,
+      "p50": 8.3,
+      "p95": 10.3,
+      "p99": 11,
+      "max": 12.3
+    },
+    "loopCpuMs": {
+      "mean": 3.8,
+      "p50": 3.6,
+      "p95": 5.5,
+      "p99": 5.7,
+      "max": 6.4
+    },
+    "unlitLoopCpuMs": {
+      "mean": 2.38,
+      "p50": 2.5,
+      "p95": 3.7,
+      "p99": 4.4,
+      "max": 4.7
+    },
+    "tickMs": 0.464,
+    "renderMs": 3.072,
+    "fireTickMs": 0.421,
+    "fireRenderMs": 0.87,
+    "sections": {
+      "LightingManager.pack": {
+        "ms": 0.03,
+        "calls": 1
+      },
+      "LightingManager.masks": {
+        "ms": 0.065,
+        "calls": 1
+      },
+      "LightingManager.lights": {
+        "ms": 0.176,
+        "calls": 1
+      },
+      "LightingManager.composite": {
+        "ms": 0.144,
+        "calls": 1
+      },
+      "VisionController": {
+        "ms": 0.995,
+        "calls": 6
+      },
+      "Renderer.render": {
+        "ms": 0.692,
+        "calls": 1
+      }
+    },
+    "top": [
+      {
+        "label": "Game.render > main",
+        "ms": 1.102,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController",
+        "ms": 1.039,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire",
+        "ms": 0.826,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > Renderer.render",
+        "ms": 0.732,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > fire",
+        "ms": 0.44,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager",
+        "ms": 0.439,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FloorMarks",
+        "ms": 0.435,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > fire > SmokeField",
+        "ms": 0.433,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.darkness",
+        "ms": 0.41,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.explored",
+        "ms": 0.268,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.lights",
+        "ms": 0.201,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireGrid",
+        "ms": 0.167,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.unseen",
+        "ms": 0.158,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireEmbers",
+        "ms": 0.118,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.composite",
+        "ms": 0.118,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.occluders",
+        "ms": 0.086,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.visibility",
+        "ms": 0.075,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.masks",
+        "ms": 0.057,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireRenderer",
+        "ms": 0.056,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > SmokeField",
+        "ms": 0.044,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.mesh",
+        "ms": 0.034,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.pack",
+        "ms": 0.029,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input",
+        "ms": 0.023,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input > PlayerHumanController",
+        "ms": 0.02,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main",
+        "ms": 0.02,
+        "calls": 1
+      }
+    ]
+  },
+  {
+    "count": 16,
+    "burning": 603,
+    "lights": 628,
+    "lightsInView": 118,
+    "shadowedInView": 118,
+    "shadowsPerLight": 13.6,
+    "entities": 846,
+    "fps": 113.8,
+    "unlitFps": 119.8,
+    "frameIntervalMs": {
+      "mean": 8.74,
+      "p50": 8.5,
+      "p95": 11.7,
+      "p99": 20.6,
+      "max": 43.9
+    },
+    "unlitFrameIntervalMs": {
+      "mean": 8.33,
+      "p50": 8.3,
+      "p95": 10.6,
+      "p99": 11.4,
+      "max": 12.2
+    },
+    "loopCpuMs": {
+      "mean": 6.01,
+      "p50": 5,
+      "p95": 11.2,
+      "p99": 20.1,
+      "max": 43.6
+    },
+    "unlitLoopCpuMs": {
+      "mean": 2.53,
+      "p50": 2.4,
+      "p95": 3.8,
+      "p99": 4.7,
+      "max": 4.8
+    },
+    "tickMs": 0.783,
+    "renderMs": 5.165,
+    "fireTickMs": 0.738,
+    "fireRenderMs": 0.999,
+    "sections": {
+      "LightingManager.pack": {
+        "ms": 0.047,
+        "calls": 1
+      },
+      "LightingManager.masks": {
+        "ms": 0.028,
+        "calls": 1
+      },
+      "LightingManager.lights": {
+        "ms": 0.653,
+        "calls": 1
+      },
+      "LightingManager.composite": {
+        "ms": 0.384,
+        "calls": 1
+      },
+      "VisionController": {
+        "ms": 0.572,
+        "calls": 6
+      },
+      "Renderer.render": {
+        "ms": 2.348,
+        "calls": 1
+      }
+    },
+    "top": [
+      {
+        "label": "Game.render > Renderer.render",
+        "ms": 2.875,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire",
+        "ms": 1.278,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > fire",
+        "ms": 0.812,
+        "calls": 1.1
+      },
+      {
+        "label": "Game.tick > fire > SmokeField",
+        "ms": 0.798,
+        "calls": 1.1
+      },
+      {
+        "label": "Game.render > main",
+        "ms": 0.657,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController",
+        "ms": 0.588,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager",
+        "ms": 0.504,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireGrid",
+        "ms": 0.384,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > SmokeField",
+        "ms": 0.352,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.lights",
+        "ms": 0.275,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FloorMarks",
+        "ms": 0.209,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireRenderer",
+        "ms": 0.176,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.explored",
+        "ms": 0.156,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireEmbers",
+        "ms": 0.151,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.darkness",
+        "ms": 0.133,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.occluders",
+        "ms": 0.093,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.visibility",
+        "ms": 0.078,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.unseen",
+        "ms": 0.077,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.composite",
+        "ms": 0.068,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.masks",
+        "ms": 0.062,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.pack",
+        "ms": 0.049,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.mesh",
+        "ms": 0.039,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main",
+        "ms": 0.027,
+        "calls": 1.1
+      },
+      {
+        "label": "Game.tick > input",
+        "ms": 0.022,
+        "calls": 1.1
+      },
+      {
+        "label": "Game.tick > input > PlayerHumanController",
+        "ms": 0.019,
+        "calls": 1.1
+      }
+    ]
+  },
+  {
+    "count": 32,
+    "burning": 1209,
+    "lights": 1234,
+    "lightsInView": 205,
+    "shadowedInView": 205,
+    "shadowsPerLight": 11.6,
+    "entities": 1452,
+    "fps": 101.5,
+    "unlitFps": 118,
+    "frameIntervalMs": {
+      "mean": 9.82,
+      "p50": 8.4,
+      "p95": 26.3,
+      "p99": 33.2,
+      "max": 65.3
+    },
+    "unlitFrameIntervalMs": {
+      "mean": 8.47,
+      "p50": 8.3,
+      "p95": 10.7,
+      "p99": 22.6,
+      "max": 29.7
+    },
+    "loopCpuMs": {
+      "mean": 7.48,
+      "p50": 5.4,
+      "p95": 26,
+      "p99": 32.8,
+      "max": 64.9
+    },
+    "unlitLoopCpuMs": {
+      "mean": 3.46,
+      "p50": 3.1,
+      "p95": 4.3,
+      "p99": 22,
+      "max": 29.3
+    },
+    "tickMs": 1.1,
+    "renderMs": 5.789,
+    "fireTickMs": 1.051,
+    "fireRenderMs": 1.607,
+    "sections": {
+      "LightingManager.pack": {
+        "ms": 0.093,
+        "calls": 1
+      },
+      "LightingManager.masks": {
+        "ms": 0.036,
+        "calls": 2
+      },
+      "LightingManager.lights": {
+        "ms": 0.33,
+        "calls": 2
+      },
+      "LightingManager.composite": {
+        "ms": 0.092,
+        "calls": 1
+      },
+      "VisionController": {
+        "ms": 0.438,
+        "calls": 6
+      },
+      "Renderer.render": {
+        "ms": 3.025,
+        "calls": 1
+      }
+    },
+    "top": [
+      {
+        "label": "Game.render > Renderer.render",
+        "ms": 2.864,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire",
+        "ms": 1.597,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > fire",
+        "ms": 1.172,
+        "calls": 1.1
+      },
+      {
+        "label": "Game.tick > fire > SmokeField",
+        "ms": 1.15,
+        "calls": 1.1
+      },
+      {
+        "label": "Game.render > fire > FireGrid",
+        "ms": 0.78,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager",
+        "ms": 0.706,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main",
+        "ms": 0.56,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController",
+        "ms": 0.492,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FloorMarks",
+        "ms": 0.355,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.lights",
+        "ms": 0.347,
+        "calls": 2
+      },
+      {
+        "label": "Game.render > fire > FireRenderer",
+        "ms": 0.219,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > FireEmbers",
+        "ms": 0.17,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.composite",
+        "ms": 0.125,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.darkness",
+        "ms": 0.113,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.pack",
+        "ms": 0.1,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.occluders",
+        "ms": 0.1,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.explored",
+        "ms": 0.093,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.visibility",
+        "ms": 0.073,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > fire > SmokeField",
+        "ms": 0.067,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.unseen",
+        "ms": 0.052,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > main > VisionController > VisionController.mesh",
+        "ms": 0.051,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > LightingManager > LightingManager.masks",
+        "ms": 0.036,
+        "calls": 2
+      },
+      {
+        "label": "Game.tick > main",
+        "ms": 0.031,
+        "calls": 1.1
+      },
+      {
+        "label": "Game.tick > input",
+        "ms": 0.025,
+        "calls": 1.1
+      },
+      {
+        "label": "Game.tick > input > PlayerHumanController",
+        "ms": 0.022,
+        "calls": 1.1
+      }
+    ]
+  }
+]

@@ -41,7 +41,9 @@ export default class SpitterSprite extends BaseEntity implements Entity {
       this.sprite.addChild(bodySprite);
     }
 
-    this.glow = this.addChild(new PointLight({ color: 0x00ff00 }));
+    this.glow = this.addChild(
+      new PointLight({ color: 0x00ff00, dynamic: true }),
+    );
   }
 
   @on("render")

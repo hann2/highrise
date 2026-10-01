@@ -14,6 +14,7 @@ import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
+import { measureCpuAndGpu } from "../../core/util/GpuProfiler";
 import { profiler } from "../../core/util/Profiler";
 import { V, V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
@@ -282,7 +283,7 @@ export default class VisionController extends BaseEntity implements Entity {
         sourceRadius: VISION_SOURCE_RADIUS,
       }),
     );
-    profiler.measure("VisionController.mesh", () => {
+    measureCpuAndGpu("VisionController.mesh", () => {
       const outline = visibilityOutline(this.eye, this.samples);
       setGeometry(
         this.geometry,
@@ -300,7 +301,7 @@ export default class VisionController extends BaseEntity implements Entity {
       this.mesh.visible = this.geometry.indices.length > 0;
       this.penumbraMesh.visible = this.penumbraGeometry.indices.length > 0;
     });
-    profiler.measure("VisionController.darkness", () => {
+    measureCpuAndGpu("VisionController.darkness", () => {
       // The meshes are relative to the eye, so put it in the middle
       this.renderer.render({
         container: this.darknessContainer,
@@ -310,7 +311,7 @@ export default class VisionController extends BaseEntity implements Entity {
         transform: new Matrix().translate(this.outerRadius, this.outerRadius),
       });
     });
-    profiler.measure("VisionController.unseen", () => {
+    measureCpuAndGpu("VisionController.unseen", () => {
       // At full strength, so that where the darkness and the static shape
       // beyond it overlap is no darker than either
       this.renderer.render({
@@ -320,7 +321,7 @@ export default class VisionController extends BaseEntity implements Entity {
         clearColor: [0, 0, 0, 0],
       });
     });
-    profiler.measure("VisionController.explored", () => {
+    measureCpuAndGpu("VisionController.explored", () => {
       this.explored?.update(this.eye);
     });
   }

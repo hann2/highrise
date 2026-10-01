@@ -1,6 +1,7 @@
 import { DEFAULT_LAYER, LAYERS } from "../config/layers";
 import { ContactList } from "./ContactList";
 import { TICK_LAYERS } from "../config/tickLayers";
+import { gpuProfiler } from "./util/GpuProfiler";
 import { profile, profiler } from "./util/Profiler";
 import { on } from "./entity/handler";
 import EntityList from "./EntityList";
@@ -165,6 +166,10 @@ export default class Game {
     rendererOptions?: GameRenderer2dOptions;
   } = {}) {
     await this.renderer.init(rendererOptions);
+    // Undefined unless Pixi chose WebGL
+    gpuProfiler.init(
+      (this.renderer.app.renderer as { gl?: WebGL2RenderingContext }).gl,
+    );
     this.io = new IOManager(this.renderer.canvas, (event, data) =>
       this.dispatch(event, data as GameEventMap[typeof event], false),
     );
@@ -369,6 +374,7 @@ export default class Game {
   @profile
   private nextFrame(frames: number): void {
     this.framenumber += 1;
+    gpuProfiler.poll();
 
     const renderDt = frames / this.targetFrameRate;
     this.elapsedTime += renderDt;
@@ -470,18 +476,27 @@ export default class Game {
   @profile
   private render(dt: number) {
     this.cleanupEntities();
-    // In the same layers as ticks, so each layer's rendering is timed as a whole
+    gpuProfiler.start("Game.render");
+    // In the same layers as ticks, so each layer's rendering is timed as a
+    // whole (by the GPU profiler too: some draw into textures as they go)
     for (const layer of TICK_LAYERS) {
       profiler.measure(layer, () => {
-        this.callHandlers(
-          "render",
-          dt,
-          this.entities.getRenderersOnLayer(layer),
-        );
+        gpuProfiler.measure(layer, () => {
+          this.callHandlers(
+            "render",
+            dt,
+            this.entities.getRenderersOnLayer(layer),
+          );
+        });
       });
     }
-    this.callHandlers("lateRender", dt);
-    profiler.measure("Renderer.render", () => this.renderer.render());
+    gpuProfiler.measure("lateRender", () =>
+      this.callHandlers("lateRender", dt),
+    );
+    profiler.measure("Renderer.render", () =>
+      gpuProfiler.measure("Renderer.render", () => this.renderer.render()),
+    );
+    gpuProfiler.end();
   }
 
   /**

@@ -18,6 +18,7 @@
     "test": "playwright test",
     "benchmark": "BENCHMARK=1 playwright test",
     "benchmark:enemies": "BENCHMARK=1 playwright test enemies.benchmark",
+    "benchmark:fire": "BENCHMARK=1 playwright test fire.benchmark",
     "generate-manifest": "tsx ./bin/generate-manifest.ts",
     "watch-manifest": "tsx ./bin/generate-manifest.ts watch",
     "test:physics": "tsx --test tests/physics/*.test.ts",

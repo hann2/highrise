@@ -37,7 +37,7 @@ export default class Flashlight extends BaseEntity implements Entity {
 
   @on("render")
   onRender() {
-    // The light's size is baked into its texture, so a new range needs a new light
+    // The cone's texture is made for one length, so a new range needs a new light
     const length = BASE_LENGTH * this.human.stats.flashlightRange;
     if (length !== this.length) {
       this.length = length;
@@ -47,7 +47,6 @@ export default class Flashlight extends BaseEntity implements Entity {
       this.light.enabled = enabled;
     }
 
-    // Only rebakes when the light actually moved or turned
     const [position, direction] = this.getMount();
     this.light.setPosition(position);
     this.light.setDirection(direction);
@@ -77,5 +76,6 @@ function makeLight(length: number): DirectionalLight {
     intensity: 0.7,
     color: 0xfff1d6,
     sourceRadius: 0.1,
+    dynamic: true,
   });
 }

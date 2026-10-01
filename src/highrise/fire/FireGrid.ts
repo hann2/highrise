@@ -384,6 +384,8 @@ export default class FireGrid extends BaseEntity implements Entity {
             radius: CELL_LIGHT_RADIUS,
             intensity: 0,
             position: this.cellCenter(cell),
+            // It wanders as it flickers
+            dynamic: true,
           }),
         );
         this.lights.set(cell, light);

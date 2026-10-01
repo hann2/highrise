@@ -13,6 +13,8 @@ export interface DirectionalLightOptions {
   shadowsEnabled?: boolean;
   /** Radius of the light source in meters, for soft shadows */
   sourceRadius?: number;
+  /** Drawn every frame, for a light that moves or turns all the time (see `Light`) */
+  dynamic?: boolean;
 }
 
 /** A cone of light, like a flashlight. Point it with `setDirection`. */
@@ -24,6 +26,7 @@ export class DirectionalLight extends Light {
     color = 0xffffff,
     shadowsEnabled = true,
     sourceRadius = 0,
+    dynamic = false,
   }: DirectionalLightOptions = {}) {
     const cone = new Sprite(getConeTexture(length, spread));
     cone.anchor.set(0, 0.5);
@@ -32,6 +35,7 @@ export class DirectionalLight extends Light {
     cone.blendMode = "add";
 
     super(cone, shadowsEnabled, length, sourceRadius, length * 2);
+    this.dynamic = dynamic;
 
     this.setIntensity(intensity);
     this.setColor(color);
@@ -40,7 +44,7 @@ export class DirectionalLight extends Light {
   setDirection(angle: number) {
     if (angle !== this.lightSprite.rotation) {
       this.lightSprite.rotation = angle;
-      this.dirty = true;
+      this.invalidate();
     }
   }
 }

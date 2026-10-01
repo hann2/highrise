@@ -83,6 +83,8 @@ export default class Burning extends BaseEntity implements Entity {
         radius: BURNING_LIGHT_RADIUS,
         intensity: 0,
         position: this.target.getPosition(),
+        // It follows the burning thing, and wanders as it flickers
+        dynamic: true,
       }),
     );
   }

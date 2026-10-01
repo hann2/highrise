@@ -51,12 +51,13 @@ export const ARRIVALS: ReadonlyArray<Arrival> = [
 ];
 
 /** The shape of the arena (see `arenaLayouts.ts`) */
-export type LayoutName = "open" | "pillars" | "corridor" | "hall";
+export type LayoutName = "open" | "pillars" | "corridor" | "hall" | "offices";
 export const LAYOUT_NAMES: ReadonlyArray<LayoutName> = [
   "open",
   "pillars",
   "corridor",
   "hall",
+  "offices",
 ];
 
 /** Everything about an arena setup. It all goes in the URL (see `arenaConfigToQuery`). */
@@ -85,6 +86,8 @@ export interface ArenaConfig {
   dummies: boolean;
   /** As dark as a floor, rather than brightly lit */
   dark: boolean;
+  /** Pools of fire spread over the room that never go out, for stress tests */
+  fires: number;
 }
 
 /** Lower case with only letters and digits, for names in the URL: "Dragon's Breath" is "dragonsbreath" */
@@ -141,7 +144,7 @@ export function startingSlots(
  *
  * `?scene=arena&char=chad&weapons=spas12,glock&items=buckshotbounce*2,choke
  * &throwable=molotov*3&usable=stimpack&act=3&wave=zombie*12,heavy*2
- * &arrival=surround&layout=pillars&god&infammo&fog&dummies&dark`
+ * &arrival=surround&layout=pillars&god&infammo&fog&dummies&dark&fires=8`
  */
 export function parseArenaConfig(params: URLSearchParams): ArenaConfig {
   const character =
@@ -178,6 +181,7 @@ export function parseArenaConfig(params: URLSearchParams): ArenaConfig {
   }
 
   const act = parseInt(params.get("act") ?? "1", 10);
+  const fires = parseInt(params.get("fires") ?? "0", 10);
   const arrival = params.get("arrival") as Arrival;
   const layout = params.get("layout") as LayoutName;
 
@@ -197,6 +201,7 @@ export function parseArenaConfig(params: URLSearchParams): ArenaConfig {
     fog: params.has("fog"),
     dummies: params.has("dummies"),
     dark: params.has("dark"),
+    fires: isNaN(fires) ? 0 : Math.max(fires, 0),
   };
 }
 
@@ -232,6 +237,9 @@ export function arenaConfigToQuery(config: ArenaConfig): string {
     .map(([name, n]) => formatCount(name, n));
   parts.push(`wave=${wave.join(",")}`);
   parts.push(`arrival=${config.arrival}`, `layout=${config.layout}`);
+  if (config.fires > 0) {
+    parts.push(`fires=${config.fires}`);
+  }
   const flags: [boolean, string][] = [
     [config.god, "god"],
     [config.infiniteAmmo, "infammo"],
@@ -257,6 +265,7 @@ export function arenaConfigToQuery(config: ArenaConfig): string {
     "wave",
     "arrival",
     "layout",
+    "fires",
     ...flags.map(([, flag]) => flag),
   ]);
   for (const [key, value] of new URLSearchParams(window.location.search)) {

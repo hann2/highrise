@@ -152,9 +152,82 @@ const HALL: ArenaLayout = {
   edgeSpots: edgeSpots(60, 40),
 };
 
+/**
+ * A grid of `columns` by `rows` rooms filling `width` by `height`, with a
+ * doorway `door` meters wide in every wall between two rooms. The doorways
+ * sit a third or two thirds of the way along, alternating, so they don't
+ * line up into corridors.
+ */
+function rooms(
+  width: number,
+  height: number,
+  columns: number,
+  rows: number,
+  door: number = 1.4,
+): Segment[] {
+  const walls: Segment[] = [];
+  const roomWidth = width / columns;
+  const roomHeight = height / rows;
+  // A wall from `from` to `to` along one axis, at `at` on the other, with a doorway
+  const withDoor = (
+    vertical: boolean,
+    at: number,
+    from: number,
+    to: number,
+    which: number,
+  ) => {
+    const middle = from + ((to - from) * (which % 2 === 0 ? 1 : 2)) / 3;
+    const point = (along: number): [number, number] =>
+      vertical ? [at, along] : [along, at];
+    walls.push(
+      [point(from), point(middle - door / 2)],
+      [point(middle + door / 2), point(to)],
+    );
+  };
+  for (let i = 1; i < columns; i++) {
+    for (let j = 0; j < rows; j++) {
+      withDoor(
+        true,
+        i * roomWidth,
+        j * roomHeight,
+        (j + 1) * roomHeight,
+        i + j,
+      );
+    }
+  }
+  for (let j = 1; j < rows; j++) {
+    for (let i = 0; i < columns; i++) {
+      withDoor(
+        false,
+        j * roomHeight,
+        i * roomWidth,
+        (i + 1) * roomWidth,
+        i + j,
+      );
+    }
+  }
+  return walls;
+}
+
+/**
+ * The hall's size, divided into rooms about the size of a floor's offices,
+ * with doorways between them: as many walls near any one spot as on a real
+ * floor, for stress testing what walls cost (shadows and vision; see
+ * `tests/fire.benchmark.spec.ts`). The player starts in a room in the middle.
+ */
+const OFFICES: ArenaLayout = {
+  width: 60,
+  height: 40,
+  walls: rooms(60, 40, 9, 5),
+  playerStart: V(30, 20),
+  spawnArea: { center: V(56.5, 20), radius: 2 },
+  edgeSpots: edgeSpots(60, 40),
+};
+
 export const ARENA_LAYOUTS: Record<LayoutName, ArenaLayout> = {
   open: OPEN,
   pillars: PILLARS,
   corridor: CORRIDOR,
   hall: HALL,
+  offices: OFFICES,
 };
