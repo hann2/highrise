@@ -4,7 +4,11 @@ import { Capsule } from "../../../shapes/Capsule";
 import { Circle } from "../../../shapes/Circle";
 import { Line } from "../../../shapes/Line";
 import { Shape } from "../../../shapes/Shape";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 // Scratch vectors to avoid per-call allocations
 const _lineStart = V();
@@ -88,12 +92,11 @@ export function circleLineOrCapsule(
       _contactOnLine.set(_projectedPoint);
 
       const result = createCollisionResult();
-      result.contacts.push({
-        worldContactA: V(_contactOnCircle).isub(bodyA.position),
-        worldContactB: V(_contactOnLine).isub(bodyB.position),
-        normal: V(_normal),
-        depth: radiusSum - Math.abs(perpDistance),
-      });
+      const added = addContact(result);
+      added.worldContactA.set(_contactOnCircle).isub(bodyA.position);
+      added.worldContactB.set(_contactOnLine).isub(bodyB.position);
+      added.normal.set(_normal);
+      added.depth = radiusSum - Math.abs(perpDistance);
 
       return result;
     }
@@ -118,12 +121,11 @@ export function circleLineOrCapsule(
       _contactOnLine.set(endpoint).iadd(V(_normal).imul(-lr));
 
       const result = createCollisionResult();
-      result.contacts.push({
-        worldContactA: V(_contactOnCircle).isub(bodyA.position),
-        worldContactB: V(_contactOnLine).isub(bodyB.position),
-        normal: V(_normal),
-        depth: radiusSum - _dist.magnitude,
-      });
+      const added = addContact(result);
+      added.worldContactA.set(_contactOnCircle).isub(bodyA.position);
+      added.worldContactB.set(_contactOnLine).isub(bodyB.position);
+      added.normal.set(_normal);
+      added.depth = radiusSum - _dist.magnitude;
 
       return result;
     }

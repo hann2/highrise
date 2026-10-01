@@ -4,7 +4,11 @@ import { Circle } from "../../../shapes/Circle";
 import { Convex } from "../../../shapes/Convex";
 import { Shape } from "../../../shapes/Shape";
 import { pointInConvexLocal } from "../../CollisionHelpers";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 // Scratch vectors to avoid per-call allocations
 const _localCirclePos = V();
@@ -111,12 +115,11 @@ export function circleConvex(
     _closestEdgePoint.set(_normal).imul(minCandidateDistance).iadd(_candidate);
 
     const result = createCollisionResult();
-    result.contacts.push({
-      worldContactA: V(_candidate).isub(bodyA.position),
-      worldContactB: V(_closestEdgePoint).isub(bodyB.position),
-      normal: V(_candidate).isub(offsetA).inormalize(),
-      depth: minCandidateDistance,
-    });
+    const added = addContact(result);
+    added.worldContactA.set(_candidate).isub(bodyA.position);
+    added.worldContactB.set(_closestEdgePoint).isub(bodyB.position);
+    added.normal.set(_candidate).isub(offsetA).inormalize();
+    added.depth = minCandidateDistance;
 
     return result;
   }
@@ -142,12 +145,15 @@ export function circleConvex(
         _normal.set(_worldDist).inormalize();
 
         const result = createCollisionResult();
-        result.contacts.push({
-          worldContactA: V(_normal).imul(cr).isub(bodyA.position).iadd(offsetA),
-          worldContactB: V(_worldVertex).isub(bodyB.position),
-          normal: V(_normal),
-          depth: cr - _worldDist.magnitude,
-        });
+        const added = addContact(result);
+        added.worldContactA
+          .set(_normal)
+          .imul(cr)
+          .isub(bodyA.position)
+          .iadd(offsetA);
+        added.worldContactB.set(_worldVertex).isub(bodyB.position);
+        added.normal.set(_normal);
+        added.depth = cr - _worldDist.magnitude;
 
         return result;
       }

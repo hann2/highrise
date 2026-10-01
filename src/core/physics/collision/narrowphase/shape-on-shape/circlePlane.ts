@@ -2,7 +2,11 @@ import { V, V2d } from "../../../../Vector";
 import { Body } from "../../../body/Body";
 import { Circle } from "../../../shapes/Circle";
 import { Plane } from "../../../shapes/Plane";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 const yAxis = V(0, 1);
 
@@ -49,12 +53,11 @@ export function circlePlane(
   _contactOnPlane.set(_circleToPlane).isub(_projectionOffset).iadd(offsetB);
 
   const result = createCollisionResult();
-  result.contacts.push({
-    worldContactA: V(_contactOnCircle).isub(bodyA.position),
-    worldContactB: V(_contactOnPlane).isub(bodyB.position),
-    normal: V(_planeNormal).imul(-1), // Normal from circle towards plane
-    depth: circleRadius - distance,
-  });
+  const added = addContact(result);
+  added.worldContactA.set(_contactOnCircle).isub(bodyA.position);
+  added.worldContactB.set(_contactOnPlane).isub(bodyB.position);
+  added.normal.set(_planeNormal).imul(-1); // Normal from circle towards plane
+  added.depth = circleRadius - distance;
 
   return result;
 }

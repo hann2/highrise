@@ -1,111 +1,126 @@
 import type { Body } from "../body/Body";
-import type { ContactEquation } from "../equations/ContactEquation";
 import type { Shape } from "../shapes/Shape";
 
-/** Input: current frame's overlapping shape pairs with their contact equations */
-export interface ShapeOverlap {
+/** Two shapes (and their bodies) touching */
+export interface ShapePair {
   bodyA: Body;
   shapeA: Shape;
   bodyB: Body;
   shapeB: Shape;
-  contactEquations: ContactEquation[]; // empty for sensors
 }
 
-/** Output for new overlaps - includes contact equations for beginContact event */
-export interface NewOverlap {
-  bodyA: Body;
-  shapeA: Shape;
-  bodyB: Body;
-  shapeB: Shape;
-  contactEquations: ContactEquation[];
-}
+/** Input: one of this step's overlapping shape pairs (a collision or a sensor overlap) */
+export type ShapeOverlap = ShapePair;
 
-/** Output for ended overlaps - just body/shape refs for endContact event */
-export interface EndedOverlap {
-  bodyA: Body;
-  shapeA: Shape;
-  bodyB: Body;
-  shapeB: Shape;
-}
+/** Output for new overlaps: the input pair itself, so it's only good during the step */
+export type NewOverlap = ShapeOverlap;
+
+/** Output for ended overlaps: the pair as it was when the overlap began */
+export type EndedOverlap = ShapePair;
 
 export interface OverlapChanges {
   newOverlaps: NewOverlap[];
   endedOverlaps: EndedOverlap[];
-  /** Body pairs that just started overlapping (for firstImpact flag) */
-  newlyOverlappingBodies: Set<string>;
+  /** Body pairs that just started overlapping (for firstImpact flag), by `bodyKey` */
+  newlyOverlappingBodies: ReadonlySet<PairKey>;
 }
 
-/** Returns a unique id for a tuple of two numbers, ignoring number order */
-export function tupleToInt(a: number, b: number): string {
-  return a < b ? `${a}:${b}` : `${b}:${a}`;
+/** A key for an unordered pair of ids (see `tupleToInt`) */
+export type PairKey = number | string;
+
+/** Below this, `lo * 2^32 + hi` is an exact number (2^21: it has to fit in 53 bits) */
+const MAX_NUMERIC_LO = 2 ** 21;
+const HI_FACTOR = 2 ** 32;
+
+/**
+ * A unique key for a pair of ids, ignoring their order: a number (cheap to
+ * make and to look up) as long as the smaller id is below 2^21, else a
+ * string.
+ */
+export function tupleToInt(a: number, b: number): PairKey {
+  const lo = a < b ? a : b;
+  const hi = a < b ? b : a;
+  return lo < MAX_NUMERIC_LO && hi < HI_FACTOR
+    ? lo * HI_FACTOR + hi
+    : `${lo}:${hi}`;
 }
 
 /** Generates a unique key for a shape pair (order-independent) */
-export function shapeKey(shapeA: Shape, shapeB: Shape): string {
+export function shapeKey(shapeA: Shape, shapeB: Shape): PairKey {
   return tupleToInt(shapeA.id, shapeB.id);
 }
 
 /** Generates a unique key for a body pair (order-independent) */
-export function bodyKey(bodyA: Body, bodyB: Body): string {
+export function bodyKey(bodyA: Body, bodyB: Body): PairKey {
   return tupleToInt(bodyA.id, bodyB.id);
 }
 
 /**
  * Tracks shape overlaps between frames to detect begin/end contact events.
  * Also tracks body-level overlaps for bodiesAreOverlapping() queries.
+ *
+ * Its maps and sets are reused from step to step, and an overlap that goes on
+ * keeps the record it was given when it began, so a steady pile of contacts
+ * makes no garbage.
  */
 export class OverlapKeeper {
-  private previousShapeOverlaps = new Map<string, EndedOverlap>();
-  private previousBodyOverlaps = new Set<string>();
-  private currentBodyOverlaps = new Set<string>();
+  /** Last step's shape overlaps, then (while updating) the ones not seen again yet */
+  private previousShapeOverlaps = new Map<PairKey, ShapePair>();
+  private currentShapeOverlaps = new Map<PairKey, ShapePair>();
+  private previousBodyOverlaps = new Set<PairKey>();
+  private currentBodyOverlaps = new Set<PairKey>();
+  private newlyOverlappingBodies = new Set<PairKey>();
 
-  /** Update with current frame's overlaps and return what changed. */
-  updateOverlaps(currentOverlaps: readonly ShapeOverlap[]): OverlapChanges {
-    // Build map of current shape overlaps and set of body overlaps
-    const currentShapeMap = new Map<string, ShapeOverlap>();
-    const currentBodySet = new Set<string>();
+  /**
+   * Update with this step's overlaps and return what changed. What it returns
+   * is only good until the next update.
+   */
+  updateOverlaps(
+    ...overlapLists: ReadonlyArray<readonly ShapeOverlap[]>
+  ): OverlapChanges {
+    const previous = this.previousShapeOverlaps;
+    const current = this.currentShapeOverlaps;
+    current.clear();
+    // Last step's body overlaps become the previous ones
+    const previousBodies = this.currentBodyOverlaps;
+    const currentBodies = this.previousBodyOverlaps;
+    currentBodies.clear();
+    const newlyOverlappingBodies = this.newlyOverlappingBodies;
+    newlyOverlappingBodies.clear();
 
-    for (const overlap of currentOverlaps) {
-      currentShapeMap.set(shapeKey(overlap.shapeA, overlap.shapeB), overlap);
-      currentBodySet.add(bodyKey(overlap.bodyA, overlap.bodyB));
-    }
-
-    // New overlaps: in current but not in previous
     const newOverlaps: NewOverlap[] = [];
-    for (const [key, overlap] of currentShapeMap) {
-      if (!this.previousShapeOverlaps.has(key)) {
-        newOverlaps.push(overlap);
+    for (const overlaps of overlapLists) {
+      for (const overlap of overlaps) {
+        const key = shapeKey(overlap.shapeA, overlap.shapeB);
+        if (current.has(key)) {
+          continue;
+        }
+        const ongoing = previous.get(key);
+        if (ongoing) {
+          // What's left in `previous` at the end has ended
+          previous.delete(key);
+          current.set(key, ongoing);
+        } else {
+          const { bodyA, shapeA, bodyB, shapeB } = overlap;
+          current.set(key, { bodyA, shapeA, bodyB, shapeB });
+          newOverlaps.push(overlap);
+        }
+
+        const pair = bodyKey(overlap.bodyA, overlap.bodyB);
+        currentBodies.add(pair);
+        if (!previousBodies.has(pair)) {
+          newlyOverlappingBodies.add(pair);
+        }
       }
     }
 
-    // Ended overlaps: in previous but not in current
-    const endedOverlaps: EndedOverlap[] = [];
-    for (const [key, overlap] of this.previousShapeOverlaps) {
-      if (!currentShapeMap.has(key)) {
-        endedOverlaps.push(overlap);
-      }
-    }
+    const endedOverlaps: EndedOverlap[] = [...previous.values()];
 
-    // Body pairs that just started overlapping
-    const newlyOverlappingBodies = new Set<string>();
-    for (const key of currentBodySet) {
-      if (!this.previousBodyOverlaps.has(key)) {
-        newlyOverlappingBodies.add(key);
-      }
-    }
-
-    // Store current as previous for next frame
-    this.previousShapeOverlaps = new Map();
-    for (const [key, overlap] of currentShapeMap) {
-      this.previousShapeOverlaps.set(key, {
-        bodyA: overlap.bodyA,
-        shapeA: overlap.shapeA,
-        bodyB: overlap.bodyB,
-        shapeB: overlap.shapeB,
-      });
-    }
-    this.previousBodyOverlaps = this.currentBodyOverlaps;
-    this.currentBodyOverlaps = currentBodySet;
+    // This step's become the previous ones
+    this.previousShapeOverlaps = current;
+    this.currentShapeOverlaps = previous;
+    this.previousBodyOverlaps = previousBodies;
+    this.currentBodyOverlaps = currentBodies;
 
     return { newOverlaps, endedOverlaps, newlyOverlappingBodies };
   }

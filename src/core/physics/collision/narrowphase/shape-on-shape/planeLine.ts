@@ -2,7 +2,11 @@ import { V, V2d } from "../../../../Vector";
 import { Body } from "../../../body/Body";
 import { Line } from "../../../shapes/Line";
 import { Shape } from "../../../shapes/Shape";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 const yAxis = V(0, 1);
 
@@ -53,12 +57,11 @@ export function planeLine(
       _projectionOffset.set(_planeNormal).imul(distance);
       _contactOnPlane.set(endpoint).isub(_projectionOffset);
 
-      result.contacts.push({
-        worldContactA: V(_contactOnPlane).isub(bodyA.position),
-        worldContactB: V(endpoint).isub(bodyB.position),
-        normal: V(_planeNormal),
-        depth: -distance,
-      });
+      const added = addContact(result);
+      added.worldContactA.set(_contactOnPlane).isub(bodyA.position);
+      added.worldContactB.set(endpoint).isub(bodyB.position);
+      added.normal.set(_planeNormal);
+      added.depth = -distance;
     }
   }
 

@@ -4,7 +4,11 @@ import { Box } from "../../../shapes/Box";
 import { Capsule } from "../../../shapes/Capsule";
 import { Shape } from "../../../shapes/Shape";
 import { setCapsuleMiddleRect } from "../../CollisionHelpers";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 import { circleCircle } from "./circleCircle";
 import { convexCapsule } from "./convexCapsule";
 
@@ -111,12 +115,11 @@ export function capsuleCapsule(
   if (rect2Result) {
     // Swap contacts since we called with swapped bodies
     for (const contact of rect2Result.contacts) {
-      result.contacts.push({
-        worldContactA: contact.worldContactB,
-        worldContactB: contact.worldContactA,
-        normal: V(contact.normal).imul(-1),
-        depth: contact.depth,
-      });
+      const added = addContact(result);
+      added.worldContactA.set(contact.worldContactB);
+      added.worldContactB.set(contact.worldContactA);
+      added.normal.set(contact.normal).imul(-1);
+      added.depth = contact.depth;
     }
   }
 

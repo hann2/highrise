@@ -7,7 +7,11 @@ import {
   findIncidentEdge,
   findMaxSeparation,
 } from "../../CollisionHelpers";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 // Scratch arrays for polygon clipping
 const clipPoints1 = [V(), V()];
@@ -174,12 +178,11 @@ export function convexConvex(
       _dist.set(_normal).imul(-separation);
       _contactPointOnPoly1.set(clipPoints2[i]).iadd(_dist);
 
-      result.contacts.push({
-        worldContactA: V(_contactPointOnPoly1).isub(body1.position),
-        worldContactB: V(_contactPointOnPoly2).isub(body2.position),
-        normal: V(_normal),
-        depth: -separation,
-      });
+      const added = addContact(result);
+      added.worldContactA.set(_contactPointOnPoly1).isub(body1.position);
+      added.worldContactB.set(_contactPointOnPoly2).isub(body2.position);
+      added.normal.set(_normal);
+      added.depth = -separation;
     }
   }
 

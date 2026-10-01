@@ -3,7 +3,11 @@ import { Body } from "../../../body/Body";
 import { Capsule } from "../../../shapes/Capsule";
 import { Circle } from "../../../shapes/Circle";
 import { Shape } from "../../../shapes/Shape";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 import { circlePlane } from "./circlePlane";
 
 const tempCircle = new Circle({ radius: 1 });
@@ -71,22 +75,20 @@ export function planeCapsule(
   const result = createCollisionResult();
   if (result1) {
     for (const contact of result1.contacts) {
-      result.contacts.push({
-        worldContactA: contact.worldContactB,
-        worldContactB: contact.worldContactA,
-        normal: V(contact.normal).imul(-1),
-        depth: contact.depth,
-      });
+      const added = addContact(result);
+      added.worldContactA.set(contact.worldContactB);
+      added.worldContactB.set(contact.worldContactA);
+      added.normal.set(contact.normal).imul(-1);
+      added.depth = contact.depth;
     }
   }
   if (result2) {
     for (const contact of result2.contacts) {
-      result.contacts.push({
-        worldContactA: contact.worldContactB,
-        worldContactB: contact.worldContactA,
-        normal: V(contact.normal).imul(-1),
-        depth: contact.depth,
-      });
+      const added = addContact(result);
+      added.worldContactA.set(contact.worldContactB);
+      added.worldContactB.set(contact.worldContactA);
+      added.normal.set(contact.normal).imul(-1);
+      added.depth = contact.depth;
     }
   }
 

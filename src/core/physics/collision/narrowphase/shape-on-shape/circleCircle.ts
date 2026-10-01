@@ -1,7 +1,11 @@
 import { V, V2d } from "../../../../Vector";
 import { Body } from "../../../body/Body";
 import { Circle } from "../../../shapes/Circle";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 // Scratch vectors to avoid per-call allocations
 const _centerDiff = V();
@@ -48,12 +52,11 @@ export function circleCircle(
   _contactOnB.set(_normal).imul(-rB).iadd(offsetB);
 
   const result = createCollisionResult();
-  result.contacts.push({
-    worldContactA: V(_contactOnA).isub(bodyA.position),
-    worldContactB: V(_contactOnB).isub(bodyB.position),
-    normal: V(_normal),
-    depth: radiusSum - _centerDiff.magnitude,
-  });
+  const added = addContact(result);
+  added.worldContactA.set(_contactOnA).isub(bodyA.position);
+  added.worldContactB.set(_contactOnB).isub(bodyB.position);
+  added.normal.set(_normal);
+  added.depth = radiusSum - _centerDiff.magnitude;
 
   return result;
 }

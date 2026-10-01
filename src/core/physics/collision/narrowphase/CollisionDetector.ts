@@ -67,12 +67,13 @@ function swapped<T1, T2>(
     );
     if (!result) return null;
 
-    // Swap contact points and negate normal
+    // Swap contact points and negate normal (in place: the contacts are
+    // the result's own, see addContact)
     for (const contact of result.contacts) {
       const temp = contact.worldContactA;
       contact.worldContactA = contact.worldContactB;
       contact.worldContactB = temp;
-      contact.normal = V(-contact.normal.x, -contact.normal.y);
+      contact.normal.imul(-1);
     }
     return result;
   };

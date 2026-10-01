@@ -1,6 +1,6 @@
 import { FilterSet } from "../../util/FilterSet";
 import type { Constraint } from "../constraints/Constraint";
-import { bodyKey } from "./OverlapKeeper";
+import { bodyKey, type PairKey } from "./OverlapKeeper";
 
 /** Manages constraints in the physics world. */
 export class ConstraintManager implements Iterable<Constraint> {
@@ -9,7 +9,7 @@ export class ConstraintManager implements Iterable<Constraint> {
     (constraint): constraint is Constraint => !constraint.collideConnected,
   );
   /** Cached body keys for constraints with collideConnected=false */
-  private _disabledBodyKeys = new Set<string>();
+  private _disabledBodyKeys = new Set<PairKey>();
   /** Constraints bucketed by concrete class, so hot-path update loops can
    *  run monomorphically and be measured per-type. */
   private _byType = new Map<Function, Constraint[]>();
@@ -76,7 +76,7 @@ export class ConstraintManager implements Iterable<Constraint> {
   }
 
   /** Pre-computed body keys for constraints with collideConnected=false */
-  get disabledBodyKeys(): ReadonlySet<string> {
+  get disabledBodyKeys(): ReadonlySet<PairKey> {
     return this._disabledBodyKeys;
   }
 }
