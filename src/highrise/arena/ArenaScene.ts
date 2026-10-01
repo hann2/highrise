@@ -22,6 +22,7 @@ import { AmbientLight } from "../lighting-and-vision/AmbientLight";
 import LightingManager from "../lighting-and-vision/LightingManager";
 import VisionController from "../lighting-and-vision/VisionController";
 import { ActOverride } from "../run/acts";
+import { Molotov } from "../weapons/consumables/consumable-stats/Molotov";
 import { AMMO_CLASSES, MAX_RESERVE } from "../weapons/guns/ammo";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
@@ -48,6 +49,8 @@ const SURROUND_MIN_DISTANCE = 7;
 const SPREAD_WALL_CLEARANCE = 0.8;
 /** Seconds from the player dying to them being back */
 const RESPAWN_DELAY = 1.5;
+/** Seconds of fuel in the fires that never go out */
+const ENDLESS_FUEL = 1e9;
 
 /** How the current wave is going, for the readout */
 export interface WaveStatus {
@@ -147,6 +150,9 @@ export default class ArenaScene
     }
     if (newRoom || config.act !== previous.act) {
       this.clear();
+    } else if (config.fires !== previous.fires) {
+      this.grid.clear();
+      this.lightFires();
     }
 
     this.ambient.color = hexToRgb(config.dark ? DARK_AMBIENT : BRIGHT_AMBIENT);
@@ -208,6 +214,22 @@ export default class ArenaScene
     // Everything the scene didn't make itself (it all lives under the scene)
     this.game.clearScene(Persistence.Floor);
     this.grid.clear();
+    this.lightFires();
+  }
+
+  /**
+   * The config's fires that never go out: a molotov's worth of fuel each,
+   * spread over the room clear of the player, all lit
+   */
+  private lightFires() {
+    if (this.config.fires === 0) {
+      return;
+    }
+    const { radius } = Molotov.fire!;
+    for (const spot of this.spreadSpots(this.config.fires)) {
+      const cells = this.grid.spillFuel(spot, radius, ENDLESS_FUEL);
+      this.grid.igniteCells(cells);
+    }
   }
 
   /** Sends in the wave the config describes, the way it says */

@@ -329,6 +329,14 @@ export default class ArenaPanel extends ReactEntity implements Entity {
               value={draft.dark}
               onChange={(v) => (draft.dark = v)}
             />
+            <Row label="Fires that never go out">
+              <Stepper
+                value={draft.fires}
+                min={0}
+                max={99}
+                onChange={(n) => (draft.fires = n)}
+              />
+            </Row>
           </Section>
         </div>
 
