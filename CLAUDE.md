@@ -2,7 +2,7 @@
 
 Top-down 2D zombie shooter for the browser and, through Electron, the desktop. TypeScript, Pixi.js v8 (rendering), a custom 2D physics engine, Web Audio, bundled with Vite. The web version is deployed to Vercel.
 
-`src/core/` is Simon's shared game engine, copied per game. It descends from `simonbw/game-engine` (entities, events, rendering, io, sound) plus the physics engine from `simonbw/tack-and-trim`, stripped down to general-purpose 2D. When fixing engine bugs here, consider whether they should be upstreamed.
+`src/core/` is Simon's shared game engine, copied per game. It descends from `simonbw/game-engine` (entities, events, rendering, io, sound) plus the physics engine from `simonbw/tack-and-trim`, stripped down to general-purpose 2D. When fixing engine bugs here, consider whether they should be upstreamed, and add them to `notes/upstream.md`, the list of what's waiting to go back.
 
 ## Commands
 
@@ -58,7 +58,7 @@ Top-down 2D zombie shooter for the browser and, through Electron, the desktop. T
 - `bin/generate-manifest.ts` — generates `resources/resources.ts`
 - `tests/` — Playwright e2e (`*.spec.ts`), physics node tests (`physics/`), reference screenshots
 - `electron/` — the desktop app (Electron Forge, `forge.config.ts`; plan and what's left in `notes/electron.md`). The game in it is the same Vite build as the web version (`electron/vite.renderer.config.mts` only changes the output folder and port). `main.ts` opens one window (fullscreen by default, remembered in `window-state.json` in the user data folder) and serves the build at `app://highrise/`, not `file://`: `fetch()` (sounds) doesn't work on `file://`, and localStorage (the save) is kept per origin, so a fixed origin keeps saves across updates. `preload.ts` gives the page `window.desktop` (quit, fullscreen), which the game reads through `src/core/desktop.ts` and which is undefined on the web, so desktop-only things (the Quit and Fullscreen menu buttons) check for it. `HIGHRISE_HEADLESS=1` runs the app hidden and muted, `HIGHRISE_SMOKE=1` also quits with 0 once the title is up (the game logs `[smoke] title-ok`), and `HIGHRISE_USER_DATA` points it at another save folder. The icon is a placeholder from `bin/make-placeholder-icon.ts`
-- `notes/` — design notes. `roguelike-redesign.md` is the design doc and the backlog (unfinished features, open questions and leftovers), `fire.md` is the fire design and what's left of it, `lighting-ideas.md` holds tabled lighting features; the other files are idea lists
+- `notes/` — design notes. `roguelike-redesign.md` is the design doc and the backlog (unfinished features, open questions and leftovers), `fire.md` is the fire design and what's left of it, `lighting-ideas.md` holds tabled lighting features; `upstream.md` lists engine changes to take back to game-engine and tack-and-trim; the other files are idea lists
 
 ## Architecture conventions
 
