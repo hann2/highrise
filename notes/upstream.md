@@ -88,6 +88,32 @@ Highrise's)
   `movingUpdates`, plus `movingRehashes`.
 - Test: "bodies that stay in the same cells aren't moved in the hash".
 
+### Narrowphase and contact bookkeeping without the garbage
+`4311f12` "Narrowphase and contact bookkeeping without the garbage"
+
+- `CollisionResult.ts` pools results and contacts: `createCollisionResult`
+  reuses one, the new `addContact(result)` hands out a contact for the
+  caller to fill in, and `releaseCollisionResults()` (called at the start of
+  `getContactsFromPairs`) frees them all. Every shape-pair function in
+  `narrowphase/shape-on-shape/` fills in `addContact` instead of pushing a
+  literal with new vectors; `swapped` negates normals in place.
+  `getContactsFromPairs` pools the `Collision` objects too and puts shapes'
+  world positions in scratch vectors.
+- `OverlapKeeper`: number keys (`tupleToInt` packs `lo * 2^32 + hi`, with a
+  string fallback for ids from 2^21 on), maps and sets reused across steps,
+  ongoing overlaps keep their records, `updateOverlaps(...lists)` takes the
+  collisions and sensor overlaps as they are.
+- `Collision.contactEquations` is set when the world makes them, so
+  `emitContactEvents` doesn't build a lookup map every step; events are made
+  from bodies and shapes rather than spread from pooled objects.
+- `doBroadphase` skips the disabled-pairs filter when there are none.
+- **API changes:** `Collision`s, `CollisionResult`s and their contacts are
+  only good during their step; `bodyKey`/`shapeKey` return `PairKey`
+  (number or string) and `ConstraintManager.disabledBodyKeys` is a
+  `ReadonlySet<PairKey>`.
+- Tests: `tests/physics/contacts.test.ts` (begin/end events over many
+  steps, pair keys).
+
 ## Core (game-engine)
 
 ### Frame pacing: one tick per display refresh
