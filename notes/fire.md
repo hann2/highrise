@@ -53,7 +53,7 @@ A primary weapon with its own fuel ammo, but not a `Gun`: it sprays short-lived 
 
 - Burning zombies moving faster or sounding different.
 - Burning things setting fire to whoever they grab.
-- Later combinations: flammable spitter goo, burning enemies that explode on death, a burning melee weapon, a fire-resistance upgrade, a character who starts with molotovs, "dragon's breath" shotgun shells as a weapon card.
+- Later combinations: flammable spitter goo, burning enemies that explode on death, a burning melee weapon, a fire-resistance upgrade (the Fire Retardant Jacket in `notes/roguelike-redesign.md`'s item candidates), a character who starts with molotovs, "dragon's breath" shotgun shells as a weapon card.
 
 ### Looks
 
