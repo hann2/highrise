@@ -70,12 +70,16 @@ test("the desktop app boots, plays, keeps its save, and quits", async () => {
     smoke: window.desktop?.smoke,
     // Headless windows are never fullscreen
     fullscreen: window.desktop?.isFullscreen(),
+    displayFrequency: window.desktop?.displayFrequency(),
   }));
   expect(bridge).toEqual({
     platform: process.platform,
     smoke: false,
     fullscreen: false,
+    displayFrequency: expect.any(Number),
   });
+  // The display's own refresh rate, which the game runs at
+  expect(bridge.displayFrequency).toBeGreaterThan(0);
   await page.evaluate(() => {
     window.localStorage.setItem("tutorialComplete", "true");
     window.localStorage.setItem("electronTest", "kept");

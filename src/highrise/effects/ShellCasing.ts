@@ -27,6 +27,7 @@ const PORT_HEIGHT = 1.0; // meters off the ground
 // TODO: Different sound depending on floor
 
 export default class ShellCasing extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   sprite: Sprite & GameSprite;
   body: Body;
   z: number;

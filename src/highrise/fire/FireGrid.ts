@@ -48,6 +48,7 @@ const NEIGHBORS = [
  * and scorch marks are still placeholder squares.
  */
 export default class FireGrid extends BaseEntity implements Entity {
+  tickLayer = "fire" as const;
   persistenceLevel = Persistence.Game;
 
   /** Cells across and down */

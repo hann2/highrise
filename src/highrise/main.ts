@@ -45,7 +45,6 @@ export async function main() {
   }
 
   const game = new Game({
-    ticksPerSecond: 60,
     world: new World({
       // Needed for contact friction to be based on how hard things are pressed together
       solverConfig: { frictionIterations: 2 },
@@ -57,6 +56,13 @@ export async function main() {
     }),
   });
   initContactMaterials(game);
+  game.frameRateLimit = loadSaveData().frameRateLimit;
+  // ?fps=120 runs as if the display were 120 Hz instead of measuring it, for
+  // tests and benchmarks, which run without vsync
+  const fps = parseInt(params.get("fps") ?? "", 10);
+  if (fps > 0) {
+    game.refreshRateOverride = fps;
+  }
 
   window.DEBUG = { game, profiler };
   await game.init();

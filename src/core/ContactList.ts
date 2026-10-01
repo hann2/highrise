@@ -1,7 +1,18 @@
-import { PhysicsEventMap } from "./physics/events/PhysicsEvents";
+import type { Body } from "./physics/body/Body";
+import type { Shape } from "./physics/shapes/Shape";
 
-type BeginContactEvent = PhysicsEventMap["beginContact"];
-type EndContactEvent = PhysicsEventMap["endContact"];
+/**
+ * The bodies and shapes in a contact. Not its contact equations, which are
+ * only good during the physics step they come from.
+ */
+export interface Contact {
+  shapeA: Shape;
+  shapeB: Shape;
+  bodyA: Body;
+  bodyB: Body;
+}
+type BeginContactEvent = Contact;
+type EndContactEvent = Contact;
 
 /**
  * Manages a list of active physics contacts between bodies and shapes.
@@ -9,11 +20,12 @@ type EndContactEvent = PhysicsEventMap["endContact"];
  * of ongoing contacts for collision handling.
  */
 export class ContactList {
-  private contacts: BeginContactEvent[] = [];
+  private contacts: Contact[] = [];
 
-  beginContact(event: BeginContactEvent) {
-    if (shouldTrack(event)) {
-      this.contacts.push(event);
+  beginContact({ shapeA, shapeB, bodyA, bodyB }: Contact) {
+    const contact = { shapeA, shapeB, bodyA, bodyB };
+    if (shouldTrack(contact)) {
+      this.contacts.push(contact);
     }
   }
 
@@ -28,7 +40,7 @@ export class ContactList {
     }
   }
 
-  getContacts(): ReadonlyArray<BeginContactEvent> {
+  getContacts(): ReadonlyArray<Contact> {
     return this.contacts;
   }
 }

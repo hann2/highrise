@@ -106,14 +106,21 @@ export class Camera2d extends BaseEntity implements Entity {
     this.vy = vy + k * (y - this.y);
   }
 
+  /**
+   * Move the velocity part of the way to `[vx, vy]`. `stiffness` is the part
+   * of the way it goes per 60th of a second, whatever the tick rate. Call
+   * this from `onTick`.
+   */
   smoothSetVelocity([vx, vy]: V2d, stiffness: number = 0.9) {
-    this.vx = lerpOrSnap(this.vx, vx, stiffness, 0.001);
-    this.vy = lerpOrSnap(this.vy, vy, stiffness, 0.001);
+    const moved = 1 - perTick(1 - stiffness, this.game.tickDuration);
+    this.vx = lerpOrSnap(this.vx, vx, moved, 0.001);
+    this.vy = lerpOrSnap(this.vy, vy, moved, 0.001);
   }
 
-  /** Move the camera part of the way to the desired zoom. */
+  /** Move the camera part of the way to the desired zoom; `smooth` is the part of the way it doesn't go per 60th of a second. */
   smoothZoom(z: number, smooth: number = 0.9) {
-    this.z = smooth * this.z + (1 - smooth) * z;
+    const kept = perTick(smooth, this.game.tickDuration);
+    this.z = kept * this.z + (1 - kept) * z;
   }
 
   /** Returns [width, height] of the viewport in pixels */
@@ -141,6 +148,67 @@ export class Camera2d extends BaseEntity implements Entity {
     const width = right - left;
     const height = bottom - top;
     return { top, bottom, left, right, width, height };
+  }
+
+  /** The view's bounding box in the world, and what it was worked out from */
+  private viewBounds = {
+    key: [NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN],
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  };
+
+  /**
+   * Whether a circle of `radius` around `[x, y]` might be in view (it's
+   * checked against the view's bounding box in the world, which is bigger
+   * than the view when the camera is rotated). Cheap enough to call for
+   * every sprite every frame: the bounding box is only worked out again when
+   * the camera or the screen changes.
+   */
+  isInView([x, y]: [number, number], radius: number = 0): boolean {
+    const bounds = this.getViewBounds();
+    return (
+      x + radius >= bounds.left &&
+      x - radius <= bounds.right &&
+      y + radius >= bounds.top &&
+      y - radius <= bounds.bottom
+    );
+  }
+
+  private getViewBounds() {
+    const bounds = this.viewBounds;
+    const key = bounds.key;
+    const canvas = this.renderer.canvas;
+    if (
+      key[0] === this.x &&
+      key[1] === this.y &&
+      key[2] === this.z &&
+      key[3] === this.angle &&
+      key[4] === this.shakeOffset.x &&
+      key[5] === this.shakeOffset.y &&
+      key[6] === canvas.width &&
+      key[7] === canvas.height
+    ) {
+      return bounds;
+    }
+    key[0] = this.x;
+    key[1] = this.y;
+    key[2] = this.z;
+    key[3] = this.angle;
+    key[4] = this.shakeOffset.x;
+    key[5] = this.shakeOffset.y;
+    key[6] = canvas.width;
+    key[7] = canvas.height;
+    const [w, h] = this.getViewportSize();
+    const corners = [V(0, 0), V(w, 0), V(0, h), V(w, h)].map((corner) =>
+      this.toWorld(corner),
+    );
+    bounds.left = Math.min(...corners.map(([x]) => x));
+    bounds.right = Math.max(...corners.map(([x]) => x));
+    bounds.top = Math.min(...corners.map(([, y]) => y));
+    bounds.bottom = Math.max(...corners.map(([, y]) => y));
+    return bounds;
   }
 
   /** Convert screen coordinates to world coordinates */
@@ -198,4 +266,9 @@ export class Camera2d extends BaseEntity implements Entity {
       });
     }
   }
+}
+
+/** A fraction kept per 60th of a second, as the fraction kept per tick of `tickDuration` */
+function perTick(keptPer60th: number, tickDuration: number): number {
+  return Math.pow(keptPer60th, 60 * tickDuration);
 }

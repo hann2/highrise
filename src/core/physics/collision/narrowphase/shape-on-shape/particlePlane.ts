@@ -1,7 +1,11 @@
 import { V, V2d } from "../../../../Vector";
 import { Body } from "../../../body/Body";
 import { Shape } from "../../../shapes/Shape";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 const yAxis = V(0, 1);
 
@@ -43,12 +47,11 @@ export function particlePlane(
 
   const result = createCollisionResult();
   // Note: Normal points out of plane (bodyB), so we need to flip for bodyA
-  result.contacts.push({
-    worldContactA: V(offsetA).isub(bodyA.position),
-    worldContactB: V(_contactOnPlane).isub(bodyB.position),
-    normal: V(_planeNormal).imul(-1), // Normal from particle towards plane
-    depth: -distance,
-  });
+  const added = addContact(result);
+  added.worldContactA.set(offsetA).isub(bodyA.position);
+  added.worldContactB.set(_contactOnPlane).isub(bodyB.position);
+  added.normal.set(_planeNormal).imul(-1); // Normal from particle towards plane
+  added.depth = -distance;
 
   return result;
 }

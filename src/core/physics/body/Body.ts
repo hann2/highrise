@@ -104,6 +104,8 @@ export class Body
   _wakeUpAfterNarrowphase: boolean = false;
   /** @internal CCD sets this when it's nuked a substep so position integrate skips. */
   _skipPositionThisStep: boolean = false;
+  /** @internal The broadphase's mark for bodies a query has already seen */
+  _queryStamp: number = 0;
 
   // ── Position / angle ─────────────────────────────────────────────────
   position: V2d = V();
@@ -246,6 +248,7 @@ export class Body
     this.updateBoundingRadius();
 
     this.aabbNeedsUpdate = true;
+    this.world?.broadphase.bodyShapesChanged(this);
     return this;
   }
 
@@ -255,6 +258,7 @@ export class Body
       this.shapes.splice(idx, 1);
       this.aabbNeedsUpdate = true;
       shape.body = null;
+      this.world?.broadphase.bodyShapesChanged(this);
       return true;
     }
     return false;

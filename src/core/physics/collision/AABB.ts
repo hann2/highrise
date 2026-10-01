@@ -52,22 +52,18 @@ export class AABB {
     const sinAngle = Math.sin(angle);
 
     for (let i = 1; i < points.length; i++) {
-      let p: CompatibleVector = points[i];
-
+      let x = points[i][0];
+      let y = points[i][1];
       if (angle !== 0) {
-        const x = p[0];
-        const y = p[1];
-        const rotated = V(
-          cosAngle * x - sinAngle * y,
-          sinAngle * x + cosAngle * y,
-        );
-        p = rotated;
+        const rotatedX = cosAngle * x - sinAngle * y;
+        y = sinAngle * x + cosAngle * y;
+        x = rotatedX;
       }
 
-      if (p[0] > u[0]) u[0] = p[0];
-      if (p[1] > u[1]) u[1] = p[1];
-      if (p[0] < l[0]) l[0] = p[0];
-      if (p[1] < l[1]) l[1] = p[1];
+      if (x > u[0]) u[0] = x;
+      if (y > u[1]) u[1] = y;
+      if (x < l[0]) l[0] = x;
+      if (y < l[1]) l[1] = y;
     }
 
     // Add offset

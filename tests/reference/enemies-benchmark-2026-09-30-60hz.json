@@ -1,0 +1,917 @@
+[
+  {
+    "count": 50,
+    "enemies": 50,
+    "objectives": {
+      "SHAMBLE": 30,
+      "CLOSE_IN": 14,
+      "ATTACK": 6
+    },
+    "entities": 583,
+    "bodies": 96,
+    "fps": 815.5,
+    "ticksPerSecond": 60,
+    "loopCpuMs": {
+      "mean": 0.8,
+      "p50": 0.7,
+      "p95": 1.7,
+      "p99": 2.3,
+      "max": 3.9
+    },
+    "frameIntervalMs": {
+      "mean": 1.23,
+      "p50": 1,
+      "p95": 2.4,
+      "p99": 3.7,
+      "max": 6.1
+    },
+    "tickMs": 0.671,
+    "physicsMs": 0.28,
+    "renderMs": 0.732,
+    "frame60Ms": 1.683,
+    "top": [
+      {
+        "label": "Game.tick > main",
+        "per": "tick",
+        "ms": 0.639,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > Renderer.render",
+        "per": "frame",
+        "ms": 0.439,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > SimpleEnemyController",
+        "per": "tick",
+        "ms": 0.279,
+        "calls": 50
+      },
+      {
+        "label": "Game.render > ZombieSprite",
+        "per": "frame",
+        "ms": 0.103,
+        "calls": 50
+      },
+      {
+        "label": "Game.tick > main > Human",
+        "per": "tick",
+        "ms": 0.064,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.doBroadphase",
+        "per": "tick",
+        "ms": 0.058,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve",
+        "per": "tick",
+        "ms": 0.055,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > SpeakingCircle",
+        "per": "frame",
+        "ms": 0.05,
+        "calls": 51
+      },
+      {
+        "label": "Game.tick > main > Timer",
+        "per": "tick",
+        "ms": 0.038,
+        "calls": 75.2
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate",
+        "per": "tick",
+        "ms": 0.035,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.contactEquations",
+        "per": "tick",
+        "ms": 0.033,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.narrowphase",
+        "per": "tick",
+        "ms": 0.032,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > WalkSpring",
+        "per": "tick",
+        "ms": 0.03,
+        "calls": 51
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate > planar2D",
+        "per": "tick",
+        "ms": 0.027,
+        "calls": 1323.2
+      },
+      {
+        "label": "Game.tick > main > EnemyVoice",
+        "per": "tick",
+        "ms": 0.025,
+        "calls": 50
+      },
+      {
+        "label": "World.step > World.updateOverlapTracking",
+        "per": "tick",
+        "ms": 0.024,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > Zombie",
+        "per": "frame",
+        "ms": 0.02,
+        "calls": 50
+      },
+      {
+        "label": "Game.tick > input",
+        "per": "tick",
+        "ms": 0.02,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input > PlayerHumanController",
+        "per": "tick",
+        "ms": 0.02,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.frictionEquations",
+        "per": "tick",
+        "ms": 0.02,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > ZombieSprite",
+        "per": "tick",
+        "ms": 0.016,
+        "calls": 50
+      },
+      {
+        "label": "Game.render > CameraController",
+        "per": "frame",
+        "ms": 0.015,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Zombie",
+        "per": "tick",
+        "ms": 0.015,
+        "calls": 50
+      },
+      {
+        "label": "Game.tick > main > FleshImpact",
+        "per": "tick",
+        "ms": 0.014,
+        "calls": 1.7
+      },
+      {
+        "label": "Game.render > ArenaPanel",
+        "per": "frame",
+        "ms": 0.01,
+        "calls": 1
+      }
+    ]
+  },
+  {
+    "count": 100,
+    "enemies": 100,
+    "objectives": {
+      "SHAMBLE": 62,
+      "CLOSE_IN": 32,
+      "ATTACK": 6
+    },
+    "entities": 930,
+    "bodies": 146,
+    "fps": 780.3,
+    "ticksPerSecond": 60.3,
+    "loopCpuMs": {
+      "mean": 0.93,
+      "p50": 0.7,
+      "p95": 2.5,
+      "p99": 2.8,
+      "max": 4.1
+    },
+    "frameIntervalMs": {
+      "mean": 1.28,
+      "p50": 1,
+      "p95": 3,
+      "p99": 3.7,
+      "max": 5.4
+    },
+    "tickMs": 1.581,
+    "physicsMs": 0.505,
+    "renderMs": 0.925,
+    "frame60Ms": 3.011,
+    "top": [
+      {
+        "label": "Game.tick > main",
+        "per": "tick",
+        "ms": 1.55,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > SimpleEnemyController",
+        "per": "tick",
+        "ms": 0.941,
+        "calls": 100
+      },
+      {
+        "label": "Game.render > Renderer.render",
+        "per": "frame",
+        "ms": 0.411,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > ZombieSprite",
+        "per": "frame",
+        "ms": 0.208,
+        "calls": 100
+      },
+      {
+        "label": "World.step > World.solve",
+        "per": "tick",
+        "ms": 0.11,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.doBroadphase",
+        "per": "tick",
+        "ms": 0.096,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Human",
+        "per": "tick",
+        "ms": 0.093,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > SpeakingCircle",
+        "per": "frame",
+        "ms": 0.086,
+        "calls": 101
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate",
+        "per": "tick",
+        "ms": 0.077,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.narrowphase",
+        "per": "tick",
+        "ms": 0.075,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate > planar2D",
+        "per": "tick",
+        "ms": 0.07,
+        "calls": 3056.2
+      },
+      {
+        "label": "Game.tick > main > WalkSpring",
+        "per": "tick",
+        "ms": 0.065,
+        "calls": 101
+      },
+      {
+        "label": "World.step > World.contactEquations",
+        "per": "tick",
+        "ms": 0.065,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Timer",
+        "per": "tick",
+        "ms": 0.051,
+        "calls": 91.7
+      },
+      {
+        "label": "Game.tick > main > EnemyVoice",
+        "per": "tick",
+        "ms": 0.048,
+        "calls": 100
+      },
+      {
+        "label": "World.step > World.updateOverlapTracking",
+        "per": "tick",
+        "ms": 0.048,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.frictionEquations",
+        "per": "tick",
+        "ms": 0.039,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > Zombie",
+        "per": "frame",
+        "ms": 0.038,
+        "calls": 100
+      },
+      {
+        "label": "Game.tick > main > FleshImpact",
+        "per": "tick",
+        "ms": 0.036,
+        "calls": 3.9
+      },
+      {
+        "label": "Game.tick > main > Zombie",
+        "per": "tick",
+        "ms": 0.036,
+        "calls": 100
+      },
+      {
+        "label": "Game.tick > main > ZombieSprite",
+        "per": "tick",
+        "ms": 0.033,
+        "calls": 100
+      },
+      {
+        "label": "Game.render > CameraController",
+        "per": "frame",
+        "ms": 0.024,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input",
+        "per": "tick",
+        "ms": 0.021,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > PositionalSound",
+        "per": "tick",
+        "ms": 0.019,
+        "calls": 16.4
+      },
+      {
+        "label": "Game.tick > input > PlayerHumanController",
+        "per": "tick",
+        "ms": 0.019,
+        "calls": 1
+      }
+    ]
+  },
+  {
+    "count": 200,
+    "enemies": 200,
+    "objectives": {
+      "SHAMBLE": 127,
+      "CLOSE_IN": 67,
+      "ATTACK": 6
+    },
+    "entities": 1628,
+    "bodies": 246,
+    "fps": 418.8,
+    "ticksPerSecond": 60,
+    "loopCpuMs": {
+      "mean": 1.93,
+      "p50": 1.2,
+      "p95": 6.3,
+      "p99": 6.8,
+      "max": 7.3
+    },
+    "frameIntervalMs": {
+      "mean": 2.39,
+      "p50": 1.7,
+      "p95": 6.9,
+      "p99": 7.4,
+      "max": 9.9
+    },
+    "tickMs": 4.914,
+    "physicsMs": 0.94,
+    "renderMs": 1.802,
+    "frame60Ms": 7.656,
+    "top": [
+      {
+        "label": "Game.tick > main",
+        "per": "tick",
+        "ms": 4.881,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > SimpleEnemyController",
+        "per": "tick",
+        "ms": 3.843,
+        "calls": 200
+      },
+      {
+        "label": "Game.render > Renderer.render",
+        "per": "frame",
+        "ms": 0.78,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > ZombieSprite",
+        "per": "frame",
+        "ms": 0.46,
+        "calls": 200
+      },
+      {
+        "label": "World.step > World.solve",
+        "per": "tick",
+        "ms": 0.208,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.doBroadphase",
+        "per": "tick",
+        "ms": 0.205,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Human",
+        "per": "tick",
+        "ms": 0.182,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > SpeakingCircle",
+        "per": "frame",
+        "ms": 0.177,
+        "calls": 201
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate",
+        "per": "tick",
+        "ms": 0.162,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate > planar2D",
+        "per": "tick",
+        "ms": 0.154,
+        "calls": 6049.4
+      },
+      {
+        "label": "World.step > World.narrowphase",
+        "per": "tick",
+        "ms": 0.137,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > WalkSpring",
+        "per": "tick",
+        "ms": 0.128,
+        "calls": 201
+      },
+      {
+        "label": "World.step > World.contactEquations",
+        "per": "tick",
+        "ms": 0.11,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > Zombie",
+        "per": "frame",
+        "ms": 0.088,
+        "calls": 200
+      },
+      {
+        "label": "World.step > World.updateOverlapTracking",
+        "per": "tick",
+        "ms": 0.085,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Zombie",
+        "per": "tick",
+        "ms": 0.079,
+        "calls": 200
+      },
+      {
+        "label": "Game.tick > main > ZombieSprite",
+        "per": "tick",
+        "ms": 0.079,
+        "calls": 200
+      },
+      {
+        "label": "World.step > World.frictionEquations",
+        "per": "tick",
+        "ms": 0.078,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > EnemyVoice",
+        "per": "tick",
+        "ms": 0.075,
+        "calls": 200
+      },
+      {
+        "label": "Game.tick > main > Timer",
+        "per": "tick",
+        "ms": 0.049,
+        "calls": 90.6
+      },
+      {
+        "label": "Game.tick > main > FleshImpact",
+        "per": "tick",
+        "ms": 0.041,
+        "calls": 4.3
+      },
+      {
+        "label": "Game.render > CameraController",
+        "per": "frame",
+        "ms": 0.026,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input",
+        "per": "tick",
+        "ms": 0.022,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.emitContactEvents",
+        "per": "tick",
+        "ms": 0.021,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > input > PlayerHumanController",
+        "per": "tick",
+        "ms": 0.02,
+        "calls": 1
+      }
+    ]
+  },
+  {
+    "count": 400,
+    "enemies": 400,
+    "objectives": {
+      "SHAMBLE": 263,
+      "CLOSE_IN": 131,
+      "ATTACK": 6
+    },
+    "entities": 3021,
+    "bodies": 446,
+    "fps": 36.3,
+    "ticksPerSecond": 55.8,
+    "loopCpuMs": {
+      "mean": 26.99,
+      "p50": 32.1,
+      "p95": 36.2,
+      "p99": 41.1,
+      "max": 51.3
+    },
+    "frameIntervalMs": {
+      "mean": 27.8,
+      "p50": 24.9,
+      "p95": 51.6,
+      "p99": 52.5,
+      "max": 52.6
+    },
+    "tickMs": 16.301,
+    "physicsMs": 2.04,
+    "renderMs": 4.185,
+    "frame60Ms": 22.526,
+    "top": [
+      {
+        "label": "Game.tick > main",
+        "per": "tick",
+        "ms": 16.259,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > SimpleEnemyController",
+        "per": "tick",
+        "ms": 14.351,
+        "calls": 400
+      },
+      {
+        "label": "Game.render > Renderer.render",
+        "per": "frame",
+        "ms": 1.724,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > ZombieSprite",
+        "per": "frame",
+        "ms": 1.322,
+        "calls": 400
+      },
+      {
+        "label": "World.step > World.solve",
+        "per": "tick",
+        "ms": 0.473,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > SpeakingCircle",
+        "per": "frame",
+        "ms": 0.468,
+        "calls": 401
+      },
+      {
+        "label": "World.step > World.doBroadphase",
+        "per": "tick",
+        "ms": 0.403,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate",
+        "per": "tick",
+        "ms": 0.37,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate > planar2D",
+        "per": "tick",
+        "ms": 0.359,
+        "calls": 14739.1
+      },
+      {
+        "label": "World.step > World.narrowphase",
+        "per": "tick",
+        "ms": 0.304,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Human",
+        "per": "tick",
+        "ms": 0.294,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > WalkSpring",
+        "per": "tick",
+        "ms": 0.287,
+        "calls": 401
+      },
+      {
+        "label": "World.step > World.contactEquations",
+        "per": "tick",
+        "ms": 0.274,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.updateOverlapTracking",
+        "per": "tick",
+        "ms": 0.185,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.frictionEquations",
+        "per": "tick",
+        "ms": 0.182,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Zombie",
+        "per": "tick",
+        "ms": 0.162,
+        "calls": 400
+      },
+      {
+        "label": "Game.render > Zombie",
+        "per": "frame",
+        "ms": 0.162,
+        "calls": 400
+      },
+      {
+        "label": "Game.tick > main > EnemyVoice",
+        "per": "tick",
+        "ms": 0.159,
+        "calls": 400
+      },
+      {
+        "label": "Game.tick > main > ZombieSprite",
+        "per": "tick",
+        "ms": 0.158,
+        "calls": 400
+      },
+      {
+        "label": "World.step > World.emitContactEvents",
+        "per": "tick",
+        "ms": 0.066,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > Timer",
+        "per": "tick",
+        "ms": 0.045,
+        "calls": 79.9
+      },
+      {
+        "label": "Game.tick > main > FleshImpact",
+        "per": "tick",
+        "ms": 0.041,
+        "calls": 3.9
+      },
+      {
+        "label": "World.step > World.solve > Solver.setup",
+        "per": "tick",
+        "ms": 0.038,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve > planar2D",
+        "per": "tick",
+        "ms": 0.036,
+        "calls": 1473.9
+      },
+      {
+        "label": "Game.render > ArenaPanel",
+        "per": "frame",
+        "ms": 0.035,
+        "calls": 1
+      }
+    ]
+  },
+  {
+    "count": 800,
+    "enemies": 800,
+    "objectives": {
+      "SHAMBLE": 556,
+      "CLOSE_IN": 238,
+      "ATTACK": 6
+    },
+    "entities": 5705,
+    "bodies": 846,
+    "fps": 2.8,
+    "ticksPerSecond": 20.8,
+    "loopCpuMs": {
+      "mean": 433.48,
+      "p50": 435.8,
+      "p95": 478.8,
+      "p99": 478.8,
+      "max": 478.8
+    },
+    "frameIntervalMs": {
+      "mean": 391.84,
+      "p50": 429.1,
+      "p95": 470.6,
+      "p99": 470.6,
+      "max": 470.6
+    },
+    "tickMs": 62.819,
+    "physicsMs": 3.569,
+    "renderMs": 8.667,
+    "frame60Ms": 75.055,
+    "top": [
+      {
+        "label": "Game.tick > main",
+        "per": "tick",
+        "ms": 62.768,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > SimpleEnemyController",
+        "per": "tick",
+        "ms": 59.175,
+        "calls": 800
+      },
+      {
+        "label": "Game.render > Renderer.render",
+        "per": "frame",
+        "ms": 3.744,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > ZombieSprite",
+        "per": "frame",
+        "ms": 2.678,
+        "calls": 800
+      },
+      {
+        "label": "Game.render > SpeakingCircle",
+        "per": "frame",
+        "ms": 0.922,
+        "calls": 801
+      },
+      {
+        "label": "World.step > World.solve",
+        "per": "tick",
+        "ms": 0.81,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.doBroadphase",
+        "per": "tick",
+        "ms": 0.734,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > WalkSpring",
+        "per": "tick",
+        "ms": 0.64,
+        "calls": 801
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate",
+        "per": "tick",
+        "ms": 0.64,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve > Solver.iterate > planar2D",
+        "per": "tick",
+        "ms": 0.632,
+        "calls": 24902.4
+      },
+      {
+        "label": "Game.tick > main > Human",
+        "per": "tick",
+        "ms": 0.61,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.narrowphase",
+        "per": "tick",
+        "ms": 0.537,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.contactEquations",
+        "per": "tick",
+        "ms": 0.466,
+        "calls": 1
+      },
+      {
+        "label": "Game.render > Zombie",
+        "per": "frame",
+        "ms": 0.333,
+        "calls": 800
+      },
+      {
+        "label": "World.step > World.frictionEquations",
+        "per": "tick",
+        "ms": 0.299,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.updateOverlapTracking",
+        "per": "tick",
+        "ms": 0.29,
+        "calls": 1
+      },
+      {
+        "label": "Game.tick > main > EnemyVoice",
+        "per": "tick",
+        "ms": 0.281,
+        "calls": 800
+      },
+      {
+        "label": "Game.tick > main > ZombieSprite",
+        "per": "tick",
+        "ms": 0.279,
+        "calls": 800
+      },
+      {
+        "label": "Game.tick > main > Zombie",
+        "per": "tick",
+        "ms": 0.276,
+        "calls": 800
+      },
+      {
+        "label": "World.step > World.emitContactEvents",
+        "per": "tick",
+        "ms": 0.116,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve > Solver.setup",
+        "per": "tick",
+        "ms": 0.072,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.applyForces",
+        "per": "tick",
+        "ms": 0.06,
+        "calls": 1
+      },
+      {
+        "label": "World.step > World.solve > planar2D",
+        "per": "tick",
+        "ms": 0.057,
+        "calls": 2490.2
+      },
+      {
+        "label": "Game.render > FleshImpact",
+        "per": "frame",
+        "ms": 0.044,
+        "calls": 3.6
+      },
+      {
+        "label": "Game.tick > main > FleshImpact",
+        "per": "tick",
+        "ms": 0.034,
+        "calls": 3.9
+      }
+    ]
+  }
+]

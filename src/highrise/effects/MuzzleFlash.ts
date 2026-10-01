@@ -33,6 +33,7 @@ const DURATION = 0.1; // seconds
 const RADIUS = 12; // meters for light
 
 export default class MuzzleFlash extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   light?: PointLight;
   timeLeft: number = DURATION;
   sprite: Sprite & GameSprite;

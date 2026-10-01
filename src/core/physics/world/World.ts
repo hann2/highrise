@@ -14,6 +14,7 @@ import { RaycastHit, RaycastOptions } from "../collision/raycast/RaycastHit";
 import { generateContactEquationsForCollision } from "../collision/response/ContactGenerator";
 import { generateFrictionEquationsForCollision } from "../collision/response/FrictionGenerator";
 import { ContactEquation } from "../equations/ContactEquation";
+import { EquationPool } from "../equations/EquationPool";
 import { FrictionEquation } from "../equations/FrictionEquation";
 import { EventEmitter } from "../events/EventEmitter";
 import { PhysicsEventMap } from "../events/PhysicsEvents";
@@ -31,12 +32,7 @@ import { BodyManager } from "./BodyManager";
 import { ConstraintManager } from "./ConstraintManager";
 import { ContactMaterialManager } from "./ContactMaterialManager";
 import { splitIntoIslands, type Island } from "./Island";
-import {
-  bodyKey,
-  OverlapKeeper,
-  type OverlapChanges,
-  type ShapeOverlap,
-} from "./OverlapKeeper";
+import { bodyKey, OverlapKeeper, type OverlapChanges } from "./OverlapKeeper";
 
 /** Options for creating a World. */
 export interface WorldOptions {
@@ -102,6 +98,14 @@ export class World extends EventEmitter<PhysicsEventMap> {
   emitImpactEvent: boolean = true;
   /** When true, multiple contacts between shapes produce one averaged friction equation instead of many. */
   frictionReduction: boolean = true;
+
+  /** Contact and friction equations, reused from step to step */
+  private contactEquationPool = new EquationPool(
+    (bodyA, bodyB) => new ContactEquation(bodyA, bodyB),
+  );
+  private frictionEquationPool = new EquationPool(
+    (bodyA, bodyB) => new FrictionEquation(bodyA, bodyB),
+  );
   /** @internal */
   _constraintIdCounter: number = 0;
   /** @internal */
@@ -252,12 +256,16 @@ export class World extends EventEmitter<PhysicsEventMap> {
       sensorOverlaps,
     );
 
-    // 5. Build contact equations to resolve overlaps
+    // 5. Build contact equations to resolve overlaps. Last step's contact and
+    // friction equations are reused, so nothing may hold on to them past
+    // the step (events hand them out only for the length of the handler)
+    this.contactEquationPool.releaseAll();
+    this.frictionEquationPool.releaseAll();
     profiler.start("World.contactEquations");
     const collisionsWithContactEquations: [Collision, ContactEquation[]][] =
       collisions.map((collision) => [
         collision,
-        generateContactEquationsForCollision(
+        (collision.contactEquations = generateContactEquationsForCollision(
           collision,
           this.contactMaterials.get(
             collision.shapeA.material,
@@ -266,7 +274,8 @@ export class World extends EventEmitter<PhysicsEventMap> {
           overlapChanges.newlyOverlappingBodies.has(
             bodyKey(collision.bodyA, collision.bodyB),
           ),
-        ),
+          this.contactEquationPool,
+        )),
       ]);
 
     const contactEquations: ContactEquation[] =
@@ -277,17 +286,29 @@ export class World extends EventEmitter<PhysicsEventMap> {
 
     // 6. Build friction equations and flatten all equations
     profiler.start("World.frictionEquations");
+    // With friction bounded by the contact force (frictionIterations > 0),
+    // frictionless contacts would get friction equations that do nothing, so
+    // they get none. (Without it, friction is a constant slip force whatever
+    // the material says.)
+    const frictionFromForce = this.solverConfig.frictionIterations > 0;
     const frictionEquations: FrictionEquation[] =
-      collisionsWithContactEquations.flatMap(([collision, contactEquations]) =>
-        generateFrictionEquationsForCollision(
-          collision,
-          contactEquations,
-          this.contactMaterials.get(
+      collisionsWithContactEquations.flatMap(
+        ([collision, contactEquations]) => {
+          const contactMaterial = this.contactMaterials.get(
             collision.shapeA.material,
             collision.shapeB.material,
-          ),
-          this.frictionReduction,
-        ),
+          );
+          if (frictionFromForce && contactMaterial.friction === 0) {
+            return [];
+          }
+          return generateFrictionEquationsForCollision(
+            collision,
+            contactEquations,
+            contactMaterial,
+            this.frictionReduction,
+            this.frictionEquationPool,
+          );
+        },
       );
     profiler.end("World.frictionEquations");
 
@@ -295,7 +316,7 @@ export class World extends EventEmitter<PhysicsEventMap> {
     this.handleCollisionWakeUps(collisions);
 
     // 8. Emit collision events (using overlapChanges from step 4)
-    this.emitContactEvents(overlapChanges, collisionsWithContactEquations);
+    this.emitContactEvents(overlapChanges);
     this.emitPreSolveAndWakeUp(contactEquations, frictionEquations);
 
     // 9. Fold accumulated forces into velocity once, up front. This consumes
@@ -411,9 +432,12 @@ export class World extends EventEmitter<PhysicsEventMap> {
     // Use pre-computed disabled body keys from ConstraintManager
     const disabledBodyKeys = this.constraints.disabledBodyKeys;
 
-    const filteredPossibleCollisions = possibleCollisions.filter(
-      ([bodyA, bodyB]) => !disabledBodyKeys.has(bodyKey(bodyA, bodyB)),
-    );
+    const filteredPossibleCollisions =
+      disabledBodyKeys.size === 0
+        ? possibleCollisions
+        : possibleCollisions.filter(
+            ([bodyA, bodyB]) => !disabledBodyKeys.has(bodyKey(bodyA, bodyB)),
+          );
 
     this.emit({ type: "postBroadphase", pairs: filteredPossibleCollisions });
     return filteredPossibleCollisions;
@@ -425,19 +449,7 @@ export class World extends EventEmitter<PhysicsEventMap> {
     collisions: Collision[],
     sensorOverlaps: SensorOverlap[],
   ): OverlapChanges {
-    // Build overlap input (without contact equations - they don't exist yet)
-    const currentOverlaps: ShapeOverlap[] = [
-      ...collisions.map((collision) => ({
-        ...collision,
-        contactEquations: [] as ContactEquation[],
-      })),
-      ...sensorOverlaps.map((sensor) => ({
-        ...sensor,
-        contactEquations: [] as ContactEquation[],
-      })),
-    ];
-
-    return this.overlapKeeper.updateOverlaps(currentOverlaps);
+    return this.overlapKeeper.updateOverlaps(collisions, sensorOverlaps);
   }
 
   /** Handle wake-up logic for sleeping bodies that collide with fast-moving bodies */
@@ -484,36 +496,29 @@ export class World extends EventEmitter<PhysicsEventMap> {
 
   /** Emit beginContact/endContact events using pre-computed overlap changes */
   @profile
-  private emitContactEvents(
-    overlapChanges: OverlapChanges,
-    collisionsWithContacts: [Collision, ContactEquation[]][],
-  ): void {
+  private emitContactEvents(overlapChanges: OverlapChanges): void {
     const { newOverlaps, endedOverlaps } = overlapChanges;
 
     // Emit beginContact events, but only if we have at least one listener
     if (this.has("beginContact")) {
-      // Build lookup for contact equations (newOverlaps don't have them yet)
-      const contactsByShapePair = new Map<string, ContactEquation[]>();
-      for (const [collision, contacts] of collisionsWithContacts) {
-        const key = `${collision.shapeA.id}:${collision.shapeB.id}`;
-        contactsByShapePair.set(key, contacts);
-      }
-
       for (const overlap of newOverlaps) {
-        const key = `${overlap.shapeA.id}:${overlap.shapeB.id}`;
-        const contacts = contactsByShapePair.get(key) ?? [];
+        // A collision has its equations by now; a sensor overlap has none
+        const { bodyA, shapeA, bodyB, shapeB } = overlap;
         this.emit({
           type: "beginContact",
-          ...overlap,
-          contactEquations: contacts,
+          bodyA,
+          shapeA,
+          bodyB,
+          shapeB,
+          contactEquations: (overlap as Collision).contactEquations ?? [],
         });
       }
     }
 
     // Emit endContact events, but only if we have at least one listener
     if (this.has("endContact")) {
-      for (const overlap of endedOverlaps) {
-        this.emit({ type: "endContact", ...overlap });
+      for (const { bodyA, shapeA, bodyB, shapeB } of endedOverlaps) {
+        this.emit({ type: "endContact", bodyA, shapeA, bodyB, shapeB });
       }
     }
   }

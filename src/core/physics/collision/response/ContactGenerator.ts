@@ -1,3 +1,4 @@
+import type { EquationPool } from "../../equations/EquationPool";
 import { ContactEquation } from "../../equations/ContactEquation";
 import { ContactMaterial } from "../../material/ContactMaterial";
 import { Collision } from "../narrowphase/getContactsFromCollisionPairs";
@@ -9,6 +10,8 @@ export function generateContactEquationsForCollision(
   { bodyA, shapeA, bodyB, shapeB, contacts }: Collision,
   contactMaterial: ContactMaterial,
   isFirstImpact: boolean,
+  /** Where to get the equations from; new ones if not given */
+  pool?: EquationPool<ContactEquation>,
 ): ContactEquation[] {
   // Only enable equations if all parties have collisionResponse enabled
   const enabled =
@@ -18,7 +21,9 @@ export function generateContactEquationsForCollision(
     shapeB.collisionResponse;
 
   return contacts.map((contact) => {
-    const eq = new ContactEquation(bodyA, bodyB);
+    const eq = pool
+      ? pool.take(bodyA, bodyB)
+      : new ContactEquation(bodyA, bodyB);
     eq.shapeA = shapeA;
     eq.shapeB = shapeB;
 

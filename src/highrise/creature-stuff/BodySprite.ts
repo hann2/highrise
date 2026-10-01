@@ -16,6 +16,12 @@ export interface BodyTextures {
   rightArm: ImageName;
 }
 
+/**
+ * How far (meters) beyond the edge of the view a body is still posed and
+ * drawn, so nothing shows up unposed at the edge
+ */
+const VIEW_MARGIN = 1;
+
 // A body with arms that faces a direction
 export abstract class BodySprite extends BaseEntity implements Entity {
   sprite: Container & GameSprite;
@@ -73,8 +79,26 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     );
   }
 
+  /**
+   * Poses the body where it is, unless it's out of view: then it isn't drawn,
+   * and isn't posed either, since that's most of the cost of a body. Nothing
+   * else may rely on the pose being up to date; `getPartPoses` updates it.
+   */
   @on("render")
-  onRender(dt: number) {
+  onRender(_dt: number) {
+    const inView = this.game.camera.isInView(
+      this.getPosition(),
+      this.radius + VIEW_MARGIN,
+    );
+    // Not `visible`, which the owner may use (enemies fade out of sight with it)
+    this.sprite.renderable = inView;
+    if (inView) {
+      this.updatePose();
+    }
+  }
+
+  /** Puts the sprites where the body and its parts are now */
+  updatePose() {
     this.sprite.position.copyFrom(this.getPosition());
     this.sprite.rotation = this.getAngle();
 
@@ -139,14 +163,15 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     return this.getShoulderPositions();
   }
 
-  /** A point in the body's own coordinates, in the world, as of the last render */
+  /** A point in the body's own coordinates, in the world, as of the last pose */
   toWorld(local: V2d): V2d {
     const { x, y } = this.sprite.position;
     return local.rotate(this.sprite.rotation).iadd([x, y]);
   }
 
-  /** Where each part of the body is in the world and which way it points, as of the last render */
+  /** Where each part of the body is in the world and which way it points */
   getPartPoses(): BodyPoses {
+    this.updatePose();
     const pose = (part: Sprite): PartPose => ({
       position: this.toWorld(V(part.position.x, part.position.y)),
       angle: this.sprite.rotation + part.rotation,

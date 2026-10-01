@@ -22,9 +22,9 @@ export function getShadowCasters(
   });
   const result: Body[] = [];
 
-  // Static casters (walls) come from the broadphase hash. Asking it for
-  // moving bodies too would make it hash every dynamic body in the world
-  // for each query, and only a handful of them (doors) cast shadows.
+  // Static casters (walls) come from the broadphase's static hash. Only a
+  // handful of moving bodies (doors) cast shadows, so they're found by tag
+  // below rather than by sifting through every moving body nearby.
   for (const body of world.broadphase.aabbQuery(world, aabb, false)) {
     if (body.owner?.tags?.includes(CAST_SHADOW_TAG)) {
       result.push(body);

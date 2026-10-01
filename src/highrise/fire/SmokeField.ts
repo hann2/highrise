@@ -49,6 +49,7 @@ const EMPTY = 0.005;
  * over it so the cells don't show, under the lighting so fire lights it.
  */
 export default class SmokeField extends BaseEntity implements Entity {
+  tickLayer = "fire" as const;
   sprite: Container & GameSprite;
   private density = new Float32Array(0);
   private change = new Float32Array(0);

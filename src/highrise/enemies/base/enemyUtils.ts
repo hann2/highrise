@@ -1,3 +1,4 @@
+import { PhysicsMaterials } from "../../../config/PhysicsMaterials";
 import { CollisionGroups } from "../../../config/CollisionGroups";
 import Game from "../../../core/Game";
 import { createRigid2D } from "../../../core/physics/body/bodyFactories";
@@ -17,6 +18,7 @@ export function makeSimpleEnemyBody(
       radius,
       collisionGroup: CollisionGroups.Enemies,
       collisionMask: CollisionGroups.All,
+      material: PhysicsMaterials.enemy,
     }),
   );
   return body;

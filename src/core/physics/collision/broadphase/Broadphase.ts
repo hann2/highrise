@@ -1,6 +1,7 @@
 import type { Body } from "../../body/Body";
 import type { World } from "../../world/World";
-import type { AABB } from "../AABB";
+import type { CompatibleVector } from "../../../Vector";
+import { AABB } from "../AABB";
 
 /**
  * Abstract base class for broadphase collision detection.
@@ -24,13 +25,34 @@ export abstract class Broadphase {
 
   /**
    * Returns all the bodies within an AABB.
-   * @param shouldAddBodies If true, adds dynamic/kinematic bodies to hash before querying (SpatialHashingBroadphase only)
+   * @param includeMoving If false, only static bodies (SpatialHashingBroadphase only)
    */
   abstract aabbQuery(
     _world: World,
     _aabb: AABB,
-    _shouldAddBodies?: boolean,
+    _includeMoving?: boolean,
   ): Iterable<Body>;
+
+  /**
+   * Returns the bodies a ray from `from` to `to` might hit (at least all the
+   * ones it does). By default, the bodies within the ray's bounding box;
+   * SpatialHashingBroadphase only looks along the ray.
+   * @param includeMoving If false, only static bodies (SpatialHashingBroadphase only)
+   */
+  rayQuery(
+    world: World,
+    from: CompatibleVector,
+    to: CompatibleVector,
+    includeMoving: boolean = true,
+  ): Iterable<Body> {
+    const aabb = new AABB();
+    aabb.lowerBound.set(Math.min(from[0], to[0]), Math.min(from[1], to[1]));
+    aabb.upperBound.set(Math.max(from[0], to[0]), Math.max(from[1], to[1]));
+    return this.aabbQuery(world, aabb, includeMoving);
+  }
+
+  /** Called when a body in the world gains or loses a shape, which changes its AABB */
+  bodyShapesChanged(_body: Body): void {}
 
   /** Set the world that we are searching for collision pairs in. */
   setWorld(world: World): void {

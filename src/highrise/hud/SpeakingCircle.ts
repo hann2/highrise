@@ -18,7 +18,7 @@ export default class SpeakingCircle extends BaseEntity implements Entity {
   sprite: Graphics & GameSprite;
   active: boolean = false;
 
-  phase = 0;
+  phase = START_PHASE;
 
   constructor(
     public getPosition: () => V2d,
@@ -26,32 +26,39 @@ export default class SpeakingCircle extends BaseEntity implements Entity {
   ) {
     super();
 
-    this.sprite = new Graphics();
+    // Drawn once; it pulses by scaling
+    this.sprite = new Graphics()
+      .circle(0, 0, RADIUS * RESOLUTION)
+      .stroke({ width: 0.1 * RESOLUTION, color: this.color, alpha: 0.5 });
     this.sprite.scale.set(1 / RESOLUTION); // For higher resolution cicles
     this.sprite.layerName = Layer.WORLD_OVERLAY;
     this.sprite.alpha = 0;
+    this.sprite.visible = false;
   }
 
   @on("render")
   onRender(dt: number) {
-    this.sprite.clear();
-    this.sprite.position.copyFrom(this.getPosition());
-
-    if (this.active) {
-      this.sprite.alpha = clamp(this.sprite.alpha + dt * FADE_SPEED);
-    } else {
-      this.sprite.alpha = clamp(this.sprite.alpha - dt * FADE_SPEED);
+    // Almost always: nobody's talking, and it's faded out
+    if (!this.active && this.sprite.alpha === 0) {
+      return;
     }
 
-    if (this.sprite.alpha > 0) {
-      this.phase += dt * Math.PI * OSCILLATION_F;
-      const r = RADIUS + Math.sin(this.phase) * CONTRACT_AMOUNT;
-
-      this.sprite
-        .circle(0, 0, r * RESOLUTION)
-        .stroke({ width: 0.1 * RESOLUTION, color: this.color, alpha: 0.5 });
-    } else {
+    const fade = dt * FADE_SPEED;
+    this.sprite.alpha = clamp(this.sprite.alpha + (this.active ? fade : -fade));
+    if (this.sprite.alpha === 0) {
+      this.sprite.visible = false;
       this.phase = START_PHASE; // So we always start at the same place
+      return;
+    }
+    this.phase += dt * Math.PI * OSCILLATION_F;
+
+    const position = this.getPosition();
+    const inView = this.game.camera.isInView(position, RADIUS);
+    this.sprite.visible = inView;
+    if (inView) {
+      this.sprite.position.copyFrom(position);
+      const r = RADIUS + Math.sin(this.phase) * CONTRACT_AMOUNT;
+      this.sprite.scale.set(r / RADIUS / RESOLUTION);
     }
   }
 }

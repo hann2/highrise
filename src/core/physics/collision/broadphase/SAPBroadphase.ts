@@ -138,7 +138,7 @@ export class SAPBroadphase extends Broadphase {
   aabbQuery(
     _world: World,
     aabb: AABB,
-    _shouldAddBodies: boolean = true,
+    _includeMoving: boolean = true,
   ): Iterable<Body> {
     this.sortList();
 

@@ -26,8 +26,7 @@ export class Plane extends Shape {
     this.area = Number.MAX_VALUE;
   }
 
-  computeAABB(_position: V2d, _angle: number): AABB {
-    const out = new AABB();
+  computeAABB(_position: V2d, _angle: number, out = new AABB()): AABB {
     const max = Number.MAX_VALUE;
     out.lowerBound.set(-max, -max);
     out.upperBound.set(max, max);

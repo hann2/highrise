@@ -2,7 +2,11 @@ import { V, V2d } from "../../../../Vector";
 import { Body } from "../../../body/Body";
 import { Convex } from "../../../shapes/Convex";
 import { Shape } from "../../../shapes/Shape";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 const yAxis = V(0, 1);
 
@@ -53,12 +57,11 @@ export function planeConvex(
       _projectionOffset.set(_planeNormal).imul(d);
       _contactOnPlane.set(_worldVertex).isub(_projectionOffset);
 
-      result.contacts.push({
-        worldContactA: V(_contactOnPlane).isub(bodyA.position),
-        worldContactB: V(_worldVertex).isub(bodyB.position),
-        normal: V(_planeNormal),
-        depth: -d,
-      });
+      const added = addContact(result);
+      added.worldContactA.set(_contactOnPlane).isub(bodyA.position);
+      added.worldContactB.set(_worldVertex).isub(bodyB.position);
+      added.normal.set(_planeNormal);
+      added.depth = -d;
     }
   }
 

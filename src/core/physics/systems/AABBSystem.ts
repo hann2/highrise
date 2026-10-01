@@ -1,5 +1,10 @@
 import { V } from "../../Vector";
 import type { Body } from "../body/Body";
+import { AABB } from "../collision/AABB";
+
+// Scratch space, so updating an AABB allocates nothing
+const offset = V();
+const shapeAABB = new AABB();
 
 /**
  * Recompute the body's AABB from its shapes and stamp `aabbNeedsUpdate = false`.
@@ -14,16 +19,14 @@ export function updateAABB(body: Body): void {
     const shape = shapes[i];
     const angle = shape.angle + bodyAngle;
 
-    const offset = V(shape.position);
+    offset.set(shape.position);
     offset.irotate(bodyAngle);
     offset.iadd(body.position);
 
-    const aabb = shape.computeAABB(offset, angle);
-
     if (i === 0) {
-      body.aabb.copy(aabb);
+      shape.computeAABB(offset, angle, body.aabb);
     } else {
-      body.aabb.extend(aabb);
+      body.aabb.extend(shape.computeAABB(offset, angle, shapeAABB));
     }
   }
 

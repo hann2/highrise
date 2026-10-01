@@ -1,3 +1,5 @@
+import type { Body } from "../../body/Body";
+import type { EquationPool } from "../../equations/EquationPool";
 import { ContactEquation } from "../../equations/ContactEquation";
 import { FrictionEquation } from "../../equations/FrictionEquation";
 import { ContactMaterial } from "../../material/ContactMaterial";
@@ -17,6 +19,8 @@ export function generateFrictionEquationsForCollision(
   contactEquations: ReadonlyArray<ContactEquation>,
   contactMaterial: ContactMaterial,
   frictionReduction: boolean,
+  /** Where to get the equations from; new ones if not given */
+  pool?: EquationPool<FrictionEquation>,
 ): FrictionEquation[] {
   if (frictionReduction && contactEquations.length > 1) {
     return [
@@ -24,6 +28,7 @@ export function generateFrictionEquationsForCollision(
         collision,
         contactEquations,
         contactMaterial,
+        pool,
       ),
     ];
   } else {
@@ -31,14 +36,30 @@ export function generateFrictionEquationsForCollision(
       collision,
       contactEquations,
       contactMaterial,
+      pool,
     );
   }
+}
+
+/** A friction equation that slips at `INITIAL_SLIP_FORCE` until the solver bounds it */
+function makeFrictionEquation(
+  bodyA: Body,
+  bodyB: Body,
+  pool: EquationPool<FrictionEquation> | undefined,
+): FrictionEquation {
+  if (!pool) {
+    return new FrictionEquation(bodyA, bodyB, INITIAL_SLIP_FORCE);
+  }
+  const eq = pool.take(bodyA, bodyB);
+  eq.setSlipForce(INITIAL_SLIP_FORCE);
+  return eq;
 }
 
 function generateAllFrictionEquationsForCollision(
   collision: Collision,
   contactEquations: ReadonlyArray<ContactEquation>,
   contactMaterial: ContactMaterial,
+  pool: EquationPool<FrictionEquation> | undefined,
 ): FrictionEquation[] {
   // Only enable equations if all parties have collisionResponse enabled
   const enabled =
@@ -48,11 +69,7 @@ function generateAllFrictionEquationsForCollision(
     collision.shapeB.collisionResponse;
 
   return contactEquations.map((contact) => {
-    const eq = new FrictionEquation(
-      contact.bodyA,
-      contact.bodyB,
-      INITIAL_SLIP_FORCE,
-    );
+    const eq = makeFrictionEquation(contact.bodyA, contact.bodyB, pool);
     eq.shapeA = contact.shapeA;
     eq.shapeB = contact.shapeB;
 
@@ -77,12 +94,9 @@ function generateAverageFrictionEquationForCollision(
   collision: Collision,
   contactEquations: ReadonlyArray<ContactEquation>,
   contactMaterial: ContactMaterial,
+  pool: EquationPool<FrictionEquation> | undefined,
 ): FrictionEquation {
-  const eq = new FrictionEquation(
-    collision.bodyA,
-    collision.bodyB,
-    INITIAL_SLIP_FORCE,
-  );
+  const eq = makeFrictionEquation(collision.bodyA, collision.bodyB, pool);
 
   eq.shapeA = collision.shapeA;
   eq.shapeB = collision.shapeB;

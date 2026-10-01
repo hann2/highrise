@@ -96,8 +96,11 @@ export abstract class Shape {
   /** Recalculate the area. Called after shape properties change. */
   abstract updateArea(): void;
 
-  /** Compute the axis-aligned bounding box at the given world position and angle. */
-  abstract computeAABB(position: V2d, angle: number): AABB;
+  /**
+   * Compute the axis-aligned bounding box at the given world position and
+   * angle, into `out` if it's given (overwriting it), else a new one.
+   */
+  abstract computeAABB(position: V2d, angle: number, out?: AABB): AABB;
 
   /** Cast a ray against this shape. Returns hit info or null if no hit. */
   abstract raycast(

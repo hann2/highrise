@@ -25,8 +25,7 @@ export class Particle extends Shape {
     this.area = 0;
   }
 
-  computeAABB(position: V2d, _angle: number): AABB {
-    const out = new AABB();
+  computeAABB(position: V2d, _angle: number, out = new AABB()): AABB {
     out.lowerBound.set(position);
     out.upperBound.set(position);
     return out;

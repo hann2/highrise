@@ -3,6 +3,7 @@ import { desktop } from "../../core/desktop";
 import Game from "../../core/Game";
 import { getCurrentGraphicsQuality } from "../controllers/GraphicsQualityController";
 import { getVolumeController } from "../controllers/VolumeController";
+import { updateSaveData } from "../persistence/SaveData";
 import "./menu.css";
 
 const FEEDBACK_URL =
@@ -62,6 +63,34 @@ export function GraphicsButton({ game }: { game: Game }) {
       onClick={() => game.dispatch("toggleGraphicsQuality", undefined)}
     >
       Graphics: {getCurrentGraphicsQuality(game)}
+    </MenuButton>
+  );
+}
+
+/** Frame rate limits to offer, below the display's rate (a limit above it does nothing) */
+const FRAME_RATE_LIMITS = [30, 60, 90, 120, 144, 165, 240];
+
+/**
+ * Cycles the frame rate limit: the display's rate ("Auto"), then each lower
+ * limit. For fast displays on machines that can't keep up with them.
+ */
+export function FrameRateButton({ game }: { game: Game }) {
+  const limit = game.frameRateLimit;
+  const options = [
+    undefined,
+    ...FRAME_RATE_LIMITS.filter((rate) => rate < game.refreshRate),
+  ];
+  const next = options[(options.indexOf(limit) + 1) % options.length];
+  return (
+    <MenuButton
+      onClick={() => {
+        game.frameRateLimit = next;
+        updateSaveData((data) => {
+          data.frameRateLimit = next;
+        });
+      }}
+    >
+      Frame Rate: {limit ?? `Auto (${game.refreshRate})`}
     </MenuButton>
   );
 }

@@ -58,6 +58,7 @@ export interface GibOptions {
  * and slides, and then stays where it stopped as `Remains`.
  */
 export default class Gib extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   sprite: Container & GameSprite;
   body: Body;
   private z: number;

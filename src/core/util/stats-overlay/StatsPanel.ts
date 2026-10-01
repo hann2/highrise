@@ -8,8 +8,10 @@ export interface StatsPanelContext {
   game: Game;
   /** Smoothed FPS from frame timing */
   fps: number;
-  /** Screen refresh rate FPS */
-  fps2: number;
+  /** The frame rate the game is aiming for */
+  targetFps: number;
+  /** The display's refresh rate, as measured */
+  refreshRate: number;
 }
 
 /**

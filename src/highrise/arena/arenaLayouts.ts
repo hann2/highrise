@@ -127,8 +127,34 @@ const CORRIDOR: ArenaLayout = {
   edgeSpots: edgeSpots(10, 16),
 };
 
+/**
+ * A big room with pillars scattered around it, with the player in the middle:
+ * room for hundreds of enemies, for stress testing (see
+ * `tests/enemies.benchmark.spec.ts`)
+ */
+const HALL: ArenaLayout = {
+  width: 60,
+  height: 40,
+  walls: [
+    ...pillar(12, 8),
+    ...pillar(24, 12),
+    ...pillar(36, 8),
+    ...pillar(48, 12),
+    ...pillar(12, 32),
+    ...pillar(24, 28),
+    ...pillar(36, 32),
+    ...pillar(48, 28),
+    ...pillar(8, 20),
+    ...pillar(52, 20),
+  ],
+  playerStart: V(30, 20),
+  spawnArea: { center: V(55, 20), radius: 4 },
+  edgeSpots: edgeSpots(60, 40),
+};
+
 export const ARENA_LAYOUTS: Record<LayoutName, ArenaLayout> = {
   open: OPEN,
   pillars: PILLARS,
   corridor: CORRIDOR,
+  hall: HALL,
 };

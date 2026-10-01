@@ -3,7 +3,11 @@ import { Body } from "../../../body/Body";
 import { Circle } from "../../../shapes/Circle";
 import { Particle } from "../../../shapes/Particle";
 import { Shape } from "../../../shapes/Shape";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 // Scratch vectors to avoid per-call allocations
 const _particleToCircle = V();
@@ -40,12 +44,11 @@ export function circleParticle(
   _contactOnCircle.set(_normal).imul(circleRadius).iadd(offsetA);
 
   const result = createCollisionResult();
-  result.contacts.push({
-    worldContactA: V(_contactOnCircle).isub(bodyA.position),
-    worldContactB: V(offsetB).isub(bodyB.position),
-    normal: V(_normal),
-    depth: circleRadius - _particleToCircle.magnitude,
-  });
+  const added = addContact(result);
+  added.worldContactA.set(_contactOnCircle).isub(bodyA.position);
+  added.worldContactB.set(offsetB).isub(bodyB.position);
+  added.normal.set(_normal);
+  added.depth = circleRadius - _particleToCircle.magnitude;
 
   return result;
 }

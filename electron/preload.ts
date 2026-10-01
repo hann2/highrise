@@ -10,11 +10,19 @@ ipcRenderer.on("highrise:fullscreen", (_, value: boolean) => {
   fullscreen = value;
 });
 
+let displayFrequency = ipcRenderer.sendSync(
+  "highrise:display-frequency",
+) as number;
+ipcRenderer.on("highrise:display-frequency", (_, value: number) => {
+  displayFrequency = value;
+});
+
 contextBridge.exposeInMainWorld("desktop", {
   platform: process.platform,
   smoke: process.argv.includes("--highrise-smoke"),
   quit: () => ipcRenderer.send("highrise:quit"),
   isFullscreen: () => fullscreen,
+  displayFrequency: () => displayFrequency,
   setFullscreen: (value: boolean) =>
     ipcRenderer.send("highrise:set-fullscreen", value),
 });

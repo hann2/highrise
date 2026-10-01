@@ -27,6 +27,7 @@ interface Particle {
 }
 
 export default class GooImpact extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   particles: Particle[] = [];
 
   constructor(

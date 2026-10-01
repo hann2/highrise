@@ -9,6 +9,7 @@ import { V2d } from "../../../core/Vector";
 import { PointLight } from "../../lighting-and-vision/PointLight";
 
 export class Spark extends BaseEntity implements Entity {
+  tickLayer = "effects" as const;
   sprite: Graphics & GameSprite;
   light: PointLight;
 
@@ -57,7 +58,19 @@ export class Spark extends BaseEntity implements Entity {
 
   @on("render")
   onRender(dt: number) {
+    // Its light can reach into view from outside it, so it always moves
+    this.light.setPosition(this.renderPosition);
+
+    // Out of view, the streak isn't redrawn
     const endPoint = this.velocity.mul(dt);
+    const inView = this.game.camera.isInView(
+      this.renderPosition,
+      endPoint.magnitude + 0.1,
+    );
+    this.sprite.visible = inView;
+    if (!inView) {
+      return;
+    }
 
     this.sprite
       .clear()
@@ -66,6 +79,5 @@ export class Spark extends BaseEntity implements Entity {
       .stroke({ width: 0.03, color: 0xffaa00, alpha: 0.6 });
 
     this.sprite.position.copyFrom(this.renderPosition);
-    this.light.setPosition(this.renderPosition);
   }
 }

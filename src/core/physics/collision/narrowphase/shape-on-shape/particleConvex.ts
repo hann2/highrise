@@ -3,7 +3,11 @@ import { Body } from "../../../body/Body";
 import { Convex } from "../../../shapes/Convex";
 import { Shape } from "../../../shapes/Shape";
 import { pointInConvex } from "../../CollisionHelpers";
-import { CollisionResult, createCollisionResult } from "../../CollisionResult";
+import {
+  CollisionResult,
+  createCollisionResult,
+  addContact,
+} from "../../CollisionResult";
 
 // Scratch vectors to avoid per-call allocations
 const _closestPoint = V();
@@ -69,12 +73,11 @@ export function particleConvex(
   }
 
   const result = createCollisionResult();
-  result.contacts.push({
-    worldContactA: V(offsetA).isub(bodyA.position),
-    worldContactB: V(_closestPoint).isub(bodyB.position),
-    normal: V(_closestNormal).imul(-1),
-    depth: minDistance,
-  });
+  const added = addContact(result);
+  added.worldContactA.set(offsetA).isub(bodyA.position);
+  added.worldContactB.set(_closestPoint).isub(bodyB.position);
+  added.normal.set(_closestNormal).imul(-1);
+  added.depth = minDistance;
 
   return result;
 }

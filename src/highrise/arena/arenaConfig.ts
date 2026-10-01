@@ -42,19 +42,21 @@ export const ARENA_ENEMIES: ReadonlyArray<ArenaEnemyType> = [
 export const ARENA_ITEMS: ReadonlyArray<Item> = [...ITEMS, ...BOSS_ITEMS];
 
 /** How a wave comes in */
-export type Arrival = "together" | "trickle" | "surround";
+export type Arrival = "together" | "trickle" | "surround" | "spread";
 export const ARRIVALS: ReadonlyArray<Arrival> = [
   "together",
   "trickle",
   "surround",
+  "spread",
 ];
 
 /** The shape of the arena (see `arenaLayouts.ts`) */
-export type LayoutName = "open" | "pillars" | "corridor";
+export type LayoutName = "open" | "pillars" | "corridor" | "hall";
 export const LAYOUT_NAMES: ReadonlyArray<LayoutName> = [
   "open",
   "pillars",
   "corridor",
+  "hall",
 ];
 
 /** Everything about an arena setup. It all goes in the URL (see `arenaConfigToQuery`). */
