@@ -88,6 +88,8 @@ export interface ArenaConfig {
   dummies: boolean;
   /** As dark as a floor, rather than brightly lit */
   dark: boolean;
+  /** A door in each of the layout's doorways */
+  doors: boolean;
   /** Pools of fire spread over the room that never go out, for stress tests */
   fires: number;
 }
@@ -146,7 +148,7 @@ export function startingSlots(
  *
  * `?scene=arena&char=chad&weapons=spas12,glock&items=buckshotbounce*2,choke
  * &throwable=molotov*3&usable=stimpack&act=3&wave=zombie*12,heavy*2
- * &arrival=surround&layout=pillars&god&infammo&fog&dummies&dark&fires=8`
+ * &arrival=surround&layout=offices&god&infammo&fog&dummies&dark&doors&fires=8`
  */
 export function parseArenaConfig(params: URLSearchParams): ArenaConfig {
   const character =
@@ -203,6 +205,7 @@ export function parseArenaConfig(params: URLSearchParams): ArenaConfig {
     fog: params.has("fog"),
     dummies: params.has("dummies"),
     dark: params.has("dark"),
+    doors: params.has("doors"),
     fires: isNaN(fires) ? 0 : Math.max(fires, 0),
   };
 }
@@ -248,6 +251,7 @@ export function arenaConfigToQuery(config: ArenaConfig): string {
     [config.fog, "fog"],
     [config.dummies, "dummies"],
     [config.dark, "dark"],
+    [config.doors, "doors"],
   ];
   for (const [on, flag] of flags) {
     if (on) {

@@ -329,6 +329,11 @@ export default class ArenaPanel extends ReactEntity implements Entity {
               value={draft.dark}
               onChange={(v) => (draft.dark = v)}
             />
+            <Toggle
+              label="Doors in the doorways (offices, sprawl)"
+              value={draft.doors}
+              onChange={(v) => (draft.doors = v)}
+            />
             <Row label="Fires that never go out">
               <Stepper
                 value={draft.fires}

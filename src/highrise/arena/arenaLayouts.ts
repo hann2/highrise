@@ -9,6 +9,11 @@ export interface ArenaLayout {
   height: number;
   /** Walls inside the room (the outside walls come with every layout) */
   walls: Segment[];
+  /**
+   * The gaps in the walls that are doorways, from one side to the other: with
+   * the `doors` option there's a door in each, hinged at the first point
+   */
+  doorways: Segment[];
   /** Where the player starts */
   playerStart: V2d;
   /** The far end, where waves come from when they come together or trickle in */
@@ -60,6 +65,7 @@ function edgeSpots(
 const OPEN: ArenaLayout = {
   width: 30,
   height: 20,
+  doorways: [],
   walls: [],
   playerStart: V(5, 10),
   spawnArea: { center: V(26, 10), radius: 3 },
@@ -69,6 +75,7 @@ const OPEN: ArenaLayout = {
 const PILLARS: ArenaLayout = {
   width: 30,
   height: 20,
+  doorways: [],
   walls: [
     ...pillar(10, 5),
     ...pillar(10, 15),
@@ -93,6 +100,7 @@ const PILLARS: ArenaLayout = {
 const CORRIDOR: ArenaLayout = {
   width: 36,
   height: 16,
+  doorways: [],
   walls: [
     // The player's room ends at x = 10, the far room starts at x = 26
     [
@@ -135,6 +143,7 @@ const CORRIDOR: ArenaLayout = {
 const HALL: ArenaLayout = {
   width: 60,
   height: 40,
+  doorways: [],
   walls: [
     ...pillar(12, 8),
     ...pillar(24, 12),
@@ -154,9 +163,9 @@ const HALL: ArenaLayout = {
 
 /**
  * A grid of `columns` by `rows` rooms filling `width` by `height`, with a
- * doorway `door` meters wide in every wall between two rooms. The doorways
- * sit a third or two thirds of the way along, alternating, so they don't
- * line up into corridors.
+ * doorway `door` meters wide in every wall between two rooms: the walls, and
+ * the doorways. The doorways sit a third or two thirds of the way along,
+ * alternating, so they don't line up into corridors.
  */
 function rooms(
   width: number,
@@ -164,8 +173,9 @@ function rooms(
   columns: number,
   rows: number,
   door: number = 1.4,
-): Segment[] {
+): { walls: Segment[]; doorways: Segment[] } {
   const walls: Segment[] = [];
+  const doorways: Segment[] = [];
   const roomWidth = width / columns;
   const roomHeight = height / rows;
   // A wall from `from` to `to` along one axis, at `at` on the other, with a doorway
@@ -183,6 +193,7 @@ function rooms(
       [point(from), point(middle - door / 2)],
       [point(middle + door / 2), point(to)],
     );
+    doorways.push([point(middle - door / 2), point(middle + door / 2)]);
   };
   for (let i = 1; i < columns; i++) {
     for (let j = 0; j < rows; j++) {
@@ -206,7 +217,7 @@ function rooms(
       );
     }
   }
-  return walls;
+  return { walls, doorways };
 }
 
 /**
@@ -218,7 +229,7 @@ function rooms(
 const OFFICES: ArenaLayout = {
   width: 60,
   height: 40,
-  walls: rooms(60, 40, 9, 5),
+  ...rooms(60, 40, 9, 5),
   playerStart: V(30, 20),
   spawnArea: { center: V(56.5, 20), radius: 2 },
   edgeSpots: edgeSpots(60, 40),
@@ -233,7 +244,7 @@ const OFFICES: ArenaLayout = {
 const SPRAWL: ArenaLayout = {
   width: 240,
   height: 160,
-  walls: rooms(240, 160, 36, 20),
+  ...rooms(240, 160, 36, 20),
   playerStart: V(123.3, 84),
   spawnArea: { center: V(236.5, 84), radius: 2 },
   edgeSpots: edgeSpots(240, 160),

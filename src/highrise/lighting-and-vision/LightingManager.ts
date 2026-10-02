@@ -16,7 +16,7 @@ import Light from "./Light";
 import { AtlasPage, LightAtlas, StaticLightAtlas } from "./LightAtlas";
 import { LIGHT_RESOLUTION } from "./lightingConstants";
 import { getShadowCasters } from "./occluders";
-import { ShadowCasters } from "./ShadowCasters";
+import { Area, ShadowCasters } from "./ShadowCasters";
 
 /**
  * Lights the world: a screen-sized texture, cleared to the ambient color with
@@ -193,17 +193,34 @@ export default class LightingManager extends BaseEntity implements Entity {
     const staticInView = this.staticInView;
     const dynamicInView = this.dynamicInView;
     inView.length = staticInView.length = dynamicInView.length = 0;
+    // The area the squares of the lights in view cover
+    const region: Area = [Infinity, Infinity, -Infinity, -Infinity];
     for (const light of this.lights) {
       if (this.shouldRenderLight(light, minX, minY, maxX, maxY)) {
         inView.push(light);
         (light.dynamic ? dynamicInView : staticInView).push(light);
+        const halfSize = light.size / 2;
+        region[0] = Math.min(region[0], light.x - halfSize);
+        region[1] = Math.min(region[1], light.y - halfSize);
+        region[2] = Math.max(region[2], light.x + halfSize);
+        region[3] = Math.max(region[3], light.y + halfSize);
       }
     }
+
+    // Moving casters (doors): the ones the lights reach, and static lights
+    // drawn again where one moved
+    profiler.measure("LightingManager.moving", () => {
+      for (const area of this.shadowCasters.updateMoving(
+        inView.length > 0 ? region : undefined,
+      )) {
+        this.staticAtlas.invalidateArea(area);
+      }
+    });
 
     // The static lights that changed, in their squares of the static page
     if (staticInView.length > 0) {
       const changed = profiler.measure("LightingManager.packStatic", () =>
-        this.staticAtlas.update(staticInView),
+        this.staticAtlas.update(staticInView, this.game.framenumber),
       );
       if (changed.length > 0) {
         measureCpuAndGpu("LightingManager.static", () => {

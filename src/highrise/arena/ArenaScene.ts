@@ -36,7 +36,7 @@ import {
 } from "./arenaConfig";
 import { ARENA_LAYOUTS, ArenaLayout } from "./arenaLayouts";
 import ArenaPanel from "./ArenaPanel";
-import ArenaRoom, { ArenaLights } from "./ArenaRoom";
+import ArenaRoom, { ArenaDoors, ArenaLights } from "./ArenaRoom";
 
 /** Ambient light when it's bright (like the lobby) and when it's as dark as a floor */
 const BRIGHT_AMBIENT = 0x777777;
@@ -104,6 +104,8 @@ export default class ArenaScene
   private room?: ArenaRoom;
   /** Only when it's dark */
   private lights?: ArenaLights;
+  /** Only with the `doors` option */
+  private doors?: ArenaDoors;
   private ambient!: AmbientLight;
   private vision!: VisionController;
   private grid!: FireGrid;
@@ -164,9 +166,14 @@ export default class ArenaScene
     }
     if (newRoom || config.act !== previous.act) {
       this.clear();
-    } else if (config.fires !== previous.fires) {
-      this.grid.clear();
-      this.lightFires();
+    } else {
+      if (config.fires !== previous.fires) {
+        this.grid.clear();
+        this.lightFires();
+      }
+      if (config.doors !== previous.doors) {
+        this.placeDoors();
+      }
     }
 
     this.ambient.color = hexToRgb(config.dark ? DARK_AMBIENT : BRIGHT_AMBIENT);
@@ -229,6 +236,15 @@ export default class ArenaScene
     this.game.clearScene(Persistence.Floor);
     this.grid.clear();
     this.lightFires();
+    this.placeDoors();
+  }
+
+  /** New doors in the doorways, all shut, if the config has them */
+  private placeDoors() {
+    this.doors?.destroy();
+    this.doors = this.config.doors
+      ? this.addChild(new ArenaDoors(this.layout))
+      : undefined;
   }
 
   /**
