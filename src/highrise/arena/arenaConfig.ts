@@ -51,13 +51,15 @@ export const ARRIVALS: ReadonlyArray<Arrival> = [
 ];
 
 /** The shape of the arena (see `arenaLayouts.ts`) */
-export type LayoutName = "open" | "pillars" | "corridor" | "hall" | "offices";
+export type LayoutName =
+  "open" | "pillars" | "corridor" | "hall" | "offices" | "sprawl";
 export const LAYOUT_NAMES: ReadonlyArray<LayoutName> = [
   "open",
   "pillars",
   "corridor",
   "hall",
   "offices",
+  "sprawl",
 ];
 
 /** Everything about an arena setup. It all goes in the URL (see `arenaConfigToQuery`). */

@@ -49,6 +49,14 @@ const SURROUND_MIN_DISTANCE = 7;
 const SPREAD_WALL_CLEARANCE = 0.8;
 /** Seconds from the player dying to them being back */
 const RESPAWN_DELAY = 1.5;
+/** A rectangle of the room, in meters */
+interface Area {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /** Seconds of fuel in the fires that never go out */
 const ENDLESS_FUEL = 1e9;
 
@@ -86,6 +94,12 @@ export default class ArenaScene
   config: ArenaConfig;
   player?: Human;
   wave?: WaveStatus;
+  /**
+   * Where the config's fires go: the whole room, unless set (the fire
+   * benchmark sets it to the offices' size around the player, to compare
+   * layouts with the same fires in view)
+   */
+  fireArea?: Area;
   private layout!: ArenaLayout;
   private room?: ArenaRoom;
   /** Only when it's dark */
@@ -226,7 +240,7 @@ export default class ArenaScene
       return;
     }
     const { radius } = Molotov.fire!;
-    for (const spot of this.spreadSpots(this.config.fires)) {
+    for (const spot of this.spreadSpots(this.config.fires, this.fireArea)) {
       const cells = this.grid.spillFuel(spot, radius, ENDLESS_FUEL);
       this.grid.igniteCells(cells);
     }
@@ -303,12 +317,20 @@ export default class ArenaScene
   }
 
   /**
-   * `count` spots spread evenly over the room, clear of the walls and not too
-   * close to the player, in a random order. A grid, made finer until enough
-   * spots fit, with a little jitter so it doesn't look like one.
+   * `count` spots spread evenly over the room (or `area` of it), clear of the
+   * walls and not too close to the player, in a random order. A grid, made
+   * finer until enough spots fit, with a little jitter so it doesn't look
+   * like one.
    */
-  private spreadSpots(count: number): V2d[] {
-    const { width, height, walls } = this.layout;
+  private spreadSpots(count: number, area?: Area): V2d[] {
+    const { walls } = this.layout;
+    const left = Math.max(0, area?.x ?? 0);
+    const top = Math.max(0, area?.y ?? 0);
+    const right = Math.min(this.layout.width, left + (area?.width ?? Infinity));
+    const bottom = Math.min(
+      this.layout.height,
+      top + (area?.height ?? Infinity),
+    );
     const at = this.player?.getPosition() ?? this.layout.playerStart;
     const inset = SPREAD_WALL_CLEARANCE;
     const clear = (spot: V2d) =>
@@ -319,12 +341,20 @@ export default class ArenaScene
       );
 
     let spacing = Math.sqrt(
-      ((width - 2 * inset) * (height - 2 * inset)) / count,
+      ((right - left - 2 * inset) * (bottom - top - 2 * inset)) / count,
     );
     for (let attempt = 0; attempt < 20; attempt++, spacing *= 0.9) {
       const spots: V2d[] = [];
-      for (let x = inset + spacing / 2; x < width - inset; x += spacing) {
-        for (let y = inset + spacing / 2; y < height - inset; y += spacing) {
+      for (
+        let x = left + inset + spacing / 2;
+        x < right - inset;
+        x += spacing
+      ) {
+        for (
+          let y = top + inset + spacing / 2;
+          y < bottom - inset;
+          y += spacing
+        ) {
           const spot = V(x, y);
           if (clear(spot)) {
             spots.push(spot);
