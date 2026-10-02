@@ -34,15 +34,22 @@ const COUNTS = (
 )
   .split(",")
   .map(Number);
+/**
+ * With `DOORS=1`, a door in every doorway (the arena's `doors`), and each
+ * count is also measured with every door being kicked open over and over, so
+ * the static lights near them have to be drawn again
+ */
+const DOORS = process.env.DOORS === "1";
 /** From lighting the fires to measuring, for them to spread and the smoke to build up */
 const SETTLE_MS = 6000;
 const MEASURE_MS = 4000;
 const PROFILE_MS = 4000;
 
-const URL = `/?scene=arena&seed=1&char=chad&wave=zombie*0&layout=${LAYOUT}&god&dark&fog&fps=120`;
+const URL = `/?scene=arena&seed=1&char=chad&wave=zombie*0&layout=${LAYOUT}&god&dark&fog&fps=120${DOORS ? "&doors" : ""}`;
 
 /** Profiler sections worth showing on their own, wherever they are in the tree */
 const SECTIONS = [
+  "LightingManager.moving",
   "LightingManager.pack",
   "LightingManager.masks",
   "LightingManager.lights",
@@ -91,6 +98,18 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
       entityDetail: false,
     });
     await setLightingAndVision(page, true);
+    let swinging: Swinging | undefined;
+    if (DOORS) {
+      await kickDoors(page, true);
+      await page.waitForTimeout(500);
+      swinging = summarizeSwinging(
+        await measureFrames(page, MEASURE_MS),
+        await captureProfile(page, PROFILE_MS, { entityDetail: false }),
+      );
+      await kickDoors(page, false);
+      // Shut again
+      await page.waitForTimeout(3000);
+    }
     results.push(
       summarize(
         count,
@@ -102,6 +121,7 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
         detail.stats,
         detail.gpu,
         counts,
+        swinging,
       ),
     );
   }
@@ -109,13 +129,16 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
 
   fs.mkdirSync("tests/output", { recursive: true });
   fs.writeFileSync(
-    `tests/output/fire-benchmark${LAYOUT === "offices" ? "" : `-${LAYOUT}`}${NEAR ? "-near" : ""}${DISPLAY.suffix}.json`,
+    `tests/output/fire-benchmark${LAYOUT === "offices" ? "" : `-${LAYOUT}`}${NEAR ? "-near" : ""}${DOORS ? "-doors" : ""}${DISPLAY.suffix}.json`,
     JSON.stringify(results, null, 2) + "\n",
   );
   console.log(
-    `Layout: ${LAYOUT}${NEAR ? ", fires near the player" : ""}, ${results[0].casterShapes} shadow shapes, resolution ${await getResolution(page)}`,
+    `Layout: ${LAYOUT}${NEAR ? ", fires near the player" : ""}${DOORS ? ", with doors" : ""}, ${results[0].casterShapes} shadow shapes, resolution ${await getResolution(page)}`,
   );
   console.log(formatTable(results));
+  if (DOORS) {
+    console.log(formatSwinging(results));
+  }
   console.log(formatSections(results));
   for (const result of results) {
     console.log(formatGpuSections(result));
@@ -141,6 +164,56 @@ function setFires(page: Page, count: number) {
     },
     { count, near: NEAR },
   );
+}
+
+/**
+ * Starts (or stops) kicking every door open, one way then the other, a few
+ * times a second, so they never come to rest
+ */
+function kickDoors(page: Page, on: boolean) {
+  return page.evaluate((on) => {
+    const w = window as any;
+    clearInterval(w.__doorKicks);
+    if (!on) {
+      return;
+    }
+    let way = 1;
+    w.__doorKicks = setInterval(() => {
+      way = -way;
+      for (const entity of window.DEBUG.game!.entities.all) {
+        if (entity.constructor.name === "Door") {
+          const body = (entity as any).body;
+          body.wakeUp();
+          body.angularVelocity = way * 4;
+        }
+      }
+    }, 400);
+  }, on);
+}
+
+type Swinging = ReturnType<typeof summarizeSwinging>;
+
+/** With the doors swinging: the frames, and the static lights drawn again */
+function summarizeSwinging(
+  frames: Awaited<ReturnType<typeof measureFrames>>,
+  profile: Awaited<ReturnType<typeof captureProfile>>,
+) {
+  const section = profile.stats.find((s) =>
+    s.label.endsWith("> LightingManager.static"),
+  );
+  const seconds = MEASURE_MS / 1000;
+  return {
+    fps: Math.round((frames.frames / seconds) * 10) / 10,
+    frameIntervalMs: frames.frameIntervalMs.mean,
+    loopCpuMs: frames.loopCpuMs.mean,
+    staticMs: Math.round((section?.msPerFrame ?? 0) * 1000) / 1000,
+    staticCalls: Math.round((section?.callsPerFrame ?? 0) * 100) / 100,
+    gpuMs:
+      Math.round(
+        (profile.gpu.stats.find((s) => s.label === "Game.render")?.msPerFrame ??
+          0) * 1000,
+      ) / 1000,
+  };
 }
 
 function setLightingAndVision(page: Page, enabled: boolean) {
@@ -218,6 +291,7 @@ function summarize(
   detailStats: Stat[],
   detailGpu: GpuReport,
   counts: Awaited<ReturnType<typeof countFireAndLights>>,
+  swinging: Swinging | undefined,
 ) {
   const round = (n: number, places = 3) =>
     Math.round(n * 10 ** places) / 10 ** places;
@@ -277,6 +351,7 @@ function summarize(
     gpuMs: round(renderGpuMs(gpu)),
     unlitGpuMs: round(renderGpuMs(unlitGpu)),
     top,
+    swinging,
     // The GPU's time per section, in drawing order, from timing them all
     // separately, which adds to them (see GpuProfiler): for comparing
     // sections with each other
@@ -322,6 +397,32 @@ function formatTable(results: Result[]): string {
   );
   return [
     "Interval = mean ms between frames (GPU included, no vsync), cpu/f = ms of CPU per frame, gpu/f = ms of GPU per frame (the render, an upper bound); shadows/l = shadow shapes per light in view; unlit = lighting and vision off",
+    header,
+    ...rows,
+  ].join("\n");
+}
+
+/** With the doors swinging, against at rest */
+function formatSwinging(results: Result[]): string {
+  const header =
+    "fires   at rest: fps  interval  cpu/f   swinging: fps  interval  cpu/f  gpu/f   static lights drawn: ms/f  frames drawing them";
+  const rows = results.map((r) => {
+    const s = r.swinging!;
+    return [
+      String(r.count).padStart(5),
+      r.fps.toFixed(0).padStart(13),
+      r.frameIntervalMs.mean.toFixed(2).padStart(9),
+      r.loopCpuMs.mean.toFixed(2).padStart(6),
+      s.fps.toFixed(0).padStart(14),
+      s.frameIntervalMs.toFixed(2).padStart(9),
+      s.loopCpuMs.toFixed(2).padStart(6),
+      s.gpuMs.toFixed(2).padStart(6),
+      s.staticMs.toFixed(3).padStart(27),
+      `${Math.round(s.staticCalls * 100)}%`.padStart(20),
+    ].join(" ");
+  });
+  return [
+    "\nDoors swinging (kicked open every 0.4 s), against at rest; static lights drawn = LightingManager.static, the CPU drawing static lights again",
     header,
     ...rows,
   ].join("\n");
