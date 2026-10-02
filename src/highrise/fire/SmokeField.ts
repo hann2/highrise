@@ -12,8 +12,9 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
-import { clamp } from "../../core/util/MathUtil";
+import { clamp, lerp } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
+import Door from "../environment/Door";
 import Burning from "./Burning";
 import {
   FIRE_CELL_SIZE,
@@ -23,6 +24,9 @@ import {
   SMOKE_COLOR,
   SMOKE_DARK_COLOR,
   SMOKE_DARK_DENSITY,
+  SMOKE_DOOR_OPEN_ANGLE,
+  SMOKE_DOOR_SEAL_OPEN,
+  SMOKE_DOOR_SEAL_SHUT,
   SMOKE_FROM_BURNING,
   SMOKE_FROM_CELL,
   SMOKE_MAX_DENSITY,
@@ -40,11 +44,18 @@ import { gpuTimed } from "../../core/util/GpuProfiler";
 /** Below this, a cell has no smoke */
 const EMPTY = 0.005;
 
+/** What's along an edge between two cells (see `SmokeField.walls`) */
+const UNKNOWN = -1;
+const OPEN = 0;
+const WALL = 1;
+const DOOR = 2;
+
 /**
  * Smoke as a density in each cell of the fire grid. Fire and burning things
  * put smoke into their cells; each tick smoke flows from each cell into the
  * neighbors that have less, unless a wall is between them, so it fills rooms,
  * pours out of doorways and piles up against walls, and it slowly clears.
+ * Doors hold it back by how shut they are.
  * Only the box around the cells with smoke is simulated, as a plain sweep
  * over the arrays (a set of the smoky cells was ten times slower). It's drawn
  * by `smoke.frag` from a texture of the densities (one pixel per cell), with
@@ -75,11 +86,16 @@ export default class SmokeField extends BaseEntity implements Entity {
   /** How many cells had smoke after the last tick */
   private smokyCells = 0;
   /**
-   * Whether a wall is past each cell's right edge (even indexes) and bottom
-   * edge (odd): -1 until someone asks, then 0 or 1. Walls don't move, so
-   * each edge is only checked once. (Doors aren't walls here.)
+   * What's past each cell's right edge (even indexes) and bottom edge (odd):
+   * `UNKNOWN` until someone asks, then `OPEN` or `WALL`. Walls don't move, so
+   * each edge is only checked once. Edges a shut door would cross are `DOOR`
+   * from the first tick the door is around, and let `doorLeak` through.
    */
   private walls = new Int8Array(0);
+  /** How much of the flow across each `DOOR` edge gets through, 0 to 1 */
+  private doorLeak = new Float32Array(0);
+  /** The edges each door crosses when it's shut */
+  private doorEdges = new Map<Door, number[]>();
   private pixels = new Uint8Array(4);
   private source = new BufferImageSource({
     resource: this.pixels,
@@ -143,7 +159,9 @@ export default class SmokeField extends BaseEntity implements Entity {
     this.change = new Float32Array(count);
     this.clearing = new Float32Array(count);
     this.clearingCells.clear();
-    this.walls = new Int8Array(count * 2).fill(-1);
+    this.walls = new Int8Array(count * 2).fill(UNKNOWN);
+    this.doorLeak = new Float32Array(count * 2);
+    this.doorEdges.clear();
     this.emptyBox();
     this.smokyCells = 0;
 
@@ -270,6 +288,7 @@ export default class SmokeField extends BaseEntity implements Entity {
         SMOKE_FROM_BURNING * dt,
       );
     }
+    this.updateDoors();
     if (this.hasSmoke) {
       this.spread(dt);
       this.texturesDirty = true;
@@ -379,7 +398,6 @@ export default class SmokeField extends BaseEntity implements Entity {
     const { columns, rows } = this.grid;
     const density = this.density;
     const change = this.change;
-    const walls = this.walls;
     const rate = Math.min(0.24, SMOKE_SPREAD * dt);
     const left = Math.max(0, this.boxLeft - 1);
     const right = Math.min(columns - 1, this.boxRight + 1);
@@ -393,24 +411,16 @@ export default class SmokeField extends BaseEntity implements Entity {
         const d = density[cell];
         if (column < right) {
           const difference = d - density[cell + 1];
-          if (
-            difference !== 0 &&
-            (walls[cell * 2] === 0 ||
-              (walls[cell * 2] < 0 && !this.wallAlong(cell * 2)))
-          ) {
-            const flow = difference * rate;
+          if (difference !== 0) {
+            const flow = difference * rate * this.through(cell * 2);
             change[cell] -= flow;
             change[cell + 1] += flow;
           }
         }
         if (row < bottom) {
           const difference = d - density[cell + columns];
-          if (
-            difference !== 0 &&
-            (walls[cell * 2 + 1] === 0 ||
-              (walls[cell * 2 + 1] < 0 && !this.wallAlong(cell * 2 + 1)))
-          ) {
-            const flow = difference * rate;
+          if (difference !== 0) {
+            const flow = difference * rate * this.through(cell * 2 + 1);
             change[cell] -= flow;
             change[cell + columns] += flow;
           }
@@ -470,12 +480,28 @@ export default class SmokeField extends BaseEntity implements Entity {
   }
 
   /**
-   * Whether a wall is along edge `edge`: a cell's index times two for its
-   * right edge, plus one for its bottom edge (see `walls`)
+   * How much of the flow across edge `edge` gets through: all of it, none
+   * through a wall, or a door's leak
+   */
+  private through(edge: number): number {
+    const wall = this.walls[edge];
+    if (wall === OPEN) {
+      return 1;
+    } else if (wall === DOOR) {
+      return this.doorLeak[edge];
+    } else {
+      return wall === WALL || this.wallAlong(edge) ? 0 : 1;
+    }
+  }
+
+  /**
+   * Whether a wall, or a door that's more shut than not, is along edge
+   * `edge`: a cell's index times two for its right edge, plus one for its
+   * bottom edge (see `walls`)
    */
   wallAlong(edge: number): boolean {
     let wall = this.walls[edge];
-    if (wall < 0) {
+    if (wall === UNKNOWN) {
       const cell = edge >> 1;
       const neighbor = edge & 1 ? cell + this.grid.columns : cell + 1;
       const hit = this.game.world.raycast(
@@ -487,10 +513,79 @@ export default class SmokeField extends BaseEntity implements Entity {
           filter: (body) => body.motion === "static",
         },
       );
-      wall = hit ? 1 : 0;
+      wall = hit ? WALL : OPEN;
       this.walls[edge] = wall;
     }
-    return wall === 1;
+    if (wall === DOOR) {
+      return this.doorLeak[edge] < 0.5;
+    }
+    return wall === WALL;
+  }
+
+  /**
+   * Finds the edges of doors that are new, forgets doors that are gone, and
+   * sets how much each door's edges leak from how far open it is
+   */
+  private updateDoors() {
+    for (const [door, edges] of this.doorEdges) {
+      if (door.isDestroyed) {
+        for (const edge of edges) {
+          this.walls[edge] = UNKNOWN;
+        }
+        this.doorEdges.delete(door);
+      }
+    }
+    for (const door of this.game.entities.getByConstructor(Door)) {
+      let edges = this.doorEdges.get(door);
+      if (!edges) {
+        edges = this.edgesAcross(...door.getShutEnds());
+        for (const edge of edges) {
+          this.walls[edge] = DOOR;
+        }
+        this.doorEdges.set(door, edges);
+      }
+      // Eased, since a door a little open is a lot less in the way
+      const open = clamp(Math.abs(door.getOpenAngle()) / SMOKE_DOOR_OPEN_ANGLE);
+      const seal = lerp(
+        SMOKE_DOOR_SEAL_SHUT,
+        SMOKE_DOOR_SEAL_OPEN,
+        open * (2 - open),
+      );
+      for (const edge of edges) {
+        this.doorLeak[edge] = 1 - seal;
+      }
+    }
+  }
+
+  /**
+   * The edges that the line from `a` to `b` crosses (the lines between the
+   * middles of neighboring cells), leaving out ones with a wall along them
+   */
+  private edgesAcross(a: V2d, b: V2d): number[] {
+    const { columns, rows } = this.grid;
+    const toCell = (meters: number, count: number) =>
+      clamp(Math.floor(meters / FIRE_CELL_SIZE), 0, count - 1);
+    const left = toCell(Math.min(a[0], b[0]) - FIRE_CELL_SIZE, columns);
+    const right = toCell(Math.max(a[0], b[0]), columns);
+    const top = toCell(Math.min(a[1], b[1]) - FIRE_CELL_SIZE, rows);
+    const bottom = toCell(Math.max(a[1], b[1]), rows);
+    const edges: number[] = [];
+    for (let row = top; row <= bottom; row++) {
+      for (let column = left; column <= right; column++) {
+        const cell = row * columns + column;
+        const x = (column + 0.5) * FIRE_CELL_SIZE;
+        const y = (row + 0.5) * FIRE_CELL_SIZE;
+        const crosses = (dx: number, dy: number) =>
+          segmentsCross(a[0], a[1], b[0], b[1], x, y, x + dx, y + dy);
+        if (column + 1 < columns && crosses(FIRE_CELL_SIZE, 0)) {
+          edges.push(cell * 2);
+        }
+        if (row + 1 < rows && crosses(0, FIRE_CELL_SIZE)) {
+          edges.push(cell * 2 + 1);
+        }
+      }
+    }
+    return edges.filter((edge) => !this.wallAlong(edge));
   }
 
   @on("render")
@@ -508,4 +603,29 @@ export default class SmokeField extends BaseEntity implements Entity {
   onDestroy() {
     this.source.destroy();
   }
+}
+
+/** Whether the segment from (ax, ay) to (bx, by) crosses (cx, cy) to (dx, dy) */
+function segmentsCross(
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  cx: number,
+  cy: number,
+  dx: number,
+  dy: number,
+): boolean {
+  const side = (
+    px: number,
+    py: number,
+    qx: number,
+    qy: number,
+    x: number,
+    y: number,
+  ) => Math.sign((qx - px) * (y - py) - (qy - py) * (x - px));
+  return (
+    side(ax, ay, bx, by, cx, cy) * side(ax, ay, bx, by, dx, dy) < 0 &&
+    side(cx, cy, dx, dy, ax, ay) * side(cx, cy, dx, dy, bx, by) < 0
+  );
 }
