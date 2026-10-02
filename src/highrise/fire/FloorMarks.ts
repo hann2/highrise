@@ -16,6 +16,7 @@ import {
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
 import { cellJitter } from "./FireRenderer";
+import { gpuTimed, measureCpuAndGpu } from "../../core/util/GpuProfiler";
 
 /** How many differently shaped blobs there are to paint with */
 const BLOB_SHAPES = 6;
@@ -28,7 +29,7 @@ const BLOB_SHAPES = 6;
  */
 export default class FloorMarks extends BaseEntity implements Entity {
   tickLayer = "fire" as const;
-  sprites: (Sprite & GameSprite)[];
+  sprite: Container & GameSprite;
   private scorchSprite: Sprite & GameSprite;
   private fuelSprite: Sprite & GameSprite;
   private scorchTexture = RenderTexture.create({ width: 1, height: 1 });
@@ -46,12 +47,13 @@ export default class FloorMarks extends BaseEntity implements Entity {
   constructor(private grid: FireGrid) {
     super();
     this.scorchSprite = new Sprite(this.scorchTexture);
-    this.scorchSprite.layerName = Layer.FLOOR_DECALS;
     this.scorchSprite.alpha = SCORCH_ALPHA;
     this.fuelSprite = new Sprite(this.fuelTexture);
-    this.fuelSprite.layerName = Layer.FLOOR_DECALS;
     this.fuelSprite.alpha = FUEL_STAIN_ALPHA;
-    this.sprites = [this.scorchSprite, this.fuelSprite];
+    const marks = new Container();
+    marks.addChild(this.scorchSprite, this.fuelSprite);
+    this.sprite = gpuTimed("FloorMarks", marks);
+    this.sprite.layerName = Layer.FLOOR_DECALS;
   }
 
   /** Blank marks for a level of `width` × `height` meters */
@@ -141,12 +143,14 @@ export default class FloorMarks extends BaseEntity implements Entity {
     for (let i = count; i < this.blobs.length; i++) {
       this.blobs[i].visible = false;
     }
-    this.game.renderer.app.renderer.render({
-      container: this.blobContainer,
-      target,
-      clear,
-      clearColor: [0, 0, 0, 0],
-    });
+    measureCpuAndGpu("FloorMarks.paint", () =>
+      this.game.renderer.app.renderer.render({
+        container: this.blobContainer,
+        target,
+        clear,
+        clearColor: [0, 0, 0, 0],
+      }),
+    );
   }
 
   @on("destroy")

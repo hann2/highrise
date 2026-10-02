@@ -100,6 +100,7 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
         totals.gpu,
         unlitTotals.gpu,
         detail.stats,
+        detail.gpu,
         counts,
       ),
     );
@@ -116,6 +117,9 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
   );
   console.log(formatTable(results));
   console.log(formatSections(results));
+  for (const result of results) {
+    console.log(formatGpuSections(result));
+  }
   for (const result of results) {
     console.log(formatTop(result));
   }
@@ -212,6 +216,7 @@ function summarize(
   gpu: GpuReport,
   unlitGpu: GpuReport,
   detailStats: Stat[],
+  detailGpu: GpuReport,
   counts: Awaited<ReturnType<typeof countFireAndLights>>,
 ) {
   const round = (n: number, places = 3) =>
@@ -272,6 +277,17 @@ function summarize(
     gpuMs: round(renderGpuMs(gpu)),
     unlitGpuMs: round(renderGpuMs(unlitGpu)),
     top,
+    // The GPU's time per section, in drawing order, from timing them all
+    // separately, which adds to them (see GpuProfiler): for comparing
+    // sections with each other
+    gpuSections: detailGpu.stats
+      .filter((s) => s.msPerFrame >= 0.01)
+      .map((s) => ({
+        label: s.label,
+        depth: s.depth,
+        ms: round(s.msPerFrame),
+        selfMs: round(s.selfMs),
+      })),
   };
 }
 
@@ -327,6 +343,17 @@ function formatSections(results: Result[]): string {
     "\nLighting sections, without per-entity timing: ms per frame (calls per frame)",
     header,
     ...rows,
+  ].join("\n");
+}
+
+/** The GPU's time per section, as a tree, timed separately (so inflated) */
+function formatGpuSections(result: Result): string {
+  return [
+    `\n${result.count} fires, GPU ms per frame by section (each timed separately, which adds to them; total ${result.gpuMs.toFixed(2)} timed alone):`,
+    ...result.gpuSections.map(
+      (s) =>
+        `${s.ms.toFixed(3).padStart(8)} ms  ${"  ".repeat(s.depth)}${s.label.split(" > ").pop()}`,
+    ),
   ].join("\n");
 }
 

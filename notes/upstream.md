@@ -164,6 +164,31 @@ Part of `d9a6f87`: `ContactList` keeps only bodies and shapes, and
 `onContacting` no longer gets `contactEquations` (they were the ones from
 when the contact began, and with pooling would belong to other contacts).
 
+### Pixi's ticker drew the stage a second time
+"Don't let Pixi's ticker draw the stage too" (`gpu-lights`, 2026-10-01)
+
+- `GameRenderer2d.init` made a `Pixi.Application` without `autoStart:
+  false`, so Pixi's own ticker drew the whole stage on every animation frame
+  on top of the game's `render()`: twice a frame with vsync, and many times
+  a frame without it (about 9 per game frame in the benchmarks). Its second
+  draw was invisible to the profilers. Now `autoStart: false`.
+
+### GPU profiler
+"GPU profiler: WebGL timer queries for the render, in benchmarks and the
+overlay" (`3169b15`), and "GPU sections around the fire and smoke draws"
+(`gpu-lights`, 2026-10-01)
+
+- `util/GpuProfiler.ts`: `gpuProfiler` times sections of the GPU's work with
+  `EXT_disjoint_timer_query_webgl2` (`measure`, `start`/`end`, captures like
+  `Profiler`'s), and `measureCpuAndGpu` times a section on both. `Game` times
+  `Game.render` (by tick layer, `lateRender`, `Renderer.render`).
+- `gpuTimed(label, content)` times something drawn as part of the stage,
+  with a `RenderContainer` on either side that starts and ends the section.
+- The profiler panel has a GPU section.
+- Caveat (in its doc comment): on a Mac (ANGLE over Metal), splitting the
+  timeline into sections inflates them, and siblings come out about equal
+  whatever they draw, so only the total timed alone is trustworthy there.
+
 ## From before this branch
 
 From the engine port (2026-09, merged to master), never upstreamed: the
