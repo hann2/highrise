@@ -108,6 +108,12 @@ export class GameRenderer2d {
     return V(this.getWidth(), this.getHeight());
   }
 
+  /** Whether the canvas is antialiased (fixed when it's made, by `init`'s options) */
+  get antialias(): boolean {
+    const gl = (this.app.renderer as { gl?: WebGL2RenderingContext }).gl;
+    return gl?.getContextAttributes()?.antialias ?? false;
+  }
+
   /** Change the number of device pixels rendered per logical pixel. */
   setResolution(resolution: number) {
     this.app.renderer.resolution = resolution;

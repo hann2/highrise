@@ -80,7 +80,15 @@ export default class Game {
     desktop?.displayFrequency() || undefined,
   );
   private readonly framePacer = new FramePacer();
-  /** Pretends the display runs at this rate instead of measuring it (for tests and benchmarks) */
+  /**
+   * Pretends the display runs at this rate, and that every animation frame
+   * callback is one of its refreshes, however much time really went by: for
+   * benchmarks, which run without vsync. Every callback then runs a frame
+   * (unless `frameRateLimit` is lower), so the browser calls back as soon as
+   * the last frame is done, and the intervals between frames are what they
+   * cost, CPU and GPU. (Skipping callbacks without drawing anything makes
+   * headless Chrome call back irregularly, about every 15 ms.)
+   */
   refreshRateOverride: number | undefined;
   /** The player's frame rate limit, for fast displays on slow machines. Undefined is the display's rate */
   frameRateLimit: number | undefined;
@@ -348,7 +356,11 @@ export default class Game {
    */
   private loop(time: number): void {
     window.requestAnimationFrame((t) => this.loop(t));
-    const elapsed = (time - this.lastFrameTime) / 1000;
+    // With the rate overridden, every callback is one refresh of that display,
+    // however long it really took (see `refreshRateOverride`)
+    const elapsed = this.refreshRateOverride
+      ? 1 / this.refreshRateOverride
+      : (time - this.lastFrameTime) / 1000;
     this.lastFrameTime = time;
     this.refreshRateEstimator.maxRate =
       desktop?.displayFrequency() || undefined;

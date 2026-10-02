@@ -214,8 +214,8 @@ export async function wander(page: Page, ms: number) {
 /**
  * Measures the intervals between the frames the game runs (ticks and a
  * render), and the CPU time each takes, for `ms`. Benchmarks run without vsync
- * and pin the frame rate with `?fps=120`, so the game runs at 120 fps when it
- * keeps up, and the intervals get longer when it doesn't.
+ * and with `?fps=120`, so the game runs a frame per animation frame callback,
+ * as fast as it can, and the intervals are what each frame costs.
  */
 export async function measureFrames(page: Page, ms: number) {
   return page.evaluate(async (measureMs) => {
