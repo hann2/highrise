@@ -69,8 +69,10 @@ export default class FireGrid extends BaseEntity implements Entity {
   private sources = new Map<number, Human | undefined>();
   /** Indexes of the cells that are burning */
   private burningCells = new Set<number>();
-  /** One light per burning cell (see `updateLights`) */
+  /** One light per burning cell in view (see `updateLights`) */
   private lights = new Map<number, PointLight>();
+  /** A cell's middle, for checking it's in view without making a vector */
+  private scratchPoint: [number, number] = [0, 0];
 
   /** The smoke from the fire */
   smoke: SmokeField;
@@ -144,6 +146,14 @@ export default class FireGrid extends BaseEntity implements Entity {
     const column = cell % this.columns;
     const row = Math.floor(cell / this.columns);
     return V((column + 0.5) * FIRE_CELL_SIZE, (row + 0.5) * FIRE_CELL_SIZE);
+  }
+
+  /** The middle of cell `cell`, in a point that's reused (see `cellCenter`) */
+  private cellMiddle(cell: number): [number, number] {
+    const point = this.scratchPoint;
+    point[0] = ((cell % this.columns) + 0.5) * FIRE_CELL_SIZE;
+    point[1] = (Math.floor(cell / this.columns) + 0.5) * FIRE_CELL_SIZE;
+    return point;
   }
 
   isBurningAt(position: [number, number]): boolean {
@@ -367,16 +377,33 @@ export default class FireGrid extends BaseEntity implements Entity {
    * One small, dim light per burning cell, each flickering on its own. Lots
    * of little lights light a fire the shape it is, with shadows from all of
    * it (they cost well under a millisecond a frame for a molotov's worth).
+   *
+   * Only the cells near enough to the view to light any of it have lights:
+   * moving and flickering them all cost more than drawing the ones in view
+   * (14 ms a frame with fire all over a huge level). A light wanders at most
+   * `CELL_LIGHT_WANDER` from its cell, so a cell further than that and its
+   * radius from the view can't light it. Lights a little further than that
+   * are only destroyed further out still, so they don't come and go at the
+   * edge; a new one looks the same, since its flicker only depends on its
+   * cell and the time.
    */
   private updateLights() {
+    const camera = this.game.camera;
+    const reach = CELL_LIGHT_RADIUS + CELL_LIGHT_WANDER;
     for (const [cell, light] of this.lights) {
-      if (this.burnAge[cell] < 0) {
+      if (
+        this.burnAge[cell] < 0 ||
+        !camera.isInView(this.cellMiddle(cell), reach + LIGHT_KEEP_DISTANCE)
+      ) {
         light.destroy();
         this.lights.delete(cell);
       }
     }
     const t = this.game.elapsedUnpausedTime;
     for (const cell of this.burningCells) {
+      if (!camera.isInView(this.cellMiddle(cell), reach)) {
+        continue;
+      }
       let light = this.lights.get(cell);
       if (!light) {
         light = this.addChild(
@@ -404,6 +431,12 @@ export default class FireGrid extends BaseEntity implements Entity {
     }
   }
 }
+
+/**
+ * Meters further from the view than they can light it that cells keep their
+ * lights (see `FireGrid.updateLights`)
+ */
+const LIGHT_KEEP_DISTANCE = 2;
 
 /** The fire grid of the run, or undefined outside of one (in the lobby) */
 export function getFireGrid(game: Game): FireGrid | undefined {
