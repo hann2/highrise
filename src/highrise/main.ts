@@ -62,15 +62,20 @@ export async function main() {
   });
   initContactMaterials(game);
   game.frameRateLimit = loadSaveData().frameRateLimit;
-  // ?fps=120 runs as if the display were 120 Hz instead of measuring it, for
-  // tests and benchmarks, which run without vsync
+  // ?fps=120 runs as if the display were 120 Hz, every animation frame one of
+  // its refreshes, for benchmarks, which run without vsync: as fast as the game
+  // can go, each frame 1/120 s of game time (see `refreshRateOverride`)
   const fps = parseInt(params.get("fps") ?? "", 10);
   if (fps > 0) {
     game.refreshRateOverride = fps;
   }
 
   window.DEBUG = { game, profiler, gpuProfiler };
-  await game.init();
+  // ?aa=0 or ?aa=1 turns the canvas's antialiasing off or on
+  const aa = params.get("aa");
+  await game.init({
+    rendererOptions: aa != null ? { antialias: aa !== "0" } : {},
+  });
 
   const preloader = game.addEntity(new Preloader());
   await preloader.waitTillReady();
