@@ -189,6 +189,51 @@ overlay" (`3169b15`), and "GPU sections around the fire and smoke draws"
   timeline into sections inflates them, and siblings come out about equal
   whatever they draw, so only the total timed alone is trustworthy there.
 
+### Benchmarks run a frame per animation frame
+"Benchmarks run a frame per animation frame, as fast as they can" (`9a5277a`)
+
+- With `Game.refreshRateOverride` set (`?fps=N`), every animation frame
+  callback counts as one refresh, however much time went by, so every
+  callback runs a frame and, without vsync, the browser calls back as soon
+  as it's done: frame intervals are what frames cost. Skipping callbacks
+  without drawing made headless Chrome call back irregularly.
+- `GameRenderer2d.antialias` says whether the canvas is antialiased
+  ("Antialiasing setting, off by default on retina displays", `185f60c`).
+
+### The lighting system (still in Highrise, to move into core)
+Lights with soft shadows that scale to hundreds of lights and huge levels:
+the light atlas, shadows drawn on the GPU from walls kept there in chunks,
+static and dynamic lights, moving casters (doors). It's all in
+`src/highrise/lighting-and-vision/` and was written to be engine code, but
+hasn't been moved. The history is in the merges "Merge perf-lighting:
+lighting that scales to hundreds of lights" (`bdf3a4a`), "Merge gpu-lights:
+shadow casters in chunks, ..." (`3d1dc32`) and the door commits ("Doors cast
+shadows from lights", `1592ef2`); how it works is in `CLAUDE.md` (the
+`lighting-and-vision/` paragraph) and the classes' doc comments.
+
+- What moves to `src/core/lighting/`: `Light`, `PointLight`,
+  `DirectionalLight`, `AmbientLight`, `LightingManager`, `LightAtlas`,
+  `ShadowCasters`, `shadowMask.vert`/`.frag`, `lightingConstants`,
+  `shapeUtils` (`getShapeCorners`), and the caster lookup from `occluders.ts`
+  (`getShadowCasters`, `CAST_SHADOW_TAG`).
+- What stays in Highrise: vision (`VisionController`, `visibility.ts`,
+  `visionMesh.ts`, `ExploredMap`, `penumbraTexture`), which would import the
+  caster lookup from core.
+- Its only ties to Highrise are in `LightingManager`: `Layer.LIGHTING` (the
+  layer its sprite goes in) and `Persistence.Game`. Make them options, say
+  `new LightingManager({ layer, persistenceLevel?, castShadowTag? })` (a
+  `LayerName` is a type-only import through `src/config`, which core may
+  use), and pass them at its five creation sites (`GameController`, `Lobby`,
+  `ArenaScene`, `FireTestScene`, `DeathsTestScene`), maybe through a small
+  Highrise helper. About 28 files import from `lighting-and-vision/`.
+- Its notes for the engine's readme: GLSL ES 3.0 only with `#version 300 es`
+  in the fragment shader (Pixi's `GlProgram`); the clip planes need
+  `WEBGL_clip_cull_distance` (Chrome has it, so Electron always does); the
+  GPU profiler's caveats; `gl.flush()` after the lighting passes.
+- Its scratch checks (static lights that move, doors, the screenshots it was
+  compared with) weren't kept; the arena's `fires`, `doors` and the `sprawl`
+  layout, and the fire and lighting benchmarks, are the test beds.
+
 ## From before this branch
 
 From the engine port (2026-09, merged to master), never upstreamed: the
