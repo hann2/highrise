@@ -46,6 +46,14 @@ export const FUEL_STAIN_COLOR = 0x221c0c;
 export const FUEL_STAIN_ALPHA = 0.9;
 /** Seconds of fuel in a cell for its stain to be as dark as it gets */
 export const FUEL_STAIN_FULL = 5;
+/**
+ * Fuel stains are repainted (all of them) when one changes by more than this
+ * much alpha (of 0 to 0.4): at once when one gets darker, and as they fade,
+ * at most every `FUEL_STAIN_FADE_INTERVAL` seconds, which is too slow a fade
+ * to see steps in
+ */
+export const FUEL_STAIN_STEP = 0.01;
+export const FUEL_STAIN_FADE_INTERVAL = 0.2;
 
 // --- Embers (see `FireEmbers.ts`) ---
 
