@@ -1,4 +1,5 @@
 import { Container, Sprite, Texture } from "pixi.js";
+import { gpuTimed } from "../../core/util/GpuProfiler";
 import { Layer } from "../../config/layers";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
@@ -38,7 +39,9 @@ interface Ember {
  */
 export default class FireEmbers extends BaseEntity implements Entity {
   tickLayer = "fire" as const;
-  sprite: Container & GameSprite = new Container();
+  /** The embers' sprites */
+  private emberContainer = new Container();
+  sprite: Container & GameSprite = gpuTimed("FireEmbers", this.emberContainer);
   private embers: Ember[] = [];
   private spares: Sprite[] = [];
   /** Cells that were burning last frame, to see which just caught */
@@ -112,7 +115,7 @@ export default class FireEmbers extends BaseEntity implements Entity {
     sprite.anchor.set(0.5);
     sprite.blendMode = "add";
     sprite.visible = true;
-    this.sprite.addChild(sprite);
+    this.emberContainer.addChild(sprite);
     this.embers.push({
       x: x + (random() - 0.5) * 0.4,
       y: y + (random() - 0.5) * 0.4,

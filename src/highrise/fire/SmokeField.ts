@@ -35,6 +35,7 @@ import {
 import type FireGrid from "./FireGrid";
 import frag_smoke from "./smoke.frag?raw";
 import vert_flames from "./flames.vert?raw";
+import { gpuTimed } from "../../core/util/GpuProfiler";
 
 /** Below this, a cell has no smoke */
 const EMPTY = 0.005;
@@ -91,9 +92,8 @@ export default class SmokeField extends BaseEntity implements Entity {
       }),
       shader: this.shader,
     });
-    this.sprite = new Container();
+    this.sprite = gpuTimed("SmokeField.smoke", this.mesh);
     this.sprite.layerName = Layer.WORLD_FRONT;
-    this.sprite.addChild(this.mesh);
   }
 
   private makeShader(): Shader {

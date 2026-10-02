@@ -1,5 +1,43 @@
 import { expect, Page } from "@playwright/test";
 
+/**
+ * The display benchmarks run on: `DPR=2` gives the page a retina display's
+ * two pixels per point, and `QUALITY=Low` sets the game's graphics quality
+ * (else it's the default, Medium). Quality only sets the resolution: Low is
+ * half the display's pixels per point, Medium and High all of them. A spec
+ * passes `deviceScaleFactor` to `test.use`, and calls `useDisplay` before
+ * loading the page. `suffix` tells results on another display apart.
+ */
+export const DISPLAY = (() => {
+  const dpr = Number(process.env.DPR ?? 1);
+  const quality = process.env.QUALITY;
+  const parts = [
+    ...(dpr !== 1 ? [`dpr${dpr}`] : []),
+    ...(quality ? [quality.toLowerCase()] : []),
+  ];
+  return {
+    deviceScaleFactor: dpr,
+    quality,
+    suffix: parts.map((part) => `-${part}`).join(""),
+  };
+})();
+
+/** Sets up `page` for `DISPLAY`'s graphics quality */
+export async function useDisplay(page: Page) {
+  if (DISPLAY.quality) {
+    await page.addInitScript((quality) => {
+      window.localStorage.setItem("graphicsQuality", quality);
+    }, DISPLAY.quality);
+  }
+}
+
+/** The game's render resolution: device pixels per logical pixel */
+export function getResolution(page: Page): Promise<number> {
+  return page.evaluate(
+    () => (window.DEBUG.game as any).renderer.app.renderer.resolution,
+  );
+}
+
 /** Collects page errors and console errors so tests can assert there are none. */
 export function collectIssues(page: Page): string[] {
   const issues: string[] = [];

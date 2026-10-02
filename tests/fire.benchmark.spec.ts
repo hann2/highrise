@@ -3,19 +3,43 @@ import * as fs from "fs";
 import {
   captureProfile,
   collectIssues,
+  DISPLAY,
   expectNoIssues,
+  getResolution,
   measureFrames,
+  useDisplay,
 } from "./helpers";
 
-/** How many fires to measure with. `FIRES=8,32` picks others */
-const COUNTS = (process.env.FIRES ?? "0,4,8,16,32").split(",").map(Number);
+test.use({ deviceScaleFactor: DISPLAY.deviceScaleFactor });
+
+/**
+ * The arena layout: `offices` (a real floor's wall density), or `sprawl` (the
+ * same rooms sixteen times over, for how lighting holds up on a huge level).
+ * `LAYOUT=sprawl` picks it
+ */
+const LAYOUT = process.env.LAYOUT ?? "offices";
+/**
+ * With `NEAR=1`, the fires only go in an area the offices' size around the
+ * player, so a bigger layout has the same fires in view and only its size
+ * differs: for what far walls cost
+ */
+const NEAR = process.env.NEAR === "1";
+/**
+ * How many fires to measure with, by default as many per square meter on
+ * either layout (or on the area around the player). `FIRES=8,32` picks others
+ */
+const COUNTS = (
+  process.env.FIRES ??
+  (LAYOUT === "sprawl" && !NEAR ? "0,64,128,256,512" : "0,4,8,16,32")
+)
+  .split(",")
+  .map(Number);
 /** From lighting the fires to measuring, for them to spread and the smoke to build up */
 const SETTLE_MS = 6000;
 const MEASURE_MS = 4000;
 const PROFILE_MS = 4000;
 
-const URL =
-  "/?scene=arena&seed=1&char=chad&wave=zombie*0&layout=offices&god&dark&fog&fps=120";
+const URL = `/?scene=arena&seed=1&char=chad&wave=zombie*0&layout=${LAYOUT}&god&dark&fog&fps=120`;
 
 /** Profiler sections worth showing on their own, wherever they are in the tree */
 const SECTIONS = [
@@ -31,9 +55,9 @@ const SECTIONS = [
  * How the game scales with fire: more and more molotov-sized pools of fire
  * that never go out (the arena's `fires` option), spread over the arena's
  * `offices` (rooms with doorways, as many walls near any spot as on a real
- * floor, which is what shadows cost by), dark and with fog of war, as on a
- * floor. The player stands in the middle with no enemies around. For each count it measures the frames with
- * everything on, then with lighting and vision off, which (since benchmarks
+ * floor, which is what shadows cost by) or `LAYOUT`, dark and with fog of
+ * war, as on a floor. The player stands in the middle with no enemies around.
+ * For each count it measures the frames with everything on, then with lighting and vision off, which (since benchmarks
  * run without vsync, so frame intervals include GPU time) shows what they
  * cost the GPU as well as the CPU. Run with `npm run benchmark:fire` (or `npm
  * run benchmark`, with the others).
@@ -41,6 +65,7 @@ const SECTIONS = [
 test("benchmark: fire and lighting scaling", async ({ page }) => {
   test.setTimeout(60000 + COUNTS.length * 60000);
   const issues = collectIssues(page);
+  await useDisplay(page);
   await page.goto(URL);
   await page.waitForFunction(
     () => window.DEBUG?.game?.entities.getById("arenaScene"),
@@ -75,6 +100,7 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
         totals.gpu,
         unlitTotals.gpu,
         detail.stats,
+        detail.gpu,
         counts,
       ),
     );
@@ -83,11 +109,17 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
 
   fs.mkdirSync("tests/output", { recursive: true });
   fs.writeFileSync(
-    "tests/output/fire-benchmark.json",
+    `tests/output/fire-benchmark${LAYOUT === "offices" ? "" : `-${LAYOUT}`}${NEAR ? "-near" : ""}${DISPLAY.suffix}.json`,
     JSON.stringify(results, null, 2) + "\n",
+  );
+  console.log(
+    `Layout: ${LAYOUT}${NEAR ? ", fires near the player" : ""}, ${results[0].casterShapes} shadow shapes, resolution ${await getResolution(page)}`,
   );
   console.log(formatTable(results));
   console.log(formatSections(results));
+  for (const result of results) {
+    console.log(formatGpuSections(result));
+  }
   for (const result of results) {
     console.log(formatTop(result));
   }
@@ -96,12 +128,19 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
 
 /** Puts out the fire and lights `count` fires, with the player back in the middle */
 function setFires(page: Page, count: number) {
-  return page.evaluate((count) => {
-    const scene = window.DEBUG.game!.entities.getById("arenaScene") as any;
-    scene.config.fires = count;
-    scene.clear();
-    scene.spawnPlayer(scene.layout.playerStart);
-  }, count);
+  return page.evaluate(
+    ({ count, near }) => {
+      const scene = window.DEBUG.game!.entities.getById("arenaScene") as any;
+      if (near) {
+        const [x, y] = scene.layout.playerStart;
+        scene.fireArea = { x: x - 30, y: y - 20, width: 60, height: 40 };
+      }
+      scene.config.fires = count;
+      scene.clear();
+      scene.spawnPlayer(scene.layout.playerStart);
+    },
+    { count, near: NEAR },
+  );
 }
 
 function setLightingAndVision(page: Page, enabled: boolean) {
@@ -127,12 +166,16 @@ function countFireAndLights(page: Page) {
     let lightsInView = 0;
     let shadowedInView = 0;
     let shadowShapes = 0;
+    let casterShapes = 0;
     for (const entity of game.entities.all) {
       const name = entity.constructor.name;
       if (name === "FireGrid") {
         burning = (entity as any).burningCount;
       } else if (name === "LightingManager") {
         const manager = entity as any;
+        for (const body of manager.shadowCasters.bodies) {
+          casterShapes += body.shapes.length;
+        }
         const camera = game.camera;
         const [minX, minY] = camera.toWorld([0, 0] as any);
         const [maxX, maxY] = camera.toWorld(camera.getViewportSize());
@@ -150,7 +193,14 @@ function countFireAndLights(page: Page) {
     }
     const shadowsPerLight =
       Math.round((10 * shadowShapes) / Math.max(1, shadowedInView)) / 10;
-    return { burning, lights, lightsInView, shadowedInView, shadowsPerLight };
+    return {
+      burning,
+      lights,
+      lightsInView,
+      shadowedInView,
+      shadowsPerLight,
+      casterShapes,
+    };
   });
 }
 
@@ -166,6 +216,7 @@ function summarize(
   gpu: GpuReport,
   unlitGpu: GpuReport,
   detailStats: Stat[],
+  detailGpu: GpuReport,
   counts: Awaited<ReturnType<typeof countFireAndLights>>,
 ) {
   const round = (n: number, places = 3) =>
@@ -226,6 +277,17 @@ function summarize(
     gpuMs: round(renderGpuMs(gpu)),
     unlitGpuMs: round(renderGpuMs(unlitGpu)),
     top,
+    // The GPU's time per section, in drawing order, from timing them all
+    // separately, which adds to them (see GpuProfiler): for comparing
+    // sections with each other
+    gpuSections: detailGpu.stats
+      .filter((s) => s.msPerFrame >= 0.01)
+      .map((s) => ({
+        label: s.label,
+        depth: s.depth,
+        ms: round(s.msPerFrame),
+        selfMs: round(s.selfMs),
+      })),
   };
 }
 
@@ -281,6 +343,17 @@ function formatSections(results: Result[]): string {
     "\nLighting sections, without per-entity timing: ms per frame (calls per frame)",
     header,
     ...rows,
+  ].join("\n");
+}
+
+/** The GPU's time per section, as a tree, timed separately (so inflated) */
+function formatGpuSections(result: Result): string {
+  return [
+    `\n${result.count} fires, GPU ms per frame by section (each timed separately, which adds to them; total ${result.gpuMs.toFixed(2)} timed alone):`,
+    ...result.gpuSections.map(
+      (s) =>
+        `${s.ms.toFixed(3).padStart(8)} ms  ${"  ".repeat(s.depth)}${s.label.split(" > ").pop()}`,
+    ),
   ].join("\n");
 }
 

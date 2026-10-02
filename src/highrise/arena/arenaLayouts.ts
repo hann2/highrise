@@ -224,10 +224,26 @@ const OFFICES: ArenaLayout = {
   edgeSpots: edgeSpots(60, 40),
 };
 
+/**
+ * The offices sixteen times over: 240 by 160 meters of the same rooms, far
+ * bigger than any floor, for stress testing how lighting holds up when the
+ * level is huge and most of its walls are far from any light. The player
+ * starts in a room in the middle.
+ */
+const SPRAWL: ArenaLayout = {
+  width: 240,
+  height: 160,
+  walls: rooms(240, 160, 36, 20),
+  playerStart: V(123.3, 84),
+  spawnArea: { center: V(236.5, 84), radius: 2 },
+  edgeSpots: edgeSpots(240, 160),
+};
+
 export const ARENA_LAYOUTS: Record<LayoutName, ArenaLayout> = {
   open: OPEN,
   pillars: PILLARS,
   corridor: CORRIDOR,
   hall: HALL,
   offices: OFFICES,
+  sprawl: SPRAWL,
 };

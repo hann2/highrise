@@ -33,6 +33,7 @@ import FireEmbers from "./FireEmbers";
 import frag_flames from "./flames.frag?raw";
 
 import vert_flames from "./flames.vert?raw";
+import { gpuTimed, measureCpuAndGpu } from "../../core/util/GpuProfiler";
 
 /**
  * Draws all the fire: every burning cell of the grid and every burning thing
@@ -95,9 +96,8 @@ export default class FireRenderer extends BaseEntity implements Entity {
     });
     this.mesh.blendMode = "add";
 
-    this.sprite = new Container();
+    this.sprite = gpuTimed("FireRenderer.flames", this.mesh);
     this.sprite.layerName = Layer.EMISSIVES;
-    this.sprite.addChild(this.mesh);
 
     this.addChild(new FireEmbers(grid, this.blobTexture));
   }
@@ -216,13 +216,15 @@ export default class FireRenderer extends BaseEntity implements Entity {
     texel[0] = 1 / (bufferWidth * HEAT_RESOLUTION);
     texel[1] = 1 / (bufferHeight * HEAT_RESOLUTION);
 
-    this.game.renderer.app.renderer.render({
-      container: this.heatContainer,
-      target: this.heat,
-      clear: true,
-      clearColor: [0, 0, 0, 0],
-      transform: new Matrix().translate(-x, -y),
-    });
+    measureCpuAndGpu("FireRenderer.heat", () =>
+      this.game.renderer.app.renderer.render({
+        container: this.heatContainer,
+        target: this.heat,
+        clear: true,
+        clearColor: [0, 0, 0, 0],
+        transform: new Matrix().translate(-x, -y),
+      }),
+    );
 
     this.mesh.position.set(x, y);
     this.mesh.scale.set(bufferWidth, bufferHeight);

@@ -3,12 +3,17 @@ import * as fs from "fs";
 import {
   captureProfile,
   collectIssues,
+  DISPLAY,
   expectNoIssues,
+  getResolution,
   loadGame,
   measureFrames,
   startGame,
+  useDisplay,
   wander,
 } from "./helpers";
+
+test.use({ deviceScaleFactor: DISPLAY.deviceScaleFactor });
 
 const WARMUP_MS = 3000;
 const MEASURE_MS = 6000;
@@ -21,6 +26,7 @@ const PROFILE_MS = 6000;
  */
 test("benchmark: lighting and vision cost", async ({ page }) => {
   const issues = collectIssues(page);
+  await useDisplay(page);
   await loadGame(page, 424242, { fps: 120 });
   await startGame(page);
   await page.waitForTimeout(WARMUP_MS);
@@ -87,7 +93,7 @@ test("benchmark: lighting and vision cost", async ({ page }) => {
 
   fs.mkdirSync("tests/output", { recursive: true });
   fs.writeFileSync(
-    "tests/output/lighting-benchmark.json",
+    `tests/output/lighting-benchmark${DISPLAY.suffix}.json`,
     JSON.stringify({ variants: results, profile }, null, 2) + "\n",
   );
 
@@ -96,6 +102,7 @@ test("benchmark: lighting and vision cost", async ({ page }) => {
     const c = r.loopCpuMs;
     return `${name.padEnd(12)} frame mean ${f.mean.toFixed(2).padStart(6)}  p95 ${f.p95.toFixed(2).padStart(6)}   loop cpu mean ${c.mean.toFixed(2).padStart(5)}  p95 ${c.p95.toFixed(2).padStart(5)}   gpu ${r.gpuMs.toFixed(2).padStart(5)}`;
   });
+  console.log(`Resolution ${await getResolution(page)}`);
   console.log(rows.join("\n"));
   console.log(
     profile

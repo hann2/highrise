@@ -1,3 +1,4 @@
+import { Container, RenderContainer } from "pixi.js";
 import { profiler } from "./Profiler";
 
 /**
@@ -293,4 +294,24 @@ export const gpuProfiler = new GpuProfiler();
 /** Times a section on both the CPU (`profiler`) and the GPU, under one label */
 export function measureCpuAndGpu<T>(label: string, fn: () => T): T {
   return profiler.measure(label, () => gpuProfiler.measure(label, fn));
+}
+
+/**
+ * `content` in a container that times its drawing on the GPU, under `label`,
+ * nested in whatever section is drawing it (usually `Renderer.render`).
+ * Drawing the stage is one call, so its parts can't be timed from outside;
+ * instead a `RenderContainer` on either side of `content` starts and ends
+ * the section as the GPU's commands are sent, in drawing order. They break
+ * Pixi's batching, so whatever is batched with `content` (sprites before or
+ * after it) is drawn separately. Use the container in place of `content`
+ * (its layer, its parent).
+ */
+export function gpuTimed(label: string, content: Container): Container {
+  const container = new Container();
+  container.addChild(
+    new RenderContainer({ render: () => gpuProfiler.start(label) }),
+    content,
+    new RenderContainer({ render: () => gpuProfiler.end() }),
+  );
+  return container;
 }
