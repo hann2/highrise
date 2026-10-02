@@ -40,20 +40,6 @@ import { gpuTimed } from "../../core/util/GpuProfiler";
 /** Below this, a cell has no smoke */
 const EMPTY = 0.005;
 
-/** Columns and rows, inclusive */
-interface Box {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
-const NOTHING_PAINTED: Box = {
-  left: Infinity,
-  top: Infinity,
-  right: -1,
-  bottom: -1,
-};
-
 /**
  * Smoke as a density in each cell of the fire grid. Fire and burning things
  * put smoke into their cells; each tick smoke flows from each cell into the
@@ -88,8 +74,6 @@ export default class SmokeField extends BaseEntity implements Entity {
   private boxBottom = -1;
   /** How many cells had smoke after the last tick */
   private smokyCells = 0;
-  /** The box of the texture that might have something in it (see `paint`) */
-  private painted: Box = NOTHING_PAINTED;
   /**
    * Whether a wall is past each cell's right edge (even indexes) and bottom
    * edge (odd): -1 until someone asks, then 0 or 1. Walls don't move, so
@@ -162,7 +146,6 @@ export default class SmokeField extends BaseEntity implements Entity {
     this.walls = new Int8Array(count * 2).fill(-1);
     this.emptyBox();
     this.smokyCells = 0;
-    this.painted = NOTHING_PAINTED;
 
     this.pixels = new Uint8Array(count * 4);
     this.opaque();
@@ -192,7 +175,6 @@ export default class SmokeField extends BaseEntity implements Entity {
     this.clearingCells.clear();
     this.pixels.fill(0);
     this.opaque();
-    this.painted = NOTHING_PAINTED;
     this.texturesDirty = true;
   }
 
@@ -300,6 +282,7 @@ export default class SmokeField extends BaseEntity implements Entity {
           this.clearing[cell] = 0;
           this.clearingCells.delete(cell);
         }
+        this.paintHidden(cell);
       }
       this.texturesDirty = true;
     }
@@ -371,7 +354,19 @@ export default class SmokeField extends BaseEntity implements Entity {
     if (amount > this.clearing[cell]) {
       this.clearing[cell] = amount;
       this.clearingCells.add(cell);
+      this.paintHidden(cell);
     }
+  }
+
+  /**
+   * Writes how much of `cell` is hidden into the texture's green. Tunnels
+   * close up with an ease, not a steady fade.
+   */
+  private paintHidden(cell: number) {
+    const hidden = this.clearing[cell];
+    this.pixels[cell * 4 + 1] = Math.round(
+      hidden * hidden * (3 - 2 * hidden) * 255,
+    );
   }
 
   /**
@@ -425,9 +420,13 @@ export default class SmokeField extends BaseEntity implements Entity {
 
     // Thinning out: a fraction of what's there (which thins thick smoke) and
     // a fixed amount (which finishes off thin smoke, rather than letting it
-    // linger and creep through the level forever)
+    // linger and creep through the level forever). The texture's red, the
+    // density, is written here too, since these are all the cells that can
+    // have changed.
     const keep = Math.exp(-dt / SMOKE_CLEAR_TIME);
     const fade = SMOKE_FADE_RATE * dt;
+    const pixels = this.pixels;
+    const toPixel = 255 / SMOKE_MAX_DENSITY;
     let smoky = 0;
     let newLeft = columns;
     let newRight = -1;
@@ -440,8 +439,12 @@ export default class SmokeField extends BaseEntity implements Entity {
         change[cell] = 0;
         if (d < EMPTY) {
           density[cell] = 0;
+          pixels[cell * 4] = 0;
         } else {
           density[cell] = d;
+          // Rounded, since storing truncates
+          const value = d * toPixel + 0.5;
+          pixels[cell * 4] = value < 255 ? value : 255;
           smoky++;
           if (column < newLeft) newLeft = column;
           if (column > newRight) newRight = column;
@@ -497,61 +500,7 @@ export default class SmokeField extends BaseEntity implements Entity {
     uniforms.uTime = this.game.elapsedUnpausedTime;
     if (this.texturesDirty) {
       this.texturesDirty = false;
-      this.paint();
       this.source.update();
-    }
-  }
-
-  /**
-   * Writes the densities into the texture's red and how much of each cell is
-   * hidden (tunnels) into its green, over the box of the smoke and tunnels
-   * and whatever was painted last time (so what's gone is cleared)
-   */
-  private paint() {
-    const { columns } = this.grid;
-    const pixels = this.pixels;
-    const density = this.density;
-    const clearing = this.clearing;
-
-    // The box that will have something in it after this
-    let left = this.boxLeft;
-    let right = this.boxRight;
-    let top = this.boxTop;
-    let bottom = this.boxBottom;
-    if (!this.hasSmoke) {
-      left = top = Infinity;
-      right = bottom = -1;
-    }
-    for (const cell of this.clearingCells) {
-      const column = cell % columns;
-      const row = (cell - column) / columns;
-      left = Math.min(left, column);
-      right = Math.max(right, column);
-      top = Math.min(top, row);
-      bottom = Math.max(bottom, row);
-    }
-    const painted = this.painted;
-    const fromLeft = Math.min(left, painted.left);
-    const toRight = Math.max(right, painted.right);
-    const fromTop = Math.min(top, painted.top);
-    const toBottom = Math.max(bottom, painted.bottom);
-
-    for (let row = fromTop; row <= toBottom; row++) {
-      let cell = row * columns + fromLeft;
-      for (let column = fromLeft; column <= toRight; column++, cell++) {
-        const value = density[cell] / SMOKE_MAX_DENSITY;
-        pixels[cell * 4] = value >= 1 ? 255 : Math.round(value * 255);
-        // Tunnels close up with an ease, not a steady fade
-        const hidden = clearing[cell];
-        pixels[cell * 4 + 1] = Math.round(
-          hidden * hidden * (3 - 2 * hidden) * 255,
-        );
-      }
-    }
-    if (right >= left) {
-      this.painted = { left, top, right, bottom };
-    } else {
-      this.painted = NOTHING_PAINTED;
     }
   }
 
