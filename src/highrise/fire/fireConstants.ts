@@ -82,6 +82,14 @@ export const SMOKE_CLEAR_TIME = 10;
  * thick smoke but finishes off thin smoke. Smoke this thin is about invisible.
  */
 export const SMOKE_FADE_RATE = 0.1;
+/**
+ * How much of the smoke that would flow across a doorway a door holds back:
+ * this much when it's shut (a little seeps past)...
+ */
+export const SMOKE_DOOR_SEAL_SHUT = 0.98;
+/** ...and this much once it's open `SMOKE_DOOR_OPEN_ANGLE` radians or more */
+export const SMOKE_DOOR_SEAL_OPEN = 0.25;
+export const SMOKE_DOOR_OPEN_ANGLE = 0.5;
 /** The density at which the density texture maxes out */
 export const SMOKE_MAX_DENSITY = 4;
 /** The color of light, wispy smoke... */

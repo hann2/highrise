@@ -130,6 +130,14 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     );
   }
 
+  /** Where the door's ends are when it's shut: the hinge and the free end */
+  getShutEnds(): [V2d, V2d] {
+    return [
+      this.hingePoint.clone(),
+      this.hingePoint.add(polarToVec(this.restingAngle, this.length)),
+    ];
+  }
+
   /** Current angle relative to the resting angle */
   getOpenAngle(): number {
     return this.body.angle - this.restingAngle;
