@@ -63,6 +63,10 @@ export class GameRenderer2d {
         resizeTo: window,
         autoDensity: true,
         antialias: true,
+        // The game draws each frame itself (`render`). Pixi's own ticker
+        // would draw the stage again on every animation frame: twice a frame
+        // with vsync, and many times a frame without (the benchmarks)
+        autoStart: false,
         ...pixiOptions,
       })
       .then(() => {
