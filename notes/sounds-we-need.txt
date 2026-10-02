@@ -5,5 +5,36 @@ Menu Sounds?
  - Click on menu items
 
 Enemy Sounds
- - Necromancer
- - 
+ - Necromancer (borrows the spitter's attack sounds)
+ -
+
+Fire (none yet; see notes/fire.md)
+ - Glass smash for the molotov (stand-in: sped-up wall hit + spitter splat + slowed sword swoosh)
+ - Whoosh when fuel catches
+ - Looping crackle per patch of fire, quieter as it dies down
+ - Burning zombies screaming
+
+Explosions
+ - Frag grenade going off (stand-in: shotgun shot + deagle shot)
+ - Flashbang going off (stand-in: pistol shot + pop)
+ - Exploding rounds (stand-in: slowed shotgun shot)
+ - Grenade bounce (borrows the old glowstick drop sounds)
+
+Weapons
+ - Baseball bat swing (uses the sword swooshes)
+ - Axe swing (uses the sword swooshes)
+ - Shell casings on different floors (always the board sound; TODO in ShellCasing.ts)
+ - Gun shots leveled against each other (all shots are turned down to 0.3 in code; TODO in Gun.ts)
+ - P90 shot and reload (uses the M1911's shot and the AR-15's reload)
+ - AK-47 reload (uses the AR-15's)
+
+Pickups and interactables
+ - Keycard pickup (uses a magazine load)
+ - Keycard lock refusing you (uses a dry fire)
+ - Item, throwable and usable pickups (use a quarter drop / glowstick drop)
+ - Directory plaque opening (uses a quarter drop)
+ - Doors being hit (use the wall hits)
+
+Store
+ - "INSUFFICIENT FUNDS" buzz (uses a vending machine hit)
+ - Thunk when a bought item drops (uses a vending machine hit)
