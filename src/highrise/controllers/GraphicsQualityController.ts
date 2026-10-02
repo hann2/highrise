@@ -46,6 +46,10 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
 
   setGraphicsQuality(quality: GraphicsQuality) {
     this.currentQuality = quality;
+    // Directly, not from the event: the first call is from `onAdd`, before
+    // this entity gets events, so the saved quality was never applied (a
+    // retina display started out at half resolution)
+    this.game.renderer.setResolution(getResolutionForGraphicsQuality(quality));
     this.game.dispatch("graphicsQualityChanged", { quality });
     localStorage.setItem("graphicsQuality", quality);
   }
@@ -70,11 +74,6 @@ export class GraphicsQualityController extends BaseEntity implements Entity {
   @on("toggleGraphicsQuality")
   onToggleGraphicsQuality() {
     this.nextGraphicsQuality();
-  }
-
-  @on("graphicsQualityChanged")
-  onGraphicsQualityChanged({ quality }: { quality: GraphicsQuality }) {
-    this.game.renderer.setResolution(getResolutionForGraphicsQuality(quality));
   }
 }
 
