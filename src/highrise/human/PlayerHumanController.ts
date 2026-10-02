@@ -21,6 +21,12 @@ export default class PlayerHumanController
     private getPlayer: () => Human,
     /** While this says so, the player stands still and nothing they press does anything */
     private isInputBlocked: () => boolean = () => false,
+    /**
+     * What Q, the wheel and Y do, 1 for forward and -1 for back (Shift-Q,
+     * scrolling up). By default they swap to the other slot either way.
+     */
+    private swapWeapon: (direction: 1 | -1) => void = () =>
+      this.human.swapWeapon(),
   ) {
     super();
   }
@@ -51,7 +57,7 @@ export default class PlayerHumanController
         this.human.interactWithNearest();
         break;
       case ControllerButton.Y:
-        this.human.swapWeapon();
+        this.swapWeapon(1);
         break;
       case ControllerButton.LB:
         this.human.useConsumable();
@@ -90,7 +96,12 @@ export default class PlayerHumanController
         this.human.flashlight.toggle();
         break;
       case "KeyQ":
-        this.human.swapWeapon();
+        this.swapWeapon(
+          this.game.io.isKeyDown("ShiftLeft") ||
+            this.game.io.isKeyDown("ShiftRight")
+            ? -1
+            : 1,
+        );
         break;
       case "KeyG":
         this.human.useConsumable();
@@ -102,12 +113,12 @@ export default class PlayerHumanController
   }
 
   @on("wheel")
-  onWheel() {
+  onWheel({ deltaY }: { deltaY: number }) {
     if (this.isInputBlocked()) {
       return;
     }
     // With two slots, either direction means "the other one"
-    this.human.swapWeapon();
+    this.swapWeapon(deltaY < 0 ? -1 : 1);
   }
 
   @on("tick")

@@ -26,6 +26,7 @@ import { Molotov } from "../weapons/consumables/consumable-stats/Molotov";
 import { AMMO_CLASSES, MAX_RESERVE } from "../weapons/guns/ammo";
 import Gun from "../weapons/guns/Gun";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
+import { WEAPONS } from "../weapons/weapons";
 import { WeaponStats } from "../weapons/WeaponStats";
 import {
   ARENA_ENEMIES,
@@ -49,6 +50,8 @@ const SURROUND_MIN_DISTANCE = 7;
 const SPREAD_WALL_CLEARANCE = 0.8;
 /** Seconds from the player dying to them being back */
 const RESPAWN_DELAY = 1.5;
+/** Seconds between weapon changes, so a trackpad's scroll doesn't fly through them all */
+const CYCLE_COOLDOWN = 0.15;
 /** A rectangle of the room, in meters */
 interface Area {
   x: number;
@@ -81,8 +84,9 @@ export interface WaveStatus {
  *
  * Enter sends a wave, Backspace clears the enemies away (and the fire and
  * whatever's on the floor), and Shift-Backspace does that and resets the
- * player too. The player comes back after dying. Enemies are as tough as in
- * the chosen act.
+ * player too. Q (Shift-Q, the wheel, Y) doesn't swap slots here: it goes
+ * through every weapon in the game, as if the player carried them all. The
+ * player comes back after dying. Enemies are as tough as in the chosen act.
  */
 export default class ArenaScene
   extends BaseEntity
@@ -139,6 +143,7 @@ export default class ArenaScene
       new PlayerHumanController(
         () => this.player!,
         () => this.player!.isDestroyed || panel.open,
+        (direction) => this.cycleWeapon(direction),
       ),
       new DamagedOverlay(getPlayer),
       new AmmoOverlay(() => this.player!),
@@ -226,6 +231,43 @@ export default class ArenaScene
       player.giveUsable(config.usable);
     }
     this.player = player;
+  }
+
+  /** When the weapon in hand last changed, in game seconds */
+  private lastCycleTime = -Infinity;
+
+  /**
+   * Swaps the weapon in hand for the next one in `WEAPONS` (`direction` -1:
+   * the one before), or the first (last) if it has none, and keeps the config
+   * and the URL up to date so a reset or a reload keeps it
+   */
+  cycleWeapon(direction: 1 | -1) {
+    const player = this.player;
+    if (
+      !player ||
+      player.isDestroyed ||
+      this.game.elapsedTime - this.lastCycleTime < CYCLE_COOLDOWN
+    ) {
+      return;
+    }
+    this.lastCycleTime = this.game.elapsedTime;
+    const slot = player.activeSlot;
+    const current = player.getWeaponInSlot(slot)?.stats;
+    const index = current ? WEAPONS.indexOf(current) : -1;
+    const next =
+      index === -1
+        ? WEAPONS[direction > 0 ? 0 : WEAPONS.length - 1]
+        : WEAPONS[(index + direction + WEAPONS.length) % WEAPONS.length];
+    player.removeWeapon(slot);
+    // The slot in hand is the empty one now, so that's where it goes
+    const weapon = makeWeapon(next);
+    player.giveWeapon(weapon, false);
+    weapon.playSound("pickup", player.getPosition());
+
+    const weapons: ArenaConfig["weapons"] = [...this.config.weapons];
+    weapons[slot] = next;
+    this.config = { ...this.config, weapons };
+    window.history.replaceState(null, "", arenaConfigToQuery(this.config));
   }
 
   /** Every enemy gone, with the fire, the smoke and whatever's lying on the floor */

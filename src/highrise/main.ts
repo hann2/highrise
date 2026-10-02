@@ -90,7 +90,10 @@ export async function main() {
 
   game.addEntity(new AutoPauser(loadSaveData().autoPause));
   game.addEntity(new VolumeController());
-  game.addEntity(new MusicController());
+  // The arena is for testing, and the music gets in the way of hearing things
+  if (params.get("scene") !== "arena") {
+    game.addEntity(new MusicController());
+  }
   game.addEntity(new PositionalSoundListener());
   game.addEntity(new GraphicsQualityController());
   game.addEntity(new GameController());

@@ -114,7 +114,7 @@ export default class ArenaPanel extends ReactEntity implements Entity {
         {waveText && <div className="arena-hint__wave">{waveText}</div>}
         <div className="arena-hint__keys">
           Tab setup · Enter send wave · Backspace clear · Shift-Backspace reset
-          · Esc pause
+          · Q / Shift-Q next / previous weapon · Esc pause
         </div>
       </div>
     );
