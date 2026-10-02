@@ -3,9 +3,14 @@ import * as fs from "fs";
 import {
   captureProfile,
   collectIssues,
+  DISPLAY,
   expectNoIssues,
+  getResolution,
   measureFrames,
+  useDisplay,
 } from "./helpers";
+
+test.use({ deviceScaleFactor: DISPLAY.deviceScaleFactor });
 
 /**
  * The arena layout: `offices` (a real floor's wall density), or `sprawl` (the
@@ -60,6 +65,7 @@ const SECTIONS = [
 test("benchmark: fire and lighting scaling", async ({ page }) => {
   test.setTimeout(60000 + COUNTS.length * 60000);
   const issues = collectIssues(page);
+  await useDisplay(page);
   await page.goto(URL);
   await page.waitForFunction(
     () => window.DEBUG?.game?.entities.getById("arenaScene"),
@@ -102,13 +108,11 @@ test("benchmark: fire and lighting scaling", async ({ page }) => {
 
   fs.mkdirSync("tests/output", { recursive: true });
   fs.writeFileSync(
-    LAYOUT === "offices" && !NEAR
-      ? "tests/output/fire-benchmark.json"
-      : `tests/output/fire-benchmark-${LAYOUT}${NEAR ? "-near" : ""}.json`,
+    `tests/output/fire-benchmark${LAYOUT === "offices" ? "" : `-${LAYOUT}`}${NEAR ? "-near" : ""}${DISPLAY.suffix}.json`,
     JSON.stringify(results, null, 2) + "\n",
   );
   console.log(
-    `Layout: ${LAYOUT}${NEAR ? ", fires near the player" : ""}, ${results[0].casterShapes} shadow shapes`,
+    `Layout: ${LAYOUT}${NEAR ? ", fires near the player" : ""}, ${results[0].casterShapes} shadow shapes, resolution ${await getResolution(page)}`,
   );
   console.log(formatTable(results));
   console.log(formatSections(results));
