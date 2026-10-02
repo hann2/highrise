@@ -9,7 +9,9 @@ import {
   FLOOR_MARK_RESOLUTION,
   FUEL_STAIN_ALPHA,
   FUEL_STAIN_COLOR,
+  FUEL_STAIN_FADE_INTERVAL,
   FUEL_STAIN_FULL,
+  FUEL_STAIN_STEP,
   MARK_BLOB_RADIUS,
   SCORCH_ALPHA,
   SCORCH_COLOR,
@@ -23,7 +25,7 @@ const BLOB_SHAPES = 6;
 
 /**
  * What fire leaves on the floor, painted with soft, irregular blobs so the
- * grid doesn't show: fuel stains (repainted whenever the fuel changes) and
+ * grid doesn't show: fuel stains (repainted when the fuel changes enough) and
  * scorch marks (painted on as cells burn, and never taken off). Each is a
  * texture the size of the level.
  */
@@ -36,8 +38,16 @@ export default class FloorMarks extends BaseEntity implements Entity {
   private fuelTexture = RenderTexture.create({ width: 1, height: 1 });
   /** How much scorch has been painted on each cell, 0 to 1 */
   private paintedScorch = new Float32Array(0);
-  /** The fuel stains are repainted when the grid's fuel changes */
+  /** The grid's fuel when the fuel stains were last looked at */
   private paintedFuelVersion = -1;
+  /** How dark each cell's fuel stain was painted (see `stainAlpha`) */
+  private paintedFuel = new Float32Array(0);
+  /** The cells with a fuel stain painted */
+  private paintedFuelCells: number[] = [];
+  /** When the fuel stains were last painted, in unpaused seconds */
+  private fuelPaintedAt = -Infinity;
+  /** The fuel stains are painted from scratch next frame, whatever the fuel */
+  private fuelStale = true;
   private blobTextures = Array.from({ length: BLOB_SHAPES }, (_, i) =>
     makeIrregularBlobTexture(i),
   );
@@ -68,13 +78,15 @@ export default class FloorMarks extends BaseEntity implements Entity {
     this.scorchSprite.texture = this.scorchTexture;
     this.fuelSprite.texture = this.fuelTexture;
     this.paintedScorch = new Float32Array(this.grid.columns * this.grid.rows);
-    this.paintedFuelVersion = -1;
+    this.paintedFuel = new Float32Array(this.grid.columns * this.grid.rows);
+    this.paintedFuelCells = [];
+    this.fuelStale = true;
   }
 
   /** Takes all the marks off */
   clear() {
     this.paintedScorch.fill(0);
-    this.paintedFuelVersion = -1;
+    this.fuelStale = true;
     if (this.isAdded) {
       this.paint(this.scorchTexture, 0, true);
     }
@@ -100,16 +112,59 @@ export default class FloorMarks extends BaseEntity implements Entity {
       this.paint(this.scorchTexture, count, false);
     }
 
-    // Fuel stains, from scratch whenever the fuel changes
-    if (grid.fuelVersion !== this.paintedFuelVersion) {
+    // Fuel stains, from scratch, since they fade as the fuel burns
+    if (this.fuelStale || grid.fuelVersion !== this.paintedFuelVersion) {
       this.paintedFuelVersion = grid.fuelVersion;
-      count = 0;
-      for (const cell of grid.fuelCells) {
-        const alpha = clamp(grid.fuelInCell(cell) / FUEL_STAIN_FULL) * 0.4;
-        this.addBlob(count++, cell, FUEL_STAIN_COLOR, alpha, 1);
+      const now = this.game.elapsedUnpausedTime;
+      const change = this.fuelStale ? "darker" : this.fuelStainChange();
+      if (
+        change === "darker" ||
+        (change === "lighter" &&
+          now - this.fuelPaintedAt >= FUEL_STAIN_FADE_INTERVAL)
+      ) {
+        this.paintFuelStains();
+        this.fuelPaintedAt = now;
+        this.fuelStale = false;
       }
-      this.paint(this.fuelTexture, count, true);
     }
+  }
+
+  /** How dark the fuel stain in `cell` should be */
+  private stainAlpha(cell: number): number {
+    return clamp(this.grid.fuelInCell(cell) / FUEL_STAIN_FULL) * 0.4;
+  }
+
+  /**
+   * Whether any fuel stain is more than a step darker than it was painted
+   * (or new), else whether any is lighter (or gone)
+   */
+  private fuelStainChange(): "darker" | "lighter" | undefined {
+    const fuelCells = this.grid.fuelCells;
+    let lighter = fuelCells.size < this.paintedFuelCells.length;
+    for (const cell of fuelCells) {
+      const difference = this.stainAlpha(cell) - this.paintedFuel[cell];
+      if (difference > FUEL_STAIN_STEP) {
+        return "darker";
+      } else if (difference < -FUEL_STAIN_STEP) {
+        lighter = true;
+      }
+    }
+    return lighter ? "lighter" : undefined;
+  }
+
+  private paintFuelStains() {
+    for (const cell of this.paintedFuelCells) {
+      this.paintedFuel[cell] = 0;
+    }
+    this.paintedFuelCells = [];
+    let count = 0;
+    for (const cell of this.grid.fuelCells) {
+      const alpha = this.stainAlpha(cell);
+      this.addBlob(count++, cell, FUEL_STAIN_COLOR, alpha, 1);
+      this.paintedFuel[cell] = alpha;
+      this.paintedFuelCells.push(cell);
+    }
+    this.paint(this.fuelTexture, count, true);
   }
 
   private addBlob(
