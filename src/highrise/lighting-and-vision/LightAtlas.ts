@@ -144,21 +144,32 @@ export class LightAtlas {
  * Squares for the static lights, which keep them from frame to frame, so a
  * light that hasn't changed isn't drawn again: one page, filled up in rows as
  * lights come into view. A light keeps its square while it's out of view, in
- * case it comes back. When the page is full, it starts over with just the
- * lights in view (growing if they need it), and they're all drawn again.
+ * case it comes back, but is drawn again when it does: what happens out of
+ * view (a door moving) isn't kept track of. When the page is full, it starts
+ * over with just the lights in view (growing if they need it), and they're
+ * all drawn again.
  */
 export class StaticLightAtlas {
   page?: AtlasPage;
   private packer = new RowPacker(0);
   private slots = new Map<Light, AtlasSlot>();
+  /** The frame each light was last in view */
+  private lastInView = new Map<Light, number>();
   /** Set when the page was started over, so it needs clearing */
   needsClear = false;
 
   /**
    * Gives each light in view a slot (see `Light.placeInAtlas`), and returns
-   * the ones that have to be drawn: changed (`dirty`), or in a new square.
+   * the ones that have to be drawn: changed (`dirty`), in a new square, or
+   * back in view (not in view last `frame`).
    */
-  update(lights: readonly Light[]): Light[] {
+  update(lights: readonly Light[], frame: number): Light[] {
+    for (const light of lights) {
+      if (this.lastInView.get(light) !== frame - 1) {
+        light.dirty = true;
+      }
+      this.lastInView.set(light, frame);
+    }
     const toDraw: Light[] = [];
     if (!this.placeAll(lights, toDraw)) {
       // Full: start over with just these, on a page big enough for them
@@ -217,9 +228,25 @@ export class StaticLightAtlas {
     }
   }
 
+  /** The lights whose squares overlap `area` have to be drawn again (a door moved there) */
+  invalidateArea([minX, minY, maxX, maxY]: readonly number[]) {
+    for (const light of this.slots.keys()) {
+      const halfSize = light.size / 2;
+      if (
+        light.x - halfSize < maxX &&
+        light.x + halfSize > minX &&
+        light.y - halfSize < maxY &&
+        light.y + halfSize > minY
+      ) {
+        light.dirty = true;
+      }
+    }
+  }
+
   /** A light that's gone, or isn't static any more */
   forget(light: Light) {
     this.slots.delete(light);
+    this.lastInView.delete(light);
   }
 
   destroy() {

@@ -27,6 +27,19 @@ const SOLID_CORNER = 4;
 const CHUNK_SIZE = 16;
 /** Floats per light in a chunk's instance buffer (see `shadowMask.vert`) */
 const LIGHT_FLOATS = 6;
+/** How far a moving caster moves (meters, radians) before lights are drawn again */
+const MOVE_EPSILON = 0.001;
+
+/** An area of the world: min x, min y, max x, max y */
+export type Area = [number, number, number, number];
+
+/** Where a moving caster was the last time, and what it covered */
+interface Pose {
+  x: number;
+  y: number;
+  angle: number;
+  area: Area;
+}
 
 /**
  * The casters whose shapes' middles are in one square of a grid, as a mesh of
@@ -68,7 +81,9 @@ interface Chunk {
  * shapes longer than a square have chunks of their own, so a room's long
  * outside wall doesn't drag a square of small walls along to every light.
  *
- * Moving casters (doors) don't cast shadows from lights.
+ * Moving casters (doors, tagged but not static) are a chunk of their own,
+ * of the ones that reach the lights in view, rebuilt when one of them moves
+ * or the lights reach different ones (see `updateMoving`).
  */
 export class ShadowCasters {
   /** The casters the meshes were built from */
@@ -83,6 +98,12 @@ export class ShadowCasters {
   private touched: Chunk[] = [];
   /** Counts the lights given to chunks, for `Chunk.lastLight` */
   private lightNumber = 0;
+  /** The moving casters reaching the lights in view, as a chunk */
+  private moving?: Chunk;
+  /** Every moving caster, as of the last `update` */
+  private movingCasters: Body[] = [];
+  /** The pose of each moving caster in `moving`, for seeing which moved */
+  private poses = new Map<Body, Pose>();
   /** What gets drawn: the chunks with lights this time */
   private container = new Container();
   /** `WEBGL_clip_cull_distance`, once asked for (null where it's missing) */
@@ -107,18 +128,24 @@ export class ShadowCasters {
 
   /** Whether there's nothing to cast shadows */
   get isEmpty(): boolean {
-    return this.chunks.length === 0;
+    return this.chunks.length === 0 && !this.moving;
   }
 
-  /** Rebuilds the meshes if casters were added or removed since the last call */
+  /**
+   * Rebuilds the meshes if casters were added or removed since the last
+   * call, and finds the moving ones for `updateMoving`
+   */
   update(game: Game) {
     const current: Body[] = [];
     let changed = false;
+    this.movingCasters.length = 0;
     for (const entity of game.entities.getTagged(CAST_SHADOW_TAG)) {
       const body = entity.body;
       if (body && body.motion === "static") {
         current.push(body);
         changed ||= !this.bodies.has(body);
+      } else if (body) {
+        this.movingCasters.push(body);
       }
     }
     if (!changed && current.length === this.bodies.size) {
@@ -158,34 +185,8 @@ export class ShadowCasters {
     }
 
     for (const shapes of bySquare.values()) {
-      let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity];
-      for (const corners of shapes) {
-        const b = bounds(corners);
-        minX = Math.min(minX, b[0]);
-        minY = Math.min(minY, b[1]);
-        maxX = Math.max(maxX, b[2]);
-        maxY = Math.max(maxY, b[3]);
-      }
-      const lightBuffer = new Buffer({
-        data: new Float32Array(LIGHT_FLOATS),
-        usage: BufferUsage.VERTEX | BufferUsage.COPY_DST,
-      });
-      const mesh = new Mesh({
-        geometry: buildGeometry(shapes, lightBuffer),
-        shader: this.shader,
-      });
-      mesh.blendMode = "add";
-      const chunk: Chunk = {
-        mesh,
-        minX,
-        minY,
-        maxX,
-        maxY,
-        lightBuffer,
-        lightData: new Float32Array(0),
-        lightCount: 0,
-        lastLight: -1,
-      };
+      const chunk = this.makeChunk(shapes);
+      const { minX, minY, maxX, maxY } = chunk;
       this.chunks.push(chunk);
       // In every grid square its shapes reach, so a light only has to look
       // in the squares its own square is in
@@ -206,6 +207,118 @@ export class ShadowCasters {
           }
         }
       }
+    }
+  }
+
+  /** A chunk of the shapes with these corners */
+  private makeChunk(shapes: readonly (readonly V2d[])[]): Chunk {
+    let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity];
+    for (const corners of shapes) {
+      const b = bounds(corners);
+      minX = Math.min(minX, b[0]);
+      minY = Math.min(minY, b[1]);
+      maxX = Math.max(maxX, b[2]);
+      maxY = Math.max(maxY, b[3]);
+    }
+    const lightBuffer = new Buffer({
+      data: new Float32Array(LIGHT_FLOATS),
+      usage: BufferUsage.VERTEX | BufferUsage.COPY_DST,
+    });
+    const mesh = new Mesh({
+      geometry: buildGeometry(shapes, lightBuffer),
+      shader: this.shader,
+    });
+    mesh.blendMode = "add";
+    return {
+      mesh,
+      minX,
+      minY,
+      maxX,
+      maxY,
+      lightBuffer,
+      lightData: new Float32Array(0),
+      lightCount: 0,
+      lastLight: -1,
+    };
+  }
+
+  /**
+   * Keeps up with the moving casters (tagged bodies that aren't static, like
+   * doors) that reach `region`, the squares of the lights in view (the
+   * others only cost a look at their bounds; `update` finds them all).
+   * Returns the areas where one of them moved (where it was and where it is
+   * now), came into the region or left it, for the static lights there to be
+   * drawn again; static lights out of view are drawn again when they come
+   * back into it anyway (see `StaticLightAtlas.update`). If anything changed,
+   * the moving chunk is built again from the ones in the region. A door at
+   * rest costs a look at its pose.
+   */
+  updateMoving(region: Area | undefined): Area[] {
+    const changed: Area[] = [];
+    const seen = new Set<Body>();
+    let rebuild = false;
+    if (region) {
+      for (const body of this.movingCasters) {
+        const aabb = body.getAABB();
+        if (
+          aabb.lowerBound[0] >= region[2] ||
+          aabb.upperBound[0] <= region[0] ||
+          aabb.lowerBound[1] >= region[3] ||
+          aabb.upperBound[1] <= region[1]
+        ) {
+          continue;
+        }
+        seen.add(body);
+        const [x, y] = body.position;
+        const angle = body.angle;
+        const pose = this.poses.get(body);
+        if (
+          !pose ||
+          Math.abs(pose.x - x) > MOVE_EPSILON ||
+          Math.abs(pose.y - y) > MOVE_EPSILON ||
+          Math.abs(pose.angle - angle) > MOVE_EPSILON
+        ) {
+          const area = bodyArea(body);
+          if (pose) {
+            changed.push(pose.area);
+          }
+          changed.push(area);
+          this.poses.set(body, { x, y, angle, area });
+          rebuild = true;
+        }
+      }
+    }
+    // Gone, or out of the region
+    for (const [body, pose] of this.poses) {
+      if (!seen.has(body)) {
+        changed.push(pose.area);
+        this.poses.delete(body);
+        rebuild = true;
+      }
+    }
+    if (rebuild) {
+      this.buildMoving([...seen]);
+    }
+    return changed;
+  }
+
+  /** The moving chunk, from these bodies as they are now */
+  private buildMoving(bodies: Body[]) {
+    if (this.moving) {
+      this.destroyChunk(this.moving);
+      this.moving = undefined;
+    }
+    const shapes: V2d[][] = [];
+    for (const body of bodies) {
+      for (const shape of body.shapes) {
+        const corners = getShapeCorners(shape, body);
+        if (corners.length >= 2) {
+          shapes.push(corners);
+        }
+      }
+    }
+    if (shapes.length > 0) {
+      this.moving = this.makeChunk(shapes);
     }
   }
 
@@ -272,6 +385,38 @@ export class ShadowCasters {
       const minY = light.y - halfSize;
       const maxX = light.x + halfSize;
       const maxY = light.y + halfSize;
+      // Into `chunk`'s lights, if its shapes reach the light's square
+      const give = (chunk: Chunk) => {
+        if (
+          chunk.lastLight === number ||
+          chunk.minX >= maxX ||
+          chunk.maxX <= minX ||
+          chunk.minY >= maxY ||
+          chunk.maxY <= minY
+        ) {
+          return;
+        }
+        chunk.lastLight = number;
+        if (chunk.lightCount === 0) {
+          touched.push(chunk);
+        }
+        const j = chunk.lightCount * LIGHT_FLOATS;
+        if (chunk.lightData.length < j + LIGHT_FLOATS) {
+          const bigger = new Float32Array(
+            Math.max(j + LIGHT_FLOATS, 2 * chunk.lightData.length),
+          );
+          bigger.set(chunk.lightData);
+          chunk.lightData = bigger;
+        }
+        const data = chunk.lightData;
+        data[j] = light.x;
+        data[j + 1] = light.y;
+        data[j + 2] = halfSize;
+        data[j + 3] = Math.max(light.sourceRadius, minSourceRadius);
+        data[j + 4] = light.slot!.x;
+        data[j + 5] = light.slot!.y;
+        chunk.lightCount += 1;
+      };
       // The chunks in the grid squares the light's square is in might reach
       // it, and their bounds say whether they do
       const lastColumn = Math.floor(maxX / CHUNK_SIZE);
@@ -287,37 +432,12 @@ export class ShadowCasters {
             continue;
           }
           for (const chunk of inSquare) {
-            if (
-              chunk.lastLight === number ||
-              chunk.minX >= maxX ||
-              chunk.maxX <= minX ||
-              chunk.minY >= maxY ||
-              chunk.maxY <= minY
-            ) {
-              continue;
-            }
-            chunk.lastLight = number;
-            if (chunk.lightCount === 0) {
-              touched.push(chunk);
-            }
-            const j = chunk.lightCount * LIGHT_FLOATS;
-            if (chunk.lightData.length < j + LIGHT_FLOATS) {
-              const bigger = new Float32Array(
-                Math.max(j + LIGHT_FLOATS, 2 * chunk.lightData.length),
-              );
-              bigger.set(chunk.lightData);
-              chunk.lightData = bigger;
-            }
-            const data = chunk.lightData;
-            data[j] = light.x;
-            data[j + 1] = light.y;
-            data[j + 2] = halfSize;
-            data[j + 3] = Math.max(light.sourceRadius, minSourceRadius);
-            data[j + 4] = light.slot!.x;
-            data[j + 5] = light.slot!.y;
-            chunk.lightCount += 1;
+            give(chunk);
           }
         }
+      }
+      if (this.moving) {
+        give(this.moving);
       }
     }
     for (const chunk of touched) {
@@ -332,12 +452,20 @@ export class ShadowCasters {
     }
   }
 
+  private destroyChunk(chunk: Chunk) {
+    const geometry = chunk.mesh.geometry;
+    chunk.mesh.destroy();
+    // Its buffers too, the chunk's lights' among them
+    geometry.destroy(true);
+    const i = this.touched.indexOf(chunk);
+    if (i >= 0) {
+      this.touched.splice(i, 1);
+    }
+  }
+
   private destroyChunks() {
     for (const chunk of this.chunks) {
-      const geometry = chunk.mesh.geometry;
-      chunk.mesh.destroy();
-      // Its buffers too, the chunk's lights' among them
-      geometry.destroy(true);
+      this.destroyChunk(chunk);
     }
     this.chunks = [];
     this.touched = [];
@@ -346,6 +474,9 @@ export class ShadowCasters {
 
   destroy() {
     this.destroyChunks();
+    if (this.moving) {
+      this.destroyChunk(this.moving);
+    }
     this.shader.destroy();
     this.container.destroy();
   }
@@ -354,6 +485,24 @@ export class ShadowCasters {
 /** A grid square's key (squares 32 km either way of the origin are all different) */
 function gridKey(column: number, row: number): number {
   return column + 32768 + (row + 32768) * 65536;
+}
+
+/** Whether two areas overlap */
+function overlaps(a: Area, b: Area): boolean {
+  return a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
+}
+
+/** The area a body's shapes cover now */
+function bodyArea(body: Body): Area {
+  const area: Area = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const shape of body.shapes) {
+    const [minX, minY, maxX, maxY] = bounds(getShapeCorners(shape, body));
+    area[0] = Math.min(area[0], minX);
+    area[1] = Math.min(area[1], minY);
+    area[2] = Math.max(area[2], maxX);
+    area[3] = Math.max(area[3], maxY);
+  }
+  return area;
 }
 
 /** The bounding box of `corners`: min x, min y, max x, max y */
