@@ -27,6 +27,7 @@ import { generateRunPlan } from "./run/RunPlan";
 import { CHARACTERS } from "./characters/Character";
 import { clamp } from "../core/util/MathUtil";
 import { loadSaveData } from "./persistence/SaveData";
+import { antialiasFor, getAntialiasChoice } from "./controllers/antialiasing";
 import Preloader from "./preloader/Preloader";
 
 declare global {
@@ -71,10 +72,12 @@ export async function main() {
   }
 
   window.DEBUG = { game, profiler, gpuProfiler };
-  // ?aa=0 or ?aa=1 turns the canvas's antialiasing off or on
+  // The player's antialiasing setting, unless ?aa=0 or ?aa=1 turns it off or on
   const aa = params.get("aa");
   await game.init({
-    rendererOptions: aa != null ? { antialias: aa !== "0" } : {},
+    rendererOptions: {
+      antialias: aa != null ? aa !== "0" : antialiasFor(getAntialiasChoice()),
+    },
   });
 
   const preloader = game.addEntity(new Preloader());

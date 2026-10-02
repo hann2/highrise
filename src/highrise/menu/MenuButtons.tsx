@@ -1,6 +1,11 @@
 import { ComponentChildren } from "preact";
 import { desktop } from "../../core/desktop";
 import Game from "../../core/Game";
+import {
+  antialiasFor,
+  getAntialiasChoice,
+  setAntialiasChoice,
+} from "../controllers/antialiasing";
 import { getCurrentGraphicsQuality } from "../controllers/GraphicsQualityController";
 import { getVolumeController } from "../controllers/VolumeController";
 import { updateSaveData } from "../persistence/SaveData";
@@ -63,6 +68,23 @@ export function GraphicsButton({ game }: { game: Game }) {
       onClick={() => game.dispatch("toggleGraphicsQuality", undefined)}
     >
       Graphics: {getCurrentGraphicsQuality(game)}
+    </MenuButton>
+  );
+}
+
+/**
+ * Cycles antialiasing: Auto, on, off. It applies when the game next starts,
+ * which the button says while what's chosen isn't what the canvas has.
+ */
+export function AntialiasButton({ game }: { game: Game }) {
+  const choice = getAntialiasChoice();
+  const next = choice === undefined ? true : choice ? false : undefined;
+  const wanted = antialiasFor(choice);
+  const onOff = wanted ? "On" : "Off";
+  return (
+    <MenuButton onClick={() => setAntialiasChoice(next)}>
+      Antialiasing: {choice === undefined ? `Auto (${onOff})` : onOff}
+      {wanted !== game.renderer.antialias ? " (on restart)" : ""}
     </MenuButton>
   );
 }

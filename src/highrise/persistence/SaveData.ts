@@ -65,6 +65,8 @@ export interface SaveData {
   autoPause: boolean;
   /** The most frames per second the game runs at; undefined is the display's refresh rate */
   frameRateLimit?: number;
+  /** Whether the canvas is antialiased; undefined is Auto (see `controllers/antialiasing.ts`) */
+  antialias?: boolean;
   /** Name of the character the last run started with, who you arrive in the lobby as */
   lastCharacter?: string;
   /** How much of the lobby has been seen, as a PNG data URL of its explored map */
@@ -199,6 +201,9 @@ export function parseSaveData(raw: unknown): SaveData {
   }
   if (typeof raw.frameRateLimit === "number" && raw.frameRateLimit > 0) {
     data.frameRateLimit = raw.frameRateLimit;
+  }
+  if (typeof raw.antialias === "boolean") {
+    data.antialias = raw.antialias;
   }
   if (typeof raw.lastCharacter === "string") {
     data.lastCharacter = raw.lastCharacter;
