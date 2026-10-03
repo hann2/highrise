@@ -34,7 +34,7 @@ export const AK47: GunStats = {
   rightHandPosition: [0.32, 0],
   holdPosition: [0.55, 0],
   stanceAngle: degToRad(55),
-  stanceOffset: [0, -0.25],
+  sideOffset: 0.25,
   muzzleLength: 1.1,
 
   sounds: {

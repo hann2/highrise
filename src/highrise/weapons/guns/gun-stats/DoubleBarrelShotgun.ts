@@ -37,7 +37,7 @@ export const DoubleBarrelShotgun: GunStats = {
   rightHandPosition: [0.3, 0],
   holdPosition: [0.4, 0],
   stanceAngle: degToRad(35),
-  stanceOffset: [0, -0.2],
+  sideOffset: 0.2,
 
   sounds: {
     ...defaultGunStats.sounds,

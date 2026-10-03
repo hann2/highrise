@@ -58,6 +58,8 @@ import type { Item } from "../items/Item";
 import type { Level } from "../levels/Level";
 
 const MAX_ROTATION = 2 * Math.PI * 4; // Radians / second
+// Closer than this, a gun held off to the side aims as if the target were this far
+const MIN_AIM_DISTANCE = 1.0; // meters
 const SPEED = 5.0; // meters / second
 const HURT_SPEED = 3.0; // Speed while hurt
 /** Sprinting multiplies the walking speed by this (and `PlayerStats.sprintSpeed`) */
@@ -211,6 +213,17 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     const angleDiff = angleDelta(this.body.angle, angle);
     const turnAmount = clamp(angleDiff, -MAX_ROTATION * dt, MAX_ROTATION * dt);
     this.body.angle += turnAmount;
+  }
+
+  /**
+   * Turns toward `target`, a point in the world, so the gun in hand points at
+   * it: a gun held off to the side needs the body turned a little past it
+   */
+  aimAt(target: V2d, dt: number) {
+    const toTarget = target.sub(this.getPosition());
+    const side = this.weapon instanceof Gun ? this.weapon.stats.sideOffset : 0;
+    const distance = Math.max(toTarget.magnitude, MIN_AIM_DISTANCE);
+    this.setDirection(toTarget.angle - Math.asin(side / distance), dt);
   }
 
   setPosition(position: [number, number]) {

@@ -35,7 +35,7 @@ export const P90: GunStats = {
   rightHandPosition: [0.2, 0],
   holdPosition: [0.35, 0],
   stanceAngle: degToRad(50),
-  stanceOffset: [0, -0.2],
+  sideOffset: 0.2,
   muzzleLength: 0.7,
 
   sounds: {

@@ -10,13 +10,11 @@ import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import Human from "./Human";
 
 const GUN_SCALE = 1 / 300;
-const STANCE_ADJUST_SPEED = 3; // meters per second
 const STANCE_ROTATE_SPEED = Math.PI * 2; // radians per second
 
 // Renders a human
 export default class HumanSprite extends BodySprite {
   private _stanceAngle: number = 0;
-  private _stanceOffset: V2d = V(0, 0);
 
   weaponSprite?: Sprite;
   laserSight?: LaserSight;
@@ -35,18 +33,6 @@ export default class HumanSprite extends BodySprite {
       this._stanceAngle,
       this.getTargetStanceAngle(),
       dt * STANCE_ROTATE_SPEED,
-    );
-
-    const targetStanceOffset = this.getTargetStanceOffset();
-    this._stanceOffset[0] = stepToward(
-      this._stanceOffset[0],
-      targetStanceOffset[0],
-      dt * STANCE_ADJUST_SPEED,
-    );
-    this._stanceOffset[1] = stepToward(
-      this._stanceOffset[1],
-      targetStanceOffset[1],
-      dt * STANCE_ADJUST_SPEED,
     );
   }
 
@@ -87,20 +73,8 @@ export default class HumanSprite extends BodySprite {
     return this.human.getDirection();
   }
 
-  getTargetStanceOffset(): [number, number] {
-    if (this.human.weapon instanceof Gun) {
-      return this.human.weapon.stats.stanceOffset;
-    } else {
-      return [0, 0];
-    }
-  }
-
   getStanceAngle() {
     return this._stanceAngle;
-  }
-
-  getStanceOffset() {
-    return this._stanceOffset;
   }
 
   getRecoilOffset(gun: Gun): number {

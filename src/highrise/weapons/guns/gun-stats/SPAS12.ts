@@ -34,7 +34,7 @@ export const SPAS12: GunStats = {
   rightHandPosition: [0.3, 0],
   holdPosition: [0.6, 0],
   stanceAngle: degToRad(55),
-  stanceOffset: [0, -0.25],
+  sideOffset: 0.25,
   muzzleLength: 1.2,
 
   sounds: {

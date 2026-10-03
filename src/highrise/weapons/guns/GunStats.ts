@@ -75,8 +75,9 @@ export interface GunStats extends BaseWeaponStats {
   holdPosition: [number, number];
   // Angle that the shooter stands at while holding the gun
   stanceAngle: number;
-  // Position offset that the shooter stands at while holding the gun
-  stanceOffset: [number, number];
+  // How far to the shooter's right the gun is held, in meters: the shooter
+  // turns in place, with the gun at their shoulder rather than in the middle
+  sideOffset: number;
 }
 
 export type GunSounds = GunStats["sounds"];
@@ -137,7 +138,7 @@ export const defaultGunStats: GunStats = {
   rightHandPosition: [0.3, 0],
   holdPosition: [0.3, 0],
   stanceAngle: 0,
-  stanceOffset: [0, 0],
+  sideOffset: 0,
 
   textures: {
     pickup: "glockPickup",
