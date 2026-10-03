@@ -1,4 +1,4 @@
-import { Graphics } from "pixi.js";
+import { Graphics, NineSliceSprite, Texture } from "pixi.js";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
 import Entity from "../../core/entity/Entity";
@@ -17,10 +17,15 @@ import { HitResult, Projectile, projectileRaycast } from "./Projectile";
 
 /** The lowest frame rate a bullet's glow is sized for (see `Game.frameRateLimit`) */
 const MIN_FRAME_RATE = 30;
+/** How far the glow reaches out from the streak, in meters */
+const GLOW_RADIUS = 0.4;
+/** Brightness of the glow at the streak */
+const GLOW_INTENSITY = 0.8;
 export default class Bullet extends Projectile implements Entity {
   sprite: Graphics & GameSprite;
   light: Light;
-  lightGraphics: Graphics;
+  /** The glow: the point light's texture stretched into a capsule along the streak */
+  glow: NineSliceSprite;
 
   // Set by the gun that fires it, from its attachments and the shooter's items
   /** The gun that fired it */
@@ -56,13 +61,26 @@ export default class Bullet extends Projectile implements Entity {
     this.sprite = new Graphics();
     this.sprite.layerName = Layer.WEAPONS;
 
-    // A glow along the streak, centered on its middle. Big enough for the
-    // longest streak: a frame's travel at the lowest frame rate
-    this.lightGraphics = new Graphics();
-    const lightSize = stats.muzzleVelocity / MIN_FRAME_RATE + 0.5;
-    this.light = this.addChild(
-      new Light(this.lightGraphics, false, 1, 0, lightSize),
-    );
+    // A glow along the streak, centered on its middle: the point light's
+    // round falloff, with its middle column stretched to the streak's length.
+    // The light is big enough for the longest streak (a frame's travel at
+    // the lowest frame rate) and the glow around it
+    const texture = Texture.from("pointLight");
+    const half = texture.width / 2;
+    this.glow = new NineSliceSprite({
+      texture,
+      leftWidth: half,
+      rightWidth: half,
+      topHeight: 0,
+      bottomHeight: 0,
+    });
+    this.glow.pivot.set(half, half);
+    this.glow.scale.set(GLOW_RADIUS / half);
+    this.glow.tint = stats.color;
+    this.glow.alpha = GLOW_INTENSITY;
+    this.glow.blendMode = "add";
+    const lightSize = stats.muzzleVelocity / MIN_FRAME_RATE + 2 * GLOW_RADIUS;
+    this.light = this.addChild(new Light(this.glow, false, 1, 0, lightSize));
     // The streak is drawn again every frame
     this.light.dynamic = true;
   }
@@ -165,14 +183,12 @@ export default class Bullet extends Projectile implements Entity {
 
     this.sprite.position.copyFrom(this.renderPosition);
 
-    // The light is where the middle of the streak is, and the glow is drawn
-    // around it
-    const [halfX, halfY] = endPoint.imul(0.5);
-    this.lightGraphics
-      .clear()
-      .moveTo(-halfX, -halfY)
-      .lineTo(halfX, halfY)
-      .stroke({ width: 0.2, color: this.stats.color, alpha: 1.0 });
+    // The light is where the middle of the streak is, and the glow is
+    // stretched along it
+    const length = endPoint.magnitude;
+    this.glow.width = (length + 2 * GLOW_RADIUS) / this.glow.scale.x;
+    this.glow.pivot.x = this.glow.width / 2;
+    this.glow.rotation = endPoint.angle;
     this.light.setPosition(middle);
   }
 }
