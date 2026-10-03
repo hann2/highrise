@@ -39,6 +39,7 @@ This was reconstructed in 2026 from git history, the design files in `assets/sou
 | `axe.png`                                                                                                                    | Simon (`assets/source/axe.afdesign`; it replaced an earlier axe of Philip's)                                 | known      |
 | `baseball-bat-hold.png`, `baseball-bat-pickup.png`                                                                           | Simon (`assets/source/bat.afdesign`)                                                                         | known      |
 | `katana.png`                                                                                                                 | Simon (`assets/source/katana.afdesign`)                                                                      | known      |
+| `magazines/*` (placeholders, for reload animations: magazines, shells, a revolver round)                                     | Claude, drawn as SVG in `assets/source/magazines/`, rendered by `bin/render-svg.ts`                          | known      |
 
 ## Floors (`environment/floor/`)
 
