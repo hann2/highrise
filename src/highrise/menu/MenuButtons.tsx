@@ -1,14 +1,5 @@
 import { ComponentChildren } from "preact";
 import { desktop } from "../../core/desktop";
-import Game from "../../core/Game";
-import {
-  antialiasFor,
-  getAntialiasChoice,
-  setAntialiasChoice,
-} from "../controllers/antialiasing";
-import { getCurrentGraphicsQuality } from "../controllers/GraphicsQualityController";
-import { getVolumeController } from "../controllers/VolumeController";
-import { updateSaveData } from "../persistence/SaveData";
 import "./menu.css";
 
 const FEEDBACK_URL =
@@ -53,101 +44,10 @@ export function FeedbackButton() {
   );
 }
 
-export function MuteButton({ game }: { game: Game }) {
-  const muted = getVolumeController(game).muted;
-  return (
-    <MenuButton onClick={() => game.dispatch("toggleMute", undefined)}>
-      {muted ? "Unmute" : "Mute"}
-    </MenuButton>
-  );
-}
-
-export function GraphicsButton({ game }: { game: Game }) {
-  return (
-    <MenuButton
-      onClick={() => game.dispatch("toggleGraphicsQuality", undefined)}
-    >
-      Graphics: {getCurrentGraphicsQuality(game)}
-    </MenuButton>
-  );
-}
-
-/**
- * Cycles antialiasing: Auto, on, off. It applies when the game next starts,
- * which the button says while what's chosen isn't what the canvas has.
- */
-export function AntialiasButton({ game }: { game: Game }) {
-  const choice = getAntialiasChoice();
-  const next = choice === undefined ? true : choice ? false : undefined;
-  const wanted = antialiasFor(choice);
-  const onOff = wanted ? "On" : "Off";
-  return (
-    <MenuButton onClick={() => setAntialiasChoice(next)}>
-      Antialiasing: {choice === undefined ? `Auto (${onOff})` : onOff}
-      {wanted !== game.renderer.antialias ? " (on restart)" : ""}
-    </MenuButton>
-  );
-}
-
-/** Frame rate limits to offer, below the display's rate (a limit above it does nothing) */
-const FRAME_RATE_LIMITS = [30, 60, 90, 120, 144, 165, 240];
-
-/**
- * Cycles the frame rate limit: the display's rate ("Auto"), then each lower
- * limit. For fast displays on machines that can't keep up with them.
- */
-export function FrameRateButton({ game }: { game: Game }) {
-  const limit = game.frameRateLimit;
-  const options = [
-    undefined,
-    ...FRAME_RATE_LIMITS.filter((rate) => rate < game.refreshRate),
-  ];
-  const next = options[(options.indexOf(limit) + 1) % options.length];
-  return (
-    <MenuButton
-      onClick={() => {
-        game.frameRateLimit = next;
-        updateSaveData((data) => {
-          data.frameRateLimit = next;
-        });
-      }}
-    >
-      Frame Rate: {limit ?? `Auto (${game.refreshRate})`}
-    </MenuButton>
-  );
-}
-
-/** Fullscreen or windowed, in the desktop app (a browser has its own ways) */
-export function FullscreenButton() {
-  if (!desktop) {
-    return null;
-  }
-  const fullscreen = desktop.isFullscreen();
-  return (
-    <MenuButton onClick={() => desktop!.setFullscreen(!fullscreen)}>
-      Fullscreen: {fullscreen ? "On" : "Off"}
-    </MenuButton>
-  );
-}
-
 /** Closes the desktop app. A browser tab is closed by the browser. */
 export function QuitButton({ label = "Quit" }: { label?: string }) {
   if (!desktop) {
     return null;
   }
   return <MenuButton onClick={() => desktop!.quit()}>{label}</MenuButton>;
-}
-
-export function AutoPauseButton({
-  enabled,
-  onClick,
-}: {
-  enabled: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <MenuButton onClick={onClick}>
-      Auto-Pause: {enabled ? "On" : "Off"}
-    </MenuButton>
-  );
 }

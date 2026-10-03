@@ -5,6 +5,7 @@ import {
   getLeaderPosition,
   getLevelNumber,
   getLobbyPlayerPosition,
+  getResolution,
   arriveInLobby,
   loadGame,
 } from "./helpers";
@@ -1854,17 +1855,44 @@ test("game boots, plays, and changes levels without errors", async ({
       return paused && resumed;
     });
   expect(await hidingPauses()).toBe(true);
+
+  // --- The settings, from the pause menu: changes apply and are saved ---
   await page.keyboard.press("Escape");
-  await page.locator(".menu-button", { hasText: "Auto-Pause: On" }).click();
-  await expect(
-    page.locator(".menu-button", { hasText: "Auto-Pause: Off" }),
-  ).toHaveCount(1);
+  await page.locator(".menu-button", { hasText: "Settings" }).click();
+  await expect(page.locator(".settings")).toHaveCount(1);
+  // The pause menu steps aside while they're up
+  await expect(page.locator(".menu-title", { hasText: "PAUSED" })).toHaveCount(
+    0,
+  );
+  // Render scale (the first row of Display) down a step with the keyboard
+  const resolutionBefore = await getResolution(page);
+  await page.keyboard.press("ArrowLeft");
+  await expect
+    .poll(() => getResolution(page))
+    .toBeCloseTo(resolutionBefore * 0.9);
+  await page.keyboard.press("ArrowRight");
+  await expect.poll(() => getResolution(page)).toBeCloseTo(resolutionBefore);
+  // Auto-pause off with the mouse, on the Game tab
+  await page.locator(".settings__tab", { hasText: "Game" }).click();
+  const autoPauseRow = page.locator(".settings__row", {
+    hasText: "Auto-Pause",
+  });
+  await expect(autoPauseRow.locator(".settings__value")).toHaveText("On");
+  await autoPauseRow.locator(".settings__value").click();
+  await expect(autoPauseRow.locator(".settings__value")).toHaveText("Off");
+  // Escape closes the settings back to the pause menu, and again unpauses
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".settings")).toHaveCount(0);
+  await expect(page.locator(".menu-title", { hasText: "PAUSED" })).toHaveCount(
+    1,
+  );
   await page.keyboard.press("Escape");
   expect(await hidingPauses()).toBe(false);
   expect(
     await page.evaluate(
       () =>
-        JSON.parse(window.localStorage.getItem("highriseSaveData")!).autoPause,
+        JSON.parse(window.localStorage.getItem("highriseSaveData")!).settings
+          .autoPause,
     ),
   ).toBe(false);
 

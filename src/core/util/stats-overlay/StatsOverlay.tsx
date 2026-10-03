@@ -87,6 +87,11 @@ export class StatsOverlay extends ReactEntity implements Entity {
     );
   }
 
+  /** Shows the panel with this id, or closes the overlay for undefined */
+  showPanel(id: string | undefined) {
+    this.setActivePanel(this.panels.findIndex((p) => p.id === id));
+  }
+
   private setActivePanel(index: number) {
     this.activePanel?.onHide?.();
     this.activePanelIndex = index;

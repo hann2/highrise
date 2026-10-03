@@ -3,6 +3,7 @@ import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import { SoundInstance } from "../../core/sound/SoundInstance";
 import { Persistence } from "../constants/constants";
+import { getVolumeController } from "./VolumeController";
 
 const MUSIC_VOLUME = 0.7;
 
@@ -20,6 +21,8 @@ export default class MusicController extends BaseEntity implements Entity {
         reactToSlowMo: false,
         persistenceLevel: Persistence.Permanent,
         pauseable: false,
+        // The music's own bus, for its volume setting
+        outnode: () => getVolumeController(this.game).musicGain,
       }),
     );
   }
