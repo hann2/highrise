@@ -9,6 +9,7 @@ import { rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { BodySprite } from "../../creature-stuff/BodySprite";
+import { ZOMBIE_GAIT } from "../../creature-stuff/Legs";
 import { lerpOffsets } from "../base/enemyUtils";
 import Zombie from "./Zombie";
 
@@ -27,7 +28,10 @@ export default class ZombieSprite extends BodySprite {
   wiggleSpeed: number = rNormal(WIGGLE_SPEED, WIGGLE_SPEED / 5);
 
   constructor(private zombie: Zombie) {
-    super(zombie.zombieVariant.textures, ZOMBIE_RADIUS);
+    super(zombie.zombieVariant.textures, ZOMBIE_RADIUS, {
+      colors: zombie.zombieVariant.legColors,
+      gait: ZOMBIE_GAIT,
+    });
   }
 
   getPosition() {
@@ -84,6 +88,7 @@ export default class ZombieSprite extends BodySprite {
 
   @on("tick")
   onTick(dt: number) {
+    super.onTick(dt);
     if (!this.zombie.isStunned) {
       const moveSpeed = clamp(this.zombie.body.velocity.magnitude, -1, 4);
       this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;

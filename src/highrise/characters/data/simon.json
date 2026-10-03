@@ -9,6 +9,10 @@
     "rightHand": "simonRightHand",
     "torso": "simonTorso"
   },
+  "legs": {
+    "pants": "#3e4e6e",
+    "shoes": "#c8c8c8"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

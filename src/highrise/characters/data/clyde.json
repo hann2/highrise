@@ -9,6 +9,10 @@
     "rightHand": "mikeRightHand",
     "torso": "mikeTorso"
   },
+  "legs": {
+    "pants": "#6b5a46",
+    "shoes": "#3a2a1e"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

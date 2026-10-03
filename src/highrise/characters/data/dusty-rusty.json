@@ -9,6 +9,10 @@
     "rightHand": "dustyRustyRightHand",
     "torso": "dustyRustyTorso"
   },
+  "legs": {
+    "pants": "#45597a",
+    "shoes": "#6b4426"
+  },
   "stats": {},
   "startingWeapons": ["S&W Revolver"],
   "clips": [

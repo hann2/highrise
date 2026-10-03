@@ -9,6 +9,10 @@
     "rightHand": "luckyJackRightHand",
     "torso": "luckyJackTorso"
   },
+  "legs": {
+    "pants": "#2b2522",
+    "shoes": "#3b2416"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

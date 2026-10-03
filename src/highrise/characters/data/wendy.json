@@ -9,6 +9,10 @@
     "rightHand": "wendyRightHand",
     "torso": "wendyTorso"
   },
+  "legs": {
+    "pants": "#5b78a8",
+    "shoes": "#d84040"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

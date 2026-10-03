@@ -21,6 +21,7 @@ import ArenaScene from "./arena/ArenaScene";
 import FireTestScene from "./fire/FireTestScene";
 import DeathsTestScene from "./enemies/remains/DeathsTestScene";
 import RigTestScene from "./rig/RigTestScene";
+import WalkTestScene from "./rig/WalkTestScene";
 import { isHuman } from "./human/Human";
 import { getStartingCharacter } from "./lobby/Lobby";
 import { generateRunPlan } from "./run/RunPlan";
@@ -142,6 +143,15 @@ export async function main() {
   // ?scene=rig (development only) is for looking at how humans are animated
   if (process.env.NODE_ENV === "development" && params.get("scene") === "rig") {
     game.addEntity(new RigTestScene());
+    return;
+  }
+
+  // ?scene=walk (development only) is for looking at how bodies walk
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "walk"
+  ) {
+    game.addEntity(new WalkTestScene());
     return;
   }
 

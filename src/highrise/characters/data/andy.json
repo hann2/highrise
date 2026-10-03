@@ -9,6 +9,10 @@
     "rightHand": "andyRightHand",
     "torso": "andyTorso"
   },
+  "legs": {
+    "pants": "#3b4a66",
+    "shoes": "#2b2b2b"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

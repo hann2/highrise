@@ -9,6 +9,10 @@
     "rightHand": "santaRightHand",
     "torso": "santaTorso"
   },
+  "legs": {
+    "pants": "#b0161a",
+    "shoes": "#1a1a1a"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

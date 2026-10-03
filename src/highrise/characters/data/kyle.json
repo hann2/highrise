@@ -9,6 +9,10 @@
     "rightHand": "kyleRightHand",
     "torso": "kyleTorso"
   },
+  "legs": {
+    "pants": "#5d5a45",
+    "shoes": "#2a2a2a"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

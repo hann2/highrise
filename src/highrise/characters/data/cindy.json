@@ -9,6 +9,10 @@
     "rightHand": "cindyRightHand",
     "torso": "cindyTorso"
   },
+  "legs": {
+    "pants": "#7d9cc4",
+    "shoes": "#f0f0f0"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

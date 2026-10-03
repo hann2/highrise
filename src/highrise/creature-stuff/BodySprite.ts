@@ -4,8 +4,11 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
+import { Gait } from "../../core/animation/Gait";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
+import { HUMAN_RADIUS } from "../constants/constants";
+import { LegStyle } from "./Legs";
 
 export interface BodyTextures {
   head: ImageName;
@@ -22,6 +25,19 @@ export interface BodyTextures {
  */
 const VIEW_MARGIN = 1;
 
+// A human's legs, in meters; other bodies' are in proportion to their size
+/** From the middle of the body to each hip */
+const HIP_WIDTH = 0.1;
+const LEG_THICKNESS = 0.16;
+const FOOT_LENGTH = 0.26;
+const FOOT_WIDTH = 0.12;
+/** How far in front of the ankle the middle of the foot is */
+const FOOT_FORWARD = 0.05;
+/** How much bigger a foot looks at the top of its swing, nearer the camera */
+const FOOT_LIFT_SCALE = 0.15;
+/** Radians the shoulders turn against the hips with each step, at full stride */
+const TORSO_TWIST = 0.06;
+
 // A body with arms that faces a direction
 export abstract class BodySprite extends BaseEntity implements Entity {
   sprite: Container & GameSprite;
@@ -32,14 +48,24 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   rightArmSprite: Sprite;
   leftHandSprite: Sprite;
   rightHandSprite: Sprite;
+  /** The legs and feet, under everything else; only for a body with `legs` */
+  legsSprite?: Container;
+  private legSprites: Sprite[] = [];
+  private footSprites: Sprite[] = [];
+  /** How the legs walk, worked out from how the body moves; only for a body with `legs` */
+  readonly gait?: Gait;
+  /** How big the legs are next to a human's */
+  private legScale: number;
 
   constructor(
     readonly textures: BodyTextures,
     private radius: number,
+    legs?: LegStyle,
   ) {
     super();
 
     this.sprite = new Container();
+    this.legScale = radius / HUMAN_RADIUS;
 
     this.torsoSprite = Sprite.from(textures.torso);
     this.torsoSprite.anchor.set(0.5);
@@ -77,6 +103,28 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       this.torsoSprite,
       this.headSprite,
     );
+
+    if (legs) {
+      this.gait = new Gait(legs.gait);
+      const pair = (image: "leg" | "foot", color: string) =>
+        [0, 1].map(() => {
+          const sprite = Sprite.from(image);
+          sprite.anchor.set(0.5);
+          sprite.tint = color;
+          return sprite;
+        });
+      this.legSprites = pair("leg", legs.colors.pants);
+      this.footSprites = pair("foot", legs.colors.shoes);
+      this.legsSprite = new Container();
+      this.legsSprite.addChild(...this.legSprites, ...this.footSprites);
+      this.sprite.addChildAt(this.legsSprite, 0);
+    }
+  }
+
+  /** Moves the walk cycle on by how far the body went. Subclasses that tick call this. */
+  @on("tick")
+  onTick(dt: number) {
+    this.gait?.update(this.getPosition(), this.getAngle(), dt);
   }
 
   /**
@@ -102,7 +150,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.sprite.position.copyFrom(this.getPosition());
     this.sprite.rotation = this.getAngle();
 
-    this.torsoSprite.rotation = this.getStanceAngle();
+    this.torsoSprite.rotation = this.getStanceAngle() + this.getTorsoTwist();
+    this.poseLegs();
 
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();
     const [leftHandPos, rightHandPos] = this.getHandPositions();
@@ -123,6 +172,50 @@ export abstract class BodySprite extends BaseEntity implements Entity {
 
     this.leftHandSprite.position.copyFrom(leftHandPos);
     this.rightHandSprite.position.copyFrom(rightHandPos);
+  }
+
+  /** Puts the legs and feet where the walk cycle has them */
+  private poseLegs() {
+    const gait = this.gait;
+    if (!gait) {
+      return;
+    }
+    const scale = this.legScale;
+    const facing = this.getAngle();
+    const hipAngle = gait.hipAngle - facing;
+    const travelAngle = gait.travelAngle - facing;
+    for (const side of [0, 1] as const) {
+      const hip = polarToVec(
+        hipAngle + (side === 0 ? -Math.PI / 2 : Math.PI / 2),
+        HIP_WIDTH * scale,
+      );
+      const step = gait.foot(side);
+      const ankle = hip.add(polarToVec(travelAngle, step.along));
+
+      const leg = this.legSprites[side];
+      const span = ankle.sub(hip);
+      leg.position.copyFrom(hip.lerp(ankle, 0.5));
+      leg.rotation = span.magnitude > 0.01 ? span.angle : hipAngle;
+      leg.width = span.magnitude + LEG_THICKNESS * scale;
+      leg.height = LEG_THICKNESS * scale;
+
+      const foot = this.footSprites[side];
+      const lift = 1 + step.lift * FOOT_LIFT_SCALE;
+      foot.position.copyFrom(
+        ankle.iadd(polarToVec(hipAngle, FOOT_FORWARD * scale)),
+      );
+      foot.rotation = hipAngle;
+      foot.width = FOOT_LENGTH * scale * lift;
+      foot.height = FOOT_WIDTH * scale * lift;
+    }
+  }
+
+  /** The shoulders turning a little against the hips with each step */
+  getTorsoTwist(): number {
+    const gait = this.gait;
+    return gait
+      ? Math.sin(gait.phase * Math.PI * 2) * TORSO_TWIST * gait.stride
+      : 0;
   }
 
   // Override me!
