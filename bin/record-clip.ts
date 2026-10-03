@@ -122,6 +122,8 @@ async function main() {
     const { data } = await cdp.send("Page.captureScreenshot", {
       format: "png",
       optimizeForSpeed: true,
+      // Device pixels: without a clip it's CSS pixels whatever the dpr
+      clip: { x: 0, y: 0, width, height, scale: dpr },
     });
     writes.push(
       writeFile(
