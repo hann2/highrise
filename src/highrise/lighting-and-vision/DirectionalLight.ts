@@ -1,7 +1,7 @@
 import { Sprite, Texture } from "pixi.js";
 import { degToRad } from "../../core/util/MathUtil";
 import Light from "./Light";
-import { LIGHT_RESOLUTION } from "./lightingConstants";
+import { lightResolution } from "./lightingConstants";
 
 export interface DirectionalLightOptions {
   /** How far the light reaches, in meters */
@@ -58,15 +58,15 @@ const coneTextures = new Map<string, Texture>();
 
 /**
  * A cone of light pointing along +x from the left edge's midpoint, fading
- * out with distance and toward the edges of the cone. Cached per shape, so
+ * out with distance and toward the edges of the cone. Cached per shape (and resolution), so
  * every flashlight of the same size shares one texture.
  */
 function getConeTexture(length: number, spread: number): Texture {
-  const key = `${length},${spread}`;
+  const key = `${length},${spread},${lightResolution}`;
   let texture = coneTextures.get(key);
   if (!texture) {
-    const width = Math.ceil(length * LIGHT_RESOLUTION);
-    const height = Math.ceil(coneHeight(length, spread) * LIGHT_RESOLUTION);
+    const width = Math.ceil(length * lightResolution);
+    const height = Math.ceil(coneHeight(length, spread) * lightResolution);
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
@@ -77,8 +77,8 @@ function getConeTexture(length: number, spread: number): Texture {
     const edgeSoftness = 0.3;
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const px = (x + 0.5) / LIGHT_RESOLUTION;
-        const py = (y + 0.5) / LIGHT_RESOLUTION - height / LIGHT_RESOLUTION / 2;
+        const px = (x + 0.5) / lightResolution;
+        const py = (y + 0.5) / lightResolution - height / lightResolution / 2;
         const distance = Math.hypot(px, py);
         const angle = Math.abs(Math.atan2(py, px));
         const radial = Math.max(0, 1 - distance / length);

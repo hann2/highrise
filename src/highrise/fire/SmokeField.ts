@@ -15,6 +15,7 @@ import { on } from "../../core/entity/handler";
 import { clamp, lerp } from "../../core/util/MathUtil";
 import { V2d } from "../../core/Vector";
 import Door from "../environment/Door";
+import { getSetting } from "../settings/SettingsController";
 import Burning from "./Burning";
 import {
   FIRE_CELL_SIZE,
@@ -146,6 +147,7 @@ export default class SmokeField extends BaseEntity implements Entity {
           uAlpha: { value: SMOKE_ALPHA, type: "f32" },
           uMaxDensity: { value: SMOKE_MAX_DENSITY, type: "f32" },
           uWarp: { value: SMOKE_WARP, type: "f32" },
+          uOctaves: { value: 4, type: "f32" },
         },
       },
     });
@@ -593,6 +595,7 @@ export default class SmokeField extends BaseEntity implements Entity {
     this.mesh.visible = this.hasSmoke || this.clearingCells.size > 0;
     const uniforms = this.shader.resources.smokeUniforms.uniforms;
     uniforms.uTime = this.game.elapsedUnpausedTime;
+    uniforms.uOctaves = getSetting(this.game, "flameDetail");
     if (this.texturesDirty) {
       this.texturesDirty = false;
       this.source.update();

@@ -1,6 +1,6 @@
 import { RenderTexture } from "pixi.js";
 import type Light from "./Light";
-import { LIGHT_RESOLUTION } from "./lightingConstants";
+import { lightResolution } from "./lightingConstants";
 
 /** Where a light is in the atlas: which page, and the middle of its square, in meters */
 export interface AtlasSlot {
@@ -26,7 +26,7 @@ const PADDING = 2;
 
 /** Pixels across a light's square in the atlas, padding included */
 function slotSide(light: Light): number {
-  return Math.ceil(light.size * LIGHT_RESOLUTION) + 2 * PADDING;
+  return Math.ceil(light.size * lightResolution) + 2 * PADDING;
 }
 
 /** The smallest page (a power of two) for squares adding up to `area` pixels */
@@ -43,12 +43,12 @@ function pageSizeFor(area: number, biggestSide: number): number {
 }
 
 function makePage(pixels: number): AtlasPage {
-  const meters = pixels / LIGHT_RESOLUTION;
+  const meters = pixels / lightResolution;
   const make = () =>
     RenderTexture.create({
       width: meters,
       height: meters,
-      resolution: LIGHT_RESOLUTION,
+      resolution: lightResolution,
     });
   return { mask: make(), light: make() };
 }
@@ -80,8 +80,8 @@ class RowPacker {
       return undefined;
     }
     const middle = {
-      x: (this.x + side / 2) / LIGHT_RESOLUTION,
-      y: (this.y + side / 2) / LIGHT_RESOLUTION,
+      x: (this.x + side / 2) / lightResolution,
+      y: (this.y + side / 2) / lightResolution,
     };
     this.x += side;
     this.rowHeight = Math.max(this.rowHeight, side);
@@ -91,7 +91,7 @@ class RowPacker {
 
 /**
  * Squares for the dynamic lights in view, packed into pages of two textures
- * (masks and lights) at `LIGHT_RESOLUTION`, so that all the lights can be
+ * (masks and lights) at `lightResolution`, so that all the lights can be
  * drawn in a handful of render passes rather than a couple each. Texture
  * coordinates are in meters, like the world. Packed afresh every frame (it's
  * a few microseconds), in rows from the biggest light down. Pages grow to fit

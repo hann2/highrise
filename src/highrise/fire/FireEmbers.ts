@@ -17,6 +17,7 @@ import {
   MAX_EMBERS,
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
+import { getSetting } from "../settings/SettingsController";
 
 interface Ember {
   x: number;
@@ -63,9 +64,13 @@ export default class FireEmbers extends BaseEntity implements Entity {
     if (this.game.paused) {
       return;
     }
+    this.amount = getSetting(this.game, "embers");
     this.spawn(dt);
     this.update(dt);
   }
+
+  /** The fraction of embers made (the Embers setting) */
+  private amount = 1;
 
   private spawn(dt: number) {
     const grid = this.grid;
@@ -105,10 +110,13 @@ export default class FireEmbers extends BaseEntity implements Entity {
   }
 
   private addEmber(x: number, y: number, speed: number) {
-    if (this.embers.length >= MAX_EMBERS) {
+    const random = this.random;
+    if (
+      this.embers.length >= MAX_EMBERS * this.amount ||
+      (this.amount < 1 && random() >= this.amount)
+    ) {
       return;
     }
-    const random = this.random;
     const angle = random() * Math.PI * 2;
     const v = EMBER_SPEED * speed * (0.3 + random());
     const sprite = this.spares.pop() ?? new Sprite(this.texture);

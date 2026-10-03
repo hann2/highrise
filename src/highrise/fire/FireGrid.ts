@@ -12,6 +12,8 @@ import type Human from "../human/Human";
 import { isHuman } from "../human/Human";
 import type { Level } from "../levels/Level";
 import { PointLight } from "../lighting-and-vision/PointLight";
+import { SettingId } from "../settings/settings";
+import { getSetting } from "../settings/SettingsController";
 import { ignite } from "./Burning";
 import FireRenderer from "./FireRenderer";
 import FloorMarks from "./FloorMarks";
@@ -69,7 +71,7 @@ export default class FireGrid extends BaseEntity implements Entity {
   private sources = new Map<number, Human | undefined>();
   /** Indexes of the cells that are burning */
   private burningCells = new Set<number>();
-  /** One light per burning cell in view (see `updateLights`) */
+  /** One light per burning cell (or block of cells) in view (see `updateLights`) */
   private lights = new Map<number, PointLight>();
   /** A cell's middle, for checking it's in view without making a vector */
   private scratchPoint: [number, number] = [0, 0];
@@ -373,63 +375,124 @@ export default class FireGrid extends BaseEntity implements Entity {
     this.updateLights();
   }
 
+  @on("settingChanged")
+  onSettingChanged({ id }: { id: SettingId }) {
+    if (id === "fireLights") {
+      // Blocks of another size are numbered differently
+      this.removeLights();
+    }
+  }
+
   /**
    * One small, dim light per burning cell, each flickering on its own. Lots
    * of little lights light a fire the shape it is, with shadows from all of
    * it (they cost well under a millisecond a frame for a molotov's worth).
+   * The Fire Lights setting can make that one per block of 2 × 2 or 4 × 4
+   * cells instead, as bright as the block's cells together, in the middle of
+   * the ones burning.
    *
-   * Only the cells near enough to the view to light any of it have lights:
+   * Only the blocks near enough to the view to light any of it have lights:
    * moving and flickering them all cost more than drawing the ones in view
    * (14 ms a frame with fire all over a huge level). A light wanders at most
-   * `CELL_LIGHT_WANDER` from its cell, so a cell further than that and its
+   * `CELL_LIGHT_WANDER` from its cells, so cells further than that and its
    * radius from the view can't light it. Lights a little further than that
    * are only destroyed further out still, so they don't come and go at the
    * edge; a new one looks the same, since its flicker only depends on its
-   * cell and the time.
+   * block and the time.
    */
   private updateLights() {
     const camera = this.game.camera;
     const reach = CELL_LIGHT_RADIUS + CELL_LIGHT_WANDER;
-    for (const [cell, light] of this.lights) {
-      if (
-        this.burnAge[cell] < 0 ||
-        !camera.isInView(this.cellMiddle(cell), reach + LIGHT_KEEP_DISTANCE)
-      ) {
+    const size = getSetting(this.game, "fireLights");
+    const blockColumns = Math.ceil(this.columns / size);
+
+    // The burning cells near the view, added up by block
+    const blocks = this.blocks;
+    blocks.clear();
+    let used = 0;
+    for (const cell of this.burningCells) {
+      const middle = this.cellMiddle(cell);
+      if (!camera.isInView(middle, reach + LIGHT_KEEP_DISTANCE)) {
+        continue;
+      }
+      const column = cell % this.columns;
+      const row = Math.floor(cell / this.columns);
+      const key =
+        Math.floor(row / size) * blockColumns + Math.floor(column / size);
+      let block = blocks.get(key);
+      if (!block) {
+        block = this.blockPool[used] ??= {
+          heat: 0,
+          x: 0,
+          y: 0,
+          cells: 0,
+          inReach: false,
+        };
+        used += 1;
+        block.heat = block.x = block.y = block.cells = 0;
+        block.inReach = false;
+        blocks.set(key, block);
+      }
+      block.heat += this.cellHeat(cell);
+      block.x += middle[0];
+      block.y += middle[1];
+      block.cells += 1;
+      block.inReach ||= camera.isInView(middle, reach);
+    }
+
+    for (const [key, light] of this.lights) {
+      if (!blocks.has(key)) {
         light.destroy();
-        this.lights.delete(cell);
+        this.lights.delete(key);
       }
     }
     const t = this.game.elapsedUnpausedTime;
-    for (const cell of this.burningCells) {
-      if (!camera.isInView(this.cellMiddle(cell), reach)) {
-        continue;
-      }
-      let light = this.lights.get(cell);
+    for (const [key, block] of blocks) {
+      let light = this.lights.get(key);
       if (!light) {
+        if (!block.inReach) {
+          continue;
+        }
         light = this.addChild(
           new PointLight({
             radius: CELL_LIGHT_RADIUS,
             intensity: 0,
-            position: this.cellCenter(cell),
             // It wanders as it flickers
             dynamic: true,
           }),
         );
-        this.lights.set(cell, light);
+        this.lights.set(key, light);
       }
-      // Wandering about the cell, so shadows flicker too
+      // Wandering about the cells, so shadows flicker too
       const { intensity, color, offset } = fireLightFlicker(
         t,
-        cell * 0.37,
+        key * 0.37,
         CELL_LIGHT_WANDER,
       );
-      light.setPosition(this.cellCenter(cell).iadd(offset));
-      light.setIntensity(
-        CELL_LIGHT_INTENSITY * intensity * this.cellHeat(cell),
+      light.setPosition(
+        V(block.x / block.cells, block.y / block.cells).iadd(offset),
       );
+      light.setIntensity(CELL_LIGHT_INTENSITY * intensity * block.heat);
       light.setColor(color);
     }
   }
+
+  /** The burning cells near the view by block, this frame (see `updateLights`) */
+  private blocks = new Map<number, LightBlock>();
+  /** Blocks to reuse, so there's nothing new to make each frame */
+  private blockPool: LightBlock[] = [];
+}
+
+/** The burning cells in one block of the grid, added up (see `FireGrid.updateLights`) */
+interface LightBlock {
+  /** Their heat, together */
+  heat: number;
+  /** Their middles, added up */
+  x: number;
+  y: number;
+  cells: number;
+  /** Whether any is near enough to the view to light it */
+  inReach: boolean;
 }
 
 /**

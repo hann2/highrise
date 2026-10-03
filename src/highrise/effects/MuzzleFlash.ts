@@ -8,6 +8,7 @@ import { on } from "../../core/entity/handler";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
 import { PointLight } from "../lighting-and-vision/PointLight";
+import { getSetting } from "../settings/SettingsController";
 
 const MUZZLE_FLASH_TEXTURES: ImageName[] = [
   "muzzleFlash1",
@@ -52,6 +53,9 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
 
   @on("add")
   onAdd() {
+    if (!getSetting(this.game, "gunfireLights")) {
+      return;
+    }
     this.light = this.addChild(
       new PointLight({
         radius: RADIUS,

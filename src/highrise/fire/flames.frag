@@ -15,6 +15,8 @@ uniform float uTime;
 uniform float uWarp;
 // The size of a pixel of the heat buffer, in texture coordinates
 uniform vec2 uTexel;
+// Octaves of noise, up to four (the Flame & Smoke Detail setting)
+uniform float uOctaves;
 
 // --- Noise ---
 
@@ -44,16 +46,20 @@ float noise(vec3 x) {
   );
 }
 
-// Four octaves, 0 to about 1
+// `uOctaves` octaves (up to four), 0 to about 1
 float fbm(vec3 p) {
   float sum = 0.0;
   float amplitude = 0.5;
   for (int i = 0; i < 4; i++) {
+    if (float(i) >= uOctaves) {
+      break;
+    }
     sum += amplitude * noise(p);
     p = p * 2.03 + vec3(1.7, -3.1, 0.0);
     amplitude *= 0.5;
   }
-  return sum / 0.9375;
+  // The amplitudes add up to 1 - 2 * the next one's
+  return sum / (1.0 - 2.0 * amplitude);
 }
 
 // The noise at `p`, carried along `flow` (meters per second): two copies

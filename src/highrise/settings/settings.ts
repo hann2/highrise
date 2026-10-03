@@ -61,6 +61,12 @@ const ON_OFF = [
   { value: false, label: "Off" },
 ];
 
+function labeled<T extends SettingValue>(
+  pairs: [T, string][],
+): SettingOption<T>[] {
+  return pairs.map(([value, label]) => ({ value, label }));
+}
+
 /** 0 to 100% in tenths */
 const VOLUME_STEPS = Array.from({ length: 11 }, (_, i) => ({
   value: i / 10,
@@ -69,6 +75,14 @@ const VOLUME_STEPS = Array.from({ length: 11 }, (_, i) => ({
 
 /** Frame rate limits to offer, below the display's rate (a limit above it does nothing) */
 const FRAME_RATE_LIMITS = [30, 60, 90, 120, 144, 165, 240];
+
+/**
+ * Where the costs in the descriptions were measured: the fire benchmark
+ * (`npm run benchmark:fire` with `FIRES=32 DPR=2 SETTINGS=...`), a lot of
+ * fire in the dark, at 6 ms a frame with the defaults on Simon's Mac.
+ * Measured 2026-10-02, to a few tenths of a millisecond.
+ */
+const IN_THE_BENCHMARK = "with 32 pools of fire on a retina display";
 
 /** The display's pixels per logical pixel, which a render scale of 100% renders at */
 export const MAX_RESOLUTION =
@@ -82,7 +96,7 @@ export const SETTINGS = {
     description:
       "How many of the display's pixels the game draws. Lower is blurrier, " +
       "and much less work for the graphics card.",
-    cost: "The biggest one on high-resolution displays: what every pixel costs, times the number of pixels.",
+    cost: `The biggest one: what every pixel costs, times the number of pixels. 50% took a frame from 6 ms to 2.8 ${IN_THE_BENCHMARK}.`,
     default: 1,
     options: () =>
       [0.5, 0.6, 0.75, 0.9, 1].map((value) => ({
@@ -160,6 +174,119 @@ export const SETTINGS = {
     },
   }),
 
+  // Graphics
+  lightingDetail: setting({
+    tab: "Graphics",
+    label: "Lighting Detail",
+    description:
+      "How sharply lights and shadows are drawn, in pixels per meter. Lower " +
+      "makes shadow edges blurrier and blockier.",
+    cost: `Grows with the number of lights in view. Low saved about 0.5 ms a frame and Ultra added 1 to 2, ${IN_THE_BENCHMARK}.`,
+    default: 32,
+    options: () =>
+      labeled([
+        [16, "Low (16)"],
+        [24, "Medium (24)"],
+        [32, "High (32)"],
+        [48, "Ultra (48)"],
+      ]),
+  }),
+  movingLightShadows: setting({
+    tab: "Graphics",
+    label: "Moving Light Shadows",
+    description:
+      "Shadows from lights that move or flicker: fire, burning things, " +
+      "sparks, the flashlight. Off, their light goes through walls.",
+    cost: `Grows with the walls near each light. Off saved about 0.6 ms a frame ${IN_THE_BENCHMARK}.`,
+    default: true,
+    options: () => ON_OFF,
+  }),
+  fireLights: setting({
+    tab: "Graphics",
+    label: "Fire Lights",
+    description:
+      "How many lights a fire on the floor has: one for every half-meter " +
+      "square that's burning, or one for every few. Fewer lights flicker " +
+      "less, and light the fire less like the shape it is.",
+    cost: `Only with fire in view. Reduced (one light per 2 × 2 squares) saved about 0.7 ms a frame and Minimal (4 × 4) about 1.2, ${IN_THE_BENCHMARK}.`,
+    default: 1,
+    options: () =>
+      labeled([
+        [1, "Full"],
+        [2, "Reduced"],
+        [4, "Minimal"],
+      ]),
+  }),
+  flameDetail: setting({
+    tab: "Graphics",
+    label: "Flame & Smoke Detail",
+    description:
+      "Layers of swirling detail in flames and smoke. Fewer looks smoother " +
+      "and blurrier.",
+    cost: `Every pixel of flame and smoke, so it grows with the render scale. Low saved about 1.5 ms a frame, the most of any graphics setting, ${IN_THE_BENCHMARK}.`,
+    default: 4,
+    options: () =>
+      labeled([
+        [2, "Low"],
+        [3, "Medium"],
+        [4, "High"],
+      ]),
+  }),
+  flameResolution: setting({
+    tab: "Graphics",
+    label: "Flame Resolution",
+    description:
+      "How finely the shape of the flames is worked out, in pixels per " +
+      "meter. Lower makes flames blobbier.",
+    cost: `Small: Low made no difference that could be measured ${IN_THE_BENCHMARK}.`,
+    default: 16,
+    options: () =>
+      labeled([
+        [8, "Low (8)"],
+        [12, "Medium (12)"],
+        [16, "High (16)"],
+        [24, "Ultra (24)"],
+      ]),
+  }),
+  embers: setting({
+    tab: "Graphics",
+    label: "Embers",
+    description: "The sparks that fly up off fire.",
+    cost: `Only with fire in view. Off saved about 1 ms a frame ${IN_THE_BENCHMARK}.`,
+    default: 1,
+    options: () =>
+      labeled([
+        [1, "Full"],
+        [0.5, "Half"],
+        [0, "Off"],
+      ]),
+  }),
+  fogDetail: setting({
+    tab: "Graphics",
+    label: "Fog of War Detail",
+    description:
+      "How sharply the edge of what you can see is drawn, in pixels per " +
+      "meter. Lower makes it blurrier.",
+    cost: `Small: Low made no difference that could be measured ${IN_THE_BENCHMARK}.`,
+    default: 48,
+    options: () =>
+      labeled([
+        [24, "Low (24)"],
+        [32, "Medium (32)"],
+        [48, "High (48)"],
+        [64, "Ultra (64)"],
+      ]),
+  }),
+  gunfireLights: setting({
+    tab: "Graphics",
+    label: "Gunfire Lights",
+    description:
+      "The flash of light from each shot, and the glow of bullets in the dark.",
+    cost: "Small: a light per shot and per bullet in flight. Not measured.",
+    default: true,
+    options: () => ON_OFF,
+  }),
+
   // Audio
   masterVolume: setting({
     tab: "Audio",
@@ -194,6 +321,36 @@ export const SETTINGS = {
   }),
 
   // Game
+  damageEffect: setting({
+    tab: "Game",
+    label: "Damage Effect",
+    description:
+      "How strongly the screen flashes red when you're hurt (and green when " +
+      "you're healed), and greys out as your health runs low.",
+    cost:
+      "The greying out is a pass over the whole screen, a few tenths of a " +
+      "millisecond on a retina display, but only below two thirds of your " +
+      "health, and not at all when Off.",
+    default: 1,
+    options: () =>
+      labeled([
+        [1, "Full"],
+        [0.5, "Reduced"],
+        [0, "Off"],
+      ]),
+  }),
+  screenShake: setting({
+    tab: "Game",
+    label: "Screen Shake",
+    description: "How much the view shakes, like in the lobby's elevator.",
+    default: 1,
+    options: () =>
+      labeled([
+        [1, "Full"],
+        [0.5, "Half"],
+        [0, "Off"],
+      ]),
+  }),
   autoPause: setting({
     tab: "Game",
     label: "Auto-Pause",

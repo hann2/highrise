@@ -14,7 +14,9 @@ import { Persistence } from "../constants/constants";
 import { AmbientLight } from "./AmbientLight";
 import Light from "./Light";
 import { AtlasPage, LightAtlas, StaticLightAtlas } from "./LightAtlas";
-import { LIGHT_RESOLUTION } from "./lightingConstants";
+import { lightResolution, setLightResolution } from "./lightingConstants";
+import { SettingId } from "../settings/settings";
+import { getSetting } from "../settings/SettingsController";
 import { getShadowCasters } from "./occluders";
 import { Area, ShadowCasters } from "./ShadowCasters";
 
@@ -80,8 +82,40 @@ export default class LightingManager extends BaseEntity implements Entity {
     this.texture.resize(width, height, this.renderer.resolution);
   }
 
+  @on("settingChanged")
+  onSettingChanged({ id }: { id: SettingId }) {
+    if (id === "lightingDetail") {
+      this.setResolution(getSetting(this.game, "lightingDetail"));
+    } else if (id === "movingLightShadows") {
+      this.movingLightShadows = getSetting(this.game, "movingLightShadows");
+    }
+  }
+
+  /** Whether dynamic lights cast shadows (the setting) */
+  private movingLightShadows = true;
+
+  /**
+   * Draws lights at `pixelsPerMeter` from now on: starts both atlases over at
+   * that size, and every light is drawn again
+   */
+  setResolution(pixelsPerMeter: number) {
+    if (pixelsPerMeter === lightResolution) {
+      return;
+    }
+    setLightResolution(pixelsPerMeter);
+    this.atlas.destroy();
+    this.atlas = new LightAtlas();
+    this.staticAtlas.destroy();
+    this.staticAtlas = new StaticLightAtlas();
+    for (const light of this.lights) {
+      light.dirty = true;
+    }
+  }
+
   @on("add")
   onAdd({ game }: { game: Game }) {
+    this.setResolution(getSetting(game, "lightingDetail"));
+    this.movingLightShadows = getSetting(game, "movingLightShadows");
     const [width, height] = game.renderer.getSize();
     this.texture = RenderTexture.create({
       width,
@@ -287,7 +321,10 @@ export default class LightingManager extends BaseEntity implements Entity {
     page: AtlasPage,
     clearPage: boolean,
   ) {
-    const shadowed = lights.filter((light) => light.shadowsEnabled);
+    const shadowed = lights.filter(
+      (light) =>
+        light.shadowsEnabled && (this.movingLightShadows || !light.dynamic),
+    );
     const casters = this.shadowCasters;
     const drawMasks = shadowed.length > 0 && !casters.isEmpty;
     const container = this.atlasContainer;
@@ -345,7 +382,7 @@ export default class LightingManager extends BaseEntity implements Entity {
       }
       const slot = lights[i].slot!;
       square.position.set(slot.x, slot.y);
-      square.width = square.height = slot.side / LIGHT_RESOLUTION;
+      square.width = square.height = slot.side / lightResolution;
       container.addChild(square);
     }
   }
