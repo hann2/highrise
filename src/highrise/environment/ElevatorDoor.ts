@@ -11,6 +11,7 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { smoothStep } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
+import ContactShadow from "../lighting-and-vision/ContactShadow";
 import Bullet from "../projectiles/Bullet";
 import Hittable from "./Hittable";
 import Interactable from "./Interactable";
@@ -18,6 +19,8 @@ import Interactable from "./Interactable";
 const OPEN_TIME = 1.9;
 const CLOSE_TIME = 2.8;
 const DING_TIME = 0.5;
+/** How far a door's shadow on the floor reaches past its edges, in meters */
+const SHADOW_REACH = 0.2;
 
 /**
  * Represents one of the two doors representing an elevator door
@@ -28,6 +31,8 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
   sprite: Graphics & GameSprite;
   doorShape?: Box;
   body: Body;
+  /** Shrinks with the door as it slides into the wall */
+  private shadow: ContactShadow;
 
   constructor(
     private staticCorner: V2d,
@@ -44,6 +49,22 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
 
     this.body = createRigid2D({ motion: "kinematic" });
 
+    // Everywhere the shadow can be is around the door shut
+    const [x1, y1] = staticCorner;
+    const [x2, y2] = oppositeCorner;
+    const [width, height] = this.dimensions;
+    this.shadow = this.addChild(
+      new ContactShadow(Math.abs(width), Math.abs(height), SHADOW_REACH, {
+        body: this.body,
+        area: [
+          Math.min(x1, x2) - SHADOW_REACH,
+          Math.min(y1, y2) - SHADOW_REACH,
+          Math.max(x1, x2) + SHADOW_REACH,
+          Math.max(y1, y2) + SHADOW_REACH,
+        ],
+      }),
+    );
+
     this.setOpenPercentage(0);
   }
 
@@ -53,11 +74,21 @@ class HalfDoor extends BaseEntity implements Entity, Hittable {
       this.dimensions.y * (this.verticalMovement ? 1 - openPercentage : 1),
     );
 
+    // From its top left corner: Pixi doesn't draw a rect with a negative size,
+    // which the door that closes from below or the right has
     this.sprite.clear();
-    this.sprite.rect(0, 0, delta.x, delta.y).fill(0xff6666);
+    this.sprite
+      .rect(
+        Math.min(0, delta.x),
+        Math.min(0, delta.y),
+        Math.abs(delta.x),
+        Math.abs(delta.y),
+      )
+      .fill(0xff6666);
 
     this.body.position.set(this.staticCorner.add(delta.mul(0.5)));
     this.setDoorShape(Math.abs(delta.x), Math.abs(delta.y));
+    this.shadow.setSize(Math.abs(delta.x), Math.abs(delta.y));
   }
 
   /** Boxes can't be resized, so we make a new one whenever the door moves. */

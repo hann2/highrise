@@ -18,6 +18,11 @@ export interface ContactShadowOptions {
   angle?: number;
   /** A body to move with, for things that move (doors) */
   body?: Body;
+  /**
+   * Everywhere one that moves can darken (min x, min y, max x, max y), if
+   * it doesn't just swing around its body like a door (see `getArea`)
+   */
+  area?: [number, number, number, number];
 }
 
 /** Vertices in a shadow's mesh: a 4 × 4 grid, cut like a nine-slice sprite */
@@ -47,13 +52,14 @@ const UV_CUTS = [
 export default class ContactShadow extends BaseEntity implements Entity {
   private manager?: ContactShadows;
   /** Where the quads' corners are, along the rectangle and across it */
-  private cutsAlong: number[];
-  private cutsAcross: number[];
+  private cutsAlong: number[] = [];
+  private cutsAcross: number[] = [];
   private position: V2d;
   private angle: number;
   private follow?: Body;
-  /** How far from its middle it reaches */
+  /** How far from its middle it reaches, at the size it was made */
   private radius: number;
+  private area?: [number, number, number, number];
   /** Its own mesh, around its middle, if it moves */
   private ownMesh?: Mesh;
 
@@ -63,13 +69,20 @@ export default class ContactShadow extends BaseEntity implements Entity {
     /** Across the rectangle, in meters */
     width: number,
     /** How far the shadow reaches past the rectangle's edges, in meters */
-    reach: number,
-    { position = V(0, 0), angle = 0, body }: ContactShadowOptions = {},
+    private reach: number,
+    { position = V(0, 0), angle = 0, body, area }: ContactShadowOptions = {},
   ) {
     super();
     this.position = position;
     this.angle = angle;
     this.follow = body;
+    this.area = area;
+    this.setCuts(length, width);
+    this.radius = Math.hypot(length + 2 * reach, width + 2 * reach) / 2;
+  }
+
+  private setCuts(length: number, width: number) {
+    const reach = this.reach;
     this.cutsAlong = [
       -length / 2 - reach,
       -length / 2,
@@ -82,7 +95,26 @@ export default class ContactShadow extends BaseEntity implements Entity {
       width / 2,
       width / 2 + reach,
     ];
-    this.radius = Math.hypot(length + 2 * reach, width + 2 * reach) / 2;
+  }
+
+  /**
+   * Changes the size of the rectangle, for one that moves (an elevator door
+   * sliding into the wall). It has to stay inside its `area`.
+   */
+  setSize(length: number, width: number) {
+    this.setCuts(length, width);
+    const mesh = this.ownMesh;
+    if (mesh) {
+      const geometry = mesh.geometry;
+      this.writeMesh(
+        0,
+        geometry.positions,
+        geometry.uvs,
+        geometry.indices as Uint32Array,
+        [0, 0, 0],
+      );
+      geometry.getBuffer("aPosition").update();
+    }
   }
 
   /** Whether it moves with a body, and has its own mesh */
@@ -163,12 +195,15 @@ export default class ContactShadow extends BaseEntity implements Entity {
   }
 
   /**
-   * Around everywhere it can darken: where it is, or for one that moves,
-   * everywhere it can get to, swinging around its body. (Anything that
-   * moves is hinged for now: a door. Something that wanders, like furniture
-   * that gets pushed, would need its area worked out as it goes.)
+   * Around everywhere it can darken: where it is, or for one that moves, the
+   * `area` it was given, or else everywhere it can get to, swinging around
+   * its body like a door. (Something that wanders, like furniture that gets
+   * pushed, would need its area worked out as it goes.)
    */
   getArea(): [number, number, number, number] {
+    if (this.area) {
+      return this.area;
+    }
     const body = this.follow;
     if (body && this.moves) {
       const reach = this.position.magnitude + this.radius;
