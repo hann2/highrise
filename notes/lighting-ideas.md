@@ -39,12 +39,11 @@ The screen's light texture is 8-bit, so it clamps at 1, and it's multiplied over
 
 ## Ambient occlusion for walls and doors
 
-Added 2026-10-01. Many of our sprites have fake ambient occlusion painted in (a darkening where they meet the floor). Walls and doors don't, because shading their edges would mean the shadow overlapping neighboring tiles, and walls join up in too many ways for a baked edge to look right. So walls and doors meet the floor with no contact shadow, and look flatter than everything else.
+Done 2026-10-02 as contact shadows (`lighting-and-vision/ContactShadows.ts`; how it works is in `CLAUDE.md`). Walls, doors and door frames have them, and the shadows painted into the wall and door images are gone. What's left:
 
-Do it dynamically instead: draw the occlusion from the actual wall and door geometry, so it follows whatever shape the level ends up with. Some ways, not yet weighed:
+- Props: anything new can add a `ContactShadow` (a soft rectangle around its shape) rather than having a shadow painted in. For irregular silhouettes, a drawn shadow image would need to be drawn with "min" too: either greyscale on white, or a small shader that turns a transparent shadow layer's alpha into that.
+- Inside corners come out a little lighter than real ambient occlusion would make them (darkest wins, rather than adding up). A small extra darkening there would fix it if it shows.
+- Something that moves without a hinge (pushed furniture) would need its floor cells worked out as it goes; doors' cells are their whole swing, fixed.
+- Darkness and reach are `CONTACT_SHADOW_DARKNESS` and each caller's reach; the falloff is a smoothstep.
 
-- Bake it per level: walls are static, so render a soft darkening along every wall outline into a level-sized texture once when the level is generated (like `ExploredMap` or `FloorMarks`), drawn on the floor under the walls.
-- Doors move, so give them their own soft shadow that moves with them (a blurred sprite or mesh following the door), or fold them into the baked texture when they're closed and draw them separately while swinging.
-- Soft edges as mesh geometry (the way `visionMesh.ts` does penumbras) rather than a blur filter, since filters don't work in render-to-texture passes.
-
-Suggested order when we come back: overbright with (b) first (it fixes the fire washing out), then heights with hard shadows, furniture and ceiling lights, then people and zombies as casters starting with option 1.
+Suggested order when we come back (ambient occlusion is done): overbright with (b) first (it fixes the fire washing out), then heights with hard shadows, furniture and ceiling lights, then people and zombies as casters starting with option 1.

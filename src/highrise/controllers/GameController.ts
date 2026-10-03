@@ -14,6 +14,7 @@ import { KeycardOverlay } from "../hud/KeycardOverlay";
 import { QuarterCounter } from "../hud/QuarterCounter";
 import PlayerHumanController from "../human/PlayerHumanController";
 import LightingManager from "../lighting-and-vision/LightingManager";
+import ContactShadows from "../lighting-and-vision/ContactShadows";
 import VisionController from "../lighting-and-vision/VisionController";
 import GameOverScreen from "../menu/GameOverScreen";
 import PauseMenu from "../menu/PauseMenu";
@@ -81,6 +82,7 @@ export class GameController extends BaseEntity implements Entity {
     const game = this.game;
     // Humans carry lights, so this has to exist before the party does
     game.addEntity(new LightingManager());
+    game.addEntity(new ContactShadows());
     const partyManager = game.addEntity(new PartyManager(character));
     const getPlayer = () => partyManager.leader;
     game.addEntities(

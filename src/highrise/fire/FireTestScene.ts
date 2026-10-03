@@ -17,6 +17,7 @@ import Human from "../human/Human";
 import PlayerHumanController from "../human/PlayerHumanController";
 import { AmbientLight } from "../lighting-and-vision/AmbientLight";
 import LightingManager from "../lighting-and-vision/LightingManager";
+import ContactShadows from "../lighting-and-vision/ContactShadows";
 import VisionController from "../lighting-and-vision/VisionController";
 import { Molotov } from "../weapons/consumables/consumable-stats/Molotov";
 import Gun from "../weapons/guns/Gun";
@@ -76,6 +77,7 @@ export default class FireTestScene extends BaseEntity implements Entity {
 
     // Humans carry lights, so this has to exist before anyone is added
     this.addChild(new LightingManager());
+    this.addChild(new ContactShadows());
     this.addChildren(
       new RepeatingFloor(floor, [0, 0], [WIDTH, HEIGHT]),
       new AmbientLight(ambient),
