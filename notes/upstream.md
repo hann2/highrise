@@ -241,6 +241,16 @@ pixel ratio"
 - Highrise's use of it is the gun poses (`weapons/guns/GunPose.ts`), which
   stay in the game.
 
+### Walk cycle
+"Legs: a walk cycle from how bodies move" (branch `legs`)
+
+- `src/core/animation/Gait.ts`: a two-footed walk cycle worked out from
+  where a body is each tick and which way it faces, so feet stay put on the
+  ground; `GaitStyle` sets reach and time on the ground by speed. Tests in
+  `tests/core/gait.test.ts`.
+- Highrise draws it with `creature-stuff/BodySprite` and `Legs.ts`, which
+  stay in the game.
+
 ### Sounds: part of a buffer, resuming, slow-mo
 "Sounds: play part of a buffer, and fix resuming and slow-mo" (`045a2b1`,
 branch `rig-animations`)
