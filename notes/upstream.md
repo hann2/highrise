@@ -288,10 +288,11 @@ shadows from lights", `1592ef2`); how it works is in `CLAUDE.md` (the
   compared with) weren't kept; the arena's `fires`, `doors` and the `sprawl`
   layout, and the fire and lighting benchmarks, are the test beds.
 
-### Not built yet: frame-by-frame video capture
-An idea in `notes/tooling-ideas.md`: video capture built into the engine,
-rendering frames one at a time into a video instead of a screen recording.
-If it gets built, it belongs in core and should go upstream too.
+### Frame-by-frame video capture, the rest of it
+The stepping half is built (see "Recording video a frame at a time" above);
+what's left, capturing without Playwright and recording the sound, is in
+`notes/tooling-ideas.md`. When it's built, it belongs in core and should go
+upstream too.
 
 ## From before this branch
 
