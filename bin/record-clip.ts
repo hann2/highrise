@@ -27,6 +27,7 @@ import { chromium } from "@playwright/test";
 import { execFileSync } from "child_process";
 import ffmpegPath from "ffmpeg-static";
 import { cpSync, mkdirSync, mkdtempSync, rmSync } from "fs";
+import { writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import path from "path";
 
@@ -111,17 +112,28 @@ async function main() {
     await page.waitForTimeout(5);
   }
 
+  // Straight from Chrome, with the PNG compressed for speed rather than size
+  const cdp = await page.context().newCDPSession(page);
   const frames = Math.round(seconds * fps);
   const started = Date.now();
+  const writes: Promise<void>[] = [];
   for (let i = 0; i < frames; i++) {
     await page.evaluate(() => (window as any).DEBUG.game.stepFrames(1));
-    await page.screenshot({
-      path: path.join(framesDir, `frame-${String(i).padStart(5, "0")}.png`),
+    const { data } = await cdp.send("Page.captureScreenshot", {
+      format: "png",
+      optimizeForSpeed: true,
     });
+    writes.push(
+      writeFile(
+        path.join(framesDir, `frame-${String(i).padStart(5, "0")}.png`),
+        Buffer.from(data, "base64"),
+      ),
+    );
     if (i % fps === fps - 1) {
       process.stdout.write(`\r${i + 1}/${frames} frames`);
     }
   }
+  await Promise.all(writes);
   console.log(
     `\r${frames} frames in ${((Date.now() - started) / 1000).toFixed(1)} s`,
   );
