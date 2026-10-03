@@ -1,0 +1,209 @@
+/* Settings: a panel down the left side, so the paused game shows next to it
+   when it's opened from the pause menu. Tabs along the top, the tab's
+   settings in a list, and the selected one's description underneath. */
+.settings {
+  animation: menu-fade-in 0.2s ease-out;
+}
+
+.settings__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(640px, 100vw);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 32px;
+  background: #111111;
+  border-right: 2px solid rgba(255, 255, 255, 0.08);
+  pointer-events: auto;
+  font-family: oswald;
+  color: white;
+}
+
+.settings__title {
+  font-family: captureIt;
+  font-size: 56px;
+  line-height: 1;
+  color: red;
+}
+
+.settings__tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.settings__tab {
+  cursor: pointer;
+  padding: 6px 14px;
+  font-family: captureIt;
+  font-size: 28px;
+  line-height: 1;
+  color: #888888;
+  border-bottom: 3px solid transparent;
+}
+
+.settings__tab:hover {
+  color: #dddddd;
+}
+
+.settings__tab--selected {
+  color: white;
+  border-bottom-color: red;
+}
+
+.settings__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings__empty {
+  padding: 8px 12px;
+  font-size: 20px;
+  color: #666666;
+}
+
+.settings__row {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 12px;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.settings__row--selected {
+  border-color: red;
+  background: rgba(255, 0, 0, 0.12);
+}
+
+.settings__label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.settings__pending {
+  font-size: 14px;
+  color: #ffc53d;
+}
+
+.settings__control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings__arrow {
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 16px;
+  color: #888888;
+}
+
+.settings__arrow:hover {
+  color: white;
+}
+
+.settings__value {
+  cursor: pointer;
+  min-width: 150px;
+  text-align: center;
+}
+
+.settings__bar {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  justify-content: center;
+  height: 20px;
+}
+
+.settings__bar-label {
+  width: 48px;
+  margin-left: 6px;
+  font-size: 15px;
+  text-align: right;
+  color: #aaaaaa;
+}
+
+.settings__bar-step {
+  cursor: pointer;
+  width: 8px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.settings__bar-step--on {
+  background: #dddddd;
+}
+
+.settings__row--selected .settings__bar-step--on {
+  background: white;
+}
+
+.settings__detail {
+  flex: none;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  white-space: normal;
+  font-size: 18px;
+  line-height: 1.4;
+  color: #dddddd;
+}
+
+.settings__cost {
+  color: #aaaaaa;
+}
+
+.settings__cost-label {
+  margin-right: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #888888;
+}
+
+.settings__when {
+  color: #ffc53d;
+}
+
+.settings__footer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Quiet, like the pause menu's buttons */
+.settings__footer .menu-button {
+  font-family: oswald;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.settings__hint {
+  margin-left: auto;
+  font-size: 15px;
+  color: #888888;
+}

@@ -22,7 +22,6 @@ import {
   HEAT_BLOB_JITTER,
   HEAT_BLOB_RADIUS,
   HEAT_MARGIN,
-  HEAT_RESOLUTION,
   BURNING_HEAT_RADIUS,
   BURNING_TAIL,
   DEAD_BURNING_FADE_TIME,
@@ -30,6 +29,7 @@ import {
 } from "./fireConstants";
 import type FireGrid from "./FireGrid";
 import FireEmbers from "./FireEmbers";
+import { getSetting } from "../settings/SettingsController";
 import frag_flames from "./flames.frag?raw";
 
 import vert_flames from "./flames.vert?raw";
@@ -65,11 +65,8 @@ export default class FireRenderer extends BaseEntity implements Entity {
   constructor(private grid: FireGrid) {
     super();
 
-    this.heat = RenderTexture.create({
-      width: 1,
-      height: 1,
-      resolution: HEAT_RESOLUTION,
-    });
+    // At the Flame Resolution setting's pixels per meter, once it's read
+    this.heat = RenderTexture.create({ width: 1, height: 1, resolution: 1 });
     this.shader = new Shader({
       glProgram: GlProgram.from({
         vertex: vert_flames,
@@ -83,6 +80,7 @@ export default class FireRenderer extends BaseEntity implements Entity {
           uTime: { value: 0, type: "f32" },
           uWarp: { value: FLAME_WARP, type: "f32" },
           uTexel: { value: new Float32Array([1, 1]), type: "vec2<f32>" },
+          uOctaves: { value: 4, type: "f32" },
         },
       },
     });
@@ -108,6 +106,19 @@ export default class FireRenderer extends BaseEntity implements Entity {
     this.mesh.visible = blobCount > 0;
     const uniforms = this.shader.resources.flameUniforms.uniforms;
     uniforms.uTime = this.game.elapsedUnpausedTime;
+    uniforms.uOctaves = getSetting(this.game, "flameDetail");
+  }
+
+  /** A new heat buffer at `pixelsPerMeter`, the same size as the old one */
+  private remakeHeat(pixelsPerMeter: number) {
+    const old = this.heat;
+    this.heat = RenderTexture.create({
+      width: old.width,
+      height: old.height,
+      resolution: pixelsPerMeter,
+    });
+    this.shader.resources.uHeat = this.heat.source;
+    old.destroy(true);
   }
 
   /** Draws the heat buffer; returns how many blobs went into it */
@@ -199,6 +210,10 @@ export default class FireRenderer extends BaseEntity implements Entity {
       return 0;
     }
 
+    const resolution = getSetting(this.game, "flameResolution");
+    if (resolution !== this.heat.source.resolution) {
+      this.remakeHeat(resolution);
+    }
     // The buffer follows the camera, and only changes size when the view does
     if (
       Math.abs(this.heat.width - width) > 0.5 ||
@@ -213,8 +228,8 @@ export default class FireRenderer extends BaseEntity implements Entity {
     this.rect[2] = bufferWidth;
     this.rect[3] = bufferHeight;
     const texel = this.shader.resources.flameUniforms.uniforms.uTexel;
-    texel[0] = 1 / (bufferWidth * HEAT_RESOLUTION);
-    texel[1] = 1 / (bufferHeight * HEAT_RESOLUTION);
+    texel[0] = 1 / (bufferWidth * resolution);
+    texel[1] = 1 / (bufferHeight * resolution);
 
     measureCpuAndGpu("FireRenderer.heat", () =>
       this.game.renderer.app.renderer.render({

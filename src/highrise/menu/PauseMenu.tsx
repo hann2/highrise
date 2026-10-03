@@ -1,4 +1,3 @@
-import AutoPauser from "../../core/AutoPauser";
 import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
@@ -6,23 +5,17 @@ import { ControllerButton } from "../../core/io/Gamepad";
 import { KeyCode } from "../../core/io/Keys";
 import ReactEntity from "../../core/ReactEntity";
 import { Persistence } from "../constants/constants";
-import { updateSaveData } from "../persistence/SaveData";
 import CreditsScreen, { isCreditsOpen } from "./CreditsScreen";
 import Encyclopedia, { isEncyclopediaOpen } from "./Encyclopedia";
 import "./menu.css";
 import {
-  AutoPauseButton,
   FeedbackButton,
-  FullscreenButton,
-  AntialiasButton,
-  FrameRateButton,
-  GraphicsButton,
   MenuButton,
   MenuButtons,
-  MuteButton,
   QuitButton,
 } from "./MenuButtons";
 import { isFloorDirectoryOpen } from "./FloorDirectory";
+import SettingsScreen, { isSettingsOpen } from "./SettingsScreen";
 import { isStoreOpen } from "./StoreScreen";
 
 /**
@@ -39,7 +32,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
   }
 
   renderContent() {
-    // The store pauses the game too, but isn't a pause. The
+    // The store pauses the game too, but isn't a pause. The settings,
     // encyclopedia and credits cover the menu and give it back when they close.
     if (!this.visible || !this.takingInput) {
       return null;
@@ -62,6 +55,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
               Skip Tutorial
             </MenuButton>
           )}
+          <MenuButton onClick={() => this.openSettings()}>Settings</MenuButton>
           <MenuButton onClick={() => this.openEncyclopedia()}>
             Encyclopedia
           </MenuButton>
@@ -69,15 +63,6 @@ export default class PauseMenu extends ReactEntity implements Entity {
             <MenuButton onClick={() => this.rollCredits()}>Credits</MenuButton>
           )}
           <FeedbackButton />
-          <MuteButton game={game} />
-          <GraphicsButton game={game} />
-          <AntialiasButton game={game} />
-          <FrameRateButton game={game} />
-          <FullscreenButton />
-          <AutoPauseButton
-            enabled={this.autoPauser.enabled}
-            onClick={() => this.toggleAutoPause()}
-          />
           <QuitButton label="Quit to Desktop" />
         </MenuButtons>
       </div>
@@ -98,16 +83,11 @@ export default class PauseMenu extends ReactEntity implements Entity {
     this.destroy();
   }
 
-  private get autoPauser(): AutoPauser {
-    return this.game.entities.getSingleton(AutoPauser);
-  }
-
-  toggleAutoPause() {
-    const enabled = !this.autoPauser.enabled;
-    this.autoPauser.enabled = enabled;
-    updateSaveData((data) => {
-      data.autoPause = enabled;
-    });
+  /** Over the pause menu, with the game still paused */
+  openSettings() {
+    if (this.visible && !isSettingsOpen(this.game)) {
+      this.game.addEntity(new SettingsScreen(Persistence.Game));
+    }
   }
 
   /** Over the pause menu, with the game still paused */
@@ -130,6 +110,7 @@ export default class PauseMenu extends ReactEntity implements Entity {
       !isStoreOpen(this.game) &&
       !isFloorDirectoryOpen(this.game) &&
       !isEncyclopediaOpen(this.game) &&
+      !isSettingsOpen(this.game) &&
       !isCreditsOpen(this.game)
     );
   }

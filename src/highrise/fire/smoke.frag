@@ -23,6 +23,8 @@ uniform float uAlpha;
 uniform float uMaxDensity;
 // How far the density is pushed around, in meters
 uniform float uWarp;
+// Octaves of noise, up to four (the Flame & Smoke Detail setting)
+uniform float uOctaves;
 
 // --- Noise (the same as flames.frag) ---
 
@@ -55,11 +57,15 @@ float fbm(vec3 p) {
   float sum = 0.0;
   float amplitude = 0.5;
   for (int i = 0; i < 4; i++) {
+    if (float(i) >= uOctaves) {
+      break;
+    }
     sum += amplitude * noise(p);
     p = p * 2.03 + vec3(1.7, -3.1, 0.0);
     amplitude *= 0.5;
   }
-  return sum / 0.9375;
+  // The amplitudes add up to 1 - 2 * the next one's
+  return sum / (1.0 - 2.0 * amplitude);
 }
 
 void main(void) {

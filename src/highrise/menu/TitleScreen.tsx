@@ -15,6 +15,7 @@ import {
   MenuButtons,
   QuitButton,
 } from "./MenuButtons";
+import SettingsScreen, { isSettingsOpen } from "./SettingsScreen";
 
 const FADE_IN_TIME = 1;
 const FADE_OUT_TIME = process.env.NODE_ENV === "development" ? 0.1 : 1.0;
@@ -42,7 +43,11 @@ export default class TitleScreen extends ReactEntity implements Entity {
 
   /** Whether another screen is over this one and has the input */
   private get covered(): boolean {
-    return isEncyclopediaOpen(this.game) || isCreditsOpen(this.game);
+    return (
+      isEncyclopediaOpen(this.game) ||
+      isSettingsOpen(this.game) ||
+      isCreditsOpen(this.game)
+    );
   }
 
   renderContent() {
@@ -70,6 +75,7 @@ export default class TitleScreen extends ReactEntity implements Entity {
           <MenuButton onClick={() => this.openEncyclopedia()}>
             Encyclopedia
           </MenuButton>
+          <MenuButton onClick={() => this.openSettings()}>Settings</MenuButton>
           <MenuButton onClick={() => this.rollCredits()}>Credits</MenuButton>
           <FeedbackButton />
           <QuitButton />
@@ -98,6 +104,12 @@ export default class TitleScreen extends ReactEntity implements Entity {
   openEncyclopedia() {
     if (!this.inTransition && !this.covered) {
       this.game.addEntity(new Encyclopedia(this.persistenceLevel));
+    }
+  }
+
+  openSettings() {
+    if (!this.inTransition && !this.covered) {
+      this.game.addEntity(new SettingsScreen(this.persistenceLevel));
     }
   }
 
@@ -131,6 +143,8 @@ export default class TitleScreen extends ReactEntity implements Entity {
       this.rollCredits();
     } else if (key === "KeyE") {
       this.openEncyclopedia();
+    } else if (key === "KeyS") {
+      this.openSettings();
     }
   }
 
@@ -145,6 +159,8 @@ export default class TitleScreen extends ReactEntity implements Entity {
       this.rollCredits();
     } else if (button === ControllerButton.Y) {
       this.openEncyclopedia();
+    } else if (button === ControllerButton.X) {
+      this.openSettings();
     }
   }
 }

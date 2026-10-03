@@ -116,6 +116,14 @@ Highrise's)
 
 ## Core (game-engine)
 
+### Stats overlay: an FPS-only panel, and choosing a panel from outside
+(branch `worktree-graphics-settings`, for the Show FPS setting)
+
+- New `core/util/stats-overlay/FpsPanel.tsx`: a panel with nothing under the
+  FPS header, for players. `StatsPanel.render` may return `null` for that.
+- `StatsOverlay.showPanel(id | undefined)` shows a panel, or closes the
+  overlay, from code.
+
 ### Frame pacing: one tick per display refresh
 `dcc546e` "Run one tick per display refresh, with dt the ideal frame time"
 (and `3acd3c0`, which only changed Highrise's tick rate)

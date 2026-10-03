@@ -4,7 +4,8 @@
  * Reading is tolerant: missing, corrupt or partly wrong data falls back to the
  * defaults field by field, and nothing here ever throws (localStorage itself
  * can throw, e.g. when storage is disabled). The older standalone keys
- * (`tutorialComplete`, `muted`, `volume`, `graphicsQuality`) are left where
+ * (`tutorialComplete`, and `muted`, `volume` and `graphicsQuality`, which
+ * `settings/settings.ts` reads until they're in `settings`) are left where
  * they are.
  */
 
@@ -61,12 +62,8 @@ export interface SaveData {
   bestFloor: number;
   /** Names of the things the player has come across, for the encyclopedia */
   seen: SeenFlags;
-  /** Whether the game pauses while its tab is hidden (see AutoPauser) */
-  autoPause: boolean;
-  /** The most frames per second the game runs at; undefined is the display's refresh rate */
-  frameRateLimit?: number;
-  /** Whether the canvas is antialiased; undefined is Auto (see `controllers/antialiasing.ts`) */
-  antialias?: boolean;
+  /** The player's settings by id, as stored (`settings/settings.ts` checks them) */
+  settings: Record<string, string | number | boolean>;
   /** Name of the character the last run started with, who you arrive in the lobby as */
   lastCharacter?: string;
   /** How much of the lobby has been seen, as a PNG data URL of its explored map */
@@ -81,7 +78,7 @@ export function defaultSaveData(): SaveData {
     totalRuns: 0,
     bestFloor: 0,
     seen: { guns: [], melee: [], consumables: [], items: [], enemies: [] },
-    autoPause: true,
+    settings: {},
     lastCharacter: undefined,
     lobbyExplored: undefined,
   };
@@ -196,15 +193,7 @@ export function parseSaveData(raw: unknown): SaveData {
     ...data.runs.map((run) => run.floorReached),
   );
   data.seen = parseSeenFlags(raw.seen);
-  if (typeof raw.autoPause === "boolean") {
-    data.autoPause = raw.autoPause;
-  }
-  if (typeof raw.frameRateLimit === "number" && raw.frameRateLimit > 0) {
-    data.frameRateLimit = raw.frameRateLimit;
-  }
-  if (typeof raw.antialias === "boolean") {
-    data.antialias = raw.antialias;
-  }
+  data.settings = parseSettings(raw);
   if (typeof raw.lastCharacter === "string") {
     data.lastCharacter = raw.lastCharacter;
   }
@@ -215,6 +204,37 @@ export function parseSaveData(raw: unknown): SaveData {
     data.lobbyExplored = raw.lobbyExplored;
   }
   return data;
+}
+
+/**
+ * The stored settings as they are (`settings/settings.ts` checks each one),
+ * plus the ones kept at the top level before there were settings
+ */
+function parseSettings(
+  raw: Record<string, unknown>,
+): Record<string, string | number | boolean> {
+  const settings: Record<string, string | number | boolean> = {};
+  if (typeof raw.autoPause === "boolean") {
+    settings.autoPause = raw.autoPause;
+  }
+  if (typeof raw.frameRateLimit === "number") {
+    settings.frameRateLimit = raw.frameRateLimit;
+  }
+  if (typeof raw.antialias === "boolean") {
+    settings.antialias = raw.antialias ? "on" : "off";
+  }
+  if (isObject(raw.settings)) {
+    for (const [id, value] of Object.entries(raw.settings)) {
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      ) {
+        settings[id] = value;
+      }
+    }
+  }
+  return settings;
 }
 
 function parseRunSummary(raw: unknown): RunSummary | undefined {

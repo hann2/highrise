@@ -1,33 +1,55 @@
 import { expect, Page } from "@playwright/test";
 
 /**
- * The display benchmarks run on: `DPR=2` gives the page a retina display's
- * two pixels per point, and `QUALITY=Low` sets the game's graphics quality
- * (else it's the default, Medium). Quality only sets the resolution: Low is
- * half the display's pixels per point, Medium and High all of them. A spec
- * passes `deviceScaleFactor` to `test.use`, and calls `useDisplay` before
- * loading the page. `suffix` tells results on another display apart.
+ * The display and settings benchmarks run with: `DPR=2` gives the page a
+ * retina display's two pixels per point, and `SETTINGS=renderScale=0.5,...`
+ * sets the game's settings by id (`src/highrise/settings/settings.ts`; values
+ * are numbers, true/false, or else strings), else they're the defaults. A
+ * spec passes `deviceScaleFactor` to `test.use`, and calls `useDisplay`
+ * before loading the page. `suffix` tells results with another display or
+ * settings apart.
  */
 export const DISPLAY = (() => {
   const dpr = Number(process.env.DPR ?? 1);
-  const quality = process.env.QUALITY;
+  const settings: Record<string, string | number | boolean> = {};
+  for (const pair of (process.env.SETTINGS ?? "").split(",")) {
+    const [id, text] = pair.split("=");
+    if (id && text !== undefined) {
+      settings[id] =
+        text === "true"
+          ? true
+          : text === "false"
+            ? false
+            : isNaN(Number(text))
+              ? text
+              : Number(text);
+    }
+  }
   const parts = [
     ...(dpr !== 1 ? [`dpr${dpr}`] : []),
-    ...(quality ? [quality.toLowerCase()] : []),
+    ...Object.entries(settings).map(([id, value]) => `${id}-${value}`),
   ];
   return {
     deviceScaleFactor: dpr,
-    quality,
+    settings,
     suffix: parts.map((part) => `-${part}`).join(""),
   };
 })();
 
-/** Sets up `page` for `DISPLAY`'s graphics quality */
+/** Sets up `page` with `DISPLAY`'s settings, over whatever the save has */
 export async function useDisplay(page: Page) {
-  if (DISPLAY.quality) {
-    await page.addInitScript((quality) => {
-      window.localStorage.setItem("graphicsQuality", quality);
-    }, DISPLAY.quality);
+  if (Object.keys(DISPLAY.settings).length > 0) {
+    await page.addInitScript((settings) => {
+      const key = "highriseSaveData";
+      let save: Record<string, unknown> = {};
+      try {
+        save = JSON.parse(window.localStorage.getItem(key) ?? "{}") ?? {};
+      } catch {
+        save = {};
+      }
+      save.settings = { ...(save.settings as object), ...settings };
+      window.localStorage.setItem(key, JSON.stringify(save));
+    }, DISPLAY.settings);
   }
 }
 

@@ -13,7 +13,7 @@ import Game from "../../core/Game";
 import type { Body } from "../../core/physics/body/Body";
 import { V2d } from "../../core/Vector";
 import type Light from "./Light";
-import { LIGHT_RESOLUTION } from "./lightingConstants";
+import { lightResolution } from "./lightingConstants";
 import { CAST_SHADOW_TAG } from "./occluders";
 import frag_shadowMask from "./shadowMask.frag?raw";
 import vert_shadowMask from "./shadowMask.vert?raw";
@@ -377,7 +377,7 @@ export class ShadowCasters {
     }
     touched.length = 0;
     // At least a pixel, which antialiases hard shadows
-    const minSourceRadius = 1 / LIGHT_RESOLUTION;
+    const minSourceRadius = 1 / lightResolution;
     for (const light of lights) {
       const number = this.lightNumber++;
       const halfSize = light.size / 2;

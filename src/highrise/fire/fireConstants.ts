@@ -9,8 +9,8 @@ export const FIRE_SPREAD_DELAY = 0.12;
 
 // --- How fire looks (see `FireRenderer.ts` and `flames.frag`) ---
 
-/** Pixels per meter of the heat buffer */
-export const HEAT_RESOLUTION = 16;
+// The heat buffer's pixels per meter, and the flames' and smoke's octaves of
+// noise, are settings (Flame Resolution, Flame & Smoke Detail)
 /** Meters the heat buffer reaches past each edge of the screen */
 export const HEAT_MARGIN = 1.5;
 /** Meters across the blob of heat of one burning cell (half of it) */

@@ -6,6 +6,8 @@ uniform highp vec4 uInputSize;
 uniform highp vec4 uOutputFrame;
 
 uniform float uHealthPercent;
+// How strong the effect is, 0 to 1 (the Damage Effect setting)
+uniform float uStrength;
 
 void main(void) {
   vec3 grayMagic = vec3(0.2126, 0.7152, 0.0722);
@@ -19,7 +21,7 @@ void main(void) {
   float amount = 1.0 - 1.5 * uHealthPercent;
   vec2 uv = vTextureCoord.xy * uInputSize.xy / uOutputFrame.zw;
   amount *= distance(uv, vec2(0.5, 0.5)) * 2.0 + 1.0;
-  amount = clamp(amount, 0.0, 1.0);
+  amount = clamp(amount, 0.0, 1.0) * uStrength;
 
   // desaturate
   color = mix(color, faded, amount);

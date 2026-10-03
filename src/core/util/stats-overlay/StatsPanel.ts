@@ -23,7 +23,7 @@ export interface StatsPanel {
   id: string;
 
   /** Render the panel content */
-  render(ctx: StatsPanelContext): VNode;
+  render(ctx: StatsPanelContext): VNode | null;
 
   /** Called when the panel becomes the visible one */
   onShow?(): void;

@@ -34,6 +34,7 @@ import { isCreditsOpen } from "../menu/CreditsScreen";
 import Encyclopedia, { isEncyclopediaOpen } from "../menu/Encyclopedia";
 import PauseMenu from "../menu/PauseMenu";
 import { loadSaveData, updateSaveData } from "../persistence/SaveData";
+import { getSetting } from "../settings/SettingsController";
 import { generateRunPlan, RunPlan } from "../run/RunPlan";
 import { Direction } from "../utils/directions";
 import LobbyCharacterController from "./LobbyCharacterController";
@@ -294,8 +295,10 @@ export default class Lobby extends BaseEntity implements Entity {
     await this.arrivalDoor.open();
   }
 
+  /** Shakes the camera by an offset, as much as the Screen Shake setting allows */
   private setShake([x, y]: [number, number]) {
-    this.game.camera.shakeOffset.set(x, y);
+    const amount = getSetting(this.game, "screenShake");
+    this.game.camera.shakeOffset.set(x * amount, y * amount);
   }
 
   @on("destroy")

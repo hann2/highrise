@@ -15,17 +15,32 @@ import Game from "../../core/Game";
 import { smoothStep } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
+import { getSetting } from "../settings/SettingsController";
 import frag_damageFilter from "./damage-filter.frag?raw";
 
 const FLASH_ALPHA = 0.4;
+/**
+ * Above this fraction of their health the player sees no greying out, so the
+ * filter does nothing and is taken off the stage (it's a pass over the whole
+ * screen). It's where `damage-filter.frag`'s amount, 1 - 1.5 × health, is 0.
+ */
+const FILTER_FROM_HEALTH = 2 / 3;
 
+/**
+ * How hurt the player is: the screen greys out as their health goes down,
+ * and flashes red when they're hurt and green when they're healed, as
+ * strongly as the Damage Effect setting says.
+ */
 export class DamagedOverlay extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
   sprite: Container & GameSprite;
   colorFilter: Filter;
   private uniforms = new UniformGroup({
     uHealthPercent: { value: 1.0, type: "f32" },
+    uStrength: { value: 1.0, type: "f32" },
   });
+  /** Whether `colorFilter` is on the stage */
+  private filterOn = false;
 
   constructor(private getPlayer: () => Human | undefined) {
     super();
@@ -47,14 +62,26 @@ export class DamagedOverlay extends BaseEntity implements Entity {
     });
   }
 
-  @on("add")
-  onAdd({ game }: { game: Game }) {
-    game.renderer.addStageFilter(this.colorFilter);
-  }
-
+  // `this.game` is gone by now, so the game comes from the event
   @on("destroy")
   onDestroy({ game }: { game: Game }) {
-    game.renderer.removeStageFilter(this.colorFilter);
+    this.setFilterOn(false, game);
+  }
+
+  private setFilterOn(on: boolean, game: Game = this.game) {
+    if (on !== this.filterOn) {
+      this.filterOn = on;
+      if (on) {
+        game.renderer.addStageFilter(this.colorFilter);
+      } else {
+        game.renderer.removeStageFilter(this.colorFilter);
+      }
+    }
+  }
+
+  /** 0 to 1, from the Damage Effect setting */
+  private get strength(): number {
+    return getSetting(this.game, "damageEffect");
   }
 
   @on("humanInjured")
@@ -82,7 +109,10 @@ export class DamagedOverlay extends BaseEntity implements Entity {
   }
 
   updateBaseline(healthPercent: number) {
+    const strength = this.strength;
     this.uniforms.uniforms.uHealthPercent = healthPercent;
+    this.uniforms.uniforms.uStrength = strength;
+    this.setFilterOn(strength > 0 && healthPercent < FILTER_FROM_HEALTH);
   }
 
   makeOverlay(color: number = 0xff0000): Graphics {
@@ -95,15 +125,19 @@ export class DamagedOverlay extends BaseEntity implements Entity {
     fadeInTime: number = 0,
     fadeOutTime: number = 0.4,
   ) {
+    const alpha = FLASH_ALPHA * this.strength;
+    if (alpha <= 0) {
+      return;
+    }
     const graphics = this.makeOverlay(color);
     this.sprite.addChild(graphics);
     await this.wait(fadeInTime, (dt, t) => {
-      graphics.alpha = smoothStep(t * FLASH_ALPHA);
+      graphics.alpha = smoothStep(t * alpha);
     });
     await this.wait(
       fadeOutTime,
       (dt, t) => {
-        graphics.alpha = smoothStep((1 - t) * FLASH_ALPHA);
+        graphics.alpha = smoothStep((1 - t) * alpha);
       },
       "flash",
     );

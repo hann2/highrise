@@ -1,11 +1,11 @@
 import type { V2d } from "../core/Vector";
 import type { Character } from "../highrise/characters/Character";
-import type { GraphicsQuality } from "../highrise/controllers/GraphicsQualityController";
 import type { BaseEnemy } from "../highrise/enemies/base/Enemy";
 import type Human from "../highrise/human/Human";
 import type SurvivorHumanController from "../highrise/human/SurvivorHumanController";
 import type { Level } from "../highrise/levels/Level";
 import type { RunPlan } from "../highrise/run/RunPlan";
+import type { SettingId } from "../highrise/settings/settings";
 
 /**
  * Global event types that can be dispatched by the Game and listened to by entities.
@@ -48,9 +48,6 @@ export type CustomEvents = {
   quartersSpent: { amount: number };
 
   // Settings
-  toggleGraphicsQuality: void;
-  graphicsQualityChanged: { quality: GraphicsQuality };
-  toggleMute: void;
-  muteChanged: { muted: boolean; volume: number };
-  volumeChanged: { muted: boolean; volume: number };
+  /** The player changed a setting (see `highrise/settings/settings.ts`) */
+  settingChanged: { id: SettingId };
 };

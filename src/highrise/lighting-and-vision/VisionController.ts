@@ -20,6 +20,8 @@ import { V, V2d } from "../../core/Vector";
 import { Persistence } from "../constants/constants";
 import Human from "../human/Human";
 import { Level } from "../levels/Level";
+import { SettingId } from "../settings/settings";
+import { getSetting } from "../settings/SettingsController";
 import { ExploredMap } from "./ExploredMap";
 import { getOccluders } from "./occluders";
 import { getPenumbraTexture } from "./penumbraTexture";
@@ -41,7 +43,7 @@ const VISION_SOURCE_RADIUS = 0.2;
 const EDGE_ANTIALIAS_WIDTH = 0.05;
 /** How dark explored places are when the player can't currently see them */
 export const EXPLORED_DARKNESS = 0.6;
-/** Pixels per meter of the darkness texture. The screen is about 75 px/m at the default zoom. */
+/** Pixels per meter of the darkness texture, until the Fog of War Detail setting is read. The screen is about 75 px/m at the default zoom. */
 const DARKNESS_RESOLUTION = 48;
 /** Vision starts fading out at this fraction of the vision range and is gone at the limit */
 const RANGE_FADE_START = 0.65;
@@ -97,6 +99,8 @@ export default class VisionController extends BaseEntity implements Entity {
 
   /** Where the player is looking from */
   private eye: V2d = V(0, 0);
+  /** Where the darkness texture is centered: the eye, snapped to its pixels */
+  private darknessCenter: V2d = V(0, 0);
   /** What can be seen from there, sorted by angle */
   private samples: VisibilitySample[] = [];
 
@@ -147,7 +151,10 @@ export default class VisionController extends BaseEntity implements Entity {
       this.penumbraMesh,
       this.rangeFade,
     );
-    this.darkness = makeDarknessTexture(this.outerRadius);
+    this.darkness = makeDarknessTexture(
+      this.outerRadius,
+      this.darknessResolution,
+    );
     this.darknessSprite = new Sprite(this.darkness);
     this.darknessSprite.anchor.set(0.5);
     this.distanceShadows = new Graphics();
@@ -184,13 +191,32 @@ export default class VisionController extends BaseEntity implements Entity {
   private setRange(range: number) {
     this.range = range;
     this.sizeToRange();
+    this.remakeDarkness();
+  }
+
+  /** The darkness texture again, at the range and resolution there are now */
+  private remakeDarkness() {
     // A fresh texture rather than a resize, which leaves the sprites'
     // texture coordinates behind
     const oldDarkness = this.darkness;
-    this.darkness = makeDarknessTexture(this.outerRadius);
+    this.darkness = makeDarknessTexture(
+      this.outerRadius,
+      this.darknessResolution,
+    );
     this.darknessSprite.texture = this.darkness;
-    this.explored?.setRadius(range, this.darkness);
+    this.explored?.setRadius(this.range, this.darkness);
     oldDarkness.destroy(true);
+  }
+
+  /** Pixels per meter of the darkness texture (the Fog of War Detail setting) */
+  private darknessResolution = DARKNESS_RESOLUTION;
+
+  @on("settingChanged")
+  onSettingChanged({ id }: { id: SettingId }) {
+    if (id === "fogDetail") {
+      this.darknessResolution = getSetting(this.game, "fogDetail");
+      this.remakeDarkness();
+    }
   }
 
   /** How visible a point is to the player: 1 in plain view, 0 hidden */
@@ -207,6 +233,10 @@ export default class VisionController extends BaseEntity implements Entity {
 
   @on("add")
   onAdd({ game }: { game: Game }) {
+    if (getSetting(game, "fogDetail") !== this.darknessResolution) {
+      this.darknessResolution = getSetting(game, "fogDetail");
+      this.remakeDarkness();
+    }
     this.unseen = this.makeUnseenTexture();
     this.unseenSprite = new Sprite(this.unseen);
     this.unseenSprite.alpha = this.exploredDarkness;
@@ -265,10 +295,20 @@ export default class VisionController extends BaseEntity implements Entity {
       this.setRange(range);
     }
     this.eye = player.getPosition();
+    // The darkness texture is centered on the eye snapped to its pixels, so
+    // its pixels stay put in the world. Centered on the eye itself, a wall's
+    // shadow landed somewhere else in its pixels every frame the player
+    // moved, and its edge crawled.
+    const pixel = 1 / this.darknessResolution;
+    const center = this.darknessCenter;
+    center.set(
+      Math.round(this.eye.x / pixel) * pixel,
+      Math.round(this.eye.y / pixel) * pixel,
+    );
     const cameraMatrix = this.game.camera.getMatrix();
     this.unseenContainer.setFromMatrix(cameraMatrix);
     this.worldContainer.setFromMatrix(cameraMatrix);
-    this.eyeContainer.position.copyFrom(this.eye);
+    this.eyeContainer.position.copyFrom(center);
     if (this.explored) {
       const [ox, oy] = this.explored.origin;
       this.explored.sprite.position.set(ox, oy);
@@ -302,13 +342,17 @@ export default class VisionController extends BaseEntity implements Entity {
       this.penumbraMesh.visible = this.penumbraGeometry.indices.length > 0;
     });
     measureCpuAndGpu("VisionController.darkness", () => {
-      // The meshes are relative to the eye, so put it in the middle
+      // The meshes are relative to the eye, so put it in the middle, off by
+      // as much as it is from the snapped center
       this.renderer.render({
         container: this.darknessContainer,
         target: this.darkness,
         clear: true,
         clearColor: [0, 0, 0, 0],
-        transform: new Matrix().translate(this.outerRadius, this.outerRadius),
+        transform: new Matrix().translate(
+          this.outerRadius + this.eye.x - center.x,
+          this.outerRadius + this.eye.y - center.y,
+        ),
       });
     });
     measureCpuAndGpu("VisionController.unseen", () => {
@@ -322,7 +366,7 @@ export default class VisionController extends BaseEntity implements Entity {
       });
     });
     measureCpuAndGpu("VisionController.explored", () => {
-      this.explored?.update(this.eye);
+      this.explored?.update(center);
     });
   }
 
@@ -339,12 +383,15 @@ export default class VisionController extends BaseEntity implements Entity {
 }
 
 /** What the player can't see right now, centered on the eye */
-function makeDarknessTexture(outerRadius: number): RenderTexture {
+function makeDarknessTexture(
+  outerRadius: number,
+  resolution: number,
+): RenderTexture {
   // No multisampling: every visible edge in it is a gradient already
   return RenderTexture.create({
     width: outerRadius * 2,
     height: outerRadius * 2,
-    resolution: DARKNESS_RESOLUTION,
+    resolution,
   });
 }
 

@@ -11,6 +11,7 @@ import { isHittable } from "../environment/Hittable";
 import { getFireGrid } from "../fire/FireGrid";
 import Human from "../human/Human";
 import Light from "../lighting-and-vision/Light";
+import { getSetting } from "../settings/SettingsController";
 import { BulletStats, LONG_RANGE } from "../weapons/guns/BulletStats";
 import type Gun from "../weapons/guns/Gun";
 import { HitResult, Projectile, projectileRaycast } from "./Projectile";
@@ -169,8 +170,9 @@ export default class Bullet extends Projectile implements Entity {
       endPoint.magnitude / 2 + 0.1,
     );
     this.sprite.visible = inView;
-    // Off, so its last glow doesn't stay behind at the edge of the view
-    this.light.enabled = inView;
+    // Off, so its last glow doesn't stay behind at the edge of the view (and
+    // off for good without the Gunfire Lights setting)
+    this.light.enabled = inView && getSetting(this.game, "gunfireLights");
     if (!inView) {
       return;
     }

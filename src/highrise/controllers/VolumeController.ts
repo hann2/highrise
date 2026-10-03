@@ -3,66 +3,63 @@ import Entity from "../../core/entity/Entity";
 import { on } from "../../core/entity/handler";
 import Game from "../../core/Game";
 import { KeyCode } from "../../core/io/Keys";
-import { clamp } from "../../core/util/MathUtil";
 import { Persistence } from "../constants/constants";
+import { SettingId } from "../settings/settings";
+import { getSetting, getSettings } from "../settings/SettingsController";
 
+/**
+ * The volume settings. Sounds go to `game.masterGain` unless told otherwise,
+ * so that's made the sound effects' bus: it's moved off the speakers onto
+ * `output`, the overall volume, and the music has its own bus, `musicGain`,
+ * into `output` too (`MusicController` plays into it). M toggles mute.
+ */
 export default class VolumeController extends BaseEntity implements Entity {
   pausable = false;
   persistenceLevel = Persistence.Permanent;
 
-  private _muted = localStorage.getItem("muted") === "true";
-  private _volume = loadSavedVolume();
-
-  get muted(): boolean {
-    return this._muted;
-  }
-
-  set muted(muted: boolean) {
-    this._muted = muted;
-    this.game.masterGain.gain.value = muted ? 0 : this.volume;
-    localStorage.setItem("muted", muted ? "true" : "false");
-    this.game.dispatch("muteChanged", {
-      muted: this._muted,
-      volume: this._volume,
-    });
-  }
-
-  get volume() {
-    return this._volume;
-  }
-
-  set volume(value: number) {
-    if (!isNaN(value)) {
-      this._volume = clamp(value);
-      localStorage.setItem("volume", String(this._volume));
-      this.game.dispatch("volumeChanged", {
-        muted: this._muted,
-        volume: this._volume,
-      });
-    }
-  }
+  /** Everything, on its way to the speakers */
+  private output!: GainNode;
+  /** The music, on its way to `output` */
+  musicGain!: GainNode;
 
   @on("add")
   onAdd({ game }: { game: Game }) {
-    const gain = this._muted ? 0 : this._volume;
-    game.masterGain.gain.value = gain;
+    this.output = game.audio.createGain();
+    this.output.connect(game.audio.destination);
+    this.musicGain = game.audio.createGain();
+    this.musicGain.connect(this.output);
+    game.masterGain.disconnect();
+    game.masterGain.connect(this.output);
+    this.updateGains();
   }
 
-  @on("toggleMute")
-  onToggleMute() {
-    this.muted = !this._muted;
+  @on("settingChanged")
+  onSettingChanged({ id }: { id: SettingId }) {
+    if (
+      id === "masterVolume" ||
+      id === "musicVolume" ||
+      id === "effectsVolume" ||
+      id === "muted"
+    ) {
+      this.updateGains();
+    }
   }
+
+  private updateGains() {
+    const game = this.game;
+    const muted = getSetting(game, "muted");
+    this.output.gain.value = muted ? 0 : getSetting(game, "masterVolume");
+    this.musicGain.gain.value = getSetting(game, "musicVolume");
+    game.masterGain.gain.value = getSetting(game, "effectsVolume");
+  }
+
   @on("keyDown")
   onKeyDown({ key }: { key: KeyCode }) {
     if (key === "KeyM") {
-      this.muted = !this._muted;
+      const settings = getSettings(this.game);
+      settings.set("muted", !settings.get("muted"));
     }
   }
-}
-
-function loadSavedVolume(): number {
-  const saved = parseFloat(localStorage.getItem("volume") ?? "");
-  return isNaN(saved) ? 1 : clamp(saved);
 }
 
 export function getVolumeController(game: Game): VolumeController {

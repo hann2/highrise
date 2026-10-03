@@ -15,7 +15,6 @@ import { StatsOverlay } from "../core/util/stats-overlay/StatsOverlay";
 import { CELL_SIZE, DEFAULT_LEVEL_SIZE } from "./constants/constants";
 import CheatController from "./controllers/CheatController";
 import { GameController } from "./controllers/GameController";
-import { GraphicsQualityController } from "./controllers/GraphicsQualityController";
 import MusicController from "./controllers/MusicController";
 import VolumeController from "./controllers/VolumeController";
 import ArenaScene from "./arena/ArenaScene";
@@ -26,8 +25,9 @@ import { getStartingCharacter } from "./lobby/Lobby";
 import { generateRunPlan } from "./run/RunPlan";
 import { CHARACTERS } from "./characters/Character";
 import { clamp } from "../core/util/MathUtil";
-import { loadSaveData } from "./persistence/SaveData";
-import { antialiasFor, getAntialiasChoice } from "./controllers/antialiasing";
+import { antialiasFor, loadSettings } from "./settings/settings";
+import SettingsController, { getSetting } from "./settings/SettingsController";
+import { createFpsPanel } from "../core/util/stats-overlay/FpsPanel";
 import Preloader from "./preloader/Preloader";
 
 declare global {
@@ -62,7 +62,6 @@ export async function main() {
     }),
   });
   initContactMaterials(game);
-  game.frameRateLimit = loadSaveData().frameRateLimit;
   // ?fps=120 runs as if the display were 120 Hz, every animation frame one of
   // its refreshes, for benchmarks, which run without vsync: as fast as the game
   // can go, each frame 1/120 s of game time (see `refreshRateOverride`)
@@ -76,7 +75,8 @@ export async function main() {
   const aa = params.get("aa");
   await game.init({
     rendererOptions: {
-      antialias: aa != null ? aa !== "0" : antialiasFor(getAntialiasChoice()),
+      antialias:
+        aa != null ? aa !== "0" : antialiasFor(loadSettings().antialias),
     },
   });
 
@@ -88,20 +88,31 @@ export async function main() {
   // Think of these like indexes in a DB
   game.entities.addFilter(isHuman);
 
-  game.addEntity(new AutoPauser(loadSaveData().autoPause));
+  // First, so that everything after can read the settings
+  game.addEntity(new SettingsController());
+  game.addEntity(new AutoPauser(getSetting(game, "autoPause")));
   game.addEntity(new VolumeController());
   // The arena is for testing, and the music gets in the way of hearing things
   if (params.get("scene") !== "arena") {
     game.addEntity(new MusicController());
   }
   game.addEntity(new PositionalSoundListener());
-  game.addEntity(new GraphicsQualityController());
   game.addEntity(new GameController());
-  // Backslash cycles the stats panels; ?profile=1 starts with the profiler one
+  // Backslash cycles the stats panels; ?profile=1 starts with the profiler
+  // one, else the Show FPS setting starts it on the frame rate
   game.addEntity(
     new StatsOverlay(
-      [createLeanPanel(), createProfilerPanel(), createRenderPanel()],
-      params.has("profile") ? "profiler" : undefined,
+      [
+        createFpsPanel(),
+        createLeanPanel(),
+        createProfilerPanel(),
+        createRenderPanel(),
+      ],
+      params.has("profile")
+        ? "profiler"
+        : getSetting(game, "showFps")
+          ? "fps"
+          : undefined,
     ),
   );
 
