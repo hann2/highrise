@@ -30,8 +30,12 @@ export const SPAS12: GunStats = {
   recoilAmount: degToRad(7),
   recoilRecovery: 2.2,
 
-  leftHandPosition: [0.65, -0.03],
-  rightHandPosition: [0.3, 0],
+  points: {
+    grip: [-0.3, 0],
+    foregrip: [0.05, -0.03],
+    magazine: [-0.3, 0],
+    action: [-0.3, 0],
+  },
   holdPosition: [0.6, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,

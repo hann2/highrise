@@ -30,8 +30,12 @@ export const PumpShotgun: GunStats = {
   recoilAmount: degToRad(8),
   recoilRecovery: 2,
 
-  leftHandPosition: [0.7, -0.03],
-  rightHandPosition: [0.3, 0],
+  points: {
+    grip: [-0.2, 0],
+    foregrip: [0.2, -0.03],
+    magazine: [-0.2, 0],
+    action: [-0.2, 0],
+  },
   holdPosition: [0.5, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,

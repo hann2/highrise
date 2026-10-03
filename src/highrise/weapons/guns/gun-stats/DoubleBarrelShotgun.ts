@@ -33,8 +33,12 @@ export const DoubleBarrelShotgun: GunStats = {
   recoilAmount: degToRad(10),
   recoilRecovery: 3,
 
-  leftHandPosition: [0.52, -0.03],
-  rightHandPosition: [0.3, 0],
+  points: {
+    grip: [-0.1, 0],
+    foregrip: [0.12, -0.03],
+    magazine: [-0.1, 0],
+    action: [-0.1, 0],
+  },
   holdPosition: [0.4, 0],
   stanceAngle: degToRad(35),
   sideOffset: 0.2,

@@ -6,18 +6,27 @@ import { HUMAN_RADIUS } from "../constants/constants";
 import { BodySprite } from "../creature-stuff/BodySprite";
 import { LaserSight } from "../effects/LaserSight";
 import Gun from "../weapons/guns/Gun";
+import { GunPose } from "../weapons/guns/GunPose";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import Human from "./Human";
 
 const GUN_SCALE = 1 / 300;
 const STANCE_ROTATE_SPEED = Math.PI * 2; // radians per second
+/** Radians a push twists a gun per meter it shoves it */
+const PUSH_TWIST = 1;
 
 // Renders a human
 export default class HumanSprite extends BodySprite {
   private _stanceAngle: number = 0;
 
   weaponSprite?: Sprite;
+  /** The magazine (or round) a gun's animation shows in the hand */
+  magazineSprite?: Sprite;
   laserSight?: LaserSight;
+  /** The gun in hand's pose, worked out at the start of `updatePose` */
+  private gunPose?: GunPose;
+  /** Whether the left hand and arm are drawn over the weapon right now */
+  private leftHandOver = false;
 
   constructor(private human: Human) {
     super(human.character.textures, HUMAN_RADIUS);
@@ -36,23 +45,49 @@ export default class HumanSprite extends BodySprite {
     );
   }
 
-  @on("render")
-  onRender(dt: number) {
-    super.onRender(dt);
-
+  updatePose() {
     const weapon = this.human.weapon;
-    if (weapon && this.weaponSprite) {
-      const pushOffset = this.getPushOffset();
-      if (weapon instanceof MeleeWeapon) {
-        this.weaponSprite.visible = weapon.currentCooldown <= 0;
-        this.weaponSprite.position.copyFrom(
-          V(weapon.swing.restPosition).iadd([pushOffset, 0]),
-        );
+    const pushOffset = this.getPushOffset();
+    this.gunPose =
+      weapon instanceof Gun
+        ? weapon.getPose(pushOffset, pushOffset * PUSH_TWIST)
+        : undefined;
+
+    super.updatePose();
+
+    const pose = this.gunPose;
+    if (weapon instanceof MeleeWeapon && this.weaponSprite) {
+      this.weaponSprite.visible = weapon.currentCooldown <= 0;
+      this.weaponSprite.position.copyFrom(
+        V(weapon.swing.restPosition).iadd([pushOffset, 0]),
+      );
+    } else if (pose && this.weaponSprite) {
+      this.weaponSprite.position.copyFrom(pose.position);
+      this.weaponSprite.rotation = pose.angle;
+    }
+
+    if (this.magazineSprite) {
+      const inHand = pose?.magazine.place === "hand";
+      this.magazineSprite.visible = inHand;
+      if (inHand) {
+        this.magazineSprite.position.copyFrom(pose.magazine.position);
+        this.magazineSprite.rotation = pose.magazine.angle;
+      }
+    }
+
+    this.setLeftHandOver(pose?.leftHandOver ?? false);
+  }
+
+  /** Draws the left hand and arm over the weapon, or back under the body where they belong */
+  private setLeftHandOver(over: boolean) {
+    if (over !== this.leftHandOver) {
+      this.leftHandOver = over;
+      if (over) {
+        this.sprite.addChild(this.leftArmSprite, this.leftHandSprite);
       } else {
-        this.weaponSprite.position.copyFrom(
-          weapon.getCurrentHoldPosition().iadd([pushOffset, 0]),
-        );
-        this.weaponSprite.rotation = weapon.getCurrentHoldAngle() + pushOffset;
+        // Where `BodySprite` puts them
+        this.sprite.addChildAt(this.leftArmSprite, 0);
+        this.sprite.addChildAt(this.leftHandSprite, 2);
       }
     }
   }
@@ -77,14 +112,12 @@ export default class HumanSprite extends BodySprite {
     return this._stanceAngle;
   }
 
-  getRecoilOffset(gun: Gun): number {
-    return -0.125 * gun.getCurrentRecoilAmount() ** 1.5;
-  }
-
   getHandPositions(): [V2d, V2d] {
     const { weapon } = this.human;
     const pushOffset = this.getPushOffset();
-    if (weapon) {
+    if (this.gunPose) {
+      return [this.gunPose.leftHand, this.gunPose.rightHand];
+    } else if (weapon instanceof MeleeWeapon) {
       const [left, right] = weapon.getCurrentHandPositions();
       return [left.iadd([pushOffset, 0]), right.iadd([pushOffset, 0])];
     } else {
@@ -115,11 +148,21 @@ export default class HumanSprite extends BodySprite {
 
   handleNewWeapon(weapon: Gun | MeleeWeapon) {
     if (weapon instanceof Gun) {
-      const { textures } = weapon.stats;
+      const { textures, magazine } = weapon.stats;
+      if (magazine) {
+        this.magazineSprite = Sprite.from(magazine.texture);
+        this.magazineSprite.anchor.set(0.5, 0.5);
+        this.magazineSprite.scale.set(
+          magazine.length / this.magazineSprite.texture.width,
+        );
+        this.magazineSprite.visible = false;
+        // Under the gun
+        this.sprite.addChild(this.magazineSprite);
+      }
+
       this.weaponSprite = Sprite.from(textures.holding);
       this.weaponSprite.scale.set(GUN_SCALE);
       this.weaponSprite.anchor.set(0.5, 0.5);
-      this.weaponSprite.position.copyFrom(weapon.getCurrentHoldPosition());
       this.sprite.addChild(this.weaponSprite);
 
       // Its own, or one from a Laser Sight attachment
@@ -159,10 +202,15 @@ export default class HumanSprite extends BodySprite {
   }
 
   handleDropWeapon() {
-    if (this.weaponSprite) {
-      this.sprite.removeChild(this.weaponSprite);
-      this.weaponSprite = undefined;
+    this.setLeftHandOver(false);
+    for (const sprite of [this.weaponSprite, this.magazineSprite]) {
+      if (sprite) {
+        this.sprite.removeChild(sprite);
+        sprite.destroy();
+      }
     }
+    this.weaponSprite = undefined;
+    this.magazineSprite = undefined;
     this.laserSight?.destroy();
     this.laserSight = undefined;
   }

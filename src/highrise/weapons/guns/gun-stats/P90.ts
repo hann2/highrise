@@ -31,8 +31,12 @@ export const P90: GunStats = {
   recoilAmount: degToRad(2.5),
   recoilRecovery: 6,
 
-  leftHandPosition: [0.45, -0.03],
-  rightHandPosition: [0.2, 0],
+  points: {
+    grip: [-0.15, 0],
+    foregrip: [0.1, -0.03],
+    magazine: [-0.15, 0],
+    action: [-0.15, 0],
+  },
   holdPosition: [0.35, 0],
   stanceAngle: degToRad(50),
   sideOffset: 0.2,

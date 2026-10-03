@@ -30,8 +30,12 @@ export const AK47: GunStats = {
   recoilAmount: degToRad(4),
   recoilRecovery: 3.1,
 
-  leftHandPosition: [0.65, -0.03],
-  rightHandPosition: [0.32, 0],
+  points: {
+    grip: [-0.23, 0],
+    foregrip: [0.1, -0.03],
+    magazine: [-0.23, 0],
+    action: [-0.23, 0],
+  },
   holdPosition: [0.55, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,

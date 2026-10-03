@@ -29,8 +29,12 @@ export const Revolver: GunStats = {
   recoilAmount: degToRad(8.5),
   recoilRecovery: 8,
 
-  leftHandPosition: [0.4, 0],
-  rightHandPosition: [0.4, 0],
+  points: {
+    grip: [-0.15, 0],
+    foregrip: [-0.15, 0],
+    magazine: [-0.15, 0],
+    action: [-0.15, 0],
+  },
   holdPosition: [0.55, 0],
   muzzleLength: 0.64,
 

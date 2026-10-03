@@ -23,8 +23,12 @@ export const DesertEagle: GunStats = {
   recoilAmount: degToRad(6),
   recoilRecovery: 4,
 
-  leftHandPosition: [0.4, 0],
-  rightHandPosition: [0.4, 0],
+  points: {
+    grip: [-0.12, 0],
+    foregrip: [-0.12, 0],
+    magazine: [-0.12, 0],
+    action: [-0.12, 0],
+  },
   holdPosition: [0.52, 0],
   muzzleLength: 0.62,
 

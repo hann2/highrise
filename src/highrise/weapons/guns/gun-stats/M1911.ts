@@ -20,8 +20,12 @@ export const M1911: GunStats = {
   },
   size: [0.45, 0.45],
 
-  leftHandPosition: [0.4, 0],
-  rightHandPosition: [0.4, 0],
+  points: {
+    grip: [-0.1, 0],
+    foregrip: [-0.1, 0],
+    magazine: [-0.1, 0],
+    action: [-0.1, 0],
+  },
   holdPosition: [0.5, 0],
   muzzleLength: 0.6,
 
