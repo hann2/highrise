@@ -7,6 +7,7 @@ import {
   GunStats,
   ReloadingStyle,
 } from "../GunStats";
+import { DOUBLE_BARREL_ANIMATIONS } from "../gun-animations/doubleBarrelReload";
 
 export const DoubleBarrelShotgun: GunStats = {
   ...defaultGunStats,
@@ -33,8 +34,14 @@ export const DoubleBarrelShotgun: GunStats = {
   recoilAmount: degToRad(10),
   recoilRecovery: 3,
 
-  leftHandPosition: [0.52, -0.03],
-  rightHandPosition: [0.3, 0],
+  points: {
+    grip: [-0.1, 0],
+    foregrip: [0.12, -0.03],
+    magazine: [0, 0],
+    action: [0.12, -0.03],
+  },
+  animations: DOUBLE_BARREL_ANIMATIONS,
+  magazine: { texture: "shotgunShellPair", length: 0.075 },
   holdPosition: [0.4, 0],
   stanceAngle: degToRad(35),
   sideOffset: 0.2,

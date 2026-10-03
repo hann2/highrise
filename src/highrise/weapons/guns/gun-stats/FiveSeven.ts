@@ -1,6 +1,7 @@
 import { degToRad } from "../../../../core/util/MathUtil";
 import { NineMil } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
+import { PISTOL_ANIMATIONS } from "../gun-animations/pistolReload";
 
 export const FiveSeven: GunStats = {
   ...defaultGunStats,
@@ -20,8 +21,14 @@ export const FiveSeven: GunStats = {
   },
   size: [0.45, 0.45],
 
-  leftHandPosition: [0.4, 0],
-  rightHandPosition: [0.4, 0],
+  points: {
+    grip: [-0.1, 0],
+    foregrip: [-0.1, 0],
+    magazine: [-0.1, 0],
+    action: [-0.115, 0],
+  },
+  animations: PISTOL_ANIMATIONS,
+  magazine: { texture: "pistolMagazine", length: 0.125 },
   holdPosition: [0.5, 0],
   muzzleLength: 0.6,
 

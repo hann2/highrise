@@ -5,6 +5,26 @@ import { degToRad } from "../../../core/util/MathUtil";
 import { BaseWeaponStats } from "../WeaponStats";
 import { AmmoClass } from "./ammo";
 import { BulletStats, defaultBulletStats } from "./BulletStats";
+import { TILT_ANIMATIONS } from "./gun-animations/tiltReload";
+import { GunAnimation, GunPoints, MagazineStats } from "./GunPose";
+
+/**
+ * The animations a gun plays, each stretched to the time it takes (so the
+ * times in `GunStats` stay the gameplay's, and an animation can be shared by
+ * guns that take different times). Magazine guns play `reload` (or
+ * `reloadEmpty` when empty) over the whole reload; guns loaded a round at a
+ * time play `reloadStart`, then `reloadInsert` per round, then
+ * `reloadFinish`, over each part.
+ */
+export interface GunAnimations {
+  readonly reload?: GunAnimation;
+  readonly reloadEmpty?: GunAnimation;
+  readonly reloadStart?: GunAnimation;
+  readonly reloadInsert?: GunAnimation;
+  readonly reloadFinish?: GunAnimation;
+  /** Working the pump (`EjectionType.PUMP`), played as long as it takes */
+  readonly pump?: GunAnimation;
+}
 
 export interface GunStats extends BaseWeaponStats {
   // Maximum rounds per second
@@ -67,10 +87,15 @@ export interface GunStats extends BaseWeaponStats {
     readonly shellCasing: ImageName;
   };
 
-  // Position of the left hand
-  leftHandPosition: [number, number];
-  // Position of the right hand
-  rightHandPosition: [number, number];
+  /**
+   * Where the hands go and things happen, in the gun's own frame: meters from
+   * the middle of `textures.holding`, x toward the muzzle (see `GunPose`)
+   */
+  points: GunPoints;
+  /** How it's reloaded and worked (see `GunAnimations`) */
+  animations: GunAnimations;
+  /** What its reload animations show outside the gun, if anything */
+  magazine?: MagazineStats;
   // Position of the sprite
   holdPosition: [number, number];
   // Angle that the shooter stands at while holding the gun
@@ -134,8 +159,13 @@ export const defaultGunStats: GunStats = {
 
   size: [1, 1],
   muzzleLength: 0.5,
-  leftHandPosition: [0.3, 0],
-  rightHandPosition: [0.3, 0],
+  points: {
+    grip: [0, 0],
+    foregrip: [0, 0],
+    magazine: [0, 0],
+    action: [0, 0],
+  },
+  animations: TILT_ANIMATIONS,
   holdPosition: [0.3, 0],
   stanceAngle: 0,
   sideOffset: 0,

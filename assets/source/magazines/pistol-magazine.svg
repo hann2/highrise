@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="44" viewBox="0 0 150 44">
+  <!-- A pistol magazine from the side, base plate on the left, a round
+       showing at the top on the right. 0.125 m long. -->
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#505050"/>
+      <stop offset="0.5" stop-color="#303030"/>
+      <stop offset="1" stop-color="#1e1e1e"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2d27a"/>
+      <stop offset="1" stop-color="#a87a28"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="8" width="118" height="28" rx="3"
+        fill="url(#body)" stroke="#0a0a0a" stroke-width="3"/>
+  <!-- Witness holes -->
+  <circle cx="50" cy="22" r="2.5" fill="#00000088"/>
+  <circle cx="72" cy="22" r="2.5" fill="#00000088"/>
+  <circle cx="94" cy="22" r="2.5" fill="#00000088"/>
+  <!-- Base plate -->
+  <rect x="3" y="4" width="14" height="36" rx="4" fill="#1e1e1e" stroke="#0a0a0a" stroke-width="3"/>
+  <!-- The top round -->
+  <path d="M 126 13 L 138 13 Q 148 22 138 31 L 126 31 Z"
+        fill="url(#brass)" stroke="#5a3e10" stroke-width="2"/>
+</svg>

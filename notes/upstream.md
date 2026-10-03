@@ -208,6 +208,52 @@ overlay" (`3169b15`), and "GPU sections around the fire and smoke draws"
 - `GameRenderer2d.antialias` says whether the canvas is antialiased
   ("Antialiasing setting, off by default on retina displays", `185f60c`).
 
+### Recording video a frame at a time
+"Record clips a frame at a time" (`9ad4ffc`, branch `rig-animations`,
+2026-10-03), with the screenshots made faster in "Rig test scene, and faster
+frame capture" and at the right size in "Clips: screenshots at the device
+pixel ratio"
+
+- `Game.manualFrames` stops the animation frame loop from running frames,
+  and `Game.stepFrames(n)` runs them by hand, each a frame of
+  `targetFrameRate` (set `refreshRateOverride` to choose it). Nothing in the
+  game reads the wall clock, so the frames are exactly what the game would
+  draw at that rate, however long each takes.
+- `bin/record-clip.ts` uses it from Playwright: steps the scene to where it
+  should start, then steps a frame, screenshots it (Chrome's own
+  `Page.captureScreenshot` with `optimizeForSpeed`, about twenty times as fast
+  as Playwright's screenshots, and with a `clip` whose `scale` is the device
+  pixel ratio, or it's CSS pixels), and encodes the PNGs with ffmpeg. It's
+  Highrise's, but only its test-scene convention (`?scene=x&auto`, an entity
+  `xTestScene` counting `cycles`) is game-specific. The idea for the engine is
+  in `notes/tooling-ideas.md`.
+
+### Keyframe animation
+"Keyframe animation in core" (`08b6184`, branch `rig-animations`)
+
+- `src/core/animation/`: `easing.ts` (named easings), `Track.ts` (keyframes
+  of any value; samplers for numbers, vectors and steps, and `segmentAt` for
+  values the caller interpolates itself), `AnimationPlayer.ts` (`Animation` =
+  tracks + timed events; plays one at a time stretched to a duration, fires
+  events as it's advanced, blends from the last animation or the rest pose,
+  `seek` for tools). It doesn't know what it animates. Tests in
+  `tests/core/animation.test.ts`.
+- Highrise's use of it is the gun poses (`weapons/guns/GunPose.ts`), which
+  stay in the game.
+
+### Sounds: part of a buffer, resuming, slow-mo
+"Sounds: play part of a buffer, and fix resuming and slow-mo" (`045a2b1`,
+branch `rig-animations`)
+
+- `SoundOptions.offset` and `duration` play part of a sound.
+- `randomStart` passed its random time to `start()` as *when* to start
+  rather than *where* in the sound (it's unused here).
+- A sound restarted (`unpause`, `jumpToRandom`) never got an `onended`, so
+  it was never destroyed, and the old node's could destroy the new one.
+- `SoundInstance` still had a `handlers = { slowMoChanged }` object from the
+  old event system, which nothing reads, so playing sounds didn't follow
+  slow-mo changes; it's an `@on("slowMoChanged")` handler now.
+
 ### The lighting system (still in Highrise, to move into core)
 Lights with soft shadows that scale to hundreds of lights and huge levels:
 the light atlas, shadows drawn on the GPU from walls kept there in chunks,

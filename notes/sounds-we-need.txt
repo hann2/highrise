@@ -27,6 +27,10 @@ Weapons
  - Gun shots leveled against each other (all shots are turned down to 0.3 in code; TODO in Gun.ts)
  - P90 shot and reload (uses the M1911's shot and the AR-15's reload)
  - AK-47 reload (uses the AR-15's)
+ - Pistol reloads other than the M1911's, and an empty one with the slide release (every pistol uses the M1911's, whose last click is used for the slide)
+ - A magazine hitting the floor (uses the glowstick drops)
+ - The double barrel snapping shut (uses part of the pump)
+ - Reload recordings as separate pieces (magazine out, in, slap, bolt): the animations play the AR-15's and M1911's recordings a piece at a time, cut at their quiet points, which only roughly matches what each piece is
 
 Pickups and interactables
  - Keycard pickup (uses a magazine load)

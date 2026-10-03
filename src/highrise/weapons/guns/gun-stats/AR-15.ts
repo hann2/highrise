@@ -6,6 +6,7 @@ import {
   GunStats,
   ReloadingStyle,
 } from "../GunStats";
+import { rifleAnimations } from "../gun-animations/rifleReload";
 
 export const AR15: GunStats = {
   ...defaultGunStats,
@@ -31,8 +32,14 @@ export const AR15: GunStats = {
   recoilAmount: degToRad(2),
   recoilRecovery: 5,
 
-  leftHandPosition: [0.65, -0.03],
-  rightHandPosition: [0.32, 0],
+  points: {
+    grip: [-0.23, 0],
+    foregrip: [0.1, -0.03],
+    magazine: [-0.12, 0],
+    action: [-0.3, 0],
+  },
+  animations: rifleAnimations(),
+  magazine: { texture: "rifleMagazine", length: 0.19 },
   holdPosition: [0.55, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,

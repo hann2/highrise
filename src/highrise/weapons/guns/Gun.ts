@@ -1,5 +1,6 @@
 import { SoundName } from "../../../../resources/resources";
 import { CollisionGroups } from "../../../config/CollisionGroups";
+import { AnimationPlayer } from "../../../core/animation/AnimationPlayer";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { on } from "../../../core/entity/handler";
@@ -7,9 +8,7 @@ import { PositionalSound } from "../../../core/sound/PositionalSound";
 import {
   clamp,
   degToRad,
-  lerp,
   polarToVec,
-  smoothStep,
   stepToward,
 } from "../../../core/util/MathUtil";
 import {
@@ -33,7 +32,18 @@ import Bullet from "../../projectiles/Bullet";
 import { PhasedAction } from "../../utils/PhasedAction";
 import { ShuffleRing } from "../../utils/ShuffleRing";
 import {
+  blendGunPoses,
+  GunAdjustments,
+  GunEvent,
+  GunPose,
+  GunTracks,
+  muzzleOf,
+  pointOnGun,
+  poseGun,
+} from "./GunPose";
+import {
   EjectionType,
+  GunAnimations,
   GunSoundName,
   GunSounds,
   GunStats,
@@ -54,6 +64,17 @@ const MAX_FIRING_TILT = degToRad(20);
 const RETRACT_SPEED = 8;
 const EXTEND_SPEED = 3;
 
+/** Meters the gun slides back right after a shot */
+const RECOIL_SLIDE = 0.125;
+/** Seconds of the pump's stroke: back (when the shell comes out), held, and forward */
+const PUMP_BACK = 0.15;
+const PUMP_HOLD = 0.05;
+const PUMP_FORWARD = 0.13;
+/** Meters off the floor a dropped magazine falls from */
+const MAGAZINE_DROP_HEIGHT = 0.9;
+// TODO: A real magazine hitting the floor
+const MAGAZINE_DROP_SOUNDS: SoundName[] = ["glowStickDrop1", "glowStickDrop2"];
+
 export default class Gun extends BaseEntity implements Entity {
   // All the defining characteristics of this gun
   stats: GunStats;
@@ -68,14 +89,23 @@ export default class Gun extends BaseEntity implements Entity {
   reloadAction: PhasedAction<"start" | "insert" | "finish", [Human]>;
   // Easy way to play random characteristic sounds for this gun
   sounds: GunSoundRings;
-  // What percentage we're currently pumping the gun. Unused for non-pump guns
-  pumpAmount = 0;
+  /** Working the pump after a shot (or a reload), which it can't fire during. Unused for non-pump guns */
+  pumping = false;
   // How many shells we've fired that haven't been ejected yet
   shellsToEject = 0;
 
   aimOffset = 0;
   /** How far the muzzle is pulled back from its usual spot to keep it out of a wall */
   wallRetraction = 0;
+  /**
+   * Plays the gun's animations (`GunStats.animations`): how it's held and
+   * worked, beyond the gameplay, and the sounds of it
+   */
+  readonly animator = new AnimationPlayer<GunTracks, GunEvent>((event) =>
+    this.handleAnimationEvent(event),
+  );
+  /** Who's working the gun in the animation playing, for its events */
+  private animatedBy?: Human;
 
   constructor(stats: GunStats) {
     super();
@@ -89,17 +119,15 @@ export default class Gun extends BaseEntity implements Entity {
           name: "start",
           duration: (shooter: Human) =>
             this.stats.reloadStartTime / shooter.stats.reloadSpeed,
-          startAction: (shooter: Human) => {
-            this.playSound("reload", shooter.getPosition());
-          },
+          startAction: (shooter: Human) =>
+            this.startReloadPart("reloadStart", "reload", shooter),
         },
         {
           name: "insert",
           duration: (shooter: Human) =>
             this.stats.reloadInsertTime / shooter.stats.reloadSpeed,
-          startAction: (shooter: Human) => {
-            this.playSound("reloadInsert", shooter.getPosition());
-          },
+          startAction: (shooter: Human) =>
+            this.startReloadPart("reloadInsert", "reloadInsert", shooter),
           endAction: (shooter: Human) => {
             if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
               this.ammo += shooter.takeReserve(this.stats.ammoClass, 1);
@@ -113,17 +141,36 @@ export default class Gun extends BaseEntity implements Entity {
           duration: (shooter: Human) =>
             this.stats.reloadEndTime / shooter.stats.reloadSpeed,
           startAction: (shooter: Human) => {
-            this.playSound("reloadFinish", shooter.getPosition());
-
             if (this.stats.ejectionType === EjectionType.PUMP) {
               this.pump(shooter);
             } else {
-              this.playSound("reloadFinish", shooter.getPosition());
+              this.startReloadPart("reloadFinish", "reloadFinish", shooter);
             }
           },
         },
       ]),
     );
+  }
+
+  /** Whether the reload going on is animated (and so makes its own sounds) */
+  private reloadAnimated = false;
+
+  /**
+   * Plays the animation for a part of a reload, if the gun has one and loads
+   * a round at a time (a magazine gun's reload is one animation, played when
+   * it starts), or else that part's sound
+   */
+  private startReloadPart(
+    animation: "reloadStart" | "reloadInsert" | "reloadFinish",
+    sound: GunSoundName,
+    shooter: Human,
+  ) {
+    if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
+      this.reloadAnimated = this.animate(animation, shooter);
+    }
+    if (!this.reloadAnimated) {
+      this.playSound(sound, shooter.getPosition());
+    }
   }
 
   // Whether or not we're currently in the middle of reloading
@@ -154,11 +201,12 @@ export default class Gun extends BaseEntity implements Entity {
       }
     } else if (
       this.shootCooldown <= 0 &&
-      this.pumpAmount <= 0 &&
+      !this.pumping &&
       !this.isRaisedByWall()
     ) {
-      const direction = shooter.getDirection() + this.getCurrentHoldAngle();
-      const muzzlePosition = shooter.localToWorld(this.getMuzzlePosition());
+      const pose = this.getPose();
+      const direction = shooter.getDirection() + pose.angle;
+      const muzzlePosition = shooter.localToWorld(muzzleOf(this.stats, pose));
 
       if (this.ammo > 0) {
         // Actually shoot
@@ -222,29 +270,96 @@ export default class Gun extends BaseEntity implements Entity {
     }
   }
 
+  /** Back (ejecting the shell at the back of the stroke), and forward again */
   private async pump(shooter: Human) {
-    this.playSound("pump", shooter.getPosition());
-    await this.wait(
-      0.15,
-      (dt, t) => {
-        this.pumpAmount = t;
-      },
-      "pump",
-    );
-
+    this.pumping = true;
+    if (!this.animate("pump", shooter)) {
+      this.playSound("pump", shooter.getPosition());
+    }
+    await this.wait(PUMP_BACK, undefined, "pump");
     if (this.shellsToEject > 0) {
       this.makeShellCasing(shooter);
     }
-    await this.wait(0.05, undefined, "pump");
+    await this.wait(PUMP_HOLD + PUMP_FORWARD, undefined, "pump");
+    this.pumping = false;
+  }
 
-    await this.wait(
-      0.13,
-      (dt, t) => {
-        this.pumpAmount = 1.0 - t;
-      },
-      "pump",
+  /** Seconds `shooter` takes for what one of the gun's animations shows (what it's stretched to) */
+  animationDuration(name: keyof GunAnimations, shooter: Human): number {
+    const { reloadStartTime, reloadInsertTime, reloadEndTime } = this.stats;
+    const speed = shooter.stats.reloadSpeed;
+    switch (name) {
+      case "reload":
+      case "reloadEmpty":
+        return (reloadStartTime + reloadInsertTime + reloadEndTime) / speed;
+      case "reloadStart":
+        return reloadStartTime / speed;
+      case "reloadInsert":
+        return reloadInsertTime / speed;
+      case "reloadFinish":
+        return reloadEndTime / speed;
+      case "pump":
+        return PUMP_BACK + PUMP_HOLD + PUMP_FORWARD;
+    }
+  }
+
+  /**
+   * Plays one of the gun's animations as worked by `shooter`, stretched to
+   * the time it takes them. False if the gun doesn't have it.
+   */
+  animate(name: keyof GunAnimations, shooter: Human): boolean {
+    const animation = this.stats.animations[name];
+    if (animation) {
+      this.animatedBy = shooter;
+      this.animator.play(animation, {
+        duration: this.animationDuration(name, shooter),
+      });
+    }
+    return animation !== undefined;
+  }
+
+  private handleAnimationEvent(event: GunEvent) {
+    const shooter = this.animatedBy;
+    if (!shooter || !this.isAdded) {
+      return;
+    }
+    if ("sound" in event) {
+      const { sound, offset, duration, gain } = event;
+      this.game.addEntity(
+        new PositionalSound(sound, shooter.getPosition(), {
+          offset,
+          duration,
+          gain,
+        }),
+      );
+    } else if ("gunSound" in event) {
+      this.playSound(event.gunSound, shooter.getPosition());
+    } else if (event.effect === "dropMagazine") {
+      this.dropMagazine(shooter);
+    }
+  }
+
+  /** Lets the magazine fall out of the gun to the floor */
+  private dropMagazine(shooter: Human) {
+    const { magazine, points } = this.stats;
+    if (!magazine) {
+      return;
+    }
+    const pose = this.getPose();
+    const position = shooter.localToWorld(pointOnGun(pose, points.magazine));
+    const velocity = shooter.body.velocity
+      .clone()
+      .iadd(polarToVec(rDirection(), rUniform(0, 0.4)));
+    this.game.addEntity(
+      new ShellCasing(
+        position,
+        velocity,
+        shooter.getDirection() + pose.angle,
+        magazine.texture,
+        MAGAZINE_DROP_SOUNDS,
+        { size: magazine.length, height: MAGAZINE_DROP_HEIGHT, spin: 0.15 },
+      ),
     );
-    this.pumpAmount = 0;
   }
 
   makeShellCasing(shooter: Human) {
@@ -365,6 +480,9 @@ export default class Gun extends BaseEntity implements Entity {
       this.loadFromReserve(shooter);
       this.playSound("reload", shooter.getPosition());
     } else if (this.stats.reloadingStyle === ReloadingStyle.MAGAZINE) {
+      this.reloadAnimated =
+        (this.ammo === 0 && this.animate("reloadEmpty", shooter)) ||
+        this.animate("reload", shooter);
       await this.reloadAction.do(shooter);
     } else if (this.stats.reloadingStyle === ReloadingStyle.INDIVIDUAL) {
       await this.reloadAction.doSinglePhase("start", shooter);
@@ -379,6 +497,9 @@ export default class Gun extends BaseEntity implements Entity {
   }
 
   cancelReload() {
+    if (this.isReloading) {
+      this.animator.stop();
+    }
     this.reloadAction.reset();
   }
 
@@ -389,6 +510,7 @@ export default class Gun extends BaseEntity implements Entity {
     }
 
     this.aimOffset *= Math.exp(-dt * this.stats.recoilRecovery);
+    this.animator.advance(dt);
   }
 
   /** Pulls the gun in (or lets it back out) depending on how close the wall in front of `holder` is */
@@ -410,7 +532,7 @@ export default class Gun extends BaseEntity implements Entity {
     if (this.wallRetraction <= 0) {
       return { slide: 0, tilt: 0 };
     }
-    const gripX = this.stats.rightHandPosition[0];
+    const gripX = this.stats.holdPosition[0] + this.stats.points.grip[0];
     const slide = clamp(
       this.wallRetraction,
       0,
@@ -422,19 +544,6 @@ export default class Gun extends BaseEntity implements Entity {
     const cos = (barrel - (this.wallRetraction - slide)) / barrel;
     const tilt = Math.min(Math.acos(clamp(cos, -1, 1)), MAX_WALL_TILT);
     return { slide, tilt };
-  }
-
-  /**
-   * Moves a point on the gun from its usual spot to where the wall pose puts
-   * it, then out to the shooter's side
-   */
-  private applyWallPose(localPoint: V2d): V2d {
-    const { slide, tilt } = this.getWallPose();
-    if (slide !== 0 || tilt !== 0) {
-      const grip = V(this.stats.rightHandPosition);
-      localPoint.isub(grip).irotate(-tilt).iadd(grip).isub([slide, 0]);
-    }
-    return localPoint.iadd([0, this.stats.sideOffset]);
   }
 
   playSound(
@@ -456,56 +565,36 @@ export default class Gun extends BaseEntity implements Entity {
     return clamp(this.shootCooldown / maxShootCooldown);
   }
 
-  // Returns local positions for where the hands should go
-  getCurrentHandPositions(): [V2d, V2d] {
-    const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
-    const pumpOffset = -0.2 * this.pumpAmount;
-    const [leftX, leftY] = this.stats.leftHandPosition;
-    const [rightX, rightY] = this.stats.rightHandPosition;
-
-    return [
-      this.applyWallPose(V(leftX + recoilOffset + pumpOffset, leftY)),
-      this.applyWallPose(V(rightX + recoilOffset, rightY)),
-    ];
-  }
-
-  // Returns local coordinates for the center of the gun sprite
-  getCurrentHoldPosition(): V2d {
-    if (this.isReloading) {
-      return this.applyWallPose(V(this.stats.holdPosition).imul(0.9));
-    } else {
-      const recoilOffset = -0.125 * this.getCurrentRecoilAmount() ** 1.5;
-      return this.applyWallPose(
-        V(this.stats.holdPosition).iadd([recoilOffset, 0]),
-      );
-    }
-  }
-
-  getCurrentHoldAngle(): number {
-    return this.getBaseHoldAngle() - this.getWallPose().tilt;
-  }
-
-  private getBaseHoldAngle(): number {
-    if (this.isReloading) {
-      const t = smoothStep(this.reloadAction.phasePercent);
-      switch (this.reloadAction.currentPhase!.name) {
-        case "start":
-          return lerp(0, degToRad(-30), t);
-        case "insert":
-          return degToRad(-30);
-        case "finish":
-          return lerp(degToRad(-30), 0, t);
-      }
-    } else {
-      return this.aimOffset;
-    }
-  }
-
-  // Returns the local coordinates for the muzzle position
-  getMuzzlePosition(): V2d {
-    return this.getCurrentHoldPosition().iadd(
-      polarToVec(this.getCurrentHoldAngle(), this.stats.muzzleLength / 2),
+  /**
+   * Where the gun and the hands holding it are, in the holder's frame: the
+   * animation playing, moved by recoil, a wall in the way, and `push` meters
+   * and `twist` radians of a push (see `poseGun`)
+   */
+  getPose(push = 0, twist = 0): GunPose {
+    const wall = this.getWallPose();
+    const adjust: GunAdjustments = {
+      recoil: RECOIL_SLIDE * this.getCurrentRecoilAmount() ** 1.5,
+      kick: this.aimOffset,
+      wallSlide: wall.slide,
+      wallTilt: wall.tilt,
+      push,
+      twist,
+    };
+    return this.animator.pose(
+      (frame) => poseGun(this.stats, frame, adjust),
+      () => poseGun(this.stats, undefined, adjust),
+      blendGunPoses,
     );
+  }
+
+  /** Which way the gun points, from the way its holder faces */
+  getCurrentHoldAngle(): number {
+    return this.getPose().angle;
+  }
+
+  /** Where the muzzle is, in the holder's frame */
+  getMuzzlePosition(): V2d {
+    return muzzleOf(this.stats, this.getPose());
   }
 }
 

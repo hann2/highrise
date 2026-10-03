@@ -20,6 +20,7 @@ import VolumeController from "./controllers/VolumeController";
 import ArenaScene from "./arena/ArenaScene";
 import FireTestScene from "./fire/FireTestScene";
 import DeathsTestScene from "./enemies/remains/DeathsTestScene";
+import RigTestScene from "./rig/RigTestScene";
 import { isHuman } from "./human/Human";
 import { getStartingCharacter } from "./lobby/Lobby";
 import { generateRunPlan } from "./run/RunPlan";
@@ -135,6 +136,12 @@ export async function main() {
     params.get("scene") === "deaths"
   ) {
     game.addEntity(new DeathsTestScene());
+    return;
+  }
+
+  // ?scene=rig (development only) is for looking at how humans are animated
+  if (process.env.NODE_ENV === "development" && params.get("scene") === "rig") {
+    game.addEntity(new RigTestScene());
     return;
   }
 

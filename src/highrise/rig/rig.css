@@ -1,0 +1,58 @@
+/* The rig scene's panel (RigPanel), in the top left corner */
+.rig-panel {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  max-width: 420px;
+  padding: 8px 12px;
+  background: rgba(10, 10, 12, 0.8);
+  color: #ddd;
+  font-family: sans-serif;
+  font-size: 13px;
+  user-select: none;
+  pointer-events: none;
+  z-index: 900;
+}
+
+.rig-panel__title {
+  font-family: captureIt;
+  font-size: 22px;
+  color: red;
+}
+
+.rig-panel__guns {
+  margin-top: 6px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.rig-panel__guns td {
+  padding: 0 10px 0 0;
+}
+
+.rig-panel__time {
+  font-variant-numeric: tabular-nums;
+  color: #aaa;
+}
+
+.rig-panel__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.rig-panel__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.rig-panel__keys {
+  margin-top: 4px;
+  color: #999;
+  font-size: 11px;
+}

@@ -26,6 +26,16 @@ const PORT_HEIGHT = 1.0; // meters off the ground
 
 // TODO: Different sound depending on floor
 
+/** For things other than shell casings that fall from a gun, like magazines */
+export interface FallingOptions {
+  /** Meters wide (`texture`'s width), else a shell casing's */
+  size?: number;
+  /** Meters off the floor it starts */
+  height?: number;
+  /** How fast it spins, as a part of a shell casing's spin */
+  spin?: number;
+}
+
 export default class ShellCasing extends BaseEntity implements Entity {
   tickLayer = "effects" as const;
   sprite: Sprite & GameSprite;
@@ -33,6 +43,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
   z: number;
   zVelocity: number;
   bounceSounds: ShuffleRing<SoundName>;
+  private size: number;
 
   constructor(
     position: V2d,
@@ -40,34 +51,40 @@ export default class ShellCasing extends BaseEntity implements Entity {
     rotation: number,
     texture: ImageName,
     sounds: SoundName[],
+    { size = SIZE, height = PORT_HEIGHT, spin = 1 }: FallingOptions = {},
   ) {
     super();
 
-    this.z = PORT_HEIGHT;
+    this.size = size;
+    this.z = height;
     this.zVelocity = rUniform(0, velocity.magnitude * 0.3);
 
     this.sprite = Sprite.from(texture);
     this.sprite.layerName = Layer.FLOOR_STUFF;
-    this.sprite.scale.set(SIZE / this.sprite.texture.width);
+    this.sprite.scale.set(size / this.sprite.texture.width);
     this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.rotation = rotation;
 
     this.body = createRigid2D({
       motion: "dynamic",
       mass: 0.1,
       position,
       velocity,
+      angle: rotation,
       // No damping: speed is only lost on z-bounces (see onTick)
-      angularVelocity: rUniform(MAX_SPIN / 10, MAX_SPIN),
+      angularVelocity: rUniform(MAX_SPIN / 10, MAX_SPIN) * spin,
     });
 
+    // Along its image's long side
+    const { width, height: imageHeight } = this.sprite;
     const shape = new Capsule({
-      radius: this.sprite.width / 2,
-      length: this.sprite.height,
+      radius: Math.min(width, imageHeight) / 2,
+      length: Math.max(width, imageHeight),
       collisionGroup: CollisionGroups.Particle,
       collisionMask: CollisionGroups.Walls | CollisionGroups.Enemies,
       material: PhysicsMaterials.smallObject,
     });
-    this.body.addShape(shape, undefined, Math.PI / 2);
+    this.body.addShape(shape, undefined, imageHeight > width ? Math.PI / 2 : 0);
 
     this.bounceSounds = new ShuffleRing(sounds);
   }
@@ -106,7 +123,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.sprite.rotation = this.body.angle;
 
     const scale = 1 + this.z * 0.8;
-    this.sprite.scale.set((SIZE / this.sprite.texture.width) * scale);
+    this.sprite.scale.set((this.size / this.sprite.texture.width) * scale);
   }
 
   @on("impact")

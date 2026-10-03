@@ -1,6 +1,7 @@
 import { degToRad } from "../../../../core/util/MathUtil";
 import { Magnum } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
+import { PISTOL_ANIMATIONS } from "../gun-animations/pistolReload";
 
 export const DesertEagle: GunStats = {
   ...defaultGunStats,
@@ -23,8 +24,14 @@ export const DesertEagle: GunStats = {
   recoilAmount: degToRad(6),
   recoilRecovery: 4,
 
-  leftHandPosition: [0.4, 0],
-  rightHandPosition: [0.4, 0],
+  points: {
+    grip: [-0.12, 0],
+    foregrip: [-0.12, 0],
+    magazine: [-0.12, 0],
+    action: [-0.15, 0],
+  },
+  animations: PISTOL_ANIMATIONS,
+  magazine: { texture: "pistolMagazine", length: 0.14 },
   holdPosition: [0.52, 0],
   muzzleLength: 0.62,
 
