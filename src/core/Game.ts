@@ -90,6 +90,12 @@ export default class Game {
    * headless Chrome call back irregularly, about every 15 ms.)
    */
   refreshRateOverride: number | undefined;
+  /**
+   * While set, animation frames don't run the game: only `stepFrames` does,
+   * one frame of `targetFrameRate` at a time however long it really takes.
+   * For recording video a frame at a time (`bin/record-clip.ts`).
+   */
+  manualFrames = false;
   /** The player's frame rate limit, for fast displays on slow machines. Undefined is the display's rate */
   frameRateLimit: number | undefined;
 
@@ -362,6 +368,9 @@ export default class Game {
       ? 1 / this.refreshRateOverride
       : (time - this.lastFrameTime) / 1000;
     this.lastFrameTime = time;
+    if (this.manualFrames) {
+      return;
+    }
     this.refreshRateEstimator.maxRate =
       desktop?.displayFrequency() || undefined;
     this.refreshRateEstimator.addFrame(time / 1000);
@@ -375,6 +384,13 @@ export default class Game {
     );
     if (frames > 0) {
       this.nextFrame(frames);
+    }
+  }
+
+  /** Runs `count` frames (each a tick and a render) right now. See `manualFrames`. */
+  stepFrames(count: number = 1): void {
+    for (let i = 0; i < count; i++) {
+      this.nextFrame(1);
     }
   }
 

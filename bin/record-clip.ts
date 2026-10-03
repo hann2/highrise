@@ -1,22 +1,32 @@
 /**
- * Records a short video of a test scene, for looking at effects without
- * playing the game. Needs a dev server running (`npm run dev-server`).
+ * Records a short video of a test scene, for looking at effects and animations
+ * without playing the game. Needs a dev server running (`npm run dev-server`).
  *
- *   npm run clip -- [--scene fire|deaths] [--seconds 6] [--port 1234] [--out file.mp4]
- *     [--query "profile=1&floor=wood"]
+ *   npm run clip -- [--scene fire|deaths|rig] [--seconds 6] [--fps 60]
+ *     [--size 1280x720] [--dpr 1] [--crf 12] [--cycle 1] [--port 1234]
+ *     [--out file.mp4] [--keep-frames] [--query "gun=ar-15&zoom=3"]
  *
  * The scene (`?scene=<scene>&auto`) has to play by itself and be an entity
- * with the id `<scene>TestScene` that counts its `cycles`. Waits for the
- * scene's second cycle (so the first-time costs of compiling
- * shaders and loading are out of the way), records `seconds` of it at
- * 1280×720, and writes an mp4 (H.264, so it plays anywhere) to
- * `tests/output/<scene>.mp4` unless `--out` says otherwise, and 12 of its
- * frames side by side to `<out>-sheet.png`.
+ * with the id `<scene>TestScene` that counts its `cycles`.
+ *
+ * It's recorded a frame at a time rather than as a screen recording: the
+ * game's own loop is stopped (`Game.manualFrames`), and each frame is run
+ * (`Game.stepFrames`, at exactly `fps`), then screenshotted losslessly, so
+ * the video has every frame, evenly spaced, however slowly the machine draws
+ * them, and none of a screen recording's compression. Frames are
+ * screenshots of the page, so the HTML over the canvas is in them too.
+ *
+ * Steps the game until the scene's `cycle` has begun, records `seconds` of
+ * it at `size` (times `dpr`, the device pixel ratio: 2 is a retina display),
+ * and writes an mp4 (H.264 at quality `crf`, lower is better, 0 lossless;
+ * 4:2:0 so it plays anywhere) to `tests/output/<scene>.mp4` unless `--out`
+ * says otherwise, and 12 of its frames side by side to `<out>-sheet.png`.
+ * `--keep-frames` keeps the PNGs, in `<out>-frames/`.
  */
 import { chromium } from "@playwright/test";
 import { execFileSync } from "child_process";
 import ffmpegPath from "ffmpeg-static";
-import { mkdirSync, mkdtempSync, rmSync } from "fs";
+import { cpSync, mkdirSync, mkdtempSync, rmSync } from "fs";
 import { tmpdir } from "os";
 import path from "path";
 
@@ -27,23 +37,30 @@ function arg(name: string, fallback: string): string {
 
 const scene = arg("scene", "fire");
 const seconds = Number(arg("seconds", "6"));
+const fps = Number(arg("fps", "60"));
+const [width, height] = arg("size", "1280x720").split("x").map(Number);
+const dpr = Number(arg("dpr", "1"));
+const crf = arg("crf", "12");
+const cycle = Number(arg("cycle", "1"));
 const port = arg("port", "1234");
 const out = arg("out", `tests/output/${scene}.mp4`);
+const keepFrames = process.argv.includes("--keep-frames");
 // More of the URL, like "profile=1&floor=wood"
 const query = arg("query", "");
 
+/** Frames run per round trip to the page while waiting for the cycle */
+const WAIT_STEP = 10;
+
 async function main() {
-  const videoDir = mkdtempSync(path.join(tmpdir(), "highrise-clip-"));
+  const framesDir = mkdtempSync(path.join(tmpdir(), "highrise-clip-"));
   const browser = await chromium.launch({
     headless: false,
     args: ["--headless=new", "--ignore-gpu-blocklist", "--mute-audio"],
   });
-  const context = await browser.newContext({
-    viewport: { width: 1280, height: 720 },
-    recordVideo: { dir: videoDir, size: { width: 1280, height: 720 } },
+  const page = await browser.newPage({
+    viewport: { width, height },
+    deviceScaleFactor: dpr,
   });
-  const page = await context.newPage();
-  const recordingStart = Date.now();
   page.on("pageerror", (error) => console.error("pageerror:", error.message));
   page.on("console", (message) => {
     if (message.type() === "error" || message.type() === "warning") {
@@ -54,19 +71,62 @@ async function main() {
   await page.goto(
     `http://localhost:${port}/?scene=${scene}&auto&seed=1${query ? `&${query}` : ""}`,
   );
-  // The start of the second cycle
-  await page.waitForFunction(
-    (id) =>
-      ((window as any).DEBUG?.game?.entities.getById(id) as any)?.cycles >= 2,
-    `${scene}TestScene`,
-    { timeout: 180000, polling: 50 },
+  // Take over the game's loop as soon as there is one
+  await page.waitForFunction(() => (window as any).DEBUG?.game, undefined, {
+    timeout: 180000,
+    polling: 20,
+  });
+  await page.evaluate((fps) => {
+    const game = (window as any).DEBUG.game;
+    game.refreshRateOverride = fps;
+    game.manualFrames = true;
+  }, fps);
+
+  // Step until the cycle has begun. Real time goes by between steps, so
+  // anything still loading (the preloader, fonts) gets to finish.
+  const id = `${scene}TestScene`;
+  const deadline = Date.now() + 180000;
+  while (
+    !(await page.evaluate(
+      ({ id, cycle, steps }) => {
+        // No named functions in here: tsx would wrap them in a helper the
+        // page doesn't have
+        const game = (window as any).DEBUG.game;
+        for (let i = 0; i <= steps; i++) {
+          if ((game.entities.getById(id)?.cycles ?? 0) >= cycle) {
+            return true;
+          }
+          if (i < steps) {
+            game.stepFrames(1);
+          }
+        }
+        return false;
+      },
+      { id, cycle, steps: WAIT_STEP },
+    ))
+  ) {
+    if (Date.now() > deadline) {
+      throw new Error(`${id} never reached cycle ${cycle}`);
+    }
+    await page.waitForTimeout(5);
+  }
+
+  const frames = Math.round(seconds * fps);
+  const started = Date.now();
+  for (let i = 0; i < frames; i++) {
+    await page.evaluate(() => (window as any).DEBUG.game.stepFrames(1));
+    await page.screenshot({
+      path: path.join(framesDir, `frame-${String(i).padStart(5, "0")}.png`),
+    });
+    if (i % fps === fps - 1) {
+      process.stdout.write(`\r${i + 1}/${frames} frames`);
+    }
+  }
+  console.log(
+    `\r${frames} frames in ${((Date.now() - started) / 1000).toFixed(1)} s`,
   );
-  const clipStart = (Date.now() - recordingStart) / 1000;
-  await page.waitForTimeout(seconds * 1000);
-  await context.close();
   await browser.close();
 
-  const video = await page.video()!.path();
   mkdirSync(path.dirname(out), { recursive: true });
   execFileSync(
     ffmpegPath as unknown as string,
@@ -74,29 +134,38 @@ async function main() {
       "-y",
       "-loglevel",
       "error",
-      "-ss",
-      String(clipStart),
+      "-framerate",
+      String(fps),
       "-i",
-      video,
-      "-t",
-      String(seconds),
+      path.join(framesDir, "frame-%05d.png"),
       "-c:v",
       "libx264",
+      "-preset",
+      "slow",
+      "-tune",
+      "animation",
+      "-crf",
+      crf,
       "-pix_fmt",
       "yuv420p",
-      "-crf",
-      "20",
+      // Even dimensions, which 4:2:0 needs
+      "-vf",
+      "pad=ceil(iw/2)*2:ceil(ih/2)*2",
       "-movflags",
       "+faststart",
       out,
     ],
     { stdio: "inherit" },
   );
-  rmSync(videoDir, { recursive: true, force: true });
+  const base = out.replace(/\.mp4$/, "");
+  if (keepFrames) {
+    rmSync(`${base}-frames`, { recursive: true, force: true });
+    cpSync(framesDir, `${base}-frames`, { recursive: true });
+  }
+  rmSync(framesDir, { recursive: true, force: true });
 
   // Frames side by side, for looking at it without playing it
-  const sheet = out.replace(/\.mp4$/, "") + "-sheet.png";
-  const fps = 12 / seconds;
+  const sheet = `${base}-sheet.png`;
   execFileSync(
     ffmpegPath as unknown as string,
     [
@@ -106,7 +175,7 @@ async function main() {
       "-i",
       out,
       "-vf",
-      `fps=${fps},scale=640:-1,tile=3x4`,
+      `fps=${12 / seconds},scale=640:-1,tile=3x4`,
       "-frames:v",
       "1",
       sheet,
