@@ -12,6 +12,16 @@ export interface LegStyle {
   gait: GaitStyle;
 }
 
+// A human's legs, in meters (`BodySprite`, and the character editor's
+// preview); other bodies' are in proportion to their size
+/** From the middle of the body to each hip */
+export const HIP_WIDTH = 0.1;
+export const LEG_THICKNESS = 0.16;
+export const FOOT_LENGTH = 0.26;
+export const FOOT_WIDTH = 0.12;
+/** How far in front of the ankle the middle of the foot is */
+export const FOOT_FORWARD = 0.05;
+
 /** Plain trousers and shoes, for a character whose data doesn't say */
 export const DEFAULT_LEG_COLORS: LegColors = {
   pants: "#3e4552",

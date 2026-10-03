@@ -8,7 +8,14 @@ import { Gait } from "../../core/animation/Gait";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
-import { LegStyle } from "./Legs";
+import {
+  FOOT_FORWARD,
+  FOOT_LENGTH,
+  FOOT_WIDTH,
+  HIP_WIDTH,
+  LEG_THICKNESS,
+  LegStyle,
+} from "./Legs";
 
 export interface BodyTextures {
   head: ImageName;
@@ -25,14 +32,6 @@ export interface BodyTextures {
  */
 const VIEW_MARGIN = 1;
 
-// A human's legs, in meters; other bodies' are in proportion to their size
-/** From the middle of the body to each hip */
-const HIP_WIDTH = 0.1;
-const LEG_THICKNESS = 0.16;
-const FOOT_LENGTH = 0.26;
-const FOOT_WIDTH = 0.12;
-/** How far in front of the ankle the middle of the foot is */
-const FOOT_FORWARD = 0.05;
 /** How much bigger a foot looks at the top of its swing, nearer the camera */
 const FOOT_LIFT_SCALE = 0.15;
 /** Radians the shoulders turn against the hips with each step, at full stride */
