@@ -40,7 +40,6 @@ export default class HumanSprite extends BodySprite {
 
   @on("tick")
   onTick(dt: number) {
-    super.onTick(dt);
     const { body } = this.human;
     this.sprite.position.copyFrom(body.position);
     this.sprite.rotation = body.angle;

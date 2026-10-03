@@ -1,5 +1,5 @@
 import { angleDelta, clamp, lerp, mod, smoothStep } from "../util/MathUtil";
-import { V, V2d } from "../Vector";
+import { V2d } from "../Vector";
 
 /**
  * How a creature walks: how far its feet reach and how long they stay down,
@@ -90,7 +90,8 @@ export class Gait {
   /** Which way the hips and feet point */
   hipAngle: number;
 
-  private lastPosition?: V2d;
+  private lastX = NaN;
+  private lastY = NaN;
 
   constructor(
     public style: GaitStyle = DEFAULT_GAIT,
@@ -101,24 +102,28 @@ export class Gait {
     this.hipAngle = facing;
   }
 
-  update(position: V2d, facing: number, dt: number) {
-    const last = this.lastPosition;
-    this.lastPosition = position.clone();
-    if (dt <= 0) {
+  /**
+   * Moves the cycle on to where the body is now, `dt` seconds after the last
+   * update. That can be every tick, or (since it's only looks) every frame
+   * the body's drawn, with the game time since the last one.
+   */
+  update([x, y]: V2d, facing: number, dt: number) {
+    const dx = Number.isNaN(this.lastX) ? 0 : x - this.lastX;
+    const dy = Number.isNaN(this.lastY) ? 0 : y - this.lastY;
+    this.lastX = x;
+    this.lastY = y;
+    const distance = Math.hypot(dx, dy);
+    // Paused, or teleported: nothing to step
+    if (dt <= 0 || distance > TELEPORT_DISTANCE) {
       return;
     }
-    const moved = last ? position.sub(last) : V(0, 0);
-    const distance = moved.magnitude;
-    if (distance > TELEPORT_DISTANCE) {
-      this.speed = 0;
-      return;
-    }
+    const movedAngle = Math.atan2(dy, dx);
     this.speed = distance / dt;
     const { style } = this;
     const moving = this.speed > STANDING_SPEED;
 
     // Shorter steps going sideways
-    const across = moving ? Math.abs(Math.sin(moved.angle - facing)) : 0;
+    const across = moving ? Math.abs(Math.sin(movedAngle - facing)) : 0;
     const targetReach = moving
       ? Math.min(
           style.minReach + this.speed * style.reachPerSpeed,
@@ -132,7 +137,7 @@ export class Gait {
     if (moving) {
       this.travelAngle = approachAngle(
         this.travelAngle,
-        moved.angle,
+        movedAngle,
         TRAVEL_RESPONSE,
         dt,
       );

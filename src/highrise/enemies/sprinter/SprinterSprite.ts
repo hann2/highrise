@@ -89,7 +89,6 @@ export default class SprinterSprite extends BodySprite {
 
   @on("tick")
   onTick(dt: number) {
-    super.onTick(dt);
     if (!this.sprinter.isStunned) {
       const moveSpeed = clamp(this.sprinter.body.velocity.magnitude, -1, 4);
       this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;

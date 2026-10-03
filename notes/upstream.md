@@ -250,6 +250,9 @@ pixel ratio"
   `tests/core/gait.test.ts`.
 - Highrise draws it with `creature-stuff/BodySprite` and `Legs.ts`, which
   stay in the game.
+- `Game.simulatedTime`: seconds of ticks run while not paused (slow-mo
+  slows it). The gait is moved on in `onRender`, only for bodies in view, by
+  how much of it passed since the last frame, rather than every tick.
 
 ### Sounds: part of a buffer, resuming, slow-mo
 "Sounds: play part of a buffer, and fix resuming and slow-mo" (`045a2b1`,

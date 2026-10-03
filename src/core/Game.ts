@@ -124,6 +124,12 @@ export default class Game {
   elapsedTime: number = 0;
   /** Total amount of game time that has elapsed while not paused */
   elapsedUnpausedTime: number = 0;
+  /**
+   * Seconds the world has been simulated: the ticks' `dt`s while not paused,
+   * so slow motion slows it down. For bringing looks up to date in `onRender`
+   * by how much happened since the last frame.
+   */
+  simulatedTime: number = 0;
 
   /** TODO: Document game.camera */
   get camera() {
@@ -417,6 +423,7 @@ export default class Game {
     for (let i = 0; i < ticks; i++) {
       this.tick(tickDt);
       if (!this.paused) {
+        this.simulatedTime += tickDt;
         this.world.step(tickDt);
         this.cleanupEntities();
         this.contacts();

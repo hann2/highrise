@@ -89,7 +89,6 @@ export default class HeavySprite extends BodySprite {
 
   @on("tick")
   onTick(dt: number) {
-    super.onTick(dt);
     if (!this.heavy.isStunned) {
       const moveSpeed = clamp(this.heavy.body.velocity.magnitude);
       this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;

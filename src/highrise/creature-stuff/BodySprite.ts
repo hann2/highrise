@@ -34,6 +34,8 @@ const VIEW_MARGIN = 1;
 
 /** How much bigger a foot looks at the top of its swing, nearer the camera */
 const FOOT_LIFT_SCALE = 0.15;
+/** Feet reaching less than this (meters) are under the torso: the legs aren't drawn */
+const STANDING_REACH = 0.02;
 /** Radians the shoulders turn against the hips with each step, at full stride */
 const TORSO_TWIST = 0.06;
 
@@ -53,6 +55,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   private footSprites: Sprite[] = [];
   /** How the legs walk, worked out from how the body moves; only for a body with `legs` */
   readonly gait?: Gait;
+  /** `game.simulatedTime` when the gait was last moved on */
+  private gaitTime = 0;
   /** How big the legs are next to a human's */
   private legScale: number;
 
@@ -120,16 +124,12 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     }
   }
 
-  /** Moves the walk cycle on by how far the body went. Subclasses that tick call this. */
-  @on("tick")
-  onTick(dt: number) {
-    this.gait?.update(this.getPosition(), this.getAngle(), dt);
-  }
-
   /**
    * Poses the body where it is, unless it's out of view: then it isn't drawn,
    * and isn't posed either, since that's most of the cost of a body. Nothing
    * else may rely on the pose being up to date; `getPartPoses` updates it.
+   * The walk cycle is only for looks too, so it's moved on here, by the game
+   * time since it last was.
    */
   @on("render")
   onRender(_dt: number) {
@@ -140,6 +140,15 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     // Not `visible`, which the owner may use (enemies fade out of sight with it)
     this.sprite.renderable = inView;
     if (inView) {
+      if (this.gait) {
+        const now = this.game.simulatedTime;
+        this.gait.update(
+          this.getPosition(),
+          this.getAngle(),
+          now - this.gaitTime,
+        );
+        this.gaitTime = now;
+      }
       this.updatePose();
     }
   }
@@ -173,39 +182,51 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.rightHandSprite.position.copyFrom(rightHandPos);
   }
 
-  /** Puts the legs and feet where the walk cycle has them */
+  /**
+   * Puts the legs and feet where the walk cycle has them. Standing, they're
+   * under the torso, so they aren't drawn at all.
+   */
   private poseLegs() {
     const gait = this.gait;
-    if (!gait) {
+    if (!gait || !this.legsSprite) {
+      return;
+    }
+    this.legsSprite.visible = gait.reach > STANDING_REACH;
+    if (!this.legsSprite.visible) {
       return;
     }
     const scale = this.legScale;
     const facing = this.getAngle();
     const hipAngle = gait.hipAngle - facing;
     const travelAngle = gait.travelAngle - facing;
+    // Across the hips, and along the line of travel
+    const acrossX = -Math.sin(hipAngle) * HIP_WIDTH * scale;
+    const acrossY = Math.cos(hipAngle) * HIP_WIDTH * scale;
+    const travelX = Math.cos(travelAngle);
+    const travelY = Math.sin(travelAngle);
+    const footForward = FOOT_FORWARD * scale;
     for (const side of [0, 1] as const) {
-      const hip = polarToVec(
-        hipAngle + (side === 0 ? -Math.PI / 2 : Math.PI / 2),
-        HIP_WIDTH * scale,
-      );
-      const step = gait.foot(side);
-      const ankle = hip.add(polarToVec(travelAngle, step.along));
+      const hipX = side === 0 ? -acrossX : acrossX;
+      const hipY = side === 0 ? -acrossY : acrossY;
+      const { along, lift } = gait.foot(side);
+      const ankleX = hipX + travelX * along;
+      const ankleY = hipY + travelY * along;
 
       const leg = this.legSprites[side];
-      const span = ankle.sub(hip);
-      leg.position.copyFrom(hip.lerp(ankle, 0.5));
-      leg.rotation = span.magnitude > 0.01 ? span.angle : hipAngle;
-      leg.width = span.magnitude + LEG_THICKNESS * scale;
+      leg.position.set((hipX + ankleX) / 2, (hipY + ankleY) / 2);
+      leg.rotation = along >= 0 ? travelAngle : travelAngle + Math.PI;
+      leg.width = Math.abs(along) + LEG_THICKNESS * scale;
       leg.height = LEG_THICKNESS * scale;
 
       const foot = this.footSprites[side];
-      const lift = 1 + step.lift * FOOT_LIFT_SCALE;
-      foot.position.copyFrom(
-        ankle.iadd(polarToVec(hipAngle, FOOT_FORWARD * scale)),
+      const size = scale * (1 + lift * FOOT_LIFT_SCALE);
+      foot.position.set(
+        ankleX + Math.cos(hipAngle) * footForward,
+        ankleY + Math.sin(hipAngle) * footForward,
       );
       foot.rotation = hipAngle;
-      foot.width = FOOT_LENGTH * scale * lift;
-      foot.height = FOOT_WIDTH * scale * lift;
+      foot.width = FOOT_LENGTH * size;
+      foot.height = FOOT_WIDTH * size;
     }
   }
 

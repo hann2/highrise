@@ -88,7 +88,6 @@ export default class ZombieSprite extends BodySprite {
 
   @on("tick")
   onTick(dt: number) {
-    super.onTick(dt);
     if (!this.zombie.isStunned) {
       const moveSpeed = clamp(this.zombie.body.velocity.magnitude, -1, 4);
       this.wigglePhase += moveSpeed * this.wiggleSpeed * dt;
