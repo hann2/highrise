@@ -99,6 +99,8 @@ export default class VisionController extends BaseEntity implements Entity {
 
   /** Where the player is looking from */
   private eye: V2d = V(0, 0);
+  /** Where the darkness texture is centered: the eye, snapped to its pixels */
+  private darknessCenter: V2d = V(0, 0);
   /** What can be seen from there, sorted by angle */
   private samples: VisibilitySample[] = [];
 
@@ -293,10 +295,20 @@ export default class VisionController extends BaseEntity implements Entity {
       this.setRange(range);
     }
     this.eye = player.getPosition();
+    // The darkness texture is centered on the eye snapped to its pixels, so
+    // its pixels stay put in the world. Centered on the eye itself, a wall's
+    // shadow landed somewhere else in its pixels every frame the player
+    // moved, and its edge crawled.
+    const pixel = 1 / this.darknessResolution;
+    const center = this.darknessCenter;
+    center.set(
+      Math.round(this.eye.x / pixel) * pixel,
+      Math.round(this.eye.y / pixel) * pixel,
+    );
     const cameraMatrix = this.game.camera.getMatrix();
     this.unseenContainer.setFromMatrix(cameraMatrix);
     this.worldContainer.setFromMatrix(cameraMatrix);
-    this.eyeContainer.position.copyFrom(this.eye);
+    this.eyeContainer.position.copyFrom(center);
     if (this.explored) {
       const [ox, oy] = this.explored.origin;
       this.explored.sprite.position.set(ox, oy);
@@ -330,13 +342,17 @@ export default class VisionController extends BaseEntity implements Entity {
       this.penumbraMesh.visible = this.penumbraGeometry.indices.length > 0;
     });
     measureCpuAndGpu("VisionController.darkness", () => {
-      // The meshes are relative to the eye, so put it in the middle
+      // The meshes are relative to the eye, so put it in the middle, off by
+      // as much as it is from the snapped center
       this.renderer.render({
         container: this.darknessContainer,
         target: this.darkness,
         clear: true,
         clearColor: [0, 0, 0, 0],
-        transform: new Matrix().translate(this.outerRadius, this.outerRadius),
+        transform: new Matrix().translate(
+          this.outerRadius + this.eye.x - center.x,
+          this.outerRadius + this.eye.y - center.y,
+        ),
       });
     });
     measureCpuAndGpu("VisionController.unseen", () => {
@@ -350,7 +366,7 @@ export default class VisionController extends BaseEntity implements Entity {
       });
     });
     measureCpuAndGpu("VisionController.explored", () => {
-      this.explored?.update(this.eye);
+      this.explored?.update(center);
     });
   }
 
