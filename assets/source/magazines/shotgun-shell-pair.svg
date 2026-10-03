@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="58" viewBox="0 0 90 58">
+  <!-- Two 12 gauge shells side by side, for the double barrel. 0.075 m long. -->
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e0473a"/>
+      <stop offset="0.5" stop-color="#b52a20"/>
+      <stop offset="1" stop-color="#7a1610"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2d27a"/>
+      <stop offset="1" stop-color="#a87a28"/>
+    </linearGradient>
+    <g id="shell">
+      <rect x="20" y="4" width="66" height="22" rx="3" fill="url(#hull)" stroke="#4a0a05" stroke-width="2.5"/>
+      <path d="M 80 6 L 80 24" stroke="#00000055" stroke-width="2"/>
+      <rect x="3" y="2" width="22" height="26" rx="2" fill="url(#brass)" stroke="#5a3e10" stroke-width="2.5"/>
+      <rect x="3" y="2" width="5" height="26" rx="1" fill="#c9a240" stroke="#5a3e10" stroke-width="2"/>
+    </g>
+  </defs>
+  <use href="#shell"/>
+  <use href="#shell" y="28"/>
+</svg>

@@ -6,6 +6,7 @@ import {
   GunStats,
   ReloadingStyle,
 } from "../GunStats";
+import { SHOTGUN_ANIMATIONS } from "../gun-animations/shotgunReload";
 
 export const PumpShotgun: GunStats = {
   ...defaultGunStats,
@@ -33,9 +34,11 @@ export const PumpShotgun: GunStats = {
   points: {
     grip: [-0.2, 0],
     foregrip: [0.2, -0.03],
-    magazine: [-0.2, 0],
-    action: [-0.2, 0],
+    magazine: [-0.1, 0],
+    action: [0.2, -0.03],
   },
+  animations: SHOTGUN_ANIMATIONS,
+  magazine: { texture: "shotgunShell", length: 0.075 },
   holdPosition: [0.5, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,

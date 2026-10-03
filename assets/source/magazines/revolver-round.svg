@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="20" viewBox="0 0 64 20">
+  <!-- A .357 round from the side, rim on the left, lead nose on the right. 0.04 m long. -->
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2d27a"/>
+      <stop offset="1" stop-color="#a87a28"/>
+    </linearGradient>
+    <linearGradient id="lead" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9a9a9a"/>
+      <stop offset="1" stop-color="#555"/>
+    </linearGradient>
+  </defs>
+  <path d="M 44 4 L 52 4 Q 62 10 52 16 L 44 16 Z" fill="url(#lead)" stroke="#333" stroke-width="2"/>
+  <rect x="6" y="4" width="40" height="12" rx="1" fill="url(#brass)" stroke="#5a3e10" stroke-width="2"/>
+  <rect x="2" y="2" width="6" height="16" rx="1" fill="#c9a240" stroke="#5a3e10" stroke-width="2"/>
+</svg>

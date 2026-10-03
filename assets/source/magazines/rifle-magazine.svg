@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="228" height="80" viewBox="0 0 228 80">
+  <!-- An AR-15 magazine from the side, base plate on the left, feed lips on
+       the right with a round showing. 0.19 m long. -->
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a4a4a"/>
+      <stop offset="0.5" stop-color="#2e2e2e"/>
+      <stop offset="1" stop-color="#1c1c1c"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2d27a"/>
+      <stop offset="1" stop-color="#a87a28"/>
+    </linearGradient>
+  </defs>
+  <!-- Slightly curved body -->
+  <path d="M 14 14 Q 110 6 200 12 L 204 64 Q 110 70 14 66 Z"
+        fill="url(#body)" stroke="#0a0a0a" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Ribs -->
+  <path d="M 40 14 L 40 66 M 70 12 L 70 68 M 100 11 L 100 69 M 130 11 L 130 69 M 160 11 L 160 68"
+        stroke="#00000055" stroke-width="3"/>
+  <!-- Base plate -->
+  <rect x="4" y="10" width="16" height="60" rx="4"
+        fill="#262626" stroke="#0a0a0a" stroke-width="4"/>
+  <!-- Feed lips and the top round -->
+  <rect x="196" y="20" width="16" height="40" rx="3" fill="#1a1a1a" stroke="#0a0a0a" stroke-width="3"/>
+  <path d="M 200 28 L 214 28 Q 226 40 214 52 L 200 52 Z"
+        fill="url(#brass)" stroke="#5a3e10" stroke-width="2"/>
+</svg>

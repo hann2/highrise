@@ -6,6 +6,7 @@ import {
   GunStats,
   ReloadingStyle,
 } from "../GunStats";
+import { REVOLVER_ANIMATIONS } from "../gun-animations/revolverReload";
 
 export const Revolver: GunStats = {
   ...defaultGunStats,
@@ -32,9 +33,11 @@ export const Revolver: GunStats = {
   points: {
     grip: [-0.15, 0],
     foregrip: [-0.15, 0],
-    magazine: [-0.15, 0],
+    magazine: [-0.04, 0],
     action: [-0.15, 0],
   },
+  animations: REVOLVER_ANIMATIONS,
+  magazine: { texture: "revolverRound", length: 0.04 },
   holdPosition: [0.55, 0],
   muzzleLength: 0.64,
 

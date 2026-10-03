@@ -1,6 +1,7 @@
 import { degToRad } from "../../../../core/util/MathUtil";
 import { FourtyFive } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
+import { PISTOL_ANIMATIONS } from "../gun-animations/pistolReload";
 
 export const M1911: GunStats = {
   ...defaultGunStats,
@@ -24,8 +25,10 @@ export const M1911: GunStats = {
     grip: [-0.1, 0],
     foregrip: [-0.1, 0],
     magazine: [-0.1, 0],
-    action: [-0.1, 0],
+    action: [-0.12, 0],
   },
+  animations: PISTOL_ANIMATIONS,
+  magazine: { texture: "pistolMagazine", length: 0.125 },
   holdPosition: [0.5, 0],
   muzzleLength: 0.6,
 

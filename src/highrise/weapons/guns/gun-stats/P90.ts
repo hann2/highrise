@@ -6,6 +6,7 @@ import {
   GunStats,
   ReloadingStyle,
 } from "../GunStats";
+import { rifleAnimations } from "../gun-animations/rifleReload";
 
 export const P90: GunStats = {
   ...defaultGunStats,
@@ -34,9 +35,11 @@ export const P90: GunStats = {
   points: {
     grip: [-0.15, 0],
     foregrip: [0.1, -0.03],
-    magazine: [-0.15, 0],
-    action: [-0.15, 0],
+    magazine: [-0.03, 0],
+    action: [0.1, -0.03],
   },
+  animations: rifleAnimations({ magazineOnTop: true }),
+  magazine: { texture: "p90Magazine", length: 0.26 },
   holdPosition: [0.35, 0],
   stanceAngle: degToRad(50),
   sideOffset: 0.2,

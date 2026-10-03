@@ -82,13 +82,27 @@ export default class HumanSprite extends BodySprite {
   private setLeftHandOver(over: boolean) {
     if (over !== this.leftHandOver) {
       this.leftHandOver = over;
-      if (over) {
-        this.sprite.addChild(this.leftArmSprite, this.leftHandSprite);
-      } else {
-        // Where `BodySprite` puts them
-        this.sprite.addChildAt(this.leftArmSprite, 0);
-        this.sprite.addChildAt(this.leftHandSprite, 2);
-      }
+      this.arrangeLeftHand();
+    }
+  }
+
+  /**
+   * Puts the left arm and hand, and the magazine it carries, on top of
+   * everything, or under the body (where `BodySprite` has the arms and
+   * hands) but over the right arm, so the magazine's seen. The hand's over
+   * the magazine.
+   */
+  private arrangeLeftHand() {
+    const left = [this.leftArmSprite, this.leftHandSprite];
+    if (this.magazineSprite) {
+      left.splice(1, 0, this.magazineSprite);
+    }
+    if (this.leftHandOver) {
+      this.sprite.addChild(...left);
+    } else {
+      [this.rightArmSprite, this.rightHandSprite, ...left].forEach(
+        (sprite, i) => this.sprite.addChildAt(sprite, i),
+      );
     }
   }
 
@@ -156,8 +170,7 @@ export default class HumanSprite extends BodySprite {
           magazine.length / this.magazineSprite.texture.width,
         );
         this.magazineSprite.visible = false;
-        // Under the gun
-        this.sprite.addChild(this.magazineSprite);
+        this.arrangeLeftHand();
       }
 
       this.weaponSprite = Sprite.from(textures.holding);

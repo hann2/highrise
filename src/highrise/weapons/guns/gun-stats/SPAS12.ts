@@ -6,6 +6,7 @@ import {
   GunStats,
   ReloadingStyle,
 } from "../GunStats";
+import { SHOTGUN_ANIMATIONS } from "../gun-animations/shotgunReload";
 
 export const SPAS12: GunStats = {
   ...defaultGunStats,
@@ -33,9 +34,11 @@ export const SPAS12: GunStats = {
   points: {
     grip: [-0.3, 0],
     foregrip: [0.05, -0.03],
-    magazine: [-0.3, 0],
-    action: [-0.3, 0],
+    magazine: [-0.18, 0],
+    action: [0.05, -0.03],
   },
+  animations: SHOTGUN_ANIMATIONS,
+  magazine: { texture: "shotgunShell", length: 0.075 },
   holdPosition: [0.6, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,

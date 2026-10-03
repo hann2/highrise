@@ -238,9 +238,12 @@ export function blendGunPoses(from: GunPose, to: GunPose, u: number): GunPose {
   };
 }
 
+/** Where a point on the gun (in its own frame) is with the gun posed so, in the holder's frame */
+export function pointOnGun(pose: GunPose, point: Point): V2d {
+  return V(point[0], point[1]).irotate(pose.angle).iadd(pose.position);
+}
+
 /** Where the muzzle is with the gun posed so */
 export function muzzleOf(stats: GunStats, pose: GunPose): V2d {
-  return V(stats.muzzleLength / 2, 0)
-    .irotate(pose.angle)
-    .iadd(pose.position);
+  return pointOnGun(pose, [stats.muzzleLength / 2, 0]);
 }
