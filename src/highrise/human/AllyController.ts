@@ -108,10 +108,9 @@ export default class AllyHumanController extends BaseEntity implements Entity {
     }
 
     if (target) {
-      const direction = target.angle;
       const distance = target.magnitude;
 
-      human.setDirection(direction, dt);
+      human.aimAt(target.add(human.getPosition()), dt);
 
       if (distance < PUSH_RANGE && human.canPush()) {
         human.push();

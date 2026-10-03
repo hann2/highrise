@@ -34,7 +34,7 @@ export const PumpShotgun: GunStats = {
   rightHandPosition: [0.3, 0],
   holdPosition: [0.5, 0],
   stanceAngle: degToRad(55),
-  stanceOffset: [0, -0.25],
+  sideOffset: 0.25,
   muzzleLength: 1.1,
 
   sounds: {

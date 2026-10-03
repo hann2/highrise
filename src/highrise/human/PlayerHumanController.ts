@@ -155,8 +155,7 @@ export default class PlayerHumanController
       }
     } else {
       const mousePosition = this.game.camera.toWorld(io.mousePosition);
-      const mouseDirection = mousePosition.sub(this.human.getPosition()).angle;
-      this.human.setDirection(mouseDirection, dt);
+      this.human.aimAt(mousePosition, dt);
     }
 
     // Moving

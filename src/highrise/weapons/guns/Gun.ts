@@ -250,7 +250,9 @@ export default class Gun extends BaseEntity implements Entity {
   makeShellCasing(shooter: Human) {
     this.shellsToEject -= 1;
     const shooterDirection = shooter.getDirection();
-    const position = shooter.localToWorld(this.stats.holdPosition);
+    const position = shooter.localToWorld(
+      V(this.stats.holdPosition).iadd([0, this.stats.sideOffset]),
+    );
 
     let velocity;
     if (this.stats.ejectionType === EjectionType.RELOAD) {
@@ -392,9 +394,10 @@ export default class Gun extends BaseEntity implements Entity {
   /** Pulls the gun in (or lets it back out) depending on how close the wall in front of `holder` is */
   updateWallRetraction(holder: Human, dt: number) {
     const reach = this.stats.holdPosition[0] + this.stats.muzzleLength / 2;
+    const side = this.stats.sideOffset;
     const hit = this.game.world.raycast(
-      holder.getPosition(),
-      holder.localToWorld([reach + WALL_MARGIN, 0]),
+      holder.localToWorld([0, side]),
+      holder.localToWorld([reach + WALL_MARGIN, side]),
       { collisionMask: CollisionGroups.Walls, skipBackfaces: true },
     );
     const target = hit ? reach + WALL_MARGIN - hit.distance : 0;
@@ -421,14 +424,17 @@ export default class Gun extends BaseEntity implements Entity {
     return { slide, tilt };
   }
 
-  /** Moves a point on the gun from its usual spot to where the wall pose puts it */
+  /**
+   * Moves a point on the gun from its usual spot to where the wall pose puts
+   * it, then out to the shooter's side
+   */
   private applyWallPose(localPoint: V2d): V2d {
     const { slide, tilt } = this.getWallPose();
-    if (slide === 0 && tilt === 0) {
-      return localPoint;
+    if (slide !== 0 || tilt !== 0) {
+      const grip = V(this.stats.rightHandPosition);
+      localPoint.isub(grip).irotate(-tilt).iadd(grip).isub([slide, 0]);
     }
-    const grip = V(this.stats.rightHandPosition);
-    return localPoint.isub(grip).irotate(-tilt).iadd(grip).isub([slide, 0]);
+    return localPoint.iadd([0, this.stats.sideOffset]);
   }
 
   playSound(

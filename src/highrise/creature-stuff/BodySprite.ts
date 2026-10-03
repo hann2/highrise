@@ -104,10 +104,6 @@ export abstract class BodySprite extends BaseEntity implements Entity {
 
     this.torsoSprite.rotation = this.getStanceAngle();
 
-    const stanceOffset = this.getStanceOffset();
-    this.torsoSprite.position.copyFrom(stanceOffset);
-    this.headSprite.position.copyFrom(stanceOffset);
-
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();
     const [leftHandPos, rightHandPos] = this.getHandPositions();
 
@@ -144,18 +140,12 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     return 0;
   }
 
-  // Override me!
-  getStanceOffset() {
-    return V(0, 0);
-  }
-
   getShoulderPositions(): [V2d, V2d] {
     const stanceAngle = this.getStanceAngle();
-    const offset = this.getStanceOffset();
     const r = this.radius - this.armThickness / 2;
     return [
-      polarToVec(stanceAngle - Math.PI / 2, r).iadd(offset),
-      polarToVec(stanceAngle + Math.PI / 2, r).iadd(offset),
+      polarToVec(stanceAngle - Math.PI / 2, r),
+      polarToVec(stanceAngle + Math.PI / 2, r),
     ];
   }
 
