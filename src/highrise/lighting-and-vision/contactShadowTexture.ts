@@ -1,7 +1,7 @@
 import { Texture } from "pixi.js";
 
 /** How dark a contact shadow is right against what casts it, 0 to 1 */
-export const CONTACT_SHADOW_DARKNESS = 0.4;
+export const CONTACT_SHADOW_DARKNESS = 0.3;
 /** Pixels of the texture from the edge of the rectangle to the shadow's end */
 export const CONTACT_SHADOW_BORDER = 32;
 /** The texture's width and height: a border each side of a 2 × 2 middle */
