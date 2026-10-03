@@ -13,7 +13,7 @@ export enum Layer {
   FLOOR_DECALS = "floor_decals",
   // stuff sitting on top of the floor, like shell casings
   FLOOR_STUFF = "floor_stuff",
-  // ambient occlusion on the floor
+  // Contact shadows on the floor, where walls and doors meet it
   FLOOR_AO = "floor_ao",
   // Furniture sitting on the ground
   FURNITURE = "furniture",

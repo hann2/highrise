@@ -27,6 +27,7 @@ import {
   STAIRS_CELL,
 } from "../levels/rooms/LobbyRoomTemplate";
 import LightingManager from "../lighting-and-vision/LightingManager";
+import ContactShadows from "../lighting-and-vision/ContactShadows";
 import VisionController, {
   EXPLORED_DARKNESS,
 } from "../lighting-and-vision/VisionController";
@@ -111,6 +112,7 @@ export default class Lobby extends BaseEntity implements Entity {
 
     // Humans carry lights, so this has to exist before anyone is added
     this.addChild(new LightingManager());
+    this.addChild(new ContactShadows());
     const lobby = generateLobby();
     this.arrivalDoor = lobby.arrivalDoor;
     this.addChildren(...lobby.entities);

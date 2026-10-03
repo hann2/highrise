@@ -14,14 +14,19 @@ import { Box } from "../../core/physics/shapes/Box";
 import { PositionalSound } from "../../core/sound/PositionalSound";
 import { polarToVec } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
-import { V2d } from "../../core/Vector";
+import { V, V2d } from "../../core/Vector";
 import WallImpact from "../effects/WallImpact";
+import ContactShadow from "../lighting-and-vision/ContactShadow";
 import Bullet from "../projectiles/Bullet";
 import DoorSpring from "../utils/DoorSpring";
 import { DoorFrame } from "./DoorFrame";
 import Hittable from "./Hittable";
 
 const DOOR_THICKNESS = 0.25;
+/** How much of the door images' height is door, as a fraction of their width (their length) */
+const DOOR_IMAGE_THICKNESS = 22 / 128;
+/** How far a door's shadow on the floor reaches past its edges, in meters */
+const DOOR_SHADOW_REACH = 0.2;
 
 // The closer that swings one-way and locked doors shut (N·m per radian, N·m·s per radian)
 const CLOSER_STIFFNESS = 15;
@@ -98,6 +103,17 @@ export default class Door extends BaseEntity implements Entity, Hittable {
     this.body.addShape(shape, [length / 2, 0], Math.PI / 2);
 
     this.addChild(new DoorFrame(hingePoint, restingAngle, length));
+    this.addChild(
+      new ContactShadow(
+        length,
+        length * DOOR_IMAGE_THICKNESS,
+        DOOR_SHADOW_REACH,
+        {
+          position: V(length / 2, 0),
+          body: this.body,
+        },
+      ),
+    );
   }
 
   @on("add")

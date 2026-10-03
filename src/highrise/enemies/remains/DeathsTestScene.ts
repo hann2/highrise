@@ -14,6 +14,7 @@ import FireGrid from "../../fire/FireGrid";
 import Human from "../../human/Human";
 import { AmbientLight } from "../../lighting-and-vision/AmbientLight";
 import LightingManager from "../../lighting-and-vision/LightingManager";
+import ContactShadows from "../../lighting-and-vision/ContactShadows";
 import VisionController from "../../lighting-and-vision/VisionController";
 import SimpleEnemyController from "../base/SimpleEnemyController";
 import type { BodySprite } from "../../creature-stuff/BodySprite";
@@ -145,6 +146,7 @@ export default class DeathsTestScene extends BaseEntity implements Entity {
     this.auto = new URLSearchParams(window.location.search).has("auto");
     // Humans carry lights, so this has to exist before anyone is added
     this.addChild(new LightingManager());
+    this.addChild(new ContactShadows());
     this.addChildren(
       new RepeatingFloor(cementFloor, [0, 0], [WIDTH, HEIGHT]),
       new AmbientLight(0x777777),

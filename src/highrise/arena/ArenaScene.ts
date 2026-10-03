@@ -20,6 +20,7 @@ import Human from "../human/Human";
 import PlayerHumanController from "../human/PlayerHumanController";
 import { AmbientLight } from "../lighting-and-vision/AmbientLight";
 import LightingManager from "../lighting-and-vision/LightingManager";
+import ContactShadows from "../lighting-and-vision/ContactShadows";
 import VisionController from "../lighting-and-vision/VisionController";
 import { ActOverride } from "../run/acts";
 import { Molotov } from "../weapons/consumables/consumable-stats/Molotov";
@@ -131,6 +132,7 @@ export default class ArenaScene
     const getPlayer = () => this.player;
     // Humans carry lights, so this has to exist before anyone is added
     this.addChild(new LightingManager());
+    this.addChild(new ContactShadows());
     this.ambient = this.addChild(new AmbientLight(BRIGHT_AMBIENT));
     this.grid = this.addChild(new FireGrid());
     // Enemies ask it whether they can be seen, even with the fog off

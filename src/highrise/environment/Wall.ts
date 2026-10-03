@@ -14,7 +14,13 @@ import BulletHole from "../effects/BulletHole";
 import WallImpact from "../effects/WallImpact";
 import Bullet from "../projectiles/Bullet";
 import Hittable from "./Hittable";
+import ContactShadow from "../lighting-and-vision/ContactShadow";
 import { SolidWall, WallType } from "./WallTypes";
+
+/** How much of the wall images' width is wall (the rest is transparent) */
+const WALL_IMAGE_FILL = 0.4;
+/** How far a wall's shadow on the floor reaches past it, as a fraction of its sprite's width (as far as the shadow painted into a sprite used to) */
+const WALL_SHADOW_REACH = 0.3;
 
 export default class Wall extends BaseEntity implements Entity, Hittable {
   tags: string[] = [];
@@ -34,15 +40,6 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
 
     const drawHeight = length + type.spriteWidth / 3; // add in width to make things line up nicely
 
-    // TODO: AO Breaks on outside corners
-    const aoSprite = loadGameSprite("wallAo1", Layer.FLOOR_AO);
-    aoSprite.blendMode = "multiply";
-    aoSprite.anchor.set(0.5, 0.5);
-    aoSprite.width = drawHeight;
-    aoSprite.height = type.spriteWidth;
-    aoSprite.position.set(x, y);
-    aoSprite.rotation = angle + Math.PI / 2;
-
     // TODO: Tile wall sprite rather than just stretch it
     const wallSprite = loadGameSprite(type.imageName, Layer.WALLS);
     wallSprite.anchor.set(0.5, 0.5);
@@ -52,7 +49,17 @@ export default class Wall extends BaseEntity implements Entity, Hittable {
     wallSprite.rotation = angle + Math.PI / 2;
     wallSprite.tint = type.color ?? 0xffffff;
 
-    this.sprites = [wallSprite, aoSprite];
+    this.sprite = wallSprite;
+
+    // Around the part of the sprite that's wall
+    this.addChild(
+      new ContactShadow(
+        drawHeight,
+        type.spriteWidth * WALL_IMAGE_FILL,
+        type.spriteWidth * WALL_SHADOW_REACH,
+        { position: V(x, y), angle: angle - Math.PI / 2 },
+      ),
+    );
 
     this.body = createRigid2D({ motion: "static", position: [x, y], angle });
 
