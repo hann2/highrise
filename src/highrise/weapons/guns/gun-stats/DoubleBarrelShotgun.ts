@@ -8,11 +8,13 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 import { DOUBLE_BARREL_ANIMATIONS } from "../gun-animations/doubleBarrelReload";
+import { SAWN_OFF_FLASH } from "../muzzleFlashes";
 
 export const DoubleBarrelShotgun: GunStats = {
   ...defaultGunStats,
 
   name: "Sawn Off Shotgun",
+  flash: SAWN_OFF_FLASH,
   fireRate: 10,
   bulletStats: TwelveGuageBuckshot,
   bulletSpread: degToRad(20),
@@ -33,6 +35,8 @@ export const DoubleBarrelShotgun: GunStats = {
 
   recoilAmount: degToRad(10),
   recoilRecovery: 3,
+  recoilSlide: 0.1,
+  recoilTime: 0.05,
 
   points: {
     grip: [-0.1, 0],

@@ -7,6 +7,7 @@ import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
 import { colorLerp } from "../../core/util/ColorUtils";
 import { clamp } from "../../core/util/MathUtil";
+import { makeRandom } from "../../core/util/Random";
 import Burning from "./Burning";
 import {
   EMBER_COLORS,
@@ -174,15 +175,4 @@ export default class FireEmbers extends BaseEntity implements Entity {
       sprite.destroy();
     }
   }
-}
-
-/** Mulberry32: small, fast, and separate from the game's seeded random */
-function makeRandom(seed: number): () => number {
-  let a = seed;
-  return () => {
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
 }

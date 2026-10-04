@@ -7,11 +7,13 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 import { rifleAnimations } from "../gun-animations/rifleReload";
+import { AR15_FLASH } from "../muzzleFlashes";
 
 export const AR15: GunStats = {
   ...defaultGunStats,
 
   name: "AR-15",
+  flash: AR15_FLASH,
   fireRate: 12,
   bulletStats: FiveFiveSix,
   fireMode: FireMode.SEMI_AUTO,
@@ -31,6 +33,8 @@ export const AR15: GunStats = {
   laserSightColor: 0xff0000,
   recoilAmount: degToRad(2),
   recoilRecovery: 5,
+  recoilSlide: 0.03,
+  recoilTime: 0.03,
 
   points: {
     grip: [-0.23, 0],

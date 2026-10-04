@@ -64,8 +64,6 @@ const MAX_FIRING_TILT = degToRad(20);
 const RETRACT_SPEED = 8;
 const EXTEND_SPEED = 3;
 
-/** Meters the gun slides back right after a shot */
-const RECOIL_SLIDE = 0.125;
 /** Seconds of the pump's stroke: back (when the shell comes out), held, and forward */
 const PUMP_BACK = 0.15;
 const PUMP_HOLD = 0.05;
@@ -95,6 +93,15 @@ export default class Gun extends BaseEntity implements Entity {
   shellsToEject = 0;
 
   aimOffset = 0;
+  /**
+   * How far the gun is slid back by recoil, in meters, and how fast it's
+   * moving: a critically damped spring that each shot kicks back
+   * (`GunStats.recoilSlide`, `recoilTime`)
+   */
+  private recoilSlide = 0;
+  private recoilVelocity = 0;
+  /** Kicks from shots this tick, put into the spring after it's moved on */
+  private recoilKick = 0;
   /** How far the muzzle is pulled back from its usual spot to keep it out of a wall */
   wallRetraction = 0;
   /**
@@ -256,10 +263,17 @@ export default class Gun extends BaseEntity implements Entity {
     this.ammo -= 1;
     this.shellsToEject += 1;
     this.aimOffset += rSign() * stats.recoilAmount;
+    this.recoilKick += 1;
 
     // Various effects
     this.playSound("shoot", position);
-    this.game.addEntity(new MuzzleFlash(position, direction));
+    this.game.addEntity(
+      new MuzzleFlash(position, direction, stats.flash, () =>
+        shooter.weapon === this && !shooter.isDestroyed
+          ? shooter.localToWorld(this.getMuzzlePosition())
+          : undefined,
+      ),
+    );
     this.makeSmoke(position, direction);
 
     if (this.stats.ejectionType === EjectionType.AUTOMATIC) {
@@ -510,7 +524,27 @@ export default class Gun extends BaseEntity implements Entity {
     }
 
     this.aimOffset *= Math.exp(-dt * this.stats.recoilRecovery);
+    this.updateRecoil(dt);
     this.animator.advance(dt);
+  }
+
+  /**
+   * Moves the recoil spring on by `dt` (exactly, so it's the same at any tick
+   * rate), then kicks it with this tick's shots. Kicked after, so the frame a
+   * shot goes off shows the gun where it fired from, not already slid back
+   */
+  private updateRecoil(dt: number) {
+    const omega = 1 / this.stats.recoilTime;
+    const decay = Math.exp(-omega * dt);
+    const x = this.recoilSlide;
+    const v = this.recoilVelocity;
+    const w = (v + omega * x) * dt;
+    this.recoilSlide = (x + w) * decay;
+    this.recoilVelocity = (v - omega * w) * decay;
+    // A kick of this speed takes it recoilSlide back at its furthest
+    this.recoilVelocity +=
+      this.recoilKick * this.stats.recoilSlide * Math.E * omega;
+    this.recoilKick = 0;
   }
 
   /** Pulls the gun in (or lets it back out) depending on how close the wall in front of `holder` is */
@@ -560,11 +594,6 @@ export default class Gun extends BaseEntity implements Entity {
     }
   }
 
-  getCurrentRecoilAmount() {
-    const maxShootCooldown = 1.0 / this.stats.fireRate;
-    return clamp(this.shootCooldown / maxShootCooldown);
-  }
-
   /**
    * Where the gun and the hands holding it are, in the holder's frame: the
    * animation playing, moved by recoil, a wall in the way, and `push` meters
@@ -573,7 +602,7 @@ export default class Gun extends BaseEntity implements Entity {
   getPose(push = 0, twist = 0): GunPose {
     const wall = this.getWallPose();
     const adjust: GunAdjustments = {
-      recoil: RECOIL_SLIDE * this.getCurrentRecoilAmount() ** 1.5,
+      recoil: this.recoilSlide,
       kick: this.aimOffset,
       wallSlide: wall.slide,
       wallTilt: wall.tilt,

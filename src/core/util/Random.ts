@@ -31,9 +31,16 @@ export function reseedIfSeeded(offset: number): void {
 }
 
 function reseed(seed: number): void {
-  // mulberry32
+  r = makeRandom(seed);
+}
+
+/**
+ * A generator of its own (mulberry32: small and fast), separate from the
+ * seeded one, for randomness that's only looks and mustn't disturb it.
+ */
+export function makeRandom(seed: number): () => number {
   let a = seed | 0;
-  r = () => {
+  return () => {
     a = (a + 0x6d2b79f5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;

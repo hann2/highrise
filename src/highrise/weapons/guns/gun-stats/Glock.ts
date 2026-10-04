@@ -2,11 +2,13 @@ import { degToRad } from "../../../../core/util/MathUtil";
 import { NineMil } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 import { PISTOL_ANIMATIONS } from "../gun-animations/pistolReload";
+import { GLOCK_FLASH } from "../muzzleFlashes";
 
 export const Glock: GunStats = {
   ...defaultGunStats,
 
   name: "Glock",
+  flash: GLOCK_FLASH,
   fireRate: 20,
   bulletStats: NineMil,
   reloadingStyle: ReloadingStyle.MAGAZINE,
@@ -30,10 +32,12 @@ export const Glock: GunStats = {
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.125 },
   holdPosition: [0.5, 0],
-  muzzleLength: 0.6,
+  muzzleLength: 0.28,
 
   recoilAmount: degToRad(8),
   recoilRecovery: 10,
+  recoilSlide: 0.05,
+  recoilTime: 0.03,
 
   sounds: {
     ...defaultGunStats.sounds,

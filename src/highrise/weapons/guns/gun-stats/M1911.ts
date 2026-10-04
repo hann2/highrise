@@ -2,11 +2,13 @@ import { degToRad } from "../../../../core/util/MathUtil";
 import { FourtyFive } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 import { PISTOL_ANIMATIONS } from "../gun-animations/pistolReload";
+import { M1911_FLASH } from "../muzzleFlashes";
 
 export const M1911: GunStats = {
   ...defaultGunStats,
 
   name: "M1911",
+  flash: M1911_FLASH,
   fireRate: 20,
   bulletStats: FourtyFive,
   reloadingStyle: ReloadingStyle.MAGAZINE,
@@ -30,10 +32,12 @@ export const M1911: GunStats = {
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.125 },
   holdPosition: [0.5, 0],
-  muzzleLength: 0.6,
+  muzzleLength: 0.28,
 
   recoilAmount: degToRad(8),
   recoilRecovery: 10,
+  recoilSlide: 0.06,
+  recoilTime: 0.032,
 
   sounds: {
     ...defaultGunStats.sounds,

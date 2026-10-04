@@ -2,7 +2,7 @@
  * Records a short video of a test scene, for looking at effects and animations
  * without playing the game. Needs a dev server running (`npm run dev-server`).
  *
- *   npm run clip -- [--scene fire|deaths|rig] [--seconds 6] [--fps 60]
+ *   npm run clip -- [--scene fire|deaths|rig|walk|flash] [--seconds 6] [--fps 60]
  *     [--size 1280x720] [--dpr 1] [--crf 12] [--cycle 1] [--port 1234]
  *     [--out file.mp4] [--keep-frames] [--query "gun=ar-15&zoom=3"]
  *

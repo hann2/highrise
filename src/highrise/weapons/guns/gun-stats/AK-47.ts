@@ -7,11 +7,13 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 import { rifleAnimations } from "../gun-animations/rifleReload";
+import { AK47_FLASH } from "../muzzleFlashes";
 
 export const AK47: GunStats = {
   ...defaultGunStats,
 
   name: "AK-47",
+  flash: AK47_FLASH,
   fireRate: 10,
   bulletStats: SevenSixTwo,
   fireMode: FireMode.FULL_AUTO,
@@ -30,6 +32,8 @@ export const AK47: GunStats = {
 
   recoilAmount: degToRad(4),
   recoilRecovery: 3.1,
+  recoilSlide: 0.04,
+  recoilTime: 0.032,
 
   points: {
     grip: [-0.23, 0],
@@ -42,7 +46,7 @@ export const AK47: GunStats = {
   holdPosition: [0.55, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,
-  muzzleLength: 1.1,
+  muzzleLength: 0.98,
 
   sounds: {
     ...defaultGunStats.sounds,

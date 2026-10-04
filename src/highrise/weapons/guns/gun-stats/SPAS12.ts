@@ -7,11 +7,13 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 import { SHOTGUN_ANIMATIONS } from "../gun-animations/shotgunReload";
+import { SPAS12_FLASH } from "../muzzleFlashes";
 
 export const SPAS12: GunStats = {
   ...defaultGunStats,
 
   name: "SPAS12",
+  flash: SPAS12_FLASH,
   fireRate: 8,
   bulletStats: TwelveGuageBuckshot,
   bulletSpread: degToRad(7),
@@ -30,6 +32,8 @@ export const SPAS12: GunStats = {
   size: [1.1, 1.1],
   recoilAmount: degToRad(7),
   recoilRecovery: 2.2,
+  recoilSlide: 0.075,
+  recoilTime: 0.045,
 
   points: {
     grip: [-0.3, 0],
@@ -42,7 +46,7 @@ export const SPAS12: GunStats = {
   holdPosition: [0.6, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,
-  muzzleLength: 1.2,
+  muzzleLength: 1.1,
 
   sounds: {
     ...defaultGunStats.sounds,
