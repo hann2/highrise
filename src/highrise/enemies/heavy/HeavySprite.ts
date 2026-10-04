@@ -10,7 +10,7 @@ import { V, V2d } from "../../../core/Vector";
 import { BodySprite } from "../../creature-stuff/BodySprite";
 import { HEAVY_GAIT } from "../../creature-stuff/Legs";
 import { lerpOffsets } from "../base/enemyUtils";
-import { ZOMBIE_VARIANTS } from "../zombie/ZombieVariants";
+import { HEAVY_VARIANTS } from "../zombie/ZombieVariants";
 import Heavy, { HEAVY_RADIUS } from "./Heavy";
 
 const WIGGLE_SPEED = 0.5;
@@ -28,7 +28,7 @@ export default class HeavySprite extends BodySprite {
   wiggleSpeed: number = rNormal(WIGGLE_SPEED, WIGGLE_SPEED / 5);
 
   constructor(private heavy: Heavy) {
-    const variant = choose(...ZOMBIE_VARIANTS);
+    const variant = choose(...HEAVY_VARIANTS);
     super(variant.body.standing, HEAVY_RADIUS, {
       colors: variant.body.legColors,
       gait: HEAVY_GAIT,

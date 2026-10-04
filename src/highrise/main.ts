@@ -34,7 +34,7 @@ import SettingsController, { getSetting } from "./settings/SettingsController";
 import { createFpsPanel } from "../core/util/stats-overlay/FpsPanel";
 import Preloader from "./preloader/Preloader";
 import { bakeBodies } from "./looks/bakeBodies";
-import { ZOMBIE_LOOKS } from "./enemies/zombie/ZombieVariants";
+import { HEAVY_LOOKS, ZOMBIE_LOOKS } from "./enemies/zombie/ZombieVariants";
 import { BOB_LOOK } from "./lobby/ReceptionistBob";
 
 declare global {
@@ -91,6 +91,7 @@ export async function main() {
   const baking = bakeBodies([
     ...CHARACTERS.map((character) => character.look),
     ...ZOMBIE_LOOKS,
+    ...HEAVY_LOOKS,
     BOB_LOOK,
   ]);
   const preloader = game.addEntity(new Preloader());

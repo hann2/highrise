@@ -43,3 +43,28 @@ export const ZOMBIE_VARIANTS: ZombieVariant[] = ZOMBIE_LOOKS.map(
 export const SPRINTER_VARIANTS: ZombieVariant[] = ZOMBIE_LOOKS.map(
   (look) => new ZombieVariant(look, KEVIN_ZOMBIE_SOUNDS),
 );
+
+/** Heavies' looks: the same kind of people, but big */
+export const HEAVY_LOOKS: BodyLook[] = (() => {
+  const random = makeRandom(ZOMBIE_LOOK_SEED + 1);
+  const big = (min: number) =>
+    Math.round((min + random() * (1 - min)) * 100) / 100;
+  return Array.from({ length: 8 }, () => {
+    const look = randomLook(random, true);
+    look.build = {
+      ...look.build,
+      shoulders: big(0.5),
+      chest: big(0.4),
+      belly: big(0.3),
+      hunch: big(0.5),
+      arms: big(0.6),
+      hands: big(0.5),
+      head: big(-0.3),
+    };
+    return look;
+  });
+})();
+
+export const HEAVY_VARIANTS: ZombieVariant[] = HEAVY_LOOKS.map(
+  (look) => new ZombieVariant(look, RACHEL_ZOMBIE_SOUNDS),
+);

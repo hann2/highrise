@@ -8,7 +8,8 @@ import { CHARACTERS } from "../characters/Character";
 import { HUMAN_RADIUS, Persistence } from "../constants/constants";
 import { BodySprite } from "../creature-stuff/BodySprite";
 import { HUMAN_GAIT, ZOMBIE_GAIT } from "../creature-stuff/Legs";
-import { ZOMBIE_LOOKS } from "../enemies/zombie/ZombieVariants";
+import { HEAVY_LOOKS, ZOMBIE_LOOKS } from "../enemies/zombie/ZombieVariants";
+import { HEAVY_RADIUS } from "../enemies/heavy/Heavy";
 import { cementFloor } from "../environment/decorations/floorDecorations";
 import RepeatingFloor from "../environment/RepeatingFloor";
 import { BOB_LOOK } from "../lobby/ReceptionistBob";
@@ -60,14 +61,21 @@ export default class LooksTestScene extends BaseEntity implements Entity {
       ),
     ];
     await bakeBodies(extra);
-    const bodies = [
+    const bodies: { look: BodyLook; zombie: boolean; radius?: number }[] = [
       ...characters,
       ...ZOMBIE_LOOKS.slice(0, zombieCount).map((look) => ({
         look,
         zombie: true,
       })),
+      ...HEAVY_LOOKS.slice(0, zombieCount).map((look) => ({
+        look,
+        zombie: true,
+        radius: HEAVY_RADIUS,
+      })),
       ...extra.map((look) => ({ look, zombie: !!look.zombie })),
-      ...(only === null ? [{ look: BOB_LOOK, zombie: true }] : []),
+      ...(only === null
+        ? [{ look: BOB_LOOK, zombie: true, radius: HEAVY_RADIUS }]
+        : []),
     ];
 
     const view = this.game.renderer.getSize();
@@ -90,14 +98,16 @@ export default class LooksTestScene extends BaseEntity implements Entity {
     this.game.camera.center(V(roomWidth / 2, roomHeight / 2));
 
     const still = params.has("still");
-    bodies.forEach(({ look, zombie }, i) => {
+    bodies.forEach(({ look, zombie, radius }, i) => {
       const center = offset.add(
         V(
           (i % columns) * SPACING + SPACING / 2,
           Math.floor(i / columns) * SPACING + SPACING / 2,
         ),
       );
-      this.addChild(new Mannequin(look, center, zombie, still, i));
+      this.addChild(
+        new Mannequin(look, center, zombie, still, i, radius ?? HUMAN_RADIUS),
+      );
     });
     this.cycles = 1;
   }
@@ -115,9 +125,10 @@ class Mannequin extends BodySprite {
     private zombie: boolean,
     private still: boolean,
     index: number,
+    radius: number,
   ) {
     const appearance = getAppearance(look);
-    super(appearance.standing, HUMAN_RADIUS, {
+    super(appearance.standing, radius, {
       colors: appearance.legColors,
       gait: zombie ? ZOMBIE_GAIT : HUMAN_GAIT,
     });

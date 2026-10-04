@@ -1,7 +1,7 @@
 import { ImageName } from "../../../resources/resources";
 import { BodyLook } from "../looks/BodyLook";
 import { ComposeOptions } from "../looks/composeBody";
-import { ZOMBIE_LOOKS } from "../enemies/zombie/ZombieVariants";
+import { HEAVY_LOOKS, ZOMBIE_LOOKS } from "../enemies/zombie/ZombieVariants";
 
 /** What the encyclopedia says about a kind of enemy */
 export interface EnemyInfo {
@@ -46,7 +46,7 @@ export const ENEMY_INFO: ReadonlyArray<EnemyInfo> = [
   },
   {
     name: "Heavy",
-    image: { look: ZOMBIE_LOOKS[3] },
+    image: { look: HEAVY_LOOKS[0] },
     health: "1000",
     damage: "30–45 per hit",
     speed: "Walking pace",
