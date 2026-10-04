@@ -9,6 +9,10 @@
     "rightHand": "clariceRightHand",
     "torso": "clariceTorso"
   },
+  "legs": {
+    "pants": "#2a2a2e",
+    "shoes": "#151515"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

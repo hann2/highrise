@@ -206,6 +206,12 @@ test("changes the game would refuse aren't written", async () => {
     /isn't a weapon/,
   );
   await assert.rejects(
+    store.updateCharacter("tess", {
+      legs: { pants: "blue", shoes: "#000000" },
+    }),
+    /isn't a color/,
+  );
+  await assert.rejects(
     store.updateClip("tess", "tess-hurt-1.flac", {
       categories: ["dancing" as any],
     }),
@@ -219,12 +225,14 @@ test("character changes keep the clips, and ignore unknown fields", async () => 
     name: "Tessa",
     stats: { moveSpeed: 1.2 },
     startingWeapons: ["Glock"],
+    legs: { pants: "#112233", shoes: "#445566" },
     clips: [],
   } as any);
   const data = readData();
   assert.equal(data.name, "Tessa");
   assert.deepEqual(data.stats, { moveSpeed: 1.2 });
   assert.deepEqual(data.startingWeapons, ["Glock"]);
+  assert.deepEqual(data.legs, { pants: "#112233", shoes: "#445566" });
   assert.equal(data.clips.length, 2);
 });
 

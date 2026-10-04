@@ -1,4 +1,5 @@
 import { resourceName } from "../../core/resources/resourceName";
+import type { LegColors } from "../creature-stuff/Legs";
 import { PlayerStats } from "../human/PlayerStats";
 
 /** When a character speaks, in the order the character editor lists them */
@@ -44,6 +45,8 @@ export interface CharacterData {
   description: string;
   /** Image names from the manifest */
   textures: Record<(typeof CHARACTER_TEXTURE_PARTS)[number], string>;
+  /** The colors of their trousers and shoes (`#rrggbb`), which tint the leg images; plain ones if left out */
+  legs?: LegColors;
   /** Changes to the neutral `PlayerStats`, applied before any items */
   stats: Partial<PlayerStats>;
   /** Weapon names (`WeaponStats.name`), given at the start of a run and to them as a survivor */
@@ -104,6 +107,12 @@ export function characterDataProblems(
     const image = data.textures?.[part];
     if (!context.imageNames.has(image)) {
       problem(`texture ${part} "${image}" isn't an image`);
+    }
+  }
+
+  for (const [part, color] of Object.entries(data.legs ?? {})) {
+    if (!/^#[0-9a-fA-F]{6}$/.test(color)) {
+      problem(`legs ${part} "${color}" isn't a color like #3e4552`);
     }
   }
 

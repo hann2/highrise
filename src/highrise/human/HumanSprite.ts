@@ -4,6 +4,7 @@ import { lerp, smoothStep, stepToward } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
 import { BodySprite } from "../creature-stuff/BodySprite";
+import { HUMAN_GAIT } from "../creature-stuff/Legs";
 import { LaserSight } from "../effects/LaserSight";
 import Gun from "../weapons/guns/Gun";
 import { GunPose } from "../weapons/guns/GunPose";
@@ -14,6 +15,8 @@ const GUN_SCALE = 1 / 300;
 const STANCE_ROTATE_SPEED = Math.PI * 2; // radians per second
 /** Radians a push twists a gun per meter it shoves it */
 const PUSH_TWIST = 1;
+/** How far an empty hand swings for each meter its opposite foot steps */
+const ARM_SWING = 0.4;
 
 // Renders a human
 export default class HumanSprite extends BodySprite {
@@ -29,7 +32,10 @@ export default class HumanSprite extends BodySprite {
   private leftHandOver = false;
 
   constructor(private human: Human) {
-    super(human.character.textures, HUMAN_RADIUS);
+    super(human.character.textures, HUMAN_RADIUS, {
+      colors: human.character.legColors,
+      gait: HUMAN_GAIT,
+    });
   }
 
   @on("tick")
@@ -89,8 +95,8 @@ export default class HumanSprite extends BodySprite {
   /**
    * Puts the left arm and hand, and the magazine it carries, on top of
    * everything, or under the body (where `BodySprite` has the arms and
-   * hands) but over the right arm, so the magazine's seen. The hand's over
-   * the magazine.
+   * hands, over the legs) but over the right arm, so the magazine's seen.
+   * The hand's over the magazine.
    */
   private arrangeLeftHand() {
     const left = [this.leftArmSprite, this.leftHandSprite];
@@ -100,8 +106,9 @@ export default class HumanSprite extends BodySprite {
     if (this.leftHandOver) {
       this.sprite.addChild(...left);
     } else {
+      const bottom = this.legsSprite ? 1 : 0;
       [this.rightArmSprite, this.rightHandSprite, ...left].forEach(
-        (sprite, i) => this.sprite.addChildAt(sprite, i),
+        (sprite, i) => this.sprite.addChildAt(sprite, bottom + i),
       );
     }
   }
@@ -135,11 +142,25 @@ export default class HumanSprite extends BodySprite {
       const [left, right] = weapon.getCurrentHandPositions();
       return [left.iadd([pushOffset, 0]), right.iadd([pushOffset, 0])];
     } else {
-      // Wave em in the air like you just don't care?
+      // Wave em in the air like you just don't care? Each swings with the other side's foot.
       const x = 0.3 + pushOffset;
       const y = Math.sin(this.game.elapsedTime * 2) * 0.05;
-      return [V(x, -0.2 + y), V(x, 0.2 - y)];
+      const [leftSwing, rightSwing] = this.getArmSwing();
+      return [V(x + leftSwing, -0.2 + y), V(x + rightSwing, 0.2 - y)];
     }
+  }
+
+  /** How far forward each empty hand swings as they walk: with the other side's foot, forward the way they face */
+  private getArmSwing(): [number, number] {
+    const gait = this.gait;
+    if (!gait) {
+      return [0, 0];
+    }
+    const forward = Math.cos(gait.travelAngle - this.getAngle());
+    return [
+      gait.foot(1).along * forward * ARM_SWING,
+      gait.foot(0).along * forward * ARM_SWING,
+    ];
   }
 
   getPushOffset(): number {

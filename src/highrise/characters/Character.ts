@@ -1,6 +1,7 @@
 import { ImageName, RESOURCES, SoundName } from "../../../resources/resources";
 import { choose } from "../../core/util/Random";
 import { BodyTextures } from "../creature-stuff/BodySprite";
+import { DEFAULT_LEG_COLORS, LegColors } from "../creature-stuff/Legs";
 import { PlayerStats } from "../human/PlayerStats";
 import { loadSaveData } from "../persistence/SaveData";
 import { ShuffleRing } from "../utils/ShuffleRing";
@@ -36,6 +37,7 @@ export interface Character {
   id: string;
   name: string;
   textures: CharacterTextures;
+  legColors: LegColors;
   /** Changes to the neutral `PlayerStats` */
   stats: Partial<PlayerStats>;
   startingWeapons: WeaponStats[];
@@ -83,6 +85,7 @@ function makeCharacter(id: string, data: CharacterData): Character {
     id,
     name: data.name,
     textures: data.textures as Record<keyof BodyTextures, ImageName>,
+    legColors: data.legs ?? DEFAULT_LEG_COLORS,
     stats: data.stats,
     startingWeapons: data.startingWeapons.map((name) =>
       WEAPON_STATS.find((weapon) => weapon.name === name)!,

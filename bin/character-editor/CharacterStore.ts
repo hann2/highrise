@@ -42,6 +42,7 @@ const CHARACTER_FIELDS = [
   "name",
   "description",
   "textures",
+  "legs",
   "stats",
   "startingWeapons",
   "voice",

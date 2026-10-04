@@ -8,6 +8,7 @@ import {
 import { rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import { BodySprite } from "../../creature-stuff/BodySprite";
+import { SPRINTER_GAIT } from "../../creature-stuff/Legs";
 import { lerpOffsets } from "../base/enemyUtils";
 import Sprinter, { RUNNER_RADIUS, SPRINTER_TINT } from "./Sprinter";
 
@@ -26,7 +27,10 @@ export default class SprinterSprite extends BodySprite {
   wiggleSpeed: number = rNormal(WIGGLE_SPEED, WIGGLE_SPEED / 5);
 
   constructor(private sprinter: Sprinter) {
-    super(sprinter.zombieVariant.textures, RUNNER_RADIUS);
+    super(sprinter.zombieVariant.textures, RUNNER_RADIUS, {
+      colors: sprinter.zombieVariant.legColors,
+      gait: SPRINTER_GAIT,
+    });
 
     this.sprite.tint = SPRINTER_TINT;
   }

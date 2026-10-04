@@ -9,6 +9,10 @@
     "rightHand": "nancyRightHand",
     "torso": "nancyTorso"
   },
+  "legs": {
+    "pants": "#2f3550",
+    "shoes": "#dddddd"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

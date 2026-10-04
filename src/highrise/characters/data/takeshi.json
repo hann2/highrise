@@ -9,6 +9,10 @@
     "rightHand": "takeshiRightHand",
     "torso": "takeshiTorso"
   },
+  "legs": {
+    "pants": "#1f1f22",
+    "shoes": "#3a3a3a"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

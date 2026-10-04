@@ -9,6 +9,10 @@
     "rightHand": "chadRightHand",
     "torso": "chadTorso"
   },
+  "legs": {
+    "pants": "#c2ad84",
+    "shoes": "#e6e6e6"
+  },
   "stats": {},
   "startingWeapons": ["M1911"],
   "clips": [

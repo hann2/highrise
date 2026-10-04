@@ -3,6 +3,7 @@ import {
   CHARACTER_TEXTURE_PARTS,
   CharacterData,
 } from "../../highrise/characters/CharacterData";
+import { DEFAULT_LEG_COLORS } from "../../highrise/creature-stuff/Legs";
 import { PlayerStats } from "../../highrise/human/PlayerStats";
 import { GUNS } from "../../highrise/weapons/guns/gun-stats/gunStats";
 import { MELEE_WEAPONS } from "../../highrise/weapons/melee/melee-weapons/meleeWeapons";
@@ -75,7 +76,7 @@ export function CharacterPanel({
   return (
     <div class="panel">
       <header class="panel__header">
-        <SpritePreview textures={data.textures} size={140} />
+        <SpritePreview textures={data.textures} legs={data.legs} size={140} />
         <div class="panel__title">
           <EditableText
             class="panel__name"
@@ -106,6 +107,21 @@ export function CharacterPanel({
                 value={data.textures[part]}
                 onChange={(image) =>
                   update({ textures: { ...data.textures, [part]: image } })
+                }
+              />
+            ))}
+            {(["pants", "shoes"] as const).map((part) => (
+              <ColorPicker
+                key={part}
+                label={part === "pants" ? "Trousers" : "Shoes"}
+                value={(data.legs ?? DEFAULT_LEG_COLORS)[part]}
+                onChange={(color) =>
+                  update({
+                    legs: {
+                      ...(data.legs ?? DEFAULT_LEG_COLORS),
+                      [part]: color,
+                    },
+                  })
                 }
               />
             ))}
@@ -188,6 +204,29 @@ function PartPicker({
           </option>
         ))}
       </select>
+    </label>
+  );
+}
+
+/** A color the leg images are tinted, saved when the picker closes */
+function ColorPicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (color: string) => void;
+}) {
+  return (
+    <label class="part">
+      <input
+        type="color"
+        value={value}
+        onChange={(event) => onChange((event.target as HTMLInputElement).value)}
+      />
+      <span class="part__label">{label}</span>
+      <span class="part__value">{value}</span>
     </label>
   );
 }
