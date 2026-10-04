@@ -49,6 +49,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
   /** Seconds it lasts */
   readonly duration: number;
   private shader: Shader;
+  private geometry: Geometry;
 
   /**
    * `frozenAt` holds it at that fraction of its life forever, for looking at
@@ -116,13 +117,14 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
         },
       },
     });
+    this.geometry = new Geometry({
+      attributes: {
+        aPosition: [left, top, right, top, right, bottom, left, bottom],
+      },
+      indexBuffer: [0, 1, 2, 0, 2, 3],
+    });
     this.sprite = new Mesh({
-      geometry: new Geometry({
-        attributes: {
-          aPosition: [left, top, right, top, right, bottom, left, bottom],
-        },
-        indexBuffer: [0, 1, 2, 0, 2, 3],
-      }),
+      geometry: this.geometry,
       shader: this.shader,
     });
     this.sprite.blendMode = "add";
@@ -153,6 +155,13 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
   private brightness(): number {
     const t = this.frozenAt ?? Math.min(this.age / this.duration, 1);
     return (1 - t) ** 1.5;
+  }
+
+  @on("destroy")
+  onDestroy() {
+    // Destroying the mesh leaves its geometry and shader, which are its own
+    this.geometry.destroy();
+    this.shader.destroy();
   }
 
   @on("tick")
