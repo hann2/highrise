@@ -1,17 +1,29 @@
 {
   "name": "Kyle",
   "description": "",
-  "textures": {
-    "head": "kyleHead",
-    "leftArm": "kyleLeftArm",
-    "leftHand": "kyleLeftHand",
-    "rightArm": "kyleRightArm",
-    "rightHand": "kyleRightHand",
-    "torso": "kyleTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#ecc3a2",
+    "hair": {
+      "color": "#2a1d15",
+      "coverage": 0.8,
+      "volume": 0.3,
+      "messiness": 0.6,
+      "fringe": -0.4
+    },
+    "top": {
+      "style": "hoodie",
+      "color": "#1f5a1f"
+    },
+    "sleeves": {
+      "length": 0.9
+    },
+    "build": {
+      "belly": 0.3,
+      "chest": 0.2
+    },
     "pants": "#5d5a45",
-    "shoes": "#2a2a2a"
+    "shoes": "#2a2a2a",
+    "seed": 6
   },
   "stats": {},
   "startingWeapons": ["M1911"],

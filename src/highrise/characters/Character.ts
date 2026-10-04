@@ -1,7 +1,6 @@
-import { ImageName, RESOURCES, SoundName } from "../../../resources/resources";
+import { RESOURCES, SoundName } from "../../../resources/resources";
 import { choose } from "../../core/util/Random";
-import { BodyTextures } from "../creature-stuff/BodySprite";
-import { DEFAULT_LEG_COLORS, LegColors } from "../creature-stuff/Legs";
+import { BodyLook, resolveLook } from "../looks/BodyLook";
 import { PlayerStats } from "../human/PlayerStats";
 import { loadSaveData } from "../persistence/SaveData";
 import { ShuffleRing } from "../utils/ShuffleRing";
@@ -36,8 +35,8 @@ export interface Character {
   /** Their data file's name, which also names their audio folders */
   id: string;
   name: string;
-  textures: CharacterTextures;
-  legColors: LegColors;
+  /** What they look like; `getAppearance(look)` has their textures */
+  look: BodyLook;
   /** Changes to the neutral `PlayerStats` */
   stats: Partial<PlayerStats>;
   startingWeapons: WeaponStats[];
@@ -45,8 +44,6 @@ export interface Character {
   sounds: CharacterSounds;
   data: CharacterData;
 }
-
-export interface CharacterTextures extends BodyTextures {}
 
 export type CharacterSounds = Record<CharacterSoundClass, SoundName[]>;
 
@@ -84,8 +81,7 @@ function makeCharacter(id: string, data: CharacterData): Character {
   return {
     id,
     name: data.name,
-    textures: data.textures as Record<keyof BodyTextures, ImageName>,
-    legColors: data.legs ?? DEFAULT_LEG_COLORS,
+    look: resolveLook(data.look),
     stats: data.stats,
     startingWeapons: data.startingWeapons.map((name) =>
       WEAPON_STATS.find((weapon) => weapon.name === name)!,
@@ -103,7 +99,6 @@ function makeCharacter(id: string, data: CharacterData): Character {
 function checkCharacterData() {
   const problems = Object.entries(CHARACTER_DATA).flatMap(([id, data]) =>
     characterDataProblems(id, data as CharacterData, {
-      imageNames: new Set(Object.keys(RESOURCES.images)),
       soundNames: new Set(Object.keys(RESOURCES.sounds)),
       weaponNames: new Set(WEAPON_STATS.map((weapon) => weapon.name)),
     }),

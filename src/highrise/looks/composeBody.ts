@@ -5,7 +5,7 @@ import {
   HIP_WIDTH,
   LEG_THICKNESS,
 } from "../creature-stuff/Legs";
-import { PartialLook } from "./BodyLook";
+import { BodyLook, PartialLook } from "./BodyLook";
 import { darken } from "./color";
 import { BodyDrawing, drawBody } from "./drawBody";
 import { capsulePath, Drawing, ellipsePath, n } from "./svg";
@@ -21,6 +21,8 @@ export interface ComposeOptions {
   scale?: number;
   /** Facing up the page, as players think of it, instead of along +x */
   faceUp?: boolean;
+  /** Lying down without its legs, like a crawler */
+  legless?: boolean;
 }
 
 function place(part: Drawing, transform: string): string {
@@ -107,7 +109,9 @@ export function composeBodySvg(
     const waist = -torsoLength * 0.4;
     // The legs over the torn end, as a corpse has them
     items.push(place(parts.lyingTorso, ""));
-    items.push(place(parts.lyingLegs, `translate(${n(waist)} 0)`));
+    if (!options.legless) {
+      items.push(place(parts.lyingLegs, `translate(${n(waist)} 0)`));
+    }
     for (const [arm, hand, side] of [
       [parts.leftArm, parts.leftHand, -1],
       [parts.rightArm, parts.rightHand, 1],
@@ -127,7 +131,7 @@ export function composeBodySvg(
     items.push(place(parts.head, `translate(${n(dims.headRx * 0.55)} 0)`));
     const reach = dims.shoulderHalfWidth + 120;
     box = [
-      waist + parts.lyingLegs.minX,
+      options.legless ? parts.lyingTorso.minX : waist + parts.lyingLegs.minX,
       -reach,
       dims.headRx * 0.55 + parts.head.maxX,
       reach,
@@ -157,4 +161,20 @@ export function partSvg(part: Drawing, scale = 200): string {
 /** An SVG as a URL an `<img>` can show */
 export function svgDataUrl(svg: string): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+const portraits = new Map<string, string>();
+
+/** A whole body as an image URL, made once per look and options */
+export function portraitUrl(
+  look: BodyLook,
+  options: ComposeOptions = {},
+): string {
+  const key = JSON.stringify([look, options]);
+  let url = portraits.get(key);
+  if (!url) {
+    url = svgDataUrl(composeBodySvg(look, options, `portrait${portraits.size}`));
+    portraits.set(key, url);
+  }
+  return url;
 }

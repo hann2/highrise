@@ -2,8 +2,6 @@
 // SO DON'T PUT ANY IMPORTS IN THIS FILE EXCEPT TYPES
 
 import type { ImageName, SoundName } from "../../../resources/resources";
-import type { BodyTextures } from "../creature-stuff/BodySprite";
-import type { LegColors } from "../creature-stuff/Legs";
 import type { EnemySounds } from "../enemies/base/EnemyVoice";
 
 export const DEFAULT_LEVEL_SIZE = 14; // number of rows/columns
@@ -22,74 +20,6 @@ export const ZOMBIE_RADIUS = 0.35; // meters
 
 // Radius of a human in meters
 export const HUMAN_RADIUS = 0.35; // meters
-
-export const ZOMBIE_TEXTURES: BodyTextures[] = [
-  {
-    torso: "zombieTorso1",
-    head: "zombieHead1",
-    leftArm: "zombieLeftArm1",
-    rightArm: "zombieRightArm1",
-    leftHand: "zombieLeftHand1",
-    rightHand: "zombieRightHand1",
-  },
-  {
-    torso: "zombieTorso2",
-    head: "zombieHead2",
-    leftArm: "zombieLeftArm2",
-    rightArm: "zombieRightArm2",
-    leftHand: "zombieLeftHand2",
-    rightHand: "zombieRightHand2",
-  },
-  {
-    torso: "zombieTorso3",
-    head: "zombieHead3",
-    leftArm: "zombieLeftArm3",
-    rightArm: "zombieRightArm3",
-    leftHand: "zombieLeftHand3",
-    rightHand: "zombieRightHand3",
-  },
-];
-
-export const CRAWLER_TEXTURES: BodyTextures[] = [
-  {
-    torso: "crawlerTorso1",
-    head: "crawlerHead1",
-    leftArm: "crawlerLeftArm1",
-    rightArm: "crawlerRightArm1",
-    leftHand: "crawlerLeftHand1",
-    rightHand: "crawlerRightHand1",
-  },
-  {
-    torso: "crawlerTorso2",
-    head: "crawlerHead2",
-    leftArm: "crawlerLeftArm2",
-    rightArm: "crawlerRightArm2",
-    leftHand: "crawlerLeftHand2",
-    rightHand: "crawlerRightHand2",
-  },
-  {
-    torso: "crawlerTorso3",
-    head: "crawlerHead3",
-    leftArm: "crawlerLeftArm3",
-    rightArm: "crawlerRightArm3",
-    leftHand: "crawlerLeftHand3",
-    rightHand: "crawlerRightHand3",
-  },
-];
-
-/** Legs lying down, for corpses (one per variant, like `CRAWLER_TEXTURES`) */
-export const ZOMBIE_LEGS: ImageName[] = [
-  "zombieLegs1",
-  "zombieLegs2",
-  "zombieLegs3",
-];
-
-/** What each variant's legs are when it's up and walking: the same as `ZOMBIE_LEGS` */
-export const ZOMBIE_LEG_COLORS: LegColors[] = [
-  { pants: "#3d5470", shoes: "#2a2420" },
-  { pants: "#6b6452", shoes: "#1f1f22" },
-  { pants: "#4a3a2c", shoes: "#302018" },
-];
 
 export const RACHEL_ZOMBIE_SOUNDS: EnemySounds = {
   hit: ["rachelZombie5", "rachelZombie6", "rachelZombie13"],

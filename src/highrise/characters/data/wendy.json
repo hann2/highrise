@@ -1,17 +1,32 @@
 {
   "name": "Wendy",
   "description": "",
-  "textures": {
-    "head": "wendyHead",
-    "leftArm": "wendyLeftArm",
-    "leftHand": "wendyLeftHand",
-    "rightArm": "wendyRightArm",
-    "rightHand": "wendyRightHand",
-    "torso": "wendyTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#e2b48c",
+    "hair": {
+      "color": "#6b4024",
+      "coverage": 0.85,
+      "volume": 0.3,
+      "length": 0.6,
+      "messiness": 0.3,
+      "fringe": -0.4
+    },
+    "top": {
+      "style": "tshirt",
+      "color": "#f0d81a"
+    },
+    "sleeves": {
+      "length": 0.3
+    },
+    "build": {
+      "shoulders": -0.5,
+      "arms": -0.5,
+      "hands": -0.3,
+      "head": -0.1
+    },
     "pants": "#5b78a8",
-    "shoes": "#d84040"
+    "shoes": "#d84040",
+    "seed": 13
   },
   "stats": {},
   "startingWeapons": ["M1911"],

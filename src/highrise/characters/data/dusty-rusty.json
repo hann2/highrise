@@ -1,17 +1,38 @@
 {
   "name": "Dusty Rusty",
   "description": "",
-  "textures": {
-    "head": "dustyRustyHead",
-    "leftArm": "dustyRustyLeftArm",
-    "leftHand": "dustyRustyLeftHand",
-    "rightArm": "dustyRustyRightArm",
-    "rightHand": "dustyRustyRightHand",
-    "torso": "dustyRustyTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#e8bf9a",
+    "hair": {
+      "color": "#8a5a32",
+      "coverage": 0.8,
+      "volume": 0.2,
+      "messiness": 0.5
+    },
+    "beard": {
+      "length": 0.3
+    },
+    "hat": {
+      "style": "cowboy",
+      "color": "#9a6438",
+      "secondary": "#4a2e18"
+    },
+    "top": {
+      "style": "vest",
+      "color": "#5a4428",
+      "secondary": "#efe4d2"
+    },
+    "sleeves": {
+      "length": 0.95
+    },
+    "build": {
+      "shoulders": 0.1,
+      "hunch": 0.3,
+      "squareness": 0.3
+    },
     "pants": "#45597a",
-    "shoes": "#6b4426"
+    "shoes": "#6b4426",
+    "seed": 5
   },
   "stats": {},
   "startingWeapons": ["S&W Revolver"],

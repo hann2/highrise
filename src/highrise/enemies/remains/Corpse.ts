@@ -1,5 +1,4 @@
-import { Container, Sprite } from "pixi.js";
-import { ImageName } from "../../../../resources/resources";
+import { Container, Sprite, Texture } from "pixi.js";
 import { Layer } from "../../../config/layers";
 import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
@@ -10,6 +9,8 @@ import { angleDelta, clamp, lerp } from "../../../core/util/MathUtil";
 import { choose, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import type { BodyPoses, BodyTextures } from "../../creature-stuff/BodySprite";
+import { HUMAN_RADIUS } from "../../constants/constants";
+import { bodyPixelScale } from "../../looks/bakeBodies";
 import { WET_RADIUS } from "../../effects/BloodSplat";
 import {
   BLOOD_COLOR as BLOOD_STAIN_COLOR,
@@ -31,9 +32,6 @@ const CHAR_TIME = 4;
 export const CHARRED_TINT = 0x584840;
 /** How red the blood is */
 const BLOOD_COLOR = 0xff0000;
-/** Legs picture length, in torso lengths, and width, in body widths (it has space around the legs) */
-export const LEGS_LENGTH = 1.05;
-export const LEGS_WIDTH = 1.45;
 
 /** Where the hands can end up, for the arm on the right (+y); mirrored for the left */
 const HAND_SPOTS: V2d[] = [V(0.34, 0.12), V(0.12, 0.34), V(-0.26, 0.2)];
@@ -50,7 +48,7 @@ export interface CorpseOptions {
   /** Lying down, from the waist up (a crawler's) */
   textures: BodyTextures;
   /** Its legs lying down, waist on the right */
-  legs?: ImageName;
+  legs?: Texture;
   /** Half the width of the body lying down, in meters */
   radius: number;
   /** Where the shoulders end up */
@@ -60,7 +58,7 @@ export interface CorpseOptions {
   /** Where its parts were when it died, to fall from */
   from: BodyPoses;
   /** The torso it had standing, to fade from, with where its anchor was */
-  standingTorso: { texture: ImageName; anchor: number; scale: number };
+  standingTorso: { texture: Texture; scale: number };
   parts: CorpseParts;
   /** Tint on all of it, like a sprinter's */
   tint?: number;
@@ -111,6 +109,8 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
   private legsTo: Pose;
   private armThicknessFrom: number;
   private armThickness: number;
+  /** The scale arms and hands are drawn at */
+  private armScaleY: number;
   private legsLength: number;
 
   constructor(private options: CorpseOptions) {
@@ -132,26 +132,23 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
       angle: pose.angle - options.angle,
     });
 
-    // Sized like a crawler
-    this.torsoSprite = Sprite.from(textures.torso);
-    const scale = (radius * 2) / this.torsoSprite.texture.height;
-    this.torsoSprite.anchor.set(0.9, 0.5);
+    // Sized like a crawler, the shoulders at its middle
+    const size = radius / HUMAN_RADIUS;
+    const scale = bodyPixelScale(size);
+    this.torsoSprite = new Sprite(textures.torso);
     this.torsoSprite.scale.set(scale);
     const torsoLength = this.torsoSprite.width;
     this.torsoFrom = local(from.torso);
 
     const standing = options.standingTorso;
-    this.standingTorsoSprite = Sprite.from(standing.texture);
-    this.standingTorsoSprite.anchor.set(standing.anchor, 0.5);
+    this.standingTorsoSprite = new Sprite(standing.texture);
     this.standingTorsoSprite.scale.set(standing.scale);
 
     if (parts.legs && options.legs) {
-      const legs = Sprite.from(options.legs);
-      // The waist is at the right edge of the picture
-      legs.anchor.set(0.99, 0.5);
-      this.legsLength = torsoLength * LEGS_LENGTH;
-      legs.width = this.legsLength;
-      legs.height = radius * 2 * LEGS_WIDTH;
+      // Anchored at the waist, at the right edge of the picture
+      const legs = new Sprite(options.legs);
+      legs.scale.set(scale);
+      this.legsLength = legs.width;
       this.legsSprite = legs;
     } else {
       this.legsLength = 0;
@@ -161,23 +158,24 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
       angle: rUniform(-0.15, 0.15),
     };
 
-    const armTexture = Sprite.from(textures.leftArm).texture;
-    this.armThickness = scale * armTexture.height;
+    this.armThickness = textures.metrics.armThickness * size;
     this.armThicknessFrom = from.armThickness;
-    const shoulderOffset = radius - this.armThickness / 2;
+    this.armScaleY = scale;
+    const shoulderOffset = textures.metrics.shoulderOffset * size;
     for (const side of ["left", "right"] as const) {
       if (!(side === "left" ? parts.leftArm : parts.rightArm)) {
         continue;
       }
       const sign = side === "left" ? -1 : 1;
-      const arm = Sprite.from(
+      const arm = new Sprite(
         side === "left" ? textures.leftArm : textures.rightArm,
       );
       arm.anchor.set(0.5);
-      const hand = Sprite.from(
+      arm.scale.set(scale);
+      const hand = new Sprite(
         side === "left" ? textures.leftHand : textures.rightHand,
       );
-      hand.anchor.set(0.5);
+      hand.scale.set(scale);
       const spot = choose(...HAND_SPOTS);
       const shoulder = V(0, sign * shoulderOffset);
       this.arms.push({
@@ -205,8 +203,7 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     this.headFrom = local(from.head);
     this.headTo = { position: V(0.02, 0), angle: rUniform(-0.5, 0.5) };
     if (parts.head) {
-      this.headSprite = Sprite.from(textures.head);
-      this.headSprite.anchor.set(0.5);
+      this.headSprite = new Sprite(textures.head);
       this.headSprite.scale.set(scale);
     }
 
@@ -346,7 +343,7 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
         this.legsTo,
         legs,
       );
-      legs.width = this.legsLength * lerp(0.3, 1, t);
+      legs.scale.x = (this.legsLength * lerp(0.3, 1, t)) / legs.texture.width;
       legs.alpha = clamp(t * 2);
     }
 
@@ -354,7 +351,9 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
       lerpPose(this.headFrom, this.headTo, this.headSprite);
     }
 
-    const thickness = lerp(this.armThicknessFrom, this.armThickness, t);
+    // Arms thicken or thin from what they were standing
+    const thickness =
+      lerp(this.armThicknessFrom, this.armThickness, t) / this.armThickness;
     for (const { arm, hand, from, to } of this.arms) {
       const shoulder = from.shoulder.lerp(to.shoulder, t);
       lerpPose(from.hand, to.hand, hand);
@@ -362,9 +361,8 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
       arm.position.copyFrom(shoulder.iaddScaled(span, 0.5));
       arm.rotation = span.angle;
       arm.width = span.magnitude;
-      arm.height = thickness;
-      hand.width = thickness;
-      hand.height = thickness;
+      arm.scale.y = this.armScaleY * thickness;
+      hand.scale.set(this.armScaleY * thickness);
     }
   }
 

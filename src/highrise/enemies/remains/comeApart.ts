@@ -1,5 +1,5 @@
 import { Container, Sprite } from "pixi.js";
-import { ImageName } from "../../../../resources/resources";
+import { Texture } from "pixi.js";
 import { CollisionGroups } from "../../../config/CollisionGroups";
 import Game from "../../../core/Game";
 import { colorLerp, darken } from "../../../core/util/ColorUtils";
@@ -15,12 +15,9 @@ import FleshImpact from "../../effects/FleshImpact";
 import { BLOB_TEXTURES } from "../../effects/Splat";
 import type Burning from "../../fire/Burning";
 import type { DeathBlow } from "../base/DeathBlow";
-import Corpse, {
-  CHARRED_TINT,
-  CorpseParts,
-  LEGS_LENGTH,
-  LEGS_WIDTH,
-} from "./Corpse";
+import { bodyPixelScale } from "../../looks/bakeBodies";
+import { HUMAN_RADIUS } from "../../constants/constants";
+import Corpse, { CHARRED_TINT, CorpseParts } from "./Corpse";
 import Gib from "./Gib";
 
 // How much damage (the blow plus what came just before) it takes to...
@@ -178,7 +175,7 @@ export interface BodyRemains {
   /** Lying down, from the waist up (a crawler's) */
   lying: BodyTextures;
   /** Its legs lying down, unless it's lost them already */
-  legs?: ImageName;
+  legs?: Texture;
   /** Half the width of the body lying down, in meters */
   radius: number;
   velocity: V2d;
@@ -312,7 +309,6 @@ export function comeApart(
       from: poses,
       standingTorso: {
         texture: sprite.textures.torso,
-        anchor: sprite.torsoSprite.anchor.x,
         scale: sprite.torsoSprite.scale.x,
       },
       parts,
@@ -413,16 +409,15 @@ class PartMaker {
     private poses: BodyPoses,
     private tint: number,
   ) {
-    const torso = Sprite.from(remains.lying.torso).texture;
-    this.scale = (remains.radius * 2) / torso.height;
-    this.torsoLength = torso.width * this.scale;
-    this.legsLength = this.torsoLength * LEGS_LENGTH;
-    this.armThickness =
-      Sprite.from(remains.lying.leftArm).texture.height * this.scale;
+    const size = remains.radius / HUMAN_RADIUS;
+    this.scale = bodyPixelScale(size);
+    this.torsoLength = remains.lying.torso.width * this.scale;
+    this.legsLength = remains.legs ? remains.legs.width * this.scale : 0;
+    this.armThickness = remains.lying.metrics.armThickness * size;
   }
 
-  private sprite(texture: ImageName, scale: number = this.scale): Sprite {
-    const sprite = Sprite.from(texture);
+  private sprite(texture: Texture, scale: number = this.scale): Sprite {
+    const sprite = new Sprite(texture);
     sprite.anchor.set(0.5);
     sprite.scale.set(scale);
     return sprite;
@@ -458,10 +453,7 @@ class PartMaker {
     const length = 0.3;
     const arm = this.sprite(left ? textures.leftArm : textures.rightArm);
     arm.width = length;
-    arm.height = this.armThickness;
     const hand = this.sprite(left ? textures.leftHand : textures.rightHand);
-    hand.width = this.armThickness;
-    hand.height = this.armThickness;
     hand.position.set(length / 2, 0);
     const stump = this.stump(V(-length / 2, 0), this.armThickness * 1.3);
     return this.display(arm, stump, hand);
@@ -474,10 +466,8 @@ class PartMaker {
   }
 
   /** Legs, torn off at the waist */
-  legs(texture: ImageName): Container {
+  legs(texture: Texture): Container {
     const legs = this.sprite(texture);
-    legs.width = this.legsLength;
-    legs.height = this.remains.radius * 2 * LEGS_WIDTH;
     const stump = this.stump(
       V(this.legsLength * 0.45, 0),
       this.remains.radius * 1.3,

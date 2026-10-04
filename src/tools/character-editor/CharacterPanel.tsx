@@ -1,9 +1,5 @@
 import { ImageName, RESOURCES } from "../../../resources/resources";
-import {
-  CHARACTER_TEXTURE_PARTS,
-  CharacterData,
-} from "../../highrise/characters/CharacterData";
-import { DEFAULT_LEG_COLORS } from "../../highrise/creature-stuff/Legs";
+import { CharacterData } from "../../highrise/characters/CharacterData";
 import { PlayerStats } from "../../highrise/human/PlayerStats";
 import { GUNS } from "../../highrise/weapons/guns/gun-stats/gunStats";
 import { MELEE_WEAPONS } from "../../highrise/weapons/melee/melee-weapons/meleeWeapons";
@@ -14,7 +10,8 @@ import { RunAction } from "./App";
 import { ClipsSection } from "./ClipsSection";
 import { EditableText } from "./EditableText";
 import { playingKey, toggle } from "./player";
-import { SpritePreview } from "./SpritePreview";
+import { resolveLook } from "../../highrise/looks/BodyLook";
+import { portraitUrl } from "../../highrise/looks/composeBody";
 import { usePlaying } from "./usePlaying";
 
 const NEUTRAL_STATS = new PlayerStats();
@@ -36,15 +33,6 @@ const STAT_GROUPS: [string, (keyof PlayerStats)[]][] = [
     ],
   ],
 ];
-
-const PART_LABELS: Record<(typeof CHARACTER_TEXTURE_PARTS)[number], string> = {
-  head: "Head",
-  torso: "Torso",
-  leftArm: "Left arm",
-  leftHand: "Left hand",
-  rightArm: "Right arm",
-  rightHand: "Right hand",
-};
 
 function humanize(name: string): string {
   const words = name.replace(/([A-Z])/g, " $1").toLowerCase();
@@ -76,7 +64,7 @@ export function CharacterPanel({
   return (
     <div class="panel">
       <header class="panel__header">
-        <SpritePreview textures={data.textures} legs={data.legs} size={140} />
+        <img class="sprite-preview" src={portraitUrl(resolveLook(data.look), { scale: 260 })} />
         <div class="panel__title">
           <EditableText
             class="panel__name"
@@ -97,36 +85,6 @@ export function CharacterPanel({
       </header>
 
       <div class="panel__grid">
-        <section class="card">
-          <h2>Body</h2>
-          <div class="parts">
-            {CHARACTER_TEXTURE_PARTS.map((part) => (
-              <PartPicker
-                key={part}
-                part={part}
-                value={data.textures[part]}
-                onChange={(image) =>
-                  update({ textures: { ...data.textures, [part]: image } })
-                }
-              />
-            ))}
-            {(["pants", "shoes"] as const).map((part) => (
-              <ColorPicker
-                key={part}
-                label={part === "pants" ? "Trousers" : "Shoes"}
-                value={(data.legs ?? DEFAULT_LEG_COLORS)[part]}
-                onChange={(color) =>
-                  update({
-                    legs: {
-                      ...(data.legs ?? DEFAULT_LEG_COLORS),
-                      [part]: color,
-                    },
-                  })
-                }
-              />
-            ))}
-          </div>
-        </section>
 
         <section class="card">
           <h2>Starting weapons</h2>
@@ -172,62 +130,6 @@ export function CharacterPanel({
 
       <ClipsSection id={id} data={data} run={run} />
     </div>
-  );
-}
-
-function PartPicker({
-  part,
-  value,
-  onChange,
-}: {
-  part: (typeof CHARACTER_TEXTURE_PARTS)[number];
-  value: string;
-  onChange: (image: string) => void;
-}) {
-  const suffix = part[0].toUpperCase() + part.slice(1);
-  const options = Object.keys(RESOURCES.images).filter((name) =>
-    name.endsWith(suffix),
-  );
-  return (
-    <label class="part">
-      <img src={RESOURCES.images[value as ImageName]} />
-      <span class="part__label">{PART_LABELS[part]}</span>
-      <select
-        value={value}
-        onChange={(event) =>
-          onChange((event.target as HTMLSelectElement).value)
-        }
-      >
-        {options.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-/** A color the leg images are tinted, saved when the picker closes */
-function ColorPicker({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (color: string) => void;
-}) {
-  return (
-    <label class="part">
-      <input
-        type="color"
-        value={value}
-        onChange={(event) => onChange((event.target as HTMLInputElement).value)}
-      />
-      <span class="part__label">{label}</span>
-      <span class="part__value">{value}</span>
-    </label>
   );
 }
 

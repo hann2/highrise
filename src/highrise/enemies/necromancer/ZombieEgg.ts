@@ -9,7 +9,7 @@ import { darken } from "../../../core/util/ColorUtils";
 import { lerp, smoothStep } from "../../../core/util/MathUtil";
 import { rDirection, rInteger, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CRAWLER_TEXTURES, ZOMBIE_RADIUS } from "../../constants/constants";
+import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { getSplatSound } from "../../effects/Splat";
 import Crawler from "../crawler/Crawler";
 import Zombie from "../zombie/Zombie";
@@ -87,7 +87,7 @@ export class ZombieEgg extends BaseEntity implements Entity {
         return new Crawler(
           position,
           0,
-          CRAWLER_TEXTURES[this.variant % CRAWLER_TEXTURES.length],
+          ZOMBIE_VARIANTS[this.variant % ZOMBIE_VARIANTS.length].body.lying,
         );
     }
   }

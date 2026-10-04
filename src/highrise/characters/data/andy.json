@@ -1,17 +1,28 @@
 {
   "name": "Andy",
   "description": "Software engineer. Deadpan, dry, never raises his voice, treats the apocalypse like a badly run sprint. Jokes constantly, never smiles.",
-  "textures": {
-    "head": "andyHead",
-    "leftArm": "andyLeftArm",
-    "leftHand": "andyLeftHand",
-    "rightArm": "andyRightArm",
-    "rightHand": "andyRightHand",
-    "torso": "andyTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#ecc3a2",
+    "hair": {
+      "color": "#2a1d15",
+      "coverage": 0.8,
+      "volume": 0.25,
+      "messiness": 0.3
+    },
+    "top": {
+      "style": "tshirt",
+      "color": "#7a1010"
+    },
+    "sleeves": {
+      "length": 0.3
+    },
+    "build": {
+      "shoulders": -0.2,
+      "arms": -0.2
+    },
     "pants": "#3b4a66",
-    "shoes": "#2b2b2b"
+    "shoes": "#2b2b2b",
+    "seed": 1
   },
   "stats": {},
   "startingWeapons": ["M1911"],

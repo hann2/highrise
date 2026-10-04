@@ -89,8 +89,8 @@ export default class Zombie extends BaseEnemy {
 
     const remains: BodyRemains = {
       sprite: this.bodySprite,
-      lying: this.zombieVariant.crawlerTextures,
-      legs: this.zombieVariant.legs,
+      lying: this.zombieVariant.body.lying,
+      legs: this.zombieVariant.body.lyingLegs,
       radius: ZOMBIE_RADIUS * 0.9,
       velocity: this.body.velocity,
       burning: this.burning,
@@ -109,7 +109,7 @@ export default class Zombie extends BaseEnemy {
       const crawler = new Crawler(
         this.getPosition(),
         this.body.angle,
-        this.zombieVariant.crawlerTextures,
+        this.zombieVariant.body.lying,
       );
       // Still on fire
       if (this.burning) {

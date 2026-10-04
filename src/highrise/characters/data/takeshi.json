@@ -1,17 +1,29 @@
 {
   "name": "Takeshi",
   "description": "",
-  "textures": {
-    "head": "takeshiHead",
-    "leftArm": "takeshiLeftArm",
-    "leftHand": "takeshiLeftHand",
-    "rightArm": "takeshiRightArm",
-    "rightHand": "takeshiRightHand",
-    "torso": "takeshiTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#e8c09c",
+    "hair": {
+      "color": "#0e0e10",
+      "coverage": 0.85,
+      "volume": 0.35,
+      "messiness": 0.7,
+      "fringe": -0.5
+    },
+    "top": {
+      "style": "sweater",
+      "color": "#3a3a3c"
+    },
+    "sleeves": {
+      "length": 0.95
+    },
+    "build": {
+      "shoulders": -0.1,
+      "squareness": -0.3
+    },
     "pants": "#1f1f22",
-    "shoes": "#3a3a3a"
+    "shoes": "#3a3a3a",
+    "seed": 12
   },
   "stats": {},
   "startingWeapons": ["M1911"],

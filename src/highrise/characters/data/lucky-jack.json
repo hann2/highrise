@@ -1,17 +1,39 @@
 {
   "name": "Lucky Jack",
   "description": "",
-  "textures": {
-    "head": "luckyJackHead",
-    "leftArm": "luckyJackLeftArm",
-    "leftHand": "luckyJackLeftHand",
-    "rightArm": "luckyJackRightArm",
-    "rightHand": "luckyJackRightHand",
-    "torso": "luckyJackTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#e2b48c",
+    "hair": {
+      "color": "#2a1d15",
+      "coverage": 0.85,
+      "length": 0.45,
+      "messiness": 0.6,
+      "volume": 0.3
+    },
+    "beard": {
+      "length": 0.25
+    },
+    "hat": {
+      "style": "tricorn",
+      "color": "#262626",
+      "secondary": "#c9a640"
+    },
+    "top": {
+      "style": "coat",
+      "color": "#2e2e2e",
+      "secondary": "#e8e0cc"
+    },
+    "sleeves": {
+      "length": 0.85,
+      "cuff": "#c9a640"
+    },
+    "build": {
+      "shoulders": 0.2,
+      "squareness": 0.6
+    },
     "pants": "#2b2522",
-    "shoes": "#3b2416"
+    "shoes": "#3b2416",
+    "seed": 7
   },
   "stats": {},
   "startingWeapons": ["M1911"],

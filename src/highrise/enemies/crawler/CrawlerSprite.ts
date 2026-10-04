@@ -3,7 +3,8 @@ import { on } from "../../../core/entity/handler";
 import { clamp, smoothStep } from "../../../core/util/MathUtil";
 import { choose, rNormal, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import { CRAWLER_TEXTURES, ZOMBIE_RADIUS } from "../../constants/constants";
+import { ZOMBIE_RADIUS } from "../../constants/constants";
+import { ZOMBIE_VARIANTS } from "../zombie/ZombieVariants";
 import { BodySprite } from "../../creature-stuff/BodySprite";
 import { lerpOffsets } from "../base/enemyUtils";
 import Crawler from "./Crawler";
@@ -22,11 +23,10 @@ export default class CrawlereSprite extends BodySprite {
 
   constructor(
     private crawler: Crawler,
-    textures = choose(...CRAWLER_TEXTURES),
+    textures = choose(...ZOMBIE_VARIANTS).body.lying,
   ) {
     super(textures, ZOMBIE_RADIUS * 0.9);
 
-    this.torsoSprite.anchor.set(0.9, 0.5);
     this.sprite.layerName = Layer.CRAWLERS;
   }
 

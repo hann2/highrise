@@ -27,8 +27,8 @@ export default class SprinterSprite extends BodySprite {
   wiggleSpeed: number = rNormal(WIGGLE_SPEED, WIGGLE_SPEED / 5);
 
   constructor(private sprinter: Sprinter) {
-    super(sprinter.zombieVariant.textures, RUNNER_RADIUS, {
-      colors: sprinter.zombieVariant.legColors,
+    super(sprinter.zombieVariant.body.standing, RUNNER_RADIUS, {
+      colors: sprinter.zombieVariant.body.legColors,
       gait: SPRINTER_GAIT,
     });
 

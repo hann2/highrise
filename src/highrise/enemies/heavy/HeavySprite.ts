@@ -29,8 +29,8 @@ export default class HeavySprite extends BodySprite {
 
   constructor(private heavy: Heavy) {
     const variant = choose(...ZOMBIE_VARIANTS);
-    super(variant.textures, HEAVY_RADIUS, {
-      colors: variant.legColors,
+    super(variant.body.standing, HEAVY_RADIUS, {
+      colors: variant.body.legColors,
       gait: HEAVY_GAIT,
     });
   }

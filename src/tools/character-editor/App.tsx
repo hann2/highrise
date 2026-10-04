@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { ImageName, RESOURCES } from "../../../resources/resources";
+import { resolveLook } from "../../highrise/looks/BodyLook";
+import { portraitUrl } from "../../highrise/looks/composeBody";
 import { api } from "./api";
 import { CharacterEntry, Voice } from "./apiTypes";
 import { CharacterPanel } from "./CharacterPanel";
@@ -78,7 +79,7 @@ export function App() {
               href={`#${id}`}
               class={`sidebar__item ${entry?.id === id ? "is-selected" : ""}`}
             >
-              <img src={RESOURCES.images[data.textures.head as ImageName]} />
+              <img src={portraitUrl(resolveLook(data.look), { scale: 60 })} />
               <span class="sidebar__name">{data.name}</span>
               <span class="sidebar__count" title="Enabled clips / all clips">
                 {enabled}/{data.clips.length}

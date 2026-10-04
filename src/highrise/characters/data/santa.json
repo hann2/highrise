@@ -1,17 +1,51 @@
 {
   "name": "Santa",
   "description": "",
-  "textures": {
-    "head": "santaHead",
-    "leftArm": "santaLeftArm",
-    "leftHand": "santaLeftHand",
-    "rightArm": "santaRightArm",
-    "rightHand": "santaRightHand",
-    "torso": "santaTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#f0c8aa",
+    "hair": {
+      "color": "#f2f0ea",
+      "coverage": 0.7,
+      "volume": 0.3,
+      "messiness": 0.5,
+      "length": 0.15
+    },
+    "beard": {
+      "color": "#f6f4ee",
+      "length": 0.9
+    },
+    "hat": {
+      "style": "santa",
+      "color": "#c8141c",
+      "secondary": "#f4f1ea"
+    },
+    "top": {
+      "style": "coat",
+      "color": "#c8141c",
+      "secondary": "#f4f1ea"
+    },
+    "sleeves": {
+      "length": 0.85,
+      "cuff": "#f4f1ea"
+    },
+    "gloves": "#1f1f1f",
+    "extras": [
+      {
+        "kind": "sack",
+        "color": "#94602a"
+      }
+    ],
+    "build": {
+      "shoulders": 0.4,
+      "chest": 0.4,
+      "belly": 1,
+      "arms": 0.3,
+      "hands": 0.2,
+      "head": 0.1
+    },
     "pants": "#b0161a",
-    "shoes": "#1a1a1a"
+    "shoes": "#1a1a1a",
+    "seed": 10
   },
   "stats": {},
   "startingWeapons": ["M1911"],

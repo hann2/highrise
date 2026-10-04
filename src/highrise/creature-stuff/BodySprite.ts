@@ -1,5 +1,5 @@
 import { Container, Sprite } from "pixi.js";
-import { ImageName } from "../../../resources/resources";
+import { BodyTextures, bodyPixelScale } from "../looks/bakeBodies";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
@@ -19,14 +19,7 @@ import {
 import FloorStains, { getFloorStains } from "../effects/FloorStains";
 import { Shoes } from "./Shoes";
 
-export interface BodyTextures {
-  head: ImageName;
-  torso: ImageName;
-  leftHand: ImageName;
-  rightHand: ImageName;
-  leftArm: ImageName;
-  rightArm: ImageName;
-}
+export type { BodyTextures } from "../looks/bakeBodies";
 
 /**
  * How far (meters) beyond the edge of the view a body is still posed and
@@ -46,6 +39,9 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   headSprite: Sprite;
   leftArmSprite: Sprite;
   armThickness: number;
+  /** From the middle to each shoulder joint, in meters */
+  private shoulderOffset: number;
+  private headRadius: number;
   rightArmSprite: Sprite;
   leftHandSprite: Sprite;
   rightHandSprite: Sprite;
@@ -74,33 +70,32 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.sprite = new Container();
     this.legScale = radius / HUMAN_RADIUS;
 
-    this.torsoSprite = Sprite.from(textures.torso);
-    this.torsoSprite.anchor.set(0.5);
-    const baseScale = (this.radius * 2) / this.torsoSprite.height;
-    this.torsoSprite.scale.set(baseScale);
+    // Each part's texture is anchored where it attaches, and drawn at a
+    // fixed number of pixels per meter, bigger or smaller with the body
+    const scale = bodyPixelScale(this.legScale);
+    const { metrics } = textures;
+    this.armThickness = metrics.armThickness * this.legScale;
+    this.shoulderOffset = metrics.shoulderOffset * this.legScale;
+    this.headRadius = metrics.headRadius * this.legScale;
 
-    this.headSprite = Sprite.from(textures.head);
-    this.headSprite.anchor.set(0.5);
-    this.headSprite.scale.copyFrom(this.torsoSprite.scale); // because we know we're exporting them at the same resolution
+    this.torsoSprite = new Sprite(textures.torso);
+    this.torsoSprite.scale.set(scale);
 
-    this.leftArmSprite = Sprite.from(textures.leftArm);
-    this.armThickness = baseScale * this.leftArmSprite.height; // To use for shoulder positioning
+    this.headSprite = new Sprite(textures.head);
+    this.headSprite.scale.set(scale);
+
+    // Stretched from the shoulder to the hand
+    this.leftArmSprite = new Sprite(textures.leftArm);
     this.leftArmSprite.anchor.set(0.5, 0.5);
-    this.leftArmSprite.height = this.armThickness;
-
-    this.rightArmSprite = Sprite.from(textures.rightArm);
+    this.leftArmSprite.scale.set(scale);
+    this.rightArmSprite = new Sprite(textures.rightArm);
     this.rightArmSprite.anchor.set(0.5, 0.5);
-    this.rightArmSprite.height = this.armThickness;
+    this.rightArmSprite.scale.set(scale);
 
-    this.leftHandSprite = Sprite.from(textures.leftHand);
-    this.leftHandSprite.anchor.set(0.5, 0.5);
-    this.leftHandSprite.width = this.armThickness;
-    this.leftHandSprite.height = this.armThickness;
-
-    this.rightHandSprite = Sprite.from(textures.rightHand);
-    this.rightHandSprite.anchor.set(0.5, 0.5);
-    this.rightHandSprite.width = this.armThickness;
-    this.rightHandSprite.height = this.armThickness;
+    this.leftHandSprite = new Sprite(textures.leftHand);
+    this.leftHandSprite.scale.set(scale);
+    this.rightHandSprite = new Sprite(textures.rightHand);
+    this.rightHandSprite.scale.set(scale);
 
     this.sprite.addChild(
       this.leftArmSprite,
@@ -273,7 +268,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
 
   getShoulderPositions(): [V2d, V2d] {
     const stanceAngle = this.getStanceAngle();
-    const r = this.radius - this.armThickness / 2;
+    const r = this.shoulderOffset;
     return [
       polarToVec(stanceAngle - Math.PI / 2, r),
       polarToVec(stanceAngle + Math.PI / 2, r),
@@ -307,7 +302,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       rightHand: pose(this.rightHandSprite),
       leftShoulder: this.toWorld(leftShoulder),
       rightShoulder: this.toWorld(rightShoulder),
-      headRadius: this.headSprite.height / 2,
+      headRadius: this.headRadius,
       armThickness: this.armThickness,
     };
   }

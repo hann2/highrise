@@ -56,8 +56,8 @@ export default class Sprinter extends BaseEnemy {
       chooseDeathStyle(blow, this.bodySprite.getPartPoses(), true),
       {
         sprite: this.bodySprite,
-        lying: this.zombieVariant.crawlerTextures,
-        legs: this.zombieVariant.legs,
+        lying: this.zombieVariant.body.lying,
+        legs: this.zombieVariant.body.lyingLegs,
         radius: RUNNER_RADIUS * 0.9,
         velocity: this.body.velocity,
         tint: SPRINTER_TINT,

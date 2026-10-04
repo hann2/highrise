@@ -1,17 +1,29 @@
 {
   "name": "Simon",
   "description": "",
-  "textures": {
-    "head": "simonHead",
-    "leftArm": "simonLeftArm",
-    "leftHand": "simonLeftHand",
-    "rightArm": "simonRightArm",
-    "rightHand": "simonRightHand",
-    "torso": "simonTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#ecc3a2",
+    "hair": {
+      "color": "#6b4428",
+      "coverage": 0.8,
+      "volume": 0.35,
+      "messiness": 0.4,
+      "part": -0.4
+    },
+    "top": {
+      "style": "tshirt",
+      "color": "#2e3a8a"
+    },
+    "sleeves": {
+      "length": 0.35
+    },
+    "build": {
+      "shoulders": 0,
+      "arms": -0.1
+    },
     "pants": "#3e4e6e",
-    "shoes": "#c8c8c8"
+    "shoes": "#c8c8c8",
+    "seed": 11
   },
   "stats": {},
   "startingWeapons": ["M1911"],

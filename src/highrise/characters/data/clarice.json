@@ -1,17 +1,42 @@
 {
   "name": "Clarice",
   "description": "",
-  "textures": {
-    "head": "clariceHead",
-    "leftArm": "clariceLeftArm",
-    "leftHand": "clariceLeftHand",
-    "rightArm": "clariceRightArm",
-    "rightHand": "clariceRightHand",
-    "torso": "clariceTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#b07a48",
+    "hair": {
+      "color": "#111111",
+      "coverage": 0.85,
+      "volume": 0.25,
+      "curls": 0.4,
+      "bun": 0.35,
+      "fringe": 0.3
+    },
+    "glasses": {
+      "shape": "square",
+      "color": "#2a2a2a"
+    },
+    "top": {
+      "style": "coat",
+      "color": "#f4f4f2",
+      "secondary": "#e8e8e4"
+    },
+    "sleeves": {
+      "length": 0.92
+    },
+    "extras": [
+      {
+        "kind": "lanyard",
+        "color": "#2a5aa8"
+      }
+    ],
+    "build": {
+      "shoulders": -0.4,
+      "arms": -0.5,
+      "hands": -0.2
+    },
     "pants": "#2a2a2e",
-    "shoes": "#151515"
+    "shoes": "#151515",
+    "seed": 4
   },
   "stats": {},
   "startingWeapons": ["M1911"],

@@ -28,8 +28,8 @@ export default class ZombieSprite extends BodySprite {
   wiggleSpeed: number = rNormal(WIGGLE_SPEED, WIGGLE_SPEED / 5);
 
   constructor(private zombie: Zombie) {
-    super(zombie.zombieVariant.textures, ZOMBIE_RADIUS, {
-      colors: zombie.zombieVariant.legColors,
+    super(zombie.zombieVariant.body.standing, ZOMBIE_RADIUS, {
+      colors: zombie.zombieVariant.body.legColors,
       gait: ZOMBIE_GAIT,
     });
   }

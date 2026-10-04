@@ -6,11 +6,31 @@ import { PositionalSound } from "../../core/sound/PositionalSound";
 import { angleDelta, clamp, degToRad } from "../../core/util/MathUtil";
 import { choose } from "../../core/util/Random";
 import { V2d } from "../../core/Vector";
-import { PERRY_ZOMBIE_SOUNDS, ZOMBIE_TEXTURES } from "../constants/constants";
+import { PERRY_ZOMBIE_SOUNDS } from "../constants/constants";
 import { BodySprite } from "../creature-stuff/BodySprite";
 import { HEAVY_RADIUS } from "../enemies/heavy/Heavy";
 import Interactable from "../environment/Interactable";
 import Human from "../human/Human";
+import { BodyLook, resolveLook } from "../looks/BodyLook";
+import { getAppearance } from "../looks/bakeBodies";
+
+/** Shirt, tie, name badge, and only a little dead */
+export const BOB_LOOK: BodyLook = resolveLook({
+  skin: "#e0b48f",
+  build: { shoulders: 0.3, chest: 0.3, belly: 1, hunch: 0.4, arms: 0.4, hands: 0.3, head: 0.1 },
+  hair: { color: "#6b5a4a", coverage: 0.55, volume: 0.05, messiness: 0.2, fringe: 1 },
+  glasses: { shape: "square", color: "#2a2a2a" },
+  top: { style: "shirt", color: "#c4d6e8", secondary: "#ffffff" },
+  sleeves: { length: 0.4 },
+  extras: [
+    { kind: "tie", color: "#7a1f2b" },
+    { kind: "lanyard", color: "#2a5aa8" },
+  ],
+  pants: "#45484f",
+  shoes: "#2a2420",
+  zombie: { rot: 0.6, blood: 0, tears: 0 },
+  seed: 1000,
+});
 
 /** How close the player has to be for Bob to look at them */
 const NOTICE_DISTANCE = 5;
@@ -31,7 +51,7 @@ export default class ReceptionistBob extends BodySprite {
     private position: V2d,
     private getPlayer: () => Human | undefined,
   ) {
-    super(ZOMBIE_TEXTURES[0], HEAVY_RADIUS);
+    super(getAppearance(BOB_LOOK).standing, HEAVY_RADIUS);
 
     this.body = createRigid2D({ motion: "static", position });
     this.body.addShape(

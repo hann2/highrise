@@ -1,5 +1,5 @@
 import { resourceName } from "../../core/resources/resourceName";
-import type { LegColors } from "../creature-stuff/Legs";
+import { lookProblems, PartialLook } from "../looks/BodyLook";
 import { PlayerStats } from "../human/PlayerStats";
 
 /** When a character speaks, in the order the character editor lists them */
@@ -22,16 +22,6 @@ export const CHARACTER_SOUND_CLASSES = [
 
 export type CharacterSoundClass = (typeof CHARACTER_SOUND_CLASSES)[number];
 
-/** The body part images a character is drawn with */
-export const CHARACTER_TEXTURE_PARTS = [
-  "head",
-  "torso",
-  "leftArm",
-  "leftHand",
-  "rightArm",
-  "rightHand",
-] as const;
-
 /**
  * A character as stored in `characters/data/<id>.json`, which is what the
  * character editor reads and writes. `Character.ts` turns these into
@@ -43,10 +33,8 @@ export interface CharacterData {
   name: string;
   /** Who they are, for writing their lines */
   description: string;
-  /** Image names from the manifest */
-  textures: Record<(typeof CHARACTER_TEXTURE_PARTS)[number], string>;
-  /** The colors of their trousers and shoes (`#rrggbb`), which tint the leg images; plain ones if left out */
-  legs?: LegColors;
+  /** What they look like, which their body is drawn from (`looks/`); the default look's for anything left out */
+  look: PartialLook;
   /** Changes to the neutral `PlayerStats`, applied before any items */
   stats: Partial<PlayerStats>;
   /** Weapon names (`WeaponStats.name`), given at the start of a run and to them as a survivor */
@@ -84,7 +72,6 @@ export function clipSoundName(clip: VoiceClip): string {
 
 /** What exists for character data to refer to */
 export interface CharacterDataContext {
-  imageNames: ReadonlySet<string>;
   /** Sound names in the manifest, so every enabled clip and no disabled one */
   soundNames: ReadonlySet<string>;
   weaponNames: ReadonlySet<string>;
@@ -103,18 +90,7 @@ export function characterDataProblems(
     problem("has no name");
   }
 
-  for (const part of CHARACTER_TEXTURE_PARTS) {
-    const image = data.textures?.[part];
-    if (!context.imageNames.has(image)) {
-      problem(`texture ${part} "${image}" isn't an image`);
-    }
-  }
-
-  for (const [part, color] of Object.entries(data.legs ?? {})) {
-    if (!/^#[0-9a-fA-F]{6}$/.test(color)) {
-      problem(`legs ${part} "${color}" isn't a color like #3e4552`);
-    }
-  }
+  lookProblems(data.look).forEach(problem);
 
   const neutral = new PlayerStats();
   for (const [stat, value] of Object.entries(data.stats ?? {})) {

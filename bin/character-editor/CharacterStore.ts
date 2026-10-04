@@ -41,8 +41,7 @@ export interface SpeechGenerator {
 const CHARACTER_FIELDS = [
   "name",
   "description",
-  "textures",
-  "legs",
+  "look",
   "stats",
   "startingWeapons",
   "voice",
@@ -71,7 +70,6 @@ const FILE_STEMS: Record<CharacterSoundClass, string> = {
   relief: "relief",
 };
 
-const IMAGE_EXTENSIONS = ["bmp", "gif", "jpg", "png", "svg"];
 const SOUND_EXTENSIONS = ["flac", "mp3", "ogg", "wav"];
 
 export class CharacterStore {
@@ -141,7 +139,6 @@ export class CharacterStore {
         ),
       );
     return {
-      imageNames: namesOf(IMAGE_EXTENSIONS),
       soundNames: namesOf(SOUND_EXTENSIONS),
       weaponNames: new Set([...GUNS, ...MELEE_WEAPONS].map((w) => w.name)),
     };

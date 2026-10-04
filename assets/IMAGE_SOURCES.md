@@ -18,19 +18,19 @@ This was reconstructed in 2026 from git history, the design files in `assets/sou
 
 ## Characters (`characters/`)
 
-| Files                                                                                                  | Source                                                                                                                                                                               | Confidence             |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
-| `legs/footprint` (placeholder: a shoe's print, white, tinted with what it stepped in)                  | Claude, drawn as SVG in `assets/source/legs/`, rendered by `bin/render-svg.ts`                                                                                                       | known                  |
-| `legs/leg`, `legs/foot` (placeholders: a leg and a shoe in greys, tinted with each character's colors) | Claude, drawn as SVG in `assets/source/legs/`, rendered by `bin/render-svg.ts`                                                                                                       | known                  |
-| `<name>-head`, `-torso`, `-left/right-arm`, `-left/right-hand` (all 13 characters)                     | Simon, in `assets/source/characters.afdesign`. The style is close to Kenney's Topdown Shooter pack (its vectors are in `assets/source/kenny-vectors/`), which may have been the base | known (Kenney base: ?) |
+Characters', zombies' and Bob's bodies aren't images: they're drawn by code from each one's look (`src/highrise/looks/`), by Claude, from Simon's hand-drawn originals (which were in `assets/source/characters.afdesign`).
+
+| Files                                                                                                  | Source                                                                         | Confidence |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ---------- |
+| `legs/footprint` (placeholder: a shoe's print, white, tinted with what it stepped in)                  | Claude, drawn as SVG in `assets/source/legs/`, rendered by `bin/render-svg.ts` | known      |
+| `legs/leg`, `legs/foot` (placeholders: a leg and a shoe in greys, tinted with each character's colors) | Claude, drawn as SVG in `assets/source/legs/`, rendered by `bin/render-svg.ts` | known      |
 
 ## Zombies (`zombies/`)
 
-| Files                                                                                                | Source                                                         | Confidence         |
-| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------ |
-| `zombie-*`, `crawler-*` (heads, torsos, arms, hands, and the combined `zombie-1..3`, `crawler-1..3`) | Simon. Skin texture maybe from `assets/source/Materials_Skin/` | known (texture: ?) |
-| `crawler.png`, `heavy.png`, `necromancer.png`, `spitter.png`                                         | Philip, in `assets/source/enemies.afdesign`                    | known              |
-| `zombie-legs-1..3` (placeholders, for corpses)                                                       | Claude, drawn as SVG in `assets/source/zombie-legs/`           | known              |
+| Files                                                                       | Source                                                         | Confidence         |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------ |
+| `zombie-1..3`, `crawler-1..3` (whole bodies, inside the necromancer's eggs) | Simon. Skin texture maybe from `assets/source/Materials_Skin/` | known (texture: ?) |
+| `crawler.png`, `heavy.png`, `necromancer.png`, `spitter.png`                | Philip, in `assets/source/enemies.afdesign`                    | known              |
 
 ## Weapons (`weapons/`)
 
@@ -96,12 +96,12 @@ This was reconstructed in 2026 from git history, the design files in `assets/sou
 
 ## Effects and everything else
 
-| Files                                                                       | Source                                                                      | Confidence |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---------- |
-| `splats/` (blobs, splats, glows)                                            | Simon (`assets/unused/images/splats/splats-and-blobs.afdesign`)             | known      |
-| `shell-casings/`                                                            | Simon (`assets/source/shell-casings.afdesign`)                              | known      |
-| `effects/glow-stick-1..3.png`                                               | Simon (`assets/source/glow-stick.afdesign`)                                 | known      |
-| `effects/health-overlay.png`                                                | Simon (`assets/source/health-overlay.afdesign`)                             | known      |
-| `effects/impact-particle.png`, `solid-circle.png`, `lights/point-light.png` | Simon (simple generated shapes)                                             | likely     |
-| `health-kit.png`                                                            | Simon (`assets/source/items.afdesign`)                                      | known      |
-| `favicon.png`                                                               | ?                                                                           | ?          |
+| Files                                                                       | Source                                                          | Confidence |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------- |
+| `splats/` (blobs, splats, glows)                                            | Simon (`assets/unused/images/splats/splats-and-blobs.afdesign`) | known      |
+| `shell-casings/`                                                            | Simon (`assets/source/shell-casings.afdesign`)                  | known      |
+| `effects/glow-stick-1..3.png`                                               | Simon (`assets/source/glow-stick.afdesign`)                     | known      |
+| `effects/health-overlay.png`                                                | Simon (`assets/source/health-overlay.afdesign`)                 | known      |
+| `effects/impact-particle.png`, `solid-circle.png`, `lights/point-light.png` | Simon (simple generated shapes)                                 | likely     |
+| `health-kit.png`                                                            | Simon (`assets/source/items.afdesign`)                          | known      |
+| `favicon.png`                                                               | ?                                                               | ?          |

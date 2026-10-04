@@ -1,3 +1,4 @@
+import { getAppearance } from "../looks/bakeBodies";
 import { Sprite } from "pixi.js";
 import { on } from "../../core/entity/handler";
 import { lerp, smoothStep, stepToward } from "../../core/util/MathUtil";
@@ -32,8 +33,9 @@ export default class HumanSprite extends BodySprite {
   private leftHandOver = false;
 
   constructor(private human: Human) {
-    super(human.character.textures, HUMAN_RADIUS, {
-      colors: human.character.legColors,
+    const appearance = getAppearance(human.character.look);
+    super(appearance.standing, HUMAN_RADIUS, {
+      colors: appearance.legColors,
       gait: HUMAN_GAIT,
     });
   }

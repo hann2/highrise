@@ -23,6 +23,7 @@ import DeathsTestScene from "./enemies/remains/DeathsTestScene";
 import FlashTestScene from "./rig/FlashTestScene";
 import RigTestScene from "./rig/RigTestScene";
 import WalkTestScene from "./rig/WalkTestScene";
+import LooksTestScene from "./rig/LooksTestScene";
 import { isHuman } from "./human/Human";
 import { getStartingCharacter } from "./lobby/Lobby";
 import { generateRunPlan } from "./run/RunPlan";
@@ -32,6 +33,9 @@ import { antialiasFor, loadSettings } from "./settings/settings";
 import SettingsController, { getSetting } from "./settings/SettingsController";
 import { createFpsPanel } from "../core/util/stats-overlay/FpsPanel";
 import Preloader from "./preloader/Preloader";
+import { bakeBodies } from "./looks/bakeBodies";
+import { ZOMBIE_LOOKS } from "./enemies/zombie/ZombieVariants";
+import { BOB_LOOK } from "./lobby/ReceptionistBob";
 
 declare global {
   interface Window {
@@ -83,9 +87,16 @@ export async function main() {
     },
   });
 
+  // Every body's parts are drawn and baked into textures while the rest loads
+  const baking = bakeBodies([
+    ...CHARACTERS.map((character) => character.look),
+    ...ZOMBIE_LOOKS,
+    BOB_LOOK,
+  ]);
   const preloader = game.addEntity(new Preloader());
   await preloader.waitTillReady();
   preloader.destroy();
+  await baking;
 
   // Add some filters for fast lookup of certain entities later
   // Think of these like indexes in a DB
@@ -162,6 +173,15 @@ export async function main() {
     params.get("scene") === "walk"
   ) {
     game.addEntity(new WalkTestScene());
+    return;
+  }
+
+  // ?scene=looks (development only) is every body the generator draws
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "looks"
+  ) {
+    game.addEntity(new LooksTestScene());
     return;
   }
 

@@ -1,10 +1,14 @@
 import { ImageName } from "../../../resources/resources";
+import { BodyLook } from "../looks/BodyLook";
+import { ComposeOptions } from "../looks/composeBody";
+import { ZOMBIE_LOOKS } from "../enemies/zombie/ZombieVariants";
 
 /** What the encyclopedia says about a kind of enemy */
 export interface EnemyInfo {
   /** As given by `enemyTypeName` */
   name: string;
-  image: ImageName;
+  /** A picture, or a generated body drawn like this */
+  image: ImageName | { look: BodyLook; options?: ComposeOptions };
   health: string;
   damage: string;
   speed: string;
@@ -16,7 +20,7 @@ export interface EnemyInfo {
 export const ENEMY_INFO: ReadonlyArray<EnemyInfo> = [
   {
     name: "Zombie",
-    image: "zombieHead1",
+    image: { look: ZOMBIE_LOOKS[0] },
     health: "100",
     damage: "10–15 per hit",
     speed: "Walking pace",
@@ -25,7 +29,7 @@ export const ENEMY_INFO: ReadonlyArray<EnemyInfo> = [
   },
   {
     name: "Crawler",
-    image: "crawlerHead1",
+    image: { look: ZOMBIE_LOOKS[1], options: { pose: "lying", legless: true } },
     health: "50–80",
     damage: "10–15 per hit",
     speed: "Slow",
@@ -33,7 +37,7 @@ export const ENEMY_INFO: ReadonlyArray<EnemyInfo> = [
   },
   {
     name: "Sprinter",
-    image: "zombieHead1",
+    image: { look: ZOMBIE_LOOKS[2] },
     health: "60",
     damage: "10–15 per hit",
     speed: "Very fast",
@@ -42,7 +46,7 @@ export const ENEMY_INFO: ReadonlyArray<EnemyInfo> = [
   },
   {
     name: "Heavy",
-    image: "zombieHead1",
+    image: { look: ZOMBIE_LOOKS[3] },
     health: "1000",
     damage: "30–45 per hit",
     speed: "Walking pace",

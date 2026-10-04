@@ -1,17 +1,35 @@
 {
   "name": "Clyde",
   "description": "",
-  "textures": {
-    "head": "mikeHead",
-    "leftArm": "mikeLeftArm",
-    "leftHand": "mikeLeftHand",
-    "rightArm": "mikeRightArm",
-    "rightHand": "mikeRightHand",
-    "torso": "mikeTorso"
-  },
-  "legs": {
+  "look": {
+    "skin": "#ecc9a8",
+    "hair": {
+      "color": "#5a4636",
+      "coverage": 0.85,
+      "volume": 0,
+      "messiness": 0,
+      "fringe": 0.4
+    },
+    "top": {
+      "style": "tank",
+      "color": "#f4f4f8",
+      "pattern": {
+        "kind": "stripes",
+        "color": "#6a3ad8"
+      }
+    },
+    "sleeves": {
+      "length": 0
+    },
+    "build": {
+      "shoulders": 0.6,
+      "chest": 0.4,
+      "arms": 0.4,
+      "hands": 0.3
+    },
     "pants": "#6b5a46",
-    "shoes": "#3a2a1e"
+    "shoes": "#3a2a1e",
+    "seed": 8
   },
   "stats": {},
   "startingWeapons": ["M1911"],

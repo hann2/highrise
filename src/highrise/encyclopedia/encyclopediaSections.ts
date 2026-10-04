@@ -1,3 +1,4 @@
+import { portraitUrl } from "../looks/composeBody";
 import { RESOURCES } from "../../../resources/resources";
 import { CHARACTERS } from "../characters/Character";
 import { isCharacterUnlocked, SaveData } from "../persistence/SaveData";
@@ -45,8 +46,7 @@ const characters: EncyclopediaSection = {
     CHARACTERS.map((character) => ({
       name: character.name,
       found: isCharacterUnlocked(character.name),
-      image: RESOURCES.images[character.textures.head],
-      rotateImage: true,
+      image: portraitUrl(character.look),
       stats: [],
     })),
 };
@@ -152,8 +152,10 @@ const enemies: EncyclopediaSection = {
     ENEMY_INFO.map((enemy) => ({
       name: enemy.name,
       found: save.seen.enemies.includes(enemy.name),
-      image: RESOURCES.images[enemy.image],
-      rotateImage: enemy.image.includes("Head"),
+      image:
+        typeof enemy.image === "string"
+          ? RESOURCES.images[enemy.image]
+          : portraitUrl(enemy.image.look, enemy.image.options),
       description: enemy.description,
       stats: [
         ["Health", enemy.health],
