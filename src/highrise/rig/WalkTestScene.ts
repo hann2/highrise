@@ -39,8 +39,8 @@ const HURT = 0.2;
 const TURN_INTERVAL = 1.2;
 const TURN_FACINGS = [0, 2.4, 0.8, -1.6];
 /** Zigzagging: radians either side of straight on, and how fast it weaves */
-const ZIGZAG = 0.8;
-const ZIGZAG_RATE = 3;
+const ZIGZAG = 0.45;
+const ZIGZAG_RATE = 5;
 
 /** Who walks a lane and how */
 interface Lane {
