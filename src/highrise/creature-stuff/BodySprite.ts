@@ -4,7 +4,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
-import { Gait, SIDES } from "../../core/animation/Gait";
+import { FootLanding, Gait, SIDES } from "../../core/animation/Gait";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
@@ -16,6 +16,8 @@ import {
   LEG_THICKNESS,
   LegStyle,
 } from "./Legs";
+import FloorStains, { getFloorStains } from "../effects/FloorStains";
+import { Shoes } from "./Shoes";
 
 export interface BodyTextures {
   head: ImageName;
@@ -53,6 +55,10 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   private footSprites: Sprite[] = [];
   /** How the legs walk, worked out from how the body moves; only for a body with `legs` */
   readonly gait?: Gait;
+  /** What's on its soles, which it leaves in prints; only for a body with `legs` */
+  readonly shoes?: Shoes;
+  /** Called as each foot comes down, after the shoes have had their say (for anything else that wants to know) */
+  onFootLand?: (landing: FootLanding) => void;
   /** `game.simulatedTime` when the gait was last moved on */
   private gaitTime = 0;
   /** How big the legs are next to a human's */
@@ -107,6 +113,16 @@ export abstract class BodySprite extends BaseEntity implements Entity {
 
     if (legs) {
       this.gait = new Gait(legs.gait, HIP_WIDTH * this.legScale);
+      const shoes = new Shoes(this.legScale);
+      this.shoes = shoes;
+      this.gait.onLand = (landing) => {
+        shoes.land(
+          landing,
+          this.game.entities.getById("floorStains") as FloorStains | undefined,
+          () => getFloorStains(this.game),
+        );
+        this.onFootLand?.(landing);
+      };
       const pair = (image: "leg" | "foot", color: string) =>
         [0, 1].map(() => {
           const sprite = Sprite.from(image);

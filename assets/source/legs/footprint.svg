@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="44" viewBox="0 0 96 44">
+  <!-- The print a right shoe leaves, seen from above, heel on the left, toe
+       pointing along x; the instep (toward the other foot) is at the top.
+       White, tinted in the game (FloorStains), and mirrored for the left.
+       Same size as foot.svg, so it lines up with the shoe. Patchy, as if
+       the sole didn't press evenly. -->
+  <defs>
+    <filter id="patchy" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="7" result="noise"/>
+      <feColorMatrix in="noise" type="matrix"
+        values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 2.5 -0.35" result="mask"/>
+      <feComposite in="SourceGraphic" in2="mask" operator="in"/>
+    </filter>
+    <!-- Tread: bars across the sole -->
+    <mask id="tread">
+      <rect width="96" height="44" fill="white"/>
+      <g stroke="black" stroke-width="3.5">
+        <line x1="56" y1="4" x2="56" y2="40"/>
+        <line x1="64" y1="4" x2="64" y2="40"/>
+        <line x1="72" y1="4" x2="72" y2="40"/>
+        <line x1="80" y1="4" x2="80" y2="40"/>
+        <line x1="20" y1="8" x2="20" y2="36"/>
+        <line x1="28" y1="8" x2="28" y2="36"/>
+      </g>
+    </mask>
+  </defs>
+  <g filter="url(#patchy)" mask="url(#tread)" fill="white">
+    <!-- The ball and toes -->
+    <path d="M 50 16
+             C 56 9, 74 6, 85 11
+             C 93 15, 93 30, 85 34
+             C 74 39, 58 37, 50 33
+             C 47 27, 47 21, 50 16 Z"/>
+    <!-- The outside edge under the arch; the instep doesn't touch the floor -->
+    <path d="M 36 26 C 42 25, 48 26, 52 27 L 52 34 C 46 35, 40 35, 36 33 Z"/>
+    <!-- The heel -->
+    <ellipse cx="24" cy="23" rx="14" ry="11"/>
+  </g>
+</svg>

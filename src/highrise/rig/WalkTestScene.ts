@@ -24,6 +24,13 @@ import { GUNS } from "../weapons/guns/gun-stats/gunStats";
 import Gun from "../weapons/guns/Gun";
 import { BodySprite } from "../creature-stuff/BodySprite";
 import { HIP_WIDTH } from "../creature-stuff/Legs";
+import { Sprite } from "pixi.js";
+import { Layer } from "../../config/layers";
+import { GameSprite } from "../../core/entity/GameSprite";
+import { darken } from "../../core/util/ColorUtils";
+import { WET_RADIUS } from "../effects/BloodSplat";
+import { BLOOD_COLOR, getFloorStains } from "../effects/FloorStains";
+import { SPLAT_TEXTURES } from "../effects/Splat";
 import FootprintMarker from "./FootprintMarker";
 import { RIG_SPEEDS } from "./RigTestScene";
 
@@ -35,6 +42,9 @@ const LENGTH = 11;
 const PAUSE = 0.6;
 /** Hurt walkers are kept at this share of their health (under 30% is hurt) */
 const HURT = 0.2;
+/** With `blood`: how far along each lane its puddle is, and how big (meters) */
+const PUDDLE_ALONG = 0.3;
+const PUDDLE_SIZE = 2.2;
 /** Turning on the spot: seconds between turns, and the ways it turns to */
 const TURN_INTERVAL = 1.2;
 const TURN_FACINGS = [0, 2.4, 0.8, -1.6];
@@ -137,6 +147,35 @@ interface Walker {
   waiting: number;
 }
 
+/** A puddle of blood that stays, like a corpse's */
+class Puddle extends BaseEntity implements Entity {
+  sprite: Sprite & GameSprite;
+
+  constructor(
+    private where: V2d,
+    size: number,
+  ) {
+    super();
+    this.sprite = Sprite.from(SPLAT_TEXTURES[2]);
+    this.sprite.anchor.set(0.5);
+    this.sprite.width = size;
+    this.sprite.height = size;
+    this.sprite.position.copyFrom(where);
+    this.sprite.tint = darken(0xff0000, 0.45);
+    this.sprite.alpha = 0.9;
+    this.sprite.layerName = Layer.FLOOR_DECALS;
+  }
+
+  @on("add")
+  onAdd() {
+    getFloorStains(this.game).spill(
+      this.where,
+      this.sprite.width * WET_RADIUS,
+      BLOOD_COLOR,
+    );
+  }
+}
+
 /**
  * A dev-only scene for looking at how bodies walk (`?scene=walk`): a lane
  * each for walking forward, backward, sideways, diagonally, slowly,
@@ -145,7 +184,8 @@ interface Walker {
  * `lanes=forward,backward` picks lanes (from `LANES`), `zoom` the pixels per
  * meter (else they fill the view), `follow` keeps the camera on the first
  * walker (for close ups), `prints` marks where each foot lands
- * (`FootprintMarker`), `speed` how fast it plays. `?auto` is for recording
+ * (`FootprintMarker`), `blood` puts a puddle of blood across every lane for
+ * them to walk through and leave bloody footprints, `speed` how fast it plays. `?auto` is for recording
  * (`npm run clip -- --scene walk`); `cycles` counts the trips the first
  * lane's walker has started.
  *
@@ -214,6 +254,14 @@ export default class WalkTestScene extends BaseEntity implements Entity {
       };
     });
 
+    if (params.has("blood")) {
+      // A puddle across every lane, a third of the way along
+      for (const walker of this.walkers) {
+        const where = walker.from.lerp(walker.to, PUDDLE_ALONG);
+        this.addChild(new Puddle(where, PUDDLE_SIZE));
+      }
+    }
+
     // Enemies ask it whether they can be seen; no fog of war here
     const firstHuman = this.walkers.find((w) => w.human)?.human;
     const vision = this.addChild(new VisionController(() => firstHuman));
@@ -232,7 +280,7 @@ export default class WalkTestScene extends BaseEntity implements Entity {
         : walker.enemy?.children.find((c) => c instanceof BodySprite);
       if (sprite instanceof BodySprite && sprite.gait) {
         const scale = sprite.gait.hipWidth / HIP_WIDTH;
-        sprite.gait.onLand = (landing) => {
+        sprite.onFootLand = (landing) => {
           if (this.prints) {
             this.addChild(new FootprintMarker(landing, scale));
           }

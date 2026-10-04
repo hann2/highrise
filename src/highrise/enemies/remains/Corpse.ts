@@ -10,6 +10,11 @@ import { angleDelta, clamp, lerp } from "../../../core/util/MathUtil";
 import { choose, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import type { BodyPoses, BodyTextures } from "../../creature-stuff/BodySprite";
+import { WET_RADIUS } from "../../effects/BloodSplat";
+import {
+  BLOOD_COLOR as BLOOD_STAIN_COLOR,
+  getFloorStains,
+} from "../../effects/FloorStains";
 import { BLOB_TEXTURES, SPLAT_TEXTURES } from "../../effects/Splat";
 import Burning, { Flammable, ignite } from "../../fire/Burning";
 import type Human from "../../human/Human";
@@ -279,6 +284,14 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     }
     await this.wait(FALL_TIME, (_, t) => this.pose(t * t));
     this.pose(1);
+    // Wet for the rest of the floor, as big as it'll spread
+    const stains = getFloorStains(this.game);
+    for (const { sprite, size } of this.poolSplats) {
+      const where = V(sprite.position.x, sprite.position.y)
+        .rotate(this.options.angle)
+        .iadd(this.options.position);
+      stains.spill(where, size * WET_RADIUS, BLOOD_STAIN_COLOR);
+    }
     // A slower start than it ends, like a spreading puddle
     await this.wait(POOL_TIME, (_, t) => this.setPoolSize(1 - (1 - t) ** 2));
   }
