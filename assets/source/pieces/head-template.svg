@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">
+  <!-- Start a head piece from this: draw in its own layers, keep everything
+       inside the page, and leave the "guide" layer (it's taken out when the
+       piece is drawn). 1 unit is 1 mm; the middle of the page is the middle
+       of the skull, and the face is to the right. Fill with #ff00ff for the
+       piece's color and #00ffff for its secondary color. Save it as
+       src/highrise/looks/pieces/head/<name>.svg. -->
+  <g id="guide" opacity="0.35">
+    <ellipse cx="0" cy="0" rx="150" ry="136" fill="#e0b48f" stroke="#704a30" stroke-width="9"/>
+    <ellipse cx="-9" cy="-132" rx="24" ry="31" fill="#e0b48f"/>
+    <ellipse cx="-9" cy="132" rx="24" ry="31" fill="#e0b48f"/>
+    <ellipse cx="142" cy="0" rx="27" ry="20" fill="#e0b48f"/>
+    <path d="M 60 0 L 190 0 M 170 -14 L 190 0 L 170 14" stroke="#000" stroke-width="5" fill="none"/>
+  </g>
+</svg>

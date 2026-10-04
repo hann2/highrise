@@ -12,6 +12,7 @@ import {
   smoothPath,
 } from "../svg";
 import { drawBlood, drawGrime, drawPattern, drawRips } from "./wear";
+import { drawPiece, piecePlace } from "../pieces";
 
 /** Tops that leave the shoulders to what's under them: skin, or the secondary's shirt */
 const BANDED: Partial<Record<TopStyle, number>> = {
@@ -316,6 +317,11 @@ export function drawTorso(
   d.add(
     `<path d="${shape}" fill="none" stroke="${darken(band ? shoulderColor(look, colors.skin) : top.color, 0.5)}" stroke-width="9" stroke-linejoin="round"/>`,
   );
+  for (const piece of look.pieces ?? []) {
+    if (piecePlace(piece.name) === "torso") {
+      drawPiece(d, piece.name, piece.color, piece.secondary);
+    }
+  }
   return d;
 }
 

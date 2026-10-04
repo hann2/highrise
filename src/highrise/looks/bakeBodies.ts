@@ -3,6 +3,8 @@ import { LegColors } from "../creature-stuff/Legs";
 import { BodyLook } from "./BodyLook";
 import { BODY_PARTS, BodyPart, drawBody } from "./drawBody";
 import { Drawing, n } from "./svg";
+// Hand-drawn pieces, so looks can wear them
+import "./pieces/index";
 
 /** How many pixels a meter of a human-sized body's parts get */
 export const BODY_PIXELS_PER_METER = 200;

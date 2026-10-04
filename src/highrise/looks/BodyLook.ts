@@ -21,6 +21,8 @@ export interface BodyLook {
   glasses?: Glasses;
   /** Things worn or carried on top of the clothes */
   extras: Extra[];
+  /** Hand-drawn pieces worn on the head or torso (`pieces.ts`) */
+  pieces?: PieceUse[];
   /** The trousers and shoes, which the leg images are tinted with */
   pants: Color;
   shoes: Color;
@@ -152,6 +154,15 @@ export const EXTRA_KINDS = [
 export interface Extra {
   kind: (typeof EXTRA_KINDS)[number];
   color: Color;
+}
+
+export interface PieceUse {
+  /** Its file's name, without `.svg` */
+  name: string;
+  /** What its magenta becomes */
+  color: Color;
+  /** What its cyan becomes, else `color` */
+  secondary?: Color;
 }
 
 export interface Zombification {
@@ -293,6 +304,13 @@ export function lookProblems(look: PartialLook | undefined): string[] {
   for (const extra of r.extras) {
     oneOf("extra", extra.kind, EXTRA_KINDS);
     color(`${extra.kind}.color`, extra.color);
+  }
+  for (const piece of r.pieces ?? []) {
+    if (typeof piece.name !== "string" || !piece.name) {
+      problems.push(`look piece "${piece.name}" has no name`);
+    }
+    color(`piece ${piece.name} color`, piece.color);
+    color(`piece ${piece.name} secondary`, piece.secondary);
   }
   if (r.zombie) {
     range("zombie.rot", r.zombie.rot, 0, 1);

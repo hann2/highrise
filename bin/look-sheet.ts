@@ -6,6 +6,11 @@ import { PartialLook } from "../src/highrise/looks/BodyLook";
 import { composeBodySvg } from "../src/highrise/looks/composeBody";
 import { BODY_PARTS, drawBody } from "../src/highrise/looks/drawBody";
 import { randomLook } from "../src/highrise/looks/randomLook";
+import {
+  pieceNames,
+  PIECE_PLACES,
+  registerPiece,
+} from "../src/highrise/looks/pieces";
 
 /*
  * A contact sheet of generated bodies, for looking at the generator's art
@@ -29,6 +34,18 @@ async function main() {
   const showParts = process.argv.includes("--parts");
   const out = arg("out") ?? "tests/output/look-sheet.png";
   const random = makeRandom(Number(arg("seed") ?? 1));
+
+  // The pieces, as the game's import.meta.glob would have them
+  for (const place of PIECE_PLACES) {
+    const dir = `src/highrise/looks/pieces/${place}`;
+    for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".svg"))) {
+      registerPiece(
+        file.replace(/\.svg$/, ""),
+        place,
+        fs.readFileSync(path.join(dir, file), "utf8"),
+      );
+    }
+  }
 
   const dataDir = "src/highrise/characters/data";
   const characters: [string, PartialLook][] = fs
@@ -82,6 +99,17 @@ async function main() {
   if (characters.length) {
     html += `<h2>Characters</h2><div class="row">`;
     characters.forEach(([name, look], i) => (html += showBody(name, look, i)));
+    html += `</div>`;
+  }
+  if (process.argv.includes("--pieces")) {
+    html += `<h2>Pieces</h2><div class="row">`;
+    pieceNames().forEach((name, i) => {
+      const look = {
+        pieces: [{ name, color: "#c0392b", secondary: "#f1c40f" }],
+        seed: i,
+      };
+      html += cell(composeBodySvg(look, { scale }, `pc${i}`), name);
+    });
     html += `</div>`;
   }
   if (zombies) {

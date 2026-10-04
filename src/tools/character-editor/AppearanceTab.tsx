@@ -16,6 +16,7 @@ import {
 import { composeBodySvg, svgDataUrl } from "../../highrise/looks/composeBody";
 import { BODY_PARTS, drawBody } from "../../highrise/looks/drawBody";
 import { randomLook } from "../../highrise/looks/randomLook";
+import { pieceNames, piecePlace } from "../../highrise/looks/pieces";
 
 /** How long after the last change a look is saved */
 const SAVE_DELAY = 500;
@@ -400,6 +401,39 @@ export function AppearanceTab({
               onChange={(color) => set("glasses", { ...look.glasses!, color })}
             />
           )}
+          <h3 class="appearance__subhead">Pieces (hand-drawn)</h3>
+          {pieceNames().length === 0 && (
+            <p class="muted small">None yet: see looks/pieces/README.md</p>
+          )}
+          {pieceNames().map((name) => {
+            const piece = look.pieces?.find((p) => p.name === name);
+            const others = (look.pieces ?? []).filter((p) => p.name !== name);
+            const setPiece = (next: typeof piece) =>
+              set(
+                "pieces",
+                next ? [...others, next] : others.length ? others : undefined,
+              );
+            return (
+              <div key={name}>
+                <OptionalColor
+                  label={`${name} (${piecePlace(name)})`}
+                  value={piece?.color}
+                  fallback="#3a3a3a"
+                  onChange={(color) =>
+                    setPiece(color ? { ...piece, name, color } : undefined)
+                  }
+                />
+                {piece && (
+                  <OptionalColor
+                    label="Secondary"
+                    value={piece.secondary}
+                    fallback="#cccccc"
+                    onChange={(secondary) => setPiece({ ...piece, secondary })}
+                  />
+                )}
+              </div>
+            );
+          })}
           <h3 class="appearance__subhead">Worn or carried</h3>
           {EXTRA_KINDS.map((kind) => {
             const extra = look.extras.find((e) => e.kind === kind);

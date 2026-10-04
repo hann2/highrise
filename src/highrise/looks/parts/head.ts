@@ -11,6 +11,7 @@ import {
   smoothPath,
 } from "../svg";
 import { STYLE } from "../style";
+import { drawPiece, piecePlace } from "../pieces";
 
 /**
  * The head from above, facing +x, the skull's middle at the origin: hair,
@@ -80,6 +81,11 @@ export function drawHead(
   }
   if (look.hat) {
     drawHat(d, look.hat, rx, ry, 1 + hair.volume * 0.12 * hair.coverage);
+  }
+  for (const piece of look.pieces ?? []) {
+    if (piecePlace(piece.name) === "head") {
+      drawPiece(d, piece.name, piece.color, piece.secondary);
+    }
   }
   return d;
 }

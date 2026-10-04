@@ -1,3 +1,4 @@
+import "../../highrise/looks/pieces/index";
 import { render } from "preact";
 import { App } from "./App";
 import "./character-editor.css";

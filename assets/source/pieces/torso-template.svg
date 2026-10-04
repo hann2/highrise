@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="-400 -400 800 800">
+  <!-- Start a torso piece from this: draw in its own layers, keep everything
+       inside the page, and leave the "guide" layer (it's taken out when the
+       piece is drawn). 1 unit is 1 mm; the middle of the page is the middle
+       of the body, the front is to the right, and the head covers the middle
+       (the dashed circle), so what shows is the shoulders, the back of the
+       neck, and a belly if there is one. Fill with #ff00ff for the piece's
+       color and #00ffff for its secondary color. Save it as
+       src/highrise/looks/pieces/torso/<name>.svg. -->
+  <g id="guide" opacity="0.35">
+    <path d="M 118 0 C 118 180, 60 312, 0 312 C -60 312, -104 180, -104 0 C -104 -180, -60 -312, 0 -312 C 60 -312, 118 -180, 118 0 Z"
+          fill="#6b7c8f" stroke="#2a3038" stroke-width="9"/>
+    <ellipse cx="0" cy="0" rx="150" ry="136" fill="none" stroke="#000" stroke-width="4" stroke-dasharray="12 8"/>
+    <path d="M 160 0 L 300 0 M 280 -14 L 300 0 L 280 14" stroke="#000" stroke-width="5" fill="none"/>
+  </g>
+</svg>
