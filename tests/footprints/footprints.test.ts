@@ -30,16 +30,56 @@ test("a spill covers its circle, and nothing outside it", () => {
   assert.ok(grid.spillAt([-3, -3], 0));
 });
 
-test("a spill that fades is gone when it's faded, and overlaps keep the most", () => {
+const close = (actual: number | undefined, expected: number) =>
+  assert.ok(
+    actual !== undefined && Math.abs(actual - expected) < 1e-9,
+    `expected ${expected}, got ${actual}`,
+  );
+
+test("a spill dries up steadily, and is gone when it's dry", () => {
   const grid = new SpillGrid();
-  grid.spill([0, 0], 0.5, RED, 0.5, 10, 0);
-  assert.equal(grid.spillAt([0, 0], 5)?.amount, 0.5);
-  grid.spill([0, 0], 0.5, RED, 1, 20, 5);
-  assert.equal(grid.spillAt([0, 0], 15)?.amount, 1);
-  assert.equal(grid.spillAt([0, 0], 20), undefined);
-  // A fresh spill where one has dried replaces it
-  grid.spill([0, 0], 0.5, RED, 0.4, 30, 25);
-  assert.equal(grid.spillAt([0, 0], 26)?.amount, 0.4);
+  grid.spill([0, 0], 0.5, RED, 1, 10, 0);
+  close(grid.spillAt([0, 0], 0)?.amount, 1);
+  close(grid.spillAt([0, 0], 5)?.amount, 0.5);
+  close(grid.spillAt([0, 0], 9)?.amount, 0.1);
+  assert.equal(grid.spillAt([0, 0], 10), undefined);
+  // One that never dries doesn't
+  grid.spill([5, 5], 0.5, RED, 1, Infinity, 0);
+  close(grid.spillAt([5, 5], 1000)?.amount, 1);
+});
+
+test("where spills overlap, the wetter is kept", () => {
+  const grid = new SpillGrid();
+  grid.spill([0, 0], 0.5, RED, 1, 10, 0);
+  // Half dry by now: a fresh, smaller spill is wetter
+  grid.spill([0, 0], 0.5, RED, 0.6, 20, 5);
+  close(grid.spillAt([0, 0], 5)?.amount, 0.6);
+  // A smaller one spilled straight away isn't
+  grid.spill([3, 3], 0.5, RED, 1, 10, 0);
+  grid.spill([3, 3], 0.5, RED, 0.6, 20, 1);
+  close(grid.spillAt([3, 3], 1)?.amount, 0.9);
+});
+
+test("old blood soaks shoes less, and dried-up blood not at all", () => {
+  const grid = new SpillGrid();
+  grid.spill([0.5, 0], 0.6, RED, 1, 30, 0);
+  let now = 0;
+  const stamps: Stamp[] = [];
+  const floor: StainedFloor = {
+    spillAt: (position) => grid.spillAt(position, now),
+    stamp: (stamp) => stamps.push(stamp),
+  };
+  const fresh = new Shoes(1);
+  fresh.land(landing(0, 0.4), floor, () => floor);
+  now = 15;
+  const older = new Shoes(1);
+  older.land(landing(0, 0.4), floor, () => floor);
+  now = 25;
+  const dried = new Shoes(1);
+  dried.land(landing(0, 0.4), floor, () => floor);
+  close(fresh.wetness[0], 1);
+  close(older.wetness[0], 0.5);
+  assert.equal(dried.wetness[0], 0, "too dry to pick up");
 });
 
 /** A floor with a puddle at x 0 to 1, and the prints left on it */

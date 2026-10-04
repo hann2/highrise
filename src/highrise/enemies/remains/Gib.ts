@@ -13,7 +13,7 @@ import { PositionalSound } from "../../../core/sound/PositionalSound";
 import { clamp } from "../../../core/util/MathUtil";
 import { rUniform } from "../../../core/util/Random";
 import { V2d } from "../../../core/Vector";
-import BloodSplat from "../../effects/BloodSplat";
+import { splatBlood } from "../../effects/BloodSplat";
 import { getSplatSound } from "../../effects/Splat";
 import Remains from "./Remains";
 
@@ -116,9 +116,7 @@ export default class Gib extends BaseEntity implements Entity {
       (!this.lastSmear || this.lastSmear.distanceTo(position) > SMEAR_SPACING)
     ) {
       this.lastSmear = position.clone();
-      this.game.addEntity(
-        new BloodSplat(position, this.bloodSize * rUniform(0.4, 0.7)),
-      );
+      splatBlood(this.game, position, this.bloodSize * rUniform(0.4, 0.7));
     }
     if (this.body.velocity.magnitude < REST_SPEED) {
       this.settle();
@@ -131,9 +129,7 @@ export default class Gib extends BaseEntity implements Entity {
     const position = this.getPosition();
     if (this.bleedTime > 0) {
       this.lastSmear = position.clone();
-      this.game.addEntity(
-        new BloodSplat(position, this.bloodSize * rUniform(0.8, 1.2)),
-      );
+      splatBlood(this.game, position, this.bloodSize * rUniform(0.8, 1.2));
     }
     this.game.addEntity(
       new PositionalSound(getSplatSound(), position, {
