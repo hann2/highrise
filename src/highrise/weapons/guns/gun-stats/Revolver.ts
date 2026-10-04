@@ -7,11 +7,13 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 import { REVOLVER_ANIMATIONS } from "../gun-animations/revolverReload";
+import { REVOLVER_FLASH } from "../muzzleFlashes";
 
 export const Revolver: GunStats = {
   ...defaultGunStats,
 
   name: "S&W Revolver",
+  flash: REVOLVER_FLASH,
   fireRate: 10,
   bulletStats: Magnum,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
@@ -39,7 +41,7 @@ export const Revolver: GunStats = {
   animations: REVOLVER_ANIMATIONS,
   magazine: { texture: "revolverRound", length: 0.04 },
   holdPosition: [0.55, 0],
-  muzzleLength: 0.64,
+  muzzleLength: 0.35,
 
   sounds: {
     ...defaultGunStats.sounds,

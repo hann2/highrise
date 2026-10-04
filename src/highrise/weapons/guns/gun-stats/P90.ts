@@ -7,11 +7,13 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 import { rifleAnimations } from "../gun-animations/rifleReload";
+import { P90_FLASH } from "../muzzleFlashes";
 
 export const P90: GunStats = {
   ...defaultGunStats,
 
   name: "P90",
+  flash: P90_FLASH,
   fireRate: 16,
   bulletStats: NineMil,
   fireMode: FireMode.FULL_AUTO,

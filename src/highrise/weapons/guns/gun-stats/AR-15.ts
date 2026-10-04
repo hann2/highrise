@@ -7,11 +7,13 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 import { rifleAnimations } from "../gun-animations/rifleReload";
+import { AR15_FLASH } from "../muzzleFlashes";
 
 export const AR15: GunStats = {
   ...defaultGunStats,
 
   name: "AR-15",
+  flash: AR15_FLASH,
   fireRate: 12,
   bulletStats: FiveFiveSix,
   fireMode: FireMode.SEMI_AUTO,

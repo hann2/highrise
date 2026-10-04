@@ -7,6 +7,7 @@ import { AmmoClass } from "./ammo";
 import { BulletStats, defaultBulletStats } from "./BulletStats";
 import { TILT_ANIMATIONS } from "./gun-animations/tiltReload";
 import { GunAnimation, GunPoints, MagazineStats } from "./GunPose";
+import { MuzzleFlashStyle } from "./MuzzleFlashStyle";
 
 /**
  * The animations a gun plays, each stretched to the time it takes (so the
@@ -55,6 +56,8 @@ export interface GunStats extends BaseWeaponStats {
    * `SmokeField`). Left out, it comes from the number of bullets per shot.
    */
   readonly smoke?: number;
+  /** How its muzzle flash looks: each gun's is its own (see `MuzzleFlash`) */
+  readonly flash?: MuzzleFlashStyle;
 
   // Whether the shells eject after each shot or on reload
   readonly ejectionType: EjectionType;

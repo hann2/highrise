@@ -172,130 +172,114 @@ import images168 from "./images/environment/water-cooler.png?url";
 import images169 from "./images/favicon.png?url";
 import images170 from "./images/health-kit.png?url";
 import images171 from "./images/lights/point-light.png?url";
-import images172 from "./images/muzzle_flashs/muzzle-flash-1.png?url";
-import images173 from "./images/muzzle_flashs/muzzle-flash-10.png?url";
-import images174 from "./images/muzzle_flashs/muzzle-flash-11.png?url";
-import images175 from "./images/muzzle_flashs/muzzle-flash-12.png?url";
-import images176 from "./images/muzzle_flashs/muzzle-flash-13.png?url";
-import images177 from "./images/muzzle_flashs/muzzle-flash-14.png?url";
-import images178 from "./images/muzzle_flashs/muzzle-flash-15.png?url";
-import images179 from "./images/muzzle_flashs/muzzle-flash-16.png?url";
-import images180 from "./images/muzzle_flashs/muzzle-flash-2.png?url";
-import images181 from "./images/muzzle_flashs/muzzle-flash-3.png?url";
-import images182 from "./images/muzzle_flashs/muzzle-flash-4.png?url";
-import images183 from "./images/muzzle_flashs/muzzle-flash-5.png?url";
-import images184 from "./images/muzzle_flashs/muzzle-flash-6.png?url";
-import images185 from "./images/muzzle_flashs/muzzle-flash-7.png?url";
-import images186 from "./images/muzzle_flashs/muzzle-flash-8.png?url";
-import images187 from "./images/muzzle_flashs/muzzle-flash-9.png?url";
-import images188 from "./images/shell-casings/pistol-casing.png?url";
-import images189 from "./images/shell-casings/rifle-casing.png?url";
-import images190 from "./images/shell-casings/shotgun-casing.png?url";
-import images191 from "./images/solid-circle.png?url";
-import images192 from "./images/splats/blob-1.png?url";
-import images193 from "./images/splats/blob-2.png?url";
-import images194 from "./images/splats/blob-3.png?url";
-import images195 from "./images/splats/blob-4.png?url";
-import images196 from "./images/splats/blob-5.png?url";
-import images197 from "./images/splats/blob-glow-1.png?url";
-import images198 from "./images/splats/blob-glow-2.png?url";
-import images199 from "./images/splats/blob-glow-3.png?url";
-import images200 from "./images/splats/blob-glow-4.png?url";
-import images201 from "./images/splats/blob-glow-5.png?url";
-import images202 from "./images/splats/splat-glow_1.png?url";
-import images203 from "./images/splats/splat-glow_2.png?url";
-import images204 from "./images/splats/splat-glow_3.png?url";
-import images205 from "./images/splats/splat-glow_4.png?url";
-import images206 from "./images/splats/splat-glow_5.png?url";
-import images207 from "./images/splats/splat-glow_6.png?url";
-import images208 from "./images/splats/splat-glow_7.png?url";
-import images209 from "./images/splats/splat_1.png?url";
-import images210 from "./images/splats/splat_2.png?url";
-import images211 from "./images/splats/splat_3.png?url";
-import images212 from "./images/splats/splat_4.png?url";
-import images213 from "./images/splats/splat_5.png?url";
-import images214 from "./images/splats/splat_6.png?url";
-import images215 from "./images/splats/splat_7.png?url";
-import images216 from "./images/weapons/ak-47-hold.png?url";
-import images217 from "./images/weapons/ak47-pickup.png?url";
-import images218 from "./images/weapons/ar-15-pickup.png?url";
-import images219 from "./images/weapons/ar15-hold.png?url";
-import images220 from "./images/weapons/axe.png?url";
-import images221 from "./images/weapons/baseball-bat-hold.png?url";
-import images222 from "./images/weapons/baseball-bat-pickup.png?url";
-import images223 from "./images/weapons/desert-eagle-hold.png?url";
-import images224 from "./images/weapons/desert-eagle-pickup.png?url";
-import images225 from "./images/weapons/double-barrel-shotgun-hold.png?url";
-import images226 from "./images/weapons/double-barrel-shotgun-pickup.png?url";
-import images227 from "./images/weapons/five-seven-hold.png?url";
-import images228 from "./images/weapons/five-seven-pickup.png?url";
-import images229 from "./images/weapons/glock-hold.png?url";
-import images230 from "./images/weapons/glock-pickup.png?url";
-import images231 from "./images/weapons/katana.png?url";
-import images232 from "./images/weapons/magazines/ak-magazine.png?url";
-import images233 from "./images/weapons/magazines/p90-magazine.png?url";
-import images234 from "./images/weapons/magazines/pistol-magazine.png?url";
-import images235 from "./images/weapons/magazines/revolver-round.png?url";
-import images236 from "./images/weapons/magazines/rifle-magazine.png?url";
-import images237 from "./images/weapons/magazines/shotgun-shell-pair.png?url";
-import images238 from "./images/weapons/magazines/shotgun-shell.png?url";
-import images239 from "./images/weapons/magnum-hold.png?url";
-import images240 from "./images/weapons/magnum-pickup.png?url";
-import images241 from "./images/weapons/p90-hold.png?url";
-import images242 from "./images/weapons/p90-pickup.png?url";
-import images243 from "./images/weapons/remington-870-hold.png?url";
-import images244 from "./images/weapons/remington-pickup.png?url";
-import images245 from "./images/weapons/spas12-hold.png?url";
-import images246 from "./images/weapons/spas12-pickup.png?url";
-import images247 from "./images/zombies/crawler-1.png?url";
-import images248 from "./images/zombies/crawler-2.png?url";
-import images249 from "./images/zombies/crawler-3.png?url";
-import images250 from "./images/zombies/crawler-head-1.png?url";
-import images251 from "./images/zombies/crawler-head-2.png?url";
-import images252 from "./images/zombies/crawler-head-3.png?url";
-import images253 from "./images/zombies/crawler-left-arm-1.png?url";
-import images254 from "./images/zombies/crawler-left-arm-2.png?url";
-import images255 from "./images/zombies/crawler-left-arm-3.png?url";
-import images256 from "./images/zombies/crawler-left-hand-1.png?url";
-import images257 from "./images/zombies/crawler-left-hand-2.png?url";
-import images258 from "./images/zombies/crawler-left-hand-3.png?url";
-import images259 from "./images/zombies/crawler-right-arm-1.png?url";
-import images260 from "./images/zombies/crawler-right-arm-2.png?url";
-import images261 from "./images/zombies/crawler-right-arm-3.png?url";
-import images262 from "./images/zombies/crawler-right-hand-1.png?url";
-import images263 from "./images/zombies/crawler-right-hand-2.png?url";
-import images264 from "./images/zombies/crawler-right-hand-3.png?url";
-import images265 from "./images/zombies/crawler-torso-1.png?url";
-import images266 from "./images/zombies/crawler-torso-2.png?url";
-import images267 from "./images/zombies/crawler-torso-3.png?url";
-import images268 from "./images/zombies/crawler.png?url";
-import images269 from "./images/zombies/heavy.png?url";
-import images270 from "./images/zombies/necromancer.png?url";
-import images271 from "./images/zombies/spitter.png?url";
-import images272 from "./images/zombies/zombie-1.png?url";
-import images273 from "./images/zombies/zombie-2.png?url";
-import images274 from "./images/zombies/zombie-3.png?url";
-import images275 from "./images/zombies/zombie-head-1.png?url";
-import images276 from "./images/zombies/zombie-head-2.png?url";
-import images277 from "./images/zombies/zombie-head-3.png?url";
-import images278 from "./images/zombies/zombie-left-arm-1.png?url";
-import images279 from "./images/zombies/zombie-left-arm-2.png?url";
-import images280 from "./images/zombies/zombie-left-arm-3.png?url";
-import images281 from "./images/zombies/zombie-left-hand-1.png?url";
-import images282 from "./images/zombies/zombie-left-hand-2.png?url";
-import images283 from "./images/zombies/zombie-left-hand-3.png?url";
-import images284 from "./images/zombies/zombie-legs-1.png?url";
-import images285 from "./images/zombies/zombie-legs-2.png?url";
-import images286 from "./images/zombies/zombie-legs-3.png?url";
-import images287 from "./images/zombies/zombie-right-arm-1.png?url";
-import images288 from "./images/zombies/zombie-right-arm-2.png?url";
-import images289 from "./images/zombies/zombie-right-arm-3.png?url";
-import images290 from "./images/zombies/zombie-right-hand-1.png?url";
-import images291 from "./images/zombies/zombie-right-hand-2.png?url";
-import images292 from "./images/zombies/zombie-right-hand-3.png?url";
-import images293 from "./images/zombies/zombie-torso-1.png?url";
-import images294 from "./images/zombies/zombie-torso-2.png?url";
-import images295 from "./images/zombies/zombie-torso-3.png?url";
+import images172 from "./images/shell-casings/pistol-casing.png?url";
+import images173 from "./images/shell-casings/rifle-casing.png?url";
+import images174 from "./images/shell-casings/shotgun-casing.png?url";
+import images175 from "./images/solid-circle.png?url";
+import images176 from "./images/splats/blob-1.png?url";
+import images177 from "./images/splats/blob-2.png?url";
+import images178 from "./images/splats/blob-3.png?url";
+import images179 from "./images/splats/blob-4.png?url";
+import images180 from "./images/splats/blob-5.png?url";
+import images181 from "./images/splats/blob-glow-1.png?url";
+import images182 from "./images/splats/blob-glow-2.png?url";
+import images183 from "./images/splats/blob-glow-3.png?url";
+import images184 from "./images/splats/blob-glow-4.png?url";
+import images185 from "./images/splats/blob-glow-5.png?url";
+import images186 from "./images/splats/splat-glow_1.png?url";
+import images187 from "./images/splats/splat-glow_2.png?url";
+import images188 from "./images/splats/splat-glow_3.png?url";
+import images189 from "./images/splats/splat-glow_4.png?url";
+import images190 from "./images/splats/splat-glow_5.png?url";
+import images191 from "./images/splats/splat-glow_6.png?url";
+import images192 from "./images/splats/splat-glow_7.png?url";
+import images193 from "./images/splats/splat_1.png?url";
+import images194 from "./images/splats/splat_2.png?url";
+import images195 from "./images/splats/splat_3.png?url";
+import images196 from "./images/splats/splat_4.png?url";
+import images197 from "./images/splats/splat_5.png?url";
+import images198 from "./images/splats/splat_6.png?url";
+import images199 from "./images/splats/splat_7.png?url";
+import images200 from "./images/weapons/ak-47-hold.png?url";
+import images201 from "./images/weapons/ak47-pickup.png?url";
+import images202 from "./images/weapons/ar-15-pickup.png?url";
+import images203 from "./images/weapons/ar15-hold.png?url";
+import images204 from "./images/weapons/axe.png?url";
+import images205 from "./images/weapons/baseball-bat-hold.png?url";
+import images206 from "./images/weapons/baseball-bat-pickup.png?url";
+import images207 from "./images/weapons/desert-eagle-hold.png?url";
+import images208 from "./images/weapons/desert-eagle-pickup.png?url";
+import images209 from "./images/weapons/double-barrel-shotgun-hold.png?url";
+import images210 from "./images/weapons/double-barrel-shotgun-pickup.png?url";
+import images211 from "./images/weapons/five-seven-hold.png?url";
+import images212 from "./images/weapons/five-seven-pickup.png?url";
+import images213 from "./images/weapons/glock-hold.png?url";
+import images214 from "./images/weapons/glock-pickup.png?url";
+import images215 from "./images/weapons/katana.png?url";
+import images216 from "./images/weapons/magazines/ak-magazine.png?url";
+import images217 from "./images/weapons/magazines/p90-magazine.png?url";
+import images218 from "./images/weapons/magazines/pistol-magazine.png?url";
+import images219 from "./images/weapons/magazines/revolver-round.png?url";
+import images220 from "./images/weapons/magazines/rifle-magazine.png?url";
+import images221 from "./images/weapons/magazines/shotgun-shell-pair.png?url";
+import images222 from "./images/weapons/magazines/shotgun-shell.png?url";
+import images223 from "./images/weapons/magnum-hold.png?url";
+import images224 from "./images/weapons/magnum-pickup.png?url";
+import images225 from "./images/weapons/p90-hold.png?url";
+import images226 from "./images/weapons/p90-pickup.png?url";
+import images227 from "./images/weapons/remington-870-hold.png?url";
+import images228 from "./images/weapons/remington-pickup.png?url";
+import images229 from "./images/weapons/spas12-hold.png?url";
+import images230 from "./images/weapons/spas12-pickup.png?url";
+import images231 from "./images/zombies/crawler-1.png?url";
+import images232 from "./images/zombies/crawler-2.png?url";
+import images233 from "./images/zombies/crawler-3.png?url";
+import images234 from "./images/zombies/crawler-head-1.png?url";
+import images235 from "./images/zombies/crawler-head-2.png?url";
+import images236 from "./images/zombies/crawler-head-3.png?url";
+import images237 from "./images/zombies/crawler-left-arm-1.png?url";
+import images238 from "./images/zombies/crawler-left-arm-2.png?url";
+import images239 from "./images/zombies/crawler-left-arm-3.png?url";
+import images240 from "./images/zombies/crawler-left-hand-1.png?url";
+import images241 from "./images/zombies/crawler-left-hand-2.png?url";
+import images242 from "./images/zombies/crawler-left-hand-3.png?url";
+import images243 from "./images/zombies/crawler-right-arm-1.png?url";
+import images244 from "./images/zombies/crawler-right-arm-2.png?url";
+import images245 from "./images/zombies/crawler-right-arm-3.png?url";
+import images246 from "./images/zombies/crawler-right-hand-1.png?url";
+import images247 from "./images/zombies/crawler-right-hand-2.png?url";
+import images248 from "./images/zombies/crawler-right-hand-3.png?url";
+import images249 from "./images/zombies/crawler-torso-1.png?url";
+import images250 from "./images/zombies/crawler-torso-2.png?url";
+import images251 from "./images/zombies/crawler-torso-3.png?url";
+import images252 from "./images/zombies/crawler.png?url";
+import images253 from "./images/zombies/heavy.png?url";
+import images254 from "./images/zombies/necromancer.png?url";
+import images255 from "./images/zombies/spitter.png?url";
+import images256 from "./images/zombies/zombie-1.png?url";
+import images257 from "./images/zombies/zombie-2.png?url";
+import images258 from "./images/zombies/zombie-3.png?url";
+import images259 from "./images/zombies/zombie-head-1.png?url";
+import images260 from "./images/zombies/zombie-head-2.png?url";
+import images261 from "./images/zombies/zombie-head-3.png?url";
+import images262 from "./images/zombies/zombie-left-arm-1.png?url";
+import images263 from "./images/zombies/zombie-left-arm-2.png?url";
+import images264 from "./images/zombies/zombie-left-arm-3.png?url";
+import images265 from "./images/zombies/zombie-left-hand-1.png?url";
+import images266 from "./images/zombies/zombie-left-hand-2.png?url";
+import images267 from "./images/zombies/zombie-left-hand-3.png?url";
+import images268 from "./images/zombies/zombie-legs-1.png?url";
+import images269 from "./images/zombies/zombie-legs-2.png?url";
+import images270 from "./images/zombies/zombie-legs-3.png?url";
+import images271 from "./images/zombies/zombie-right-arm-1.png?url";
+import images272 from "./images/zombies/zombie-right-arm-2.png?url";
+import images273 from "./images/zombies/zombie-right-arm-3.png?url";
+import images274 from "./images/zombies/zombie-right-hand-1.png?url";
+import images275 from "./images/zombies/zombie-right-hand-2.png?url";
+import images276 from "./images/zombies/zombie-right-hand-3.png?url";
+import images277 from "./images/zombies/zombie-torso-1.png?url";
+import images278 from "./images/zombies/zombie-torso-2.png?url";
+import images279 from "./images/zombies/zombie-torso-3.png?url";
 import sounds0 from "./audio/characters/andy/andy-death-1.flac?url";
 import sounds1 from "./audio/characters/andy/andy-death-2.flac?url";
 import sounds2 from "./audio/characters/andy/andy-death-3.flac?url";
@@ -1017,130 +1001,114 @@ const images = {
   "favicon": images169,
   "healthKit": images170,
   "pointLight": images171,
-  "muzzleFlash1": images172,
-  "muzzleFlash10": images173,
-  "muzzleFlash11": images174,
-  "muzzleFlash12": images175,
-  "muzzleFlash13": images176,
-  "muzzleFlash14": images177,
-  "muzzleFlash15": images178,
-  "muzzleFlash16": images179,
-  "muzzleFlash2": images180,
-  "muzzleFlash3": images181,
-  "muzzleFlash4": images182,
-  "muzzleFlash5": images183,
-  "muzzleFlash6": images184,
-  "muzzleFlash7": images185,
-  "muzzleFlash8": images186,
-  "muzzleFlash9": images187,
-  "pistolCasing": images188,
-  "rifleCasing": images189,
-  "shotgunCasing": images190,
-  "solidCircle": images191,
-  "blob1": images192,
-  "blob2": images193,
-  "blob3": images194,
-  "blob4": images195,
-  "blob5": images196,
-  "blobGlow1": images197,
-  "blobGlow2": images198,
-  "blobGlow3": images199,
-  "blobGlow4": images200,
-  "blobGlow5": images201,
-  "splatGlow1": images202,
-  "splatGlow2": images203,
-  "splatGlow3": images204,
-  "splatGlow4": images205,
-  "splatGlow5": images206,
-  "splatGlow6": images207,
-  "splatGlow7": images208,
-  "splat1": images209,
-  "splat2": images210,
-  "splat3": images211,
-  "splat4": images212,
-  "splat5": images213,
-  "splat6": images214,
-  "splat7": images215,
-  "ak47Hold": images216,
-  "ak47Pickup": images217,
-  "ar15Pickup": images218,
-  "ar15Hold": images219,
-  "axe": images220,
-  "baseballBatHold": images221,
-  "baseballBatPickup": images222,
-  "desertEagleHold": images223,
-  "desertEaglePickup": images224,
-  "doubleBarrelShotgunHold": images225,
-  "doubleBarrelShotgunPickup": images226,
-  "fiveSevenHold": images227,
-  "fiveSevenPickup": images228,
-  "glockHold": images229,
-  "glockPickup": images230,
-  "katana": images231,
-  "akMagazine": images232,
-  "p90Magazine": images233,
-  "pistolMagazine": images234,
-  "revolverRound": images235,
-  "rifleMagazine": images236,
-  "shotgunShellPair": images237,
-  "shotgunShell": images238,
-  "magnumHold": images239,
-  "magnumPickup": images240,
-  "p90Hold": images241,
-  "p90Pickup": images242,
-  "remington870Hold": images243,
-  "remingtonPickup": images244,
-  "spas12Hold": images245,
-  "spas12Pickup": images246,
-  "crawler1": images247,
-  "crawler2": images248,
-  "crawler3": images249,
-  "crawlerHead1": images250,
-  "crawlerHead2": images251,
-  "crawlerHead3": images252,
-  "crawlerLeftArm1": images253,
-  "crawlerLeftArm2": images254,
-  "crawlerLeftArm3": images255,
-  "crawlerLeftHand1": images256,
-  "crawlerLeftHand2": images257,
-  "crawlerLeftHand3": images258,
-  "crawlerRightArm1": images259,
-  "crawlerRightArm2": images260,
-  "crawlerRightArm3": images261,
-  "crawlerRightHand1": images262,
-  "crawlerRightHand2": images263,
-  "crawlerRightHand3": images264,
-  "crawlerTorso1": images265,
-  "crawlerTorso2": images266,
-  "crawlerTorso3": images267,
-  "crawler": images268,
-  "heavy": images269,
-  "necromancer": images270,
-  "spitter": images271,
-  "zombie1": images272,
-  "zombie2": images273,
-  "zombie3": images274,
-  "zombieHead1": images275,
-  "zombieHead2": images276,
-  "zombieHead3": images277,
-  "zombieLeftArm1": images278,
-  "zombieLeftArm2": images279,
-  "zombieLeftArm3": images280,
-  "zombieLeftHand1": images281,
-  "zombieLeftHand2": images282,
-  "zombieLeftHand3": images283,
-  "zombieLegs1": images284,
-  "zombieLegs2": images285,
-  "zombieLegs3": images286,
-  "zombieRightArm1": images287,
-  "zombieRightArm2": images288,
-  "zombieRightArm3": images289,
-  "zombieRightHand1": images290,
-  "zombieRightHand2": images291,
-  "zombieRightHand3": images292,
-  "zombieTorso1": images293,
-  "zombieTorso2": images294,
-  "zombieTorso3": images295,
+  "pistolCasing": images172,
+  "rifleCasing": images173,
+  "shotgunCasing": images174,
+  "solidCircle": images175,
+  "blob1": images176,
+  "blob2": images177,
+  "blob3": images178,
+  "blob4": images179,
+  "blob5": images180,
+  "blobGlow1": images181,
+  "blobGlow2": images182,
+  "blobGlow3": images183,
+  "blobGlow4": images184,
+  "blobGlow5": images185,
+  "splatGlow1": images186,
+  "splatGlow2": images187,
+  "splatGlow3": images188,
+  "splatGlow4": images189,
+  "splatGlow5": images190,
+  "splatGlow6": images191,
+  "splatGlow7": images192,
+  "splat1": images193,
+  "splat2": images194,
+  "splat3": images195,
+  "splat4": images196,
+  "splat5": images197,
+  "splat6": images198,
+  "splat7": images199,
+  "ak47Hold": images200,
+  "ak47Pickup": images201,
+  "ar15Pickup": images202,
+  "ar15Hold": images203,
+  "axe": images204,
+  "baseballBatHold": images205,
+  "baseballBatPickup": images206,
+  "desertEagleHold": images207,
+  "desertEaglePickup": images208,
+  "doubleBarrelShotgunHold": images209,
+  "doubleBarrelShotgunPickup": images210,
+  "fiveSevenHold": images211,
+  "fiveSevenPickup": images212,
+  "glockHold": images213,
+  "glockPickup": images214,
+  "katana": images215,
+  "akMagazine": images216,
+  "p90Magazine": images217,
+  "pistolMagazine": images218,
+  "revolverRound": images219,
+  "rifleMagazine": images220,
+  "shotgunShellPair": images221,
+  "shotgunShell": images222,
+  "magnumHold": images223,
+  "magnumPickup": images224,
+  "p90Hold": images225,
+  "p90Pickup": images226,
+  "remington870Hold": images227,
+  "remingtonPickup": images228,
+  "spas12Hold": images229,
+  "spas12Pickup": images230,
+  "crawler1": images231,
+  "crawler2": images232,
+  "crawler3": images233,
+  "crawlerHead1": images234,
+  "crawlerHead2": images235,
+  "crawlerHead3": images236,
+  "crawlerLeftArm1": images237,
+  "crawlerLeftArm2": images238,
+  "crawlerLeftArm3": images239,
+  "crawlerLeftHand1": images240,
+  "crawlerLeftHand2": images241,
+  "crawlerLeftHand3": images242,
+  "crawlerRightArm1": images243,
+  "crawlerRightArm2": images244,
+  "crawlerRightArm3": images245,
+  "crawlerRightHand1": images246,
+  "crawlerRightHand2": images247,
+  "crawlerRightHand3": images248,
+  "crawlerTorso1": images249,
+  "crawlerTorso2": images250,
+  "crawlerTorso3": images251,
+  "crawler": images252,
+  "heavy": images253,
+  "necromancer": images254,
+  "spitter": images255,
+  "zombie1": images256,
+  "zombie2": images257,
+  "zombie3": images258,
+  "zombieHead1": images259,
+  "zombieHead2": images260,
+  "zombieHead3": images261,
+  "zombieLeftArm1": images262,
+  "zombieLeftArm2": images263,
+  "zombieLeftArm3": images264,
+  "zombieLeftHand1": images265,
+  "zombieLeftHand2": images266,
+  "zombieLeftHand3": images267,
+  "zombieLegs1": images268,
+  "zombieLegs2": images269,
+  "zombieLegs3": images270,
+  "zombieRightArm1": images271,
+  "zombieRightArm2": images272,
+  "zombieRightArm3": images273,
+  "zombieRightHand1": images274,
+  "zombieRightHand2": images275,
+  "zombieRightHand3": images276,
+  "zombieTorso1": images277,
+  "zombieTorso2": images278,
+  "zombieTorso3": images279,
 };
 export type ImageName = keyof typeof images;
 const sounds = {

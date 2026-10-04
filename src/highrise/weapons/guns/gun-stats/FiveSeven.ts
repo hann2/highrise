@@ -2,11 +2,13 @@ import { degToRad } from "../../../../core/util/MathUtil";
 import { NineMil } from "../BulletStats";
 import { defaultGunStats, GunStats, ReloadingStyle } from "../GunStats";
 import { PISTOL_ANIMATIONS } from "../gun-animations/pistolReload";
+import { FIVE_SEVEN_FLASH } from "../muzzleFlashes";
 
 export const FiveSeven: GunStats = {
   ...defaultGunStats,
 
   name: "Five Seven",
+  flash: FIVE_SEVEN_FLASH,
   fireRate: 20,
   bulletStats: NineMil,
   reloadingStyle: ReloadingStyle.MAGAZINE,
@@ -30,7 +32,7 @@ export const FiveSeven: GunStats = {
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.125 },
   holdPosition: [0.5, 0],
-  muzzleLength: 0.6,
+  muzzleLength: 0.26,
 
   laserSightColor: 0x00ff00,
 

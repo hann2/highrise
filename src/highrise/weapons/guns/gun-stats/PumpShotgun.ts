@@ -7,11 +7,13 @@ import {
   ReloadingStyle,
 } from "../GunStats";
 import { SHOTGUN_ANIMATIONS } from "../gun-animations/shotgunReload";
+import { PUMP_SHOTGUN_FLASH } from "../muzzleFlashes";
 
 export const PumpShotgun: GunStats = {
   ...defaultGunStats,
 
   name: "Remington Shotgun",
+  flash: PUMP_SHOTGUN_FLASH,
   fireRate: 2,
   bulletStats: TwelveGuageBuckshot,
   bulletSpread: degToRad(9),

@@ -20,6 +20,7 @@ import VolumeController from "./controllers/VolumeController";
 import ArenaScene from "./arena/ArenaScene";
 import FireTestScene from "./fire/FireTestScene";
 import DeathsTestScene from "./enemies/remains/DeathsTestScene";
+import FlashTestScene from "./rig/FlashTestScene";
 import RigTestScene from "./rig/RigTestScene";
 import WalkTestScene from "./rig/WalkTestScene";
 import { isHuman } from "./human/Human";
@@ -143,6 +144,15 @@ export async function main() {
   // ?scene=rig (development only) is for looking at how humans are animated
   if (process.env.NODE_ENV === "development" && params.get("scene") === "rig") {
     game.addEntity(new RigTestScene());
+    return;
+  }
+
+  // ?scene=flash (development only) is for looking at muzzle flashes
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "flash"
+  ) {
+    game.addEntity(new FlashTestScene());
     return;
   }
 

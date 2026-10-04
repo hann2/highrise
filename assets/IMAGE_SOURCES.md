@@ -98,7 +98,6 @@ This was reconstructed in 2026 from git history, the design files in `assets/sou
 
 | Files                                                                       | Source                                                                      | Confidence |
 | --------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---------- |
-| `muzzle_flashs/muzzle-flash-1..16.png`                                      | ? (a numbered set of 16, added in one commit: looks like a downloaded pack) | ?          |
 | `splats/` (blobs, splats, glows)                                            | Simon (`assets/unused/images/splats/splats-and-blobs.afdesign`)             | known      |
 | `shell-casings/`                                                            | Simon (`assets/source/shell-casings.afdesign`)                              | known      |
 | `effects/glow-stick-1..3.png`                                               | Simon (`assets/source/glow-stick.afdesign`)                                 | known      |
