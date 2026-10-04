@@ -22,6 +22,11 @@ uniform float uTime;
 uniform float uSeed;
 uniform float uTurbulence;
 uniform float uTemperature;
+// Where the muzzle is now, in the flash's frame: the root of the flash bends
+// to follow it as the gun recoils
+uniform vec2 uRoot;
+// How far along the flash the bending reaches, in meters
+uniform float uRootReach;
 
 // --- Noise ---
 
@@ -96,7 +101,9 @@ vec3 ramp(float x) {
 }
 
 void main(void) {
-  vec2 p = vLocal;
+  // Bent so its root is at the muzzle: fully behind the muzzle (and at the
+  // cylinder gap), fading out along the plume
+  vec2 p = vLocal - uRoot * (1.0 - smoothstep(0.0, uRootReach, vLocal.x));
   float r = length(p);
   float theta = atan(p.y, p.x);
   vec3 seed = vec3(uSeed * 17.0, uSeed * 31.0, uSeed * 7.0);

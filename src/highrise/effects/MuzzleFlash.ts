@@ -25,6 +25,12 @@ const MAX_LOBES = 8;
 const SCALE = 1.6;
 /** Room around the lobes for the noise to push them into, in meters */
 const MARGIN = 0.12 * SCALE;
+/** Room behind and beside the muzzle for its root to follow the gun into, in meters */
+const RECOIL_ROOM = 0.15;
+/** How far through its life the barrel keeps feeding it, so its root follows the muzzle */
+const FED_UNTIL = 0.4;
+/** How far along the flash the root's following reaches, as a fraction of its longest lobe */
+const ROOT_REACH = 0.6;
 
 /** Only looks, so it has its own random numbers and never disturbs the seeded ones */
 const random = makeRandom(Date.now());
@@ -35,10 +41,15 @@ function pick(spread: Spread): number {
     : spread[0] + random() * (spread[1] - spread[0]);
 }
 
+/** Where the muzzle is now, while there is one */
+export type MuzzleTracker = () => V2d | undefined;
+
 /**
  * A muzzle flash, drawn by a shader (`muzzleFlash.frag`) from the lobes of
  * its gun's `MuzzleFlashStyle`, each picked from its ranges, so every flash
- * is a shape of its own; plus a light that fades with it.
+ * is a shape of its own; plus a light that fades with it. It stays where it
+ * went off, but while the barrel's still feeding it, its root bends to follow
+ * the muzzle as the gun recoils, so the fire pours out of the barrel.
  */
 export default class MuzzleFlash extends BaseEntity implements Entity {
   tickLayer = "effects" as const;
@@ -50,8 +61,11 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
   readonly duration: number;
   private shader: Shader;
   private geometry: Geometry;
+  /** Where it went off */
+  private origin: V2d;
 
   /**
+   * `muzzle` says where the muzzle is now, for the root to follow.
    * `frozenAt` holds it at that fraction of its life forever, for looking at
    * (the flash test scene's gallery)
    */
@@ -59,6 +73,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     position: V2d,
     angle: number,
     private style: MuzzleFlashStyle = DEFAULT_FLASH,
+    private muzzle?: MuzzleTracker,
     private frozenAt?: number,
   ) {
     super();
@@ -68,6 +83,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     const lobeB = new Float32Array(4 * MAX_LOBES);
     let count = 0;
     let [left, top, right, bottom] = [0, 0, 0, 0];
+    let longest = 0;
     for (const lobe of style.lobes) {
       if (count >= MAX_LOBES) {
         break;
@@ -84,6 +100,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
       lobeA.set([ox, oy, dx, dy], count * 4);
       lobeB.set([length, width, pick(lobe.heat ?? 1), 0], count * 4);
       count++;
+      longest = Math.max(longest, length);
       // What it covers, as it'll be at its longest
       const reach = length * 1.2;
       const tipX = ox + dx * reach;
@@ -93,10 +110,10 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
       top = Math.min(top, oy - width, tipY - width);
       bottom = Math.max(bottom, oy + width, tipY + width);
     }
-    left -= MARGIN;
-    top -= MARGIN;
+    left -= MARGIN + (muzzle ? RECOIL_ROOM : 0);
+    top -= MARGIN + (muzzle ? RECOIL_ROOM : 0);
     right += MARGIN;
-    bottom += MARGIN;
+    bottom += MARGIN + (muzzle ? RECOIL_ROOM : 0);
 
     this.shader = new Shader({
       glProgram: GlProgram.from({
@@ -114,6 +131,8 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
           uSeed: { value: random() * 100, type: "f32" },
           uTurbulence: { value: style.turbulence, type: "f32" },
           uTemperature: { value: style.temperature, type: "f32" },
+          uRoot: { value: new Float32Array(2), type: "vec2<f32>" },
+          uRootReach: { value: longest * ROOT_REACH, type: "f32" },
         },
       },
     });
@@ -129,6 +148,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     });
     this.sprite.blendMode = "add";
     this.sprite.layerName = Layer.EMISSIVES;
+    this.origin = position.clone();
     this.sprite.position.copyFrom(position);
     this.sprite.rotation = angle + (random() * 2 - 1) * (style.wobble ?? 0);
   }
@@ -157,6 +177,19 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     return (1 - t) ** 1.5;
   }
 
+  /** Puts where the muzzle is now, in the flash's own frame, in `root` */
+  private followMuzzle(root: Float32Array) {
+    const muzzle = this.muzzle?.();
+    if (!muzzle) {
+      return;
+    }
+    const [dx, dy] = muzzle.sub(this.origin);
+    const cos = Math.cos(this.sprite.rotation);
+    const sin = Math.sin(this.sprite.rotation);
+    root[0] = dx * cos + dy * sin;
+    root[1] = dy * cos - dx * sin;
+  }
+
   @on("destroy")
   onDestroy() {
     // Destroying the mesh leaves its geometry and shader, which are its own
@@ -177,6 +210,9 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     const uniforms = this.shader.resources.flashUniforms.uniforms;
     uniforms.uAge = this.age / this.duration;
     uniforms.uTime = this.age;
+    if (uniforms.uAge < FED_UNTIL) {
+      this.followMuzzle(uniforms.uRoot);
+    }
     this.light?.setIntensity(this.style.light.intensity * this.brightness());
     this.age += dt;
   }

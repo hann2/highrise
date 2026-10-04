@@ -267,7 +267,13 @@ export default class Gun extends BaseEntity implements Entity {
 
     // Various effects
     this.playSound("shoot", position);
-    this.game.addEntity(new MuzzleFlash(position, direction, stats.flash));
+    this.game.addEntity(
+      new MuzzleFlash(position, direction, stats.flash, () =>
+        shooter.weapon === this && !shooter.isDestroyed
+          ? shooter.localToWorld(this.getMuzzlePosition())
+          : undefined,
+      ),
+    );
     this.makeSmoke(position, direction);
 
     if (this.stats.ejectionType === EjectionType.AUTOMATIC) {
