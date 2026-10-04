@@ -18,8 +18,13 @@ import vert_muzzleFlash from "./muzzleFlash.vert?raw";
 
 /** As many lobes as the shader takes */
 const MAX_LOBES = 8;
+/**
+ * Every flash's lobes are this much longer and wider than their styles say:
+ * bigger than life, so they read at the game's zoom
+ */
+const SCALE = 1.6;
 /** Room around the lobes for the noise to push them into, in meters */
-const MARGIN = 0.12;
+const MARGIN = 0.12 * SCALE;
 
 /** Only looks, so it has its own random numbers and never disturbs the seeded ones */
 const random = makeRandom(Date.now());
@@ -79,8 +84,8 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
       }
       const [ox, oy] = lobe.origin ?? [0, 0];
       const direction = pick(lobe.angle);
-      const length = pick(lobe.length);
-      const width = pick(lobe.width);
+      const length = pick(lobe.length) * SCALE;
+      const width = pick(lobe.width) * SCALE;
       const dx = Math.cos(direction);
       const dy = Math.sin(direction);
       lobeA.set([ox, oy, dx, dy], count * 4);

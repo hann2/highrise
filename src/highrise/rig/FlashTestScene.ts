@@ -17,7 +17,7 @@ import ContactShadows from "../lighting-and-vision/ContactShadows";
 import LightingManager from "../lighting-and-vision/LightingManager";
 import { GUNS } from "../weapons/guns/gun-stats/gunStats";
 import Gun from "../weapons/guns/Gun";
-import { GunStats } from "../weapons/guns/GunStats";
+import { FireMode, GunStats } from "../weapons/guns/GunStats";
 
 /** Meters between the humans in the lineup, and room for their flashes */
 const ROW_SPACING = 1.4;
@@ -26,16 +26,18 @@ const LINEUP_WIDTH = 4;
 const GALLERY_COLUMN = 1.5;
 const GALLERY_ROW = 0.9;
 /** Seconds from one round of shots to the next */
-const CYCLE_TIME = 1.2;
+const CYCLE_TIME = 1.5;
 /** Seconds between one gun's shot and the next one's */
 const STAGGER = 0.08;
+/** Rounds in an automatic's burst */
+const BURST = 4;
 /** How far through its life each gallery flash is held, by default */
 const GALLERY_AGE = 0.25;
 
 /**
  * A dev-only scene for looking at muzzle flashes (`?scene=flash`), in the
- * dark: a column of humans, one per gun, firing a shot each in turn over and
- * over. `gallery` holds flashes still instead: a row per gun of `columns`
+ * dark: a column of humans, one per gun, firing a shot each in turn (a
+ * burst, for automatics) over and over. `gallery` holds flashes still instead: a row per gun of `columns`
  * flashes (6), every one different, at `age` of the way through their lives
  * (0.25), or with `age=life` going from just fired to almost gone across the
  * row. `gun=ar15,glock` picks the guns (by `slug`), `zoom` the pixels per
@@ -166,9 +168,14 @@ export default class FlashTestScene extends BaseEntity implements Entity {
         await this.wait(i * STAGGER);
         const gun = human.weapon as Gun;
         gun.cancelReload();
-        gun.ammo = gun.getCapacity(human);
-        gun.shootCooldown = 0;
-        gun.pullTrigger(human);
+        // Automatics fire a burst, so a run of flashes shows
+        const rounds = gun.stats.fireMode === FireMode.FULL_AUTO ? BURST : 1;
+        for (let round = 0; round < rounds; round++) {
+          gun.ammo = gun.getCapacity(human);
+          gun.shootCooldown = 0;
+          gun.pullTrigger(human);
+          await this.wait(1 / gun.stats.fireRate);
+        }
       });
       await this.wait(CYCLE_TIME);
       if (this.cycles !== cycle) {
