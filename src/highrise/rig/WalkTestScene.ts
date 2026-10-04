@@ -22,6 +22,9 @@ import LightingManager from "../lighting-and-vision/LightingManager";
 import VisionController from "../lighting-and-vision/VisionController";
 import { GUNS } from "../weapons/guns/gun-stats/gunStats";
 import Gun from "../weapons/guns/Gun";
+import { BodySprite } from "../creature-stuff/BodySprite";
+import { HIP_WIDTH } from "../creature-stuff/Legs";
+import FootprintMarker from "./FootprintMarker";
 import { RIG_SPEEDS } from "./RigTestScene";
 
 /** Meters from one lane to the next, and from the walls to the ends of the lanes */
@@ -32,6 +35,12 @@ const LENGTH = 11;
 const PAUSE = 0.6;
 /** Hurt walkers are kept at this share of their health (under 30% is hurt) */
 const HURT = 0.2;
+/** Turning on the spot: seconds between turns, and the ways it turns to */
+const TURN_INTERVAL = 1.2;
+const TURN_FACINGS = [0, 2.4, 0.8, -1.6];
+/** Zigzagging: radians either side of straight on, and how fast it weaves */
+const ZIGZAG = 0.45;
+const ZIGZAG_RATE = 5;
 
 /** Who walks a lane and how */
 interface Lane {
@@ -46,6 +55,10 @@ interface Lane {
   speed?: number;
   sprint?: boolean;
   hurt?: boolean;
+  /** Weaves from side to side, turning as it walks */
+  zigzag?: boolean;
+  /** Stays where it is, turning on the spot */
+  turn?: boolean;
 }
 
 const LANES: Record<string, Lane> = {
@@ -97,6 +110,18 @@ const LANES: Record<string, Lane> = {
   },
   sprinter: { label: "sprinter", walker: { enemy: "sprinter" }, facing: 0 },
   heavy: { label: "heavy", walker: { enemy: "heavy" }, facing: 0 },
+  zigzag: {
+    label: "zigzagging",
+    walker: { character: "takeshi", gun: "glock" },
+    facing: 0,
+    zigzag: true,
+  },
+  turn: {
+    label: "turning on the spot",
+    walker: { character: "chad" },
+    facing: 0,
+    turn: true,
+  },
 };
 
 interface Walker {
@@ -115,14 +140,16 @@ interface Walker {
 /**
  * A dev-only scene for looking at how bodies walk (`?scene=walk`): a lane
  * each for walking forward, backward, sideways, diagonally, slowly,
- * sprinting, hurt, and zombies, a sprinter and a heavy, back and forth.
+ * sprinting, hurt, and zombies, a sprinter and a heavy, back and forth;
+ * one zigzagging, and one turning on the spot.
  * `lanes=forward,backward` picks lanes (from `LANES`), `zoom` the pixels per
  * meter (else they fill the view), `follow` keeps the camera on the first
- * walker (for close ups), `speed` how fast it plays. `?auto` is for
- * recording (`npm run clip -- --scene walk`); `cycles` counts the trips the
- * first lane's walker has started.
+ * walker (for close ups), `prints` marks where each foot lands
+ * (`FootprintMarker`), `speed` how fast it plays. `?auto` is for recording
+ * (`npm run clip -- --scene walk`); `cycles` counts the trips the first
+ * lane's walker has started.
  *
- * Keys: 1-4 the speed, Space pause, Enter start over.
+ * Keys: 1-4 the speed, Space pause, P footprints, Enter start over.
  */
 export default class WalkTestScene extends BaseEntity implements Entity {
   id = "walkTestScene";
@@ -134,6 +161,8 @@ export default class WalkTestScene extends BaseEntity implements Entity {
   private paused = false;
   /** Whether the camera follows the first walker (`follow`) */
   private follow = false;
+  /** Whether each foot's landing is marked on the floor (`prints`, P) */
+  private prints = false;
 
   @on("add")
   onAdd() {
@@ -193,8 +222,23 @@ export default class WalkTestScene extends BaseEntity implements Entity {
     this.game.camera.z = zoom;
     this.game.camera.center(V(roomWidth / 2, roomHeight / 2));
     this.follow = params.has("follow");
+    this.prints = params.has("prints");
     this.speed = Number(params.get("speed") ?? 1) || 1;
     this.game.slowMo = this.speed;
+
+    for (const walker of this.walkers) {
+      const sprite = walker.human
+        ? walker.human.humanSprite
+        : walker.enemy?.children.find((c) => c instanceof BodySprite);
+      if (sprite instanceof BodySprite && sprite.gait) {
+        const scale = sprite.gait.hipWidth / HIP_WIDTH;
+        sprite.gait.onLand = (landing) => {
+          if (this.prints) {
+            this.addChild(new FootprintMarker(landing, scale));
+          }
+        };
+      }
+    }
   }
 
   @on("render")
@@ -267,8 +311,13 @@ export default class WalkTestScene extends BaseEntity implements Entity {
       const creature = (human ?? enemy)!;
       const position = creature.body.position;
       const target = walker.out ? walker.to : walker.from;
+      const time = this.game.simulatedTime;
       const heading = walker.out ? 0 : Math.PI;
-      const facing = heading + lane.facing;
+      // Turning on the spot: a new way every so often
+      const turns = Math.floor(time / TURN_INTERVAL);
+      const facing = lane.turn
+        ? TURN_FACINGS[turns % TURN_FACINGS.length]
+        : heading + lane.facing;
 
       if (human) {
         human.hp = human.maxHp * (lane.hurt ? HURT : 1);
@@ -278,6 +327,13 @@ export default class WalkTestScene extends BaseEntity implements Entity {
         enemy.setTargetDirection(facing);
       }
 
+      if (lane.turn) {
+        creature.walkSpring.stop();
+        if (i === 0 && turns > this.cycles) {
+          this.cycles = turns;
+        }
+        return;
+      }
       if (walker.waiting > 0) {
         creature.walkSpring.stop();
         walker.waiting -= dt;
@@ -295,8 +351,9 @@ export default class WalkTestScene extends BaseEntity implements Entity {
       }
       // Keep to the lane
       const drift = target[1] - position[1];
+      const weave = lane.zigzag ? Math.sin(time * ZIGZAG_RATE) * ZIGZAG : 0;
       creature.walkSpring.walkTowards(
-        Math.atan2(drift * 2, toGo),
+        Math.atan2(drift * 2, toGo) + weave,
         lane.speed ?? 1,
       );
     });
@@ -312,6 +369,8 @@ export default class WalkTestScene extends BaseEntity implements Entity {
     } else if (key === "Space") {
       this.paused = !this.paused;
       this.game.slowMo = this.paused ? 0 : this.speed;
+    } else if (key === "KeyP") {
+      this.prints = !this.prints;
     } else if (key === "Enter") {
       this.restart();
     }
