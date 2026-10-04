@@ -7,3 +7,4 @@ Started 2026-10-01.
 - Grenade blasts and any other explosions should leave a charred explosion decal on the ground.
 - Screenshake during shooting and explosions.
 - Only incendiary rounds should have a glowing bullet.
+- Leave footprints after stepping in blood, acid, etc.
