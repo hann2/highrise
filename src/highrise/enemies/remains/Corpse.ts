@@ -23,6 +23,8 @@ import type Human from "../../human/Human";
 const FALL_TIME = 0.35;
 /** Seconds for the pool of blood under it to spread */
 const POOL_TIME = 4;
+/** Seconds its pool is wet enough to track in footprints, drying all the while */
+const POOL_WET_TIME = 120;
 /** Seconds of burning to go from fresh to fully charred */
 const CHAR_TIME = 4;
 /** What a fully charred body is tinted */
@@ -284,13 +286,19 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     }
     await this.wait(FALL_TIME, (_, t) => this.pose(t * t));
     this.pose(1);
-    // Wet for the rest of the floor, as big as it'll spread
+    // Wet as big as it'll spread, drying over `POOL_WET_TIME`
     const stains = getFloorStains(this.game);
     for (const { sprite, size } of this.poolSplats) {
       const where = V(sprite.position.x, sprite.position.y)
         .rotate(this.options.angle)
         .iadd(this.options.position);
-      stains.spill(where, size * WET_RADIUS, BLOOD_STAIN_COLOR);
+      stains.spill(
+        where,
+        size * WET_RADIUS,
+        BLOOD_STAIN_COLOR,
+        1,
+        POOL_WET_TIME,
+      );
     }
     // A slower start than it ends, like a spreading puddle
     await this.wait(POOL_TIME, (_, t) => this.setPoolSize(1 - (1 - t) ** 2));

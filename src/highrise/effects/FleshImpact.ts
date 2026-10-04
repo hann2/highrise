@@ -9,7 +9,7 @@ import { darken } from "../../core/util/ColorUtils";
 import { clampUp, polarToVec } from "../../core/util/MathUtil";
 import { choose, rDirection, rUniform } from "../../core/util/Random";
 import { V, V2d } from "../../core/Vector";
-import BloodSplat from "./BloodSplat";
+import { splatBlood } from "./BloodSplat";
 import { BLOB_TEXTURES, getSplatSound } from "./Splat";
 
 const FRICTION = 5.0;
@@ -99,9 +99,7 @@ export default class FleshImpact extends BaseEntity implements Entity {
 
   particleToSplat(particle: Particle) {
     const splatPos = particle.position.add(this.getPosition());
-    this.game.addEntities(
-      new BloodSplat(splatPos, particle.radius * 2),
-      new PositionalSound(getSplatSound(), splatPos),
-    );
+    splatBlood(this.game, splatPos, particle.radius * 2);
+    this.game.addEntity(new PositionalSound(getSplatSound(), splatPos));
   }
 }
