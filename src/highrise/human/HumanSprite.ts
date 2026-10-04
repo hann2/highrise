@@ -158,8 +158,8 @@ export default class HumanSprite extends BodySprite {
     }
     const forward = Math.cos(gait.travelAngle - this.getAngle());
     return [
-      gait.foot(1).along * forward * ARM_SWING,
-      gait.foot(0).along * forward * ARM_SWING,
+      gait.along(1) * forward * ARM_SWING,
+      gait.along(0) * forward * ARM_SWING,
     ];
   }
 

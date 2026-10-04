@@ -4,7 +4,7 @@ import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
 import { on } from "../../core/entity/handler";
-import { Gait } from "../../core/animation/Gait";
+import { Gait, SIDES } from "../../core/animation/Gait";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
@@ -34,8 +34,6 @@ const VIEW_MARGIN = 1;
 
 /** How much bigger a foot looks at the top of its swing, nearer the camera */
 const FOOT_LIFT_SCALE = 0.15;
-/** Feet reaching less than this (meters) are under the torso: the legs aren't drawn */
-const STANDING_REACH = 0.02;
 /** Radians the shoulders turn against the hips with each step, at full stride */
 const TORSO_TWIST = 0.06;
 
@@ -108,7 +106,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     );
 
     if (legs) {
-      this.gait = new Gait(legs.gait);
+      this.gait = new Gait(legs.gait, HIP_WIDTH * this.legScale);
       const pair = (image: "leg" | "foot", color: string) =>
         [0, 1].map(() => {
           const sprite = Sprite.from(image);
@@ -183,48 +181,52 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   }
 
   /**
-   * Puts the legs and feet where the walk cycle has them. Standing, they're
-   * under the torso, so they aren't drawn at all.
+   * Puts the legs and feet where the walk cycle has them: each leg from its
+   * hip to where its foot is on the floor. Standing square, they're under
+   * the torso, so they aren't drawn at all.
    */
   private poseLegs() {
     const gait = this.gait;
     if (!gait || !this.legsSprite) {
       return;
     }
-    this.legsSprite.visible = gait.reach > STANDING_REACH;
+    this.legsSprite.visible = !gait.underBody;
     if (!this.legsSprite.visible) {
       return;
     }
     const scale = this.legScale;
+    const [x, y] = this.getPosition();
     const facing = this.getAngle();
-    const hipAngle = gait.hipAngle - facing;
-    const travelAngle = gait.travelAngle - facing;
-    // Across the hips, and along the line of travel
-    const acrossX = -Math.sin(hipAngle) * HIP_WIDTH * scale;
-    const acrossY = Math.cos(hipAngle) * HIP_WIDTH * scale;
-    const travelX = Math.cos(travelAngle);
-    const travelY = Math.sin(travelAngle);
+    // From the world into the body's own frame, which the container turns with it
+    const cos = Math.cos(-facing);
+    const sin = Math.sin(-facing);
     const footForward = FOOT_FORWARD * scale;
-    for (const side of [0, 1] as const) {
-      const hipX = side === 0 ? -acrossX : acrossX;
-      const hipY = side === 0 ? -acrossY : acrossY;
-      const { along, lift } = gait.foot(side);
-      const ankleX = hipX + travelX * along;
-      const ankleY = hipY + travelY * along;
+    for (const side of SIDES) {
+      const step = gait.feet[side];
+      const hipDX = gait.hipX(side) - x;
+      const hipDY = gait.hipY(side) - y;
+      const hipX = hipDX * cos - hipDY * sin;
+      const hipY = hipDX * sin + hipDY * cos;
+      const ankleX = (step.x - x) * cos - (step.y - y) * sin;
+      const ankleY = (step.x - x) * sin + (step.y - y) * cos;
 
       const leg = this.legSprites[side];
+      const spanX = ankleX - hipX;
+      const spanY = ankleY - hipY;
+      const span = Math.sqrt(spanX * spanX + spanY * spanY);
       leg.position.set((hipX + ankleX) / 2, (hipY + ankleY) / 2);
-      leg.rotation = along >= 0 ? travelAngle : travelAngle + Math.PI;
-      leg.width = Math.abs(along) + LEG_THICKNESS * scale;
+      leg.rotation = span > 0.01 ? Math.atan2(spanY, spanX) : 0;
+      leg.width = span + LEG_THICKNESS * scale;
       leg.height = LEG_THICKNESS * scale;
 
       const foot = this.footSprites[side];
-      const size = scale * (1 + lift * FOOT_LIFT_SCALE);
+      const angle = step.angle - facing;
+      const size = scale * (1 + step.lift * FOOT_LIFT_SCALE);
       foot.position.set(
-        ankleX + Math.cos(hipAngle) * footForward,
-        ankleY + Math.sin(hipAngle) * footForward,
+        ankleX + Math.cos(angle) * footForward,
+        ankleY + Math.sin(angle) * footForward,
       );
-      foot.rotation = hipAngle;
+      foot.rotation = angle;
       foot.width = FOOT_LENGTH * size;
       foot.height = FOOT_WIDTH * size;
     }

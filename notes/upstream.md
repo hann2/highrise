@@ -245,9 +245,12 @@ pixel ratio"
 "Legs: a walk cycle from how bodies move" (branch `legs`)
 
 - `src/core/animation/Gait.ts`: a two-footed walk cycle worked out from
-  where a body is each tick and which way it faces, so feet stay put on the
-  ground; `GaitStyle` sets reach and time on the ground by speed. Tests in
-  `tests/core/gait.test.ts`.
+  where a body is each update and which way it faces. Each foot has a place
+  on the floor and never moves while it's down; the step cycle (by distance
+  gone) lifts it, and it lands where its hip will be plus its reach, calling
+  `onLand` (for footprints and footsteps). Standing, feet step back under
+  the hips. `GaitStyle` sets reach and time on the ground by speed. Tests
+  in `tests/core/gait.test.ts`.
 - Highrise draws it with `creature-stuff/BodySprite` and `Legs.ts`, which
   stay in the game.
 - `Game.simulatedTime`: seconds of ticks run while not paused (slow-mo

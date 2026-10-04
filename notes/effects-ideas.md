@@ -8,3 +8,4 @@ Started 2026-10-01.
 - Screenshake during shooting and explosions.
 - Only incendiary rounds should have a glowing bullet.
 - Leave footprints after stepping in blood, acid, etc.
+  - `Gait.onLand` (see `BodySprite.gait`) gives each foot's landing: where, which way it points, how fast the body was going. `?scene=walk&prints` shows them.
