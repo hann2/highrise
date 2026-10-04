@@ -26,6 +26,7 @@ import { ActOverride } from "../run/acts";
 import { Molotov } from "../weapons/consumables/consumable-stats/Molotov";
 import { AMMO_CLASSES, MAX_RESERVE } from "../weapons/guns/ammo";
 import Gun from "../weapons/guns/Gun";
+import { bulletSpeed, DEFAULT_BULLET_SLOWDOWN } from "../weapons/guns/GunStats";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import { WEAPONS } from "../weapons/weapons";
 import { WeaponStats } from "../weapons/WeaponStats";
@@ -127,6 +128,11 @@ export default class ArenaScene
     return this.config.act;
   }
 
+  @on("destroy")
+  onDestroy() {
+    bulletSpeed.slowdown = DEFAULT_BULLET_SLOWDOWN;
+  }
+
   @on("add")
   onAdd() {
     const getPlayer = () => this.player;
@@ -191,6 +197,7 @@ export default class ArenaScene
         : undefined;
     }
     this.vision.enabled = config.fog;
+    bulletSpeed.slowdown = config.bulletSlowdown;
     if (config.dummies) {
       for (const enemy of this.game.entities.getByFilter(isEnemy)) {
         makeDummy(enemy);

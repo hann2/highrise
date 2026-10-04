@@ -5,8 +5,6 @@ export interface BulletStats {
   damage: number;
   // Affects the amount of knockback done to enemies
   mass: number;
-  // Speed in meters/sec this exits the gun
-  muzzleVelocity: number;
   // Color of the line
   color: number;
   // Sound the casing makes when it hits the ground
@@ -18,7 +16,6 @@ export interface BulletStats {
 
 export const defaultBulletStats: BulletStats = {
   damage: 10,
-  muzzleVelocity: 100,
   mass: 0.01,
   color: 0xff9900,
   bulletsPerShot: 1,
@@ -37,7 +34,6 @@ export const NineMil: BulletStats = {
   color: 0xffaa00,
   damage: 25,
   mass: 0.01,
-  muzzleVelocity: 60,
 
   dropSounds: [
     "casingDropBoard1",
@@ -66,7 +62,6 @@ export const FiveFiveSix: BulletStats = {
   ...defaultBulletStats,
   damage: 45,
   mass: 0.01,
-  muzzleVelocity: 120,
 };
 
 // 7.62mm rifle round for AK-47
@@ -74,7 +69,6 @@ export const SevenSixTwo: BulletStats = {
   ...defaultBulletStats,
   damage: 50,
   mass: 0.016,
-  muzzleVelocity: 120,
 };
 
 // 12ga shotgun shell with 9 buckshot pellets
@@ -82,7 +76,6 @@ export const TwelveGuageBuckshot: BulletStats = {
   ...defaultBulletStats,
   damage: 20,
   mass: 0.003,
-  muzzleVelocity: 55,
   bulletsPerShot: 9,
   dropSounds: ["shotgunCasingDrop1"],
 };

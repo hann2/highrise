@@ -17,6 +17,8 @@ export const DoubleBarrelShotgun: GunStats = {
   flash: SAWN_OFF_FLASH,
   fireRate: 10,
   bulletStats: TwelveGuageBuckshot,
+  // 12 gauge 00 buckshot, sawn off to about 12"
+  muzzleVelocity: 340,
   bulletSpread: degToRad(20),
   reloadingStyle: ReloadingStyle.MAGAZINE,
   fireMode: FireMode.SEMI_AUTO,

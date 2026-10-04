@@ -16,6 +16,8 @@ export const AR15: GunStats = {
   flash: AR15_FLASH,
   fireRate: 12,
   bulletStats: FiveFiveSix,
+  // 5.56mm from a 16" barrel
+  muzzleVelocity: 930,
   fireMode: FireMode.SEMI_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 1.5,

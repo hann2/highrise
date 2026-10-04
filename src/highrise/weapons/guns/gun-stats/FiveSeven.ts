@@ -11,6 +11,8 @@ export const FiveSeven: GunStats = {
   flash: FIVE_SEVEN_FLASH,
   fireRate: 20,
   bulletStats: NineMil,
+  // 5.7x28mm from a 4.8" barrel
+  muzzleVelocity: 650,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 0.8,
   ammoCapacity: 20,

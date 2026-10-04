@@ -11,6 +11,8 @@ export const DesertEagle: GunStats = {
   flash: DESERT_EAGLE_FLASH,
   fireRate: 10,
   bulletStats: Magnum,
+  // .50 AE from a 6" barrel
+  muzzleVelocity: 450,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 0.8,
   ammoCapacity: 7,

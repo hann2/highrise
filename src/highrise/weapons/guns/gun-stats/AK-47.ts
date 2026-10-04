@@ -16,6 +16,8 @@ export const AK47: GunStats = {
   flash: AK47_FLASH,
   fireRate: 10,
   bulletStats: SevenSixTwo,
+  // 7.62x39mm from a 16.3" barrel
+  muzzleVelocity: 715,
   fireMode: FireMode.FULL_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 1.8,

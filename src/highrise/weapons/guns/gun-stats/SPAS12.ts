@@ -16,6 +16,8 @@ export const SPAS12: GunStats = {
   flash: SPAS12_FLASH,
   fireRate: 8,
   bulletStats: TwelveGuageBuckshot,
+  // 12 gauge 00 buckshot from a 21.5" barrel
+  muzzleVelocity: 400,
   bulletSpread: degToRad(7),
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   fireMode: FireMode.SEMI_AUTO,

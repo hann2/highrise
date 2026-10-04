@@ -16,6 +16,8 @@ export const P90: GunStats = {
   flash: P90_FLASH,
   fireRate: 16,
   bulletStats: NineMil,
+  // 5.7x28mm from a 10.4" barrel
+  muzzleVelocity: 715,
   fireMode: FireMode.FULL_AUTO,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 2.0,

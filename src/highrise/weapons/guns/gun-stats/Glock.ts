@@ -11,6 +11,8 @@ export const Glock: GunStats = {
   flash: GLOCK_FLASH,
   fireRate: 20,
   bulletStats: NineMil,
+  // 9mm from a 4.5" barrel
+  muzzleVelocity: 360,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 0.8,
   ammoCapacity: 15,

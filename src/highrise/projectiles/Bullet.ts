@@ -54,9 +54,11 @@ export default class Bullet extends Projectile implements Entity {
     position: V2d,
     direction: number,
     public stats: BulletStats,
+    /** Meters/sec it left the gun at */
+    public readonly muzzleVelocity: number,
     public readonly shooter?: Human,
   ) {
-    super(position, polarToVec(direction, stats.muzzleVelocity));
+    super(position, polarToVec(direction, muzzleVelocity));
     this.origin = position.clone();
 
     this.sprite = new Graphics();
@@ -80,7 +82,7 @@ export default class Bullet extends Projectile implements Entity {
     this.glow.tint = stats.color;
     this.glow.alpha = GLOW_INTENSITY;
     this.glow.blendMode = "add";
-    const lightSize = stats.muzzleVelocity / MIN_FRAME_RATE + 2 * GLOW_RADIUS;
+    const lightSize = muzzleVelocity / MIN_FRAME_RATE + 2 * GLOW_RADIUS;
     this.light = this.addChild(new Light(this.glow, false, 1, 0, lightSize));
     // The streak is drawn again every frame
     this.light.dynamic = true;
@@ -100,7 +102,7 @@ export default class Bullet extends Projectile implements Entity {
     return (
       this.stats.damage *
       (this.shooter?.stats.damage ?? 1) *
-      (this.velocity.magnitude / this.stats.muzzleVelocity) *
+      (this.velocity.magnitude / this.muzzleVelocity) *
       this.damageMultiplier *
       longRange
     );

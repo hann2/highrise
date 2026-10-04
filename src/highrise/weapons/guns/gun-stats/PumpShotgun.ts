@@ -16,6 +16,8 @@ export const PumpShotgun: GunStats = {
   flash: PUMP_SHOTGUN_FLASH,
   fireRate: 2,
   bulletStats: TwelveGuageBuckshot,
+  // 12 gauge 00 buckshot from an 18"+ barrel
+  muzzleVelocity: 400,
   bulletSpread: degToRad(9),
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   ejectionType: EjectionType.PUMP,

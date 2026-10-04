@@ -11,6 +11,8 @@ export const M1911: GunStats = {
   flash: M1911_FLASH,
   fireRate: 20,
   bulletStats: FourtyFive,
+  // .45 ACP from a 5" barrel
+  muzzleVelocity: 255,
   reloadingStyle: ReloadingStyle.MAGAZINE,
   reloadInsertTime: 0.8,
   ammoCapacity: 7,

@@ -49,6 +49,11 @@ export interface GunStats extends BaseWeaponStats {
 
   // The type of bullet this uses
   readonly bulletStats: BulletStats;
+  /**
+   * The real gun's muzzle velocity in meters/sec, with its barrel and usual
+   * load. Bullets leave at this divided by `bulletSpeed.slowdown`.
+   */
+  readonly muzzleVelocity: number;
   // The maximum spread of bullets fired
   readonly bulletSpread: number;
   /**
@@ -115,6 +120,15 @@ export interface GunStats extends BaseWeaponStats {
   sideOffset: number;
 }
 
+/**
+ * How many times slower than the real thing bullets are, so they can be
+ * seen: at real speeds a pistol round crosses the screen in a frame or two
+ */
+export const DEFAULT_BULLET_SLOWDOWN = 6;
+
+/** The slowdown bullets are fired with. The arena changes it to try others. */
+export const bulletSpeed = { slowdown: DEFAULT_BULLET_SLOWDOWN };
+
 export type GunSounds = GunStats["sounds"];
 export type GunSoundName = keyof GunSounds;
 
@@ -163,6 +177,7 @@ export const defaultGunStats: GunStats = {
   bulletSpread: degToRad(0.5),
 
   bulletStats: defaultBulletStats,
+  muzzleVelocity: 360,
 
   recoilAmount: degToRad(2),
   recoilRecovery: 5,

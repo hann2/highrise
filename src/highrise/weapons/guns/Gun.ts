@@ -42,6 +42,7 @@ import {
   poseGun,
 } from "./GunPose";
 import {
+  bulletSpeed,
   EjectionType,
   GunAnimations,
   GunSoundName,
@@ -434,6 +435,7 @@ export default class Gun extends BaseEntity implements Entity {
         position.clone(),
         direction + spread,
         stats.bulletStats,
+        stats.muzzleVelocity / bulletSpeed.slowdown,
         shooter,
       );
       // What the attachments and the shooter's items do to this bullet

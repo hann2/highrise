@@ -16,6 +16,7 @@ import { CONSUMABLES } from "../weapons/consumables/consumable-stats/consumableS
 import { ConsumableStats } from "../weapons/consumables/ConsumableStats";
 import { USABLES } from "../weapons/usables/usables";
 import { UsableStats } from "../weapons/usables/UsableStats";
+import { DEFAULT_BULLET_SLOWDOWN } from "../weapons/guns/GunStats";
 import { WEAPONS } from "../weapons/weapons";
 import { WeaponStats } from "../weapons/WeaponStats";
 
@@ -92,6 +93,8 @@ export interface ArenaConfig {
   doors: boolean;
   /** Pools of fire spread over the room that never go out, for stress tests */
   fires: number;
+  /** How many times slower than real bullets are (see `bulletSpeed`) */
+  bulletSlowdown: number;
 }
 
 /** Lower case with only letters and digits, for names in the URL: "Dragon's Breath" is "dragonsbreath" */
@@ -148,7 +151,7 @@ export function startingSlots(
  *
  * `?scene=arena&char=chad&weapons=spas12,glock&items=buckshotbounce*2,choke
  * &throwable=molotov*3&usable=stimpack&act=3&wave=zombie*12,heavy*2
- * &arrival=surround&layout=offices&god&infammo&fog&dummies&dark&doors&fires=8`
+ * &arrival=surround&layout=offices&god&infammo&fog&dummies&dark&doors&fires=8&slowdown=4`
  */
 export function parseArenaConfig(params: URLSearchParams): ArenaConfig {
   const character =
@@ -186,6 +189,7 @@ export function parseArenaConfig(params: URLSearchParams): ArenaConfig {
 
   const act = parseInt(params.get("act") ?? "1", 10);
   const fires = parseInt(params.get("fires") ?? "0", 10);
+  const slowdown = parseInt(params.get("slowdown") ?? "", 10);
   const arrival = params.get("arrival") as Arrival;
   const layout = params.get("layout") as LayoutName;
 
@@ -207,6 +211,9 @@ export function parseArenaConfig(params: URLSearchParams): ArenaConfig {
     dark: params.has("dark"),
     doors: params.has("doors"),
     fires: isNaN(fires) ? 0 : Math.max(fires, 0),
+    bulletSlowdown: isNaN(slowdown)
+      ? DEFAULT_BULLET_SLOWDOWN
+      : Math.max(slowdown, 1),
   };
 }
 
@@ -245,6 +252,9 @@ export function arenaConfigToQuery(config: ArenaConfig): string {
   if (config.fires > 0) {
     parts.push(`fires=${config.fires}`);
   }
+  if (config.bulletSlowdown !== DEFAULT_BULLET_SLOWDOWN) {
+    parts.push(`slowdown=${config.bulletSlowdown}`);
+  }
   const flags: [boolean, string][] = [
     [config.god, "god"],
     [config.infiniteAmmo, "infammo"],
@@ -272,6 +282,7 @@ export function arenaConfigToQuery(config: ArenaConfig): string {
     "arrival",
     "layout",
     "fires",
+    "slowdown",
     ...flags.map(([, flag]) => flag),
   ]);
   for (const [key, value] of new URLSearchParams(window.location.search)) {

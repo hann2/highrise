@@ -342,6 +342,14 @@ export default class ArenaPanel extends ReactEntity implements Entity {
                 onChange={(n) => (draft.fires = n)}
               />
             </Row>
+            <Row label="Bullets this many times slower than real">
+              <Stepper
+                value={draft.bulletSlowdown}
+                min={1}
+                max={30}
+                onChange={(n) => (draft.bulletSlowdown = n)}
+              />
+            </Row>
           </Section>
         </div>
 

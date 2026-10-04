@@ -16,6 +16,8 @@ export const Revolver: GunStats = {
   flash: REVOLVER_FLASH,
   fireRate: 10,
   bulletStats: Magnum,
+  // .44 Magnum from a 6.5" barrel
+  muzzleVelocity: 430,
   reloadingStyle: ReloadingStyle.INDIVIDUAL,
   ejectionType: EjectionType.RELOAD,
   reloadInsertTime: 0.22,
