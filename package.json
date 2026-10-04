@@ -25,6 +25,7 @@
     "test:vision": "tsx --test tests/vision/*.test.ts",
     "test:core": "tsx --test tests/core/*.test.ts",
     "test:characters": "tsx --test tests/characters/*.test.ts",
+    "test:footprints": "tsx --test tests/footprints/*.test.ts",
     "clip": "tsx bin/record-clip.ts",
     "preview": "vite preview --port 4173",
     "electron": "electron-forge start --",
