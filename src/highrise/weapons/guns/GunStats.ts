@@ -124,7 +124,7 @@ export interface GunStats extends BaseWeaponStats {
  * How many times slower than the real thing bullets are, so they can be
  * seen: at real speeds a pistol round crosses the screen in a frame or two
  */
-export const DEFAULT_BULLET_SLOWDOWN = 6;
+export const DEFAULT_BULLET_SLOWDOWN = 3;
 
 /** The slowdown bullets are fired with. The arena changes it to try others. */
 export const bulletSpeed = { slowdown: DEFAULT_BULLET_SLOWDOWN };
