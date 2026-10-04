@@ -3,24 +3,37 @@
   "description": "",
   "look": {
     "skin": "#e8c09c",
+    "build": {
+      "shoulders": -0.1,
+      "chest": 0,
+      "belly": 0,
+      "hunch": 0,
+      "squareness": -0.3,
+      "arms": 0,
+      "hands": 0,
+      "head": 0
+    },
     "hair": {
       "color": "#0e0e10",
       "coverage": 0.85,
       "volume": 0.35,
       "messiness": 0.7,
-      "fringe": -0.5
+      "curls": 0,
+      "length": 0,
+      "fringe": -0.5,
+      "bun": 0,
+      "ponytail": 0,
+      "mohawk": 0
     },
     "top": {
       "style": "sweater",
-      "color": "#3a3a3c"
+      "color": "#3a3a3c",
+      "secondary": "#e8e4dc"
     },
     "sleeves": {
       "length": 0.95
     },
-    "build": {
-      "shoulders": -0.1,
-      "squareness": -0.3
-    },
+    "extras": [],
     "pants": "#1f1f22",
     "shoes": "#3a3a3a",
     "seed": 12

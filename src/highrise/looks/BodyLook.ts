@@ -237,7 +237,9 @@ export function lookProblems(look: PartialLook | undefined): string[] {
   };
   const oneOf = (name: string, value: unknown, options: readonly string[]) => {
     if (!options.includes(value as string)) {
-      problems.push(`look ${name} "${value}" isn't one of ${options.join(", ")}`);
+      problems.push(
+        `look ${name} "${value}" isn't one of ${options.join(", ")}`,
+      );
     }
   };
 

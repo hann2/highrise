@@ -42,7 +42,11 @@ export function drawPattern(
 }
 
 /** A jagged hole, around `center` */
-export function ripPath(center: Pt, size: number, random: () => number): string {
+export function ripPath(
+  center: Pt,
+  size: number,
+  random: () => number,
+): string {
   // A slash: long one way, narrow the other, with frayed edges
   const points: Pt[] = [];
   const count = 10 + Math.floor(random() * 6);
@@ -123,7 +127,9 @@ export function drawBlood(
       12,
       (a) => 0.35 * wave(a),
     );
-    d.add(`<path d="${smoothPath(points)}" fill="${withAlpha(color, alpha)}"/>`);
+    d.add(
+      `<path d="${smoothPath(points)}" fill="${withAlpha(color, alpha)}"/>`,
+    );
     // Spatters round it
     for (let j = 0; j < 3; j++) {
       const angle = random() * Math.PI * 2;

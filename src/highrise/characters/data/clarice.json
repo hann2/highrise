@@ -3,17 +3,27 @@
   "description": "",
   "look": {
     "skin": "#b07a48",
+    "build": {
+      "shoulders": -0.4,
+      "chest": 0,
+      "belly": 0,
+      "hunch": 0,
+      "squareness": 0,
+      "arms": -0.5,
+      "hands": -0.2,
+      "head": 0
+    },
     "hair": {
       "color": "#111111",
       "coverage": 0.85,
       "volume": 0.25,
+      "messiness": 0.2,
       "curls": 0.4,
+      "length": 0,
+      "fringe": 0.3,
       "bun": 0.35,
-      "fringe": 0.3
-    },
-    "glasses": {
-      "shape": "square",
-      "color": "#2a2a2a"
+      "ponytail": 0,
+      "mohawk": 0
     },
     "top": {
       "style": "coat",
@@ -29,14 +39,13 @@
         "color": "#2a5aa8"
       }
     ],
-    "build": {
-      "shoulders": -0.4,
-      "arms": -0.5,
-      "hands": -0.2
-    },
     "pants": "#2a2a2e",
     "shoes": "#151515",
-    "seed": 4
+    "seed": 4,
+    "glasses": {
+      "shape": "square",
+      "color": "#2a2a2a"
+    }
   },
   "stats": {},
   "startingWeapons": ["M1911"],

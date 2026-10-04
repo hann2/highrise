@@ -41,8 +41,12 @@ export function composeBodySvg(
 ): string {
   const body = "parts" in look ? look : drawBody(look, prefix);
   const { parts, dims } = body;
-  const { pose = "standing", stride = 150, scale = 200, faceUp = true } =
-    options;
+  const {
+    pose = "standing",
+    stride = 150,
+    scale = 200,
+    faceUp = true,
+  } = options;
   const items: string[] = [];
   let box: [number, number, number, number];
 
@@ -118,7 +122,10 @@ export function composeBodySvg(
     ] as const) {
       const angle = side * 150;
       items.push(
-        place(arm, `translate(0 ${n(side * shoulder)}) rotate(${angle}) scale(0.75 1)`),
+        place(
+          arm,
+          `translate(0 ${n(side * shoulder)}) rotate(${angle}) scale(0.75 1)`,
+        ),
       );
       const rad = (angle * Math.PI) / 180;
       items.push(
@@ -173,7 +180,9 @@ export function portraitUrl(
   const key = JSON.stringify([look, options]);
   let url = portraits.get(key);
   if (!url) {
-    url = svgDataUrl(composeBodySvg(look, options, `portrait${portraits.size}`));
+    url = svgDataUrl(
+      composeBodySvg(look, options, `portrait${portraits.size}`),
+    );
     portraits.set(key, url);
   }
   return url;

@@ -84,22 +84,23 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
 
   // Shelf packing, tallest first
   const placements: Placement[] = [];
-  const byBody = bodies.map((body) =>
-    Object.fromEntries(
-      BODY_PARTS.map((part) => {
-        const drawing = body.parts[part];
-        const placement: Placement = {
-          drawing,
-          page: 0,
-          x: 0,
-          y: 0,
-          width: Math.ceil(drawing.width * scale),
-          height: Math.ceil(drawing.height * scale),
-        };
-        placements.push(placement);
-        return [part, placement];
-      }),
-    ) as Record<BodyPart, Placement>,
+  const byBody = bodies.map(
+    (body) =>
+      Object.fromEntries(
+        BODY_PARTS.map((part) => {
+          const drawing = body.parts[part];
+          const placement: Placement = {
+            drawing,
+            page: 0,
+            x: 0,
+            y: 0,
+            width: Math.ceil(drawing.width * scale),
+            height: Math.ceil(drawing.height * scale),
+          };
+          placements.push(placement);
+          return [part, placement];
+        }),
+      ) as Record<BodyPart, Placement>,
   );
   const pageHeights: number[] = [];
   let page = 0;

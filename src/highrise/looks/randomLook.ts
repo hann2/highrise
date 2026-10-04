@@ -58,8 +58,22 @@ const CASUAL_COLORS: Color[] = [
   "#d6d0c4",
   "#7d4f8f",
 ];
-const SUIT_COLORS: Color[] = ["#2b2f3a", "#3a3d45", "#22262f", "#4a4136", "#5a5f68", "#2d3a4f"];
-const TIE_COLORS: Color[] = ["#7a1f2b", "#1f3a7a", "#2b5a3a", "#5a2b6e", "#8a6a1f", "#3a3a3a"];
+const SUIT_COLORS: Color[] = [
+  "#2b2f3a",
+  "#3a3d45",
+  "#22262f",
+  "#4a4136",
+  "#5a5f68",
+  "#2d3a4f",
+];
+const TIE_COLORS: Color[] = [
+  "#7a1f2b",
+  "#1f3a7a",
+  "#2b5a3a",
+  "#5a2b6e",
+  "#8a6a1f",
+  "#3a3a3a",
+];
 const PANTS_COLORS: Color[] = [
   "#2a3044",
   "#26272b",
@@ -70,7 +84,14 @@ const PANTS_COLORS: Color[] = [
   "#5a4632",
   "#6b6452",
 ];
-const SHOE_COLORS: Color[] = ["#1f1f22", "#2a2420", "#4a3424", "#6b5a48", "#d8d8d4", "#3a3a3e"];
+const SHOE_COLORS: Color[] = [
+  "#1f1f22",
+  "#2a2420",
+  "#4a3424",
+  "#6b5a48",
+  "#d8d8d4",
+  "#3a3a3e",
+];
 
 type Random = () => number;
 
@@ -114,8 +135,17 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
       secondary: "#ffffff",
       sleeves: chance(random, 0.7) ? 1 : 0.4,
       extras: [
-        ...(chance(random, 0.5) ? [{ kind: "tie" as const, color: pick(random, TIE_COLORS) }] : []),
-        ...(chance(random, 0.35) ? [{ kind: "lanyard" as const, color: pick(random, ["#2a5aa8", "#b02a2a", "#2a2a2a"]) }] : []),
+        ...(chance(random, 0.5)
+          ? [{ kind: "tie" as const, color: pick(random, TIE_COLORS) }]
+          : []),
+        ...(chance(random, 0.35)
+          ? [
+              {
+                kind: "lanyard" as const,
+                color: pick(random, ["#2a5aa8", "#b02a2a", "#2a2a2a"]),
+              },
+            ]
+          : []),
       ],
       pattern: chance(random, 0.15)
         ? { kind: "stripes", color: darken(pick(random, SHIRT_COLORS), 0.15) }
@@ -132,7 +162,9 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
         color: suit,
         secondary: pick(random, SHIRT_COLORS),
         sleeves: 1,
-        extras: chance(random, 0.6) ? [{ kind: "tie", color: pick(random, TIE_COLORS) }] : [],
+        extras: chance(random, 0.6)
+          ? [{ kind: "tie", color: pick(random, TIE_COLORS) }]
+          : [],
         pants: suit,
       };
     },
@@ -146,14 +178,27 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
       secondary: pick(random, CASUAL_COLORS),
       sleeves: between(random, 0.3, 1),
       extras: [
-        ...(chance(random, 0.15) ? [{ kind: "backpack" as const, color: pick(random, CASUAL_COLORS) }] : []),
-        ...(chance(random, 0.06) ? [{ kind: "scarf" as const, color: pick(random, CASUAL_COLORS) }] : []),
+        ...(chance(random, 0.15)
+          ? [{ kind: "backpack" as const, color: pick(random, CASUAL_COLORS) }]
+          : []),
+        ...(chance(random, 0.06)
+          ? [{ kind: "scarf" as const, color: pick(random, CASUAL_COLORS) }]
+          : []),
       ],
       hat: chance(random, 0.12)
-        ? { style: pick(random, ["cap", "beanie"] as const), color: pick(random, CASUAL_COLORS), secondary: chance(random, 0.5) ? pick(random, CASUAL_COLORS) : undefined }
+        ? {
+            style: pick(random, ["cap", "beanie"] as const),
+            color: pick(random, CASUAL_COLORS),
+            secondary: chance(random, 0.5)
+              ? pick(random, CASUAL_COLORS)
+              : undefined,
+          }
         : undefined,
       pattern: chance(random, 0.12)
-        ? { kind: pick(random, ["stripes", "plaid", "dots"] as const), color: pick(random, CASUAL_COLORS) }
+        ? {
+            kind: pick(random, ["stripes", "plaid", "dots"] as const),
+            color: pick(random, CASUAL_COLORS),
+          }
         : undefined,
     }),
   },
@@ -165,7 +210,14 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
       color: pick(random, CASUAL_COLORS),
       secondary: pick(random, SHIRT_COLORS),
       sleeves: between(random, 0.6, 1),
-      extras: chance(random, 0.25) ? [{ kind: "satchel", color: pick(random, ["#6b4428", "#2a2420", "#8a5a32"]) }] : [],
+      extras: chance(random, 0.25)
+        ? [
+            {
+              kind: "satchel",
+              color: pick(random, ["#6b4428", "#2a2420", "#8a5a32"]),
+            },
+          ]
+        : [],
     }),
   },
   {
@@ -205,7 +257,12 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
       secondary: pick(random, CASUAL_COLORS),
       sleeves: 0.35,
       extras: [],
-      hat: chance(random, 0.7) ? { style: "hardhat", color: pick(random, ["#e8c22a", "#f0f0ec", "#e8752a"]) } : undefined,
+      hat: chance(random, 0.7)
+        ? {
+            style: "hardhat",
+            color: pick(random, ["#e8c22a", "#f0f0ec", "#e8752a"]),
+          }
+        : undefined,
       pants: pick(random, ["#3d5470", "#b9a57a"]),
     }),
   },
@@ -229,7 +286,13 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
       secondary: "#ffffff",
       sleeves: 0,
       extras: [],
-      hat: chance(random, 0.2) ? { style: "bandana", color: pick(random, CASUAL_COLORS), secondary: "#ffffff" } : undefined,
+      hat: chance(random, 0.2)
+        ? {
+            style: "bandana",
+            color: pick(random, CASUAL_COLORS),
+            secondary: "#ffffff",
+          }
+        : undefined,
     }),
   },
 ];
@@ -253,12 +316,20 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
   const bald = chance(random, 0.1);
   const long = chance(random, 0.3);
   const look: BodyLook = {
-    skin: mix(pick(random, SKIN_TONES), pick(random, SKIN_TONES), random() * 0.3),
+    skin: mix(
+      pick(random, SKIN_TONES),
+      pick(random, SKIN_TONES),
+      random() * 0.3,
+    ),
     build: {
       shoulders: slider(random),
       chest: slider(random),
-      belly: chance(random, 0.3) ? Math.round(random() * 100) / 100 : slider(random, 0.2),
-      hunch: zombie ? Math.round(between(random, 0, 1) * 100) / 100 : slider(random, 0.3),
+      belly: chance(random, 0.3)
+        ? Math.round(random() * 100) / 100
+        : slider(random, 0.2),
+      hunch: zombie
+        ? Math.round(between(random, 0, 1) * 100) / 100
+        : slider(random, 0.3),
       squareness: slider(random),
       arms: slider(random),
       hands: slider(random, 0.3),
@@ -268,13 +339,23 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
       color: hairColor,
       coverage: bald ? 0 : Math.round(between(random, 0.55, 1) * 100) / 100,
       volume: Math.round(between(random, 0, long ? 0.6 : 0.4) * 100) / 100,
-      messiness: Math.round(between(random, zombie ? 0.3 : 0, zombie ? 1 : 0.5) * 100) / 100,
-      curls: chance(random, 0.15) ? Math.round(between(random, 0.3, 1) * 100) / 100 : 0,
+      messiness:
+        Math.round(between(random, zombie ? 0.3 : 0, zombie ? 1 : 0.5) * 100) /
+        100,
+      curls: chance(random, 0.15)
+        ? Math.round(between(random, 0.3, 1) * 100) / 100
+        : 0,
       length: long ? Math.round(between(random, 0.2, 1) * 100) / 100 : 0,
       fringe: slider(random, 0.6),
       part: chance(random, 0.3) ? slider(random, 0.8) : undefined,
-      bun: !long && chance(random, 0.08) ? Math.round(between(random, 0.3, 1) * 100) / 100 : 0,
-      ponytail: long && chance(random, 0.3) ? Math.round(between(random, 0.3, 1) * 100) / 100 : 0,
+      bun:
+        !long && chance(random, 0.08)
+          ? Math.round(between(random, 0.3, 1) * 100) / 100
+          : 0,
+      ponytail:
+        long && chance(random, 0.3)
+          ? Math.round(between(random, 0.3, 1) * 100) / 100
+          : 0,
       mohawk: chance(random, 0.02) ? 0.3 : 0,
     },
     beard: chance(random, 0.2)
@@ -289,7 +370,10 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
     sleeves: { length: Math.round(outfit.sleeves * 100) / 100 },
     hat: outfit.hat,
     glasses: chance(random, 0.15)
-      ? { shape: pick(random, ["round", "square", "square", "shades"] as const), color: pick(random, ["#1a1a1a", "#5a3a22", "#8a8a8a", "#2a3a6a"]) }
+      ? {
+          shape: pick(random, ["round", "square", "square", "shades"] as const),
+          color: pick(random, ["#1a1a1a", "#5a3a22", "#8a8a8a", "#2a3a6a"]),
+        }
       : undefined,
     extras: outfit.extras,
     pants: outfit.pants ?? pick(random, PANTS_COLORS),

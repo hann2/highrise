@@ -85,7 +85,12 @@ export function drawTorso(
 
   // Behind: a hood, a sack
   if (look.extras.some((e) => e.kind === "sack")) {
-    drawSack(d, look.extras.find((e) => e.kind === "sack")!.color, dims, random);
+    drawSack(
+      d,
+      look.extras.find((e) => e.kind === "sack")!.color,
+      dims,
+      random,
+    );
   }
 
   // What's under the top, then the top
@@ -260,14 +265,23 @@ export function drawTorso(
   }
   if (top.style === "hoodie") {
     // The hood bunched up behind the neck, and its strings in front
-    const hood = ellipsePoints(-neck * 0.95, 0, 95, neck * 1.05, 24, (a) =>
-      0.05 * Math.sin(a * 5),
+    const hood = ellipsePoints(
+      -neck * 0.95,
+      0,
+      95,
+      neck * 1.05,
+      24,
+      (a) => 0.05 * Math.sin(a * 5),
     );
     d.blob(smoothPath(hood), darken(top.color, 0.05), { grain: "cloth" });
-    d.blob(ellipsePath(-neck * 0.75, 0, 40, neck * 0.7), darken(top.color, 0.4), {
-      shade: "flat",
-      outline: 0,
-    });
+    d.blob(
+      ellipsePath(-neck * 0.75, 0, 40, neck * 0.7),
+      darken(top.color, 0.4),
+      {
+        shade: "flat",
+        outline: 0,
+      },
+    );
     for (const side of [-1, 1]) {
       d.line(
         `M${n(neck * 0.8)} ${n(side * 30)}L${n(dims.chestDepth + 30)} ${n(side * 38)}`,
@@ -327,7 +341,11 @@ function drawSack(
       `opacity="0.5"`,
     );
   }
-  d.line(`M${n(cx + 60)} ${n(cy + 60)}L${n(cx + 140)} ${n(cy + 120)}`, darken(color, 0.5), 18);
+  d.line(
+    `M${n(cx + 60)} ${n(cy + 60)}L${n(cx + 140)} ${n(cy + 120)}`,
+    darken(color, 0.5),
+    18,
+  );
 }
 
 function drawExtra(
@@ -346,19 +364,27 @@ function drawExtra(
       d.include(x0, -w * 0.55, 0, w * 0.55);
       for (const side of [-1, 1]) {
         d.blob(
-          capsulePath(-dims.backDepth * 0.6, dims.chestDepth * 0.9, side * w * 0.45, 40),
+          capsulePath(
+            -dims.backDepth * 0.6,
+            dims.chestDepth * 0.9,
+            side * w * 0.45,
+            40,
+          ),
           darken(color, 0.2),
           { shade: "tube", clip: torso },
         );
       }
       const pack = `M${n(x0 + 40)} ${n(-w * 0.52)}L${n(-dims.backDepth + 55)} ${n(-w * 0.55)}Q${n(-dims.backDepth + 75)} 0 ${n(-dims.backDepth + 55)} ${n(w * 0.55)}L${n(x0 + 40)} ${n(w * 0.52)}Q${n(x0 - 10)} 0 ${n(x0 + 40)} ${n(-w * 0.52)}Z`;
       d.blob(pack, color, { grain: "cloth" });
-      d.blob(
-        capsulePath(x0 + 8, x0 + 80, 0, w * 0.6),
-        darken(color, 0.1),
-        { grain: "cloth", outline: 6 },
+      d.blob(capsulePath(x0 + 8, x0 + 80, 0, w * 0.6), darken(color, 0.1), {
+        grain: "cloth",
+        outline: 6,
+      });
+      d.line(
+        `M${n(x0 + 25)} ${n(-w * 0.42)}Q${n(x0 + 5)} 0 ${n(x0 + 25)} ${n(w * 0.42)}`,
+        "#d8d0b8",
+        5,
       );
-      d.line(`M${n(x0 + 25)} ${n(-w * 0.42)}Q${n(x0 + 5)} 0 ${n(x0 + 25)} ${n(w * 0.42)}`, "#d8d0b8", 5);
       return;
     }
     case "satchel": {
@@ -470,11 +496,11 @@ export function drawLyingTorso(
   const torso = d.clipPath("torso", shape);
 
   // The raw end
-  d.blob(
-    capsulePath(-length - 70, -length + 70, 0, waist * 1.9),
-    "#5a0d0d",
-    { shade: "flat", outline: 0, clip: torso },
-  );
+  d.blob(capsulePath(-length - 70, -length + 70, 0, waist * 1.9), "#5a0d0d", {
+    shade: "flat",
+    outline: 0,
+    clip: torso,
+  });
 
   const band = BANDED[top.style];
   const base = band ? shoulderColor(look, colors.skin) : top.color;
@@ -500,9 +526,13 @@ export function drawLyingTorso(
             `<path d="M${n(front)} ${n(side * half)}L${n(-length * 0.7)} ${n(-side * half * 0.4)}" stroke="${top.color}" stroke-width="50"/>`,
         );
       }
-      d.blob(capsulePath(-length - 80, -length * 0.62, 0, waist * 1.9), top.color, {
-        grain: "cloth",
-      });
+      d.blob(
+        capsulePath(-length - 80, -length * 0.62, 0, waist * 1.9),
+        top.color,
+        {
+          grain: "cloth",
+        },
+      );
     } else {
       d.blob(
         polygonPath([
@@ -524,18 +554,36 @@ export function drawLyingTorso(
   }
   d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("dome")})"/>`);
   // The seam down the back, and the collar at the neck
-  d.line(`M${n(front * 0.6)} 0L${n(-length * 0.8)} 0`, darken(base, 0.3), 6, `opacity="0.5"`);
+  d.line(
+    `M${n(front * 0.6)} 0L${n(-length * 0.8)} 0`,
+    darken(base, 0.3),
+    6,
+    `opacity="0.5"`,
+  );
   if (top.style === "hoodie") {
     d.blob(
-      smoothPath(ellipsePoints(front * 0.1, 0, 85, w * 0.45, 20, (a) => 0.05 * Math.sin(a * 5))),
+      smoothPath(
+        ellipsePoints(
+          front * 0.1,
+          0,
+          85,
+          w * 0.45,
+          20,
+          (a) => 0.05 * Math.sin(a * 5),
+        ),
+      ),
       darken(top.color, 0.05),
       { grain: "cloth" },
     );
   } else if (COLLARED.includes(top.style)) {
-    d.blob(capsulePath(front * 0.1, front * 0.55, 0, w * 0.75), lighten(top.color, 0.05), {
-      grain: "cloth",
-      outline: 6,
-    });
+    d.blob(
+      capsulePath(front * 0.1, front * 0.55, 0, w * 0.75),
+      lighten(top.color, 0.05),
+      {
+        grain: "cloth",
+        outline: 6,
+      },
+    );
   }
 
   const onBack = (): Pt => [
@@ -576,7 +624,11 @@ export function drawLyingTorso(
         extra.color,
         { grain: "cloth" },
       );
-      d.line(`M${n(-length * 0.65)} ${n(-w * 0.35)}L${n(-length * 0.65)} ${n(w * 0.35)}`, "#d8d0b8", 5);
+      d.line(
+        `M${n(-length * 0.65)} ${n(-w * 0.35)}L${n(-length * 0.65)} ${n(w * 0.35)}`,
+        "#d8d0b8",
+        5,
+      );
     }
   }
 

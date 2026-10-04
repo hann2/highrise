@@ -83,7 +83,9 @@ export default class LooksTestScene extends BaseEntity implements Entity {
     const roomHeight = Math.max(height, view[1] / zoom) + 2;
     const offset = V((roomWidth - width) / 2, (roomHeight - height) / 2);
 
-    this.addChild(new RepeatingFloor(cementFloor, [0, 0], [roomWidth, roomHeight]));
+    this.addChild(
+      new RepeatingFloor(cementFloor, [0, 0], [roomWidth, roomHeight]),
+    );
     this.game.camera.z = zoom;
     this.game.camera.center(V(roomWidth / 2, roomHeight / 2));
 
@@ -150,6 +152,9 @@ class Mannequin extends BodySprite {
       return [left.iadd(V(0.32, 0.05)), right.iadd(V(0.32, -0.05))];
     }
     const swing = this.still ? 0 : Math.sin(this.phase * 3) * 0.08;
-    return [left.iadd(V(0.08 + swing, 0.04)), right.iadd(V(0.08 - swing, -0.04))];
+    return [
+      left.iadd(V(0.08 + swing, 0.04)),
+      right.iadd(V(0.08 - swing, -0.04)),
+    ];
   }
 }

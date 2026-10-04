@@ -35,10 +35,17 @@ async function main() {
     .readdirSync(dataDir)
     .filter((file) => file.endsWith(".json"))
     .map((file) => {
-      const data = JSON.parse(fs.readFileSync(path.join(dataDir, file), "utf8"));
-      return [data.name as string, data.look as PartialLook] as [string, PartialLook];
+      const data = JSON.parse(
+        fs.readFileSync(path.join(dataDir, file), "utf8"),
+      );
+      return [data.name as string, data.look as PartialLook] as [
+        string,
+        PartialLook,
+      ];
     })
-    .filter(([name, look]) => look && (!only || only.includes(name.toLowerCase())));
+    .filter(
+      ([name, look]) => look && (!only || only.includes(name.toLowerCase())),
+    );
 
   const cell = (svg: string, label = "") =>
     `<figure>${svg}<figcaption>${label}</figcaption></figure>`;
@@ -54,10 +61,19 @@ async function main() {
   const showBody = (name: string, look: PartialLook, i: number) => {
     const body = drawBody(look, `x${i}`);
     let row = cell(composeBodySvg(body, { scale }), name);
-    row += cell(composeBodySvg(drawBody(look, `y${i}`), { scale: scale * 0.7, pose: "lying" }), "lying");
+    row += cell(
+      composeBodySvg(drawBody(look, `y${i}`), {
+        scale: scale * 0.7,
+        pose: "lying",
+      }),
+      "lying",
+    );
     if (showParts) {
       for (const part of BODY_PARTS) {
-        row += cell(drawBody(look, `p${i}${part}`).parts[part].toSvg(scale), part);
+        row += cell(
+          drawBody(look, `p${i}${part}`).parts[part].toSvg(scale),
+          part,
+        );
       }
     }
     return row;
@@ -89,7 +105,9 @@ async function main() {
   const htmlFile = out.replace(/\.png$/, ".html");
   fs.writeFileSync(htmlFile, html);
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
+  const page = await browser.newPage({
+    viewport: { width: 1400, height: 800 },
+  });
   await page.goto(`file://${path.resolve(htmlFile)}`);
   await page.screenshot({ path: out, fullPage: true });
   await browser.close();

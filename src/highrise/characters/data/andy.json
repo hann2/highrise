@@ -3,23 +3,37 @@
   "description": "Software engineer. Deadpan, dry, never raises his voice, treats the apocalypse like a badly run sprint. Jokes constantly, never smiles.",
   "look": {
     "skin": "#ecc3a2",
+    "build": {
+      "shoulders": -0.2,
+      "chest": 0,
+      "belly": 0,
+      "hunch": 0,
+      "squareness": 0,
+      "arms": -0.2,
+      "hands": 0,
+      "head": 0
+    },
     "hair": {
       "color": "#2a1d15",
       "coverage": 0.8,
       "volume": 0.25,
-      "messiness": 0.3
+      "messiness": 0.3,
+      "curls": 0,
+      "length": 0,
+      "fringe": 0.2,
+      "bun": 0,
+      "ponytail": 0,
+      "mohawk": 0
     },
     "top": {
       "style": "tshirt",
-      "color": "#7a1010"
+      "color": "#7a1010",
+      "secondary": "#e8e4dc"
     },
     "sleeves": {
       "length": 0.3
     },
-    "build": {
-      "shoulders": -0.2,
-      "arms": -0.2
-    },
+    "extras": [],
     "pants": "#3b4a66",
     "shoes": "#2b2b2b",
     "seed": 1

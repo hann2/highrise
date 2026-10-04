@@ -1,11 +1,6 @@
 import { BodyLook, Hat } from "../BodyLook";
 import { Color, darken, lighten, mix } from "../color";
-import {
-  BodyDimensions,
-  lookRandom,
-  palette,
-  wobble,
-} from "../dimensions";
+import { BodyDimensions, lookRandom, palette, wobble } from "../dimensions";
 import {
   Drawing,
   ellipsePath,
@@ -180,7 +175,10 @@ function drawHair(
       const spread = Math.min(1, Math.abs(y0 - part) / ry + 0.15);
       const angle = Math.PI - away * spread * 1.25;
       const reach = (1 + edge(angle)) * 0.98;
-      const end: Pt = [Math.cos(angle) * rx * reach, Math.sin(angle) * ry * reach];
+      const end: Pt = [
+        Math.cos(angle) * rx * reach,
+        Math.sin(angle) * ry * reach,
+      ];
       const jitter = hair.messiness * 30 * (random() - 0.5);
       d.line(
         `M${n(rx * 1.1)} ${n(y0)}Q${n(-rx * 0.15 + jitter)} ${n(y0 * 1.1 + away * 25 + jitter)} ${n(end[0])} ${n(end[1])}`,
@@ -423,7 +421,16 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
       );
       if (hat.secondary) {
         d.blob(
-          smoothPath(ellipsePoints(-hx * 0.2, 0, 44, 44, 18, (a) => 0.08 * Math.sin(a * 9))),
+          smoothPath(
+            ellipsePoints(
+              -hx * 0.2,
+              0,
+              44,
+              44,
+              18,
+              (a) => 0.08 * Math.sin(a * 9),
+            ),
+          ),
           hat.secondary,
           { grain: "knit" },
         );
@@ -437,7 +444,10 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
       d.blob(
         `M${n(-hx * 0.95)} -18L${n(hx * 0.95)} -18L${n(hx * 0.95)} 18L${n(-hx * 0.95)} 18Z`,
         lighten(color, 0.12),
-        { shade: "tube", clip: d.clipPath("hardhat", ellipsePath(-4, 0, hx * 1.0, hy * 0.98)) },
+        {
+          shade: "tube",
+          clip: d.clipPath("hardhat", ellipsePath(-4, 0, hx * 1.0, hy * 0.98)),
+        },
       );
       return;
     }
@@ -463,7 +473,16 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
           `<path d="${ellipsePath(-6, 0, hx * 0.98, hy * 0.98)}" fill="none" stroke="${fur}" stroke-width="26" filter="url(#${d.grainFilter("knit")})"/>`,
       );
       d.blob(
-        smoothPath(ellipsePoints(tip[0], tip[1], 42, 42, 16, (a) => 0.1 * Math.sin(a * 7))),
+        smoothPath(
+          ellipsePoints(
+            tip[0],
+            tip[1],
+            42,
+            42,
+            16,
+            (a) => 0.1 * Math.sin(a * 7),
+          ),
+        ),
         fur,
         { grain: "knit" },
       );
@@ -511,7 +530,11 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
       // A skull and crossbones on the front
       const sx = hx * 0.82;
       d.include(sx - 30, -30, sx + 30, 30);
-      d.line(`M${n(sx - 22)} -24L${n(sx + 26)} 24M${n(sx - 22)} 24L${n(sx + 26)} -24`, "#ece6d6", 9);
+      d.line(
+        `M${n(sx - 22)} -24L${n(sx + 26)} 24M${n(sx - 22)} 24L${n(sx + 26)} -24`,
+        "#ece6d6",
+        9,
+      );
       d.blob(ellipsePath(sx, 0, 20, 23), "#ece6d6", { outline: 4 });
       return;
     }
@@ -535,7 +558,9 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
         grain: "cloth",
       });
       if (hat.secondary) {
-        d.begin(`clip-path="url(#${d.clipPath("bandana", ellipsePath(-14, 0, hx * 0.98, hy * 1.02))})"`);
+        d.begin(
+          `clip-path="url(#${d.clipPath("bandana", ellipsePath(-14, 0, hx * 0.98, hy * 1.02))})"`,
+        );
         for (let x = -hx; x < hx; x += 46) {
           for (let y = -hy; y < hy; y += 46) {
             d.add(

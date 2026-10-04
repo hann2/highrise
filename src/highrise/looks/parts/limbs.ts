@@ -60,7 +60,10 @@ export function drawArm(
     ];
     if (ragged) {
       for (let i = 1; i < 6; i++) {
-        points.push([end + (i % 2 ? 1 : -1) * (6 + random() * 18), -half + (2 * half * i) / 6]);
+        points.push([
+          end + (i % 2 ? 1 : -1) * (6 + random() * 18),
+          -half + (2 * half * i) / 6,
+        ]);
       }
     }
     points.push([end, half], [pad + half, half]);
@@ -70,7 +73,11 @@ export function drawArm(
       `A${n(half)} ${n(half)} 0 0 1 ${n(pad + half)} ${n(-half)}Z`;
     const clip = d.clipPath("sleeve", shape);
     d.blob(shape, color, { shade: "tube", grain: "cloth" });
-    if (look.top.pattern && look.top.style !== "vest" && look.top.style !== "overalls") {
+    if (
+      look.top.pattern &&
+      look.top.style !== "vest" &&
+      look.top.style !== "overalls"
+    ) {
       drawPattern(d, look.top.pattern, clip);
       d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("tube")})"/>`);
     }
@@ -132,7 +139,11 @@ export function drawHand(
     for (let i = 0; i < 4; i++) {
       const y = (i - 1.5) * h * 0.17;
       const reach = h * (0.7 - Math.abs(i - 1.5) * 0.07);
-      d.line(`M0 ${n(y)}L${n(reach)} ${n(y * 1.25)}`, darken(color, 0.5), h * 0.17);
+      d.line(
+        `M0 ${n(y)}L${n(reach)} ${n(y * 1.25)}`,
+        darken(color, 0.5),
+        h * 0.17,
+      );
       d.line(`M0 ${n(y)}L${n(reach)} ${n(y * 1.25)}`, color, h * 0.11);
       d.add(
         `<circle cx="${n(reach + 3)}" cy="${n(y * 1.25)}" r="${n(h * 0.04)}" fill="#3b3524"/>`,
@@ -148,11 +159,10 @@ export function drawHand(
     }
   }
   // The thumb
-  d.blob(
-    ellipsePath(h * 0.08, inside * h * 0.34, h * 0.18, h * 0.12),
-    color,
-    { grain, outline: 6 },
-  );
+  d.blob(ellipsePath(h * 0.08, inside * h * 0.34, h * 0.18, h * 0.12), color, {
+    grain,
+    outline: 6,
+  });
   d.blob(ellipsePath(-h * 0.04, 0, h * 0.4, h * 0.37), color, { grain });
   return d;
 }
@@ -197,14 +207,22 @@ export function drawLyingLegs(
     const shoe = ellipsePath(ankle[0] - 55, ankle[1], 85, 52);
     d.include(ankle[0] - 145, ankle[1] - 56, ankle[0], ankle[1] + 56);
     d.blob(shoe, look.shoes);
-    d.blob(ellipsePath(ankle[0] - 62, ankle[1], 66, 36), darken(look.shoes, 0.35), {
-      shade: "flat",
-      outline: 0,
-    });
-    d.blob(ellipsePath(ankle[0] - 22, ankle[1], 20, 30), lighten(look.shoes, 0.1), {
-      shade: "flat",
-      outline: 0,
-    });
+    d.blob(
+      ellipsePath(ankle[0] - 62, ankle[1], 66, 36),
+      darken(look.shoes, 0.35),
+      {
+        shade: "flat",
+        outline: 0,
+      },
+    );
+    d.blob(
+      ellipsePath(ankle[0] - 22, ankle[1], 20, 30),
+      lighten(look.shoes, 0.1),
+      {
+        shade: "flat",
+        outline: 0,
+      },
+    );
   }
   // The waistband
   const half = hip + thigh / 2;

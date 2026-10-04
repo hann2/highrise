@@ -3,21 +3,27 @@
   "description": "",
   "look": {
     "skin": "#f0c8aa",
+    "build": {
+      "shoulders": 0.4,
+      "chest": 0.4,
+      "belly": 1,
+      "hunch": 0,
+      "squareness": 0,
+      "arms": 0.3,
+      "hands": 0.2,
+      "head": 0.1
+    },
     "hair": {
       "color": "#f2f0ea",
       "coverage": 0.7,
       "volume": 0.3,
       "messiness": 0.5,
-      "length": 0.15
-    },
-    "beard": {
-      "color": "#f6f4ee",
-      "length": 0.9
-    },
-    "hat": {
-      "style": "santa",
-      "color": "#c8141c",
-      "secondary": "#f4f1ea"
+      "curls": 0,
+      "length": 0.15,
+      "fringe": 0.2,
+      "bun": 0,
+      "ponytail": 0,
+      "mohawk": 0
     },
     "top": {
       "style": "coat",
@@ -28,24 +34,25 @@
       "length": 0.85,
       "cuff": "#f4f1ea"
     },
-    "gloves": "#1f1f1f",
     "extras": [
       {
         "kind": "sack",
         "color": "#94602a"
       }
     ],
-    "build": {
-      "shoulders": 0.4,
-      "chest": 0.4,
-      "belly": 1,
-      "arms": 0.3,
-      "hands": 0.2,
-      "head": 0.1
-    },
     "pants": "#b0161a",
     "shoes": "#1a1a1a",
-    "seed": 10
+    "seed": 10,
+    "beard": {
+      "color": "#f6f4ee",
+      "length": 0.9
+    },
+    "hat": {
+      "style": "santa",
+      "color": "#c8141c",
+      "secondary": "#f4f1ea"
+    },
+    "gloves": "#1f1f1f"
   },
   "stats": {},
   "startingWeapons": ["M1911"],

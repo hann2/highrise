@@ -60,7 +60,11 @@ export function palette(look: BodyLook): Palette {
     return { skin: look.skin, hair: look.hair.color };
   }
   // Greener, then greyer, and keeping some of how dark the skin was
-  const sickly = mix(look.skin, mix(ROT_SKIN, ROT_GREY, rot * 0.5), 0.45 + rot * 0.4);
+  const sickly = mix(
+    look.skin,
+    mix(ROT_SKIN, ROT_GREY, rot * 0.5),
+    0.45 + rot * 0.4,
+  );
   return {
     skin: saturate(sickly, 1 - rot * 0.25),
     hair: saturate(darken(look.hair.color, rot * 0.1), 1 - rot * 0.4),

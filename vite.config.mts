@@ -27,8 +27,10 @@ export default defineConfig({
     fs: {
       allow: [".."],
     },
-    // The character editor's server
-    proxy: { "/api": "http://127.0.0.1:1235" },
+    // The character editor's server (on `CHARACTER_EDITOR_PORT`, as it is)
+    proxy: {
+      "/api": `http://127.0.0.1:${process.env.CHARACTER_EDITOR_PORT ?? 1235}`,
+    },
   },
   build: {
     outDir: "../dist",

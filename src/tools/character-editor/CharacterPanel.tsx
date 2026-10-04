@@ -1,4 +1,5 @@
-import { ImageName, RESOURCES } from "../../../resources/resources";
+import { useState } from "preact/hooks";
+import { RESOURCES } from "../../../resources/resources";
 import { CharacterData } from "../../highrise/characters/CharacterData";
 import { PlayerStats } from "../../highrise/human/PlayerStats";
 import { GUNS } from "../../highrise/weapons/guns/gun-stats/gunStats";
@@ -13,6 +14,7 @@ import { playingKey, toggle } from "./player";
 import { resolveLook } from "../../highrise/looks/BodyLook";
 import { portraitUrl } from "../../highrise/looks/composeBody";
 import { usePlaying } from "./usePlaying";
+import { AppearanceTab } from "./AppearanceTab";
 
 const NEUTRAL_STATS = new PlayerStats();
 
@@ -47,6 +49,23 @@ const SECONDARIES = [
   ...MELEE_WEAPONS,
 ];
 
+const TABS = [
+  ["appearance", "Appearance"],
+  ["gameplay", "Gameplay"],
+  ["voice", "Voice"],
+] as const;
+type Tab = (typeof TABS)[number][0];
+
+/** The tab last looked at, kept when switching characters and reloading */
+function savedTab(): Tab {
+  try {
+    const tab = localStorage.getItem("characterEditorTab");
+    return TABS.some(([id]) => id === tab) ? (tab as Tab) : "appearance";
+  } catch {
+    return "appearance";
+  }
+}
+
 export function CharacterPanel({
   entry: { id, data },
   voices,
@@ -58,13 +77,22 @@ export function CharacterPanel({
   voicesError?: string;
   run: RunAction;
 }) {
+  const [tab, setTab] = useState<Tab>(savedTab);
+  // The look as it's being edited, ahead of what's saved
+  const [look, setLook] = useState(() => resolveLook(data.look));
   const update = (changes: CharacterChanges, message = "Saving…") =>
     run(message, () => api.updateCharacter(id, changes));
+  const chooseTab = (next: Tab) => {
+    setTab(next);
+    try {
+      localStorage.setItem("characterEditorTab", next);
+    } catch {}
+  };
 
   return (
     <div class="panel">
       <header class="panel__header">
-        <img class="sprite-preview" src={portraitUrl(resolveLook(data.look), { scale: 260 })} />
+        <img class="sprite-preview" src={portraitUrl(look, { scale: 260 })} />
         <div class="panel__title">
           <EditableText
             class="panel__name"
@@ -84,51 +112,83 @@ export function CharacterPanel({
         </div>
       </header>
 
-      <div class="panel__grid">
+      <nav class="tabs">
+        {TABS.map(([tabId, label]) => (
+          <button
+            key={tabId}
+            class={`tabs__tab ${tab === tabId ? "is-selected" : ""}`}
+            onClick={() => chooseTab(tabId)}
+          >
+            {label}
+            {tabId === "voice" && (
+              <span class="tabs__count">
+                {data.clips.filter((clip) => clip.enabled).length}/
+                {data.clips.length}
+              </span>
+            )}
+          </button>
+        ))}
+      </nav>
 
-        <section class="card">
-          <h2>Starting weapons</h2>
-          <p class="muted small">
-            The leader starts a run with these; as a survivor, they carry them
-            instead of a random pistol.
-          </p>
-          <WeaponPicker
-            label="Primary"
-            options={PRIMARIES}
-            data={data}
-            onChange={(startingWeapons) => update({ startingWeapons })}
-          />
-          <WeaponPicker
-            label="Secondary"
-            options={SECONDARIES}
-            data={data}
-            onChange={(startingWeapons) => update({ startingWeapons })}
-          />
-        </section>
+      {tab === "appearance" && (
+        <AppearanceTab
+          look={look}
+          onChange={setLook}
+          onSave={(saved) => update({ look: saved }, "Saving look…")}
+        />
+      )}
 
-        <section class="card">
-          <h2>Voice</h2>
-          <VoicePicker
-            data={data}
-            voices={voices}
-            voicesError={voicesError}
-            onChange={(voice) => update({ voice })}
-          />
-        </section>
+      {tab === "gameplay" && (
+        <div class="panel__grid">
+          <section class="card">
+            <h2>Starting weapons</h2>
+            <p class="muted small">
+              The leader starts a run with these; as a survivor, they carry them
+              instead of a random pistol.
+            </p>
+            <WeaponPicker
+              label="Primary"
+              options={PRIMARIES}
+              data={data}
+              onChange={(startingWeapons) => update({ startingWeapons })}
+            />
+            <WeaponPicker
+              label="Secondary"
+              options={SECONDARIES}
+              data={data}
+              onChange={(startingWeapons) => update({ startingWeapons })}
+            />
+          </section>
 
-        <section class="card card--stats">
-          <h2>Stats</h2>
-          <p class="muted small">
-            Blank is the same as everyone else. Items apply on top.
-          </p>
-          <StatsEditor
-            stats={data.stats}
-            onChange={(stats) => update({ stats })}
-          />
-        </section>
-      </div>
+          <section class="card card--wide">
+            <h2>Stats</h2>
+            <p class="muted small">
+              Blank is the same as everyone else. Items apply on top.
+            </p>
+            <StatsEditor
+              stats={data.stats}
+              onChange={(stats) => update({ stats })}
+            />
+          </section>
+        </div>
+      )}
 
-      <ClipsSection id={id} data={data} run={run} />
+      {tab === "voice" && (
+        <>
+          <div class="panel__grid">
+            <section class="card">
+              <h2>Voice</h2>
+              <VoicePicker
+                data={data}
+                voices={voices}
+                voicesError={voicesError}
+                onChange={(voice) => update({ voice })}
+              />
+            </section>
+          </div>
+          <ClipsSection id={id} data={data} run={run} />
+        </>
+      )}
     </div>
   );
 }

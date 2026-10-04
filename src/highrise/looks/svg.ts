@@ -76,7 +76,12 @@ export function ellipsePath(cx: number, cy: number, rx: number, ry: number) {
 }
 
 /** A rectangle with round ends, `x0` to `x1` along x and `thickness` across */
-export function capsulePath(x0: number, x1: number, y: number, thickness: number) {
+export function capsulePath(
+  x0: number,
+  x1: number,
+  y: number,
+  thickness: number,
+) {
   const r = thickness / 2;
   return (
     `M${n(x0 + r)} ${n(y - r)}L${n(x1 - r)} ${n(y - r)}` +
