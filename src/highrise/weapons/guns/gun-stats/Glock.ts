@@ -36,6 +36,8 @@ export const Glock: GunStats = {
 
   recoilAmount: degToRad(8),
   recoilRecovery: 10,
+  recoilSlide: 0.05,
+  recoilTime: 0.03,
 
   sounds: {
     ...defaultGunStats.sounds,

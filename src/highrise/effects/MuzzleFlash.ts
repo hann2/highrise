@@ -35,9 +35,6 @@ function pick(spread: Spread): number {
     : spread[0] + random() * (spread[1] - spread[0]);
 }
 
-/** Where the muzzle is now, and which way it points */
-export type MuzzleTracker = () => { position: V2d; angle: number } | undefined;
-
 /**
  * A muzzle flash, drawn by a shader (`muzzleFlash.frag`) from the lobes of
  * its gun's `MuzzleFlashStyle`, each picked from its ranges, so every flash
@@ -52,12 +49,8 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
   /** Seconds it lasts */
   readonly duration: number;
   private shader: Shader;
-  /** How far it's turned from the barrel */
-  private wobble: number;
 
   /**
-   * `follow` keeps it on the muzzle as the gun recoils (it slides back and
-   * kicks aside the moment it fires), for as long as it gives an answer.
    * `frozenAt` holds it at that fraction of its life forever, for looking at
    * (the flash test scene's gallery)
    */
@@ -65,7 +58,6 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     position: V2d,
     angle: number,
     private style: MuzzleFlashStyle = DEFAULT_FLASH,
-    private follow?: MuzzleTracker,
     private frozenAt?: number,
   ) {
     super();
@@ -136,8 +128,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     this.sprite.blendMode = "add";
     this.sprite.layerName = Layer.EMISSIVES;
     this.sprite.position.copyFrom(position);
-    this.wobble = (random() * 2 - 1) * (style.wobble ?? 0);
-    this.sprite.rotation = angle + this.wobble;
+    this.sprite.rotation = angle + (random() * 2 - 1) * (style.wobble ?? 0);
   }
 
   @on("add")
@@ -172,12 +163,6 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     if (this.age >= this.duration) {
       this.destroy();
       return;
-    }
-    const muzzle = this.follow?.();
-    if (muzzle) {
-      this.sprite.position.copyFrom(muzzle.position);
-      this.sprite.rotation = muzzle.angle + this.wobble;
-      this.light?.setPosition(muzzle.position);
     }
     // Shown as it is now, then moved on, so its first frame is it going off
     const uniforms = this.shader.resources.flashUniforms.uniforms;

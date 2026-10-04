@@ -38,6 +38,8 @@ export const FiveSeven: GunStats = {
 
   recoilAmount: degToRad(8),
   recoilRecovery: 10,
+  recoilSlide: 0.045,
+  recoilTime: 0.028,
 
   sounds: {
     ...defaultGunStats.sounds,

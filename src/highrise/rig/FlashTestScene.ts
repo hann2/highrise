@@ -151,7 +151,7 @@ export default class FlashTestScene extends BaseEntity implements Entity {
           (row + 0.5) * GALLERY_ROW,
         ).iadd(offset);
         const flash = this.addChild(
-          new MuzzleFlash(position, 0, stats.flash, undefined, age),
+          new MuzzleFlash(position, 0, stats.flash, age),
         );
         // Held still, their lights would light up the whole floor
         flash.light?.destroy();

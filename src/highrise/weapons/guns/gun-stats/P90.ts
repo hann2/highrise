@@ -33,6 +33,8 @@ export const P90: GunStats = {
   laserSightColor: 0x00ffff,
   recoilAmount: degToRad(2.5),
   recoilRecovery: 6,
+  recoilSlide: 0.025,
+  recoilTime: 0.028,
 
   points: {
     grip: [-0.15, 0],

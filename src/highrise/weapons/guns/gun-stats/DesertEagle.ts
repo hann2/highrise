@@ -25,6 +25,8 @@ export const DesertEagle: GunStats = {
 
   recoilAmount: degToRad(6),
   recoilRecovery: 4,
+  recoilSlide: 0.09,
+  recoilTime: 0.04,
 
   points: {
     grip: [-0.12, 0],

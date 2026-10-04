@@ -32,6 +32,8 @@ export const PumpShotgun: GunStats = {
   size: [1.1, 1.1],
   recoilAmount: degToRad(8),
   recoilRecovery: 2,
+  recoilSlide: 0.08,
+  recoilTime: 0.05,
 
   points: {
     grip: [-0.2, 0],

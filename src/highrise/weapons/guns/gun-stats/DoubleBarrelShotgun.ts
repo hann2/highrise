@@ -35,6 +35,8 @@ export const DoubleBarrelShotgun: GunStats = {
 
   recoilAmount: degToRad(10),
   recoilRecovery: 3,
+  recoilSlide: 0.1,
+  recoilTime: 0.05,
 
   points: {
     grip: [-0.1, 0],

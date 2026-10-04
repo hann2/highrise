@@ -32,6 +32,8 @@ export const SPAS12: GunStats = {
   size: [1.1, 1.1],
   recoilAmount: degToRad(7),
   recoilRecovery: 2.2,
+  recoilSlide: 0.075,
+  recoilTime: 0.045,
 
   points: {
     grip: [-0.3, 0],

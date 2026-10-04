@@ -36,6 +36,8 @@ export const M1911: GunStats = {
 
   recoilAmount: degToRad(8),
   recoilRecovery: 10,
+  recoilSlide: 0.06,
+  recoilTime: 0.032,
 
   sounds: {
     ...defaultGunStats.sounds,

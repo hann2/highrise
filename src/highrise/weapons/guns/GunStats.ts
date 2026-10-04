@@ -69,6 +69,13 @@ export interface GunStats extends BaseWeaponStats {
   readonly recoilAmount: number;
   // Percent of aim recovered per second I think
   readonly recoilRecovery: number;
+  /** Meters the gun slides back from one shot, at its furthest */
+  readonly recoilSlide: number;
+  /**
+   * Seconds from the shot to the gun being furthest back; it's back where it
+   * was about five times that after
+   */
+  readonly recoilTime: number;
 
   // Sounds that play for various things
   readonly sounds: {
@@ -159,6 +166,8 @@ export const defaultGunStats: GunStats = {
 
   recoilAmount: degToRad(2),
   recoilRecovery: 5,
+  recoilSlide: 0.05,
+  recoilTime: 0.035,
 
   size: [1, 1],
   muzzleLength: 0.5,

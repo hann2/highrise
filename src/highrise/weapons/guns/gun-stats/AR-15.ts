@@ -33,6 +33,8 @@ export const AR15: GunStats = {
   laserSightColor: 0xff0000,
   recoilAmount: degToRad(2),
   recoilRecovery: 5,
+  recoilSlide: 0.03,
+  recoilTime: 0.03,
 
   points: {
     grip: [-0.23, 0],

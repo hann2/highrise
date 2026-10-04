@@ -32,6 +32,8 @@ export const AK47: GunStats = {
 
   recoilAmount: degToRad(4),
   recoilRecovery: 3.1,
+  recoilSlide: 0.04,
+  recoilTime: 0.032,
 
   points: {
     grip: [-0.23, 0],

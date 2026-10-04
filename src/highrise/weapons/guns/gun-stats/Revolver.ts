@@ -31,6 +31,8 @@ export const Revolver: GunStats = {
 
   recoilAmount: degToRad(8.5),
   recoilRecovery: 8,
+  recoilSlide: 0.07,
+  recoilTime: 0.035,
 
   points: {
     grip: [-0.15, 0],
