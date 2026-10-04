@@ -71,6 +71,7 @@ From a second design conversation, which replaced the "pick one of three" loop (
   - **Flamethrower**: a weapon that sets things on fire. Designed in `notes/fire.md` ("The flamethrower"): its own fuel, flame particles that light enemies and spill burning fuel.
   - **Combining room**: a special room with a device that combines two items or attachments into a new one. Not a recipe for every pair, just the obvious ones (Incendiary Rounds + Exploding Rounds → exploding fire rounds, and the like); pairs with no recipe are refused. It matters most for attachments, since a gun only uses the newest one per slot (`Human.attachmentsFor`), so two ammo attachments never stack today: a combined one is the way to have both. Open: which room it is (a landmark, a keycard room, or rare in the generator), whether it costs quarters, whether the device shows its recipes or you find them by trying (the encyclopedia could list the ones found), and whether combined items can also be rolled on shelves or only made.
   - **Character-specific items**: items only one character can have, both ones they start with and ones they can find later in the run.
+  - **Heavy sniper rifle**: a heavy sniper rifle type gun that has a lot of pierce.
 - Pool size: ~50 items to start, ~80 done. Build the structure with the cheap items first; fire, sprint and Akimbo are features of their own.
 - Keycard armory/infirmary on at most one floor per act, not every floor. Armory: ammo and an attachment. Infirmary: health. The one reward that's found rather than bought.
 
