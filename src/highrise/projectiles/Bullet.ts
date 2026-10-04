@@ -24,9 +24,10 @@ const GLOW_RADIUS = 0.4;
 const GLOW_INTENSITY = 0.8;
 export default class Bullet extends Projectile implements Entity {
   sprite: Graphics & GameSprite;
-  light: Light;
+  /** Only incendiary rounds glow */
+  light?: Light;
   /** The glow: the point light's texture stretched into a capsule along the streak */
-  glow: NineSliceSprite;
+  glow?: NineSliceSprite;
 
   // Set by the gun that fires it, from its attachments and the shooter's items
   /** The gun that fired it */
@@ -63,6 +64,14 @@ export default class Bullet extends Projectile implements Entity {
 
     this.sprite = new Graphics();
     this.sprite.layerName = Layer.WEAPONS;
+  }
+
+  /** Incendiary rounds glow (the gun sets `incendiary` before adding it) */
+  @on("afterAdded")
+  onAfterAdded() {
+    if (!this.incendiary) {
+      return;
+    }
 
     // A glow along the streak, centered on its middle: the point light's
     // round falloff, with its middle column stretched to the streak's length.
@@ -79,10 +88,10 @@ export default class Bullet extends Projectile implements Entity {
     });
     this.glow.pivot.set(half, half);
     this.glow.scale.set(GLOW_RADIUS / half);
-    this.glow.tint = stats.color;
+    this.glow.tint = this.stats.color;
     this.glow.alpha = GLOW_INTENSITY;
     this.glow.blendMode = "add";
-    const lightSize = muzzleVelocity / MIN_FRAME_RATE + 2 * GLOW_RADIUS;
+    const lightSize = this.muzzleVelocity / MIN_FRAME_RATE + 2 * GLOW_RADIUS;
     this.light = this.addChild(new Light(this.glow, false, 1, 0, lightSize));
     // The streak is drawn again every frame
     this.light.dynamic = true;
@@ -174,7 +183,9 @@ export default class Bullet extends Projectile implements Entity {
     this.sprite.visible = inView;
     // Off, so its last glow doesn't stay behind at the edge of the view (and
     // off for good without the Gunfire Lights setting)
-    this.light.enabled = inView && getSetting(this.game, "gunfireLights");
+    if (this.light) {
+      this.light.enabled = inView && getSetting(this.game, "gunfireLights");
+    }
     if (!inView) {
       return;
     }
@@ -189,6 +200,9 @@ export default class Bullet extends Projectile implements Entity {
 
     // The light is where the middle of the streak is, and the glow is
     // stretched along it
+    if (!this.light || !this.glow) {
+      return;
+    }
     const length = endPoint.magnitude;
     this.glow.width = (length + 2 * GLOW_RADIUS) / this.glow.scale.x;
     this.glow.pivot.x = this.glow.width / 2;

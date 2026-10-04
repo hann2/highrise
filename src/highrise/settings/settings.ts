@@ -281,8 +281,8 @@ export const SETTINGS = {
     tab: "Graphics",
     label: "Gunfire Lights",
     description:
-      "The flash of light from each shot, and the glow of bullets in the dark.",
-    cost: "Small: a light per shot and per bullet in flight. Not measured.",
+      "The flash of light from each shot, and the glow of incendiary rounds in the dark.",
+    cost: "Small: a light per shot and per incendiary round in flight. Not measured.",
     default: true,
     options: () => ON_OFF,
   }),
