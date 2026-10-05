@@ -50,7 +50,7 @@ export function bodyDimensions(look: BodyLook): BodyDimensions {
     belly: Math.max(0, b.belly) * BELLY_DEPTH,
     bust: Math.max(0, b.bust) * BUST_DEPTH,
     hunch: b.hunch * 55,
-    squareness: 2.2 + 1.3 * (b.squareness + 1),
+    squareness: 1.9 + 0.8 * (b.squareness + 1),
     armThickness: 104 * (1 + 0.26 * b.arms),
     upperArm: STYLE.upperArm,
     forearm: STYLE.forearm,

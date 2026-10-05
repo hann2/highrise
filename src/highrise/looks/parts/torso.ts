@@ -45,9 +45,8 @@ function shoulderColor(look: BodyLook, skin: Color): Color {
 }
 
 /**
- * The torso from above, facing +x, round its middle: the chest and back,
- * and a rounded cap at each shoulder where the arm joins, blended together
- * so there's a slight groove between them at the front. Also the part of it
+ * The torso from above, facing +x, round its middle: one convex shape,
+ * broad across the shoulders and rounded at the ends. Also the part of it
  * that's lit from straight above (`lit`): the ridge of the shoulders, from
  * which the chest falls away in front and the shoulder blades behind.
  */
@@ -63,31 +62,15 @@ export function torsoProfile(
     bust,
     hunch,
     squareness,
-    armThickness,
   } = dims;
-  // Each end is as round and as wide as the top of the arm, round the
-  // shoulder joint, so an arm pointing any way meets it smoothly; the chest
-  // is a superellipse a little narrower
-  const capRadius = armThickness / 2;
-  const chestHalf = w - capRadius * 1.1;
+  // One convex shape across the shoulders, rounded at the ends, with no
+  // dip between the chest and the shoulders: the arms come out from under
+  // its front edge near the ends, as they do from above
   const p = squareness;
-  const chest = (y: number, depth: number) => {
-    const u = Math.min(1, Math.abs(y) / chestHalf);
+  const edge = (y: number, depth: number) => {
+    const u = Math.min(1, Math.abs(y) / w);
     return depth * (1 - u ** p) ** (1 / p);
   };
-  // Each shoulder's cap is a circle at the end, as deep as the arm
-  const capY = w - capRadius;
-  const cap = (y: number, side: 1 | -1) => {
-    const dy = Math.abs(y) - capY;
-    if (dy <= -capRadius * 3) {
-      return -Infinity;
-    }
-    const along = Math.max(0, capRadius ** 2 - Math.max(0, dy) ** 2);
-    return side * Math.sqrt(along);
-  };
-  // Blends two edges, rounding the corner where they meet
-  const smoothMax = (a: number, b: number, k = 30) =>
-    a === -Infinity ? b : (a + b + Math.sqrt((a - b) ** 2 + k * k)) / 2;
   // How big the belly is, from 0 to 1: the front rounds out toward a half
   // ellipse as deep as the chest and belly together, so a big belly makes
   // the body rounder, not just deeper or broader
@@ -101,8 +84,8 @@ export function torsoProfile(
     // Closer together at the ends, where it curves most
     const y = -w * Math.cos((Math.PI * i) / count);
     const across = Math.sqrt(Math.max(0, 1 - (y / w) ** 2));
-    let f = smoothMax(cap(y, 1), chest(y, chestDepth));
-    let b = -smoothMax(cap(y, 1), chest(y, backDepth));
+    let f = edge(y, chestDepth);
+    let b = -edge(y, backDepth);
     f += ((chestDepth + belly) * across - f) * round;
     f += belly * (1 - round) * across;
     f += bust * bustBumps(y, w);
