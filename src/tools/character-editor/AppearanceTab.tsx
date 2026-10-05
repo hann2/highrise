@@ -24,6 +24,7 @@ const BUILD_LABELS: Record<keyof Build, [string, string, string]> = {
   shoulders: ["Shoulders", "narrow", "broad"],
   chest: ["Chest", "flat", "deep"],
   belly: ["Belly", "none", "big"],
+  bust: ["Bust", "none", "big"],
   hunch: ["Hunch", "upright", "hunched"],
   squareness: ["Shoulder shape", "round", "square"],
   arms: ["Arms", "thin", "thick"],
@@ -31,6 +32,9 @@ const BUILD_LABELS: Record<keyof Build, [string, string, string]> = {
   head: ["Head", "small", "big"],
   legs: ["Legs", "thin", "thick"],
 };
+
+/** Build sliders where everything below 0 is the same as 0 */
+const ONE_SIDED: (keyof Build)[] = ["belly", "bust"];
 
 const HAIR_SLIDERS: [keyof Hair, string, string][] = [
   ["coverage", "Coverage", "How far forward it comes; 0 is bald"],
@@ -134,7 +138,7 @@ export function AppearanceTab({
                 label={label}
                 hint={`${low} – ${high}`}
                 value={look.build[key]}
-                min={-1}
+                min={ONE_SIDED.includes(key) ? 0 : -1}
                 max={1}
                 reset={0}
                 onChange={(value) =>

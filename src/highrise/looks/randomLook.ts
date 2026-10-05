@@ -382,6 +382,7 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
       belly: chance(random, 0.3)
         ? Math.round(random() * 100) / 100
         : slider(random, 0.2),
+      bust: 0,
       hunch: zombie
         ? Math.round(between(random, 0, 1) * 100) / 100
         : slider(random, 0.3),
@@ -450,6 +451,12 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
     // Clothes that have been through it
     look.top.color = darken(look.top.color, random() * 0.15);
     look.pants = darken(look.pants, random() * 0.15);
+  }
+  // Drawn last, so adding it didn't change everything drawn before it (the
+  // zombies' looks come from a fixed seed)
+  const bustChance = look.beard ? 0 : pantsStyle === "skirt" ? 0.9 : 0.4;
+  if (chance(random, bustChance)) {
+    look.build.bust = Math.round(between(random, 0.25, 0.85) * 100) / 100;
   }
   return look;
 }

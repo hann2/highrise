@@ -14,6 +14,8 @@ export interface BodyDimensions {
   chestDepth: number;
   backDepth: number;
   belly: number;
+  /** How far the bust comes out in front of the chest */
+  bust: number;
   /** How far forward the ends of the shoulders are */
   hunch: number;
   /** The exponent of the superellipse the torso is: 2 round, 4 square */
@@ -30,6 +32,9 @@ export interface BodyDimensions {
   legLength: number;
 }
 
+/** How far out the biggest bust comes in front of the chest, in mm */
+export const BUST_DEPTH = 80;
+
 /** How far out the biggest belly comes in front of the chest, in mm */
 export const BELLY_DEPTH = 170;
 
@@ -41,6 +46,7 @@ export function bodyDimensions(look: BodyLook): BodyDimensions {
     chestDepth: 118 * (1 + 0.28 * b.chest),
     backDepth: 104 * (1 + 0.12 * b.chest),
     belly: Math.max(0, b.belly) * BELLY_DEPTH,
+    bust: Math.max(0, b.bust) * BUST_DEPTH,
     hunch: b.hunch * 55,
     squareness: 2.2 + 1.3 * (b.squareness + 1),
     armThickness: 104 * (1 + 0.26 * b.arms),

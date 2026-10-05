@@ -2,6 +2,7 @@ import { BodyLook, TopStyle } from "../BodyLook";
 import { Color, darken, lighten } from "../color";
 import {
   BELLY_DEPTH,
+  BUST_DEPTH,
   BodyDimensions,
   lookRandom,
   palette,
@@ -43,12 +44,13 @@ function shoulderColor(look: BodyLook, skin: Color): Color {
 }
 
 /** The outline of the torso from above, facing +x, round its middle */
-export function torsoOutline(dims: BodyDimensions, count = 72): Pt[] {
+export function torsoOutline(dims: BodyDimensions, count = 96): Pt[] {
   const {
     shoulderHalfWidth: w,
     chestDepth,
     backDepth,
     belly,
+    bust,
     hunch,
     squareness,
   } = dims;
@@ -70,6 +72,8 @@ export function torsoOutline(dims: BodyDimensions, count = 72): Pt[] {
       const roundY = w * s;
       x += (roundX - x) * round + belly * (1 - round) * c;
       y += (roundY - y) * round;
+      // The bust: two rounded mounds either side of the middle
+      x += bust * bustBumps(y, w) * Math.abs(c) ** 0.5;
     } else {
       // The back rounds out and fills out too
       const backRound = 0.6 * round;
@@ -83,6 +87,54 @@ export function torsoOutline(dims: BodyDimensions, count = 72): Pt[] {
     points.push([x, y]);
   }
   return points;
+}
+
+/** Where the middle of each side of the bust is, and its half-width, as fractions of the shoulders' half-width */
+const BUST_SIDE = 0.33;
+const BUST_SPREAD = 0.27;
+
+/** How far out the bust is (0 to 1 of its depth) at `y` across the chest: two round mounds */
+function bustBumps(y: number, w: number): number {
+  const mound = (side: number) => {
+    const u = (y - side * BUST_SIDE * w) / (BUST_SPREAD * w);
+    return Math.abs(u) < 1 ? (1 - u * u) ** 0.65 : 0;
+  };
+  return Math.max(mound(-1), mound(1));
+}
+
+/** Shading that rounds out the bust: a shadow down its outer side, a highlight on top */
+function drawBustShading(
+  d: Drawing,
+  dims: BodyDimensions,
+  color: Color,
+  clip: string,
+) {
+  const w = dims.shoulderHalfWidth;
+  const depth = dims.bust;
+  d.begin(`clip-path="url(#${clip})"`);
+  for (const side of [-1, 1]) {
+    const cy = side * BUST_SIDE * w;
+    const r = BUST_SPREAD * w;
+    const front = dims.chestDepth + depth;
+    // Underneath and to the outside, where it meets the ribs
+    d.line(
+      `M${n(dims.chestDepth * 0.35)} ${n(cy + side * r * 0.95)}Q${n(front * 0.92)} ${n(cy + side * r * 1.05)} ${n(front * 0.98)} ${n(cy + side * r * 0.2)}`,
+      darken(color, 0.35),
+      10,
+      `opacity="${n(0.25 + 0.35 * (depth / BUST_DEPTH))}"`,
+    );
+    d.add(
+      `<ellipse cx="${n(front - depth * 0.55 - 10)}" cy="${n(cy - side * r * 0.1)}" rx="${n(depth * 0.45 + 12)}" ry="${n(r * 0.42)}" fill="${lighten(color, 0.25)}" opacity="${n(0.12 + 0.12 * (depth / BUST_DEPTH))}"/>`,
+    );
+  }
+  // Between them
+  d.line(
+    `M${n(dims.chestDepth * 0.6)} 0L${n(dims.chestDepth + depth * 0.5)} 0`,
+    darken(color, 0.4),
+    7,
+    `opacity="0.45"`,
+  );
+  d.end();
 }
 
 /**
@@ -191,6 +243,9 @@ export function drawTorso(
   }
   // Shading again over the pattern and bands
   d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("dome")})"/>`);
+  if (dims.bust > 0) {
+    drawBustShading(d, dims, top.color, torso);
+  }
 
   // Details
   const sleeveSeams = top.style !== "tank" && look.sleeves.length > 0.05;
