@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { resolveLook } from "../../highrise/looks/BodyLook";
 import { portraitUrl } from "../../highrise/looks/composeBody";
 import { api } from "./api";
 import { CharacterEntry, Voice } from "./apiTypes";
 import { CharacterPanel } from "./CharacterPanel";
+import { DraftStore } from "./drafts";
 
 export interface Status {
   kind: "busy" | "error" | "done";
@@ -30,6 +31,9 @@ export function App() {
   const [selected, setSelected] = useState(selectedFromHash());
   const [status, setStatus] = useState<Status>();
   const [busyCount, setBusyCount] = useState(0);
+  const [, setDraftsVersion] = useState(0);
+  const drafts = useRef<DraftStore>();
+  drafts.current ??= new DraftStore(() => setDraftsVersion((n) => n + 1));
 
   const reload = useCallback(async () => {
     setCharacters(await api.characters());
@@ -66,12 +70,80 @@ export function App() {
   }, []);
 
   const entry = characters?.find((c) => c.id === selected) ?? characters?.[0];
+  const unsavedIds = (characters ?? [])
+    .filter(({ id, data }) => drafts.current!.unsaved(id, data).length > 0)
+    .map(({ id }) => id);
+
+  const save = async (ids: string[]) => {
+    for (const id of ids) {
+      const data = characters?.find((c) => c.id === id)?.data;
+      if (!data) continue;
+      const changes = drafts.current!.unsavedChanges(id, data);
+      const name = drafts.current!.edited(id, data).name;
+      const saved = await run(`Saving ${name}…`, () =>
+        api.updateCharacter(id, changes),
+      );
+      if (!saved) {
+        // The error's showing; leave the rest unsaved
+        return;
+      }
+      drafts.current!.saved(id, saved);
+    }
+  };
+
+  // The latest of everything, for the key and unload handlers
+  const latest = useRef({ entry, unsavedIds, save });
+  latest.current = { entry, unsavedIds, save };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const { entry, save } = latest.current;
+      if (!entry || !(event.metaKey || event.ctrlKey)) {
+        return;
+      }
+      const key = event.key.toLowerCase();
+      const target = event.target as HTMLElement;
+      const typing =
+        target.tagName === "TEXTAREA" ||
+        (target.tagName === "INPUT" &&
+          ["text", "search", ""].includes(
+            (target as HTMLInputElement).type ?? "",
+          ));
+      if (key === "s") {
+        event.preventDefault();
+        // A text field being typed in has its edit in on blur
+        (document.activeElement as HTMLElement | null)?.blur();
+        setTimeout(() => save([entry.id]));
+      } else if (!typing && (key === "z" || key === "y")) {
+        event.preventDefault();
+        const redo = key === "y" || event.shiftKey;
+        drafts.current![redo ? "redo" : "undo"](entry.id, entry.data);
+      }
+    };
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (latest.current.unsavedIds.length > 0) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.title = `${unsavedIds.length > 0 ? "• " : ""}Character Editor`;
+  }, [unsavedIds.length]);
 
   return (
     <div class="editor">
       <nav class="sidebar">
         <h1>Characters</h1>
-        {characters?.map(({ id, data }) => {
+        {characters?.map(({ id, data: disk }) => {
+          const data = drafts.current!.edited(id, disk);
+          const unsaved = unsavedIds.includes(id);
           const enabled = data.clips.filter((clip) => clip.enabled).length;
           return (
             <a
@@ -80,7 +152,12 @@ export function App() {
               class={`sidebar__item ${entry?.id === id ? "is-selected" : ""}`}
             >
               <img src={portraitUrl(resolveLook(data.look), { scale: 60 })} />
-              <span class="sidebar__name">{data.name}</span>
+              <span class="sidebar__name">
+                {data.name}
+                {unsaved && (
+                  <span class="unsaved-dot" title="Unsaved changes" />
+                )}
+              </span>
               <span class="sidebar__count" title="Enabled clips / all clips">
                 {enabled}/{data.clips.length}
               </span>
@@ -97,6 +174,10 @@ export function App() {
             voices={voices}
             voicesError={voicesError}
             run={run}
+            drafts={drafts.current}
+            onSave={() => save([entry.id])}
+            onSaveAll={() => save(unsavedIds)}
+            unsavedCount={unsavedIds.length}
           />
         )}
       </main>

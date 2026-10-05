@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { ComponentChildren } from "preact";
 import { makeRandom } from "../../core/util/Random";
 import {
@@ -19,11 +19,6 @@ import { composeBodySvg, svgDataUrl } from "../../highrise/looks/composeBody";
 import { BODY_PARTS, drawBody } from "../../highrise/looks/drawBody";
 import { randomLook } from "../../highrise/looks/randomLook";
 import { pieceNames, piecePlace } from "../../highrise/looks/pieces";
-
-/** How long after the last change a look is saved */
-const SAVE_DELAY = 500;
-/** Changes closer together than this are one step of undo */
-const UNDO_GROUP = 800;
 
 const BUILD_LABELS: Record<keyof Build, [string, string, string]> = {
   shoulders: ["Shoulders", "narrow", "broad"],
@@ -52,60 +47,24 @@ const ZOMBIE_PREVIEW: Zombification = { rot: 0.8, blood: 0.6, tears: 0.6 };
 
 /**
  * Everything about how a character looks, with a live preview drawn by the
- * same generator as the game. Changes save themselves a moment after the
- * last one; Undo (or ⌘Z) steps back.
+ * same generator as the game. Changes go into the character's draft, which
+ * the save bar saves, reverts, undoes and redoes.
  */
 export function AppearanceTab({
   look,
   onChange,
-  onSave,
 }: {
   look: BodyLook;
-  onChange: (look: BodyLook) => void;
-  onSave: (look: BodyLook) => void;
+  /** `group`: changes to the same thing close together are one step of undo */
+  onChange: (look: BodyLook, group?: string) => void;
 }) {
   const [zombify, setZombify] = useState(false);
   const [zombie, setZombie] = useState(ZOMBIE_PREVIEW);
-  const history = useRef<BodyLook[]>([]);
-  const lastChange = useRef(0);
-  const saveTimer = useRef<number>();
 
-  const commit = (next: BodyLook, fromUndo = false) => {
-    const now = performance.now();
-    if (!fromUndo && now - lastChange.current > UNDO_GROUP) {
-      history.current.push(look);
-    }
-    lastChange.current = fromUndo ? 0 : now;
-    onChange(next);
-    window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => onSave(next), SAVE_DELAY);
-  };
-  const undo = () => {
-    const previous = history.current.pop();
-    if (previous) {
-      commit(previous, true);
-    }
-  };
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement;
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key === "z" &&
-        !event.shiftKey &&
-        target.tagName !== "TEXTAREA" &&
-        target.getAttribute("type") !== "text"
-      ) {
-        event.preventDefault();
-        undo();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
-
+  // Each press of a button is its own step of undo
+  const once = (next: BodyLook) => onChange(next, `once-${Date.now()}`);
   const set = <K extends keyof BodyLook>(key: K, value: BodyLook[K]) =>
-    commit({ ...look, [key]: value });
+    onChange({ ...look, [key]: value }, key);
 
   const preview = zombify ? { ...look, zombie } : look;
 
@@ -115,13 +74,10 @@ export function AppearanceTab({
 
       <div class="appearance__controls">
         <section class="card appearance__tools">
-          <button onClick={undo} disabled={history.current.length === 0}>
-            Undo
-          </button>
           <button
             title="A random look; Undo brings this one back"
             onClick={() =>
-              commit({
+              once({
                 ...randomLook(makeRandom(Date.now()), false),
                 seed: look.seed,
               })
@@ -131,7 +87,9 @@ export function AppearanceTab({
           </button>
           <button
             title="The random parts: ragged edges, where rips and blood go"
-            onClick={() => set("seed", Math.floor(Math.random() * 1e6))}
+            onClick={() =>
+              once({ ...look, seed: Math.floor(Math.random() * 1e6) })
+            }
           >
             New seed
           </button>

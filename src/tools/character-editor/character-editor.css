@@ -201,6 +201,45 @@ button.primary {
   font-family: ui-monospace, monospace;
 }
 
+.editable.is-unsaved {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.unsaved-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+}
+
+.save-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -8px 0 16px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.save-bar.is-dirty {
+  border-color: var(--accent);
+}
+.save-bar__state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.save-bar__state .unsaved-dot {
+  margin-left: 0;
+}
+
 .editable.is-dirty {
   border-color: var(--accent);
 }

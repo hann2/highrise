@@ -85,6 +85,12 @@ export function ClipsSection({
         <span class="muted">
           {enabledCount} enabled of {data.clips.length}
         </span>
+        <span
+          class="muted small"
+          title="Clips are files, so generating, trimming, enabling or deleting one, or changing its text or categories, doesn't wait for Save"
+        >
+          · Clip changes save right away
+        </span>
         <div class="clips__filters">
           {(
             [

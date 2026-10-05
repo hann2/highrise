@@ -1,12 +1,12 @@
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { RESOURCES } from "../../../resources/resources";
 import { CharacterData } from "../../highrise/characters/CharacterData";
 import { PlayerStats } from "../../highrise/human/PlayerStats";
 import { GUNS } from "../../highrise/weapons/guns/gun-stats/gunStats";
 import { MELEE_WEAPONS } from "../../highrise/weapons/melee/melee-weapons/meleeWeapons";
 import { WeaponStats } from "../../highrise/weapons/WeaponStats";
-import { api } from "./api";
 import { CharacterChanges, CharacterEntry, Voice } from "./apiTypes";
+import { DraftField, DraftStore, FIELD_LABELS } from "./drafts";
 import { RunAction } from "./App";
 import { ClipsSection } from "./ClipsSection";
 import { EditableText } from "./EditableText";
@@ -56,6 +56,23 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number][0];
 
+/** The draft fields each tab edits, for marking tabs with unsaved changes */
+const TAB_FIELDS: Record<Tab, DraftField[]> = {
+  appearance: ["look"],
+  gameplay: ["startingWeapons", "stats"],
+  voice: ["voice"],
+};
+
+const isMac = navigator.platform.startsWith("Mac");
+const shortcut = (key: string) => (isMac ? `⌘${key}` : `Ctrl+${key}`);
+
+/** "a", "a and b", "a, b and c" */
+function listOf(words: string[]): string {
+  return words.length < 2
+    ? words.join("")
+    : `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
+}
+
 /** The tab last looked at, kept when switching characters and reloading */
 function savedTab(): Tab {
   try {
@@ -67,21 +84,32 @@ function savedTab(): Tab {
 }
 
 export function CharacterPanel({
-  entry: { id, data },
+  entry: { id, data: disk },
   voices,
   voicesError,
   run,
+  drafts,
+  onSave,
+  onSaveAll,
+  unsavedCount,
 }: {
   entry: CharacterEntry;
   voices?: Voice[];
   voicesError?: string;
   run: RunAction;
+  drafts: DraftStore;
+  onSave: () => void;
+  onSaveAll: () => void;
+  /** How many characters have unsaved changes, this one included */
+  unsavedCount: number;
 }) {
   const [tab, setTab] = useState<Tab>(savedTab);
-  // The look as it's being edited, ahead of what's saved
-  const [look, setLook] = useState(() => resolveLook(data.look));
-  const update = (changes: CharacterChanges, message = "Saving…") =>
-    run(message, () => api.updateCharacter(id, changes));
+  // What's being edited: what's on disk with the unsaved edits on top
+  const data = drafts.edited(id, disk);
+  const unsaved = drafts.unsaved(id, disk);
+  const look = useMemo(() => resolveLook(data.look), [data.look]);
+  const update = (changes: CharacterChanges, group?: string) =>
+    drafts.edit(id, disk, changes, group);
   const chooseTab = (next: Tab) => {
     setTab(next);
     try {
@@ -91,11 +119,22 @@ export function CharacterPanel({
 
   return (
     <div class="panel">
+      <SaveBar
+        unsaved={unsaved}
+        otherUnsaved={unsavedCount - (unsaved.length > 0 ? 1 : 0)}
+        canUndo={drafts.canUndo(id)}
+        canRedo={drafts.canRedo(id)}
+        onUndo={() => drafts.undo(id, disk)}
+        onRedo={() => drafts.redo(id, disk)}
+        onRevert={() => drafts.revert(id, disk)}
+        onSave={onSave}
+        onSaveAll={onSaveAll}
+      />
       <header class="panel__header">
         <img class="sprite-preview" src={portraitUrl(look, { scale: 260 })} />
         <div class="panel__title">
           <EditableText
-            class="panel__name"
+            class={`panel__name ${unsaved.includes("name") ? "is-unsaved" : ""}`}
             value={data.name}
             onSave={(name) => update({ name })}
           />
@@ -104,7 +143,7 @@ export function CharacterPanel({
           </div>
           <EditableText
             multiline
-            class="panel__description"
+            class={`panel__description ${unsaved.includes("description") ? "is-unsaved" : ""}`}
             value={data.description}
             placeholder="Who are they? This is what their lines get written from."
             onSave={(description) => update({ description })}
@@ -120,6 +159,9 @@ export function CharacterPanel({
             onClick={() => chooseTab(tabId)}
           >
             {label}
+            {TAB_FIELDS[tabId].some((field) => unsaved.includes(field)) && (
+              <span class="unsaved-dot" title="Unsaved changes" />
+            )}
             {tabId === "voice" && (
               <span class="tabs__count">
                 {data.clips.filter((clip) => clip.enabled).length}/
@@ -133,8 +175,7 @@ export function CharacterPanel({
       {tab === "appearance" && (
         <AppearanceTab
           look={look}
-          onChange={setLook}
-          onSave={(saved) => update({ look: saved }, "Saving look…")}
+          onChange={(look, group) => update({ look }, group)}
         />
       )}
 
@@ -362,6 +403,85 @@ function StatsEditor({
           })}
         </div>
       ))}
+    </div>
+  );
+}
+
+/**
+ * Whether this character has unsaved changes, and what to do about them.
+ * Sticks to the top of the page.
+ */
+function SaveBar({
+  unsaved,
+  otherUnsaved,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onRevert,
+  onSave,
+  onSaveAll,
+}: {
+  unsaved: DraftField[];
+  otherUnsaved: number;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+  onRevert: () => void;
+  onSave: () => void;
+  onSaveAll: () => void;
+}) {
+  const dirty = unsaved.length > 0;
+  return (
+    <div class={`save-bar ${dirty ? "is-dirty" : ""}`}>
+      <span class="save-bar__state">
+        {dirty ? (
+          <>
+            <span class="unsaved-dot" />
+            Unsaved changes to {listOf(unsaved.map((f) => FIELD_LABELS[f]))}
+          </>
+        ) : (
+          <span class="muted">Saved</span>
+        )}
+      </span>
+      <button
+        onClick={onUndo}
+        disabled={!canUndo}
+        title={`Undo (${shortcut("Z")})`}
+      >
+        Undo
+      </button>
+      <button
+        onClick={onRedo}
+        disabled={!canRedo}
+        title={`Redo (${shortcut(isMac ? "⇧Z" : "Y")})`}
+      >
+        Redo
+      </button>
+      <button
+        onClick={onRevert}
+        disabled={!dirty}
+        title="Go back to what's saved; Undo brings the changes back"
+      >
+        Revert
+      </button>
+      {otherUnsaved > 0 && (
+        <button
+          onClick={onSaveAll}
+          title="Save every character with unsaved changes"
+        >
+          Save all ({otherUnsaved + (dirty ? 1 : 0)})
+        </button>
+      )}
+      <button
+        class="primary"
+        onClick={onSave}
+        disabled={!dirty}
+        title={`Save to characters/data (${shortcut("S")})`}
+      >
+        Save
+      </button>
     </div>
   );
 }
