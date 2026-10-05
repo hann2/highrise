@@ -5,6 +5,7 @@ import {
   capsulePath,
   Drawing,
   ellipsePath,
+  ellipsePoints,
   n,
   polygonPath,
   Pt,
@@ -46,7 +47,10 @@ export function drawArm(
   const d = new Drawing(prefix, 0, -t / 2 - pad, length, t / 2 + pad);
   const arm = capsulePath(pad, length - pad, 0, t);
   const rot = look.zombie?.rot ?? 0;
-  d.blob(arm, colors.skin, { shade: "tube", grain: rot > 0 ? "rot" : "skin" });
+  d.blob(arm, colors.skin, {
+    shade: "tube",
+    grain: rot > 0 ? "rot" : undefined,
+  });
 
   const sleeve = look.sleeves.length;
   if (sleeve > 0.02) {
@@ -72,7 +76,7 @@ export function drawArm(
       polygonPath(points).slice(0, -1) +
       `A${n(half)} ${n(half)} 0 0 1 ${n(pad + half)} ${n(-half)}Z`;
     const clip = d.clipPath("sleeve", shape);
-    d.blob(shape, color, { shade: "tube", grain: "cloth" });
+    d.blob(shape, color, { shade: "tube" });
     if (
       look.top.pattern &&
       look.top.style !== "vest" &&
@@ -90,7 +94,7 @@ export function drawArm(
           [end - 34, half + 3],
         ]),
         look.sleeves.cuff,
-        { shade: "tube", grain: "knit", outline: 6 },
+        { shade: "tube", outline: 6 },
       );
     }
     drawRips(
@@ -130,7 +134,7 @@ export function drawHand(
   const h = dims.handSize;
   const rot = look.zombie?.rot ?? 0;
   const color = look.gloves ?? colors.skin;
-  const grain = look.gloves ? "cloth" : rot > 0 ? "rot" : "skin";
+  const grain = !look.gloves && rot > 0 ? "rot" : undefined;
   const d = new Drawing(prefix, -h * 0.55, -h * 0.55, h * 0.55, h * 0.55);
   const inside = -side;
   if (rot > 0 && !look.gloves) {
@@ -149,20 +153,35 @@ export function drawHand(
         `<circle cx="${n(reach + 3)}" cy="${n(y * 1.25)}" r="${n(h * 0.04)}" fill="#3b3524"/>`,
       );
     }
+    d.blob(
+      ellipsePath(h * 0.08, inside * h * 0.34, h * 0.18, h * 0.12),
+      color,
+      { grain, outline: 6 },
+    );
+    d.blob(ellipsePath(-h * 0.04, 0, h * 0.4, h * 0.37), color, { grain });
   } else {
-    for (let i = 0; i < 4; i++) {
-      const y = (i - 1.5) * h * 0.17;
-      d.blob(ellipsePath(h * 0.3, y, h * 0.17, h * 0.1), color, {
-        grain,
-        outline: 6,
-      });
+    // A loose fist: the thumb along the inside, under the fingers, and
+    // creases between the fingers at the front
+    d.blob(ellipsePath(h * 0.12, inside * h * 0.3, h * 0.22, h * 0.12), color, {
+      outline: 6,
+      shade: "tube",
+    });
+    const fist = smoothPath(
+      ellipsePoints(0, 0, h * 0.42, h * 0.36, 32, (a) =>
+        // Squarer at the front, where the knuckles are
+        Math.cos(a) > 0 ? 0.08 * Math.cos(a) ** 2 * Math.sin(a) ** 2 * 4 : 0,
+      ),
+    );
+    d.blob(fist, color, { outline: 6 });
+    for (let i = -1; i <= 1; i++) {
+      const y = i * h * 0.15;
+      d.line(
+        `M${n(h * 0.28)} ${n(y)}L${n(h * 0.42)} ${n(y)}`,
+        darken(color, 0.4),
+        4,
+        `opacity="0.7"`,
+      );
     }
   }
-  // The thumb
-  d.blob(ellipsePath(h * 0.08, inside * h * 0.34, h * 0.18, h * 0.12), color, {
-    grain,
-    outline: 6,
-  });
-  d.blob(ellipsePath(-h * 0.04, 0, h * 0.4, h * 0.37), color, { grain });
   return d;
 }

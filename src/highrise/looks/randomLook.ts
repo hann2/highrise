@@ -1,5 +1,6 @@
 import {
   BodyLook,
+  DEFAULT_LOOK,
   Extra,
   Hat,
   PantsStyle,
@@ -415,6 +416,7 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
           : 0,
       mohawk: chance(random, 0.02) ? 0.3 : 0,
     },
+    brows: DEFAULT_LOOK.brows,
     beard: chance(random, 0.2)
       ? { length: Math.round(between(random, 0, 0.7) * 100) / 100 }
       : undefined,
@@ -452,8 +454,14 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
     look.top.color = darken(look.top.color, random() * 0.15);
     look.pants = darken(look.pants, random() * 0.15);
   }
-  // Drawn last, so adding it didn't change everything drawn before it (the
-  // zombies' looks come from a fixed seed)
+  // Drawn last, so adding them didn't change everything drawn before them
+  // (the zombies' looks come from a fixed seed)
+  look.brows = {
+    bushiness:
+      Math.round(between(random, 0.1, look.beard ? 0.9 : 0.7) * 100) / 100,
+    arch: Math.round(random() * 100) / 100,
+    tilt: Math.round(slider(random, 0.25) * 100) / 100,
+  };
   const bustChance = look.beard ? 0 : pantsStyle === "skirt" ? 0.9 : 0.4;
   if (chance(random, bustChance)) {
     look.build.bust = Math.round(between(random, 0.25, 0.85) * 100) / 100;

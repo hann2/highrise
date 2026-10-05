@@ -11,6 +11,7 @@ export interface BodyLook {
   skin: Color;
   build: Build;
   hair: Hair;
+  brows: Brows;
   /** No beard if left out */
   beard?: Beard;
   top: Top;
@@ -81,6 +82,17 @@ export interface Hair {
   mohawk: number;
 }
 
+export interface Brows {
+  /** From thin lines (0) to thick and bushy (1) */
+  bushiness: number;
+  /** From straight (0) to high arches (1) */
+  arch: number;
+  /** -1 slopes down to the middle (cross), 1 up to the middle (worried) */
+  tilt: number;
+  /** Their own color, else a little darker than the hair */
+  color?: Color;
+}
+
 export interface Beard {
   /** Its own color, else the hair's */
   color?: Color;
@@ -90,6 +102,7 @@ export interface Beard {
 
 export const TOP_STYLES = [
   "tshirt",
+  "polo",
   "shirt",
   "tank",
   "jacket",
@@ -110,6 +123,8 @@ export interface Top {
   color: Color;
   secondary: Color;
   pattern?: Pattern;
+  /** A collar turned up round the neck, on tops that have one */
+  popped?: boolean;
 }
 
 export const PATTERN_KINDS = ["stripes", "plaid", "dots"] as const;
@@ -219,6 +234,7 @@ export const DEFAULT_LOOK: BodyLook = {
     ponytail: 0,
     mohawk: 0,
   },
+  brows: { bushiness: 0.35, arch: 0.4, tilt: 0 },
   top: { style: "tshirt", color: "#6b7c8f", secondary: "#e8e4dc" },
   sleeves: { length: 0.35 },
   extras: [],
@@ -231,10 +247,11 @@ export const DEFAULT_LOOK: BodyLook = {
 
 /** A look as it may be stored: anything can be left out */
 export type PartialLook = Partial<
-  Omit<BodyLook, "build" | "hair" | "top" | "sleeves">
+  Omit<BodyLook, "build" | "hair" | "brows" | "top" | "sleeves">
 > & {
   build?: Partial<Build>;
   hair?: Partial<Hair>;
+  brows?: Partial<Brows>;
   top?: Partial<Top>;
   sleeves?: Partial<Sleeves>;
 };
@@ -247,6 +264,7 @@ export function resolveLook(look: PartialLook | undefined): BodyLook {
     ...l,
     build: { ...DEFAULT_LOOK.build, ...l.build },
     hair: { ...DEFAULT_LOOK.hair, ...l.hair },
+    brows: { ...DEFAULT_LOOK.brows, ...l.brows },
     top: { ...DEFAULT_LOOK.top, ...l.top },
     sleeves: { ...DEFAULT_LOOK.sleeves, ...l.sleeves },
     extras: l.extras ?? [],
@@ -304,6 +322,10 @@ export function lookProblems(look: PartialLook | undefined): string[] {
   if (r.hair.part !== undefined) {
     range("hair.part", r.hair.part, -1, 1);
   }
+  range("brows.bushiness", r.brows.bushiness, 0, 1);
+  range("brows.arch", r.brows.arch, 0, 1);
+  range("brows.tilt", r.brows.tilt, -1, 1);
+  color("brows.color", r.brows.color);
   if (r.beard) {
     color("beard.color", r.beard.color);
     range("beard.length", r.beard.length, 0, 1);

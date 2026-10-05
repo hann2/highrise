@@ -100,8 +100,8 @@ export interface BlobOptions {
   outline?: number;
   /** Its own outline color, else the fill darkened */
   outlineColor?: Color;
-  /** A texture over it: cloth, or skin */
-  grain?: "cloth" | "skin" | "rot" | "knit";
+  /** Blotchy rot over it */
+  grain?: "rot";
   /** Drawn only inside this clip path's id */
   clip?: string;
   opacity?: number;
@@ -181,7 +181,7 @@ export class Drawing {
     );
   }
 
-  /** A filled shape with the house shading, texture and outline */
+  /** A filled shape with the house shading and outline */
   blob(d: string, fill: Color, options: BlobOptions = {}) {
     const {
       shade = "dome",
@@ -251,12 +251,9 @@ export class Drawing {
     );
   }
 
-  /**
-   * A filter that multiplies noise into what it's on: fine for cloth and
-   * skin, blotchy for rot, ribbed for knits
-   */
-  grainFilter(grain: "cloth" | "skin" | "rot" | "knit"): string {
-    const settings = STYLE.grain[grain];
+  /** A filter that multiplies blotchy noise into what it's on, for rot */
+  grainFilter(grain: "rot"): string {
+    const settings = STYLE[grain];
     return this.def(
       `grain-${grain}`,
       (id) =>

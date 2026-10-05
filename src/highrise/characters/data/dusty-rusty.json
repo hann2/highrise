@@ -44,11 +44,12 @@
     "beard": {
       "length": 0.3
     },
-    "hat": {
-      "style": "cowboy",
-      "color": "#9a6438",
-      "secondary": "#4a2e18"
-    }
+    "pieces": [
+      {
+        "name": "cowboy-hat",
+        "color": "#9a6438"
+      }
+    ]
   },
   "stats": {},
   "startingWeapons": ["S&W Revolver"],

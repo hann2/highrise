@@ -25,7 +25,7 @@ export function drawHead(
   const { headRx: rx, headRy: ry } = dims;
   const colors = palette(look);
   const rot = look.zombie?.rot ?? 0;
-  const skinGrain = rot > 0 ? "rot" : "skin";
+  const skinGrain = rot > 0 ? "rot" : undefined;
   const hair = look.hair;
   const random = lookRandom(look, 1);
   const d = new Drawing(prefix, -rx, -ry, rx, ry);
@@ -62,16 +62,7 @@ export function drawHead(
       `<ellipse cx="${n(x)}" cy="${n(y)}" rx="9" ry="14" fill="${rot > 0.5 ? "#c9c7a0" : "#2a2420"}" transform="rotate(${side * 12} ${n(x)} ${n(y)})"/>`,
     );
   }
-  const browColor = darken(colors.hair, 0.15);
-  for (const side of [-1, 1]) {
-    const x = rx * 0.74;
-    const y = side * ry * 0.33;
-    d.line(
-      `M${n(x - 6)} ${n(y - side * 26)}Q${n(x + 7)} ${n(y)} ${n(x - 4)} ${n(y + side * 24)}`,
-      browColor,
-      10,
-    );
-  }
+  drawBrows(d, look, rx, ry, colors.hair);
 
   if (hair.coverage > 0) {
     drawHair(d, look, rx, ry, colors.hair, colors.skin, random);
@@ -80,7 +71,12 @@ export function drawHead(
     drawGlasses(d, look.glasses.shape, look.glasses.color, rx, ry);
   }
   if (look.hat) {
-    drawHat(d, look.hat, rx, ry, 1 + hair.volume * 0.12 * hair.coverage);
+    // Big enough to cover the hair's edge at its furthest
+    const hairOut =
+      hair.coverage > 0
+        ? 0.035 + hair.volume * 0.2 + hair.curls * 0.19 + hair.messiness * 0.07
+        : 0;
+    drawHat(d, look.hat, rx, ry, 1 + hairOut);
   }
   for (const piece of look.pieces ?? []) {
     if (piecePlace(piece.name) === "head") {
@@ -88,6 +84,48 @@ export function drawHead(
     }
   }
   return d;
+}
+
+/**
+ * Eyebrows, behind the eyes. Higher up the face is further back from above,
+ * so an arch bows back, and a cross brow's inner end comes forward.
+ */
+function drawBrows(
+  d: Drawing,
+  look: BodyLook,
+  rx: number,
+  ry: number,
+  hairColor: Color,
+) {
+  const { bushiness, arch, tilt } = look.brows;
+  const color = look.brows.color ?? darken(hairColor, 0.15);
+  const thickness = 5 + bushiness * 15;
+  const steps = 8;
+  for (const side of [-1, 1]) {
+    const top: Pt[] = [];
+    const bottom: Pt[] = [];
+    for (let i = 0; i <= steps; i++) {
+      // From the inner end (t = 0) to the outer
+      const t = i / steps;
+      const y = side * ry * (0.12 + 0.44 * t);
+      const x =
+        rx * 0.74 -
+        Math.sin(t * Math.PI) * arch * 16 -
+        tilt * 9 * (1 - t) +
+        tilt * 3 * t;
+      // Thickest near the inner end, tapering out
+      const half =
+        (thickness / 2) *
+        (1.05 - 0.6 * t) *
+        (0.6 + 0.4 * Math.sin((Math.min(1, t * 3 + 0.2) * Math.PI) / 2));
+
+      top.push([x - half, y]);
+      bottom.push([x + half, y]);
+    }
+    d.add(
+      `<path d="${smoothPath([...top, ...bottom.reverse()], true, 0.5)}" fill="${color}"/>`,
+    );
+  }
 }
 
 /** The edge of the hair, all round, as a factor of the skull's radii */
@@ -153,44 +191,24 @@ function drawHair(
   for (const clip of clips) {
     d.begin(`clip-path="url(#${clip})"`);
   }
-  d.blob(shape, color, { grain: "cloth", outline: STYLE.outline * 0.9 });
+  d.blob(shape, color, { outline: STYLE.outline * 0.9 });
 
   const crown: Pt = [-rx * 0.28, (hair.part ?? 0) * ry * 0.45];
   const strandColor = darken(color, 0.3);
   if (hair.curls > 0.3) {
-    // Little curls all over
+    // Little curls spread evenly all over (a sunflower's spiral), each
+    // turned to follow the round of the head
     const curls = Math.round(30 + hair.curls * 30);
+    const golden = Math.PI * (3 - Math.sqrt(5));
     for (let i = 0; i < curls; i++) {
-      const angle = random() * Math.PI * 2;
-      const r = Math.sqrt(random()) * 1.05;
+      const angle = i * golden + (random() - 0.5) * 0.3;
+      const r = Math.sqrt((i + 0.5) / curls) * 1.02;
       const x = Math.cos(angle) * rx * r;
       const y = Math.sin(angle) * ry * r;
-      const size = 9 + random() * 9;
+      const size = 12 + random() * 3;
+      const turn = (angle * 180) / Math.PI;
       d.add(
-        `<path d="M${n(x - size)} ${n(y)}a${n(size)} ${n(size)} 0 1 1 ${n(size)} ${n(size)}" fill="none" stroke="${strandColor}" stroke-width="4" opacity="0.5"/>`,
-      );
-    }
-  } else {
-    // Combed back from the hairline, away from the parting
-    const part = (hair.part ?? 0) * ry * 0.45;
-    const strands = 22;
-    for (let i = 0; i < strands; i++) {
-      const across = -1 + (2 * (i + 0.5)) / strands;
-      const y0 = across * ry * 0.9 + (random() - 0.5) * 12;
-      const away = y0 < part ? -1 : 1;
-      const spread = Math.min(1, Math.abs(y0 - part) / ry + 0.15);
-      const angle = Math.PI - away * spread * 1.25;
-      const reach = (1 + edge(angle)) * 0.98;
-      const end: Pt = [
-        Math.cos(angle) * rx * reach,
-        Math.sin(angle) * ry * reach,
-      ];
-      const jitter = hair.messiness * 30 * (random() - 0.5);
-      d.line(
-        `M${n(rx * 1.1)} ${n(y0)}Q${n(-rx * 0.15 + jitter)} ${n(y0 * 1.1 + away * 25 + jitter)} ${n(end[0])} ${n(end[1])}`,
-        strandColor,
-        4.5,
-        `opacity="0.35"`,
+        `<path d="M${n(-size)} 0a${n(size)} ${n(size)} 0 1 1 ${n(size)} ${n(size)}" transform="translate(${n(x)} ${n(y)}) rotate(${n(turn)})" fill="none" stroke="${strandColor}" stroke-width="4" opacity="0.5"/>`,
       );
     }
   }
@@ -234,7 +252,7 @@ function drawHair(
     const r = 34 + hair.bun * 42;
     const cx = -rx * 0.6 - hair.bun * 20;
     d.include(cx - r, -r, cx + r, r);
-    d.blob(ellipsePath(cx, 0, r, r * 0.95), color, { grain: "cloth" });
+    d.blob(ellipsePath(cx, 0, r, r * 0.95), color, {});
     d.line(
       `M${n(cx + r * 0.6)} ${n(0)}A${n(r * 0.6)} ${n(r * 0.55)} 0 1 1 ${n(cx)} ${n(-r * 0.55)}A${n(r * 0.3)} ${n(r * 0.3)} 0 1 1 ${n(cx + r * 0.1)} ${n(r * 0.2)}`,
       strandColor,
@@ -268,17 +286,7 @@ function drawLongHair(
     points.push([x * jag, y * jag]);
   }
   d.includePoints(points);
-  d.blob(smoothPath(points), color, { grain: "cloth" });
-  const strands = darken(color, 0.3);
-  for (let i = 1; i < 8; i++) {
-    const y = -width * 0.85 + (width * 1.7 * i) / 8;
-    d.line(
-      `M${n(-rx * 0.4)} ${n(y * 0.8)}Q${n(-back * 0.7)} ${n(y * 1.05)} ${n(-back * 0.92)} ${n(y * 0.75)}`,
-      strands,
-      5,
-      `opacity="0.4"`,
-    );
-  }
+  d.blob(smoothPath(points), color, {});
 }
 
 function drawPonytail(
@@ -304,7 +312,7 @@ function drawPonytail(
     [start[0], width],
   ];
   d.includePoints(points);
-  d.blob(smoothPath(points), color, { grain: "cloth" });
+  d.blob(smoothPath(points), color, {});
   d.line(
     `M${n(start[0] - 10)} ${n(0)}Q${n((start[0] + end[0]) / 2)} ${n(sway * 0.5)} ${n(end[0])} ${n(end[1])}`,
     darken(color, 0.3),
@@ -340,7 +348,7 @@ function drawBeard(
   }
   points.push([-rx * 0.1, ry * 0.7], [-rx * 0.1, -ry * 0.7]);
   d.includePoints(points);
-  d.blob(smoothPath(points, true, 0.8), color, { grain: "cloth" });
+  d.blob(smoothPath(points, true, 0.8), color, {});
   for (let i = 0; i < 9; i++) {
     const angle = -0.9 + (1.8 * i) / 8;
     d.line(
@@ -400,9 +408,7 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
       const brim = ellipsePath(hx * 0.62, 0, hx * 0.66, hy * 0.78);
       d.include(-hx, -hy, hx * 1.28, hy);
       d.blob(brim, darken(hat.secondary ?? color, 0.05), { shade: "flat" });
-      d.blob(ellipsePath(-6, 0, hx * 1.02, hy * 1.03), color, {
-        grain: "cloth",
-      });
+      d.blob(ellipsePath(-6, 0, hx * 1.02, hy * 1.03), color, {});
       const seam = darken(color, 0.3);
       for (const angle of [Math.PI / 3, (Math.PI * 2) / 3, Math.PI]) {
         for (const side of [-1, 1]) {
@@ -419,9 +425,7 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
     }
     case "beanie": {
       d.include(-hx * 1.1, -hy * 1.1, hx * 1.1, hy * 1.1);
-      d.blob(ellipsePath(-4, 0, hx * 1.06, hy * 1.07), color, {
-        grain: "knit",
-      });
+      d.blob(ellipsePath(-4, 0, hx * 1.06, hy * 1.07), color, {});
       d.add(
         `<path d="${ellipsePath(-4, 0, hx * 0.95, hy * 0.95)}" fill="none" stroke="${darken(color, 0.25)}" stroke-width="20" opacity="0.5"/>`,
       );
@@ -438,7 +442,7 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
             ),
           ),
           hat.secondary,
-          { grain: "knit" },
+          {},
         );
       }
       return;
@@ -462,7 +466,7 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
       const fur = hat.secondary ?? "#f4f1ea";
       const tip: Pt = [-hx * 1.35, hy * 0.75];
       d.include(tip[0] - 50, -hy * 1.15, hx * 1.15, tip[1] + 50);
-      d.blob(ellipsePath(-6, 0, hx * 1.02, hy * 1.02), red, { grain: "cloth" });
+      d.blob(ellipsePath(-6, 0, hx * 1.02, hy * 1.02), red, {});
       d.blob(
         smoothPath([
           [-hx * 0.1, -hy * 0.6],
@@ -472,11 +476,11 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
           [hx * 0.05, hy * 0.55],
         ]),
         darken(red, 0.06),
-        { grain: "cloth" },
+        {},
       );
       d.add(
         `<path d="${ellipsePath(-6, 0, hx * 0.98, hy * 0.98)}" fill="none" stroke="${darken(fur, 0.35)}" stroke-width="34"/>` +
-          `<path d="${ellipsePath(-6, 0, hx * 0.98, hy * 0.98)}" fill="none" stroke="${fur}" stroke-width="26" filter="url(#${d.grainFilter("knit")})"/>`,
+          `<path d="${ellipsePath(-6, 0, hx * 0.98, hy * 0.98)}" fill="none" stroke="${fur}" stroke-width="26"/>`,
       );
       d.blob(
         smoothPath(
@@ -490,19 +494,16 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
           ),
         ),
         fur,
-        { grain: "knit" },
+        {},
       );
       return;
     }
     case "cowboy": {
       d.include(-hx * 1.8, -hy * 1.75, hx * 1.8, hy * 1.75);
       d.blob(ellipsePath(0, 0, hx * 1.75, hy * 1.68), color, {
-        grain: "cloth",
         outline: STYLE.outline * 1.4,
       });
-      d.blob(ellipsePath(-8, 0, hx * 0.95, hy * 0.82), darken(color, 0.05), {
-        grain: "cloth",
-      });
+      d.blob(ellipsePath(-8, 0, hx * 0.95, hy * 0.82), darken(color, 0.05), {});
       d.add(
         `<path d="${ellipsePath(-8, 0, hx * 0.92, hy * 0.79)}" fill="none" stroke="${hat.secondary ?? darken(color, 0.5)}" stroke-width="16"/>`,
       );
@@ -526,13 +527,10 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
       }
       const trim = hat.secondary ?? "#c9a640";
       d.blob(smoothPath(brim, true, 0.7), color, {
-        grain: "cloth",
         outlineColor: trim,
         outline: STYLE.outline * 1.4,
       });
-      d.blob(ellipsePath(-14, 0, hx * 0.62, hy * 0.66), darken(color, 0.1), {
-        grain: "cloth",
-      });
+      d.blob(ellipsePath(-14, 0, hx * 0.62, hy * 0.66), darken(color, 0.1), {});
       // A skull and crossbones on the front
       const sx = hx * 0.82;
       d.include(sx - 30, -30, sx + 30, 30);
@@ -557,12 +555,10 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
             [-hx * 1.25, side * 30],
           ]),
           cloth,
-          { grain: "cloth" },
+          {},
         );
       }
-      d.blob(ellipsePath(-14, 0, hx * 0.98, hy * 1.02), cloth, {
-        grain: "cloth",
-      });
+      d.blob(ellipsePath(-14, 0, hx * 0.98, hy * 1.02), cloth, {});
       if (hat.secondary) {
         d.begin(
           `clip-path="url(#${d.clipPath("bandana", ellipsePath(-14, 0, hx * 0.98, hy * 1.02))})"`,
@@ -580,9 +576,7 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
     }
     case "beret": {
       d.include(-hx * 1.2, -hy * 1.2, hx * 1.2, hy * 1.3);
-      d.blob(ellipsePath(-14, 18, hx * 1.12, hy * 1.12), color, {
-        grain: "knit",
-      });
+      d.blob(ellipsePath(-14, 18, hx * 1.12, hy * 1.12), color, {});
       d.blob(ellipsePath(-14, 18, 12, 12), darken(color, 0.15), { outline: 4 });
       return;
     }

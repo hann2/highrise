@@ -193,6 +193,39 @@ export function AppearanceTab({
               onChange={(part) => set("hair", { ...look.hair, part })}
             />
           </Optional>
+          <Slider
+            label="Brows"
+            hint="thin – bushy"
+            value={look.brows.bushiness}
+            min={0}
+            max={1}
+            reset={DEFAULT_LOOK.brows.bushiness}
+            onChange={(bushiness) => set("brows", { ...look.brows, bushiness })}
+          />
+          <Slider
+            label="Brow arch"
+            hint="straight – arched"
+            value={look.brows.arch}
+            min={0}
+            max={1}
+            reset={DEFAULT_LOOK.brows.arch}
+            onChange={(arch) => set("brows", { ...look.brows, arch })}
+          />
+          <Slider
+            label="Brow tilt"
+            hint="cross – worried"
+            value={look.brows.tilt}
+            min={-1}
+            max={1}
+            reset={0}
+            onChange={(tilt) => set("brows", { ...look.brows, tilt })}
+          />
+          <OptionalColor
+            label="Own brow color"
+            value={look.brows.color}
+            fallback={look.hair.color}
+            onChange={(color) => set("brows", { ...look.brows, color })}
+          />
           <Optional
             label="Beard"
             on={!!look.beard}
@@ -239,6 +272,17 @@ export function AppearanceTab({
             value={look.top.secondary}
             onChange={(secondary) => set("top", { ...look.top, secondary })}
           />
+          {["polo", "shirt", "jacket", "coat"].includes(look.top.style) && (
+            <Optional
+              label="Popped collar"
+              on={!!look.top.popped}
+              onToggle={(popped) =>
+                set("top", { ...look.top, popped: popped || undefined })
+              }
+            >
+              {null}
+            </Optional>
+          )}
           <Optional
             label="Pattern"
             on={!!look.top.pattern}

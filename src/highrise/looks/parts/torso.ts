@@ -28,7 +28,7 @@ const BANDED: Partial<Record<TopStyle, number>> = {
 };
 
 /** Tops with a collar that stands up round the back of the neck */
-const COLLARED: TopStyle[] = ["shirt", "jacket", "coat"];
+const COLLARED: TopStyle[] = ["shirt", "polo", "jacket", "coat"];
 
 /** What shows on the shoulders: the top, or under it */
 function shoulderColor(look: BodyLook, skin: Color): Color {
@@ -156,7 +156,6 @@ export function drawTorso(
   const d = new Drawing(prefix, 0, 0, 0, 0);
   d.includePoints(outline);
   const torso = d.clipPath("torso", shape);
-  const grain = top.style === "sweater" ? "knit" : "cloth";
 
   // Behind: a hood, a sack
   if (look.extras.some((e) => e.kind === "sack")) {
@@ -170,9 +169,7 @@ export function drawTorso(
 
   // What's under the top, then the top
   const band = BANDED[top.style];
-  d.blob(shape, band ? shoulderColor(look, colors.skin) : top.color, {
-    grain: band && top.style === "tank" ? undefined : grain,
-  });
+  d.blob(shape, band ? shoulderColor(look, colors.skin) : top.color);
   let garment = torso;
   if (band || top.style === "overalls") {
     const half = band ? w * band : w * 0.36;
@@ -191,7 +188,6 @@ export function drawTorso(
       // Straps over the shoulders and a bib in front
       for (const side of [-1, 1]) {
         d.blob(capsulePath(-400, 400, side * half * 0.95, 52), top.color, {
-          grain: "cloth",
           shade: "tube",
         });
       }
@@ -203,7 +199,7 @@ export function drawTorso(
           [front, half],
         ]),
         top.color,
-        { grain: "cloth" },
+        {},
       );
       for (const side of [-1, 1]) {
         d.add(
@@ -219,7 +215,7 @@ export function drawTorso(
           [-999, half],
         ]),
         top.color,
-        { grain: "cloth", clip: torso },
+        { clip: torso },
       );
       if (top.style === "vest") {
         // Reflective stripes
@@ -261,7 +257,21 @@ export function drawTorso(
     }
   }
   const neck = dims.headRy * 1.06;
-  if (COLLARED.includes(top.style)) {
+  if (top.style === "polo") {
+    // The placket down the front, with its buttons
+    d.line(
+      `M${n(neck * 0.8)} 0L${n(dims.chestDepth + dims.bust + 20)} 0`,
+      darken(top.color, 0.3),
+      6,
+      `opacity="0.7"`,
+    );
+    for (const x of [neck * 0.95, neck * 1.12]) {
+      d.add(
+        `<circle cx="${n(x)}" cy="0" r="7" fill="${lighten(top.color, 0.5)}" stroke="${darken(top.color, 0.4)}" stroke-width="3"/>`,
+      );
+    }
+  }
+  if (COLLARED.includes(top.style) && !top.popped) {
     // The collar standing up round the back of the neck
     const collar = top.style === "coat" ? top.secondary : top.color;
     d.line(
@@ -294,7 +304,7 @@ export function drawTorso(
           [600, 380],
         ]),
         inner,
-        { grain: "cloth", clip: v },
+        { clip: v },
       );
       d.end();
       // Lapels
@@ -313,7 +323,7 @@ export function drawTorso(
     } else {
       // A coat's trim down the front
       d.begin(`clip-path="url(#${torso})"`);
-      d.blob(capsulePath(0, 600, 0, 46), inner, { grain: "knit", outline: 5 });
+      d.blob(capsulePath(0, 600, 0, 46), inner, { outline: 5 });
       d.end();
     }
   }
@@ -338,33 +348,6 @@ export function drawTorso(
         ]),
         lighten(top.color, 0.08),
         { shade: "flat", outline: 6 },
-      );
-    }
-  }
-  if (top.style === "hoodie") {
-    // The hood bunched up behind the neck, and its strings in front
-    const hood = ellipsePoints(
-      -neck * 0.95,
-      0,
-      95,
-      neck * 1.05,
-      24,
-      (a) => 0.05 * Math.sin(a * 5),
-    );
-    d.blob(smoothPath(hood), darken(top.color, 0.05), { grain: "cloth" });
-    d.blob(
-      ellipsePath(-neck * 0.75, 0, 40, neck * 0.7),
-      darken(top.color, 0.4),
-      {
-        shade: "flat",
-        outline: 0,
-      },
-    );
-    for (const side of [-1, 1]) {
-      d.line(
-        `M${n(neck * 0.8)} ${n(side * 30)}L${n(dims.chestDepth + 30)} ${n(side * 38)}`,
-        lighten(top.color, 0.5),
-        7,
       );
     }
   }
@@ -394,12 +377,88 @@ export function drawTorso(
   d.add(
     `<path d="${shape}" fill="none" stroke="${darken(band ? shoulderColor(look, colors.skin) : top.color, 0.5)}" stroke-width="9" stroke-linejoin="round"/>`,
   );
+  // Over the outline: a popped collar stands round the neck, and the hood
+  // lies on the back and shoulders
+  if (COLLARED.includes(top.style) && top.popped) {
+    drawPoppedCollar(
+      d,
+      top.style === "coat" ? top.secondary : top.color,
+      dims.headRy * 1.06,
+    );
+  }
+  if (top.style === "hoodie") {
+    // The hood bunched up behind the neck, and its strings in front
+    const hood = ellipsePoints(
+      -neck * 0.95,
+      0,
+      95,
+      neck * 1.05,
+      24,
+      (a) => 0.05 * Math.sin(a * 5),
+    );
+    d.blob(smoothPath(hood), darken(top.color, 0.05), {});
+    d.blob(
+      ellipsePath(-neck * 0.75, 0, 40, neck * 0.7),
+      darken(top.color, 0.4),
+      {
+        shade: "flat",
+        outline: 0,
+      },
+    );
+    for (const side of [-1, 1]) {
+      d.line(
+        `M${n(neck * 0.8)} ${n(side * 30)}L${n(dims.chestDepth + 30)} ${n(side * 38)}`,
+        lighten(top.color, 0.5),
+        7,
+      );
+    }
+  }
   for (const piece of look.pieces ?? []) {
     if (piecePlace(piece.name) === "torso") {
       drawPiece(d, piece.name, piece.color, piece.secondary);
     }
   }
   return d;
+}
+
+/**
+ * A collar turned up: a band standing round the neck from behind, wider
+ * than the head, its points flaring out at the front
+ */
+function drawPoppedCollar(d: Drawing, color: Color, neck: number) {
+  const start = (50 * Math.PI) / 180;
+  const steps = 20;
+  const outer: Pt[] = [];
+  const inner: Pt[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const a = start + ((Math.PI * 2 - 2 * start) * i) / steps;
+    // Taller toward the front, where the points are
+    const front = Math.max(0, Math.cos(a));
+    const r = neck * (1.38 + 0.22 * front);
+    outer.push([Math.cos(a) * r, Math.sin(a) * r]);
+    inner.push([Math.cos(a) * neck * 0.94, Math.sin(a) * neck * 0.94]);
+  }
+  const tip = (side: number): Pt => [
+    Math.cos(start - 0.18) * neck * 1.62,
+    side * Math.sin(start - 0.18) * neck * 1.62,
+  ];
+  // Out from one point, round the back to the other, and in along the neck
+  const shape = smoothPath(
+    [tip(1), ...outer, tip(-1), ...inner.slice().reverse()],
+    true,
+    0.5,
+  );
+  d.include(-neck * 1.65, -neck * 1.65, neck * 1.65, neck * 1.65);
+  d.blob(shape, lighten(color, 0.04), { shade: "flat" });
+  // The inside of the band, in shadow, and where it folds
+  d.line(
+    smoothPath(inner, false, 0.6),
+    darken(color, 0.35),
+    16,
+    `opacity="0.6"`,
+  );
+  const fold = outer.map(([x, y]): Pt => [x * 0.82, y * 0.82]);
+  d.line(smoothPath(fold, false, 0.6), darken(color, 0.25), 6, `opacity="0.6"`);
 }
 
 function drawSack(
@@ -413,7 +472,7 @@ function drawSack(
   const wave = wobble(random, 4, 3);
   const points = ellipsePoints(cx, cy, 175, 165, 24, (a) => 0.07 * wave(a));
   d.includePoints(points);
-  d.blob(smoothPath(points), color, { grain: "cloth" });
+  d.blob(smoothPath(points), color, {});
   // Folds gathered up toward the neck of it
   for (let i = 0; i < 5; i++) {
     const angle = Math.PI * (0.9 + i * 0.12);
@@ -458,9 +517,8 @@ function drawExtra(
         );
       }
       const pack = `M${n(x0 + 40)} ${n(-w * 0.52)}L${n(-dims.backDepth + 55)} ${n(-w * 0.55)}Q${n(-dims.backDepth + 75)} 0 ${n(-dims.backDepth + 55)} ${n(w * 0.55)}L${n(x0 + 40)} ${n(w * 0.52)}Q${n(x0 - 10)} 0 ${n(x0 + 40)} ${n(-w * 0.52)}Z`;
-      d.blob(pack, color, { grain: "cloth" });
+      d.blob(pack, color, {});
       d.blob(capsulePath(x0 + 8, x0 + 80, 0, w * 0.6), darken(color, 0.1), {
-        grain: "cloth",
         outline: 6,
       });
       d.line(
@@ -483,7 +541,7 @@ function drawExtra(
       const ring = ellipsePath(0, 0, neck * 1.08, neck * 1.08);
       d.add(
         `<path d="${ring}" fill="none" stroke="${darken(color, 0.45)}" stroke-width="66"/>` +
-          `<path d="${ring}" fill="none" stroke="${color}" stroke-width="54" filter="url(#${d.grainFilter("knit")})"/>`,
+          `<path d="${ring}" fill="none" stroke="${color}" stroke-width="54"/>`,
       );
       const tail = [
         [neck * 0.6, w * 0.25],
@@ -492,7 +550,7 @@ function drawExtra(
         [neck * 1.0, w * 0.18],
       ] as Pt[];
       d.includePoints(tail);
-      d.blob(smoothPath(tail), color, { grain: "knit" });
+      d.blob(smoothPath(tail), color, {});
       return;
     }
     case "tie": {
@@ -505,7 +563,7 @@ function drawExtra(
           [neck * 0.7, 16],
         ]),
         color,
-        { grain: "cloth", outline: 6 },
+        { outline: 6 },
       );
       return;
     }
@@ -587,7 +645,7 @@ export function drawLyingTorso(
 
   const band = BANDED[top.style];
   const base = band ? shoulderColor(look, colors.skin) : top.color;
-  d.blob(shape, base, { grain: "cloth" });
+  d.blob(shape, base, {});
   let garment = torso;
   if (band || top.style === "overalls") {
     const half = band ? w * band : w * 0.36;
@@ -612,9 +670,7 @@ export function drawLyingTorso(
       d.blob(
         capsulePath(-length - 80, -length * 0.62, 0, waist * 1.9),
         top.color,
-        {
-          grain: "cloth",
-        },
+        {},
       );
     } else {
       d.blob(
@@ -625,7 +681,7 @@ export function drawLyingTorso(
           [-999, half],
         ]),
         top.color,
-        { grain: "cloth" },
+        {},
       );
     }
     d.end();
@@ -656,14 +712,13 @@ export function drawLyingTorso(
         ),
       ),
       darken(top.color, 0.05),
-      { grain: "cloth" },
+      {},
     );
   } else if (COLLARED.includes(top.style)) {
     d.blob(
       capsulePath(front * 0.1, front * 0.55, 0, w * 0.75),
       lighten(top.color, 0.05),
       {
-        grain: "cloth",
         outline: 6,
       },
     );
@@ -705,7 +760,7 @@ export function drawLyingTorso(
       d.blob(
         capsulePath(-length * 0.75, -front * 0.2, 0, w * 1.05),
         extra.color,
-        { grain: "cloth" },
+        {},
       );
       d.line(
         `M${n(-length * 0.65)} ${n(-w * 0.35)}L${n(-length * 0.65)} ${n(w * 0.35)}`,

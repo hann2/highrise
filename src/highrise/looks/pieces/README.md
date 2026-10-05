@@ -20,3 +20,7 @@ How to draw one (in Affinity or anything else that saves SVG):
 - The file name (without `.svg`) is the piece's name.
 
 `npx tsx bin/look-sheet.ts` shows how it looks on everyone that wears it.
+
+`head/cowboy-hat.svg` and `head/pirate-hat.svg` are Dusty Rusty's and Lucky
+Jack's hats cut out of the old hand-drawn character art
+(`assets/unused/characters.svg`), scaled so its heads match the generator's.

@@ -48,7 +48,7 @@ export function drawLeg(
   if (style === "shorts" || style === "skirt") {
     d.blob(leg, colors.skin, {
       shade: "tube",
-      grain: rot > 0 ? "rot" : "skin",
+      grain: rot > 0 ? "rot" : undefined,
     });
     const end = length * (style === "shorts" ? SHORTS : SKIRT);
     const half0 = (t / 2) * (style === "skirt" ? 1.05 : 1.1);
@@ -56,7 +56,7 @@ export function drawLeg(
     cloth =
       `M${n(pad + half0)} ${n(-half0)}L${n(end)} ${n(-half1)}L${n(end)} ${n(half1)}L${n(pad + half0)} ${n(half0)}` +
       `A${n(half0)} ${n(half0)} 0 0 1 ${n(pad + half0)} ${n(-half0)}Z`;
-    d.blob(cloth, pants, { shade: "tube", grain: "cloth" });
+    d.blob(cloth, pants, { shade: "tube" });
     if (style === "skirt") {
       for (const y of [-0.5, 0, 0.5]) {
         d.line(
@@ -74,7 +74,7 @@ export function drawLeg(
     );
   } else {
     cloth = leg;
-    d.blob(leg, pants, { shade: "tube", grain: "cloth" });
+    d.blob(leg, pants, { shade: "tube" });
     if (style === "jeans") {
       // Stitched seams down the sides, and worn at the knee
       for (const y of [-t * 0.34, t * 0.34]) {
@@ -172,7 +172,7 @@ function drawBareFoot(
 ) {
   const l = length / 2;
   const w = width / 2;
-  const grain = rot > 0 ? "rot" : "skin";
+  const grain = rot > 0 ? "rot" : undefined;
   for (let i = 0; i < 5; i++) {
     // Big toe on the inside
     const y = inner * w * (0.62 - i * 0.3);
@@ -262,9 +262,7 @@ export function drawFoot(
           shade: "flat",
         },
       );
-      d.blob(smoothPath(shoeOutline(length * 0.93, width * 0.9, 0)), color, {
-        grain: "cloth",
-      });
+      d.blob(smoothPath(shoeOutline(length * 0.93, width * 0.9, 0)), color, {});
       d.blob(
         ellipsePath(length * 0.33, 0, length * 0.13, width * 0.3),
         lighten(color, 0.12),
@@ -291,9 +289,11 @@ export function drawFoot(
           shade: "flat",
         },
       );
-      d.blob(smoothPath(shoeOutline(length * 0.95, width * 0.94, 0)), color, {
-        grain: "cloth",
-      });
+      d.blob(
+        smoothPath(shoeOutline(length * 0.95, width * 0.94, 0)),
+        color,
+        {},
+      );
       // Where the leg goes in, and the laces up the front
       d.blob(
         ellipsePath(-length * 0.22, 0, length * 0.2, width * 0.36),
@@ -325,7 +325,6 @@ export function drawFoot(
           ellipsePath(-length * 0.08, 0, length * 0.22, width * 0.3),
           colors.skin,
           {
-            grain: "skin",
             outline: 5,
             outlineColor: darken(color, 0.4),
           },
@@ -366,7 +365,7 @@ export function drawLyingLegs(
   const pants = look.pants;
   const style = look.pantsStyle;
   const rot = look.zombie?.rot ?? 0;
-  const skinGrain = rot > 0 ? "rot" : "skin";
+  const skinGrain = rot > 0 ? "rot" : undefined;
   const bare = style === "shorts" || style === "skirt";
   const covered = d.clipPath(
     "covered",
@@ -395,7 +394,7 @@ export function drawLyingLegs(
     if (bare) {
       d.blob(path, colors.skin, { grain: skinGrain });
     }
-    d.blob(path, pants, { grain: "cloth", clip: covered });
+    d.blob(path, pants, { clip: covered });
     if (!bare) {
       d.line(
         `M${n(-length * 0.15)} ${n(side * hip * 0.9)}Q${n(-length * 0.5)} ${n((side * hip + spread) / 2)} ${n(-length * 0.85)} ${n(spread)}`,
@@ -417,7 +416,7 @@ export function drawLyingLegs(
         [0, half * 1.05],
       ]),
       pants,
-      { grain: "cloth" },
+      {},
     );
   }
   drawBlood(
@@ -444,7 +443,7 @@ export function drawLyingLegs(
       [-44, half],
     ]),
     darken(pants, 0.25),
-    { grain: "cloth", outline: 6 },
+    { outline: 6 },
   );
   return d;
 }
@@ -460,7 +459,7 @@ function drawSole(d: Drawing, look: BodyLook, skin: Color, ankle: Pt) {
   const sole = ellipsePath(cx, ankle[1], rx, ry);
   switch (style) {
     case "bare":
-      d.blob(sole, mix(skin, "#4a3a28", 0.25), { grain: "skin" });
+      d.blob(sole, mix(skin, "#4a3a28", 0.25), {});
       return;
     case "sandals":
       d.blob(sole, look.shoes, { shade: "flat" });

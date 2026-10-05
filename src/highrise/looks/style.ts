@@ -12,11 +12,9 @@ export const STYLE = {
   highlight: 0.22,
   /** Black round its edge */
   shadow: 0.3,
-  /** Noise multiplied into fills (frequencies are per mm) */
-  grain: {
-    cloth: { frequency: 0.09, octaves: 2, strength: 0.12, seed: 3 },
-    skin: { frequency: 0.035, octaves: 2, strength: 0.07, seed: 7 },
-    rot: { frequency: 0.022, octaves: 3, strength: 0.32, seed: 11 },
-    knit: { frequency: "0.03 0.16", octaves: 2, strength: 0.16, seed: 5 },
-  },
+  /**
+   * Noise multiplied into rotten skin and grime (frequencies are per mm).
+   * Everything else is flat color, lines and gradients.
+   */
+  rot: { frequency: 0.022, octaves: 3, strength: 0.32, seed: 11 },
 };

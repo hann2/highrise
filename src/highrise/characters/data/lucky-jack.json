@@ -45,11 +45,12 @@
     "beard": {
       "length": 0.25
     },
-    "hat": {
-      "style": "tricorn",
-      "color": "#262626",
-      "secondary": "#c9a640"
-    }
+    "pieces": [
+      {
+        "name": "pirate-hat",
+        "color": "#262626"
+      }
+    ]
   },
   "stats": {},
   "startingWeapons": ["M1911"],
