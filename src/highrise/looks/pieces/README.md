@@ -21,6 +21,14 @@ How to draw one (in Affinity or anything else that saves SVG):
 
 `npx tsx bin/look-sheet.ts` shows how it looks on everyone that wears it.
 
-`head/cowboy-hat.svg` and `head/pirate-hat.svg` are Dusty Rusty's and Lucky
-Jack's hats cut out of the old hand-drawn character art
-(`assets/unused/characters.svg`), scaled so its heads match the generator's.
+## Hats
+
+`../hats/<style>.svg` is a hat style (`HAT_STYLES`) drawn by hand rather
+than by code, like the cowboy hat and the tricorn (cut out of the old
+hand-drawn character art, `assets/unused/characters.svg`). The same units
+as a piece, for a head the default size under the default amount of hair;
+it's scaled with the head and the hair. Its root `<svg>` has `data-color`,
+the color it's drawn in, and optionally `data-secondary`, the colors that
+are the trim's; drawn in a hat's colors, every other color is moved the way
+`data-color` would have to move to be the hat's color (the same hue turn,
+saturation and lightness change), so the shading stays.

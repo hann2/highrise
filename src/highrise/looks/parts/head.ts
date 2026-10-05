@@ -11,7 +11,12 @@ import {
   smoothPath,
 } from "../svg";
 import { STYLE } from "../style";
-import { drawPiece, piecePlace } from "../pieces";
+import {
+  drawHatDrawing,
+  drawPiece,
+  hasHatDrawing,
+  piecePlace,
+} from "../pieces";
 
 /**
  * The head from above, facing +x, the skull's middle at the origin: hair,
@@ -403,6 +408,12 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
   const hx = rx * size;
   const hy = ry * size;
   const color = hat.color;
+  if (hasHatDrawing(hat.style)) {
+    // Drawn by hand for a head as big as the default's, under hair as big as
+    // the default's
+    drawHatDrawing(d, hat.style, color, hat.secondary, hx / 150 / 1.1);
+    return;
+  }
   switch (hat.style) {
     case "cap": {
       const brim = ellipsePath(hx * 0.62, 0, hx * 0.66, hy * 0.78);
@@ -496,50 +507,6 @@ function drawHat(d: Drawing, hat: Hat, rx: number, ry: number, size: number) {
         fur,
         {},
       );
-      return;
-    }
-    case "cowboy": {
-      d.include(-hx * 1.8, -hy * 1.75, hx * 1.8, hy * 1.75);
-      d.blob(ellipsePath(0, 0, hx * 1.75, hy * 1.68), color, {
-        outline: STYLE.outline * 1.4,
-      });
-      d.blob(ellipsePath(-8, 0, hx * 0.95, hy * 0.82), darken(color, 0.05), {});
-      d.add(
-        `<path d="${ellipsePath(-8, 0, hx * 0.92, hy * 0.79)}" fill="none" stroke="${hat.secondary ?? darken(color, 0.5)}" stroke-width="16"/>`,
-      );
-      d.line(`M${n(-hx * 0.6)} 0L${n(hx * 0.55)} 0`, darken(color, 0.3), 10);
-      return;
-    }
-    case "tricorn": {
-      const corners: Pt[] = [
-        [hx * 1.4, 0],
-        [-hx * 1.05, -hy * 1.45],
-        [-hx * 1.05, hy * 1.45],
-      ];
-      d.includePoints(corners);
-      const brim: Pt[] = [];
-      for (let i = 0; i < 3; i++) {
-        const a = corners[i];
-        const b = corners[(i + 1) % 3];
-        brim.push(a);
-        // Each side curls in toward the middle
-        brim.push([(a[0] + b[0]) * 0.42, (a[1] + b[1]) * 0.42]);
-      }
-      const trim = hat.secondary ?? "#c9a640";
-      d.blob(smoothPath(brim, true, 0.7), color, {
-        outlineColor: trim,
-        outline: STYLE.outline * 1.4,
-      });
-      d.blob(ellipsePath(-14, 0, hx * 0.62, hy * 0.66), darken(color, 0.1), {});
-      // A skull and crossbones on the front
-      const sx = hx * 0.82;
-      d.include(sx - 30, -30, sx + 30, 30);
-      d.line(
-        `M${n(sx - 22)} -24L${n(sx + 26)} 24M${n(sx - 22)} 24L${n(sx + 26)} -24`,
-        "#ece6d6",
-        9,
-      );
-      d.blob(ellipsePath(sx, 0, 20, 23), "#ece6d6", { outline: 4 });
       return;
     }
     case "bandana": {

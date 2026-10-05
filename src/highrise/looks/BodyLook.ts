@@ -165,8 +165,9 @@ export const HAT_STYLES = [
   "bandana",
   "beret",
 ] as const;
+export type HatStyle = (typeof HAT_STYLES)[number];
 export interface Hat {
-  style: (typeof HAT_STYLES)[number];
+  style: HatStyle;
   color: Color;
   /** Trim, a band, a badge */
   secondary?: Color;

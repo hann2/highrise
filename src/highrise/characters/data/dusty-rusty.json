@@ -35,6 +35,10 @@
     "sleeves": {
       "length": 0.95
     },
+    "hat": {
+      "style": "cowboy",
+      "color": "#ae7b4f"
+    },
     "extras": [],
     "pantsStyle": "jeans",
     "pants": "#45597a",
@@ -43,13 +47,7 @@
     "seed": 5,
     "beard": {
       "length": 0.3
-    },
-    "pieces": [
-      {
-        "name": "cowboy-hat",
-        "color": "#9a6438"
-      }
-    ]
+    }
   },
   "stats": {},
   "startingWeapons": ["S&W Revolver"],

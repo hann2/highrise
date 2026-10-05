@@ -6,9 +6,11 @@ import { PartialLook } from "../src/highrise/looks/BodyLook";
 import { composeBodySvg } from "../src/highrise/looks/composeBody";
 import { BODY_PARTS, drawBody } from "../src/highrise/looks/drawBody";
 import { randomLook } from "../src/highrise/looks/randomLook";
+import { HatStyle } from "../src/highrise/looks/BodyLook";
 import {
   pieceNames,
   PIECE_PLACES,
+  registerHatDrawing,
   registerPiece,
 } from "../src/highrise/looks/pieces";
 
@@ -35,7 +37,14 @@ async function main() {
   const out = arg("out") ?? "tests/output/look-sheet.png";
   const random = makeRandom(Number(arg("seed") ?? 1));
 
-  // The pieces, as the game's import.meta.glob would have them
+  // The hand-drawn hats and the pieces, as the game's import.meta.glob would have them
+  const hatDir = "src/highrise/looks/hats";
+  for (const file of fs.readdirSync(hatDir).filter((f) => f.endsWith(".svg"))) {
+    registerHatDrawing(
+      file.replace(/\.svg$/, "") as HatStyle,
+      fs.readFileSync(path.join(hatDir, file), "utf8"),
+    );
+  }
   for (const place of PIECE_PLACES) {
     const dir = `src/highrise/looks/pieces/${place}`;
     for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".svg"))) {
