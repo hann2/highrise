@@ -1,4 +1,4 @@
-import { BodyLook, Hat } from "../BodyLook";
+import { BodyLook, EYE_COLOR, Hat } from "../BodyLook";
 import { Color, darken, lighten, mix } from "../color";
 import { BodyDimensions, lookRandom, palette, wobble } from "../dimensions";
 import {
@@ -82,7 +82,7 @@ export function drawHead(
 
   // Eyes and brows at the front edge, unless the hair hides them
   if (!faceDown) {
-    drawEyes(d, rx, ry, colors.skin, rot);
+    drawEyes(d, rx, ry, colors.skin, look.eyes ?? EYE_COLOR, rot);
     drawBrows(d, look, rx, ry, colors.hair);
   }
 
@@ -110,62 +110,35 @@ export function drawHead(
   return d;
 }
 
-/** Which eyes `drawEyes` draws: being compared */
-export const EYES: { style: "dots" | "almond" | "lids" | "sockets" } = {
-  style: "almond",
-};
-
 /**
  * The eyes, at the front edge of the head: from above only a sliver of
- * each shows, under the brow
+ * each shows, under the brow, flat along the face and curving back into the
+ * head, with the line of the upper lid in front
  */
 function drawEyes(
   d: Drawing,
   rx: number,
   ry: number,
   skin: Color,
+  iris: Color,
   rot: number,
 ) {
   const dead = rot > 0.5;
+  const white = dead ? "#c9c7a0" : mix("#f4f1ea", skin, 0.12);
   for (const side of [-1, 1]) {
     const y = side * ry * 0.3;
     // Just inside the skull's front edge there
     const e = STYLE.headSquare;
     const x = rx * (1 - Math.abs(y / ry) ** e) ** (1 / e) - 9;
-    const at = `transform="rotate(${side * 14} ${n(x)} ${n(y)})"`;
-    switch (EYES.style) {
-      case "dots":
-        d.add(
-          `<ellipse cx="${n(x)}" cy="${n(y)}" rx="9" ry="14" fill="${dead ? "#c9c7a0" : "#2a2420"}" ${at}/>`,
-        );
-        break;
-      case "almond": {
-        // The white, the iris toward the front, and the lid behind
-        const white = dead ? "#c9c7a0" : mix("#f4f1ea", skin, 0.12);
-        d.add(
-          `<g ${at}><path d="M${n(x - 12)} ${n(y - 20)}Q${n(x + 14)} ${n(y)} ${n(x - 12)} ${n(y + 20)}Q${n(x - 18)} ${n(y)} ${n(x - 12)} ${n(y - 20)}Z" fill="${white}"/>` +
-            (dead
-              ? ""
-              : `<ellipse cx="${n(x - 2)}" cy="${n(y)}" rx="6" ry="9" fill="#2a2420"/>`) +
-            `<path d="M${n(x - 12)} ${n(y - 21)}Q${n(x - 19)} ${n(y)} ${n(x - 12)} ${n(y + 21)}" fill="none" stroke="${darken(skin, 0.45)}" stroke-width="4" stroke-linecap="round"/></g>`,
-        );
-        break;
-      }
-      case "lids":
-        // Just the line of the upper lid and lashes
-        d.add(
-          `<path d="M${n(x - 4)} ${n(y - 17)}Q${n(x + 7)} ${n(y)} ${n(x - 4)} ${n(y + 17)}" fill="none" stroke="${dead ? "#8a8770" : "#2a2420"}" stroke-width="5" stroke-linecap="round" ${at}/>`,
-        );
-        break;
-      case "sockets":
-        // A soft hollow, with the eye glinting in it
-        d.add(
-          `<ellipse cx="${n(x - 5)}" cy="${n(y)}" rx="14" ry="22" fill="${darken(skin, 0.18)}" opacity="0.7" ${at}/>` +
-            `<ellipse cx="${n(x)}" cy="${n(y)}" rx="6" ry="9" fill="${dead ? "#c9c7a0" : "#2a2420"}" ${at}/>` +
-            `<circle cx="${n(x + 2)}" cy="${n(y - side * 3)}" r="2" fill="#fff" opacity="0.7"/>`,
-        );
-        break;
-    }
+    d.add(
+      `<g transform="rotate(${side * 14} ${n(x)} ${n(y)})">` +
+        `<path d="M${n(x + 2)} ${n(y - 19)}Q${n(x + 5)} ${n(y)} ${n(x + 2)} ${n(y + 19)}Q${n(x - 16)} ${n(y)} ${n(x + 2)} ${n(y - 19)}Z" fill="${white}"/>` +
+        (dead
+          ? ""
+          : `<ellipse cx="${n(x - 1)}" cy="${n(y)}" rx="5" ry="8" fill="${iris}"/>` +
+            `<ellipse cx="${n(x)}" cy="${n(y)}" rx="2.6" ry="4" fill="#1c1714"/>`) +
+        `<path d="M${n(x + 1)} ${n(y - 20)}Q${n(x + 6)} ${n(y)} ${n(x + 1)} ${n(y + 20)}" fill="none" stroke="${darken(skin, 0.5)}" stroke-width="4" stroke-linecap="round"/></g>`,
+    );
   }
 }
 

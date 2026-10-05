@@ -7,7 +7,8 @@ import {
   ShoeStyle,
   TopStyle,
 } from "./BodyLook";
-import { Color, darken, mix } from "./color";
+import { Color, darken, luminance, mix } from "./color";
+import { lookRandom } from "./dimensions";
 
 /** Random looks, for zombies (and anyone else who isn't a character) */
 
@@ -509,6 +510,18 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
           : between(random, 0.3, 0.85)) * 100,
       ) / 100;
   }
+  // Mostly brown; the lighter colors are commoner with lighter skin. From
+  // the look's own seed, so the looks made after this one don't change
+  const fair = luminance(look.skin) > 0.62;
+  look.eyes = weighted<Color>(lookRandom(look, 31), {
+    "#5a3a22": 6, // brown
+    "#3a2618": 3, // dark brown
+    "#7a5a30": fair ? 2 : 1, // hazel
+    "#9a6a24": 1, // amber
+    "#5d7a4a": fair ? 2 : 0.3, // green
+    "#7d8a92": fair ? 1 : 0.2, // grey
+    "#4f78a8": fair ? 4 : 0.3, // blue
+  });
   // The odd one in a track suit
   if (
     ["tshirt", "hoodie", "sweater"].includes(look.top.style) &&

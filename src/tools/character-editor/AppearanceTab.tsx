@@ -5,6 +5,7 @@ import {
   BodyLook,
   Build,
   DEFAULT_LOOK,
+  EYE_COLOR,
   EXTRA_KINDS,
   GLASSES_SHAPES,
   HAT_STYLES,
@@ -235,6 +236,11 @@ export function AppearanceTab({
               onChange={(part) => set("hair", { ...look.hair, part })}
             />
           </Optional>
+          <ColorField
+            label="Eyes"
+            value={look.eyes ?? EYE_COLOR}
+            onChange={(v) => set("eyes", v)}
+          />
           <Slider
             label="Brows"
             hint="thin – bushy"

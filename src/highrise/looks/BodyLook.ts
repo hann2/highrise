@@ -12,6 +12,8 @@ export interface BodyLook {
   build: Build;
   hair: Hair;
   brows: Brows;
+  /** The irises' color, else `EYE_COLOR` */
+  eyes?: Color;
   /** No beard if left out */
   beard?: Beard;
   top: Top;
@@ -254,6 +256,9 @@ export interface Zombification {
   tears: number;
 }
 
+/** Brown, the commonest */
+export const EYE_COLOR: Color = "#5a3a22";
+
 export const DEFAULT_LOOK: BodyLook = {
   skin: "#e0b48f",
   build: {
@@ -346,6 +351,7 @@ export function lookProblems(look: PartialLook | undefined): string[] {
   };
 
   color("skin", r.skin);
+  color("eyes", r.eyes);
   color("pants", r.pants);
   oneOf("pantsStyle", r.pantsStyle, PANTS_STYLES);
   oneOf("shoeStyle", r.shoeStyle, SHOE_STYLES);
