@@ -25,6 +25,9 @@ export interface BodyDimensions {
   /** The skull's half-length front to back, and half-width */
   headRx: number;
   headRy: number;
+  /** A leg's thickness, and the length it's drawn at (it's stretched from hip to ankle) */
+  legThickness: number;
+  legLength: number;
 }
 
 export function bodyDimensions(look: BodyLook): BodyDimensions {
@@ -42,6 +45,8 @@ export function bodyDimensions(look: BodyLook): BodyDimensions {
     handSize: 112 * (1 + 0.2 * b.hands),
     headRx: 150 * headScale,
     headRy: 136 * headScale,
+    legThickness: 160 * (1 + 0.22 * b.legs),
+    legLength: 480,
   };
 }
 

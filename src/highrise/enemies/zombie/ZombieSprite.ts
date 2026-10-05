@@ -29,7 +29,7 @@ export default class ZombieSprite extends BodySprite {
 
   constructor(private zombie: Zombie) {
     super(zombie.zombieVariant.body.standing, ZOMBIE_RADIUS, {
-      colors: zombie.zombieVariant.body.legColors,
+      textures: zombie.zombieVariant.body.legs,
       gait: ZOMBIE_GAIT,
     });
   }

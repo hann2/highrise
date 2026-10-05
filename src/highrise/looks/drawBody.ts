@@ -1,7 +1,8 @@
 import { BodyLook, PartialLook, resolveLook } from "./BodyLook";
 import { bodyDimensions, BodyDimensions } from "./dimensions";
 import { drawHead } from "./parts/head";
-import { drawArm, drawHand, drawLyingLegs } from "./parts/limbs";
+import { drawArm, drawHand } from "./parts/limbs";
+import { drawFoot, drawLeg, drawLyingLegs } from "./parts/legs";
 import { drawLyingTorso, drawTorso } from "./parts/torso";
 import { Drawing } from "./svg";
 
@@ -13,6 +14,10 @@ export const BODY_PARTS = [
   "rightArm",
   "leftHand",
   "rightHand",
+  /** Stretched from the hip to the ankle, the same for both */
+  "leg",
+  "leftFoot",
+  "rightFoot",
   /** Face down from the waist up: crawlers, corpses */
   "lyingTorso",
   /** Face down from the waist down */
@@ -45,6 +50,9 @@ export function drawBody(look: PartialLook, prefix = "b"): BodyDrawing {
       rightArm: drawArm(resolved, dims, 1, p("ra")),
       leftHand: drawHand(resolved, dims, -1, p("lh")),
       rightHand: drawHand(resolved, dims, 1, p("rh")),
+      leg: drawLeg(resolved, dims, p("lg")),
+      leftFoot: drawFoot(resolved, dims, 1, p("lf")),
+      rightFoot: drawFoot(resolved, dims, -1, p("rf")),
       lyingTorso: drawLyingTorso(resolved, dims, p("lt")),
       lyingLegs: drawLyingLegs(resolved, dims, p("ll")),
     },

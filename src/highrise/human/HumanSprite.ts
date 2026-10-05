@@ -35,7 +35,7 @@ export default class HumanSprite extends BodySprite {
   constructor(private human: Human) {
     const appearance = getAppearance(human.character.look);
     super(appearance.standing, HUMAN_RADIUS, {
-      colors: appearance.legColors,
+      textures: appearance.legs,
       gait: HUMAN_GAIT,
     });
   }

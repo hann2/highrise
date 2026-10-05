@@ -28,7 +28,7 @@ export default class SprinterSprite extends BodySprite {
 
   constructor(private sprinter: Sprinter) {
     super(sprinter.zombieVariant.body.standing, RUNNER_RADIUS, {
-      colors: sprinter.zombieVariant.body.legColors,
+      textures: sprinter.zombieVariant.body.legs,
       gait: SPRINTER_GAIT,
     });
 

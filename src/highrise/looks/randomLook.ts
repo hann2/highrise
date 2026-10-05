@@ -1,4 +1,11 @@
-import { BodyLook, Extra, Hat, TopStyle } from "./BodyLook";
+import {
+  BodyLook,
+  Extra,
+  Hat,
+  PantsStyle,
+  ShoeStyle,
+  TopStyle,
+} from "./BodyLook";
 import { Color, darken, mix } from "./color";
 
 /** Random looks, for zombies (and anyone else who isn't a character) */
@@ -122,6 +129,43 @@ interface Outfit {
   hat?: Hat;
   pattern?: BodyLook["top"]["pattern"];
   pants?: Color;
+  pantsStyle?: PantsStyle;
+  shoeStyle?: ShoeStyle;
+}
+
+const DENIM: Color[] = ["#3d5470", "#4d5f80", "#2e3d58", "#6a7f9e", "#26272b"];
+
+/** What's on their legs and feet, if their outfit doesn't say */
+function pickLegwear(random: Random, outfit: Outfit): [PantsStyle, ShoeStyle] {
+  const office = ["shirt", "jacket", "coat"].includes(outfit.style);
+  const pants: PantsStyle =
+    outfit.pantsStyle ??
+    (office
+      ? weighted(random, { trousers: 6, skirt: 3, jeans: 1 })
+      : weighted(random, { jeans: 5, trousers: 2, shorts: 1.5, skirt: 1.5 }));
+  const shoes: ShoeStyle =
+    outfit.shoeStyle ??
+    (pants === "skirt"
+      ? weighted(random, { heels: 4, dress: 2, sneakers: 2, sandals: 1 })
+      : office
+        ? weighted(random, { dress: 5, sneakers: 2, boots: 1 })
+        : weighted(random, { sneakers: 6, boots: 2, sandals: 1, dress: 1 }));
+  return [pants, shoes];
+}
+
+function weighted<T extends string>(
+  random: Random,
+  weights: Partial<Record<T, number>>,
+): T {
+  const entries = Object.entries(weights) as [T, number][];
+  let roll = random() * entries.reduce((sum, [, w]) => sum + w, 0);
+  for (const [option, weight] of entries) {
+    roll -= weight;
+    if (roll <= 0) {
+      return option;
+    }
+  }
+  return entries[0][0];
 }
 
 /** What they're wearing, by who they were */
@@ -166,6 +210,8 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
           ? [{ kind: "tie", color: pick(random, TIE_COLORS) }]
           : [],
         pants: suit,
+        pantsStyle: "trousers",
+        shoeStyle: "dress",
       };
     },
   },
@@ -232,6 +278,8 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
         sleeves: between(random, 0.3, 0.7),
         extras: [],
         pants: color,
+        pantsStyle: "trousers",
+        shoeStyle: chance(random, 0.6) ? "boots" : "sneakers",
       };
     },
   },
@@ -246,6 +294,8 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
       extras: [{ kind: "lanyard", color: "#2a2a2a" }],
       hat: chance(random, 0.4) ? { style: "cap", color: "#22252c" } : undefined,
       pants: "#26272b",
+      pantsStyle: "trousers",
+      shoeStyle: chance(random, 0.5) ? "boots" : "dress",
     }),
   },
   {
@@ -264,6 +314,8 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
           }
         : undefined,
       pants: pick(random, ["#3d5470", "#b9a57a"]),
+      pantsStyle: chance(random, 0.6) ? "jeans" : "trousers",
+      shoeStyle: "boots",
     }),
   },
   {
@@ -286,6 +338,8 @@ const OUTFITS: { weight: number; make: (random: Random) => Outfit }[] = [
       secondary: "#ffffff",
       sleeves: 0,
       extras: [],
+      pantsStyle: chance(random, 0.7) ? "shorts" : "trousers",
+      shoeStyle: "sneakers",
       hat: chance(random, 0.2)
         ? {
             style: "bandana",
@@ -312,6 +366,7 @@ function pickOutfit(random: Random): Outfit {
 /** Someone who works (worked) in the building */
 export function randomLook(random: Random, zombie: boolean): BodyLook {
   const outfit = pickOutfit(random);
+  const [pantsStyle, shoeStyle] = pickLegwear(random, outfit);
   const hairColor = pick(random, HAIR_COLORS);
   const bald = chance(random, 0.1);
   const long = chance(random, 0.3);
@@ -334,6 +389,7 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
       arms: slider(random),
       hands: slider(random, 0.3),
       head: slider(random, 0.3),
+      legs: slider(random, 0.4),
     },
     hair: {
       color: hairColor,
@@ -376,7 +432,12 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
         }
       : undefined,
     extras: outfit.extras,
-    pants: outfit.pants ?? pick(random, PANTS_COLORS),
+    pantsStyle,
+    pants:
+      outfit.pants ??
+      pick(random, pantsStyle === "jeans" ? DENIM : PANTS_COLORS),
+    // Zombies lose their shoes
+    shoeStyle: zombie && chance(random, 0.12) ? "bare" : shoeStyle,
     shoes: pick(random, SHOE_COLORS),
     seed: Math.floor(random() * 1e6),
   };

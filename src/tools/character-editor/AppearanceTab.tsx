@@ -9,7 +9,9 @@ import {
   GLASSES_SHAPES,
   HAT_STYLES,
   Hair,
+  PANTS_STYLES,
   PATTERN_KINDS,
+  SHOE_STYLES,
   TOP_STYLES,
   Zombification,
 } from "../../highrise/looks/BodyLook";
@@ -32,6 +34,7 @@ const BUILD_LABELS: Record<keyof Build, [string, string, string]> = {
   arms: ["Arms", "thin", "thick"],
   hands: ["Hands", "small", "big"],
   head: ["Head", "small", "big"],
+  legs: ["Legs", "thin", "thick"],
 };
 
 const HAIR_SLIDERS: [keyof Hair, string, string][] = [
@@ -337,16 +340,30 @@ export function AppearanceTab({
             fallback="#2a2a2a"
             onChange={(gloves) => set("gloves", gloves)}
           />
+          <SelectField
+            label="Legs"
+            value={look.pantsStyle}
+            options={PANTS_STYLES}
+            onChange={(style) => style && set("pantsStyle", style)}
+          />
           <ColorField
-            label="Trousers"
+            label="Their color"
             value={look.pants}
             onChange={(v) => set("pants", v)}
           />
-          <ColorField
+          <SelectField
             label="Shoes"
-            value={look.shoes}
-            onChange={(v) => set("shoes", v)}
+            value={look.shoeStyle}
+            options={SHOE_STYLES}
+            onChange={(style) => style && set("shoeStyle", style)}
           />
+          {look.shoeStyle !== "bare" && (
+            <ColorField
+              label="Their color"
+              value={look.shoes}
+              onChange={(v) => set("shoes", v)}
+            />
+          )}
         </section>
 
         <section class="card">

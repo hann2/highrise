@@ -1,14 +1,21 @@
+import type { Texture } from "pixi.js";
 import { DEFAULT_GAIT, GaitStyle } from "../../core/animation/Gait";
 
-/** What a body's legs look like: the leg and shoe images are tinted these (CSS colors, `#rrggbb`) */
-export interface LegColors {
-  pants: string;
-  shoes: string;
+/**
+ * What a body's legs are drawn with (baked from its look, `looks/`): a leg
+ * stretched from hip to ankle, and each foot, at `BODY_PIXELS_PER_METER`
+ */
+export interface LegTextures {
+  leg: Texture;
+  leftFoot: Texture;
+  rightFoot: Texture;
+  /** A leg's thickness, in meters, for a human-sized body */
+  thickness: number;
 }
 
 /** A body's legs: how they look and how they walk */
 export interface LegStyle {
-  colors: LegColors;
+  textures: LegTextures;
   gait: GaitStyle;
 }
 
@@ -16,17 +23,11 @@ export interface LegStyle {
 // preview); other bodies' are in proportion to their size
 /** From the middle of the body to each hip */
 export const HIP_WIDTH = 0.1;
-export const LEG_THICKNESS = 0.16;
+/** A foot's size, for footprints (shoes are drawn their own size) */
 export const FOOT_LENGTH = 0.26;
 export const FOOT_WIDTH = 0.12;
 /** How far in front of the ankle the middle of the foot is */
 export const FOOT_FORWARD = 0.05;
-
-/** Plain trousers and shoes, for a character whose data doesn't say */
-export const DEFAULT_LEG_COLORS: LegColors = {
-  pants: "#3e4552",
-  shoes: "#262626",
-};
 
 export const HUMAN_GAIT: GaitStyle = DEFAULT_GAIT;
 

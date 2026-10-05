@@ -1,5 +1,5 @@
 import { CanvasSource, Rectangle, Texture } from "pixi.js";
-import { LegColors } from "../creature-stuff/Legs";
+import { LegTextures } from "../creature-stuff/Legs";
 import { BodyLook } from "./BodyLook";
 import { BODY_PARTS, BodyPart, drawBody } from "./drawBody";
 import { Drawing, n } from "./svg";
@@ -42,7 +42,8 @@ export interface BodyAppearance {
   lying: BodyTextures;
   /** Face down from the waist down, waist at the right */
   lyingLegs: Texture;
-  legColors: LegColors;
+  /** Its legs up and walking */
+  legs: LegTextures;
 }
 
 const baked = new Map<BodyLook, BodyAppearance>();
@@ -177,7 +178,12 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       standing: { ...limbs, torso: texture("torso") },
       lying: { ...limbs, torso: texture("lyingTorso") },
       lyingLegs: texture("lyingLegs"),
-      legColors: { pants: body.look.pants, shoes: body.look.shoes },
+      legs: {
+        leg: texture("leg"),
+        leftFoot: texture("leftFoot"),
+        rightFoot: texture("rightFoot"),
+        thickness: dims.legThickness / 1000,
+      },
     });
   });
 }

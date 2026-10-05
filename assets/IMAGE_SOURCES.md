@@ -20,10 +20,9 @@ This was reconstructed in 2026 from git history, the design files in `assets/sou
 
 Characters', zombies' and Bob's bodies aren't images: they're drawn by code from each one's look (`src/highrise/looks/`), by Claude, from Simon's hand-drawn originals (which were in `assets/source/characters.afdesign`).
 
-| Files                                                                                                  | Source                                                                         | Confidence |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ---------- |
-| `legs/footprint` (placeholder: a shoe's print, white, tinted with what it stepped in)                  | Claude, drawn as SVG in `assets/source/legs/`, rendered by `bin/render-svg.ts` | known      |
-| `legs/leg`, `legs/foot` (placeholders: a leg and a shoe in greys, tinted with each character's colors) | Claude, drawn as SVG in `assets/source/legs/`, rendered by `bin/render-svg.ts` | known      |
+| Files                                                                                 | Source                                                                         | Confidence |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------- |
+| `legs/footprint` (placeholder: a shoe's print, white, tinted with what it stepped in) | Claude, drawn as SVG in `assets/source/legs/`, rendered by `bin/render-svg.ts` | known      |
 
 ## Zombies (`zombies/`)
 

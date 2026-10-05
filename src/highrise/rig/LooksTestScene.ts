@@ -129,7 +129,7 @@ class Mannequin extends BodySprite {
   ) {
     const appearance = getAppearance(look);
     super(appearance.standing, radius, {
-      colors: appearance.legColors,
+      textures: appearance.legs,
       gait: zombie ? ZOMBIE_GAIT : HUMAN_GAIT,
     });
     this.phase = index * 0.7;

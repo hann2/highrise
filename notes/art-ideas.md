@@ -5,7 +5,7 @@ Started 2026-10-03.
 - Procedurally generate character sprites? They're mostly made from the same general formula with some tweaks already.
   - 2026-10-04: done on branch `procedural-characters` (`src/highrise/looks/`, see `CLAUDE.md`): every body is drawn from a look by code and baked into an atlas at boot; characters' looks are in their JSON and edited in the character editor's Appearance tab; zombies are 48 random looks (and heavies 8 big ones) instead of 3 variants; hand-drawn SVG pieces for anything the generator doesn't draw. Left, and worth trying:
     - The style itself (`looks/style.ts` and the part drawings): this first pass copies the old hand-drawn look. Things to try: flatter cel shading, darker or no outlines, a light direction instead of shading from the middle, more face showing.
-    - Legs and shoes are still the tinted placeholder images, the same for everyone. They could be generated per look too (shorts or a skirt showing skin, boots, heels, bare feet for zombies that lost their shoes), which would also make the lying legs match.
+    - 2026-10-04: legs and shoes are generated too (trousers, jeans, shorts, a skirt; sneakers, boots, dress shoes, heels, sandals, bare feet; some zombies have lost their shoes). Footprints are still one shoe's print whatever's on the feet; bare feet and boots could leave their own.
     - The lying torso is always torn off at the waist (the legs cover it on a whole corpse); a whole lying body could be its own part.
     - More garments and hats (dresses, suits with a waistcoat, aprons, scrubs, police caps), done as top styles, hat styles or pieces.
     - Zombies' looks are the same every run (their own seed); they could be made per run or per floor while the elevator rides, from the run's seed.

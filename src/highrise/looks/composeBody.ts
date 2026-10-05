@@ -1,14 +1,7 @@
-import {
-  FOOT_FORWARD,
-  FOOT_LENGTH,
-  FOOT_WIDTH,
-  HIP_WIDTH,
-  LEG_THICKNESS,
-} from "../creature-stuff/Legs";
+import { FOOT_FORWARD, HIP_WIDTH } from "../creature-stuff/Legs";
 import { BodyLook, PartialLook } from "./BodyLook";
-import { darken } from "./color";
 import { BodyDrawing, drawBody } from "./drawBody";
-import { capsulePath, Drawing, ellipsePath, n } from "./svg";
+import { Drawing, n } from "./svg";
 
 export interface ComposeOptions {
   /** Standing mid-stride, or lying face down like a corpse */
@@ -52,20 +45,29 @@ export function composeBodySvg(
 
   if (pose === "standing") {
     const hip = HIP_WIDTH * 1000;
-    const legThickness = LEG_THICKNESS * 1000;
-    // The left foot forward, the right back, like the editor always showed
+    const legThickness = dims.legThickness;
+    const leg = parts.leg;
+    // The left foot forward, the right back, like the editor always showed;
+    // each leg stretched from its hip to its ankle, as `BodySprite` does
     for (const side of [-1, 1]) {
       const along = -side * stride;
-      const x0 = Math.min(0, along) - legThickness / 2;
-      const x1 = Math.max(0, along) + legThickness / 2;
+      const stretch = (Math.abs(along) + legThickness) / leg.width;
       items.push(
-        `<path d="${capsulePath(x0, x1, side * hip, legThickness)}" fill="${body.look.pants}" stroke="${darken(body.look.pants, 0.5)}" stroke-width="9"/>`,
+        place(
+          leg,
+          along >= 0
+            ? `translate(${n(-legThickness / 2)} ${n(side * hip)}) scale(${stretch.toFixed(3)} 1)`
+            : `translate(${n(legThickness / 2)} ${n(side * hip)}) rotate(180) scale(${stretch.toFixed(3)} 1)`,
+        ),
       );
     }
     for (const side of [-1, 1]) {
       const along = -side * stride;
       items.push(
-        `<path d="${ellipsePath(along + FOOT_FORWARD * 1000, side * hip, (FOOT_LENGTH * 1000) / 2, (FOOT_WIDTH * 1000) / 2)}" fill="${body.look.shoes}" stroke="${darken(body.look.shoes, 0.5)}" stroke-width="9"/>`,
+        place(
+          side < 0 ? parts.leftFoot : parts.rightFoot,
+          `translate(${n(along + FOOT_FORWARD * 1000)} ${n(side * hip)})`,
+        ),
       );
     }
     const shoulder = dims.shoulderHalfWidth - dims.armThickness / 2;

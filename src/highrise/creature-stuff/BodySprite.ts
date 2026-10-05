@@ -8,14 +8,7 @@ import { FootLanding, Gait, SIDES } from "../../core/animation/Gait";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
-import {
-  FOOT_FORWARD,
-  FOOT_LENGTH,
-  FOOT_WIDTH,
-  HIP_WIDTH,
-  LEG_THICKNESS,
-  LegStyle,
-} from "./Legs";
+import { FOOT_FORWARD, HIP_WIDTH, LegStyle } from "./Legs";
 import FloorStains, { getFloorStains } from "../effects/FloorStains";
 import { Shoes } from "./Shoes";
 
@@ -59,6 +52,9 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   private gaitTime = 0;
   /** How big the legs are next to a human's */
   private legScale: number;
+  /** Meters per texture pixel */
+  private pixelScale: number;
+  private legThickness = 0;
 
   constructor(
     readonly textures: BodyTextures,
@@ -73,6 +69,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     // Each part's texture is anchored where it attaches, and drawn at a
     // fixed number of pixels per meter, bigger or smaller with the body
     const scale = bodyPixelScale(this.legScale);
+    this.pixelScale = scale;
     const { metrics } = textures;
     this.armThickness = metrics.armThickness * this.legScale;
     this.shoulderOffset = metrics.shoulderOffset * this.legScale;
@@ -118,15 +115,18 @@ export abstract class BodySprite extends BaseEntity implements Entity {
         );
         this.onFootLand?.(landing);
       };
-      const pair = (image: "leg" | "foot", color: string) =>
-        [0, 1].map(() => {
-          const sprite = Sprite.from(image);
-          sprite.anchor.set(0.5);
-          sprite.tint = color;
-          return sprite;
-        });
-      this.legSprites = pair("leg", legs.colors.pants);
-      this.footSprites = pair("foot", legs.colors.shoes);
+      const { leg, leftFoot, rightFoot, thickness } = legs.textures;
+      this.legThickness = thickness * this.legScale;
+      this.legSprites = [leg, leg].map((texture) => {
+        const sprite = new Sprite(texture);
+        sprite.anchor.set(0.5);
+        sprite.scale.set(scale);
+        return sprite;
+      });
+      // Sides are in the gait's order: left, then right
+      this.footSprites = [leftFoot, rightFoot].map(
+        (texture) => new Sprite(texture),
+      );
       this.legsSprite = new Container();
       this.legsSprite.addChild(...this.legSprites, ...this.footSprites);
       this.sprite.addChildAt(this.legsSprite, 0);
@@ -227,19 +227,17 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       const span = Math.sqrt(spanX * spanX + spanY * spanY);
       leg.position.set((hipX + ankleX) / 2, (hipY + ankleY) / 2);
       leg.rotation = span > 0.01 ? Math.atan2(spanY, spanX) : 0;
-      leg.width = span + LEG_THICKNESS * scale;
-      leg.height = LEG_THICKNESS * scale;
+      leg.width = span + this.legThickness;
 
       const foot = this.footSprites[side];
       const angle = step.angle - facing;
-      const size = scale * (1 + step.lift * FOOT_LIFT_SCALE);
+      const size = this.pixelScale * (1 + step.lift * FOOT_LIFT_SCALE);
       foot.position.set(
         ankleX + Math.cos(angle) * footForward,
         ankleY + Math.sin(angle) * footForward,
       );
       foot.rotation = angle;
-      foot.width = FOOT_LENGTH * size;
-      foot.height = FOOT_WIDTH * size;
+      foot.scale.set(size);
     }
   }
 

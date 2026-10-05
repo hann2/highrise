@@ -11,7 +11,8 @@
       "squareness": 0.5,
       "arms": 0.9,
       "hands": 0,
-      "head": 0
+      "head": 0,
+      "legs": 0
     },
     "hair": {
       "color": "#c98a3a",
@@ -34,7 +35,9 @@
       "length": 0
     },
     "extras": [],
+    "pantsStyle": "shorts",
     "pants": "#c2ad84",
+    "shoeStyle": "sneakers",
     "shoes": "#e6e6e6",
     "seed": 2,
     "glasses": {

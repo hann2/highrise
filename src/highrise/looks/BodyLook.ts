@@ -23,8 +23,11 @@ export interface BodyLook {
   extras: Extra[];
   /** Hand-drawn pieces worn on the head or torso (`pieces.ts`) */
   pieces?: PieceUse[];
-  /** The trousers and shoes, which the leg images are tinted with */
+  /** What's on the legs, and its color */
+  pantsStyle: PantsStyle;
   pants: Color;
+  /** What's on the feet, and its color (bare feet are skin) */
+  shoeStyle: ShoeStyle;
   shoes: Color;
   /** How far gone they are, for zombies */
   zombie?: Zombification;
@@ -48,6 +51,8 @@ export interface Build {
   arms: number;
   hands: number;
   head: number;
+  /** Thickness of the legs */
+  legs: number;
 }
 
 export interface Hair {
@@ -110,6 +115,19 @@ export interface Pattern {
   kind: (typeof PATTERN_KINDS)[number];
   color: Color;
 }
+
+export const PANTS_STYLES = ["trousers", "jeans", "shorts", "skirt"] as const;
+export type PantsStyle = (typeof PANTS_STYLES)[number];
+
+export const SHOE_STYLES = [
+  "sneakers",
+  "boots",
+  "dress",
+  "heels",
+  "sandals",
+  "bare",
+] as const;
+export type ShoeStyle = (typeof SHOE_STYLES)[number];
 
 export interface Sleeves {
   /** From none (0) to the wrist (1) */
@@ -184,6 +202,7 @@ export const DEFAULT_LOOK: BodyLook = {
     arms: 0,
     hands: 0,
     head: 0,
+    legs: 0,
   },
   hair: {
     color: "#3b2a1e",
@@ -200,7 +219,9 @@ export const DEFAULT_LOOK: BodyLook = {
   top: { style: "tshirt", color: "#6b7c8f", secondary: "#e8e4dc" },
   sleeves: { length: 0.35 },
   extras: [],
+  pantsStyle: "trousers",
   pants: "#3e4552",
+  shoeStyle: "sneakers",
   shoes: "#262626",
   seed: 1,
 };
@@ -256,6 +277,8 @@ export function lookProblems(look: PartialLook | undefined): string[] {
 
   color("skin", r.skin);
   color("pants", r.pants);
+  oneOf("pantsStyle", r.pantsStyle, PANTS_STYLES);
+  oneOf("shoeStyle", r.shoeStyle, SHOE_STYLES);
   color("shoes", r.shoes);
   color("gloves", r.gloves);
   for (const [key, value] of Object.entries(r.build)) {
