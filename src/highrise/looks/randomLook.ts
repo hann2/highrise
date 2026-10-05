@@ -526,6 +526,24 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
         blue: fair ? 4 : 0.3,
       })
     ];
+  // The odd one with short hair spiked up at the front, also from the look's
+  // own seed
+  const spiky = lookRandom(look, 37);
+  const hair = look.hair;
+  if (
+    hair.coverage > 0.4 &&
+    !hair.cut &&
+    hair.length < 0.2 &&
+    !hair.ponytail &&
+    !hair.bun &&
+    spiky() < 0.12
+  ) {
+    hair.hairline = "spiky";
+    hair.volume = Math.max(
+      hair.volume,
+      Math.round(between(spiky, 0.3, 0.8) * 100) / 100,
+    );
+  }
   // The odd one in a track suit
   if (
     ["tshirt", "hoodie", "sweater"].includes(look.top.style) &&

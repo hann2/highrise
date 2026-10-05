@@ -200,12 +200,71 @@ function hairlineAt(look: BodyLook, rx: number, ry: number, y: number) {
         0.06 * bell(a, 0.5, 0.2) +
         sideburns;
       break;
+    case "spiky":
+      // Where the tufts start (`spikyHairline` adds them)
+      shape = 0.02 * (1 - t) - 0.06 * bell(a, 0.75, 0.16) + sideburns;
+      break;
   }
   return base + (shape + fringe) * rx;
 }
 
+/**
+ * The tufts of a `spiky` hairline across the front, each a point sticking
+ * forward from where the hairline would be, leaning to one side, as
+ * `[left foot, tip, right foot]`, the feet joined from one tuft to the next.
+ * More volume makes fewer, bigger ones.
+ */
+function spikes(look: BodyLook, rx: number, ry: number): [Pt, Pt, Pt][] {
+  const random = lookRandom(look, 9);
+  const side = (look.hair.part ?? -1) < 0 ? -1 : 1;
+  const volume = look.hair.volume;
+  const count = Math.round(8 - 3 * volume);
+  const from = -ry * 0.88;
+  const width = (ry * 1.76) / count;
+  const tufts: [Pt, Pt, Pt][] = [];
+  for (let i = 0; i < count; i++) {
+    const y0 = from + i * width;
+    const y1 = y0 + width;
+    const mid = (y0 + y1) / 2;
+    // Shorter out to the sides
+    const out = 1 - 0.55 * (mid / ry) ** 2;
+    // Long and short in turn, and no two alike, more so the messier
+    const vary =
+      (i % 2 ? 0.8 : 1.1) +
+      (random() - 0.5) * (0.3 + look.hair.messiness * 0.6);
+    const length = rx * (0.24 + 0.16 * volume) * out * vary;
+    const lean = side * 0.8 * width * (0.6 + 0.8 * random());
+    const foot = (y: number) => hairlineAt(look, rx, ry, y) - rx * 0.03;
+    tufts.push([
+      [foot(y0), y0],
+      [hairlineAt(look, rx, ry, mid) + length, mid + lean],
+      [foot(y1), y1],
+    ]);
+  }
+  return tufts;
+}
+
 /** The region behind the hairline, as a path, `forward` mm further forward */
 function hairlinePath(look: BodyLook, rx: number, ry: number, forward = 0) {
+  // Cropped hair's too short for tufts
+  if (look.hair.hairline === "spiky" && !look.hair.cut) {
+    // Sharp: straight lines between the tufts' points
+    const tufts = spikes(look, rx, ry);
+    const points: Pt[] = [];
+    const along = (y0: number, y1: number) => {
+      for (let i = 0; i <= 8; i++) {
+        const y = y0 + ((y1 - y0) * i) / 8;
+        points.push([hairlineAt(look, rx, ry, y) + forward, y]);
+      }
+    };
+    along(-ry * 1.6, tufts[0][0][1]);
+    for (const [, tip, foot] of tufts) {
+      points.push([tip[0] + forward, tip[1]], [foot[0] + forward, foot[1]]);
+    }
+    along(tufts[tufts.length - 1][2][1], ry * 1.6);
+    points.push([-rx * 3, ry * 1.6], [-rx * 3, -ry * 1.6]);
+    return polygonPath(points);
+  }
   const points: Pt[] = [];
   for (let i = 0; i <= 40; i++) {
     const y = -ry * 1.6 + (ry * 3.2 * i) / 40;
@@ -405,8 +464,9 @@ function drawHair(
     );
     d.end();
   }
-  // Thinner just in front of the hairline, so it isn't a hard edge
-  if (hair.mohawk <= 0) {
+  // Thinner just in front of the hairline, so it isn't a hard edge (but
+  // spikes are sharp)
+  if (hair.mohawk <= 0 && hair.hairline !== "spiky") {
     // Only the band between the two
     d.begin(
       `clip-path="url(#${d.clipPath("thin", hairlinePath(look, rx, ry, 10) + hairlinePath(look, rx, ry), true)})"`,
@@ -428,6 +488,28 @@ function drawHair(
 
   const crown: Pt = [-rx * 0.28, (hair.part ?? 0) * ry * 0.45];
   const strandColor = darken(color, 0.3);
+  if (hair.hairline === "spiky") {
+    // A strand down each tuft, from the top of the head out to its point,
+    // and a lighter one here and there
+    const strands = lookRandom(look, 10);
+    for (const [, tip] of spikes(look, rx, ry)) {
+      const start: Pt = [tip[0] - rx * (0.38 + strands() * 0.2), tip[1] * 0.8];
+      const light = strands() < 0.3;
+      const dx = tip[0] - start[0];
+      const dy = tip[1] - start[1];
+      const length = Math.hypot(dx, dy);
+      const [px, py] = [-dy / length, dx / length];
+      const half = light ? 5 : 9;
+      const end: Pt = [tip[0] - (dx / length) * 8, tip[1] - (dy / length) * 8];
+      d.add(
+        `<path d="${polygonPath([
+          [start[0] + px * half, start[1] + py * half],
+          end,
+          [start[0] - px * half, start[1] - py * half],
+        ])}" fill="${light ? lighten(color, 0.35) : strandColor}" opacity="${light ? 0.55 : 0.6}"/>`,
+      );
+    }
+  }
   if (hair.curls > 0.3) {
     // Little curls spread evenly all over (a sunflower's spiral), each
     // turned to follow the round of the head

@@ -104,7 +104,8 @@ export interface Hair {
  * `straight` is bangs cut across; `peak` a widow's peak; `receding` far
  * back at the temples; `swept` a fringe swept across to one side (the
  * parting's side, else the left); `curtains` parted in the middle and swept
- * out to both sides
+ * out to both sides; `spiky` tufts that stick forward over the forehead,
+ * leaning to the parting's side (else the left)
  */
 export const HAIRLINES = [
   "natural",
@@ -113,6 +114,7 @@ export const HAIRLINES = [
   "receding",
   "swept",
   "curtains",
+  "spiky",
 ] as const;
 export type Hairline = (typeof HAIRLINES)[number];
 

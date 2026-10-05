@@ -154,6 +154,10 @@ export const HAIRLINE_OPTIONS = options(HAIRLINES, {
     "A fringe swept across to one side: the parting's side, else the left",
   ],
   curtains: ["Curtains", "Parted in the middle and swept out to both sides"],
+  spiky: [
+    "Spiky",
+    "Tufts sticking forward over the forehead, leaning to the parting's side (else the left). Volume makes them bigger, messiness less even",
+  ],
 });
 
 /**
