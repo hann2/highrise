@@ -256,8 +256,19 @@ export interface Zombification {
   tears: number;
 }
 
+/** Eye colors by name, for picking from (and `randomLook`) */
+export const EYE_COLORS = {
+  brown: "#5a3a22",
+  "dark brown": "#3a2618",
+  hazel: "#7a5a30",
+  amber: "#9a6a24",
+  green: "#5d7a4a",
+  grey: "#7d8a92",
+  blue: "#4f78a8",
+} as const satisfies Record<string, Color>;
+
 /** Brown, the commonest */
-export const EYE_COLOR: Color = "#5a3a22";
+export const EYE_COLOR: Color = EYE_COLORS.brown;
 
 export const DEFAULT_LOOK: BodyLook = {
   skin: "#e0b48f",

@@ -87,7 +87,7 @@ export function ClipsSection({
         </span>
         <span
           class="muted small"
-          title="Clips are files, so generating, trimming, enabling or deleting one, or changing its text or categories, doesn't wait for Save"
+          data-tip="Clips are files, so generating, trimming, enabling or deleting one, or changing its text or categories, doesn't wait for Save"
         >
           · Clip changes save right away
         </span>
@@ -156,7 +156,7 @@ export function ClipsSection({
                 {enabled.length > 0 && (
                   <button
                     class="text-button"
-                    title="Play every enabled clip in this category"
+                    data-tip="Play every enabled clip in this category"
                     onClick={() => playAll(enabled, category)}
                   >
                     {playingKey()?.startsWith(`${category}:`)
@@ -284,14 +284,14 @@ function ClipRow({
     >
       <button
         class={`play ${playing ? "is-playing" : ""}`}
-        title="Play"
+        data-tip="Play"
         onClick={() => toggle(api.audioUrl(id, clip.file), key)}
       >
         {playing ? "■" : "▶"}
       </button>
       <label
         class="switch"
-        title={
+        data-tip={
           shown.enabled
             ? "Enabled: in the game. Click to take it out."
             : "Disabled: not in the game. Click to put it in."
@@ -316,7 +316,7 @@ function ClipRow({
         onSave={(text) => update({ text }, "Saving…")}
       />
       {take > 0 && <span class="clip__take">take {take}</span>}
-      <span class={`badge badge--${clip.source}`} title={details}>
+      <span class={`badge badge--${clip.source}`} data-tip={details}>
         {clip.source === "recorded" ? "REC" : "AI"}
         {isFresh && " · new"}
       </span>
@@ -327,7 +327,7 @@ function ClipRow({
       <div class="clip__actions">
         <button
           class="icon-button"
-          title="Generate variations of this line"
+          data-tip="Generate variations of this line"
           disabled={!canGenerate}
           onClick={onVariations}
         >
@@ -335,7 +335,7 @@ function ClipRow({
         </button>
         <button
           class="icon-button"
-          title="Replace the text with what speech-to-text hears"
+          data-tip="Replace the text with what speech-to-text hears"
           onClick={() =>
             run("Transcribing…", () => api.transcribe(id, clip.file))
           }
@@ -344,7 +344,7 @@ function ClipRow({
         </button>
         <button
           class="icon-button"
-          title="Trim the silence off the ends and set the loudness (replaces the file)"
+          data-tip="Trim the silence off the ends and set the loudness (replaces the file)"
           onClick={() => {
             const warning =
               "This replaces the recording. If it's committed, git still has the original.";
@@ -360,14 +360,14 @@ function ClipRow({
         </button>
         <button
           class="icon-button"
-          title="Open in Ocenaudio. Save there, then play it here again."
+          data-tip="Open in Ocenaudio. Save there, then play it here again."
           onClick={() => run("Opening…", () => api.openInEditor(id, clip.file))}
         >
           ↗
         </button>
         <button
           class="icon-button icon-button--danger"
-          title="Delete this clip and its audio file"
+          data-tip="Delete this clip and its audio file"
           onClick={() => {
             const warning =
               clip.source === "recorded"
@@ -401,7 +401,7 @@ function CategoryMenu({
     <div class="category-menu">
       <button
         class="category-menu__button"
-        title={categories.map((c) => CATEGORY_INFO[c].label).join(", ")}
+        data-tip={categories.map((c) => CATEGORY_INFO[c].label).join(", ")}
         onClick={() => setOpen(!open)}
       >
         {label} ▾
@@ -530,7 +530,7 @@ function GenerateForm({
             ))}
           </select>
         </label>
-        <span class="muted small" title="ElevenLabs bills by characters">
+        <span class="muted small" data-tip="ElevenLabs bills by characters">
           {text.length * count} characters
         </span>
         <div class="generate__buttons">

@@ -1,25 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { ComponentChildren } from "preact";
 import { makeRandom } from "../../core/util/Random";
 import {
   BodyLook,
   Build,
   DEFAULT_LOOK,
   EYE_COLOR,
-  EXTRA_KINDS,
-  GLASSES_SHAPES,
-  HAT_STYLES,
-  HAIR_CUTS,
-  HAIRLINES,
-  Hair,
-  PANTS_STYLES,
-  PATTERN_KINDS,
-  SHOE_STYLES,
-  TOP_STYLES,
+  Extra,
   Zombification,
 } from "../../highrise/looks/BodyLook";
 import { composeBodySvg, svgDataUrl } from "../../highrise/looks/composeBody";
 import { BODY_LAYERS, BodyLayer } from "../../highrise/looks/drawBody";
+import { pantsCoverage } from "../../highrise/looks/parts/legs";
+import { sleeveColor } from "../../highrise/looks/parts/limbs";
 import { randomLook } from "../../highrise/looks/randomLook";
 import { pieceNames, piecePlace } from "../../highrise/looks/pieces";
 import { PlayerStats } from "../../highrise/human/PlayerStats";
@@ -28,563 +20,999 @@ import {
   PreviewMode,
   PreviewShow,
 } from "../../highrise/rig/previewMessages";
+import {
+  ColorField,
+  Field,
+  Group,
+  Picker,
+  Segmented,
+  Slider,
+  Swatch,
+  Toggle,
+} from "./controls";
+import {
+  capitalize,
+  COLLARED,
+  CUT_OPTIONS,
+  EXTRA_OPTIONS,
+  EYE_PRESETS,
+  GLASSES_OPTIONS,
+  HAIR_PRESETS,
+  HAIRLINE_OPTIONS,
+  HAT_OPTIONS,
+  PANTS_OPTIONS,
+  PATTERN_OPTIONS,
+  SHOE_OPTIONS,
+  SKIN_PRESETS,
+  SNEAKERS,
+  TOP_OPTIONS,
+  TOP_SECONDARY,
+  withHat,
+} from "./lookOptions";
+import { thumbnailUrl } from "./thumbnails";
+import { tip } from "./tooltips";
 
-const BUILD_LABELS: Record<keyof Build, [string, string, string]> = {
-  shoulders: ["Shoulders", "narrow", "broad"],
-  chest: ["Chest", "flat", "deep"],
-  belly: ["Belly", "none", "big"],
-  bust: ["Bust", "none", "big"],
-  hunch: ["Hunch", "upright", "hunched"],
-  squareness: ["Shoulder shape", "round", "square"],
-  arms: ["Arms", "thin", "thick"],
-  hands: ["Hands", "small", "big"],
-  feet: ["Feet", "small", "big"],
-  head: ["Head", "small", "big"],
-  legs: ["Legs", "thin", "thick"],
-};
+/** Sets one of the look's settings; changes to the same one close together are one step of undo */
+type SetLook = <K extends keyof BodyLook>(key: K, value: BodyLook[K]) => void;
 
-/** Build sliders where everything below 0 is the same as 0 */
-const ONE_SIDED: (keyof Build)[] = ["belly", "bust"];
+interface SectionProps {
+  look: BodyLook;
+  set: SetLook;
+}
 
-const HAIR_SLIDERS: [keyof Hair, string, string][] = [
-  ["coverage", "Coverage", "How far forward it comes; 0 is bald"],
-  ["volume", "Volume", "How much it stands out from the head"],
-  ["messiness", "Messiness", "How uneven its edge is"],
-  ["curls", "Curls", "Bumps round the edge, up to an afro"],
-  ["length", "Length", "How far it hangs down the back"],
-  ["bun", "Bun", ""],
-  ["ponytail", "Ponytail", ""],
-  ["mohawk", "Mohawk", "Shaved but for a strip this wide"],
-  ["balding", "Balding", "Bald on top, from the crown forward"],
-];
+/**
+ * The look's settings in sections, one showing at a time beside the
+ * preview: `keys` are the look's settings each holds (for the unsaved dot),
+ * `shuffle` the ones its shuffle button picks at random.
+ */
+const SECTIONS = [
+  { id: "body", label: "Body", keys: ["skin", "build"] },
+  { id: "face", label: "Face", keys: ["eyes", "brows", "beard"] },
+  { id: "hair", label: "Hair", keys: ["hair"] },
+  { id: "top", label: "Top", keys: ["top", "sleeves", "gloves"] },
+  {
+    id: "legs",
+    label: "Legs & feet",
+    keys: [
+      "pantsStyle",
+      "pants",
+      "pantsLength",
+      "pantsTrim",
+      "shoeStyle",
+      "shoes",
+      "shoeTrim",
+    ],
+  },
+  {
+    id: "accessories",
+    label: "Accessories",
+    keys: ["hat", "glasses", "extras", "pieces"],
+    // A random look has no pieces, so shuffling leaves them be
+    shuffle: ["hat", "glasses", "extras"],
+  },
+] as const satisfies {
+  id: string;
+  label: string;
+  keys: (keyof BodyLook)[];
+  shuffle?: (keyof BodyLook)[];
+}[];
+type SectionId = (typeof SECTIONS)[number]["id"];
+
+/** Where the section showing is remembered */
+const SECTION_KEY = "characterEditorAppearanceSection";
 
 const ZOMBIE_PREVIEW: Zombification = { rot: 0.8, blood: 0.6, tears: 0.6 };
 
 /**
- * Everything about how a character looks, with a live preview drawn by the
- * same generator as the game. Changes go into the character's draft, which
- * the save bar saves, reverts, undoes and redoes.
+ * Everything about how a character looks, with a live preview: the game
+ * itself, and stills drawn by the same generator. Changes go into the
+ * character's draft, which the save bar saves, reverts, undoes and redoes.
  */
 export function AppearanceTab({
   look,
+  savedLook,
   startingWeapons,
   stats,
   onChange,
 }: {
   look: BodyLook;
+  /** As it's saved, to mark the sections with unsaved changes */
+  savedLook: BodyLook;
   /** For the game preview, which can show them holding the first */
   startingWeapons: string[];
   stats: Partial<PlayerStats>;
   /** `group`: changes to the same thing close together are one step of undo */
   onChange: (look: BodyLook, group?: string) => void;
 }) {
+  const [section, setSection] = useState<SectionId>(() => {
+    try {
+      const saved = localStorage.getItem(SECTION_KEY);
+      return SECTIONS.find((s) => s.id === saved)?.id ?? "body";
+    } catch {
+      return "body";
+    }
+  });
+  const chooseSection = (next: SectionId) => {
+    setSection(next);
+    try {
+      localStorage.setItem(SECTION_KEY, next);
+    } catch {}
+  };
   const [zombify, setZombify] = useState(false);
   const [zombie, setZombie] = useState(ZOMBIE_PREVIEW);
   const [hidden, toggleLayer] = useHiddenLayers();
 
   // Each press of a button is its own step of undo
   const once = (next: BodyLook) => onChange(next, `once-${Date.now()}`);
-  const set = <K extends keyof BodyLook>(key: K, value: BodyLook[K]) =>
-    onChange({ ...look, [key]: value }, key);
+  const set: SetLook = (key, value) => onChange({ ...look, [key]: value }, key);
+  const shuffle = (keys: readonly (keyof BodyLook)[]) => {
+    const random = randomLook(makeRandom(Date.now()), false);
+    const next: Record<string, unknown> = { ...look };
+    for (const key of keys) {
+      next[key] = random[key];
+    }
+    once(next as unknown as BodyLook);
+  };
 
   const preview = zombify ? { ...look, zombie } : look;
+  const current = SECTIONS.find((s) => s.id === section)!;
+  const unsaved = (keys: readonly (keyof BodyLook)[]) =>
+    keys.some(
+      (key) => JSON.stringify(look[key]) !== JSON.stringify(savedLook[key]),
+    );
+  const props = { look, set };
 
   return (
     <div class="appearance">
-      <div class="appearance__preview">
+      <aside class="appearance__preview">
         <GamePreview
           look={preview}
           startingWeapons={startingWeapons}
           stats={stats}
           hidden={hidden}
         />
-        <LayerToggles hidden={hidden} onToggle={toggleLayer} />
-        <Preview look={preview} hidden={hidden} />
-      </div>
-
-      <div class="appearance__controls">
-        <section class="card appearance__tools">
-          <button
-            title="A random look; Undo brings this one back"
-            onClick={() =>
-              once({
-                ...randomLook(makeRandom(Date.now()), false),
-                seed: look.seed,
-              })
-            }
-          >
-            Random look
-          </button>
-          <button
-            title="The random parts: ragged edges, where rips and blood go"
-            onClick={() =>
-              once({ ...look, seed: Math.floor(Math.random() * 1e6) })
-            }
-          >
-            New seed
-          </button>
-          <label class="appearance__zombify">
-            <input
-              type="checkbox"
-              checked={zombify}
-              onChange={(e) =>
-                setZombify((e.target as HTMLInputElement).checked)
+        <div class="preview-options">
+          <LayerToggles hidden={hidden} onToggle={toggleLayer} />
+          <div class="preview-options__row">
+            <label
+              class="preview-options__zombie"
+              {...tip(
+                "Shows them as a zombie would look, without changing the look",
+              )}
+            >
+              <span class="switch">
+                <input
+                  type="checkbox"
+                  checked={zombify}
+                  onChange={(e) =>
+                    setZombify((e.target as HTMLInputElement).checked)
+                  }
+                />
+                <span />
+              </span>
+              As a zombie
+            </label>
+            <button
+              class="small-button"
+              {...tip(
+                "Draws the random details again: ragged edges, and where rips and blood go. Undo brings the old ones back",
+                "New details",
+              )}
+              onClick={() =>
+                once({ ...look, seed: Math.floor(Math.random() * 1e6) })
               }
-            />
-            Preview as a zombie
-          </label>
+            >
+              ↻ New details
+            </button>
+          </div>
           {zombify && (
-            <div class="appearance__zombie">
-              {(["rot", "blood", "tears"] as const).map((key) => (
+            <div class="preview-options__zombie-sliders">
+              {(
+                [
+                  [
+                    "rot",
+                    "Rot",
+                    "Greener, greyer, blotchier skin; thinner hair",
+                  ],
+                  ["blood", "Blood", undefined],
+                  ["tears", "Rips", "Rips in the clothes"],
+                ] as const
+              ).map(([key, label, about]) => (
                 <Slider
                   key={key}
-                  label={key[0].toUpperCase() + key.slice(1)}
+                  label={label}
+                  tip={about}
                   value={zombie[key]}
-                  min={0}
-                  max={1}
                   onChange={(value) => setZombie({ ...zombie, [key]: value })}
                 />
               ))}
             </div>
           )}
-        </section>
+        </div>
+        <Stills
+          look={preview}
+          hidden={hidden}
+          closeUp={
+            section === "face"
+              ? "face"
+              : section === "hair"
+                ? "head"
+                : undefined
+          }
+        />
+      </aside>
 
-        <section class="card">
-          <h2>Body</h2>
-          <ColorField
-            label="Skin"
-            value={look.skin}
-            onChange={(v) => set("skin", v)}
-          />
-          {(Object.keys(BUILD_LABELS) as (keyof Build)[]).map((key) => {
-            const [label, low, high] = BUILD_LABELS[key];
-            return (
-              <Slider
-                key={key}
-                label={label}
-                hint={`${low} – ${high}`}
-                value={look.build[key]}
-                min={ONE_SIDED.includes(key) ? 0 : -1}
-                max={1}
-                reset={0}
-                onChange={(value) =>
-                  set("build", { ...look.build, [key]: value })
-                }
-              />
-            );
-          })}
-        </section>
-
-        <section class="card">
-          <h2>Hair</h2>
-          <ColorField
-            label="Color"
-            value={look.hair.color}
-            onChange={(color) => set("hair", { ...look.hair, color })}
-          />
-          {HAIR_SLIDERS.map(([key, label, hint]) => (
-            <Slider
-              key={key}
-              label={label}
-              hint={hint}
-              value={look.hair[key] as number}
-              min={0}
-              max={1}
-              reset={DEFAULT_LOOK.hair[key] as number}
-              onChange={(value) => set("hair", { ...look.hair, [key]: value })}
-            />
-          ))}
-          <SelectField
-            label="Hairline"
-            value={look.hair.hairline}
-            options={HAIRLINES}
-            onChange={(hairline) =>
-              hairline && set("hair", { ...look.hair, hairline })
-            }
-          />
-          <SelectField
-            label="Cut"
-            value={look.hair.cut ?? ""}
-            options={HAIR_CUTS}
-            none="As grown"
-            onChange={(cut) =>
-              set("hair", { ...look.hair, cut: cut || undefined })
-            }
-          />
-          <Slider
-            label="Hairline position"
-            hint="forward in the middle – receding"
-            value={look.hair.fringe}
-            min={-1}
-            max={1}
-            reset={DEFAULT_LOOK.hair.fringe}
-            onChange={(fringe) => set("hair", { ...look.hair, fringe })}
-          />
-          <Optional
-            label="Parting"
-            on={look.hair.part !== undefined}
-            onToggle={(on) =>
-              set("hair", { ...look.hair, part: on ? -0.4 : undefined })
-            }
-          >
-            <Slider
-              label="Where"
-              hint="left – right"
-              value={look.hair.part ?? 0}
-              min={-1}
-              max={1}
-              onChange={(part) => set("hair", { ...look.hair, part })}
-            />
-          </Optional>
-          <ColorField
-            label="Eyes"
-            value={look.eyes ?? EYE_COLOR}
-            onChange={(v) => set("eyes", v)}
-          />
-          <Slider
-            label="Brows"
-            hint="thin – bushy"
-            value={look.brows.bushiness}
-            min={0}
-            max={1}
-            reset={DEFAULT_LOOK.brows.bushiness}
-            onChange={(bushiness) => set("brows", { ...look.brows, bushiness })}
-          />
-          <Slider
-            label="Brow arch"
-            hint="straight – arched"
-            value={look.brows.arch}
-            min={0}
-            max={1}
-            reset={DEFAULT_LOOK.brows.arch}
-            onChange={(arch) => set("brows", { ...look.brows, arch })}
-          />
-          <Slider
-            label="Brow tilt"
-            hint="cross – worried"
-            value={look.brows.tilt}
-            min={-1}
-            max={1}
-            reset={0}
-            onChange={(tilt) => set("brows", { ...look.brows, tilt })}
-          />
-          <OptionalColor
-            label="Own brow color"
-            value={look.brows.color}
-            fallback={look.hair.color}
-            onChange={(color) => set("brows", { ...look.brows, color })}
-          />
-          <Optional
-            label="Beard"
-            on={!!look.beard}
-            onToggle={(on) => set("beard", on ? { length: 0.3 } : undefined)}
-          >
-            {look.beard && (
-              <>
-                <Slider
-                  label="Length"
-                  value={look.beard.length}
-                  min={0}
-                  max={1}
-                  onChange={(length) =>
-                    set("beard", { ...look.beard!, length })
-                  }
-                />
-                <OptionalColor
-                  label="Own color"
-                  value={look.beard.color}
-                  fallback={look.hair.color}
-                  onChange={(color) => set("beard", { ...look.beard!, color })}
-                />
-              </>
-            )}
-          </Optional>
-        </section>
-
-        <section class="card">
-          <h2>Clothes</h2>
-          <SelectField
-            label="Top"
-            value={look.top.style}
-            options={TOP_STYLES}
-            onChange={(style) => style && set("top", { ...look.top, style })}
-          />
-          <ColorField
-            label="Color"
-            value={look.top.color}
-            onChange={(color) => set("top", { ...look.top, color })}
-          />
-          <ColorField
-            label="Secondary"
-            hint="The shirt under a jacket, vest or overalls; a coat's trim; a track suit's stripes"
-            value={look.top.secondary}
-            onChange={(secondary) => set("top", { ...look.top, secondary })}
-          />
-          {["polo", "shirt", "jacket", "coat", "tracksuit"].includes(
-            look.top.style,
-          ) && (
-            <Optional
-              label="Popped collar"
-              on={!!look.top.popped}
-              onToggle={(popped) =>
-                set("top", { ...look.top, popped: popped || undefined })
+      <div class="appearance__controls">
+        <div class="sections">
+          <nav class="sections__tabs">
+            {SECTIONS.map((s) => (
+              <button
+                key={s.id}
+                class={s.id === section ? "is-selected" : ""}
+                onClick={() => chooseSection(s.id)}
+              >
+                {s.label}
+                {unsaved(s.keys) && (
+                  <span class="unsaved-dot" {...tip("Unsaved changes")} />
+                )}
+              </button>
+            ))}
+          </nav>
+          <div class="sections__actions">
+            <button
+              {...tip(
+                `Picks the ${current.label.toLowerCase()} at random and leaves the rest. Undo brings this back`,
+              )}
+              onClick={() =>
+                shuffle("shuffle" in current ? current.shuffle : current.keys)
               }
             >
-              {null}
-            </Optional>
-          )}
-          <Optional
-            label="Pattern"
-            on={!!look.top.pattern}
-            onToggle={(on) =>
-              set("top", {
-                ...look.top,
-                pattern: on ? { kind: "stripes", color: "#ffffff" } : undefined,
-              })
-            }
-          >
-            {look.top.pattern && (
-              <>
-                <SelectField
-                  label="Kind"
-                  value={look.top.pattern.kind}
-                  options={PATTERN_KINDS}
-                  onChange={(kind) =>
-                    kind &&
-                    set("top", {
-                      ...look.top,
-                      pattern: { ...look.top.pattern!, kind },
-                    })
-                  }
-                />
-                <ColorField
-                  label="Color"
-                  value={look.top.pattern.color}
-                  onChange={(color) =>
-                    set("top", {
-                      ...look.top,
-                      pattern: { ...look.top.pattern!, color },
-                    })
-                  }
-                />
-              </>
-            )}
-          </Optional>
-          <Slider
-            label="Sleeves"
-            hint="none – to the wrist"
-            value={look.sleeves.length}
-            min={0}
-            max={1}
-            onChange={(length) => set("sleeves", { ...look.sleeves, length })}
-          />
-          <OptionalColor
-            label="Own sleeve color"
-            value={look.sleeves.color}
-            fallback={look.top.color}
-            onChange={(color) => set("sleeves", { ...look.sleeves, color })}
-          />
-          <OptionalColor
-            label="Cuffs"
-            value={look.sleeves.cuff}
-            fallback="#ffffff"
-            onChange={(cuff) => set("sleeves", { ...look.sleeves, cuff })}
-          />
-          <OptionalColor
-            label="Gloves"
-            value={look.gloves}
-            fallback="#2a2a2a"
-            onChange={(gloves) => set("gloves", gloves)}
-          />
-          <SelectField
-            label="Legs"
-            value={look.pantsStyle}
-            options={PANTS_STYLES}
-            onChange={(style) => style && set("pantsStyle", style)}
-          />
-          <ColorField
-            label="Their color"
-            value={look.pants}
-            onChange={(v) => set("pants", v)}
-          />
-          {(look.pantsStyle === "shorts" || look.pantsStyle === "skirt") && (
-            <Slider
-              label="Length"
-              hint="from the hip to the ankle"
-              value={
-                look.pantsLength ?? (look.pantsStyle === "shorts" ? 0.46 : 0.42)
+              <Dice /> Shuffle {current.label.toLowerCase()}
+            </button>
+            <button
+              {...tip(
+                "A whole new random look, like a zombie's. Undo brings this one back",
+              )}
+              onClick={() =>
+                once({
+                  ...randomLook(makeRandom(Date.now()), false),
+                  pieces: look.pieces,
+                  seed: look.seed,
+                })
               }
-              min={0}
-              max={1}
-              onChange={(v) => set("pantsLength", v)}
-            />
-          )}
-          {look.pantsStyle === "trackpants" && (
-            <OptionalColor
-              label="Stripes"
-              value={look.pantsTrim}
-              fallback="#f2f2ee"
-              onChange={(v) => set("pantsTrim", v)}
-            />
-          )}
-          <SelectField
-            label="Shoes"
-            value={look.shoeStyle}
-            options={SHOE_STYLES}
-            onChange={(style) => style && set("shoeStyle", style)}
-          />
-          {look.shoeStyle !== "bare" && (
-            <ColorField
-              label="Their color"
-              value={look.shoes}
-              onChange={(v) => set("shoes", v)}
-            />
-          )}
-          {["sneakers", "hightops", "runners"].includes(look.shoeStyle) && (
-            <OptionalColor
-              label="Soles"
-              value={look.shoeTrim}
-              fallback="#ecebe6"
-              onChange={(v) => set("shoeTrim", v)}
-            />
-          )}
-        </section>
-
-        <section class="card">
-          <h2>Things</h2>
-          <SelectField
-            label="Hat"
-            value={look.hat?.style ?? ""}
-            options={HAT_STYLES}
-            none="No hat"
-            onChange={(style) =>
-              set(
-                "hat",
-                style ? { color: "#3a3a3a", ...look.hat, style } : undefined,
-              )
-            }
-          />
-          {look.hat && (
-            <>
-              <ColorField
-                label="Hat color"
-                value={look.hat.color}
-                onChange={(color) => set("hat", { ...look.hat!, color })}
-              />
-              <OptionalColor
-                label="Trim"
-                value={look.hat.secondary}
-                fallback="#ffffff"
-                onChange={(secondary) =>
-                  set("hat", { ...look.hat!, secondary })
-                }
-              />
-            </>
-          )}
-          <SelectField
-            label="Glasses"
-            value={look.glasses?.shape ?? ""}
-            options={GLASSES_SHAPES}
-            none="No glasses"
-            onChange={(shape) =>
-              set(
-                "glasses",
-                shape
-                  ? { color: "#1a1a1a", ...look.glasses, shape }
-                  : undefined,
-              )
-            }
-          />
-          {look.glasses && (
-            <ColorField
-              label="Frames"
-              value={look.glasses.color}
-              onChange={(color) => set("glasses", { ...look.glasses!, color })}
-            />
-          )}
-          <h3 class="appearance__subhead">Pieces (hand-drawn)</h3>
-          {pieceNames().length === 0 && (
-            <p class="muted small">None yet: see looks/pieces/README.md</p>
-          )}
-          {pieceNames().map((name) => {
-            const piece = look.pieces?.find((p) => p.name === name);
-            const others = (look.pieces ?? []).filter((p) => p.name !== name);
-            const setPiece = (next: typeof piece) =>
-              set(
-                "pieces",
-                next ? [...others, next] : others.length ? others : undefined,
-              );
-            return (
-              <div key={name}>
-                <OptionalColor
-                  label={`${name} (${piecePlace(name)})`}
-                  value={piece?.color}
-                  fallback="#3a3a3a"
-                  onChange={(color) =>
-                    setPiece(color ? { ...piece, name, color } : undefined)
-                  }
-                />
-                {piece && (
-                  <OptionalColor
-                    label="Secondary"
-                    value={piece.secondary}
-                    fallback="#cccccc"
-                    onChange={(secondary) => setPiece({ ...piece, secondary })}
-                  />
-                )}
-              </div>
-            );
-          })}
-          <h3 class="appearance__subhead">Worn or carried</h3>
-          {EXTRA_KINDS.map((kind) => {
-            const extra = look.extras.find((e) => e.kind === kind);
-            return (
-              <OptionalColor
-                key={kind}
-                label={kind[0].toUpperCase() + kind.slice(1)}
-                value={extra?.color}
-                fallback="#6b4428"
-                onChange={(color) =>
-                  set(
-                    "extras",
-                    color
-                      ? extra
-                        ? look.extras.map((e) =>
-                            e.kind === kind ? { kind, color } : e,
-                          )
-                        : [...look.extras, { kind, color }]
-                      : look.extras.filter((e) => e.kind !== kind),
-                  )
-                }
-              />
-            );
-          })}
-        </section>
+            >
+              <Dice /> Shuffle all
+            </button>
+          </div>
+        </div>
+        <div class="groups">
+          {section === "body" && <BodySection {...props} />}
+          {section === "face" && <FaceSection {...props} />}
+          {section === "hair" && <HairSection {...props} />}
+          {section === "top" && <TopSection {...props} />}
+          {section === "legs" && <LegsSection {...props} />}
+          {section === "accessories" && <AccessoriesSection {...props} />}
+        </div>
       </div>
     </div>
   );
 }
 
-/** The body standing and lying, and each part on its own */
-function Preview({ look, hidden }: { look: BodyLook; hidden: BodyLayer[] }) {
-  const images = useMemo(
-    () => ({
-      standing: svgDataUrl(composeBodySvg(look, { scale: 420, hidden }, "ps")),
-      lying: svgDataUrl(
-        composeBodySvg(look, { scale: 220, pose: "lying", hidden }, "pl"),
-      ),
-    }),
-    [JSON.stringify(look), hidden.join()],
+function BodySection({ look, set }: SectionProps) {
+  const build = (
+    key: keyof Build,
+    label: string,
+    ends: [string, string],
+    about?: string,
+  ) => (
+    <Slider
+      label={label}
+      tip={about}
+      ends={ends}
+      value={look.build[key]}
+      // Nothing below 0 for these
+      min={key === "belly" || key === "bust" ? 0 : -1}
+      reset={0}
+      onChange={(value) => set("build", { ...look.build, [key]: value })}
+    />
   );
   return (
-    <div class="appearance__stills">
-      <div class="appearance__stage" title="Standing">
-        <img src={images.standing} />
-      </div>
-      <div class="appearance__stage" title="Lying face down, as a corpse">
-        <img src={images.lying} />
-      </div>
+    <>
+      <Group title="Skin and head">
+        <ColorField
+          label="Skin"
+          value={look.skin}
+          presets={SKIN_PRESETS}
+          onChange={(color) => color && set("skin", color)}
+        />
+        {build("head", "Head", ["small", "big"])}
+      </Group>
+      <Group title="Frame">
+        {build("shoulders", "Shoulders", ["narrow", "broad"])}
+        {build("squareness", "Shoulder shape", ["round", "square"])}
+        {build("chest", "Chest", ["flat", "deep"], "How far it comes forward")}
+        {build(
+          "hunch",
+          "Hunch",
+          ["upright", "hunched"],
+          "Shoulders rolled forward",
+        )}
+      </Group>
+      <Group title="Figure">
+        {build("belly", "Belly", ["none", "big"])}
+        {build("bust", "Bust", ["none", "big"])}
+      </Group>
+      <Group title="Limbs">
+        {build("arms", "Arms", ["thin", "thick"])}
+        {build("hands", "Hands", ["small", "big"])}
+        {build("legs", "Legs", ["thin", "thick"])}
+        {build("feet", "Feet", ["small", "big"], "And so their shoes")}
+      </Group>
+    </>
+  );
+}
+
+function FaceSection({ look, set }: SectionProps) {
+  const brows = look.brows;
+  return (
+    <>
+      <Group title="Eyes">
+        <ColorField
+          label="Color"
+          value={look.eyes ?? EYE_COLOR}
+          presets={EYE_PRESETS}
+          onChange={(color) => set("eyes", color)}
+        />
+      </Group>
+      <Group title="Brows">
+        <Slider
+          label="Thickness"
+          ends={["thin", "bushy"]}
+          value={brows.bushiness}
+          reset={DEFAULT_LOOK.brows.bushiness}
+          onChange={(bushiness) => set("brows", { ...brows, bushiness })}
+        />
+        <Slider
+          label="Arch"
+          ends={["straight", "arched"]}
+          value={brows.arch}
+          reset={DEFAULT_LOOK.brows.arch}
+          onChange={(arch) => set("brows", { ...brows, arch })}
+        />
+        <Slider
+          label="Tilt"
+          tip="Sloping down to the middle looks cross; up to it, worried"
+          ends={["cross", "worried"]}
+          value={brows.tilt}
+          min={-1}
+          reset={0}
+          onChange={(tilt) => set("brows", { ...brows, tilt })}
+        />
+        <ColorField
+          label="Color"
+          value={brows.color}
+          inherit={{ label: "Hair color, darker", color: look.hair.color }}
+          tip="Left to follow the hair, they're a little darker than it"
+          onChange={(color) => set("brows", { ...brows, color })}
+        />
+      </Group>
+      <Group title="Beard">
+        <Toggle
+          label="Beard"
+          on={!!look.beard}
+          onChange={(on) => set("beard", on ? { length: 0.3 } : undefined)}
+        />
+        {look.beard && (
+          <>
+            <Slider
+              label="Length"
+              tip="How far it sticks out in front"
+              ends={["stubbly", "long"]}
+              value={look.beard.length}
+              onChange={(length) => set("beard", { ...look.beard!, length })}
+            />
+            <ColorField
+              label="Color"
+              value={look.beard.color}
+              inherit={{ label: "Same as hair", color: look.hair.color }}
+              onChange={(color) => set("beard", { ...look.beard!, color })}
+            />
+          </>
+        )}
+      </Group>
+    </>
+  );
+}
+
+function HairSection({ look, set }: SectionProps) {
+  const hair = look.hair;
+  const setHair = (changes: Partial<typeof hair>) =>
+    set("hair", { ...hair, ...changes });
+  const bald = hair.coverage <= 0;
+  // What only hair that's grown has
+  const notGrown = bald
+    ? "Not when they're bald: turn Coverage up"
+    : hair.cut === "buzz"
+      ? "Not with a buzz cut"
+      : hair.cut === "stubble"
+        ? "Not with stubble"
+        : undefined;
+  const slider = (
+    key:
+      | "volume"
+      | "length"
+      | "curls"
+      | "messiness"
+      | "bun"
+      | "ponytail"
+      | "mohawk",
+    label: string,
+    ends: [string, string],
+    about?: string,
+  ) => (
+    <Slider
+      label={label}
+      tip={about}
+      ends={ends}
+      value={hair[key]}
+      reset={DEFAULT_LOOK.hair[key]}
+      disabled={notGrown}
+      onChange={(value) => setHair({ [key]: value })}
+    />
+  );
+  return (
+    <>
+      <Group title="Color and cut">
+        <ColorField
+          label="Color"
+          value={hair.color}
+          presets={HAIR_PRESETS}
+          onChange={(color) => color && setHair({ color })}
+        />
+        <Field label="Cut">
+          <Picker
+            look={look}
+            kind="head"
+            options={CUT_OPTIONS}
+            selected={(cut) => (hair.cut ?? "") === cut}
+            vary={(l, cut) => ({
+              ...l,
+              hair: { ...l.hair, cut: cut || undefined },
+            })}
+            onPick={(cut) => setHair({ cut: cut || undefined })}
+          />
+        </Field>
+      </Group>
+      <Group title="Hairline">
+        <Field label="Shape">
+          <Picker
+            look={look}
+            kind="face"
+            options={HAIRLINE_OPTIONS}
+            selected={(hairline) => hair.hairline === hairline}
+            vary={(l, hairline) => ({ ...l, hair: { ...l.hair, hairline } })}
+            onPick={(hairline) => setHair({ hairline })}
+          />
+        </Field>
+        <Slider
+          label="Coverage"
+          tip="How far forward the hair comes. All the way down is bald"
+          ends={["bald", "full"]}
+          value={hair.coverage}
+          reset={DEFAULT_LOOK.hair.coverage}
+          onChange={(coverage) => setHair({ coverage })}
+        />
+        <Slider
+          label="Middle"
+          tip="The middle of the hairline, against its sides"
+          ends={["forward", "back"]}
+          value={hair.fringe}
+          min={-1}
+          reset={DEFAULT_LOOK.hair.fringe}
+          disabled={bald ? "Not when they're bald" : undefined}
+          onChange={(fringe) => setHair({ fringe })}
+        />
+        <Slider
+          label="Balding"
+          tip="Bald on top, from the crown forward"
+          ends={["none", "only the sides"]}
+          value={hair.balding}
+          reset={0}
+          disabled={bald ? "They're bald already" : undefined}
+          onChange={(balding) => setHair({ balding })}
+        />
+        <Toggle
+          label="Parting"
+          on={hair.part !== undefined}
+          onChange={(on) => setHair({ part: on ? -0.4 : undefined })}
+        />
+        {hair.part !== undefined && (
+          <Slider
+            label="Parted at"
+            ends={["left", "right"]}
+            value={hair.part}
+            min={-1}
+            onChange={(part) => setHair({ part })}
+          />
+        )}
+      </Group>
+      <Group title="Length and body">
+        {slider(
+          "length",
+          "Length",
+          ["short", "long"],
+          "How far it hangs down the back",
+        )}
+        {slider(
+          "volume",
+          "Volume",
+          ["flat", "big"],
+          "How much it stands out from the head",
+        )}
+        {slider("curls", "Curls", ["straight", "afro"])}
+        {slider(
+          "messiness",
+          "Messiness",
+          ["neat", "messy"],
+          "How uneven its edge is",
+        )}
+      </Group>
+      <Group title="Tied and shaved">
+        {slider("bun", "Bun", ["none", "big"])}
+        {slider("ponytail", "Ponytail", ["none", "long"])}
+        {slider(
+          "mohawk",
+          "Mohawk",
+          ["none", "wide"],
+          "Shaved but for a strip down the middle this wide",
+        )}
+      </Group>
+    </>
+  );
+}
+
+function TopSection({ look, set }: SectionProps) {
+  const top = look.top;
+  const secondary = TOP_SECONDARY[top.style];
+  const sleevesFollow =
+    top.style === "tank"
+      ? "Bare arms"
+      : top.style === "vest" || top.style === "overalls"
+        ? "Same as shirt"
+        : "Same as top";
+  return (
+    <>
+      <Group title="Top" wide>
+        <Picker
+          look={look}
+          kind="torso"
+          options={TOP_OPTIONS}
+          selected={(style) => top.style === style}
+          vary={(l, style) => ({ ...l, top: { ...l.top, style } })}
+          onPick={(style) => set("top", { ...top, style })}
+        />
+        <ColorField
+          label="Color"
+          value={top.color}
+          onChange={(color) => color && set("top", { ...top, color })}
+        />
+        {secondary && (
+          <ColorField
+            label={secondary[0]}
+            tip={secondary[1]}
+            value={top.secondary}
+            onChange={(color) =>
+              color && set("top", { ...top, secondary: color })
+            }
+          />
+        )}
+        {COLLARED.includes(top.style) && (
+          <Toggle
+            label="Popped collar"
+            tip="Turned up round the neck"
+            on={!!top.popped}
+            onChange={(popped) =>
+              set("top", { ...top, popped: popped || undefined })
+            }
+          />
+        )}
+      </Group>
+      <Group title="Pattern">
+        <Picker
+          look={look}
+          kind="torso"
+          options={PATTERN_OPTIONS}
+          selected={(kind) => (top.pattern?.kind ?? "") === kind}
+          vary={(l, kind) => ({
+            ...l,
+            top: {
+              ...l.top,
+              pattern: kind
+                ? { kind, color: l.top.pattern?.color ?? "#ffffff" }
+                : undefined,
+            },
+          })}
+          onPick={(kind) =>
+            set("top", {
+              ...top,
+              pattern: kind
+                ? { kind, color: top.pattern?.color ?? "#ffffff" }
+                : undefined,
+            })
+          }
+        />
+        {top.pattern && (
+          <ColorField
+            label="Color"
+            value={top.pattern.color}
+            onChange={(color) =>
+              color &&
+              set("top", { ...top, pattern: { ...top.pattern!, color } })
+            }
+          />
+        )}
+      </Group>
+      <Group title="Sleeves and gloves">
+        <Slider
+          label="Sleeves"
+          ends={["none", "to the wrist"]}
+          value={look.sleeves.length}
+          onChange={(length) => set("sleeves", { ...look.sleeves, length })}
+        />
+        <ColorField
+          label="Sleeve color"
+          value={look.sleeves.color}
+          inherit={{
+            label: sleevesFollow,
+            color: sleeveColor({
+              ...look,
+              sleeves: { ...look.sleeves, color: undefined },
+            }),
+          }}
+          onChange={(color) => set("sleeves", { ...look.sleeves, color })}
+        />
+        <Toggle
+          label="Cuffs"
+          tip="A band round the end of each sleeve"
+          on={look.sleeves.cuff !== undefined}
+          onChange={(on) =>
+            set("sleeves", {
+              ...look.sleeves,
+              cuff: on ? "#ffffff" : undefined,
+            })
+          }
+        >
+          <Swatch
+            label="Cuffs"
+            value={look.sleeves.cuff ?? "#ffffff"}
+            onChange={(cuff) => set("sleeves", { ...look.sleeves, cuff })}
+          />
+        </Toggle>
+        <Toggle
+          label="Gloves"
+          on={look.gloves !== undefined}
+          onChange={(on) => set("gloves", on ? "#2a2a2a" : undefined)}
+        >
+          <Swatch
+            label="Gloves"
+            value={look.gloves ?? "#2a2a2a"}
+            onChange={(gloves) => set("gloves", gloves)}
+          />
+        </Toggle>
+      </Group>
+    </>
+  );
+}
+
+function LegsSection({ look, set }: SectionProps) {
+  const style = look.pantsStyle;
+  return (
+    <>
+      <Group title="Legs">
+        <Picker
+          look={look}
+          kind="legs"
+          options={PANTS_OPTIONS}
+          selected={(s) => style === s}
+          vary={(l, pantsStyle) => ({ ...l, pantsStyle })}
+          onPick={(pantsStyle) => set("pantsStyle", pantsStyle)}
+        />
+        <ColorField
+          label="Color"
+          value={look.pants}
+          onChange={(color) => color && set("pants", color)}
+        />
+        {(style === "shorts" || style === "skirt") && (
+          <Slider
+            label="Length"
+            ends={["hip", "ankle"]}
+            value={pantsCoverage(look)}
+            reset={pantsCoverage({ ...look, pantsLength: undefined })}
+            onChange={(length) => set("pantsLength", length)}
+          />
+        )}
+        {style === "trackpants" && (
+          <ColorField
+            label="Stripes"
+            value={look.pantsTrim}
+            inherit={{ label: "White", color: "#f2f2ee" }}
+            onChange={(color) => set("pantsTrim", color)}
+          />
+        )}
+      </Group>
+      <Group title="Feet">
+        <Picker
+          look={look}
+          kind="feet"
+          options={SHOE_OPTIONS}
+          selected={(s) => look.shoeStyle === s}
+          vary={(l, shoeStyle) => ({ ...l, shoeStyle })}
+          onPick={(shoeStyle) => set("shoeStyle", shoeStyle)}
+        />
+        {look.shoeStyle !== "bare" && (
+          <ColorField
+            label="Color"
+            value={look.shoes}
+            onChange={(color) => color && set("shoes", color)}
+          />
+        )}
+        {SNEAKERS.includes(look.shoeStyle) && (
+          <ColorField
+            label="Soles"
+            tip="And the stripes, on runners"
+            value={look.shoeTrim}
+            inherit={{ label: "White", color: "#ecebe6" }}
+            onChange={(color) => set("shoeTrim", color)}
+          />
+        )}
+      </Group>
+    </>
+  );
+}
+
+function AccessoriesSection({ look, set }: SectionProps) {
+  const pieces = pieceNames();
+  const setExtra = (kind: Extra["kind"], color: string | undefined) =>
+    set(
+      "extras",
+      color
+        ? look.extras.some((e) => e.kind === kind)
+          ? look.extras.map((e) => (e.kind === kind ? { kind, color } : e))
+          : [...look.extras, { kind, color }]
+        : look.extras.filter((e) => e.kind !== kind),
+    );
+  type Piece = NonNullable<BodyLook["pieces"]>[number];
+  const setPiece = (name: string, piece: Piece | undefined) => {
+    const others = (look.pieces ?? []).filter((p) => p.name !== name);
+    const next = piece ? [...others, piece] : others;
+    set("pieces", next.length ? next : undefined);
+  };
+  return (
+    <>
+      <Group title="Hat">
+        <Picker
+          look={look}
+          kind="head"
+          options={HAT_OPTIONS}
+          selected={(style) => (look.hat?.style ?? "") === style}
+          vary={(l, style) => ({ ...l, hat: withHat(l.hat, style) })}
+          onPick={(style) => set("hat", withHat(look.hat, style))}
+        />
+        {look.hat && (
+          <>
+            <ColorField
+              label="Color"
+              value={look.hat.color}
+              onChange={(color) => color && set("hat", { ...look.hat!, color })}
+            />
+            <ColorField
+              label="Trim"
+              tip="A band, a badge, a cap's brim or a Santa hat's fur"
+              value={look.hat.secondary}
+              inherit={{ label: "The hat's own", color: look.hat.color }}
+              onChange={(secondary) => set("hat", { ...look.hat!, secondary })}
+            />
+          </>
+        )}
+      </Group>
+      <Group title="Glasses">
+        <Picker
+          look={look}
+          kind="face"
+          options={GLASSES_OPTIONS}
+          selected={(shape) => (look.glasses?.shape ?? "") === shape}
+          vary={(l, shape) => ({
+            ...l,
+            glasses: shape
+              ? { color: "#1a1a1a", ...l.glasses, shape }
+              : undefined,
+          })}
+          onPick={(shape) =>
+            set(
+              "glasses",
+              shape ? { color: "#1a1a1a", ...look.glasses, shape } : undefined,
+            )
+          }
+        />
+        {look.glasses && (
+          <ColorField
+            label="Frames"
+            value={look.glasses.color}
+            onChange={(color) =>
+              color && set("glasses", { ...look.glasses!, color })
+            }
+          />
+        )}
+      </Group>
+      <Group title="Worn or carried" tip="Pick any number" wide>
+        <Picker
+          look={look}
+          kind="torso"
+          multiple
+          options={EXTRA_OPTIONS}
+          selected={(kind) => look.extras.some((e) => e.kind === kind)}
+          vary={(l, kind) => ({
+            ...l,
+            extras: [
+              ...l.extras.filter((e) => e.kind !== kind),
+              {
+                kind,
+                color:
+                  l.extras.find((e) => e.kind === kind)?.color ?? "#6b4428",
+              },
+            ],
+          })}
+          onPick={(kind) =>
+            setExtra(
+              kind,
+              look.extras.some((e) => e.kind === kind) ? undefined : "#6b4428",
+            )
+          }
+        />
+        {look.extras.map((extra) => (
+          <ColorField
+            key={extra.kind}
+            label={capitalize(extra.kind)}
+            value={extra.color}
+            onChange={(color) => color && setExtra(extra.kind, color)}
+          />
+        ))}
+      </Group>
+      <Group
+        title="Hand-drawn pieces"
+        tip="SVGs drawn by hand, worn on the head or the torso: see looks/pieces/README.md to add one"
+        wide
+      >
+        {pieces.length === 0 ? (
+          <p class="muted small">None yet: see looks/pieces/README.md</p>
+        ) : (
+          <>
+            <Picker
+              look={look}
+              kind={(name) => (piecePlace(name) === "head" ? "head" : "torso")}
+              multiple
+              options={pieces.map((name) => ({
+                value: name,
+                label: capitalize(name.replace(/-/g, " ")),
+              }))}
+              selected={(name) => !!look.pieces?.some((p) => p.name === name)}
+              vary={(l, name) => ({
+                ...l,
+                pieces: [
+                  ...(l.pieces ?? []).filter((p) => p.name !== name),
+                  l.pieces?.find((p) => p.name === name) ?? {
+                    name,
+                    color: "#3a3a3a",
+                  },
+                ],
+              })}
+              onPick={(name) =>
+                setPiece(
+                  name,
+                  look.pieces?.some((p) => p.name === name)
+                    ? undefined
+                    : { name, color: "#3a3a3a" },
+                )
+              }
+            />
+            {(look.pieces ?? []).map((piece) => (
+              <ColorField
+                key={piece.name}
+                label={capitalize(piece.name.replace(/-/g, " "))}
+                tip="Its magenta parts"
+                value={piece.color}
+                onChange={(color) =>
+                  color && setPiece(piece.name, { ...piece, color })
+                }
+              />
+            ))}
+            {(look.pieces ?? []).map((piece) => (
+              <ColorField
+                key={`${piece.name}-2`}
+                label="Second color"
+                tip={`The ${piece.name.replace(/-/g, " ")}'s cyan parts`}
+                value={piece.secondary}
+                inherit={{ label: "Same as first", color: piece.color }}
+                onChange={(secondary) =>
+                  setPiece(piece.name, { ...piece, secondary })
+                }
+              />
+            ))}
+          </>
+        )}
+      </Group>
+    </>
+  );
+}
+
+/**
+ * The body standing, and lying like a corpse or, while the face or the hair
+ * is being changed, the face or the head close up
+ */
+function Stills({
+  look,
+  hidden,
+  closeUp,
+}: {
+  look: BodyLook;
+  hidden: BodyLayer[];
+  closeUp?: "face" | "head";
+}) {
+  const key = JSON.stringify(look);
+  const standing = useMemo(
+    () => svgDataUrl(composeBodySvg(look, { scale: 420, hidden }, "ps")),
+    [key, hidden.join()],
+  );
+  const near = hidden.includes("head") ? undefined : closeUp;
+  const second = useMemo(
+    () =>
+      near
+        ? thumbnailUrl(look, near)
+        : svgDataUrl(
+            composeBodySvg(look, { scale: 220, pose: "lying", hidden }, "pl"),
+          ),
+    [key, hidden.join(), near],
+  );
+  return (
+    <div class="stills">
+      <figure class="stills__stage">
+        <img src={standing} alt="" />
+        <figcaption>Standing</figcaption>
+      </figure>
+      <figure
+        class={`stills__stage ${near ? `stills__stage--near stills__stage--${near}` : ""}`}
+      >
+        <img src={second} alt="" />
+        <figcaption>
+          {near === "face"
+            ? "Face"
+            : near === "head"
+              ? "Head"
+              : "Lying, as a corpse"}
+        </figcaption>
+      </figure>
     </div>
+  );
+}
+
+/** A die, for the shuffle buttons */
+function Dice() {
+  return (
+    <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+      <rect
+        x="1.5"
+        y="1.5"
+        width="13"
+        height="13"
+        rx="3"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.4"
+      />
+      <circle cx="5.2" cy="5.2" r="1.3" fill="currentColor" />
+      <circle cx="8" cy="8" r="1.3" fill="currentColor" />
+      <circle cx="10.8" cy="10.8" r="1.3" fill="currentColor" />
+    </svg>
   );
 }
 
@@ -623,15 +1051,20 @@ function LayerToggles({
 }) {
   return (
     <div class="layer-toggles">
-      <span class="muted small">Layers</span>
+      <span
+        class="muted small"
+        {...tip("Hide a layer to see what's under it, here and in the game")}
+      >
+        Show
+      </span>
       {BODY_LAYERS.map((layer) => (
         <button
           key={layer}
-          class={hidden.includes(layer) ? "" : "is-selected"}
-          title={`${hidden.includes(layer) ? "Show" : "Hide"} the ${layer}`}
+          class={`chip ${hidden.includes(layer) ? "" : "is-on"}`}
+          aria-pressed={!hidden.includes(layer)}
           onClick={() => onToggle(layer)}
         >
-          {layer[0].toUpperCase() + layer.slice(1)}
+          {capitalize(layer)}
         </button>
       ))}
     </div>
@@ -666,7 +1099,7 @@ function GamePreview({
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [ready, setReady] = useState(false);
-  const [mode, setMode] = useState<PreviewMode>(() => {
+  const [chosenMode, setMode] = useState<PreviewMode>(() => {
     try {
       const saved = localStorage.getItem(PREVIEW_MODE_KEY);
       return PREVIEW_MODES.find((m) => m === saved) ?? "walk";
@@ -680,6 +1113,9 @@ function GamePreview({
       localStorage.setItem(PREVIEW_MODE_KEY, next);
     } catch {}
   };
+  const armed = startingWeapons.length > 0;
+  // Nothing to hold, nothing to shoot
+  const mode = armed ? chosenMode : "walk";
 
   useEffect(() => {
     const listener = (event: MessageEvent) => {
@@ -719,7 +1155,6 @@ function GamePreview({
     return () => clearTimeout(timeout);
   }, [ready, key]);
 
-  const armed = startingWeapons.length > 0;
   return (
     <div class="game-preview">
       <div class="game-preview__frame">
@@ -732,201 +1167,22 @@ function GamePreview({
         {!ready && (
           <div class="game-preview__loading muted">Starting the game…</div>
         )}
+        <div class="game-preview__modes">
+          <Segmented
+            value={mode}
+            options={PREVIEW_MODES.map((m) => ({
+              value: m,
+              label: PREVIEW_MODE_LABELS[m][0],
+              tip:
+                m !== "walk" && !armed
+                  ? "They have no starting weapons: see the Gameplay tab"
+                  : PREVIEW_MODE_LABELS[m][1],
+              disabled: m !== "walk" && !armed,
+            }))}
+            onChange={chooseMode}
+          />
+        </div>
       </div>
-      <div class="game-preview__modes">
-        {PREVIEW_MODES.map((m) => (
-          <button
-            key={m}
-            class={mode === m ? "is-selected" : ""}
-            title={PREVIEW_MODE_LABELS[m][1]}
-            disabled={m !== "walk" && !armed}
-            onClick={() => chooseMode(m)}
-          >
-            {PREVIEW_MODE_LABELS[m][0]}
-          </button>
-        ))}
-        {!armed && <span class="muted small">No starting weapons</span>}
-      </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: ComponentChildren;
-}) {
-  return (
-    <label class="field" title={hint}>
-      <span class="field__label">
-        {label}
-        {hint && <span class="field__hint">{hint}</span>}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-/** A number from `min` to `max`; double-click puts it back to `reset` */
-function Slider({
-  label,
-  hint,
-  value,
-  min,
-  max,
-  reset,
-  onChange,
-}: {
-  label: string;
-  hint?: string;
-  value: number;
-  min: number;
-  max: number;
-  reset?: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <Field label={label} hint={hint}>
-      <span class="slider">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={0.01}
-          value={value}
-          onInput={(e) =>
-            onChange(Number((e.target as HTMLInputElement).value))
-          }
-          onDblClick={() => reset !== undefined && onChange(reset)}
-        />
-        <span class="slider__value">{value.toFixed(2)}</span>
-      </span>
-    </Field>
-  );
-}
-
-function ColorField({
-  label,
-  hint,
-  value,
-  onChange,
-}: {
-  label: string;
-  hint?: string;
-  value: string;
-  onChange: (color: string) => void;
-}) {
-  return (
-    <Field label={label} hint={hint}>
-      <span class="color">
-        <input
-          type="color"
-          value={value}
-          onInput={(e) => onChange((e.target as HTMLInputElement).value)}
-        />
-        <span class="color__value">{value}</span>
-      </span>
-    </Field>
-  );
-}
-
-/** A color that can be left out (gloves, cuffs, a hat's trim) */
-function OptionalColor({
-  label,
-  value,
-  fallback,
-  onChange,
-}: {
-  label: string;
-  value: string | undefined;
-  fallback: string;
-  onChange: (color: string | undefined) => void;
-}) {
-  return (
-    <Field label={label}>
-      <span class="color">
-        <input
-          type="checkbox"
-          checked={value !== undefined}
-          onChange={(e) =>
-            onChange(
-              (e.target as HTMLInputElement).checked ? fallback : undefined,
-            )
-          }
-        />
-        {value !== undefined && (
-          <>
-            <input
-              type="color"
-              value={value}
-              onInput={(e) => onChange((e.target as HTMLInputElement).value)}
-            />
-            <span class="color__value">{value}</span>
-          </>
-        )}
-      </span>
-    </Field>
-  );
-}
-
-function SelectField<T extends string>({
-  label,
-  value,
-  options,
-  none,
-  onChange,
-}: {
-  label: string;
-  value: T | "";
-  options: readonly T[];
-  /** Offers nothing at all, as this */
-  none?: string;
-  onChange: (value: T | "") => void;
-}) {
-  return (
-    <Field label={label}>
-      <select
-        value={value}
-        onChange={(e) => onChange((e.target as HTMLSelectElement).value as T)}
-      >
-        {none && <option value="">{none}</option>}
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </Field>
-  );
-}
-
-/** A group of settings that's only there when it's turned on */
-function Optional({
-  label,
-  on,
-  onToggle,
-  children,
-}: {
-  label: string;
-  on: boolean;
-  onToggle: (on: boolean) => void;
-  children: ComponentChildren;
-}) {
-  return (
-    <div class={`optional ${on ? "is-on" : ""}`}>
-      <label class="optional__toggle">
-        <input
-          type="checkbox"
-          checked={on}
-          onChange={(e) => onToggle((e.target as HTMLInputElement).checked)}
-        />
-        {label}
-      </label>
-      {on && <div class="optional__body">{children}</div>}
     </div>
   );
 }

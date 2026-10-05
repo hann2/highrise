@@ -18,7 +18,7 @@ const SHORTS = 0.46;
 const SKIRT = 0.42;
 
 /** How far down the leg shorts or a skirt come (0 to 1), or 1 for anything else */
-function pantsCoverage(look: BodyLook): number {
+export function pantsCoverage(look: BodyLook): number {
   const style = look.pantsStyle;
   if (style !== "shorts" && style !== "skirt") {
     return 1;

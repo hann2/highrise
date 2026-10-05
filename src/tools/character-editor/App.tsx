@@ -146,7 +146,7 @@ export function App() {
           <h1>Characters</h1>
           <button
             class="sidebar__toggle"
-            title={collapsed ? "Show the names" : "Fold the list away"}
+            data-tip={collapsed ? "Show the names" : "Fold the list away"}
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? "»" : "«"}
@@ -160,17 +160,18 @@ export function App() {
             <a
               key={id}
               href={`#${id}`}
-              title={data.name}
+              data-tip={collapsed ? data.name : undefined}
+              data-tip-placement="right"
               class={`sidebar__item ${entry?.id === id ? "is-selected" : ""}`}
             >
               <img src={portraitUrl(resolveLook(data.look), { scale: 60 })} />
               <span class="sidebar__name">
                 {data.name}
                 {unsaved && (
-                  <span class="unsaved-dot" title="Unsaved changes" />
+                  <span class="unsaved-dot" data-tip="Unsaved changes" />
                 )}
               </span>
-              <span class="sidebar__count" title="Enabled clips / all clips">
+              <span class="sidebar__count" data-tip="Enabled clips / all clips">
                 {enabled}/{data.clips.length}
               </span>
             </a>

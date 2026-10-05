@@ -108,6 +108,7 @@ export function CharacterPanel({
   const data = drafts.edited(id, disk);
   const unsaved = drafts.unsaved(id, disk);
   const look = useMemo(() => resolveLook(data.look), [data.look]);
+  const savedLook = useMemo(() => resolveLook(disk.look), [disk.look]);
   const update = (changes: CharacterChanges, group?: string) =>
     drafts.edit(id, disk, changes, group);
   const chooseTab = (next: Tab) => {
@@ -160,7 +161,7 @@ export function CharacterPanel({
           >
             {label}
             {TAB_FIELDS[tabId].some((field) => unsaved.includes(field)) && (
-              <span class="unsaved-dot" title="Unsaved changes" />
+              <span class="unsaved-dot" data-tip="Unsaved changes" />
             )}
             {tabId === "voice" && (
               <span class="tabs__count">
@@ -175,6 +176,7 @@ export function CharacterPanel({
       {tab === "appearance" && (
         <AppearanceTab
           look={look}
+          savedLook={savedLook}
           startingWeapons={data.startingWeapons}
           stats={data.stats}
           onChange={(look, group) => update({ look }, group)}
@@ -324,7 +326,7 @@ function VoicePicker({
         {voice?.previewUrl && (
           <button
             class="play"
-            title="Play ElevenLabs' sample of this voice"
+            data-tip="Play ElevenLabs' sample of this voice"
             onClick={() => toggle(voice.previewUrl!, "voice-preview")}
           >
             {playingKey() === "voice-preview" ? "■" : "▶"}
@@ -450,28 +452,28 @@ function SaveBar({
       <button
         onClick={onUndo}
         disabled={!canUndo}
-        title={`Undo (${shortcut("Z")})`}
+        data-tip={`Undo (${shortcut("Z")})`}
       >
         Undo
       </button>
       <button
         onClick={onRedo}
         disabled={!canRedo}
-        title={`Redo (${shortcut(isMac ? "⇧Z" : "Y")})`}
+        data-tip={`Redo (${shortcut(isMac ? "⇧Z" : "Y")})`}
       >
         Redo
       </button>
       <button
         onClick={onRevert}
         disabled={!dirty}
-        title="Go back to what's saved; Undo brings the changes back"
+        data-tip="Go back to what's saved; Undo brings the changes back"
       >
         Revert
       </button>
       {otherUnsaved > 0 && (
         <button
           onClick={onSaveAll}
-          title="Save every character with unsaved changes"
+          data-tip="Save every character with unsaved changes"
         >
           Save all ({otherUnsaved + (dirty ? 1 : 0)})
         </button>
@@ -480,7 +482,7 @@ function SaveBar({
         class="primary"
         onClick={onSave}
         disabled={!dirty}
-        title={`Save to characters/data (${shortcut("S")})`}
+        data-tip={`Save to characters/data (${shortcut("S")})`}
       >
         Save
       </button>
