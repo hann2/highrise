@@ -37,10 +37,11 @@ export function drawHead(
   d.include(-rx * 1.1, -ry * 1.15, rx * 1.1, ry * 1.15);
 
   // Hair down the back, under everything
-  if (hair.length > 0.02 && hair.coverage > 0) {
+  const grown = hair.coverage > 0 && !hair.cut;
+  if (hair.length > 0.02 && grown) {
     drawLongHair(d, look, rx, ry, colors.hair, random);
   }
-  if (hair.ponytail > 0.02 && hair.coverage > 0) {
+  if (hair.ponytail > 0.02 && grown) {
     drawPonytail(d, hair.ponytail, rx, ry, colors.hair, random);
   }
 
@@ -60,16 +61,12 @@ export function drawHead(
   d.blob(skull, colors.skin, { grain: skinGrain });
 
   // Eyes and brows at the front edge, unless the hair hides them
-  for (const side of [-1, 1]) {
-    const x = rx * 0.9;
-    const y = side * ry * 0.3;
-    d.add(
-      `<ellipse cx="${n(x)}" cy="${n(y)}" rx="9" ry="14" fill="${rot > 0.5 ? "#c9c7a0" : "#2a2420"}" transform="rotate(${side * 12} ${n(x)} ${n(y)})"/>`,
-    );
-  }
+  drawEyes(d, rx, ry, colors.skin, rot);
   drawBrows(d, look, rx, ry, colors.hair);
 
-  if (hair.coverage > 0) {
+  if (hair.coverage > 0 && hair.cut) {
+    drawCropped(d, look, rx, ry, colors.hair, colors.skin);
+  } else if (hair.coverage > 0) {
     drawHair(d, look, rx, ry, colors.hair, colors.skin, random);
   }
   if (look.glasses) {
@@ -78,7 +75,7 @@ export function drawHead(
   if (look.hat) {
     // Big enough to cover the hair's edge at its furthest
     const hairOut =
-      hair.coverage > 0
+      hair.coverage > 0 && !hair.cut
         ? 0.035 + hair.volume * 0.2 + hair.curls * 0.19 + hair.messiness * 0.07
         : 0;
     drawHat(d, look.hat, rx, ry, 1 + hairOut);
@@ -89,6 +86,208 @@ export function drawHead(
     }
   }
   return d;
+}
+
+/** Which eyes `drawEyes` draws: being compared */
+export const EYES: { style: "dots" | "almond" | "lids" | "sockets" } = {
+  style: "almond",
+};
+
+/**
+ * The eyes, at the front edge of the head: from above only a sliver of
+ * each shows, under the brow
+ */
+function drawEyes(
+  d: Drawing,
+  rx: number,
+  ry: number,
+  skin: Color,
+  rot: number,
+) {
+  const dead = rot > 0.5;
+  for (const side of [-1, 1]) {
+    const y = side * ry * 0.3;
+    // Just inside the skull's front edge there
+    const e = STYLE.headSquare;
+    const x = rx * (1 - Math.abs(y / ry) ** e) ** (1 / e) - 9;
+    const at = `transform="rotate(${side * 14} ${n(x)} ${n(y)})"`;
+    switch (EYES.style) {
+      case "dots":
+        d.add(
+          `<ellipse cx="${n(x)}" cy="${n(y)}" rx="9" ry="14" fill="${dead ? "#c9c7a0" : "#2a2420"}" ${at}/>`,
+        );
+        break;
+      case "almond": {
+        // The white, the iris toward the front, and the lid behind
+        const white = dead ? "#c9c7a0" : mix("#f4f1ea", skin, 0.12);
+        d.add(
+          `<g ${at}><path d="M${n(x - 12)} ${n(y - 20)}Q${n(x + 14)} ${n(y)} ${n(x - 12)} ${n(y + 20)}Q${n(x - 18)} ${n(y)} ${n(x - 12)} ${n(y - 20)}Z" fill="${white}"/>` +
+            (dead
+              ? ""
+              : `<ellipse cx="${n(x - 2)}" cy="${n(y)}" rx="6" ry="9" fill="#2a2420"/>`) +
+            `<path d="M${n(x - 12)} ${n(y - 21)}Q${n(x - 19)} ${n(y)} ${n(x - 12)} ${n(y + 21)}" fill="none" stroke="${darken(skin, 0.45)}" stroke-width="4" stroke-linecap="round"/></g>`,
+        );
+        break;
+      }
+      case "lids":
+        // Just the line of the upper lid and lashes
+        d.add(
+          `<path d="M${n(x - 4)} ${n(y - 17)}Q${n(x + 7)} ${n(y)} ${n(x - 4)} ${n(y + 17)}" fill="none" stroke="${dead ? "#8a8770" : "#2a2420"}" stroke-width="5" stroke-linecap="round" ${at}/>`,
+        );
+        break;
+      case "sockets":
+        // A soft hollow, with the eye glinting in it
+        d.add(
+          `<ellipse cx="${n(x - 5)}" cy="${n(y)}" rx="14" ry="22" fill="${darken(skin, 0.18)}" opacity="0.7" ${at}/>` +
+            `<ellipse cx="${n(x)}" cy="${n(y)}" rx="6" ry="9" fill="${dead ? "#c9c7a0" : "#2a2420"}" ${at}/>` +
+            `<circle cx="${n(x + 2)}" cy="${n(y - side * 3)}" r="2" fill="#fff" opacity="0.7"/>`,
+        );
+        break;
+    }
+  }
+}
+
+/** Eases from 0 below `a` to 1 above `b` */
+function smoothstep(a: number, b: number, x: number): number {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+}
+
+/** A bump of 1 at `at`, falling off over about `width` either side */
+function bell(x: number, at: number, width: number): number {
+  return Math.exp(-(((x - at) / width) ** 2));
+}
+
+/**
+ * Where the hairline is (x, mm) across the head at `y`: how far forward the
+ * hair comes there, by its coverage, fringe and shape (`Hairline`)
+ */
+function hairlineAt(look: BodyLook, rx: number, ry: number, y: number) {
+  const hair = look.hair;
+  const base = rx * (-1.2 + 2.1 * hair.coverage);
+  const u = y / ry;
+  const a = Math.abs(u);
+  const t = Math.min(1, u * u);
+  const fringe = hair.fringe * 0.42 * (t - 0.35);
+  // Forward to the sideburns at the sides, by the ears
+  const sideburns = 0.05 * smoothstep(0.9, 1.2, a);
+  let shape: number;
+  switch (hair.hairline) {
+    case "natural":
+      shape = 0.1 * (1 - t) - 0.09 * bell(a, 0.72, 0.16) + sideburns;
+      break;
+    case "straight":
+      shape = 0.1 - 0.32 * smoothstep(0.8, 1.3, a);
+      break;
+    case "peak":
+      shape =
+        0.03 +
+        0.16 * Math.max(0, 1 - a / 0.3) ** 1.5 -
+        0.1 * bell(a, 0.7, 0.18) +
+        sideburns;
+      break;
+    case "receding":
+      shape = 0.06 * (1 - t) - 0.28 * bell(a, 0.62, 0.22) + sideburns;
+      break;
+    case "swept": {
+      // Far forward on one side, back on the other
+      const side = (hair.part ?? -1) < 0 ? -1 : 1;
+      shape =
+        0.06 +
+        0.13 * Math.max(-1, Math.min(1, side * u)) -
+        0.2 * smoothstep(0.9, 1.3, a);
+      break;
+    }
+    case "curtains":
+      shape =
+        0.08 * (1 - t) -
+        0.16 * Math.max(0, 1 - a / 0.25) +
+        0.06 * bell(a, 0.5, 0.2) +
+        sideburns;
+      break;
+  }
+  return base + (shape + fringe) * rx;
+}
+
+/** The region behind the hairline, as a path, `forward` mm further forward */
+function hairlinePath(look: BodyLook, rx: number, ry: number, forward = 0) {
+  const points: Pt[] = [];
+  for (let i = 0; i <= 40; i++) {
+    const y = -ry * 1.6 + (ry * 3.2 * i) / 40;
+    points.push([hairlineAt(look, rx, ry, y) + forward, y]);
+  }
+  points.push([-rx * 3, ry * 1.6], [-rx * 3, -ry * 1.6]);
+  return smoothPath(points, true, 0.6);
+}
+
+/**
+ * Where the hair's gone, for `Hair.balding`: everything but a patch on top,
+ * from the crown, growing forward, `grow` times as big (for the thinning
+ * round it). A ring of hair is always left round the sides and back.
+ */
+function notBald(
+  d: Drawing,
+  look: BodyLook,
+  rx: number,
+  ry: number,
+  grow: number,
+): string | undefined {
+  const b = look.hair.balding;
+  if (b <= 0) {
+    return undefined;
+  }
+  const cx = -rx * 0.22 + b * rx * 0.4;
+  const ex = rx * (0.2 + 0.62 * b) * grow;
+  const ey = ry * (0.16 + 0.58 * b) * grow;
+  const everywhere = `M${n(-rx * 4)} ${n(-ry * 4)}H${n(rx * 4)}V${n(ry * 4)}H${n(-rx * 4)}Z`;
+  return d.clipPath(
+    `bald${grow}`,
+    everywhere + ellipsePath(cx, 0, ex, ey),
+    true,
+  );
+}
+
+/** Draws `draw` inside every one of `clips` that there is */
+function clipped(d: Drawing, clips: (string | undefined)[], draw: () => void) {
+  const present = clips.filter((clip) => clip !== undefined);
+  for (const clip of present) {
+    d.begin(`clip-path="url(#${clip})"`);
+  }
+  draw();
+  for (const _ of present) {
+    d.end();
+  }
+}
+
+/**
+ * A buzz cut or stubble: the hair no longer than the skull is round, so
+ * only its color over the scalp shows, behind the hairline
+ */
+function drawCropped(
+  d: Drawing,
+  look: BodyLook,
+  rx: number,
+  ry: number,
+  color: Color,
+  skin: Color,
+) {
+  const buzz = look.hair.cut === "buzz";
+  const shade = buzz ? mix(skin, color, 0.82) : mix(skin, color, 0.7);
+  const shape = smoothPath(skullPoints(rx, ry, 48, () => (buzz ? 0.015 : 0)));
+  // Fainter where it starts, so the hairline isn't a hard edge
+  const layers: [number, number, number][] = [
+    [9, 1, buzz ? 0.45 : 0.1],
+    [0, 1.2, buzz ? 0.9 : 0.2],
+  ];
+  for (const [forward, grow, opacity] of layers) {
+    const hairline = d.clipPath(
+      `crop${forward}`,
+      hairlinePath(look, rx, ry, forward),
+    );
+    clipped(d, [hairline, notBald(d, look, rx, ry, grow)], () =>
+      d.add(`<path d="${shape}" fill="${shade}" opacity="${n(opacity)}"/>`),
+    );
+  }
 }
 
 /**
@@ -190,15 +389,7 @@ function drawHair(
   const shape = smoothPath(points);
 
   // Clipped to behind the hairline, and to a strip for a mohawk
-  const base = rx * (-1.2 + 2.1 * hair.coverage);
-  const hairline: Pt[] = [];
-  for (let i = 0; i <= 24; i++) {
-    const y = -ry * 1.6 + (ry * 3.2 * i) / 24;
-    const t = Math.min(1, (y / ry) ** 2);
-    hairline.push([base + hair.fringe * rx * 0.42 * (t - 0.35), y]);
-  }
-  hairline.push([-rx * 3, ry * 1.6], [-rx * 3, -ry * 1.6]);
-  const clips = [d.clipPath("hairline", smoothPath(hairline, true, 0.6))];
+  const clips = [d.clipPath("hairline", hairlinePath(look, rx, ry))];
   if (hair.mohawk > 0) {
     const half = ry * (0.12 + hair.mohawk * 0.35);
     clips.push(
@@ -218,6 +409,22 @@ function drawHair(
       `<path d="${ellipsePath(0, 0, rx - 4, ry - 4)}" fill="${mix(skin, color, 0.35)}" opacity="0.6"/>`,
     );
     d.end();
+  }
+  // Thinner just in front of the hairline, so it isn't a hard edge
+  if (hair.mohawk <= 0) {
+    // Only the band between the two
+    d.begin(
+      `clip-path="url(#${d.clipPath("thin", hairlinePath(look, rx, ry, 10) + hairlinePath(look, rx, ry), true)})"`,
+    );
+    d.add(`<path d="${shape}" fill="${color}" opacity="0.45"/>`);
+    d.end();
+  }
+  // Thinning round where it's bald
+  if (hair.balding > 0) {
+    clipped(d, [...clips, notBald(d, look, rx, ry, 1)], () =>
+      d.add(`<path d="${shape}" fill="${color}" opacity="0.5"/>`),
+    );
+    clips.push(notBald(d, look, rx, ry, 1.25)!);
   }
   for (const clip of clips) {
     d.begin(`clip-path="url(#${clip})"`);
@@ -244,12 +451,13 @@ function drawHair(
     }
   }
   // A shine across the top
-  d.line(
-    `M${n(-rx * 0.45)} ${n(-ry * 0.42)}Q${n(-rx * 0.05)} ${n(-ry * 0.62)} ${n(rx * 0.3)} ${n(-ry * 0.38)}`,
-    lighten(color, 0.4),
-    14,
-    `opacity="0.3"`,
-  );
+  if (hair.balding < 0.4)
+    d.line(
+      `M${n(-rx * 0.45)} ${n(-ry * 0.42)}Q${n(-rx * 0.05)} ${n(-ry * 0.62)} ${n(rx * 0.3)} ${n(-ry * 0.38)}`,
+      lighten(color, 0.4),
+      14,
+      `opacity="0.3"`,
+    );
   if (hair.part !== undefined) {
     const y = hair.part * ry * 0.45;
     d.line(

@@ -414,7 +414,9 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
         ? Math.round(between(random, 0.3, 1) * 100) / 100
         : 0,
       length: long ? Math.round(between(random, 0.2, 1) * 100) / 100 : 0,
+      hairline: "natural",
       fringe: slider(random, 0.6),
+      balding: 0,
       part: chance(random, 0.3) ? slider(random, 0.8) : undefined,
       bun:
         !long && chance(random, 0.08)
@@ -475,6 +477,21 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
   const bustChance = look.beard ? 0 : pantsStyle === "skirt" ? 0.9 : 0.4;
   if (chance(random, bustChance)) {
     look.build.bust = Math.round(between(random, 0.25, 0.85) * 100) / 100;
+  }
+  // Hairlines, haircuts and thinning on top
+  look.hair.hairline = weighted(random, {
+    natural: 8,
+    straight: 2,
+    peak: 1,
+    receding: look.beard ? 3 : 1,
+    swept: 2,
+    curtains: 1,
+  });
+  if (look.hair.coverage > 0 && !look.hair.length && chance(random, 0.12)) {
+    look.hair.cut = chance(random, 0.6) ? "buzz" : "stubble";
+  }
+  if (look.hair.coverage > 0 && look.build.bust === 0 && chance(random, 0.18)) {
+    look.hair.balding = Math.round(between(random, 0.2, 1) * 100) / 100;
   }
   look.build.feet =
     Math.round((look.build.hands * 0.5 + slider(random, 0.3)) * 100) / 100;

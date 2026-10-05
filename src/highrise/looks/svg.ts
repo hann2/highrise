@@ -176,10 +176,12 @@ export class Drawing {
   }
 
   /** A clip path of `d`, by its id */
-  clipPath(name: string, d: string): string {
+  /** A clip path's id; `evenOdd`, so a shape inside another is a hole in it */
+  clipPath(name: string, d: string, evenOdd = false): string {
+    const rule = evenOdd ? ` clip-rule="evenodd"` : "";
     return this.def(
       name,
-      (id) => `<clipPath id="${id}"><path d="${d}"/></clipPath>`,
+      (id) => `<clipPath id="${id}"><path d="${d}"${rule}/></clipPath>`,
     );
   }
 

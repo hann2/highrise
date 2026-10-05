@@ -8,6 +8,8 @@ import {
   EXTRA_KINDS,
   GLASSES_SHAPES,
   HAT_STYLES,
+  HAIR_CUTS,
+  HAIRLINES,
   Hair,
   PANTS_STYLES,
   PATTERN_KINDS,
@@ -52,6 +54,7 @@ const HAIR_SLIDERS: [keyof Hair, string, string][] = [
   ["bun", "Bun", ""],
   ["ponytail", "Ponytail", ""],
   ["mohawk", "Mohawk", "Shaved but for a strip this wide"],
+  ["balding", "Balding", "Bald on top, from the crown forward"],
 ];
 
 const ZOMBIE_PREVIEW: Zombification = { rot: 0.8, blood: 0.6, tears: 0.6 };
@@ -187,8 +190,25 @@ export function AppearanceTab({
               onChange={(value) => set("hair", { ...look.hair, [key]: value })}
             />
           ))}
-          <Slider
+          <SelectField
             label="Hairline"
+            value={look.hair.hairline}
+            options={HAIRLINES}
+            onChange={(hairline) =>
+              hairline && set("hair", { ...look.hair, hairline })
+            }
+          />
+          <SelectField
+            label="Cut"
+            value={look.hair.cut ?? ""}
+            options={HAIR_CUTS}
+            none="As grown"
+            onChange={(cut) =>
+              set("hair", { ...look.hair, cut: cut || undefined })
+            }
+          />
+          <Slider
+            label="Hairline position"
             hint="forward in the middle – receding"
             value={look.hair.fringe}
             min={-1}

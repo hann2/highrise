@@ -78,8 +78,14 @@ export interface Hair {
   curls: number;
   /** How far it hangs down the back */
   length: number;
-  /** The hairline's shape: -1 comes forward in the middle (bangs, a widow's peak), 1 recedes in the middle */
+  /** The hairline's shape (`HAIRLINES`) */
+  hairline: Hairline;
+  /** Moves the hairline: -1 comes forward in the middle, 1 recedes in the middle */
   fringe: number;
+  /** Cut right down: a buzz cut, or just stubble; else as long as the sliders say */
+  cut?: HairCut;
+  /** Bald on top, from a thin crown (a little) to only a ring round the sides (1) */
+  balding: number;
   /** Where it's parted, from -1 (the left) to 1, if it is */
   part?: number;
   /** A bun on the back of the head, this big */
@@ -89,6 +95,27 @@ export interface Hair {
   /** Shaved but for a strip down the middle this wide, if more than 0 */
   mohawk: number;
 }
+
+/**
+ * What the front edge of the hair is like, from above: `natural` curves
+ * round the forehead, back at the temples and forward to the sideburns;
+ * `straight` is bangs cut across; `peak` a widow's peak; `receding` far
+ * back at the temples; `swept` a fringe swept across to one side (the
+ * parting's side, else the left); `curtains` parted in the middle and swept
+ * out to both sides
+ */
+export const HAIRLINES = [
+  "natural",
+  "straight",
+  "peak",
+  "receding",
+  "swept",
+  "curtains",
+] as const;
+export type Hairline = (typeof HAIRLINES)[number];
+
+export const HAIR_CUTS = ["buzz", "stubble"] as const;
+export type HairCut = (typeof HAIR_CUTS)[number];
 
 export interface Brows {
   /** From thin lines (0) to thick and bushy (1) */
@@ -249,7 +276,9 @@ export const DEFAULT_LOOK: BodyLook = {
     messiness: 0.2,
     curls: 0,
     length: 0,
+    hairline: "natural",
     fringe: 0.2,
+    balding: 0,
     bun: 0,
     ponytail: 0,
     mohawk: 0,
@@ -344,6 +373,11 @@ export function lookProblems(look: PartialLook | undefined): string[] {
     range(`hair.${key}`, r.hair[key], 0, 1);
   }
   range("hair.fringe", r.hair.fringe, -1, 1);
+  range("hair.balding", r.hair.balding, 0, 1);
+  oneOf("hair.hairline", r.hair.hairline, HAIRLINES);
+  if (r.hair.cut !== undefined) {
+    oneOf("hair.cut", r.hair.cut, HAIR_CUTS);
+  }
   if (r.hair.part !== undefined) {
     range("hair.part", r.hair.part, -1, 1);
   }
