@@ -421,6 +421,7 @@ The 2026-09-25 briefs, each playable on its own:
 - Floor size and count.
 - Starting-character traits: stats only, or one rule-like trait each?
 - Every store has a gun (decided 2026-09-26). That's 3 guns in today's 4-floor run, but ~11 in a 15-floor run even with act 1's stores gunless (brief 18), against the "guns are rare, 3–4 a run" goal: decide how to thin them (some floors, big stores only) or accept more guns when building brief 18.
+- A better name for the encyclopedia.
 - The 2026-09-25 progression section has its own open list (ammo numbers, consumable limits, the stat-pick fallback, big store floors).
 
 ## Leftovers
