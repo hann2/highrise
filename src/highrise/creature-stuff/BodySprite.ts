@@ -112,12 +112,13 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.rightHandSprite = new Sprite(textures.rightHand);
     this.rightHandSprite.scale.set(scale);
 
+    // The arms over the torso: the top of each arm is the shoulder's edge
     this.sprite.addChild(
+      this.torsoSprite,
       this.leftArmSprite,
       this.rightArmSprite,
       this.leftHandSprite,
       this.rightHandSprite,
-      this.torsoSprite,
       this.headSprite,
     );
 

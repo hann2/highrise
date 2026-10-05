@@ -81,18 +81,17 @@ function armHalfWidth(dims: BodyDimensions, x: number): number {
 }
 
 /**
- * The outline of an arm (`scale` times as wide, plus `extra` mm each side),
- * from `x0` to `x1` along it, rounded at both ends: a sleeve, or the arm
+ * The outline of an arm from `x0` to `x1` along it, `widen(x, half)` times
+ * as wide, rounded at both ends: the arm itself, or a sleeve
  */
 function armShape(
   dims: BodyDimensions,
   x0: number,
   x1: number,
-  scale = 1,
-  extra = 0,
+  widen: (x: number, half: number) => number = (_, half) => half,
   steps = 24,
 ): Pt[] {
-  const half = (x: number) => armHalfWidth(dims, x) * scale + extra;
+  const half = (x: number) => widen(x, armHalfWidth(dims, x));
   const top: Pt[] = [];
   const bottom: Pt[] = [];
   for (let i = 0; i <= steps; i++) {
@@ -109,6 +108,20 @@ function armShape(
     });
   };
   return [...top, ...cap(x1, 1), ...bottom.reverse(), ...cap(x0, -1)];
+}
+
+/**
+ * How wide a sleeve is at `x` for an arm `half` wide there: as wide as the
+ * arm at the shoulder, so it's the shoulder's own edge, getting looser and
+ * less tapered down the arm
+ */
+function sleeveWidener(dims: BodyDimensions) {
+  const { shoulder } = armJoints(dims);
+  return (x: number, half: number) => {
+    const f = Math.min(1, Math.max(0, (x - shoulder) / (dims.upperArm * 0.4)));
+    const loose = f * f * (3 - 2 * f);
+    return half * (1 - 0.08 * loose) + dims.armThickness * 0.12 * loose;
+  };
 }
 
 /**
@@ -148,10 +161,11 @@ export function drawArm(
       joints.shoulder + (joints.hand - joints.shoulder) * Math.min(1, sleeve);
     const ragged = (look.zombie?.tears ?? 0) > 0.3;
     // Loose: wider than the arm, and less tapered
-    const outline = armShape(dims, joints.shoulder, end, 0.92, t * 0.12, 16);
+    const widen = sleeveWidener(dims);
+    const outline = armShape(dims, joints.shoulder, end, widen, 16);
     if (ragged) {
       // Torn at the end: a zigzag across instead of the round end
-      const half = armHalfWidth(dims, end) * 0.92 + t * 0.12;
+      const half = widen(end, armHalfWidth(dims, end));
       const top = outline.slice(0, 17);
       const bottom = outline.slice(20, 37);
       const rag: Pt[] = [];
@@ -182,7 +196,7 @@ export function drawArm(
       d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("tube")})"/>`);
     }
     if (look.sleeves.cuff) {
-      const half = armHalfWidth(dims, end) * 0.92 + t * 0.12 + 3;
+      const half = widen(end, armHalfWidth(dims, end)) + 3;
       d.blob(
         polygonPath([
           [end - 34, -half],
@@ -320,10 +334,12 @@ export function drawArmSegment(
   const sleeveEnd =
     joints.shoulder +
     (joints.hand - joints.shoulder) * Math.min(1, look.sleeves.length);
-  const sleeved = (x: number) => look.sleeves.length > 0.02 && sleeveEnd > x;
-  const loose = (x: number) => (sleeved(x) ? [0.92, t * 0.12] : [1, 0]);
-  const [scale, extra] = loose(segment === "upper" ? end : start);
-  const outline = armShape(dims, start, end, Math.max(scale, 1), extra);
+  const sleeved = look.sleeves.length > 0.02;
+  const widen = sleeveWidener(dims);
+  const outline = armShape(dims, start, end, (x, half) =>
+    // A little past its end, for a round or torn end
+    sleeved && x <= sleeveEnd + t * 0.6 ? Math.max(half, widen(x, half)) : half,
+  );
   const clip = d.clipPath(
     "segment",
     smoothPath(

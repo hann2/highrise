@@ -65,9 +65,11 @@ export function torsoProfile(
     squareness,
     armThickness,
   } = dims;
-  // The chest is a superellipse a little narrower than the shoulders
-  const capRadius = armThickness * 0.62;
-  const chestHalf = w - capRadius * 0.8;
+  // Each end is as round and as wide as the top of the arm, round the
+  // shoulder joint, so an arm pointing any way meets it smoothly; the chest
+  // is a superellipse a little narrower
+  const capRadius = armThickness / 2;
+  const chestHalf = w - capRadius * 1.1;
   const p = squareness;
   const chest = (y: number, depth: number) => {
     const u = Math.min(1, Math.abs(y) / chestHalf);
