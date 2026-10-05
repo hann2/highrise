@@ -116,6 +116,50 @@ button.primary {
   grid-template-columns: 220px 1fr;
   min-height: 100vh;
 }
+.editor.is-collapsed {
+  grid-template-columns: 52px 1fr;
+}
+.sidebar__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 8px;
+}
+.sidebar__toggle {
+  padding: 0 7px;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+}
+.is-collapsed .sidebar__top {
+  justify-content: center;
+  padding: 12px 0 6px;
+}
+.is-collapsed .sidebar h1,
+.is-collapsed .sidebar__name,
+.is-collapsed .sidebar__count {
+  display: none;
+}
+.is-collapsed .sidebar__item {
+  justify-content: center;
+  padding: 6px 0;
+}
+/* The unsaved dot, which is in the hidden name, shows on the picture */
+.is-collapsed .sidebar__item {
+  position: relative;
+}
+.is-collapsed .sidebar__item:has(.unsaved-dot)::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
 
 .sidebar {
   background: var(--panel);
@@ -158,6 +202,8 @@ button.primary {
 .main {
   padding: 24px 32px 80px;
   min-width: 0;
+  /* Laid out by how much room it has, not the window: the sidebar may be folded */
+  container: main / inline-size;
 }
 
 .panel {
@@ -394,7 +440,7 @@ button.primary {
 }
 .appearance__controls {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 16px;
   align-items: start;
 }
@@ -426,7 +472,7 @@ button.primary {
 
 .field {
   display: grid;
-  grid-template-columns: 110px 1fr;
+  grid-template-columns: 118px 1fr;
   align-items: center;
   gap: 8px;
   min-height: 30px;
@@ -438,10 +484,8 @@ button.primary {
 }
 .field__hint {
   font-size: 11px;
+  line-height: 1.25;
   color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .field select {
   justify-self: start;
@@ -553,7 +597,7 @@ button.primary {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 16px;
 }
 .stats__group h3 {
@@ -904,14 +948,51 @@ button.primary {
   }
 }
 
-@media (max-width: 1100px) {
+@container main (max-width: 900px) {
   .panel__grid {
     grid-template-columns: 1fr;
   }
-  .stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .category__header {
     flex-wrap: wrap;
+  }
+}
+/* The preview goes above the settings, at a size that still fits */
+@container main (max-width: 780px) {
+  .appearance {
+    grid-template-columns: 1fr;
+  }
+  .appearance__preview {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .appearance__preview > .game-preview {
+    grid-row: span 2;
+  }
+  .appearance__controls {
+    grid-template-columns: 1fr;
+  }
+}
+@container main (max-width: 560px) {
+  .appearance__preview {
+    grid-template-columns: 1fr;
+  }
+  .panel__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .sprite-preview {
+    align-self: flex-start;
+    height: 120px;
+  }
+}
+
+@media (max-width: 700px) {
+  .main {
+    padding: 16px 12px 80px;
   }
 }

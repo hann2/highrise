@@ -133,14 +133,25 @@ export function App() {
     };
   }, []);
 
+  const [collapsed, setCollapsed] = useCollapsedSidebar();
+
   useEffect(() => {
     document.title = `${unsavedIds.length > 0 ? "• " : ""}Character Editor`;
   }, [unsavedIds.length]);
 
   return (
-    <div class="editor">
+    <div class={`editor ${collapsed ? "is-collapsed" : ""}`}>
       <nav class="sidebar">
-        <h1>Characters</h1>
+        <div class="sidebar__top">
+          <h1>Characters</h1>
+          <button
+            class="sidebar__toggle"
+            title={collapsed ? "Show the names" : "Fold the list away"}
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? "»" : "«"}
+          </button>
+        </div>
         {characters?.map(({ id, data: disk }) => {
           const data = drafts.current!.edited(id, disk);
           const unsaved = unsavedIds.includes(id);
@@ -149,6 +160,7 @@ export function App() {
             <a
               key={id}
               href={`#${id}`}
+              title={data.name}
               class={`sidebar__item ${entry?.id === id ? "is-selected" : ""}`}
             >
               <img src={portraitUrl(resolveLook(data.look), { scale: 60 })} />
@@ -193,4 +205,30 @@ export function App() {
       )}
     </div>
   );
+}
+
+/** Where whether the sidebar's folded is remembered */
+const COLLAPSED_KEY = "characterEditorSidebarCollapsed";
+
+/**
+ * Whether the character list is folded down to their pictures: as it was
+ * left, else folded when the window's narrow
+ */
+function useCollapsedSidebar(): [boolean, (collapsed: boolean) => void] {
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem(COLLAPSED_KEY);
+      if (saved !== null) {
+        return saved === "true";
+      }
+    } catch {}
+    return window.innerWidth < 1100;
+  });
+  const set = (next: boolean) => {
+    setCollapsed(next);
+    try {
+      localStorage.setItem(COLLAPSED_KEY, String(next));
+    } catch {}
+  };
+  return [collapsed, set];
 }
