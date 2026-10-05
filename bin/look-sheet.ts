@@ -6,6 +6,7 @@ import { PartialLook } from "../src/highrise/looks/BodyLook";
 import { composeBodySvg } from "../src/highrise/looks/composeBody";
 import { BODY_PARTS, drawBody } from "../src/highrise/looks/drawBody";
 import { randomLook } from "../src/highrise/looks/randomLook";
+import { setLookStyle } from "../src/highrise/looks/style";
 import { HatStyle } from "../src/highrise/looks/BodyLook";
 import {
   pieceNames,
@@ -20,7 +21,10 @@ import {
  * then random zombies and people.
  *
  *   npx tsx bin/look-sheet.ts [--zombies 24] [--people 0] [--parts] [--only andy,chad]
- *     [--seed 1] [--scale 200] [--out tests/output/look-sheet.png]
+ *     [--seed 1] [--scale 200] [--style gloss,soft] [--standing] [--out tests/output/look-sheet.png]
+ *
+ * `--style` draws it all once per look style (`looks/style.ts`), to compare
+ * them; `--standing` leaves out the bodies lying down.
  */
 
 function arg(name: string): string | undefined {
@@ -35,7 +39,9 @@ async function main() {
   const scale = Number(arg("scale") ?? 200);
   const showParts = process.argv.includes("--parts");
   const out = arg("out") ?? "tests/output/look-sheet.png";
-  const random = makeRandom(Number(arg("seed") ?? 1));
+  const seed = Number(arg("seed") ?? 1);
+  const styles = arg("style")?.split(",") ?? [undefined];
+  const standingOnly = process.argv.includes("--standing");
 
   // The hand-drawn hats and the pieces, as the game's import.meta.glob would have them
   const hatDir = "src/highrise/looks/hats";
@@ -84,58 +90,71 @@ async function main() {
     figcaption { margin-top: 4px; }
   </style>`;
 
-  const showBody = (name: string, look: PartialLook, i: number) => {
-    const body = drawBody(look, `x${i}`);
-    let row = cell(composeBodySvg(body, { scale }), name);
-    row += cell(
-      composeBodySvg(drawBody(look, `y${i}`), {
-        scale: scale * 0.7,
-        pose: "lying",
-      }),
-      "lying",
-    );
-    if (showParts) {
-      for (const part of BODY_PARTS) {
+  for (const style of styles) {
+    if (style) {
+      setLookStyle(style);
+      html += `<h1>${style}</h1>`;
+    }
+    // Ids are per inline SVG, but they share the page
+    const id = (name: string) => `${style ?? ""}${name}`;
+    const random = makeRandom(seed);
+    const showBody = (name: string, look: PartialLook, i: number) => {
+      const body = drawBody(look, id(`x${i}`));
+      let row = cell(composeBodySvg(body, { scale }), name);
+      if (!standingOnly) {
         row += cell(
-          drawBody(look, `p${i}${part}`).parts[part].toSvg(scale),
-          part,
+          composeBodySvg(drawBody(look, id(`y${i}`)), {
+            scale: scale * 0.7,
+            pose: "lying",
+          }),
+          "lying",
         );
       }
-    }
-    return row;
-  };
+      if (showParts) {
+        for (const part of BODY_PARTS) {
+          row += cell(
+            drawBody(look, id(`p${i}${part}`)).parts[part].toSvg(scale),
+            part,
+          );
+        }
+      }
+      return row;
+    };
 
-  if (characters.length) {
-    html += `<h2>Characters</h2><div class="row">`;
-    characters.forEach(([name, look], i) => (html += showBody(name, look, i)));
-    html += `</div>`;
-  }
-  if (process.argv.includes("--pieces")) {
-    html += `<h2>Pieces</h2><div class="row">`;
-    pieceNames().forEach((name, i) => {
-      const look = {
-        pieces: [{ name, color: "#c0392b", secondary: "#f1c40f" }],
-        seed: i,
-      };
-      html += cell(composeBodySvg(look, { scale }, `pc${i}`), name);
-    });
-    html += `</div>`;
-  }
-  if (zombies) {
-    html += `<h2>Zombies</h2><div class="row">`;
-    for (let i = 0; i < zombies; i++) {
-      const look = randomLook(random, true);
-      html += cell(composeBodySvg(look, { scale }, `z${i}`));
+    if (characters.length) {
+      html += `<h2>Characters</h2><div class="row">`;
+      characters.forEach(
+        ([name, look], i) => (html += showBody(name, look, i)),
+      );
+      html += `</div>`;
     }
-    html += `</div>`;
-  }
-  if (people) {
-    html += `<h2>People</h2><div class="row">`;
-    for (let i = 0; i < people; i++) {
-      const look = randomLook(random, false);
-      html += cell(composeBodySvg(look, { scale }, `h${i}`));
+    if (process.argv.includes("--pieces")) {
+      html += `<h2>Pieces</h2><div class="row">`;
+      pieceNames().forEach((name, i) => {
+        const look = {
+          pieces: [{ name, color: "#c0392b", secondary: "#f1c40f" }],
+          seed: i,
+        };
+        html += cell(composeBodySvg(look, { scale }, id(`pc${i}`)), name);
+      });
+      html += `</div>`;
     }
-    html += `</div>`;
+    if (zombies) {
+      html += `<h2>Zombies</h2><div class="row">`;
+      for (let i = 0; i < zombies; i++) {
+        const look = randomLook(random, true);
+        html += cell(composeBodySvg(look, { scale }, id(`z${i}`)));
+      }
+      html += `</div>`;
+    }
+    if (people) {
+      html += `<h2>People</h2><div class="row">`;
+      for (let i = 0; i < people; i++) {
+        const look = randomLook(random, false);
+        html += cell(composeBodySvg(look, { scale }, id(`h${i}`)));
+      }
+      html += `</div>`;
+    }
   }
 
   fs.mkdirSync(path.dirname(out), { recursive: true });

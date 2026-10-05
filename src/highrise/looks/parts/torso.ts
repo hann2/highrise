@@ -374,9 +374,7 @@ export function drawTorso(
     drawExtra(d, extra.kind, extra.color, dims, torso, random);
   }
 
-  d.add(
-    `<path d="${shape}" fill="none" stroke="${darken(band ? shoulderColor(look, colors.skin) : top.color, 0.5)}" stroke-width="9" stroke-linejoin="round"/>`,
-  );
+  d.outline(shape, band ? shoulderColor(look, colors.skin) : top.color);
   // Over the outline: a popped collar stands round the neck, and the hood
   // lies on the back and shoulders
   if (COLLARED.includes(top.style) && top.popped) {
@@ -770,8 +768,6 @@ export function drawLyingTorso(
     }
   }
 
-  d.add(
-    `<path d="${shape}" fill="none" stroke="${darken(base, 0.5)}" stroke-width="9" stroke-linejoin="round"/>`,
-  );
+  d.outline(shape, base);
   return d;
 }

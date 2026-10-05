@@ -133,7 +133,7 @@ export class Drawing {
 
   /** Makes the box big enough for this, plus room for an outline */
   include(minX: number, minY: number, maxX: number, maxY: number) {
-    const margin = STYLE.outline;
+    const margin = STYLE.outline + (STYLE.cast ? STYLE.cast.blur * 2.5 : 0);
     this.minX = Math.min(this.minX, minX - margin);
     this.minY = Math.min(this.minY, minY - margin);
     this.maxX = Math.max(this.maxX, maxX + margin);
@@ -204,13 +204,15 @@ export class Drawing {
     } else {
       this.add(`<path d="${d}" fill="${fill}"/>`);
     }
-    if (shade !== "flat") {
+    if (shade !== "flat" && STYLE.shading !== "flat") {
       this.add(`<path d="${d}" fill="url(#${this.shadeGradient(shade)})"/>`);
     }
-    if (outline > 0) {
+    // Outlines thinner than the house's (9 mm when it was made) stay as much thinner
+    const width = (outline * STYLE.outline) / 9;
+    if (width > 0) {
       const color = options.outlineColor ?? darken(fill, STYLE.outlineDarken);
       this.add(
-        `<path d="${d}" fill="none" stroke="${color}" stroke-width="${n(outline)}" stroke-linejoin="round"/>`,
+        `<path d="${d}" fill="none" stroke="${color}" stroke-width="${n(width)}" stroke-linejoin="round"/>`,
       );
     }
     if (groupAttrs.trim()) {
@@ -225,29 +227,89 @@ export class Drawing {
     );
   }
 
+  /** An outline round `d`, the house's width, in a darker `fill` */
+  outline(d: string, fill: Color) {
+    if (STYLE.outline > 0) {
+      this.add(
+        `<path d="${d}" fill="none" stroke="${darken(fill, STYLE.outlineDarken)}" stroke-width="${n(STYLE.outline)}" stroke-linejoin="round"/>`,
+      );
+    }
+  }
+
   shadeGradient(shade: "dome" | "tube"): string {
-    const { highlight, shadow } = STYLE;
+    const { highlight: hi, shadow: sh, shading } = STYLE;
+    const stops = (list: [number, string, number][]) =>
+      list
+        .map(
+          ([offset, color, opacity]) =>
+            `<stop offset="${offset}" stop-color="${color}" stop-opacity="${opacity}"/>`,
+        )
+        .join("");
     if (shade === "dome") {
+      const [attrs, list]: [string, [number, string, number][]] =
+        shading === "gloss"
+          ? [
+              `cx="0.45" cy="0.42" r="0.62"`,
+              [
+                [0, "#fff", hi],
+                [0.55, "#fff", 0],
+                [0.8, "#000", sh * 0.4],
+                [1, "#000", sh],
+              ],
+            ]
+          : shading === "soft"
+            ? [
+                `cx="0.5" cy="0.5" r="0.58"`,
+                [
+                  [0, "#fff", hi],
+                  [0.45, "#fff", 0],
+                  [0.78, "#000", sh * 0.3],
+                  [1, "#000", sh],
+                ],
+              ]
+            : [
+                `cx="0.5" cy="0.5" r="0.6"`,
+                [
+                  [0, "#000", 0],
+                  [0.74, "#000", 0],
+                  [0.74, "#000", sh],
+                  [1, "#000", sh * 1.3],
+                ],
+              ];
       return this.def(
         "dome",
         (id) =>
-          `<radialGradient id="${id}" cx="0.45" cy="0.42" r="0.62">` +
-          `<stop offset="0" stop-color="#fff" stop-opacity="${highlight}"/>` +
-          `<stop offset="0.55" stop-color="#fff" stop-opacity="0"/>` +
-          `<stop offset="0.8" stop-color="#000" stop-opacity="${shadow * 0.4}"/>` +
-          `<stop offset="1" stop-color="#000" stop-opacity="${shadow}"/>` +
-          `</radialGradient>`,
+          `<radialGradient id="${id}" ${attrs}>${stops(list)}</radialGradient>`,
       );
     }
+    const list: [number, string, number][] =
+      shading === "gloss"
+        ? [
+            [0, "#000", sh * 0.7],
+            [0.35, "#fff", hi],
+            [0.6, "#fff", 0],
+            [1, "#000", sh],
+          ]
+        : shading === "soft"
+          ? [
+              [0, "#000", sh * 0.8],
+              [0.3, "#000", 0],
+              [0.5, "#fff", hi],
+              [0.7, "#000", 0],
+              [1, "#000", sh * 0.8],
+            ]
+          : [
+              [0, "#000", sh],
+              [0.22, "#000", sh],
+              [0.22, "#000", 0],
+              [0.78, "#000", 0],
+              [0.78, "#000", sh],
+              [1, "#000", sh],
+            ];
     return this.def(
       "tube",
       (id) =>
-        `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">` +
-        `<stop offset="0" stop-color="#000" stop-opacity="${shadow * 0.7}"/>` +
-        `<stop offset="0.35" stop-color="#fff" stop-opacity="${highlight}"/>` +
-        `<stop offset="0.6" stop-color="#fff" stop-opacity="0"/>` +
-        `<stop offset="1" stop-color="#000" stop-opacity="${shadow}"/>` +
-        `</linearGradient>`,
+        `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">${stops(list)}</linearGradient>`,
     );
   }
 
@@ -268,7 +330,22 @@ export class Drawing {
 
   /** The finished drawing as the inside of an `<svg>` */
   content(): string {
-    return `<defs>${this.defs.join("")}</defs>${this.body.join("")}`;
+    let body = this.body.join("");
+    const cast = STYLE.cast;
+    if (cast) {
+      // The shadow it casts on whatever's under it: its own shape, blurred
+      const id = this.def(
+        "cast",
+        (id) =>
+          `<filter id="${id}" filterUnits="userSpaceOnUse" x="${n(this.minX)}" y="${n(this.minY)}" width="${n(this.width)}" height="${n(this.height)}">` +
+          `<feGaussianBlur in="SourceAlpha" stdDeviation="${n(cast.blur)}"/>` +
+          `<feComponentTransfer><feFuncA type="linear" slope="${cast.opacity}"/></feComponentTransfer>` +
+          `<feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>` +
+          `</filter>`,
+      );
+      body = `<g filter="url(#${id})">${body}</g>`;
+    }
+    return `<defs>${this.defs.join("")}</defs>${body}`;
   }
 
   /** As a document of its own, `pixelsPerMeter` big */

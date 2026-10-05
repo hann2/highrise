@@ -34,6 +34,7 @@ import SettingsController, { getSetting } from "./settings/SettingsController";
 import { createFpsPanel } from "../core/util/stats-overlay/FpsPanel";
 import Preloader from "./preloader/Preloader";
 import { bakeBodies } from "./looks/bakeBodies";
+import { setLookStyle } from "./looks/style";
 import { HEAVY_LOOKS, ZOMBIE_LOOKS } from "./enemies/zombie/ZombieVariants";
 import { BOB_LOOK } from "./lobby/ReceptionistBob";
 
@@ -88,6 +89,11 @@ export async function main() {
   });
 
   // Every body's parts are drawn and baked into textures while the rest loads
+  // Another look style to try, `?style=soft` (`looks/style.ts`)
+  const lookStyle = new URLSearchParams(window.location.search).get("style");
+  if (lookStyle) {
+    setLookStyle(lookStyle);
+  }
   const baking = bakeBodies([
     ...CHARACTERS.map((character) => character.look),
     ...ZOMBIE_LOOKS,

@@ -10,7 +10,6 @@ import {
   Pt,
   smoothPath,
 } from "../svg";
-import { STYLE } from "../style";
 import {
   drawHatDrawing,
   drawPiece,
@@ -196,7 +195,7 @@ function drawHair(
   for (const clip of clips) {
     d.begin(`clip-path="url(#${clip})"`);
   }
-  d.blob(shape, color, { outline: STYLE.outline * 0.9 });
+  d.blob(shape, color, { outline: 8 });
 
   const crown: Pt = [-rx * 0.28, (hair.part ?? 0) * ry * 0.45];
   const strandColor = darken(color, 0.3);
