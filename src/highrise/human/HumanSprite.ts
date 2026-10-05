@@ -96,8 +96,8 @@ export default class HumanSprite extends BodySprite {
 
   /**
    * Puts the left arm and hand, and the magazine it carries, on top of
-   * everything, or where `BodySprite` has the arms and hands (over the
-   * torso, under the head) but over the right arm, so the magazine's seen.
+   * everything, or under the body (where `BodySprite` has the arms and
+   * hands, over the legs) but over the right arm, so the magazine's seen.
    * The hand's over the magazine.
    */
   private arrangeLeftHand() {
@@ -108,12 +108,10 @@ export default class HumanSprite extends BodySprite {
     if (this.leftHandOver) {
       this.sprite.addChild(...left);
     } else {
-      const arms = [this.rightArmSprite, this.rightHandSprite, ...left];
-      for (const sprite of arms) {
-        this.sprite.removeChild(sprite);
-      }
-      const above = this.sprite.getChildIndex(this.torsoSprite) + 1;
-      arms.forEach((sprite, i) => this.sprite.addChildAt(sprite, above + i));
+      const bottom = this.legsSprite ? 1 : 0;
+      [this.rightArmSprite, this.rightHandSprite, ...left].forEach(
+        (sprite, i) => this.sprite.addChildAt(sprite, bottom + i),
+      );
     }
   }
 

@@ -94,8 +94,6 @@ export function composeBodySvg(
         part,
         `translate(${n(x0)} ${n(y0)}) rotate(${n((Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI)}) scale(${(Math.hypot(x1 - x0, y1 - y0) / length).toFixed(3)} 1)`,
       );
-    // The torso under the arms: the top of each arm is the shoulder's edge
-    items.push(place(parts.torso, ""));
     let elbowReach = Math.max(
       ...hands.map(([, hy]) => Math.abs(hy) + dims.handSize * 0.6),
     );
@@ -119,6 +117,7 @@ export function composeBodySvg(
     for (const [, , hand, , [hx, hy]] of arms) {
       items.push(place(hand, `translate(${n(hx)} ${n(hy)})`));
     }
+    items.push(place(parts.torso, ""));
     items.push(place(parts.head, ""));
     const reach = Math.max(
       dims.shoulderHalfWidth + 40,
