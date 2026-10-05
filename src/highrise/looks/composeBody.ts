@@ -1,4 +1,5 @@
-import { ARM_DROP, elbowPosition } from "../creature-stuff/armReach";
+import { elbowPosition } from "../creature-stuff/armReach";
+import { STYLE } from "./style";
 import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH } from "../creature-stuff/Legs";
 import { BodyLook, PartialLook } from "./BodyLook";
 import { BodyDrawing, drawBody } from "./drawBody";
@@ -93,7 +94,9 @@ export function composeBodySvg(
         part,
         `translate(${n(x0)} ${n(y0)}) rotate(${n((Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI)}) scale(${(Math.hypot(x1 - x0, y1 - y0) / length).toFixed(3)} 1)`,
       );
-    let elbowReach = 0;
+    let elbowReach = Math.max(
+      ...hands.map(([, hy]) => Math.abs(hy) + dims.handSize * 0.6),
+    );
     for (const [upper, fore, , side, hand] of arms) {
       const shoulderAt = [0, side * shoulder] as const;
       const elbow = elbowPosition(
@@ -101,7 +104,8 @@ export function composeBodySvg(
         hand,
         dims.upperArm,
         dims.forearm,
-        ARM_DROP * 1000,
+        STYLE.armDrop,
+        STYLE.elbowOut,
       );
       elbowReach = Math.max(
         elbowReach,
@@ -126,7 +130,12 @@ export function composeBodySvg(
     box = [
       Math.min(-stride - 200, parts.torso.minX, parts.head.minX),
       -reach,
-      Math.max(420, parts.torso.maxX, parts.head.maxX),
+      Math.max(
+        420,
+        parts.torso.maxX,
+        parts.head.maxX,
+        ...hands.map(([hx]) => hx + dims.handSize * 0.6),
+      ),
       reach,
     ];
   } else {

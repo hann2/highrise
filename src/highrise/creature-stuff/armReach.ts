@@ -1,11 +1,8 @@
-/** How far below the shoulders the hands are, for bending the arms (m, for a human) */
-export const ARM_DROP = 0.2;
-
 /**
  * Where an elbow is, seen from above. The arm is bent in 3D, with the hand
- * a little below the shoulder (`drop`) and the elbow hanging down and a
- * little out to the side (`outward`, from 0 straight down to 1 as far out
- * as down), then looked at from above: so an arm reaching out straight is
+ * a little below the shoulder (`drop`) and the elbow out to the side and a
+ * little down (`outward`: how far out for each bit down), then looked at
+ * from above: so an arm reaching out straight is
  * long, and one with the hand close in is short, with a slight bend out at
  * the elbow, as arms look from above. Too far to reach, it's straight.
  *
@@ -18,7 +15,7 @@ export function elbowPosition(
   upper: number,
   fore: number,
   drop: number,
-  outward = 0.2,
+  outward: number,
 ): [number, number] {
   const [sx, sy] = shoulder;
   const vx = hand[0] - sx;

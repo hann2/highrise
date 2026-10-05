@@ -8,7 +8,8 @@ import { FootLanding, Gait, SIDES } from "../../core/animation/Gait";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
-import { ARM_DROP, elbowPosition } from "./armReach";
+import { elbowPosition } from "./armReach";
+import { STYLE } from "../looks/style";
 import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH, LegStyle } from "./Legs";
 import FloorStains, { getFloorStains } from "../effects/FloorStains";
 import { Shoes } from "./Shoes";
@@ -209,7 +210,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       [hand.x, hand.y],
       this.upperArm,
       this.forearm,
-      ARM_DROP * this.legScale,
+      (STYLE.armDrop / 1000) * this.legScale,
+      STYLE.elbowOut,
     );
     const place = (
       sprite: Sprite,

@@ -115,6 +115,8 @@ export class Drawing {
   private defs: string[] = [];
   private body: string[] = [];
   private madeDefs = new Set<string>();
+  /** Whether it casts a shadow on what's under it, in styles that have them */
+  castsShadow = true;
 
   constructor(
     readonly prefix: string,
@@ -302,12 +304,13 @@ export class Drawing {
               [1, "#000", sh * 0.8],
             ]
           : [
-              [0, "#000", sh],
-              [0.22, "#000", sh],
-              [0.22, "#000", 0],
-              [0.78, "#000", 0],
-              [0.78, "#000", sh],
-              [1, "#000", sh],
+              // Narrower and lighter than on rounder shapes: limbs are thin
+              [0, "#000", sh * 0.6],
+              [0.16, "#000", sh * 0.6],
+              [0.16, "#000", 0],
+              [0.84, "#000", 0],
+              [0.84, "#000", sh * 0.6],
+              [1, "#000", sh * 0.6],
             ];
     return this.def(
       "tube",
@@ -334,7 +337,7 @@ export class Drawing {
   /** The finished drawing as the inside of an `<svg>` */
   content(withCast = true): string {
     let body = this.body.join("");
-    const cast = withCast ? STYLE.cast : undefined;
+    const cast = withCast && this.castsShadow ? STYLE.cast : undefined;
     if (cast) {
       // The shadow it casts on whatever's under it: its own shape, blurred
       const id = this.def(

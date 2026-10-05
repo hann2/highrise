@@ -25,9 +25,26 @@ export interface LookStyle {
   shadow: number;
   /** A soft shadow each part casts on what's under it (a head on the shoulders, an arm on the torso) */
   cast?: { blur: number; opacity: number };
+  /** From the shoulder to the elbow, and the elbow to the middle of the hand (mm) */
+  upperArm: number;
+  forearm: number;
+  /**
+   * How arms bend (`creature-stuff/armReach.ts`): how far below the
+   * shoulders the hands are (mm), and how far out to the side the elbow
+   * goes for each bit it goes down
+   */
+  armDrop: number;
+  elbowOut: number;
   /** The skull's half-length front to back and half-width, for an average head (mm) */
   headRx: number;
   headRy: number;
+  /**
+   * The skull's shape from above: how much narrower it is at the forehead
+   * than at the back (0 an ellipse), and how square its sides are (2 an
+   * ellipse, more is squarer)
+   */
+  headEgg: number;
+  headSquare: number;
   /** Noise multiplied into rotten skin and grime (frequencies are per mm) */
   rot: { frequency: number; octaves: number; strength: number; seed: number };
 }
@@ -43,8 +60,14 @@ export const STYLES = {
     shading: "gloss",
     highlight: 0.22,
     shadow: 0.3,
-    headRx: 150,
-    headRy: 136,
+    upperArm: 250,
+    forearm: 275,
+    armDrop: 100,
+    elbowOut: 1,
+    headRx: 145,
+    headRy: 128,
+    headEgg: 0.12,
+    headSquare: 2.3,
     rot: ROT,
   },
   /** Thin outlines, soft light from above, parts shadowing what's under them */
@@ -56,8 +79,14 @@ export const STYLES = {
     highlight: 0.1,
     shadow: 0.3,
     cast: { blur: 10, opacity: 0.4 },
-    headRx: 150,
-    headRy: 136,
+    upperArm: 250,
+    forearm: 275,
+    armDrop: 100,
+    elbowOut: 1,
+    headRx: 145,
+    headRy: 128,
+    headEgg: 0.12,
+    headSquare: 2.3,
     rot: ROT,
   },
   /** Medium outlines, two tones per shape */
@@ -69,8 +98,14 @@ export const STYLES = {
     highlight: 0,
     shadow: 0.22,
     cast: { blur: 5, opacity: 0.3 },
-    headRx: 150,
-    headRy: 136,
+    upperArm: 250,
+    forearm: 275,
+    armDrop: 100,
+    elbowOut: 1,
+    headRx: 145,
+    headRy: 128,
+    headEgg: 0.12,
+    headSquare: 2.3,
     rot: ROT,
   },
   /** Cel, outlining only the main shapes */
@@ -82,8 +117,14 @@ export const STYLES = {
     highlight: 0,
     shadow: 0.22,
     cast: { blur: 7, opacity: 0.35 },
-    headRx: 150,
-    headRy: 136,
+    upperArm: 250,
+    forearm: 275,
+    armDrop: 100,
+    elbowOut: 1,
+    headRx: 145,
+    headRy: 128,
+    headEgg: 0.12,
+    headSquare: 2.3,
     rot: ROT,
   },
   /** Cel with no outlines: shapes told apart by their tones and the shadows they cast */
@@ -95,8 +136,14 @@ export const STYLES = {
     highlight: 0,
     shadow: 0.24,
     cast: { blur: 8, opacity: 0.45 },
-    headRx: 150,
-    headRy: 136,
+    upperArm: 250,
+    forearm: 275,
+    armDrop: 100,
+    elbowOut: 1,
+    headRx: 145,
+    headRy: 128,
+    headEgg: 0.12,
+    headSquare: 2.3,
     rot: ROT,
   },
   /** No outlines: shapes told apart by their light and the shadows they cast */
@@ -108,8 +155,14 @@ export const STYLES = {
     highlight: 0.12,
     shadow: 0.35,
     cast: { blur: 12, opacity: 0.5 },
-    headRx: 150,
-    headRy: 136,
+    upperArm: 250,
+    forearm: 275,
+    armDrop: 100,
+    elbowOut: 1,
+    headRx: 145,
+    headRy: 128,
+    headEgg: 0.12,
+    headSquare: 2.3,
     rot: ROT,
   },
 } satisfies Record<string, LookStyle>;
@@ -117,7 +170,7 @@ export const STYLES = {
 export type LookStyleName = keyof typeof STYLES;
 
 /** The style being drawn in */
-export const STYLE: LookStyle = { ...STYLES.cel };
+export const STYLE: LookStyle = { ...STYLES.celNone };
 
 /**
  * Draws everything from now on in another style (before baking). Numbers

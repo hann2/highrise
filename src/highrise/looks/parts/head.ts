@@ -10,6 +10,7 @@ import {
   Pt,
   smoothPath,
 } from "../svg";
+import { STYLE } from "../style";
 import {
   drawHatDrawing,
   drawPiece,
@@ -55,7 +56,7 @@ export function drawHead(
   d.blob(ellipsePath(rx * 0.95, 0, 27, 20), colors.skin, { grain: skinGrain });
   d.include(rx * 0.95 + 27, -20, rx * 0.95 + 27, 20);
 
-  const skull = ellipsePath(0, 0, rx, ry);
+  const skull = smoothPath(skullPoints(rx, ry, 48));
   d.blob(skull, colors.skin, { grain: skinGrain });
 
   // Eyes and brows at the front edge, unless the hair hides them
@@ -132,6 +133,32 @@ function drawBrows(
   }
 }
 
+/**
+ * Points round the skull from above, `bump(angle)` further out (as a
+ * fraction) at each: an egg, narrower at the forehead than at the back,
+ * with sides a little squarer than an ellipse's (`STYLE.headEgg`,
+ * `headSquare`)
+ */
+export function skullPoints(
+  rx: number,
+  ry: number,
+  count: number,
+  bump: (angle: number) => number = () => 0,
+): Pt[] {
+  const e = 2 / STYLE.headSquare;
+  const points: Pt[] = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const scale = 1 + bump(angle);
+    const x = rx * Math.sign(c) * Math.abs(c) ** e;
+    const y = ry * Math.sign(s) * Math.abs(s) ** e * (1 - STYLE.headEgg * c);
+    points.push([x * scale, y * scale]);
+  }
+  return points;
+}
+
 /** The edge of the hair, all round, as a factor of the skull's radii */
 function hairEdge(look: BodyLook, random: () => number) {
   const { volume, messiness, curls } = look.hair;
@@ -158,7 +185,7 @@ function drawHair(
   const hair = look.hair;
   const edge = hairEdge(look, random);
   const count = hair.curls > 0.05 ? 160 : 72;
-  const points = ellipsePoints(0, 0, rx, ry, count, edge);
+  const points = skullPoints(rx, ry, count, edge);
   d.includePoints(points);
   const shape = smoothPath(points);
 

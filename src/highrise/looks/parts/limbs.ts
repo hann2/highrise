@@ -219,6 +219,8 @@ export function drawArmSegment(
   const whole = drawArm(look, dims, side, `${prefix}-arm`);
   const length = end - start;
   const d = new Drawing(prefix, -t / 2, -t / 2, length + t / 2, t / 2);
+  // The halves of an arm don't shadow each other, so the elbow doesn't stand out
+  d.castsShadow = false;
   d.include(-t / 2, -t / 2, length + t / 2, t / 2);
   const shape = capsulePath(-t / 2, length + t / 2, 0, t);
   const clip = d.clipPath("segment", shape);
