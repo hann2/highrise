@@ -32,27 +32,39 @@ export function sleeveColor(look: BodyLook): Color {
 /** Room round an arm's drawing */
 const ARM_PAD = 7;
 
-/** Where along an arm's drawing the shoulder, elbow and hand are (mm) */
+/**
+ * Where along an arm's drawing the shoulder, elbow and hand are (mm), and
+ * the wrist, where the arm ends: far enough inside the hand that the arm
+ * never shows past it, even stretched to reach
+ */
 function armJoints(dims: BodyDimensions) {
   const shoulder = ARM_PAD + dims.armThickness / 2;
   const elbow = shoulder + dims.upperArm;
-  return { shoulder, elbow, hand: elbow + dims.forearm };
+  const hand = elbow + dims.forearm;
+  return { shoulder, elbow, hand, wrist: hand - dims.handSize * 0.32 };
 }
 
 /**
  * How wide an arm is along its length, as a fraction of its thickness, at
  * fractions of the way from shoulder to elbow (`upper`) and elbow to hand
- * (`fore`): fullest at the shoulder, tapering to the elbow, swelling again
+ * (`fore`): fullest at the shoulder, wider than the arm is thick so it flows
+ * out of the torso, tapering to the elbow, swelling again
  * just below it where the forearm's muscles are, and tapering to the wrist.
  */
-const ARM_WIDTHS: { upper?: number; fore?: number; width: number }[] = [
-  { upper: 0, width: 1 },
-  { upper: 0.3, width: 0.85 },
-  { upper: 1, width: 0.68 },
+export const ARM_WIDTHS: { upper?: number; fore?: number; width: number }[] = [
+  { upper: 0, width: 1.4 },
+  { upper: 0.4, width: 1 },
+  { upper: 1, width: 0.7 },
   { fore: 0.2, width: 0.78 },
   { fore: 0.8, width: 0.56 },
   { fore: 1, width: 0.55 },
 ];
+
+/** As far out from its middle as an arm (or its sleeve) ever gets (mm) */
+function widestHalf(dims: BodyDimensions): number {
+  const widest = Math.max(...ARM_WIDTHS.map(({ width }) => width));
+  return (widest / 2 + 0.12) * dims.armThickness;
+}
 
 /** The arm's half-width at `x` along its drawing (mm) */
 function armHalfWidth(dims: BodyDimensions, x: number): number {
@@ -141,9 +153,12 @@ export function drawArm(
   const t = dims.armThickness;
   const joints = armJoints(dims);
   const length = joints.hand + t / 2 + ARM_PAD;
-  const d = new Drawing(prefix, 0, -t / 2 - ARM_PAD, length, t / 2 + ARM_PAD);
+  const m = widestHalf(dims) + ARM_PAD;
+  const d = new Drawing(prefix, 0, -m, length, m);
+  // The round end at the shoulder, as wide as the arm is there
+  d.include(joints.shoulder - m, -m, length, m);
   const arm = smoothPath(
-    armShape(dims, joints.shoulder, joints.hand),
+    armShape(dims, joints.shoulder, joints.wrist),
     true,
     0.5,
   );
@@ -158,7 +173,7 @@ export function drawArm(
     const color = sleeveColor(look);
     // Sleeves end along the arm, from the shoulder to the wrist
     const end =
-      joints.shoulder + (joints.hand - joints.shoulder) * Math.min(1, sleeve);
+      joints.shoulder + (joints.wrist - joints.shoulder) * Math.min(1, sleeve);
     const ragged = (look.zombie?.tears ?? 0) > 0.3;
     // Loose: wider than the arm, and less tapered
     const widen = sleeveWidener(dims);
@@ -347,18 +362,14 @@ export function drawArmSegment(
   const whole = drawArm(look, dims, side, `${prefix}-arm`);
   const length = end - start;
   const d = new Drawing(prefix, -t / 2, -t / 2, length + t / 2, t / 2);
-  d.include(
-    -t / 2 - ARM_PAD,
-    -t / 2 - ARM_PAD,
-    length + t / 2 + ARM_PAD,
-    t / 2 + ARM_PAD,
-  );
+  const m = widestHalf(dims) + ARM_PAD;
+  d.include(-m, -m, length + m, m);
   // The halves of an arm don't shadow each other, so the elbow doesn't stand out
   d.castsShadow = false;
   // The arm's own shape between the joints, sleeve and all, rounded at each
   const sleeveEnd =
     joints.shoulder +
-    (joints.hand - joints.shoulder) * Math.min(1, look.sleeves.length);
+    (joints.wrist - joints.shoulder) * Math.min(1, look.sleeves.length);
   const sleeved = look.sleeves.length > 0.02;
   const widen = sleeveWidener(dims);
   const outline = armShape(dims, start, end, (x, half) =>
