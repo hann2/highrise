@@ -207,8 +207,11 @@ export class Drawing {
     if (shade !== "flat" && STYLE.shading !== "flat") {
       this.add(`<path d="${d}" fill="url(#${this.shadeGradient(shade)})"/>`);
     }
-    // Outlines thinner than the house's (9 mm when it was made) stay as much thinner
-    const width = (outline * STYLE.outline) / 9;
+    // Outlines thinner than the house's (9 mm when it was made) stay as much
+    // thinner; they're on details, which some styles leave without
+    const detail = options.outline !== undefined && options.outline < 8;
+    const width =
+      detail && !STYLE.detailOutlines ? 0 : (outline * STYLE.outline) / 9;
     if (width > 0) {
       const color = options.outlineColor ?? darken(fill, STYLE.outlineDarken);
       this.add(
@@ -329,9 +332,9 @@ export class Drawing {
   }
 
   /** The finished drawing as the inside of an `<svg>` */
-  content(): string {
+  content(withCast = true): string {
     let body = this.body.join("");
-    const cast = STYLE.cast;
+    const cast = withCast ? STYLE.cast : undefined;
     if (cast) {
       // The shadow it casts on whatever's under it: its own shape, blurred
       const id = this.def(

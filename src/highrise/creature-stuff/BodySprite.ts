@@ -8,6 +8,7 @@ import { FootLanding, Gait, SIDES } from "../../core/animation/Gait";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
+import { ARM_DROP, elbowPosition } from "./armReach";
 import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH, LegStyle } from "./Legs";
 import FloorStains, { getFloorStains } from "../effects/FloorStains";
 import { Shoes } from "./Shoes";
@@ -30,12 +31,14 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   sprite: Container & GameSprite;
   torsoSprite: Sprite;
   headSprite: Sprite;
-  leftArmSprite: Sprite;
+  /** Each arm's upper arm and forearm */
+  leftArmSprite: Container;
   armThickness: number;
   /** From the middle to each shoulder joint, in meters */
   private shoulderOffset: number;
   private headRadius: number;
-  rightArmSprite: Sprite;
+  rightArmSprite: Container;
+  private armSegments: [Sprite, Sprite][];
   leftHandSprite: Sprite;
   rightHandSprite: Sprite;
   /** The legs and feet, under everything else; only for a body with `legs` */
@@ -55,6 +58,9 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   /** Meters per texture pixel */
   private pixelScale: number;
   private legThickness = 0;
+  /** From shoulder to elbow, and elbow to the middle of the hand (m) */
+  private upperArm: number;
+  private forearm: number;
 
   constructor(
     readonly textures: BodyTextures,
@@ -81,13 +87,24 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.headSprite = new Sprite(textures.head);
     this.headSprite.scale.set(scale);
 
-    // Stretched from the shoulder to the hand
-    this.leftArmSprite = new Sprite(textures.leftArm);
-    this.leftArmSprite.anchor.set(0.5, 0.5);
-    this.leftArmSprite.scale.set(scale);
-    this.rightArmSprite = new Sprite(textures.rightArm);
-    this.rightArmSprite.anchor.set(0.5, 0.5);
-    this.rightArmSprite.scale.set(scale);
+    // Each arm in two, bent at the elbow (see `poseArms`)
+    this.armSegments = [
+      [textures.leftUpperArm, textures.leftForearm],
+      [textures.rightUpperArm, textures.rightForearm],
+    ].map(
+      (pair) =>
+        pair.map((texture) => {
+          const sprite = new Sprite(texture);
+          sprite.scale.set(scale);
+          return sprite;
+        }) as [Sprite, Sprite],
+    );
+    this.leftArmSprite = new Container();
+    this.leftArmSprite.addChild(...this.armSegments[0]);
+    this.rightArmSprite = new Container();
+    this.rightArmSprite.addChild(...this.armSegments[1]);
+    this.upperArm = metrics.upperArm * this.legScale;
+    this.forearm = metrics.forearm * this.legScale;
 
     this.leftHandSprite = new Sprite(textures.leftHand);
     this.leftHandSprite.scale.set(scale);
@@ -174,22 +191,42 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();
     const [leftHandPos, rightHandPos] = this.getHandPositions();
 
-    const leftArmPos = leftShoulderPos.lerp(leftHandPos, 0.5);
-    const rightArmPos = rightShoulderPos.lerp(rightHandPos, 0.5);
-
-    this.leftArmSprite.position.copyFrom(leftArmPos);
-    this.rightArmSprite.position.copyFrom(rightArmPos);
-
-    const leftArmSpan = leftHandPos.sub(leftShoulderPos);
-    const rightArmSpan = rightHandPos.sub(rightShoulderPos);
-
-    this.leftArmSprite.width = leftArmSpan.magnitude;
-    this.rightArmSprite.width = rightArmSpan.magnitude;
-    this.leftArmSprite.rotation = leftArmSpan.angle;
-    this.rightArmSprite.rotation = rightArmSpan.angle;
+    this.poseArm(this.armSegments[0], leftShoulderPos, leftHandPos);
+    this.poseArm(this.armSegments[1], rightShoulderPos, rightHandPos);
 
     this.leftHandSprite.position.copyFrom(leftHandPos);
     this.rightHandSprite.position.copyFrom(rightHandPos);
+  }
+
+  /**
+   * Puts an arm's two halves from the shoulder to the elbow to the hand,
+   * the elbow where a bent arm's would be seen from above (`elbowPosition`),
+   * each half shortened as much as it's foreshortened
+   */
+  private poseArm([upper, fore]: [Sprite, Sprite], shoulder: V2d, hand: V2d) {
+    const [ex, ey] = elbowPosition(
+      [shoulder.x, shoulder.y],
+      [hand.x, hand.y],
+      this.upperArm,
+      this.forearm,
+      ARM_DROP * this.legScale,
+    );
+    const place = (
+      sprite: Sprite,
+      x0: number,
+      y0: number,
+      x1: number,
+      y1: number,
+      length: number,
+    ) => {
+      const dx = x1 - x0;
+      const dy = y1 - y0;
+      sprite.position.set(x0, y0);
+      sprite.rotation = Math.atan2(dy, dx);
+      sprite.scale.x = (this.pixelScale * Math.hypot(dx, dy)) / length;
+    };
+    place(upper, shoulder.x, shoulder.y, ex, ey, this.upperArm);
+    place(fore, ex, ey, hand.x, hand.y, this.forearm);
   }
 
   /**
@@ -299,11 +336,17 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       angle: this.sprite.rotation + part.rotation,
     });
     const [leftShoulder, rightShoulder] = this.getShoulderPositions();
+    const [leftHand, rightHand] = this.getHandPositions();
+    // An arm as a whole: halfway from the shoulder to the hand, along it
+    const arm = (shoulder: V2d, hand: V2d): PartPose => ({
+      position: this.toWorld(shoulder.lerp(hand, 0.5)),
+      angle: this.sprite.rotation + hand.sub(shoulder).angle,
+    });
     return {
       head: pose(this.headSprite),
       torso: pose(this.torsoSprite),
-      leftArm: pose(this.leftArmSprite),
-      rightArm: pose(this.rightArmSprite),
+      leftArm: arm(leftShoulder, leftHand),
+      rightArm: arm(rightShoulder, rightHand),
       leftHand: pose(this.leftHandSprite),
       rightHand: pose(this.rightHandSprite),
       leftShoulder: this.toWorld(leftShoulder),

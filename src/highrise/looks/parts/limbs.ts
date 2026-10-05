@@ -29,9 +29,20 @@ export function sleeveColor(look: BodyLook): Color {
   }
 }
 
+/** Room round an arm's drawing */
+const ARM_PAD = 7;
+
+/** Where along an arm's drawing the shoulder, elbow and hand are (mm) */
+function armJoints(dims: BodyDimensions) {
+  const shoulder = ARM_PAD + dims.armThickness / 2;
+  const elbow = shoulder + dims.upperArm;
+  return { shoulder, elbow, hand: elbow + dims.forearm };
+}
+
 /**
- * An arm from above, shoulder at x = 0 and wrist at `armLength`, which the
- * game stretches from the shoulder to the hand. Sleeved as far as it is.
+ * A whole arm from above, straight, from the shoulder end at x = 0 to the
+ * hand end. Sleeved as far as it is. Corpses and severed arms use it
+ * stretched; standing, bodies use it cut in two (`drawArmSegment`).
  */
 export function drawArm(
   look: BodyLook,
@@ -41,9 +52,9 @@ export function drawArm(
 ): Drawing {
   const colors = palette(look);
   const random = lookRandom(look, side === -1 ? 4 : 5);
-  const length = dims.armLength;
   const t = dims.armThickness;
-  const pad = 7;
+  const pad = ARM_PAD;
+  const length = armJoints(dims).hand + t / 2 + pad;
   const d = new Drawing(prefix, 0, -t / 2 - pad, length, t / 2 + pad);
   const arm = capsulePath(pad, length - pad, 0, t);
   const rot = look.zombie?.rot ?? 0;
@@ -172,7 +183,7 @@ export function drawHand(
         Math.cos(a) > 0 ? 0.08 * Math.cos(a) ** 2 * Math.sin(a) ** 2 * 4 : 0,
       ),
     );
-    d.blob(fist, color, { outline: 6 });
+    d.blob(fist, color);
     for (let i = -1; i <= 1; i++) {
       const y = i * h * 0.15;
       d.line(
@@ -183,5 +194,40 @@ export function drawHand(
       );
     }
   }
+  return d;
+}
+
+/**
+ * The upper arm (shoulder to elbow) or the forearm (elbow to the middle of
+ * the hand), cut from the whole arm with a rounded end at the elbow, so a
+ * bent arm's two halves overlap there. Its origin is where it starts (the
+ * shoulder, or the elbow) and it runs along +x.
+ */
+export function drawArmSegment(
+  look: BodyLook,
+  dims: BodyDimensions,
+  side: -1 | 1,
+  segment: "upper" | "fore",
+  prefix: string,
+): Drawing {
+  const t = dims.armThickness;
+  const joints = armJoints(dims);
+  const [start, end] =
+    segment === "upper"
+      ? [joints.shoulder, joints.elbow]
+      : [joints.elbow, joints.hand];
+  const whole = drawArm(look, dims, side, `${prefix}-arm`);
+  const length = end - start;
+  const d = new Drawing(prefix, -t / 2, -t / 2, length + t / 2, t / 2);
+  d.include(-t / 2, -t / 2, length + t / 2, t / 2);
+  const shape = capsulePath(-t / 2, length + t / 2, 0, t);
+  const clip = d.clipPath("segment", shape);
+  d.begin(`clip-path="url(#${clip})"`);
+  d.add(`<g transform="translate(${n(-start)} 0)">${whole.content(false)}</g>`);
+  d.end();
+  // The rounded end at the elbow, in whatever covers the arm there
+  const sleeveEnd = ARM_PAD + (whole.width - ARM_PAD * 2) * look.sleeves.length;
+  const covered = look.sleeves.length > 0.02 && sleeveEnd > joints.elbow;
+  d.outline(shape, covered ? sleeveColor(look) : palette(look).skin);
   return d;
 }

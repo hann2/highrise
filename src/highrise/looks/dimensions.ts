@@ -1,6 +1,7 @@
 import { makeRandom } from "../../core/util/Random";
 import { BodyLook } from "./BodyLook";
 import { Color, darken, mix, saturate } from "./color";
+import { STYLE } from "./style";
 
 /**
  * A look's build slider settings turned into sizes, in millimeters, for a
@@ -21,8 +22,9 @@ export interface BodyDimensions {
   /** The exponent of the superellipse the torso is: 2 round, 4 square */
   squareness: number;
   armThickness: number;
-  /** The length the arm is drawn at; it's stretched from shoulder to hand */
-  armLength: number;
+  /** From the shoulder to the elbow, and the elbow to the middle of the hand */
+  upperArm: number;
+  forearm: number;
   handSize: number;
   /** The skull's half-length front to back, and half-width */
   headRx: number;
@@ -43,17 +45,18 @@ export function bodyDimensions(look: BodyLook): BodyDimensions {
   const headScale = 1 + 0.12 * b.head;
   return {
     shoulderHalfWidth: 312 * (1 + 0.14 * b.shoulders + 0.04 * b.arms),
-    chestDepth: 118 * (1 + 0.28 * b.chest),
-    backDepth: 104 * (1 + 0.12 * b.chest),
+    chestDepth: 140 * (1 + 0.25 * b.chest),
+    backDepth: 125 * (1 + 0.12 * b.chest),
     belly: Math.max(0, b.belly) * BELLY_DEPTH,
     bust: Math.max(0, b.bust) * BUST_DEPTH,
     hunch: b.hunch * 55,
     squareness: 2.2 + 1.3 * (b.squareness + 1),
     armThickness: 104 * (1 + 0.26 * b.arms),
-    armLength: 420,
+    upperArm: 330,
+    forearm: 330,
     handSize: 112 * (1 + 0.2 * b.hands),
-    headRx: 150 * headScale,
-    headRy: 136 * headScale,
+    headRx: STYLE.headRx * headScale,
+    headRy: STYLE.headRy * headScale,
     legThickness: 160 * (1 + 0.22 * b.legs),
     legLength: 480,
   };

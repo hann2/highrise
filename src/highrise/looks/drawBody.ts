@@ -1,7 +1,7 @@
 import { BodyLook, PartialLook, resolveLook } from "./BodyLook";
 import { bodyDimensions, BodyDimensions } from "./dimensions";
 import { drawHead } from "./parts/head";
-import { drawArm, drawHand } from "./parts/limbs";
+import { drawArm, drawArmSegment, drawHand } from "./parts/limbs";
 import { drawFoot, drawLeg, drawLyingLegs } from "./parts/legs";
 import { drawLyingTorso, drawTorso } from "./parts/torso";
 import { Drawing } from "./svg";
@@ -10,8 +10,14 @@ import { Drawing } from "./svg";
 export const BODY_PARTS = [
   "head",
   "torso",
+  /** Whole arms, straight: for corpses and severed arms */
   "leftArm",
   "rightArm",
+  /** Arms in two, bent at the elbow, standing */
+  "leftUpperArm",
+  "leftForearm",
+  "rightUpperArm",
+  "rightForearm",
   "leftHand",
   "rightHand",
   /** Stretched from the hip to the ankle, the same for both */
@@ -48,6 +54,10 @@ export function drawBody(look: PartialLook, prefix = "b"): BodyDrawing {
       torso: drawTorso(resolved, dims, p("t")),
       leftArm: drawArm(resolved, dims, -1, p("la")),
       rightArm: drawArm(resolved, dims, 1, p("ra")),
+      leftUpperArm: drawArmSegment(resolved, dims, -1, "upper", p("lua")),
+      leftForearm: drawArmSegment(resolved, dims, -1, "fore", p("lfa")),
+      rightUpperArm: drawArmSegment(resolved, dims, 1, "upper", p("rua")),
+      rightForearm: drawArmSegment(resolved, dims, 1, "fore", p("rfa")),
       leftHand: drawHand(resolved, dims, -1, p("lh")),
       rightHand: drawHand(resolved, dims, 1, p("rh")),
       leg: drawLeg(resolved, dims, p("lg")),

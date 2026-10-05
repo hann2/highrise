@@ -18,6 +18,9 @@ export interface BodyMetrics {
   /** From the middle to each shoulder joint */
   shoulderOffset: number;
   armThickness: number;
+  /** From the shoulder to the elbow, and the elbow to the middle of the hand */
+  upperArm: number;
+  forearm: number;
   handSize: number;
   headRadius: number;
 }
@@ -26,8 +29,14 @@ export interface BodyMetrics {
 export interface BodyTextures {
   head: Texture;
   torso: Texture;
+  /** Whole and straight, stretched from shoulder to hand */
   leftArm: Texture;
   rightArm: Texture;
+  /** In two, bent at the elbow: each starts at its origin and runs along +x */
+  leftUpperArm: Texture;
+  leftForearm: Texture;
+  rightUpperArm: Texture;
+  rightForearm: Texture;
   leftHand: Texture;
   rightHand: Texture;
   metrics: BodyMetrics;
@@ -162,6 +171,8 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
     const metrics: BodyMetrics = {
       shoulderOffset: (dims.shoulderHalfWidth - dims.armThickness / 2) / 1000,
       armThickness: dims.armThickness / 1000,
+      upperArm: dims.upperArm / 1000,
+      forearm: dims.forearm / 1000,
       handSize: dims.handSize / 1000,
       headRadius: dims.headRy / 1000,
     };
@@ -169,6 +180,10 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       head: texture("head"),
       leftArm: texture("leftArm"),
       rightArm: texture("rightArm"),
+      leftUpperArm: texture("leftUpperArm"),
+      leftForearm: texture("leftForearm"),
+      rightUpperArm: texture("rightUpperArm"),
+      rightForearm: texture("rightForearm"),
       leftHand: texture("leftHand"),
       rightHand: texture("rightHand"),
       metrics,

@@ -1,3 +1,4 @@
+import { ARM_DROP, elbowPosition } from "../creature-stuff/armReach";
 import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH } from "../creature-stuff/Legs";
 import { BodyLook, PartialLook } from "./BodyLook";
 import { BodyDrawing, drawBody } from "./drawBody";
@@ -78,27 +79,45 @@ export function composeBodySvg(
       [300, 200],
     ];
     const arms = [
-      [parts.leftArm, parts.leftHand, -1, hands[0]],
-      [parts.rightArm, parts.rightHand, 1, hands[1]],
+      [parts.leftUpperArm, parts.leftForearm, parts.leftHand, -1, hands[0]],
+      [parts.rightUpperArm, parts.rightForearm, parts.rightHand, 1, hands[1]],
     ] as const;
-    for (const [arm, , side, [hx, hy]] of arms) {
-      const sy = side * shoulder;
-      const span = Math.hypot(hx, hy - sy);
-      const angle = (Math.atan2(hy - sy, hx) * 180) / Math.PI;
-      items.push(
-        place(
-          arm,
-          `translate(0 ${n(sy)}) rotate(${n(angle)}) scale(${(span / arm.width).toFixed(3)} 1)`,
-        ),
+    // Bent at the elbow, as `BodySprite` has them
+    const segment = (
+      part: Drawing,
+      [x0, y0]: readonly [number, number],
+      [x1, y1]: readonly [number, number],
+      length: number,
+    ) =>
+      place(
+        part,
+        `translate(${n(x0)} ${n(y0)}) rotate(${n((Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI)}) scale(${(Math.hypot(x1 - x0, y1 - y0) / length).toFixed(3)} 1)`,
       );
+    let elbowReach = 0;
+    for (const [upper, fore, , side, hand] of arms) {
+      const shoulderAt = [0, side * shoulder] as const;
+      const elbow = elbowPosition(
+        shoulderAt,
+        hand,
+        dims.upperArm,
+        dims.forearm,
+        ARM_DROP * 1000,
+      );
+      elbowReach = Math.max(
+        elbowReach,
+        Math.abs(elbow[1]) + dims.armThickness / 2 + 10,
+      );
+      items.push(segment(upper, shoulderAt, elbow, dims.upperArm));
+      items.push(segment(fore, elbow, hand, dims.forearm));
     }
-    for (const [, hand, , [hx, hy]] of arms) {
+    for (const [, , hand, , [hx, hy]] of arms) {
       items.push(place(hand, `translate(${n(hx)} ${n(hy)})`));
     }
     items.push(place(parts.torso, ""));
     items.push(place(parts.head, ""));
     const reach = Math.max(
       dims.shoulderHalfWidth + 40,
+      elbowReach,
       -parts.torso.minY,
       parts.torso.maxY,
       -parts.head.minY,

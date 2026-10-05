@@ -20,6 +20,7 @@ import {
 } from "../svg";
 import { drawBlood, drawGrime, drawPattern, drawRips } from "./wear";
 import { drawPiece, piecePlace } from "../pieces";
+import { STYLE } from "../style";
 
 /** Tops that leave the shoulders to what's under them: skin, or the secondary's shirt */
 const BANDED: Partial<Record<TopStyle, number>> = {
@@ -43,8 +44,17 @@ function shoulderColor(look: BodyLook, skin: Color): Color {
   }
 }
 
-/** The outline of the torso from above, facing +x, round its middle */
-export function torsoOutline(dims: BodyDimensions, count = 96): Pt[] {
+/**
+ * The torso from above, facing +x, round its middle: the chest and back,
+ * and a rounded cap at each shoulder where the arm joins, blended together
+ * so there's a slight groove between them at the front. Also the part of it
+ * that's lit from straight above (`lit`): the ridge of the shoulders, from
+ * which the chest falls away in front and the shoulder blades behind.
+ */
+export function torsoProfile(
+  dims: BodyDimensions,
+  count = 48,
+): { outline: Pt[]; lit: Pt[] } {
   const {
     shoulderHalfWidth: w,
     chestDepth,
@@ -53,40 +63,87 @@ export function torsoOutline(dims: BodyDimensions, count = 96): Pt[] {
     bust,
     hunch,
     squareness,
+    armThickness,
   } = dims;
-  const e = 2 / squareness;
+  // The chest is a superellipse a little narrower than the shoulders
+  const capRadius = armThickness * 0.62;
+  const chestHalf = w - capRadius * 0.8;
+  const p = squareness;
+  const chest = (y: number, depth: number) => {
+    const u = Math.min(1, Math.abs(y) / chestHalf);
+    return depth * (1 - u ** p) ** (1 / p);
+  };
+  // Each shoulder's cap is a circle at the end, as deep as the arm
+  const capY = w - capRadius;
+  const cap = (y: number, side: 1 | -1) => {
+    const dy = Math.abs(y) - capY;
+    if (dy <= -capRadius * 3) {
+      return -Infinity;
+    }
+    const along = Math.max(0, capRadius ** 2 - Math.max(0, dy) ** 2);
+    return side * Math.sqrt(along);
+  };
+  // Blends two edges, rounding the corner where they meet
+  const smoothMax = (a: number, b: number, k = 30) =>
+    a === -Infinity ? b : (a + b + Math.sqrt((a - b) ** 2 + k * k)) / 2;
   // How big the belly is, from 0 to 1: the front rounds out toward a half
   // ellipse as deep as the chest and belly together, so a big belly makes
   // the body rounder, not just deeper or broader
-  const girth = belly / BELLY_DEPTH;
-  const round = Math.min(1, girth * 1.2);
-  const points: Pt[] = [];
-  for (let i = 0; i < count; i++) {
-    const t = (i / count) * Math.PI * 2;
-    const c = Math.cos(t);
-    const s = Math.sin(t);
-    let y = w * Math.sign(s) * Math.abs(s) ** e;
-    let x = (c > 0 ? chestDepth : backDepth) * Math.sign(c) * Math.abs(c) ** e;
-    if (c > 0) {
-      const roundX = (chestDepth + belly) * c;
-      const roundY = w * s;
-      x += (roundX - x) * round + belly * (1 - round) * c;
-      y += (roundY - y) * round;
-      // The bust: two rounded mounds either side of the middle
-      x += bust * bustBumps(y, w) * Math.abs(c) ** 0.5;
-    } else {
-      // The back rounds out and fills out too
-      const backRound = 0.6 * round;
-      const roundBack = (backDepth + 0.35 * belly) * c;
-      x +=
-        (roundBack - x) * backRound -
-        0.35 * belly * Math.abs(c) * (1 - backRound);
-      y += (w * s - y) * backRound;
+  const round = Math.min(1, (belly / BELLY_DEPTH) * 1.2);
+
+  const front: Pt[] = [];
+  const back: Pt[] = [];
+  const litFront: Pt[] = [];
+  const litBack: Pt[] = [];
+  for (let i = 0; i <= count; i++) {
+    // Closer together at the ends, where it curves most
+    const y = -w * Math.cos((Math.PI * i) / count);
+    const across = Math.sqrt(Math.max(0, 1 - (y / w) ** 2));
+    let f = smoothMax(cap(y, 1), chest(y, chestDepth));
+    let b = -smoothMax(cap(y, 1), chest(y, backDepth));
+    f += ((chestDepth + belly) * across - f) * round;
+    f += belly * (1 - round) * across;
+    f += bust * bustBumps(y, w);
+    const backRound = 0.6 * round;
+    b += (-(backDepth + 0.35 * belly) * across - b) * backRound;
+    b -= 0.35 * belly * across * (1 - backRound);
+    const bend = hunch * (y / w) ** 2;
+    // At the very ends the front and back meet
+    if (i === 0 || i === count) {
+      f = b = (f + b) / 2;
     }
-    x += hunch * (y / w) ** 2;
-    points.push([x, y]);
+    front.push([f + bend, y]);
+    back.push([b + bend, y]);
+    // The ridge runs a little behind the middle; the lit part is most of
+    // the way to each edge, less at the front, which falls away sooner
+    const ridge = b + (f - b) * 0.45;
+    litFront.push([ridge + (f - ridge) * 0.55 + bend, y]);
+    litBack.push([ridge + (b - ridge) * 0.62 + bend, y]);
   }
-  return points;
+  return {
+    outline: [...front, ...back.slice(1, -1).reverse()],
+    lit: [...litFront, ...litBack.slice(1, -1).reverse()],
+  };
+}
+
+/**
+ * Light from above over the whole torso, patterns and all: in cel, the
+ * chest and shoulder blades in shadow beyond the lit ridge of the shoulders
+ */
+function drawTorsoShading(d: Drawing, shape: string, lit: Pt[]) {
+  if (STYLE.shading === "cel") {
+    // Everything outside the lit part, by the even-odd rule
+    d.add(
+      `<path d="${shape} ${smoothPath(lit)}" fill="#000" fill-opacity="${STYLE.shadow}" fill-rule="evenodd"/>`,
+    );
+  } else if (STYLE.shading !== "flat") {
+    d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("dome")})"/>`);
+  }
+}
+
+/** The outline of the torso from above, facing +x, round its middle */
+export function torsoOutline(dims: BodyDimensions): Pt[] {
+  return torsoProfile(dims).outline;
 }
 
 /** Where the middle of each side of the bust is, and its half-width, as fractions of the shoulders' half-width */
@@ -151,7 +208,7 @@ export function drawTorso(
   const random = lookRandom(look, 2);
   const top = look.top;
   const w = dims.shoulderHalfWidth;
-  const outline = torsoOutline(dims);
+  const { outline, lit } = torsoProfile(dims);
   const shape = smoothPath(outline);
   const d = new Drawing(prefix, 0, 0, 0, 0);
   d.includePoints(outline);
@@ -169,7 +226,9 @@ export function drawTorso(
 
   // What's under the top, then the top
   const band = BANDED[top.style];
-  d.blob(shape, band ? shoulderColor(look, colors.skin) : top.color);
+  d.blob(shape, band ? shoulderColor(look, colors.skin) : top.color, {
+    shade: "flat",
+  });
   let garment = torso;
   if (band || top.style === "overalls") {
     const half = band ? w * band : w * 0.36;
@@ -238,7 +297,7 @@ export function drawTorso(
     d.end();
   }
   // Shading again over the pattern and bands
-  d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("dome")})"/>`);
+  drawTorsoShading(d, shape, lit);
   if (dims.bust > 0) {
     drawBustShading(d, dims, top.color, torso);
   }
