@@ -420,6 +420,7 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
       fringe: slider(random, 0.6),
       balding: 0,
       part: chance(random, 0.3) ? slider(random, 0.8) : undefined,
+      lean: DEFAULT_LOOK.hair.lean,
       bun:
         !long && chance(random, 0.08)
           ? Math.round(between(random, 0.3, 1) * 100) / 100
@@ -543,6 +544,9 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
       hair.volume,
       Math.round(between(spiky, 0.3, 0.8) * 100) / 100,
     );
+    hair.lean =
+      (spiky() < 0.5 ? -1 : 1) *
+      (Math.round(between(spiky, 0.4, 1) * 100) / 100);
   }
   // The odd one in a track suit
   if (

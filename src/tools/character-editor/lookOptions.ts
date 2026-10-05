@@ -156,7 +156,7 @@ export const HAIRLINE_OPTIONS = options(HAIRLINES, {
   curtains: ["Curtains", "Parted in the middle and swept out to both sides"],
   spiky: [
     "Spiky",
-    "Tufts sticking forward over the forehead, leaning to the parting's side (else the left). Volume makes them bigger, messiness less even",
+    "Tufts sticking forward over the forehead, leaning whichever way Lean says. Volume makes them bigger, messiness less even",
   ],
 });
 

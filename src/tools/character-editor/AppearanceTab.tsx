@@ -6,6 +6,7 @@ import {
   DEFAULT_LOOK,
   EYE_COLOR,
   Extra,
+  PARTED_HAIRLINES,
   Zombification,
 } from "../../highrise/looks/BodyLook";
 import { composeBodySvg, svgDataUrl } from "../../highrise/looks/composeBody";
@@ -545,19 +546,35 @@ function HairSection({ look, set }: SectionProps) {
             reset={0}
             onChange={(balding) => setHair({ balding })}
           />
-          <Toggle
-            label="Parting"
-            on={hair.part !== undefined}
-            onChange={(on) => setHair({ part: on ? -0.4 : undefined })}
-          />
-          {hair.part !== undefined && (
+          {hair.hairline === "spiky" && !hair.cut && (
             <Slider
-              label="Parted at"
+              label="Lean"
+              tip="Which way the tufts lean"
               ends={["left", "right"]}
-              value={hair.part}
+              value={hair.lean}
               min={-1}
-              onChange={(part) => setHair({ part })}
+              reset={DEFAULT_LOOK.hair.lean}
+              onChange={(lean) => setHair({ lean })}
             />
+          )}
+          {/* Only the hairlines that can have one, and not cropped */}
+          {PARTED_HAIRLINES.includes(hair.hairline) && !hair.cut && (
+            <>
+              <Toggle
+                label="Parting"
+                on={hair.part !== undefined}
+                onChange={(on) => setHair({ part: on ? -0.4 : undefined })}
+              />
+              {hair.part !== undefined && (
+                <Slider
+                  label="Parted at"
+                  ends={["left", "right"]}
+                  value={hair.part}
+                  min={-1}
+                  onChange={(part) => setHair({ part })}
+                />
+              )}
+            </>
           )}
         </Group>
       )}

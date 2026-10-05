@@ -88,8 +88,13 @@ export interface Hair {
   cut?: HairCut;
   /** Bald on top, from a thin crown (a little) to only a ring round the sides (1) */
   balding: number;
-  /** Where it's parted, from -1 (the left) to 1, if it is */
+  /**
+   * Where it's parted, from -1 (the left) to 1, if it is: only on the
+   * hairlines that have a parting (`PARTED_HAIRLINES`), and not cropped
+   */
   part?: number;
+  /** Which way a `spiky` hairline's tufts lean, from -1 (the left) to 1 */
+  lean: number;
   /** A bun on the back of the head, this big */
   bun: number;
   /** A ponytail down the back, this long */
@@ -105,7 +110,7 @@ export interface Hair {
  * back at the temples; `swept` a fringe swept across to one side (the
  * parting's side, else the left); `curtains` parted in the middle and swept
  * out to both sides; `spiky` tufts that stick forward over the forehead,
- * leaning to the parting's side (else the left)
+ * leaning as `Hair.lean` says
  */
 export const HAIRLINES = [
   "natural",
@@ -117,6 +122,14 @@ export const HAIRLINES = [
   "spiky",
 ] as const;
 export type Hairline = (typeof HAIRLINES)[number];
+
+/** The hairlines that can have a parting: straight bangs and spikes can't, curtains always have one in the middle */
+export const PARTED_HAIRLINES: readonly Hairline[] = [
+  "natural",
+  "peak",
+  "receding",
+  "swept",
+];
 
 export const HAIR_CUTS = ["buzz", "stubble"] as const;
 export type HairCut = (typeof HAIR_CUTS)[number];
@@ -297,6 +310,7 @@ export const DEFAULT_LOOK: BodyLook = {
     hairline: "natural",
     fringe: 0.2,
     balding: 0,
+    lean: -0.8,
     bun: 0,
     ponytail: 0,
     mohawk: 0,
@@ -400,6 +414,7 @@ export function lookProblems(look: PartialLook | undefined): string[] {
   if (r.hair.part !== undefined) {
     range("hair.part", r.hair.part, -1, 1);
   }
+  range("hair.lean", r.hair.lean, -1, 1);
   range("brows.bushiness", r.brows.bushiness, 0, 1);
   range("brows.arch", r.brows.arch, 0, 1);
   range("brows.tilt", r.brows.tilt, -1, 1);
