@@ -1,8 +1,11 @@
 import {
+  DEFAULT_LOOK,
   EXTRA_KINDS,
   EYE_COLORS,
   GLASSES_SHAPES,
+  Hair,
   HAIR_CUTS,
+  HairCut,
   HAIRLINES,
   HAT_STYLES,
   PANTS_STYLES,
@@ -98,8 +101,8 @@ export const HAT_OPTIONS = [
   { value: "", label: "None" },
   ...options(HAT_STYLES, {
     hardhat: "Hard hat",
-    santa: "Santa hat",
-    cowboy: "Cowboy hat",
+    santa: "Santa",
+    cowboy: "Cowboy",
   }),
 ] as Option<"" | (typeof HAT_STYLES)[number]>[];
 
@@ -153,13 +156,40 @@ export const HAIRLINE_OPTIONS = options(HAIRLINES, {
   curtains: ["Curtains", "Parted in the middle and swept out to both sides"],
 });
 
-export const CUT_OPTIONS = [
-  { value: "", label: "As grown", tip: "As long as the sliders below say" },
+/**
+ * What the hair is, as the cut picker has it: grown, cut right down, or
+ * none (bald, which in the look is no coverage)
+ */
+export type CutChoice = "" | HairCut | "bald";
+
+export const CUT_OPTIONS: Option<CutChoice>[] = [
+  {
+    value: "",
+    label: "As grown",
+    tip: "Its length, volume, curls and how it's tied are below",
+  },
   ...options(HAIR_CUTS, {
     buzz: ["Buzz cut", "Clipped right down, the color showing over the scalp"],
     stubble: ["Stubble", "Shaved, and growing back: just a shadow"],
   }),
-] as Option<"" | (typeof HAIR_CUTS)[number]>[];
+  { value: "bald", label: "Bald" },
+];
+
+export function cutOf(hair: Hair): CutChoice {
+  return hair.coverage <= 0 ? "bald" : (hair.cut ?? "");
+}
+
+/** `hair` cut as `choice`; hair grown back on a bald head is the usual amount */
+export function withCut(hair: Hair, choice: CutChoice): Hair {
+  if (choice === "bald") {
+    return { ...hair, coverage: 0, cut: undefined };
+  }
+  return {
+    ...hair,
+    cut: choice || undefined,
+    coverage: hair.coverage > 0 ? hair.coverage : DEFAULT_LOOK.hair.coverage,
+  };
+}
 
 export const EXTRA_OPTIONS = options(EXTRA_KINDS, {
   sack: ["Sack", "Slung over the back"],

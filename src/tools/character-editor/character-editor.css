@@ -612,12 +612,6 @@ button.primary {
   text-decoration: underline dotted var(--muted);
   text-underline-offset: 3px;
 }
-.field.is-disabled .field__label {
-  color: var(--muted);
-}
-.field.is-disabled .field__control {
-  opacity: 0.4;
-}
 .field__control {
   min-width: 0;
 }
@@ -712,14 +706,6 @@ button.primary {
   box-shadow:
     0 0 0 3px var(--panel),
     0 0 0 5px var(--accent);
-}
-.range:disabled {
-  --fill: var(--muted);
-  cursor: default;
-}
-.range:disabled::-webkit-slider-thumb {
-  background: var(--muted);
-  transform: none;
 }
 .slider__ends {
   display: flex;
@@ -879,6 +865,9 @@ button.primary {
 .picker--torso {
   --thumb: 92px;
 }
+.picker--head {
+  --thumb: 60px;
+}
 .picker__option {
   position: relative;
   display: flex;
@@ -913,7 +902,8 @@ button.primary {
 .picker__option:hover {
   border-color: #5a5a66;
 }
-.picker__option.is-selected {
+.picker__option.is-selected,
+.picker__option.is-selected:hover:not(:disabled) {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 9%, var(--bg));
 }

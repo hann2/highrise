@@ -37,21 +37,15 @@ export function Group({
 export function Field({
   label,
   tip: about,
-  disabled,
   children,
 }: {
   label: string;
   tip?: string;
-  /** Why it doesn't apply, if it doesn't */
-  disabled?: string;
   children: ComponentChildren;
 }) {
   return (
-    <div class={`field ${disabled ? "is-disabled" : ""}`}>
-      <span
-        class={`field__label ${about || disabled ? "has-tip" : ""}`}
-        {...tip(disabled ?? about, disabled ? label : undefined)}
-      >
+    <div class="field">
+      <span class={`field__label ${about ? "has-tip" : ""}`} {...tip(about)}>
         {label}
       </span>
       <div class="field__control">{children}</div>
@@ -72,7 +66,6 @@ export function Slider({
   max = 1,
   reset,
   ends,
-  disabled,
   onChange,
 }: {
   label: string;
@@ -83,14 +76,13 @@ export function Slider({
   reset?: number;
   /** What the left and right ends mean */
   ends?: [string, string];
-  disabled?: string;
   onChange: (value: number) => void;
 }) {
   const t = (value - min) / (max - min);
   const from = min < 0 ? -min / (max - min) : 0;
   const changed = reset !== undefined && Math.abs(value - reset) > 0.001;
   return (
-    <Field label={label} tip={about} disabled={disabled}>
+    <Field label={label} tip={about}>
       <div class="slider">
         <div class="slider__track">
           <input
@@ -100,7 +92,6 @@ export function Slider({
             max={max}
             step={0.01}
             value={value}
-            disabled={!!disabled}
             style={{
               "--from": Math.min(from, t),
               "--to": Math.max(from, t),
@@ -119,7 +110,7 @@ export function Slider({
         </div>
         <span class="slider__value">{value.toFixed(2)}</span>
         <button
-          class={`slider__reset ${changed && !disabled ? "" : "is-hidden"}`}
+          class={`slider__reset ${changed ? "" : "is-hidden"}`}
           tabIndex={changed ? 0 : -1}
           {...tip(
             min < 0 && reset === 0 ? "Back to average" : "Back to the default",

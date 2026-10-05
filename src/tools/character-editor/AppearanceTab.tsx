@@ -47,6 +47,8 @@ import {
   SNEAKERS,
   TOP_OPTIONS,
   TOP_SECONDARY,
+  cutOf,
+  withCut,
   withHat,
 } from "./lookOptions";
 import { thumbnailUrl } from "./thumbnails";
@@ -428,15 +430,7 @@ function HairSection({ look, set }: SectionProps) {
   const hair = look.hair;
   const setHair = (changes: Partial<typeof hair>) =>
     set("hair", { ...hair, ...changes });
-  const bald = hair.coverage <= 0;
-  // What only hair that's grown has
-  const notGrown = bald
-    ? "Not when they're bald: turn Coverage up"
-    : hair.cut === "buzz"
-      ? "Not with a buzz cut"
-      : hair.cut === "stubble"
-        ? "Not with stubble"
-        : undefined;
+  const cut = cutOf(hair);
   const slider = (
     key:
       | "volume"
@@ -456,7 +450,6 @@ function HairSection({ look, set }: SectionProps) {
       ends={ends}
       value={hair[key]}
       reset={DEFAULT_LOOK.hair[key]}
-      disabled={notGrown}
       onChange={(value) => setHair({ [key]: value })}
     />
   );
@@ -465,6 +458,7 @@ function HairSection({ look, set }: SectionProps) {
       <Group title="Color and cut">
         <ColorField
           label="Color"
+          tip="Bald, it's still the brows' and the beard's"
           value={hair.color}
           presets={HAIR_PRESETS}
           onChange={(color) => color && setHair({ color })}
@@ -474,99 +468,99 @@ function HairSection({ look, set }: SectionProps) {
             look={look}
             kind="head"
             options={CUT_OPTIONS}
-            selected={(cut) => (hair.cut ?? "") === cut}
-            vary={(l, cut) => ({
-              ...l,
-              hair: { ...l.hair, cut: cut || undefined },
-            })}
-            onPick={(cut) => setHair({ cut: cut || undefined })}
+            selected={(choice) => cut === choice}
+            vary={(l, choice) => ({ ...l, hair: withCut(l.hair, choice) })}
+            onPick={(choice) => set("hair", withCut(hair, choice))}
           />
         </Field>
+        {/* What only grown hair has */}
+        {cut === "" && (
+          <>
+            {slider(
+              "length",
+              "Length",
+              ["short", "long"],
+              "How far it hangs down the back",
+            )}
+            {slider(
+              "volume",
+              "Volume",
+              ["flat", "big"],
+              "How much it stands out from the head",
+            )}
+            {slider("curls", "Curls", ["straight", "afro"])}
+            {slider(
+              "messiness",
+              "Messiness",
+              ["neat", "messy"],
+              "How uneven its edge is",
+            )}
+            {slider("bun", "Bun", ["none", "big"])}
+            {slider("ponytail", "Ponytail", ["none", "long"])}
+            {slider(
+              "mohawk",
+              "Mohawk",
+              ["none", "wide"],
+              "Shaved but for a strip down the middle this wide",
+            )}
+          </>
+        )}
       </Group>
-      <Group title="Hairline">
-        <Field label="Shape">
-          <Picker
-            look={look}
-            kind="face"
-            options={HAIRLINE_OPTIONS}
-            selected={(hairline) => hair.hairline === hairline}
-            vary={(l, hairline) => ({ ...l, hair: { ...l.hair, hairline } })}
-            onPick={(hairline) => setHair({ hairline })}
-          />
-        </Field>
-        <Slider
-          label="Coverage"
-          tip="How far forward the hair comes. All the way down is bald"
-          ends={["bald", "full"]}
-          value={hair.coverage}
-          reset={DEFAULT_LOOK.hair.coverage}
-          onChange={(coverage) => setHair({ coverage })}
-        />
-        <Slider
-          label="Middle"
-          tip="The middle of the hairline, against its sides"
-          ends={["forward", "back"]}
-          value={hair.fringe}
-          min={-1}
-          reset={DEFAULT_LOOK.hair.fringe}
-          disabled={bald ? "Not when they're bald" : undefined}
-          onChange={(fringe) => setHair({ fringe })}
-        />
-        <Slider
-          label="Balding"
-          tip="Bald on top, from the crown forward"
-          ends={["none", "only the sides"]}
-          value={hair.balding}
-          reset={0}
-          disabled={bald ? "They're bald already" : undefined}
-          onChange={(balding) => setHair({ balding })}
-        />
-        <Toggle
-          label="Parting"
-          on={hair.part !== undefined}
-          onChange={(on) => setHair({ part: on ? -0.4 : undefined })}
-        />
-        {hair.part !== undefined && (
+      {cut !== "bald" && (
+        <Group title="Hairline">
+          <Field label="Shape">
+            <Picker
+              look={look}
+              kind="face"
+              options={HAIRLINE_OPTIONS}
+              selected={(hairline) => hair.hairline === hairline}
+              vary={(l, hairline) => ({ ...l, hair: { ...l.hair, hairline } })}
+              onPick={(hairline) => setHair({ hairline })}
+            />
+          </Field>
           <Slider
-            label="Parted at"
-            ends={["left", "right"]}
-            value={hair.part}
-            min={-1}
-            onChange={(part) => setHair({ part })}
+            label="Coverage"
+            tip="How far forward the hair comes. For no hair at all, pick Bald"
+            ends={["far back", "full"]}
+            // Bald is picked, not slid to, so the settings don't vanish mid-drag
+            min={0.05}
+            value={hair.coverage}
+            reset={DEFAULT_LOOK.hair.coverage}
+            onChange={(coverage) => setHair({ coverage })}
           />
-        )}
-      </Group>
-      <Group title="Length and body">
-        {slider(
-          "length",
-          "Length",
-          ["short", "long"],
-          "How far it hangs down the back",
-        )}
-        {slider(
-          "volume",
-          "Volume",
-          ["flat", "big"],
-          "How much it stands out from the head",
-        )}
-        {slider("curls", "Curls", ["straight", "afro"])}
-        {slider(
-          "messiness",
-          "Messiness",
-          ["neat", "messy"],
-          "How uneven its edge is",
-        )}
-      </Group>
-      <Group title="Tied and shaved">
-        {slider("bun", "Bun", ["none", "big"])}
-        {slider("ponytail", "Ponytail", ["none", "long"])}
-        {slider(
-          "mohawk",
-          "Mohawk",
-          ["none", "wide"],
-          "Shaved but for a strip down the middle this wide",
-        )}
-      </Group>
+          <Slider
+            label="Middle"
+            tip="The middle of the hairline, against its sides"
+            ends={["forward", "back"]}
+            value={hair.fringe}
+            min={-1}
+            reset={DEFAULT_LOOK.hair.fringe}
+            onChange={(fringe) => setHair({ fringe })}
+          />
+          <Slider
+            label="Balding"
+            tip="Bald on top, from the crown forward"
+            ends={["none", "only the sides"]}
+            value={hair.balding}
+            reset={0}
+            onChange={(balding) => setHair({ balding })}
+          />
+          <Toggle
+            label="Parting"
+            on={hair.part !== undefined}
+            onChange={(on) => setHair({ part: on ? -0.4 : undefined })}
+          />
+          {hair.part !== undefined && (
+            <Slider
+              label="Parted at"
+              ends={["left", "right"]}
+              value={hair.part}
+              min={-1}
+              onChange={(part) => setHair({ part })}
+            />
+          )}
+        </Group>
+      )}
     </>
   );
 }
