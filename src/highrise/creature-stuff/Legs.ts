@@ -28,6 +28,12 @@ export const FOOT_LENGTH = 0.26;
 export const FOOT_WIDTH = 0.12;
 /** How far in front of the ankle the middle of the foot is */
 export const FOOT_FORWARD = 0.05;
+/**
+ * How far a leg goes past the ankle, over the shoe, as a fraction of its
+ * thickness (it goes half its thickness past the hip). Legs are drawn over
+ * the feet, so this is how much of the shoe the hem covers.
+ */
+export const HEM_OVERLAP = 0.15;
 
 export const HUMAN_GAIT: GaitStyle = DEFAULT_GAIT;
 

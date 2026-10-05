@@ -82,6 +82,8 @@ function embed(
 ) {
   const prefix = d.id(name);
   content = content
+    // Plain href: the documents parts go into don't declare xlink
+    .replace(/\bxlink:href=/g, "href=")
     .replace(/\bid="([^"]+)"/g, `id="${prefix}-$1"`)
     .replace(/url\(#([^)]+)\)/g, `url(#${prefix}-$1)`)
     .replace(/href="#([^"]+)"/g, `href="#${prefix}-$1"`);

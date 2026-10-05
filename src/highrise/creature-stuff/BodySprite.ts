@@ -8,7 +8,7 @@ import { FootLanding, Gait, SIDES } from "../../core/animation/Gait";
 import { polarToVec } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
 import { HUMAN_RADIUS } from "../constants/constants";
-import { FOOT_FORWARD, HIP_WIDTH, LegStyle } from "./Legs";
+import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH, LegStyle } from "./Legs";
 import FloorStains, { getFloorStains } from "../effects/FloorStains";
 import { Shoes } from "./Shoes";
 
@@ -128,7 +128,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
         (texture) => new Sprite(texture),
       );
       this.legsSprite = new Container();
-      this.legsSprite.addChild(...this.legSprites, ...this.footSprites);
+      // Feet under the legs, so the trouser hems cover the tops of the shoes
+      this.legsSprite.addChild(...this.footSprites, ...this.legSprites);
       this.sprite.addChildAt(this.legsSprite, 0);
     }
   }
@@ -225,9 +226,16 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       const spanX = ankleX - hipX;
       const spanY = ankleY - hipY;
       const span = Math.sqrt(spanX * spanX + spanY * spanY);
-      leg.position.set((hipX + ankleX) / 2, (hipY + ankleY) / 2);
+      // From half its thickness behind the hip to a little past the ankle
+      const behindHip = this.legThickness / 2;
+      const pastAnkle = this.legThickness * HEM_OVERLAP;
+      const shift = span > 0.0001 ? (pastAnkle - behindHip) / 2 / span : 0;
+      leg.position.set(
+        (hipX + ankleX) / 2 + spanX * shift,
+        (hipY + ankleY) / 2 + spanY * shift,
+      );
       leg.rotation = span > 0.01 ? Math.atan2(spanY, spanX) : 0;
-      leg.width = span + this.legThickness;
+      leg.width = span + behindHip + pastAnkle;
 
       const foot = this.footSprites[side];
       const angle = step.angle - facing;

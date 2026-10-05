@@ -1,4 +1,4 @@
-import { FOOT_FORWARD, HIP_WIDTH } from "../creature-stuff/Legs";
+import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH } from "../creature-stuff/Legs";
 import { BodyLook, PartialLook } from "./BodyLook";
 import { BodyDrawing, drawBody } from "./drawBody";
 import { Drawing, n } from "./svg";
@@ -47,26 +47,28 @@ export function composeBodySvg(
     const hip = HIP_WIDTH * 1000;
     const legThickness = dims.legThickness;
     const leg = parts.leg;
-    // The left foot forward, the right back, like the editor always showed;
-    // each leg stretched from its hip to its ankle, as `BodySprite` does
-    for (const side of [-1, 1]) {
-      const along = -side * stride;
-      const stretch = (Math.abs(along) + legThickness) / leg.width;
-      items.push(
-        place(
-          leg,
-          along >= 0
-            ? `translate(${n(-legThickness / 2)} ${n(side * hip)}) scale(${stretch.toFixed(3)} 1)`
-            : `translate(${n(legThickness / 2)} ${n(side * hip)}) rotate(180) scale(${stretch.toFixed(3)} 1)`,
-        ),
-      );
-    }
+    // Feet first, under the legs
     for (const side of [-1, 1]) {
       const along = -side * stride;
       items.push(
         place(
           side < 0 ? parts.leftFoot : parts.rightFoot,
           `translate(${n(along + FOOT_FORWARD * 1000)} ${n(side * hip)})`,
+        ),
+      );
+    }
+    // The left foot forward, the right back, like the editor always showed;
+    // each leg stretched from its hip to its ankle, as `BodySprite` does
+    for (const side of [-1, 1]) {
+      const along = -side * stride;
+      const stretch =
+        (Math.abs(along) + legThickness * (0.5 + HEM_OVERLAP)) / leg.width;
+      items.push(
+        place(
+          leg,
+          along >= 0
+            ? `translate(${n(-legThickness / 2)} ${n(side * hip)}) scale(${stretch.toFixed(3)} 1)`
+            : `translate(${n(legThickness / 2)} ${n(side * hip)}) rotate(180) scale(${stretch.toFixed(3)} 1)`,
         ),
       );
     }
