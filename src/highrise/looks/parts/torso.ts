@@ -29,7 +29,28 @@ const BANDED: Partial<Record<TopStyle, number>> = {
 };
 
 /** Tops with a collar that stands up round the back of the neck */
-const COLLARED: TopStyle[] = ["shirt", "polo", "jacket", "coat"];
+const COLLARED: TopStyle[] = ["shirt", "polo", "jacket", "coat", "tracksuit"];
+
+/** A track suit's stripes over the shoulders, from the neck out to the arms */
+function drawShoulderStripes(
+  d: Drawing,
+  x: number,
+  from: number,
+  to: number,
+  color: Color,
+  width: number,
+) {
+  for (const side of [-1, 1]) {
+    for (const offset of [-1, 0, 1]) {
+      const sx = x + offset * width * 2;
+      d.line(
+        `M${n(sx)} ${n(side * from)}L${n(sx)} ${n(side * to)}`,
+        color,
+        width,
+      );
+    }
+  }
+}
 
 /** What shows on the shoulders: the top, or under it */
 function shoulderColor(look: BodyLook, skin: Color): Color {
@@ -395,6 +416,27 @@ export function drawTorso(
       );
     }
   }
+  if (top.style === "tracksuit") {
+    // Stripes over the shoulders, and the zip down the front
+    d.begin(`clip-path="url(#${torso})"`);
+    drawShoulderStripes(
+      d,
+      -dims.backDepth * 0.08,
+      neck * 0.9,
+      w + 20,
+      top.secondary,
+      13,
+    );
+    d.end();
+    d.line(
+      `M${n(neck * 0.85)} 0L${n(dims.chestDepth + dims.bust + dims.belly + 20)} 0`,
+      darken(top.color, 0.4),
+      7,
+    );
+    d.add(
+      `<rect x="${n(neck * 0.88)}" y="-9" width="34" height="18" rx="5" fill="#c8c8c0" stroke="${darken(top.color, 0.5)}" stroke-width="3"/>`,
+    );
+  }
   if (top.style === "sweater" || top.style === "tshirt") {
     d.add(
       `<path d="${ellipsePath(0, 0, neck * 0.98, neck * 0.98)}" fill="none" stroke="${darken(top.color, 0.25)}" stroke-width="16" opacity="0.8"/>`,
@@ -757,6 +799,11 @@ export function drawLyingTorso(
       {},
     );
   } else if (COLLARED.includes(top.style)) {
+    if (top.style === "tracksuit") {
+      d.begin(`clip-path="url(#${torso})"`);
+      drawShoulderStripes(d, front * 0.05, w * 0.3, w + 20, top.secondary, 13);
+      d.end();
+    }
     d.blob(
       capsulePath(front * 0.1, front * 0.55, 0, w * 0.75),
       lighten(top.color, 0.05),

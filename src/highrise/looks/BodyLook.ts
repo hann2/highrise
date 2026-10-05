@@ -27,9 +27,15 @@ export interface BodyLook {
   /** What's on the legs, and its color */
   pantsStyle: PantsStyle;
   pants: Color;
+  /** How far down the leg shorts and a skirt come, from the hip (0) to the ankle (1); else the style's own */
+  pantsLength?: number;
+  /** The stripes down track pants, else white */
+  pantsTrim?: Color;
   /** What's on the feet, and its color (bare feet are skin) */
   shoeStyle: ShoeStyle;
   shoes: Color;
+  /** A sneaker's sole and stripes, else white */
+  shoeTrim?: Color;
   /** How far gone they are, for zombies */
   zombie?: Zombification;
   /** For the random parts: ragged edges, where tears and blood go */
@@ -53,6 +59,8 @@ export interface Build {
   /** Thickness of the arms */
   arms: number;
   hands: number;
+  /** How big the feet are, and so the shoes */
+  feet: number;
   head: number;
   /** Thickness of the legs */
   legs: number;
@@ -111,12 +119,14 @@ export const TOP_STYLES = [
   "sweater",
   "vest",
   "overalls",
+  "tracksuit",
 ] as const;
 export type TopStyle = (typeof TOP_STYLES)[number];
 
 /**
  * What they wear on top. `color` is the main garment; `secondary` is what
- * else shows: the shirt under a jacket, vest or overalls, a coat's trim.
+ * else shows: the shirt under a jacket, vest or overalls, a coat's trim, a
+ * track suit's stripes.
  */
 export interface Top {
   style: TopStyle;
@@ -133,11 +143,19 @@ export interface Pattern {
   color: Color;
 }
 
-export const PANTS_STYLES = ["trousers", "jeans", "shorts", "skirt"] as const;
+export const PANTS_STYLES = [
+  "trousers",
+  "jeans",
+  "trackpants",
+  "shorts",
+  "skirt",
+] as const;
 export type PantsStyle = (typeof PANTS_STYLES)[number];
 
 export const SHOE_STYLES = [
   "sneakers",
+  "hightops",
+  "runners",
   "boots",
   "dress",
   "heels",
@@ -220,6 +238,7 @@ export const DEFAULT_LOOK: BodyLook = {
     squareness: 0,
     arms: 0,
     hands: 0,
+    feet: 0,
     head: 0,
     legs: 0,
   },
@@ -302,6 +321,11 @@ export function lookProblems(look: PartialLook | undefined): string[] {
   oneOf("pantsStyle", r.pantsStyle, PANTS_STYLES);
   oneOf("shoeStyle", r.shoeStyle, SHOE_STYLES);
   color("shoes", r.shoes);
+  color("shoeTrim", r.shoeTrim);
+  color("pantsTrim", r.pantsTrim);
+  if (r.pantsLength !== undefined) {
+    range("pantsLength", r.pantsLength, 0, 1);
+  }
   color("gloves", r.gloves);
   for (const [key, value] of Object.entries(r.build)) {
     range(`build.${key}`, value, -1, 1);

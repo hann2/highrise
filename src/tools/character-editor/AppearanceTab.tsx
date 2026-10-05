@@ -35,6 +35,7 @@ const BUILD_LABELS: Record<keyof Build, [string, string, string]> = {
   squareness: ["Shoulder shape", "round", "square"],
   arms: ["Arms", "thin", "thick"],
   hands: ["Hands", "small", "big"],
+  feet: ["Feet", "small", "big"],
   head: ["Head", "small", "big"],
   legs: ["Legs", "thin", "thick"],
 };
@@ -286,11 +287,13 @@ export function AppearanceTab({
           />
           <ColorField
             label="Secondary"
-            hint="The shirt under a jacket, vest or overalls; a coat's trim"
+            hint="The shirt under a jacket, vest or overalls; a coat's trim; a track suit's stripes"
             value={look.top.secondary}
             onChange={(secondary) => set("top", { ...look.top, secondary })}
           />
-          {["polo", "shirt", "jacket", "coat"].includes(look.top.style) && (
+          {["polo", "shirt", "jacket", "coat", "tracksuit"].includes(
+            look.top.style,
+          ) && (
             <Optional
               label="Popped collar"
               on={!!look.top.popped}
@@ -375,6 +378,26 @@ export function AppearanceTab({
             value={look.pants}
             onChange={(v) => set("pants", v)}
           />
+          {(look.pantsStyle === "shorts" || look.pantsStyle === "skirt") && (
+            <Slider
+              label="Length"
+              hint="from the hip to the ankle"
+              value={
+                look.pantsLength ?? (look.pantsStyle === "shorts" ? 0.46 : 0.42)
+              }
+              min={0}
+              max={1}
+              onChange={(v) => set("pantsLength", v)}
+            />
+          )}
+          {look.pantsStyle === "trackpants" && (
+            <OptionalColor
+              label="Stripes"
+              value={look.pantsTrim}
+              fallback="#f2f2ee"
+              onChange={(v) => set("pantsTrim", v)}
+            />
+          )}
           <SelectField
             label="Shoes"
             value={look.shoeStyle}
@@ -386,6 +409,14 @@ export function AppearanceTab({
               label="Their color"
               value={look.shoes}
               onChange={(v) => set("shoes", v)}
+            />
+          )}
+          {["sneakers", "hightops", "runners"].includes(look.shoeStyle) && (
+            <OptionalColor
+              label="Soles"
+              value={look.shoeTrim}
+              fallback="#ecebe6"
+              onChange={(v) => set("shoeTrim", v)}
             />
           )}
         </section>

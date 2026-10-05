@@ -195,6 +195,31 @@ export function drawArm(
       drawPattern(d, look.top.pattern, clip);
       d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("tube")})"/>`);
     }
+    if (look.top.style === "tracksuit") {
+      // Stripes down the sleeve, and elastic cuffs
+      d.begin(`clip-path="url(#${clip})"`);
+      for (const offset of [-1, 0, 1]) {
+        d.line(
+          `M0 ${n(offset * t * 0.2)}L${n(end)} ${n(offset * t * 0.2)}`,
+          look.top.secondary,
+          t * 0.11,
+        );
+      }
+      d.end();
+      if (!look.sleeves.cuff && sleeve > 0.9) {
+        const half = widen(end, armHalfWidth(dims, end));
+        d.blob(
+          polygonPath([
+            [end - 30, -half],
+            [end, -half],
+            [end, half],
+            [end - 30, half],
+          ]),
+          darken(color, 0.15),
+          { shade: "tube", outline: 0, clip },
+        );
+      }
+    }
     if (look.sleeves.cuff) {
       const half = widen(end, armHalfWidth(dims, end)) + 3;
       d.blob(

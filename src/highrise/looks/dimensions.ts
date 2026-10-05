@@ -26,6 +26,8 @@ export interface BodyDimensions {
   upperArm: number;
   forearm: number;
   handSize: number;
+  /** How big the feet (and shoes) are next to an average pair */
+  footScale: number;
   /** The skull's half-length front to back, and half-width */
   headRx: number;
   headRy: number;
@@ -55,6 +57,7 @@ export function bodyDimensions(look: BodyLook): BodyDimensions {
     upperArm: STYLE.upperArm,
     forearm: STYLE.forearm,
     handSize: 112 * (1 + 0.2 * b.hands),
+    footScale: 1 + 0.16 * b.feet,
     headRx: STYLE.headRx * headScale,
     headRy: STYLE.headRy * headScale,
     legThickness: 160 * (1 + 0.22 * b.legs),

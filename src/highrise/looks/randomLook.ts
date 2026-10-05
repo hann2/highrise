@@ -134,6 +134,15 @@ interface Outfit {
   shoeStyle?: ShoeStyle;
 }
 
+/** Soles and stripes of sneakers that aren't plain white */
+const SHOE_TRIMS: Color[] = [
+  "#1a1a1a",
+  "#d8403a",
+  "#e8c040",
+  "#3a7ad8",
+  "#f2efe6",
+];
+
 const DENIM: Color[] = ["#3d5470", "#4d5f80", "#2e3d58", "#6a7f9e", "#26272b"];
 
 /** What's on their legs and feet, if their outfit doesn't say */
@@ -390,6 +399,7 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
       squareness: slider(random),
       arms: slider(random),
       hands: slider(random, 0.3),
+      feet: 0,
       head: slider(random, 0.3),
       legs: slider(random, 0.4),
     },
@@ -465,6 +475,41 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
   const bustChance = look.beard ? 0 : pantsStyle === "skirt" ? 0.9 : 0.4;
   if (chance(random, bustChance)) {
     look.build.bust = Math.round(between(random, 0.25, 0.85) * 100) / 100;
+  }
+  look.build.feet =
+    Math.round((look.build.hands * 0.5 + slider(random, 0.3)) * 100) / 100;
+  if (look.shoeStyle === "sneakers") {
+    look.shoeStyle = weighted(random, { sneakers: 5, hightops: 2, runners: 3 });
+    if (chance(random, 0.35)) {
+      look.shoeTrim = pick(random, SHOE_TRIMS);
+    }
+  }
+  if (look.pantsStyle === "shorts" || look.pantsStyle === "skirt") {
+    look.pantsLength =
+      Math.round(
+        (look.pantsStyle === "shorts"
+          ? between(random, 0.3, 0.6)
+          : between(random, 0.3, 0.85)) * 100,
+      ) / 100;
+  }
+  // The odd one in a track suit
+  if (
+    ["tshirt", "hoodie", "sweater"].includes(look.top.style) &&
+    chance(random, 0.06)
+  ) {
+    look.top.style = "tracksuit";
+    look.top.secondary = pick(random, [
+      "#f2f2ee",
+      "#f2f2ee",
+      "#1a1a1a",
+      "#e8c040",
+    ]);
+    look.top.pattern = undefined;
+    look.sleeves = { length: 1 };
+    look.pantsStyle = "trackpants";
+    look.pants = look.top.color;
+    look.pantsTrim = look.top.secondary;
+    look.pantsLength = undefined;
   }
   return look;
 }

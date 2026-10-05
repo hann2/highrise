@@ -12,9 +12,51 @@ import {
 } from "../svg";
 import { drawBlood, drawRips } from "./wear";
 
-/** How much of a leg shorts cover, and a skirt, from the hip */
+/** How much of a leg shorts cover, and a skirt, from the hip, unless the look says */
 const SHORTS = 0.46;
 const SKIRT = 0.42;
+
+/** How far down the leg shorts or a skirt come (0 to 1), or 1 for anything else */
+function pantsCoverage(look: BodyLook): number {
+  const style = look.pantsStyle;
+  if (style !== "shorts" && style !== "skirt") {
+    return 1;
+  }
+  return look.pantsLength ?? (style === "shorts" ? SHORTS : SKIRT);
+}
+
+/** How much wider than the leg the bottom of shorts or a skirt is */
+function pantsFlare(look: BodyLook): number {
+  switch (look.pantsStyle) {
+    case "skirt":
+      // A long skirt flares out more by the time it gets down there
+      return 1.35 + pantsCoverage(look) * 0.45;
+    case "shorts":
+      return 1.12;
+    default:
+      return 1;
+  }
+}
+
+/** The stripes down track pants: two along each edge of the leg */
+function drawTrackStripes(
+  d: Drawing,
+  from: number,
+  to: number,
+  edge: number,
+  color: Color,
+  sides: number[],
+) {
+  for (const side of sides) {
+    for (const inset of [0.16, 0.36]) {
+      d.line(
+        `M${n(from)} ${n(side * edge * (1 - inset))}L${n(to)} ${n(side * edge * (1 - inset))}`,
+        color,
+        edge * 0.13,
+      );
+    }
+  }
+}
 
 /**
  * A leg from above, hip at x = 0 and ankle at `legLength`, which the game
@@ -32,7 +74,7 @@ export function drawLeg(
   const t = dims.legThickness;
   const pad = 7;
   const style = look.pantsStyle;
-  const flare = style === "skirt" ? 1.55 : style === "shorts" ? 1.12 : 1;
+  const flare = pantsFlare(look);
   const d = new Drawing(
     prefix,
     0,
@@ -50,8 +92,12 @@ export function drawLeg(
       shade: "tube",
       grain: rot > 0 ? "rot" : undefined,
     });
-    const end = length * (style === "shorts" ? SHORTS : SKIRT);
     const half0 = (t / 2) * (style === "skirt" ? 1.05 : 1.1);
+    // At least past the round top
+    const end = Math.max(
+      pad + half0 + 30,
+      Math.min(length - pad, length * pantsCoverage(look)),
+    );
     const half1 = (t / 2) * flare;
     cloth =
       `M${n(pad + half0)} ${n(-half0)}L${n(end)} ${n(-half1)}L${n(end)} ${n(half1)}L${n(pad + half0)} ${n(half0)}` +
@@ -88,6 +134,28 @@ export function drawLeg(
       d.add(
         `<ellipse cx="${n(length * 0.52)}" cy="0" rx="${n(t * 0.55)}" ry="${n(t * 0.3)}" fill="${lighten(pants, 0.25)}" opacity="0.35"/>`,
       );
+    } else if (style === "trackpants") {
+      // Stripes down the sides, and elastic gathered at the ankle
+      const clip = d.clipPath("leg", leg);
+      d.begin(`clip-path="url(#${clip})"`);
+      drawTrackStripes(
+        d,
+        pad,
+        length - pad,
+        t / 2,
+        look.pantsTrim ?? "#f2f2ee",
+        [-1, 1],
+      );
+      d.end();
+      for (let i = 0; i < 4; i++) {
+        const x = length - pad - 30 + i * 7;
+        d.line(
+          `M${n(x)} ${n(-t * 0.42)}L${n(x)} ${n(t * 0.42)}`,
+          darken(pants, 0.3),
+          3,
+          `opacity="0.6"`,
+        );
+      }
     } else {
       d.line(
         `M${n(length * 0.1)} 0L${n(length * 0.9)} 0`,
@@ -97,16 +165,17 @@ export function drawLeg(
       );
     }
     // The hem at the ankle
-    d.blob(
-      polygonPath([
-        [length - pad - 34, -t / 2],
-        [length - pad - 22, -t / 2],
-        [length - pad - 22, t / 2],
-        [length - pad - 34, t / 2],
-      ]),
-      darken(pants, 0.25),
-      { shade: "flat", outline: 0, clip: d.clipPath("leg", leg) },
-    );
+    if (style !== "trackpants")
+      d.blob(
+        polygonPath([
+          [length - pad - 34, -t / 2],
+          [length - pad - 22, -t / 2],
+          [length - pad - 22, t / 2],
+          [length - pad - 34, t / 2],
+        ]),
+        darken(pants, 0.25),
+        { shade: "flat", outline: 0, clip: d.clipPath("leg", leg) },
+      );
   }
 
   const clip = d.clipPath("cloth", cloth);
@@ -131,9 +200,11 @@ export function drawLeg(
   return d;
 }
 
-/** A shoe's size, by its style (mm): length, width, and how pointed the toe is */
+/** A shoe's size, by its style (mm), for average feet: length, width, and how pointed the toe is */
 const SHOE_SIZES: Record<ShoeStyle, [number, number, number]> = {
   sneakers: [262, 118, 0],
+  hightops: [264, 116, 0],
+  runners: [272, 122, 0],
   boots: [285, 136, 0],
   dress: [272, 108, 0.45],
   heels: [240, 94, 0.75],
@@ -161,7 +232,11 @@ function shoeOutline(length: number, width: number, point: number): Pt[] {
   ];
 }
 
-/** A bare foot from above: the ball wider than the heel, and toes */
+/**
+ * A bare foot from above, toe toward +x: narrow at the heel, widest across the
+ * ball, and five toes in an arc from the big one on the inside, each with a
+ * nail. `inner` is the side toward the body's middle.
+ */
 function drawBareFoot(
   d: Drawing,
   length: number,
@@ -173,35 +248,48 @@ function drawBareFoot(
   const l = length / 2;
   const w = width / 2;
   const grain = rot > 0 ? "rot" : undefined;
-  for (let i = 0; i < 5; i++) {
-    // Big toe on the inside
-    const y = inner * w * (0.62 - i * 0.3);
-    const size = i === 0 ? 0.24 : 0.16 - i * 0.012;
-    d.blob(
-      ellipsePath(
-        l * (0.78 - i * 0.04),
-        y,
-        width * size * 0.7,
-        width * size * 0.6,
-      ),
-      skin,
-      { grain, outline: 5 },
-    );
+  const nail = mix(lighten(skin, 0.3), "#f0c8c0", 0.35);
+  // Toes, from the big one: where each one's tip is, and how big it is
+  const toes: { x: number; y: number; r: number }[] = [
+    { x: 0.9, y: 0.48, r: 0.3 },
+    { x: 0.88, y: 0.05, r: 0.2 },
+    { x: 0.8, y: -0.3, r: 0.18 },
+    { x: 0.7, y: -0.58, r: 0.16 },
+    { x: 0.57, y: -0.8, r: 0.14 },
+  ];
+  for (const toe of toes) {
+    const r = toe.r * w;
+    const cx = toe.x * l - r;
+    const cy = inner * toe.y * w;
+    // Each toe runs back into the foot
+    d.blob(capsulePath(cx - l * 0.3, cx + r, cy, r * 2), skin, {
+      grain,
+      shade: "tube",
+    });
   }
+  // The foot, up to where the toes begin
   d.blob(
     smoothPath([
       [-l, 0],
-      [-l * 0.8, w * 0.55],
-      [0, w * 0.7],
-      [l * 0.62, w * 0.88],
-      [l * 0.7, 0],
-      [l * 0.62, -w * 0.82],
-      [0, -w * 0.62],
-      [-l * 0.8, -w * 0.55],
+      [-l * 0.86, inner * w * 0.5],
+      [-l * 0.25, inner * w * 0.62],
+      [l * 0.38, inner * w * 0.9],
+      [l * 0.56, inner * w * 0.62],
+      [l * 0.6, 0],
+      [l * 0.44, -inner * w * 0.6],
+      [l * 0.22, -inner * w * 0.92],
+      [-l * 0.3, -inner * w * 0.74],
+      [-l * 0.86, -inner * w * 0.52],
     ]),
     skin,
-    { grain },
+    { grain, shade: "tube" },
   );
+  for (const toe of toes) {
+    const r = toe.r * w;
+    d.add(
+      `<ellipse cx="${n(toe.x * l - r * 0.75)}" cy="${n(inner * toe.y * w)}" rx="${n(r * 0.5)}" ry="${n(r * 0.55)}" fill="${nail}" opacity="0.7"/>`,
+    );
+  }
 }
 
 /**
@@ -216,7 +304,10 @@ export function drawFoot(
 ): Drawing {
   const colors = palette(look);
   const style = look.shoeStyle;
-  const [length, width, point] = SHOE_SIZES[style];
+  const [baseLength, baseWidth, point] = SHOE_SIZES[style];
+  const length = baseLength * dims.footScale;
+  const width = baseWidth * dims.footScale;
+  const trim = look.shoeTrim ?? "#ecebe6";
   const rot = look.zombie?.rot ?? 0;
   const d = new Drawing(prefix, -length / 2, -width / 2, length / 2, width / 2);
   d.include(-length / 2 - 8, -width / 2 - 8, length / 2 + 8, width / 2 + 8);
@@ -255,13 +346,9 @@ export function drawFoot(
     }
     case "sneakers": {
       // A white sole round a colored upper, laces and a toe cap
-      d.blob(
-        smoothPath(shoeOutline(length * 1.04, width * 1.1, 0)),
-        "#ecebe6",
-        {
-          shade: "flat",
-        },
-      );
+      d.blob(smoothPath(shoeOutline(length * 1.04, width * 1.1, 0)), trim, {
+        shade: "flat",
+      });
       d.blob(smoothPath(shoeOutline(length * 0.93, width * 0.9, 0)), color, {});
       d.blob(
         ellipsePath(length * 0.33, 0, length * 0.13, width * 0.3),
@@ -277,6 +364,81 @@ export function drawFoot(
           `M${n(x)} ${n(-width * 0.2)}L${n(x)} ${n(width * 0.2)}`,
           "#f4f4f0",
           7,
+        );
+      }
+      return d;
+    }
+    case "hightops": {
+      // Canvas on a thin rubber sole: a rubber toe cap, laces, and the
+      // high collar round the ankle with its round patch on the inside
+      d.blob(smoothPath(shoeOutline(length * 1.03, width * 1.06, 0)), trim, {
+        shade: "flat",
+      });
+      d.blob(
+        smoothPath(shoeOutline(length * 0.95, width * 0.94, 0)),
+        color,
+        {},
+      );
+      d.blob(ellipsePath(length * 0.36, 0, length * 0.13, width * 0.4), trim, {
+        shade: "flat",
+        outline: 0,
+      });
+      d.line(
+        `M${n(length * 0.25)} ${n(-width * 0.38)}Q${n(length * 0.21)} 0 ${n(length * 0.25)} ${n(width * 0.38)}`,
+        darken(trim, 0.3),
+        5,
+      );
+      d.blob(
+        ellipsePath(-length * 0.2, 0, length * 0.22, width * 0.43),
+        darken(color, 0.12),
+        { shade: "flat", outline: 5 },
+      );
+      d.blob(
+        ellipsePath(-length * 0.21, 0, length * 0.14, width * 0.28),
+        darken(color, 0.45),
+        { shade: "flat", outline: 0 },
+      );
+      d.add(
+        `<circle cx="${n(-length * 0.2)}" cy="${n(inner * width * 0.36)}" r="${n(width * 0.09)}" fill="${trim}" stroke="${darken(color, 0.3)}" stroke-width="3"/>`,
+      );
+      for (let i = 0; i < 4; i++) {
+        const x = length * 0.02 + i * length * 0.055;
+        d.line(
+          `M${n(x)} ${n(-width * 0.18)}L${n(x)} ${n(width * 0.18)}`,
+          "#f4f4f0",
+          6,
+        );
+      }
+      return d;
+    }
+    case "runners": {
+      // A thick sole showing all round, a mesh toe, and a swoosh of stripe
+      // along the outside
+      d.blob(smoothPath(shoeOutline(length * 1.05, width * 1.12, 0)), trim, {
+        shade: "flat",
+      });
+      d.blob(smoothPath(shoeOutline(length * 0.9, width * 0.88, 0)), color, {});
+      d.blob(
+        ellipsePath(length * 0.3, 0, length * 0.15, width * 0.33),
+        lighten(color, 0.22),
+        { shade: "flat", outline: 0 },
+      );
+      d.line(
+        `M${n(-length * 0.34)} ${n(-inner * width * 0.16)}Q${n(-length * 0.02)} ${n(-inner * width * 0.5)} ${n(length * 0.2)} ${n(-inner * width * 0.26)}`,
+        trim,
+        width * 0.09,
+      );
+      d.blob(
+        ellipsePath(-length * 0.3, 0, length * 0.12, width * 0.28),
+        darken(color, 0.4),
+        { shade: "flat", outline: 0 },
+      );
+      for (let i = 0; i < 3; i++) {
+        const x = -length * 0.1 + i * length * 0.08;
+        d.line(
+          `M${n(x)} ${n(-width * 0.16)}L${n(x)} ${n(width * 0.16)}`,
+          lighten(color, 0.55),
+          6,
         );
       }
       return d;
@@ -367,12 +529,13 @@ export function drawLyingLegs(
   const rot = look.zombie?.rot ?? 0;
   const skinGrain = rot > 0 ? "rot" : undefined;
   const bare = style === "shorts" || style === "skirt";
+  const coverage = pantsCoverage(look);
   const covered = d.clipPath(
     "covered",
     polygonPath([
       [10, -999],
-      [style === "shorts" ? -length * SHORTS : bare ? 0 : -9999, -999],
-      [style === "shorts" ? -length * SHORTS : bare ? 0 : -9999, 999],
+      [style === "shorts" ? -length * coverage : bare ? 0 : -9999, -999],
+      [style === "shorts" ? -length * coverage : bare ? 0 : -9999, 999],
       [10, 999],
     ]),
   );
@@ -395,7 +558,16 @@ export function drawLyingLegs(
       d.blob(path, colors.skin, { grain: skinGrain });
     }
     d.blob(path, pants, { clip: covered });
-    if (!bare) {
+    if (style === "trackpants") {
+      // Stripes down the outside of the leg
+      for (const inset of [0.12, 0.3]) {
+        d.line(
+          `M${n(-10)} ${n(side * (hip + thigh * (0.5 - inset)))}Q${n(-length * 0.5)} ${n((side * hip + spread) / 2 + side * thigh * (0.42 - inset))} ${n(ankle[0] + 10)} ${n(ankle[1] + side * thigh * (0.36 - inset))}`,
+          look.pantsTrim ?? "#f2f2ee",
+          thigh * 0.07,
+        );
+      }
+    } else if (!bare) {
       d.line(
         `M${n(-length * 0.15)} ${n(side * hip * 0.9)}Q${n(-length * 0.5)} ${n((side * hip + spread) / 2)} ${n(-length * 0.85)} ${n(spread)}`,
         darken(pants, 0.35),
@@ -403,21 +575,31 @@ export function drawLyingLegs(
         `opacity="0.6"`,
       );
     }
-    drawSole(d, look, colors.skin, ankle);
+    drawSole(d, look, colors.skin, ankle, dims.footScale);
   }
 
   const half = hip + thigh / 2;
   if (style === "skirt") {
+    const hem = half * (1.15 + coverage * 0.7);
     d.blob(
       polygonPath([
         [0, -half * 1.05],
-        [-length * SKIRT, -half * 1.45],
-        [-length * SKIRT, half * 1.45],
+        [-length * coverage, -hem],
+        [-length * coverage, hem],
         [0, half * 1.05],
       ]),
       pants,
-      {},
+      { shade: "tube" },
     );
+    // Folds from the waist to the hem
+    for (const f of [-0.6, -0.2, 0.2, 0.6]) {
+      d.line(
+        `M${n(-30)} ${n(f * half)}L${n(-length * coverage + 10)} ${n(f * hem)}`,
+        darken(pants, 0.3),
+        5,
+        `opacity="0.5"`,
+      );
+    }
   }
   drawBlood(
     d,
@@ -449,9 +631,17 @@ export function drawLyingLegs(
 }
 
 /** The sole of a shoe (or a foot) at `ankle`, face down, toe pointing down into the floor */
-function drawSole(d: Drawing, look: BodyLook, skin: Color, ankle: Pt) {
+function drawSole(
+  d: Drawing,
+  look: BodyLook,
+  skin: Color,
+  ankle: Pt,
+  footScale: number,
+) {
   const style = look.shoeStyle;
-  const [length, width] = SHOE_SIZES[style];
+  const [baseLength, baseWidth] = SHOE_SIZES[style];
+  const length = baseLength * footScale;
+  const width = baseWidth * footScale;
   const cx = ankle[0] - length * 0.32;
   const rx = length * 0.33;
   const ry = width * 0.45;
@@ -468,7 +658,9 @@ function drawSole(d: Drawing, look: BodyLook, skin: Color, ankle: Pt) {
       });
       return;
     case "sneakers":
-      d.blob(sole, "#dcdbd4", { shade: "flat" });
+    case "hightops":
+    case "runners":
+      d.blob(sole, darken(look.shoeTrim ?? "#ecebe6", 0.07), { shade: "flat" });
       for (let i = -2; i <= 2; i++) {
         d.line(
           `M${n(cx + i * rx * 0.3)} ${n(ankle[1] - ry * 0.6)}L${n(cx + i * rx * 0.3)} ${n(ankle[1] + ry * 0.6)}`,
