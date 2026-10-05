@@ -33,6 +33,33 @@ export const BODY_PARTS = [
 ] as const;
 export type BodyPart = (typeof BODY_PARTS)[number];
 
+/** The parts in groups that can be shown or hidden together, to look at what's under them */
+export const BODY_LAYERS = [
+  "head",
+  "torso",
+  "arms",
+  "hands",
+  "legs",
+  "feet",
+] as const;
+export type BodyLayer = (typeof BODY_LAYERS)[number];
+
+export const LAYER_PARTS: Record<BodyLayer, BodyPart[]> = {
+  head: ["head", "lyingHead"],
+  torso: ["torso", "lyingTorso"],
+  arms: [
+    "leftArm",
+    "rightArm",
+    "leftUpperArm",
+    "leftForearm",
+    "rightUpperArm",
+    "rightForearm",
+  ],
+  hands: ["leftHand", "rightHand"],
+  legs: ["leg", "lyingLegs"],
+  feet: ["leftFoot", "rightFoot"],
+};
+
 export interface BodyDrawing {
   look: BodyLook;
   dims: BodyDimensions;

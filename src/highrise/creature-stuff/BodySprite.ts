@@ -1,5 +1,6 @@
 import { Container, Sprite } from "pixi.js";
 import { BodyTextures, bodyPixelScale } from "../looks/bakeBodies";
+import { BodyLayer } from "../looks/drawBody";
 import BaseEntity from "../../core/entity/BaseEntity";
 import Entity from "../../core/entity/Entity";
 import { GameSprite } from "../../core/entity/GameSprite";
@@ -179,6 +180,18 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       }
       this.updatePose();
     }
+  }
+
+  /** Leaves out some layers, to see what's under them (the character editor) */
+  setHiddenLayers(hidden: ReadonlySet<BodyLayer>) {
+    this.headSprite.visible = !hidden.has("head");
+    this.torsoSprite.visible = !hidden.has("torso");
+    this.leftArmSprite.visible = this.rightArmSprite.visible =
+      !hidden.has("arms");
+    this.leftHandSprite.visible = this.rightHandSprite.visible =
+      !hidden.has("hands");
+    this.legSprites.forEach((leg) => (leg.visible = !hidden.has("legs")));
+    this.footSprites.forEach((foot) => (foot.visible = !hidden.has("feet")));
   }
 
   /** Puts the sprites where the body and its parts are now */

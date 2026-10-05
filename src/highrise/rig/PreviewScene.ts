@@ -14,6 +14,7 @@ import ContactShadows from "../lighting-and-vision/ContactShadows";
 import LightingManager from "../lighting-and-vision/LightingManager";
 import { BodyLook, resolveLook } from "../looks/BodyLook";
 import { bakeBodies, forgetLook } from "../looks/bakeBodies";
+import { BodyLayer } from "../looks/drawBody";
 import { GUNS } from "../weapons/guns/gun-stats/gunStats";
 import Gun from "../weapons/guns/Gun";
 import { ReloadingStyle } from "../weapons/guns/GunStats";
@@ -67,6 +68,7 @@ export default class PreviewScene extends BaseEntity implements Entity {
   /** Counts the humans made, so an old one's demonstration stops */
   private generation = 0;
   private angle = 0;
+  private hidden: ReadonlySet<BodyLayer> = new Set();
 
   @on("add")
   onAdd() {
@@ -105,7 +107,11 @@ export default class PreviewScene extends BaseEntity implements Entity {
     ) {
       return;
     }
-    const key = JSON.stringify(message);
+    // Showing and hiding layers doesn't need a new body
+    this.hidden = new Set(message.hidden);
+    this.human?.humanSprite.setHiddenLayers(this.hidden);
+    const { hidden: _, ...body } = message;
+    const key = JSON.stringify(body);
     if (key === this.shown) {
       return;
     }
@@ -155,6 +161,7 @@ export default class PreviewScene extends BaseEntity implements Entity {
       }
     }
     this.human = human;
+    human.humanSprite.setHiddenLayers(this.hidden);
     const generation = ++this.generation;
     if (this.mode === "shoot") {
       this.demonstrate(human, generation);

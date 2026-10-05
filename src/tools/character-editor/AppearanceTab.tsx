@@ -18,7 +18,7 @@ import {
   Zombification,
 } from "../../highrise/looks/BodyLook";
 import { composeBodySvg, svgDataUrl } from "../../highrise/looks/composeBody";
-import { BODY_PARTS, drawBody } from "../../highrise/looks/drawBody";
+import { BODY_LAYERS, BodyLayer } from "../../highrise/looks/drawBody";
 import { randomLook } from "../../highrise/looks/randomLook";
 import { pieceNames, piecePlace } from "../../highrise/looks/pieces";
 import { PlayerStats } from "../../highrise/human/PlayerStats";
@@ -79,6 +79,7 @@ export function AppearanceTab({
 }) {
   const [zombify, setZombify] = useState(false);
   const [zombie, setZombie] = useState(ZOMBIE_PREVIEW);
+  const [hidden, toggleLayer] = useHiddenLayers();
 
   // Each press of a button is its own step of undo
   const once = (next: BodyLook) => onChange(next, `once-${Date.now()}`);
@@ -94,8 +95,10 @@ export function AppearanceTab({
           look={preview}
           startingWeapons={startingWeapons}
           stats={stats}
+          hidden={hidden}
         />
-        <Preview look={preview} />
+        <LayerToggles hidden={hidden} onToggle={toggleLayer} />
+        <Preview look={preview} hidden={hidden} />
       </div>
 
       <div class="appearance__controls">
@@ -557,37 +560,75 @@ export function AppearanceTab({
 }
 
 /** The body standing and lying, and each part on its own */
-function Preview({ look }: { look: BodyLook }) {
-  const images = useMemo(() => {
-    const body = drawBody(look, "preview");
-    return {
-      standing: svgDataUrl(composeBodySvg(look, { scale: 420 }, "ps")),
+function Preview({ look, hidden }: { look: BodyLook; hidden: BodyLayer[] }) {
+  const images = useMemo(
+    () => ({
+      standing: svgDataUrl(composeBodySvg(look, { scale: 420, hidden }, "ps")),
       lying: svgDataUrl(
-        composeBodySvg(look, { scale: 220, pose: "lying" }, "pl"),
+        composeBodySvg(look, { scale: 220, pose: "lying", hidden }, "pl"),
       ),
-      parts: BODY_PARTS.map((part) => ({
-        part,
-        url: svgDataUrl(body.parts[part].toSvg(160)),
-      })),
-    };
-  }, [JSON.stringify(look)]);
+    }),
+    [JSON.stringify(look), hidden.join()],
+  );
   return (
-    <>
-      <div class="appearance__stage">
+    <div class="appearance__stills">
+      <div class="appearance__stage" title="Standing">
         <img src={images.standing} />
       </div>
-      <div class="appearance__stage appearance__stage--small">
+      <div class="appearance__stage" title="Lying face down, as a corpse">
         <img src={images.lying} />
       </div>
-      <div class="appearance__parts">
-        {images.parts.map(({ part, url }) => (
-          <figure key={part}>
-            <img src={url} />
-            <figcaption>{part}</figcaption>
-          </figure>
-        ))}
-      </div>
-    </>
+    </div>
+  );
+}
+
+/** Where the layers left out are remembered */
+const HIDDEN_LAYERS_KEY = "characterEditorHiddenLayers";
+
+/** Which layers are hidden, kept across reloads */
+function useHiddenLayers(): [BodyLayer[], (layer: BodyLayer) => void] {
+  const [hidden, setHidden] = useState<BodyLayer[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(HIDDEN_LAYERS_KEY) ?? "[]");
+      return BODY_LAYERS.filter((layer) => saved.includes(layer));
+    } catch {
+      return [];
+    }
+  });
+  const toggle = (layer: BodyLayer) => {
+    const next = hidden.includes(layer)
+      ? hidden.filter((l) => l !== layer)
+      : BODY_LAYERS.filter((l) => l === layer || hidden.includes(l));
+    setHidden(next);
+    try {
+      localStorage.setItem(HIDDEN_LAYERS_KEY, JSON.stringify(next));
+    } catch {}
+  };
+  return [hidden, toggle];
+}
+
+/** A button per layer, to show or hide it in every preview */
+function LayerToggles({
+  hidden,
+  onToggle,
+}: {
+  hidden: BodyLayer[];
+  onToggle: (layer: BodyLayer) => void;
+}) {
+  return (
+    <div class="layer-toggles">
+      <span class="muted small">Layers</span>
+      {BODY_LAYERS.map((layer) => (
+        <button
+          key={layer}
+          class={hidden.includes(layer) ? "" : "is-selected"}
+          title={`${hidden.includes(layer) ? "Show" : "Hide"} the ${layer}`}
+          onClick={() => onToggle(layer)}
+        >
+          {layer[0].toUpperCase() + layer.slice(1)}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -610,10 +651,12 @@ function GamePreview({
   look,
   startingWeapons,
   stats,
+  hidden,
 }: {
   look: BodyLook;
   startingWeapons: string[];
   stats: Partial<PlayerStats>;
+  hidden: BodyLayer[];
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [ready, setReady] = useState(false);
@@ -652,6 +695,7 @@ function GamePreview({
     startingWeapons,
     stats,
     mode,
+    hidden,
   };
   const key = JSON.stringify(message);
   useEffect(() => {

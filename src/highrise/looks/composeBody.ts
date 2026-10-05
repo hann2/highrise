@@ -2,7 +2,7 @@ import { elbowPosition } from "../creature-stuff/armReach";
 import { STYLE } from "./style";
 import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH } from "../creature-stuff/Legs";
 import { BodyLook, PartialLook } from "./BodyLook";
-import { BodyDrawing, drawBody } from "./drawBody";
+import { BodyDrawing, BodyLayer, drawBody, LAYER_PARTS } from "./drawBody";
 import { Drawing, n } from "./svg";
 import { lyingWaist } from "./parts/torso";
 import { armHandPosition } from "./parts/limbs";
@@ -20,6 +20,8 @@ export interface ComposeOptions {
   faceUp?: boolean;
   /** Lying down without its legs, like a crawler */
   legless?: boolean;
+  /** Layers left out, to see what's under them */
+  hidden?: readonly BodyLayer[];
 }
 
 function place(part: Drawing, transform: string): string {
@@ -37,7 +39,15 @@ export function composeBodySvg(
   prefix = "c",
 ): string {
   const body = "parts" in look ? look : drawBody(look, prefix);
-  const { parts, dims } = body;
+  const { dims } = body;
+  // Hidden parts are left empty, the same size, so everything else is where it was
+  const parts = { ...body.parts };
+  for (const layer of options.hidden ?? []) {
+    for (const part of LAYER_PARTS[layer]) {
+      const d = parts[part];
+      parts[part] = new Drawing(`${prefix}-x`, d.minX, d.minY, d.maxX, d.maxY);
+    }
+  }
   const {
     pose = "standing",
     stride = 150,

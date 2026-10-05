@@ -1,5 +1,6 @@
 import { PlayerStats } from "../human/PlayerStats";
 import { PartialLook } from "../looks/BodyLook";
+import { BodyLayer } from "../looks/drawBody";
 
 /** What the character editor's game preview shows its character doing */
 export const PREVIEW_MODES = ["walk", "armed", "shoot"] as const;
@@ -13,6 +14,8 @@ export interface PreviewShow {
   startingWeapons: string[];
   stats: Partial<PlayerStats>;
   mode: PreviewMode;
+  /** Layers left out, to see what's under them */
+  hidden: BodyLayer[];
 }
 
 /** `PreviewScene` to the editor: it's booted and listening */
