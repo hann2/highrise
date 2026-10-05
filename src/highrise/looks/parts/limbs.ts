@@ -42,16 +42,16 @@ function armJoints(dims: BodyDimensions) {
 /**
  * How wide an arm is along its length, as a fraction of its thickness, at
  * fractions of the way from shoulder to elbow (`upper`) and elbow to hand
- * (`fore`): fullest at the shoulder, narrower at the elbow, swelling again
+ * (`fore`): fullest at the shoulder, tapering to the elbow, swelling again
  * just below it where the forearm's muscles are, and tapering to the wrist.
  */
 const ARM_WIDTHS: { upper?: number; fore?: number; width: number }[] = [
   { upper: 0, width: 1 },
-  { upper: 0.45, width: 0.95 },
-  { upper: 1, width: 0.8 },
-  { fore: 0.22, width: 0.88 },
-  { fore: 0.8, width: 0.6 },
-  { fore: 1, width: 0.58 },
+  { upper: 0.3, width: 0.85 },
+  { upper: 1, width: 0.68 },
+  { fore: 0.2, width: 0.78 },
+  { fore: 0.8, width: 0.56 },
+  { fore: 1, width: 0.55 },
 ];
 
 /** The arm's half-width at `x` along its drawing (mm) */
