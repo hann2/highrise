@@ -26,6 +26,8 @@ export const BODY_PARTS = [
   "rightFoot",
   /** Face down from the waist up: crawlers, corpses */
   "lyingTorso",
+  /** The back of the head, face down */
+  "lyingHead",
   /** Face down from the waist down */
   "lyingLegs",
 ] as const;
@@ -64,6 +66,7 @@ export function drawBody(look: PartialLook, prefix = "b"): BodyDrawing {
       leftFoot: drawFoot(resolved, dims, 1, p("lf")),
       rightFoot: drawFoot(resolved, dims, -1, p("rf")),
       lyingTorso: drawLyingTorso(resolved, dims, p("lt")),
+      lyingHead: drawHead(resolved, dims, p("lhd"), true),
       lyingLegs: drawLyingLegs(resolved, dims, p("ll")),
     },
   };

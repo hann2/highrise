@@ -3,6 +3,7 @@ import { LegTextures } from "../creature-stuff/Legs";
 import { BodyLook } from "./BodyLook";
 import { BODY_PARTS, BodyPart, drawBody } from "./drawBody";
 import { Drawing, n } from "./svg";
+import { lyingWaist } from "./parts/torso";
 // Hand-drawn pieces, so looks can wear them
 import "./pieces/index";
 
@@ -23,6 +24,8 @@ export interface BodyMetrics {
   forearm: number;
   handSize: number;
   headRadius: number;
+  /** Lying face down, how far behind the shoulders the waist is, where the legs go */
+  lyingWaist: number;
 }
 
 /** The images a `BodySprite` is drawn with, and how they fit together */
@@ -177,9 +180,9 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       forearm: dims.forearm / 1000,
       handSize: dims.handSize / 1000,
       headRadius: dims.headRy / 1000,
+      lyingWaist: lyingWaist(dims) / 1000,
     };
     const limbs = {
-      head: texture("head"),
       leftArm: texture("leftArm"),
       rightArm: texture("rightArm"),
       leftUpperArm: texture("leftUpperArm"),
@@ -195,8 +198,12 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
     ]);
     baked.set(toBake[i], {
       look: body.look,
-      standing: { ...limbs, torso: texture("torso") },
-      lying: { ...limbs, torso: texture("lyingTorso") },
+      standing: { ...limbs, head: texture("head"), torso: texture("torso") },
+      lying: {
+        ...limbs,
+        head: texture("lyingHead"),
+        torso: texture("lyingTorso"),
+      },
       lyingLegs: texture("lyingLegs"),
       legs: {
         leg: texture("leg"),

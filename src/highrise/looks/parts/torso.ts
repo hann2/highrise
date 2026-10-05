@@ -681,6 +681,23 @@ function drawExtra(
  * toward +x, the waist toward -x, torn off and bloody (the legs, when there
  * are any, are drawn over that end). For crawlers, corpses and gibs.
  */
+/**
+ * How far behind the shoulders a body lying face down has its waist, where
+ * its legs go (mm): far enough down that they cover the torn end
+ */
+export function lyingWaist(dims: BodyDimensions): number {
+  return lyingTorsoLength(dims) - 60;
+}
+
+/** Half the width of a body lying face down, at the waist (mm) */
+export function lyingWaistHalf(look: BodyLook, dims: BodyDimensions): number {
+  return dims.shoulderHalfWidth * (0.74 + Math.max(0, look.build.belly) * 0.18);
+}
+
+function lyingTorsoLength(dims: BodyDimensions): number {
+  return 400 + dims.belly * 0.4;
+}
+
 export function drawLyingTorso(
   look: BodyLook,
   dims: BodyDimensions,
@@ -690,9 +707,9 @@ export function drawLyingTorso(
   const random = lookRandom(look, 3);
   const top = look.top;
   const w = dims.shoulderHalfWidth;
-  const length = 400 + dims.belly * 0.4;
+  const length = lyingTorsoLength(dims);
   const front = 70 + dims.backDepth * 0.25;
-  const waist = w * (0.74 + Math.max(0, look.build.belly) * 0.18);
+  const waist = lyingWaistHalf(look, dims);
   const jag = wobble(random, 6, 5);
   // Down the left side, ragged across the waist, back up the right
   const points: Pt[] = [
@@ -819,12 +836,13 @@ export function drawLyingTorso(
   ];
   drawRips(d, look, colors.skin, top.color, garment, onBack, random);
   drawBlood(d, look, torso, onBack, random);
-  // Always bloody where it tore
+  // Always bloody where it tore, but no further up than the legs of a
+  // whole body cover (`lyingWaist`)
   d.begin(`clip-path="url(#${torso})"`);
   for (let i = 0; i < 5; i++) {
     const y = (random() - 0.5) * waist * 1.8;
     d.add(
-      `<ellipse cx="${n(-length + 30 + random() * 50)}" cy="${n(y)}" rx="${n(40 + random() * 40)}" ry="${n(25 + random() * 25)}" fill="#6a0e0e" opacity="0.75"/>`,
+      `<ellipse cx="${n(-length - 20 + random() * 20)}" cy="${n(y)}" rx="${n(25 + random() * 25)}" ry="${n(20 + random() * 20)}" fill="#6a0e0e" opacity="0.75"/>`,
     );
   }
   d.end();

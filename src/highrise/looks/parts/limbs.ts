@@ -60,6 +60,11 @@ export const ARM_WIDTHS: { upper?: number; fore?: number; width: number }[] = [
   { fore: 1, width: 0.55 },
 ];
 
+/** Where along a whole arm's drawing (`drawArm`) the middle of the hand goes (mm) */
+export function armHandPosition(dims: BodyDimensions): number {
+  return armJoints(dims).hand;
+}
+
 /** As far out from its middle as an arm (or its sleeve) ever gets (mm) */
 function widestHalf(dims: BodyDimensions): number {
   const widest = Math.max(...ARM_WIDTHS.map(({ width }) => width));

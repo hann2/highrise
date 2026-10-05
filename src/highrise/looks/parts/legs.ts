@@ -11,6 +11,7 @@ import {
   smoothPath,
 } from "../svg";
 import { drawBlood, drawRips } from "./wear";
+import { lyingWaistHalf } from "./torso";
 
 /** How much of a leg shorts cover, and a skirt, from the hip, unless the look says */
 const SHORTS = 0.46;
@@ -578,7 +579,24 @@ export function drawLyingLegs(
     drawSole(d, look, colors.skin, ankle, dims.footScale);
   }
 
-  const half = hip + thigh / 2;
+  // The seat: the hips and bottom, as wide as the waist above, closing the
+  // gap between the tops of the legs
+  const waistHalf = Math.max(hip + thigh / 2, lyingWaistHalf(look, dims));
+  const seat: Pt[] = [
+    [14, -waistHalf * 0.98],
+    [-90, -waistHalf * 1.02],
+    [-170, -waistHalf * 0.85],
+    [-215, -hip * 0.6],
+    [-200, 0],
+    [-215, hip * 0.6],
+    [-170, waistHalf * 0.85],
+    [-90, waistHalf * 1.02],
+    [14, waistHalf * 0.98],
+  ];
+  d.includePoints(seat);
+  d.blob(smoothPath(seat, true, 0.8), pants, {});
+  d.line(`M${n(-50)} 0L${n(-195)} 0`, darken(pants, 0.35), 6, `opacity="0.6"`);
+  const half = waistHalf;
   if (style === "skirt") {
     const hem = half * (1.15 + coverage * 0.7);
     d.blob(

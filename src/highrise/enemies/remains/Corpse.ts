@@ -154,7 +154,7 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
       this.legsLength = 0;
     }
     this.legsTo = {
-      position: V(-0.4 * torsoLength, 0),
+      position: V(-textures.metrics.lyingWaist * size, 0),
       angle: rUniform(-0.15, 0.15),
     };
 

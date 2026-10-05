@@ -4,6 +4,8 @@ import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH } from "../creature-stuff/Legs";
 import { BodyLook, PartialLook } from "./BodyLook";
 import { BodyDrawing, drawBody } from "./drawBody";
 import { Drawing, n } from "./svg";
+import { lyingWaist } from "./parts/torso";
+import { armHandPosition } from "./parts/limbs";
 
 export interface ComposeOptions {
   /** Standing mid-stride, or lying face down like a corpse */
@@ -141,8 +143,8 @@ export function composeBodySvg(
   } else {
     // Face down: the legs, the top half, arms by its sides and the head
     const shoulder = dims.shoulderHalfWidth - dims.armThickness / 2;
-    const torsoLength = -parts.lyingTorso.minX;
-    const waist = -torsoLength * 0.4;
+    const waist = -lyingWaist(dims);
+    const handAt = armHandPosition(dims);
     // The legs over the torn end, as a corpse has them
     items.push(place(parts.lyingTorso, ""));
     if (!options.legless) {
@@ -163,16 +165,22 @@ export function composeBodySvg(
       items.push(
         place(
           hand,
-          `translate(${n(Math.cos(rad) * arm.width * 0.75)} ${n(side * shoulder + Math.sin(rad) * arm.width * 0.75)})`,
+          `translate(${n(Math.cos(rad) * handAt * 0.75)} ${n(side * shoulder + Math.sin(rad) * handAt * 0.75)})`,
         ),
       );
     }
-    items.push(place(parts.head, `translate(${n(dims.headRx * 0.55)} 0)`));
-    const reach = dims.shoulderHalfWidth + 120;
+    items.push(place(parts.lyingHead, `translate(${n(dims.headRx * 0.55)} 0)`));
+    // Out to the hands, at the ends of the arms
+    const handOut = shoulder + Math.sin((150 * Math.PI) / 180) * handAt * 0.75;
+    const reach = Math.max(
+      dims.shoulderHalfWidth + 120,
+      handOut + dims.handSize * 0.6,
+      parts.lyingLegs.maxY,
+    );
     box = [
       options.legless ? parts.lyingTorso.minX : waist + parts.lyingLegs.minX,
       -reach,
-      dims.headRx * 0.55 + parts.head.maxX,
+      dims.headRx * 0.55 + parts.lyingHead.maxX,
       reach,
     ];
   }

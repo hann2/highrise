@@ -20,17 +20,33 @@ import {
 
 /**
  * The head from above, facing +x, the skull's middle at the origin: hair,
- * ears, nose, brows, a beard, glasses and a hat.
+ * ears, nose, brows, a beard, glasses and a hat. `faceDown`, lying on its
+ * face (a corpse, a crawler), so what shows is the back of the head, with
+ * the top of it toward +x: no face, and hair right over it.
  */
 export function drawHead(
   look: BodyLook,
   dims: BodyDimensions,
   prefix: string,
+  faceDown = false,
 ): Drawing {
   const { headRx: rx, headRy: ry } = dims;
   const colors = palette(look);
   const rot = look.zombie?.rot ?? 0;
   const skinGrain = rot > 0 ? "rot" : undefined;
+  if (faceDown && look.hair.coverage > 0) {
+    // Hair from the crown right over to the top of the head
+    look = {
+      ...look,
+      hair: {
+        ...look.hair,
+        coverage: 1,
+        fringe: -0.4,
+        hairline: "natural",
+        part: undefined,
+      },
+    };
+  }
   const hair = look.hair;
   const random = lookRandom(look, 1);
   const d = new Drawing(prefix, -rx, -ry, rx, ry);
@@ -51,25 +67,31 @@ export function drawHead(
       grain: skinGrain,
     });
   }
-  if (look.beard && look.beard.length > 0) {
+  if (look.beard && look.beard.length > 0 && !faceDown) {
     drawBeard(d, look, rx, ry, random);
   }
-  d.blob(ellipsePath(rx * 0.95, 0, 27, 20), colors.skin, { grain: skinGrain });
-  d.include(rx * 0.95 + 27, -20, rx * 0.95 + 27, 20);
+  if (!faceDown) {
+    d.blob(ellipsePath(rx * 0.95, 0, 27, 20), colors.skin, {
+      grain: skinGrain,
+    });
+    d.include(rx * 0.95 + 27, -20, rx * 0.95 + 27, 20);
+  }
 
   const skull = smoothPath(skullPoints(rx, ry, 48));
   d.blob(skull, colors.skin, { grain: skinGrain });
 
   // Eyes and brows at the front edge, unless the hair hides them
-  drawEyes(d, rx, ry, colors.skin, rot);
-  drawBrows(d, look, rx, ry, colors.hair);
+  if (!faceDown) {
+    drawEyes(d, rx, ry, colors.skin, rot);
+    drawBrows(d, look, rx, ry, colors.hair);
+  }
 
   if (hair.coverage > 0 && hair.cut) {
     drawCropped(d, look, rx, ry, colors.hair, colors.skin);
   } else if (hair.coverage > 0) {
     drawHair(d, look, rx, ry, colors.hair, colors.skin, random);
   }
-  if (look.glasses) {
+  if (look.glasses && !faceDown) {
     drawGlasses(d, look.glasses.shape, look.glasses.color, rx, ry);
   }
   if (look.hat) {

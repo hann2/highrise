@@ -162,8 +162,15 @@ export default class DeathsTestScene extends BaseEntity implements Entity {
     // Things that die burning light the floor
     this.addChild(new FireGrid()).reset(WIDTH, HEIGHT);
 
-    this.game.camera.z = 98;
-    this.game.camera.center(V(WIDTH / 2, HEIGHT / 2));
+    // `zoom=` and `x=`/`y=` (meters) for a close look at one part of it
+    const params = new URLSearchParams(window.location.search);
+    this.game.camera.z = Number(params.get("zoom")) || 98;
+    this.game.camera.center(
+      V(
+        Number(params.get("x") ?? WIDTH / 2),
+        Number(params.get("y") ?? HEIGHT / 2),
+      ),
+    );
 
     await this.wait(0.5);
     this.lineup();
