@@ -56,6 +56,8 @@ export interface BodyAppearance {
 }
 
 const baked = new Map<BodyLook, BodyAppearance>();
+/** The atlas pages each look's parts are on */
+const pagesOf = new Map<BodyLook, CanvasSource[]>();
 
 /** The textures `look` was baked into (by `bakeBodies`, at boot) */
 export function getAppearance(look: BodyLook): BodyAppearance {
@@ -188,6 +190,9 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       rightHand: texture("rightHand"),
       metrics,
     };
+    pagesOf.set(toBake[i], [
+      ...new Set(Object.values(placed).map((p) => sources[p.page])),
+    ]);
     baked.set(toBake[i], {
       look: body.look,
       standing: { ...limbs, torso: texture("torso") },
@@ -201,6 +206,23 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       },
     });
   });
+}
+
+/**
+ * Lets go of a look baked by `bakeBodies`, and frees the atlas pages no
+ * other look is on. Nothing may be drawn with its textures any more. For
+ * looks that come and go, like the character editor's preview.
+ */
+export function forgetLook(look: BodyLook) {
+  const pages = pagesOf.get(look);
+  baked.delete(look);
+  pagesOf.delete(look);
+  const inUse = new Set([...pagesOf.values()].flat());
+  for (const page of pages ?? []) {
+    if (!inUse.has(page)) {
+      page.destroy();
+    }
+  }
 }
 
 /** One atlas page: every part in one SVG, decoded by the browser, onto a canvas */

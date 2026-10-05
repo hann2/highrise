@@ -24,6 +24,7 @@ import FlashTestScene from "./rig/FlashTestScene";
 import RigTestScene from "./rig/RigTestScene";
 import WalkTestScene from "./rig/WalkTestScene";
 import LooksTestScene from "./rig/LooksTestScene";
+import PreviewScene from "./rig/PreviewScene";
 import { isHuman } from "./human/Human";
 import { getStartingCharacter } from "./lobby/Lobby";
 import { generateRunPlan } from "./run/RunPlan";
@@ -113,8 +114,9 @@ export async function main() {
   game.addEntity(new SettingsController());
   game.addEntity(new AutoPauser(getSetting(game, "autoPause")));
   game.addEntity(new VolumeController());
-  // The arena is for testing, and the music gets in the way of hearing things
-  if (params.get("scene") !== "arena") {
+  // The arena is for testing, and the music gets in the way of hearing
+  // things; the editor's preview is silent
+  if (params.get("scene") !== "arena" && params.get("scene") !== "preview") {
     game.addEntity(new MusicController());
   }
   game.addEntity(new PositionalSoundListener());
@@ -189,6 +191,15 @@ export async function main() {
     params.get("scene") === "looks"
   ) {
     game.addEntity(new LooksTestScene());
+    return;
+  }
+
+  // ?scene=preview (development only) is the character editor's live preview
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "preview"
+  ) {
+    game.addEntity(new PreviewScene());
     return;
   }
 

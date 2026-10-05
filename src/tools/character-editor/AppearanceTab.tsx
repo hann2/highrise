@@ -1,4 +1,4 @@
-import { useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { ComponentChildren } from "preact";
 import { makeRandom } from "../../core/util/Random";
 import {
@@ -19,6 +19,12 @@ import { composeBodySvg, svgDataUrl } from "../../highrise/looks/composeBody";
 import { BODY_PARTS, drawBody } from "../../highrise/looks/drawBody";
 import { randomLook } from "../../highrise/looks/randomLook";
 import { pieceNames, piecePlace } from "../../highrise/looks/pieces";
+import { PlayerStats } from "../../highrise/human/PlayerStats";
+import {
+  PREVIEW_MODES,
+  PreviewMode,
+  PreviewShow,
+} from "../../highrise/rig/previewMessages";
 
 const BUILD_LABELS: Record<keyof Build, [string, string, string]> = {
   shoulders: ["Shoulders", "narrow", "broad"],
@@ -56,9 +62,14 @@ const ZOMBIE_PREVIEW: Zombification = { rot: 0.8, blood: 0.6, tears: 0.6 };
  */
 export function AppearanceTab({
   look,
+  startingWeapons,
+  stats,
   onChange,
 }: {
   look: BodyLook;
+  /** For the game preview, which can show them holding the first */
+  startingWeapons: string[];
+  stats: Partial<PlayerStats>;
   /** `group`: changes to the same thing close together are one step of undo */
   onChange: (look: BodyLook, group?: string) => void;
 }) {
@@ -74,7 +85,14 @@ export function AppearanceTab({
 
   return (
     <div class="appearance">
-      <Preview look={preview} />
+      <div class="appearance__preview">
+        <GamePreview
+          look={preview}
+          startingWeapons={startingWeapons}
+          stats={stats}
+        />
+        <Preview look={preview} />
+      </div>
 
       <div class="appearance__controls">
         <section class="card appearance__tools">
@@ -503,7 +521,7 @@ function Preview({ look }: { look: BodyLook }) {
     };
   }, [JSON.stringify(look)]);
   return (
-    <div class="appearance__preview">
+    <>
       <div class="appearance__stage">
         <img src={images.standing} />
       </div>
@@ -517,6 +535,116 @@ function Preview({ look }: { look: BodyLook }) {
             <figcaption>{part}</figcaption>
           </figure>
         ))}
+      </div>
+    </>
+  );
+}
+
+const PREVIEW_MODE_LABELS: Record<PreviewMode, [string, string]> = {
+  walk: ["Walk", "Walking round in a circle, empty-handed"],
+  armed: ["Armed", "Walking round with their first starting weapon"],
+  shoot: ["Shoot", "Standing, using their first starting weapon and reloading"],
+};
+
+/** Where the last mode picked is remembered */
+const PREVIEW_MODE_KEY = "characterEditorPreviewMode";
+
+/**
+ * The character in the game itself (`?scene=preview`, `PreviewScene`), in an
+ * iframe: drawn from the baked textures and animated by the game. It's sent
+ * the draft whenever it changes. It never takes the focus or the mouse, so
+ * the editor's keys keep working.
+ */
+function GamePreview({
+  look,
+  startingWeapons,
+  stats,
+}: {
+  look: BodyLook;
+  startingWeapons: string[];
+  stats: Partial<PlayerStats>;
+}) {
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [ready, setReady] = useState(false);
+  const [mode, setMode] = useState<PreviewMode>(() => {
+    try {
+      const saved = localStorage.getItem(PREVIEW_MODE_KEY);
+      return PREVIEW_MODES.find((m) => m === saved) ?? "walk";
+    } catch {
+      return "walk";
+    }
+  });
+  const chooseMode = (next: PreviewMode) => {
+    setMode(next);
+    try {
+      localStorage.setItem(PREVIEW_MODE_KEY, next);
+    } catch {}
+  };
+
+  useEffect(() => {
+    const listener = (event: MessageEvent) => {
+      if (
+        event.source === frame.current?.contentWindow &&
+        event.data?.type === "previewReady"
+      ) {
+        setReady(true);
+      }
+    };
+    window.addEventListener("message", listener);
+    return () => window.removeEventListener("message", listener);
+  }, []);
+
+  // A moment after the last change, so dragging a slider doesn't bake every step
+  const message: PreviewShow = {
+    type: "previewShow",
+    look,
+    startingWeapons,
+    stats,
+    mode,
+  };
+  const key = JSON.stringify(message);
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+    const timeout = setTimeout(
+      () =>
+        frame.current?.contentWindow?.postMessage(
+          message,
+          window.location.origin,
+        ),
+      120,
+    );
+    return () => clearTimeout(timeout);
+  }, [ready, key]);
+
+  const armed = startingWeapons.length > 0;
+  return (
+    <div class="game-preview">
+      <div class="game-preview__frame">
+        <iframe
+          ref={frame}
+          src="/?scene=preview"
+          tabIndex={-1}
+          title="The character in the game"
+        />
+        {!ready && (
+          <div class="game-preview__loading muted">Starting the game…</div>
+        )}
+      </div>
+      <div class="game-preview__modes">
+        {PREVIEW_MODES.map((m) => (
+          <button
+            key={m}
+            class={mode === m ? "is-selected" : ""}
+            title={PREVIEW_MODE_LABELS[m][1]}
+            disabled={m !== "walk" && !armed}
+            onClick={() => chooseMode(m)}
+          >
+            {PREVIEW_MODE_LABELS[m][0]}
+          </button>
+        ))}
+        {!armed && <span class="muted small">No starting weapons</span>}
       </div>
     </div>
   );

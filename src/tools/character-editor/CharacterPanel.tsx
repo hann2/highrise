@@ -175,6 +175,8 @@ export function CharacterPanel({
       {tab === "appearance" && (
         <AppearanceTab
           look={look}
+          startingWeapons={data.startingWeapons}
+          stats={data.stats}
           onChange={(look, group) => update({ look }, group)}
         />
       )}

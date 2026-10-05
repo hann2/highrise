@@ -21,6 +21,8 @@ export default class VolumeController extends BaseEntity implements Entity {
   private output!: GainNode;
   /** The music, on its way to `output` */
   musicGain!: GainNode;
+  /** Quiet whatever the settings say, without changing them (the editor's preview) */
+  private silenced = false;
 
   @on("add")
   onAdd({ game }: { game: Game }) {
@@ -48,9 +50,16 @@ export default class VolumeController extends BaseEntity implements Entity {
   private updateGains() {
     const game = this.game;
     const muted = getSetting(game, "muted");
-    this.output.gain.value = muted ? 0 : getSetting(game, "masterVolume");
+    this.output.gain.value =
+      muted || this.silenced ? 0 : getSetting(game, "masterVolume");
     this.musicGain.gain.value = getSetting(game, "musicVolume");
     game.masterGain.gain.value = getSetting(game, "effectsVolume");
+  }
+
+  /** Quiets everything (or lets it be heard again) without touching the saved settings */
+  silence(silenced: boolean) {
+    this.silenced = silenced;
+    this.updateGains();
   }
 
   @on("keyDown")
