@@ -1,6 +1,12 @@
 import { BodyLook, TopStyle } from "../BodyLook";
 import { Color, darken, lighten } from "../color";
-import { BodyDimensions, lookRandom, palette, wobble } from "../dimensions";
+import {
+  BELLY_DEPTH,
+  BodyDimensions,
+  lookRandom,
+  palette,
+  wobble,
+} from "../dimensions";
 import {
   capsulePath,
   Drawing,
@@ -47,15 +53,31 @@ export function torsoOutline(dims: BodyDimensions, count = 72): Pt[] {
     squareness,
   } = dims;
   const e = 2 / squareness;
+  // How big the belly is, from 0 to 1: the front rounds out toward a half
+  // ellipse as deep as the chest and belly together, so a big belly makes
+  // the body rounder, not just deeper or broader
+  const girth = belly / BELLY_DEPTH;
+  const round = Math.min(1, girth * 1.2);
   const points: Pt[] = [];
   for (let i = 0; i < count; i++) {
     const t = (i / count) * Math.PI * 2;
     const c = Math.cos(t);
     const s = Math.sin(t);
-    const y = w * Math.sign(s) * Math.abs(s) ** e;
+    let y = w * Math.sign(s) * Math.abs(s) ** e;
     let x = (c > 0 ? chestDepth : backDepth) * Math.sign(c) * Math.abs(c) ** e;
     if (c > 0) {
-      x += belly * Math.exp(-((y / (0.5 * w)) ** 2)) * Math.sqrt(c);
+      const roundX = (chestDepth + belly) * c;
+      const roundY = w * s;
+      x += (roundX - x) * round + belly * (1 - round) * c;
+      y += (roundY - y) * round;
+    } else {
+      // The back rounds out and fills out too
+      const backRound = 0.6 * round;
+      const roundBack = (backDepth + 0.35 * belly) * c;
+      x +=
+        (roundBack - x) * backRound -
+        0.35 * belly * Math.abs(c) * (1 - backRound);
+      y += (w * s - y) * backRound;
     }
     x += hunch * (y / w) ** 2;
     points.push([x, y]);

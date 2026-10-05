@@ -30,6 +30,9 @@ export interface BodyDimensions {
   legLength: number;
 }
 
+/** How far out the biggest belly comes in front of the chest, in mm */
+export const BELLY_DEPTH = 170;
+
 export function bodyDimensions(look: BodyLook): BodyDimensions {
   const b = look.build;
   const headScale = 1 + 0.12 * b.head;
@@ -37,7 +40,7 @@ export function bodyDimensions(look: BodyLook): BodyDimensions {
     shoulderHalfWidth: 312 * (1 + 0.14 * b.shoulders + 0.04 * b.arms),
     chestDepth: 118 * (1 + 0.28 * b.chest),
     backDepth: 104 * (1 + 0.12 * b.chest),
-    belly: Math.max(0, b.belly) * 115,
+    belly: Math.max(0, b.belly) * BELLY_DEPTH,
     hunch: b.hunch * 55,
     squareness: 2.2 + 1.3 * (b.squareness + 1),
     armThickness: 104 * (1 + 0.26 * b.arms),
