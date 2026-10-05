@@ -180,8 +180,8 @@ export function App() {
       <main class="main">
         {!characters && !status && <p class="muted">Loading…</p>}
         {entry && (
+          // Not keyed by character: the game preview in it would start again
           <CharacterPanel
-            key={entry.id}
             entry={entry}
             voices={voices}
             voicesError={voicesError}

@@ -130,7 +130,7 @@ export function CharacterPanel({
         onSave={onSave}
         onSaveAll={onSaveAll}
       />
-      <header class="panel__header">
+      <header key={id} class="panel__header">
         <img class="sprite-preview" src={portraitUrl(look, { scale: 260 })} />
         <div class="panel__title">
           <EditableText
@@ -229,7 +229,7 @@ export function CharacterPanel({
               />
             </section>
           </div>
-          <ClipsSection id={id} data={data} run={run} />
+          <ClipsSection key={id} id={id} data={data} run={run} />
         </>
       )}
     </div>
