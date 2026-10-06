@@ -82,16 +82,13 @@ export interface Hair {
   length: number;
   /** The hairline's shape (`HAIRLINES`) */
   hairline: Hairline;
-  /** Moves the hairline: -1 comes forward in the middle, 1 recedes in the middle */
+  /** The hairline's curve across the forehead: -1 arched (forward in the middle), 1 straight across */
   fringe: number;
   /** Cut right down: a buzz cut, or just stubble; else as long as the sliders say */
   cut?: HairCut;
   /** Bald on top, from a thin crown (a little) to only a ring round the sides (1) */
   balding: number;
-  /**
-   * Where it's parted, from -1 (the left) to 1, if it is: only on the
-   * hairlines that have a parting (`PARTED_HAIRLINES`), and not cropped
-   */
+  /** Where a `parted` hairline is parted, from -1 (the left) to 1; the middle if left out */
   part?: number;
   /** Which way a `spiky` hairline's tufts lean, from -1 (the left) to 1 */
   lean: number;
@@ -107,29 +104,20 @@ export interface Hair {
  * What the front edge of the hair is like, from above: `natural` curves
  * round the forehead, back at the temples and forward to the sideburns;
  * `straight` is bangs cut across; `peak` a widow's peak; `receding` far
- * back at the temples; `swept` a fringe swept across to one side (the
- * parting's side, else the left); `curtains` parted in the middle and swept
- * out to both sides; `spiky` tufts that stick forward over the forehead,
- * leaning as `Hair.lean` says
+ * back at the temples; `parted` parted where `Hair.part` says, the hair
+ * falling away to both sides (in the middle, curtains), the bigger side
+ * sweeping across the forehead; `spiky` tufts that stick forward over the
+ * forehead, leaning as `Hair.lean` says
  */
 export const HAIRLINES = [
   "natural",
   "straight",
   "peak",
   "receding",
-  "swept",
-  "curtains",
+  "parted",
   "spiky",
 ] as const;
 export type Hairline = (typeof HAIRLINES)[number];
-
-/** The hairlines that can have a parting: straight bangs and spikes can't, curtains always have one in the middle */
-export const PARTED_HAIRLINES: readonly Hairline[] = [
-  "natural",
-  "peak",
-  "receding",
-  "swept",
-];
 
 export const HAIR_CUTS = ["buzz", "stubble"] as const;
 export type HairCut = (typeof HAIR_CUTS)[number];

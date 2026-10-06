@@ -487,9 +487,9 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
     straight: 2,
     peak: 1,
     receding: look.beard ? 3 : 1,
-    swept: 2,
-    curtains: 1,
+    parted: 3,
   });
+
   if (look.hair.coverage > 0 && !look.hair.length && chance(random, 0.12)) {
     look.hair.cut = chance(random, 0.6) ? "buzz" : "stubble";
   }
@@ -547,6 +547,15 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
     hair.lean =
       (spiky() < 0.5 ? -1 : 1) *
       (Math.round(between(spiky, 0.4, 1) * 100) / 100);
+  }
+  if (look.hair.hairline === "parted" && look.hair.part === undefined) {
+    // In the middle or to one side, from the look's own seed
+    const parting = lookRandom(look, 43);
+    look.hair.part =
+      parting() < 0.4
+        ? 0
+        : (parting() < 0.5 ? -1 : 1) *
+          (Math.round(between(parting, 0.3, 0.7) * 100) / 100);
   }
   // The odd one in a track suit
   if (

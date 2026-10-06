@@ -149,11 +149,10 @@ export const HAIRLINE_OPTIONS = options(HAIRLINES, {
   straight: ["Straight", "Bangs cut straight across"],
   peak: ["Widow's peak", "Coming to a point in the middle"],
   receding: ["Receding", "Far back at the temples"],
-  swept: [
-    "Swept",
-    "A fringe swept across to one side: the parting's side, else the left",
+  parted: [
+    "Parted",
+    "The hair falling away to both sides of a parting: in the middle, curtains; to one side, the bigger side sweeps across the forehead",
   ],
-  curtains: ["Curtains", "Parted in the middle and swept out to both sides"],
   spiky: [
     "Spiky",
     "Tufts sticking forward over the forehead, leaning whichever way Lean says. Volume makes them bigger, messiness less even",

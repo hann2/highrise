@@ -6,7 +6,6 @@ import {
   DEFAULT_LOOK,
   EYE_COLOR,
   Extra,
-  PARTED_HAIRLINES,
   Zombification,
 } from "../../highrise/looks/BodyLook";
 import { composeBodySvg, svgDataUrl } from "../../highrise/looks/composeBody";
@@ -530,9 +529,9 @@ function HairSection({ look, set }: SectionProps) {
             onChange={(coverage) => setHair({ coverage })}
           />
           <Slider
-            label="Middle"
-            tip="The middle of the hairline, against its sides"
-            ends={["forward", "back"]}
+            label="Curve"
+            tip="The hairline's curve across the forehead"
+            ends={["arched", "straight"]}
             value={hair.fringe}
             min={-1}
             reset={DEFAULT_LOOK.hair.fringe}
@@ -557,24 +556,16 @@ function HairSection({ look, set }: SectionProps) {
               onChange={(lean) => setHair({ lean })}
             />
           )}
-          {/* Only the hairlines that can have one, and not cropped */}
-          {PARTED_HAIRLINES.includes(hair.hairline) && !hair.cut && (
-            <>
-              <Toggle
-                label="Parting"
-                on={hair.part !== undefined}
-                onChange={(on) => setHair({ part: on ? -0.4 : undefined })}
-              />
-              {hair.part !== undefined && (
-                <Slider
-                  label="Parted at"
-                  ends={["left", "right"]}
-                  value={hair.part}
-                  min={-1}
-                  onChange={(part) => setHair({ part })}
-                />
-              )}
-            </>
+          {hair.hairline === "parted" && !hair.cut && (
+            <Slider
+              label="Parted at"
+              ends={["left", "right"]}
+              value={hair.part ?? 0}
+              min={-1}
+              reset={0}
+              resetTip="Back to the middle"
+              onChange={(part) => setHair({ part })}
+            />
           )}
         </Group>
       )}

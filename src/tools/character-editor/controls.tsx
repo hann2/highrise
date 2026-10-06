@@ -66,6 +66,7 @@ export function Slider({
   max = 1,
   reset,
   ends,
+  resetTip,
   onChange,
 }: {
   label: string;
@@ -76,6 +77,8 @@ export function Slider({
   reset?: number;
   /** What the left and right ends mean */
   ends?: [string, string];
+  /** What ↺ says it does, if not "Back to average" or "Back to the default" */
+  resetTip?: string;
   onChange: (value: number) => void;
 }) {
   const t = (value - min) / (max - min);
@@ -113,7 +116,10 @@ export function Slider({
           class={`slider__reset ${changed ? "" : "is-hidden"}`}
           tabIndex={changed ? 0 : -1}
           {...tip(
-            min < 0 && reset === 0 ? "Back to average" : "Back to the default",
+            resetTip ??
+              (min < 0 && reset === 0
+                ? "Back to average"
+                : "Back to the default"),
           )}
           onClick={() => reset !== undefined && onChange(reset)}
         >

@@ -1,4 +1,4 @@
-import { BodyLook, EYE_COLOR, Hat, PARTED_HAIRLINES } from "../BodyLook";
+import { BodyLook, EYE_COLOR, Hat } from "../BodyLook";
 import { Color, darken, lighten, mix } from "../color";
 import { BodyDimensions, lookRandom, palette, wobble } from "../dimensions";
 import {
@@ -79,6 +79,15 @@ export function drawHead(
 
   const skull = smoothPath(skullPoints(rx, ry, 48));
   d.blob(skull, colors.skin, { grain: skinGrain });
+  if (hair.coverage <= 0) {
+    // Bald: a shine across the top, as hair has, duller the more it's rotted
+    d.line(
+      `M${n(-rx * 0.4)} ${n(-ry * 0.4)}Q${n(-rx * 0.05)} ${n(-ry * 0.58)} ${n(rx * 0.25)} ${n(-ry * 0.36)}`,
+      lighten(colors.skin, 0.5),
+      16,
+      `opacity="${n(0.4 * (1 - rot))}"`,
+    );
+  }
 
   // Eyes and brows at the front edge, unless the hair hides them
   if (!faceDown) {
@@ -153,6 +162,9 @@ function bell(x: number, at: number, width: number): number {
   return Math.exp(-(((x - at) / width) ** 2));
 }
 
+/** Where a parting meets the hairline, across the head (as a share of its half-width), at `Hair.part` 1 */
+const PART_AT = 0.41;
+
 /**
  * Where the hairline is (x, mm) across the head at `y`: how far forward the
  * hair comes there, by its coverage, fringe and shape (`Hairline`)
@@ -184,22 +196,20 @@ function hairlineAt(look: BodyLook, rx: number, ry: number, y: number) {
     case "receding":
       shape = 0.06 * (1 - t) - 0.28 * bell(a, 0.62, 0.22) + sideburns;
       break;
-    case "swept": {
-      // Far forward on one side, back on the other
-      const side = (hair.part ?? -1) < 0 ? -1 : 1;
-      shape =
-        0.06 +
-        0.13 * Math.max(-1, Math.min(1, side * u)) -
-        0.2 * smoothstep(0.9, 1.3, a);
-      break;
-    }
-    case "curtains":
+    case "parted": {
+      // A notch at the parting, the hair falling forward either side of it,
+      // and swept across from a side parting: forward on the far side
+      const part = hair.part ?? 0;
+      const q = Math.abs(u - PART_AT * part);
+      const sweep = Math.min(1, Math.abs(part) * 1.5);
       shape =
         0.08 * (1 - t) -
-        0.16 * Math.max(0, 1 - a / 0.25) +
-        0.06 * bell(a, 0.5, 0.2) +
+        0.16 * Math.max(0, 1 - q / 0.25) +
+        0.06 * bell(q, 0.5, 0.2) +
+        0.12 * sweep * Math.max(-1, Math.min(1, -Math.sign(part) * u)) +
         sideburns;
       break;
+    }
     case "spiky":
       // Where the tufts start (`spikyHairline` adds them)
       shape = 0.02 * (1 - t) - 0.06 * bell(a, 0.75, 0.16) + sideburns;
@@ -485,13 +495,8 @@ function drawHair(
   }
   d.blob(shape, color, { outline: 8 });
 
-  // The parting, on the hairlines that have one: curtains in the middle
-  const part =
-    hair.hairline === "curtains"
-      ? 0
-      : PARTED_HAIRLINES.includes(hair.hairline)
-        ? hair.part
-        : undefined;
+  // The parting, from the crown to where it meets the hairline
+  const part = hair.hairline === "parted" ? (hair.part ?? 0) : undefined;
   const strandColor = darken(color, 0.3);
   if (hair.curls > 0.3) {
     // Little curls spread evenly all over (a sunflower's spiral), each
@@ -521,7 +526,7 @@ function drawHair(
   if (part !== undefined) {
     const y = part * ry * 0.45;
     d.line(
-      `M${n(-rx * 0.28)} ${n(y)}L${n(rx * 0.9)} ${n(y * 0.9)}`,
+      `M${n(-rx * 0.28)} ${n(y)}L${n(rx * 0.9)} ${n(part * ry * PART_AT)}`,
       darken(color, 0.45),
       6,
     );
