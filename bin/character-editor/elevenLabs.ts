@@ -6,7 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Voice } from "../../src/tools/character-editor/apiTypes";
-import { SpeechGenerator } from "./CharacterStore";
+import { SpeechGenerator, VoiceConversion } from "./CharacterStore";
 
 const API = "https://api.elevenlabs.io";
 
@@ -49,6 +49,37 @@ export class ElevenLabs implements SpeechGenerator {
           ...(stability !== undefined ? { voice_settings: { stability } } : {}),
         }),
       },
+    );
+    return {
+      audio: Buffer.from(await response.arrayBuffer()),
+      extension: "mp3",
+    };
+  }
+
+  /** The voice changer: the performance in `file`, in another voice */
+  async convert({
+    file,
+    voiceId,
+    model,
+    stability,
+    similarity,
+    removeBackgroundNoise,
+  }: VoiceConversion) {
+    const form = new FormData();
+    form.append("model_id", model);
+    form.append(
+      "voice_settings",
+      JSON.stringify({ stability, similarity_boost: similarity }),
+    );
+    form.append("remove_background_noise", String(removeBackgroundNoise));
+    form.append(
+      "audio",
+      new Blob([fs.readFileSync(file)]),
+      path.basename(file),
+    );
+    const response = await this.request(
+      `/v1/speech-to-speech/${encodeURIComponent(voiceId)}?output_format=mp3_44100_128`,
+      { method: "POST", body: form },
     );
     return {
       audio: Buffer.from(await response.arrayBuffer()),

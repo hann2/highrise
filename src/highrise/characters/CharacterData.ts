@@ -61,7 +61,14 @@ export interface VoiceClip {
   created?: string;
   /** ElevenLabs stability it was generated with: 0 is the most expressive, 1 the steadiest */
   stability?: number;
-  /** The file of the clip this one was regenerated from */
+  /** For voice changed clips: how closely it was made to stick to the voice (0 to 1) */
+  similarity?: number;
+  /** For voice changed clips: whether ElevenLabs took the background noise out first */
+  removeBackgroundNoise?: boolean;
+  /**
+   * The file of the clip this one was regenerated from, or, made with the
+   * voice changer (an `_sts_` model), the performance it was made from
+   */
   basedOn?: string;
 }
 

@@ -16,6 +16,8 @@ import {
   CharacterChanges,
   CharacterStore,
   ClipChanges,
+  ClipMove,
+  ConvertRequest,
   GenerateRequest,
   NotFound,
 } from "./CharacterStore";
@@ -86,6 +88,16 @@ const ROUTES: [method: string, pattern: RegExp, handler: Handler][] = [
     "POST",
     /^\/api\/characters\/([\w-]+)\/clips\/([^/]+)\/transcribe$/,
     ([id, file]) => store.transcribe(id, file),
+  ],
+  [
+    "POST",
+    /^\/api\/characters\/([\w-]+)\/clips\/([^/]+)\/move$/,
+    ([id, file], body: ClipMove) => store.moveClip(id, file, body),
+  ],
+  [
+    "POST",
+    /^\/api\/characters\/([\w-]+)\/clips\/([^/]+)\/convert$/,
+    ([id, file], body: ConvertRequest) => store.convert(id, file, body),
   ],
   [
     "POST",

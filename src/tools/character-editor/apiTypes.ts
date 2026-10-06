@@ -43,3 +43,33 @@ export interface GenerateRequest {
   /** The file of the clip these are variations of */
   basedOn?: string;
 }
+
+/** ElevenLabs' voice changer models: one for English, one for any language */
+export const CONVERSION_MODELS = [
+  "eleven_english_sts_v2",
+  "eleven_multilingual_sts_v2",
+] as const;
+
+export type ConversionModel = (typeof CONVERSION_MODELS)[number];
+
+/** Voice changer settings for performing a clip again in the character's voice */
+export interface ConvertRequest {
+  count: number;
+  model: ConversionModel;
+  /** 0 is the most expressive, 1 the steadiest */
+  stability: number;
+  /** How closely the takes stick to the voice, from 0 to 1 */
+  similarity: number;
+  /** Has ElevenLabs take the room's noise out of the recording first */
+  removeBackgroundNoise: boolean;
+}
+
+/**
+ * Where a dragged clip goes: before or after another clip, or with neither,
+ * to the end. With `categories`, it's dropped into another category too.
+ */
+export interface ClipMove {
+  before?: string;
+  after?: string;
+  categories?: CharacterSoundClass[];
+}

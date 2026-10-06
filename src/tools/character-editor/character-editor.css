@@ -1136,6 +1136,53 @@ button.primary {
   margin: 4px 0;
 }
 
+.category.is-drop-target {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  box-shadow: inset 2px 0 var(--accent);
+}
+
+/* A clip's row, with its drag handle out in the gutter to its left */
+.clip-slot {
+  position: relative;
+}
+.clip-slot__handle {
+  position: absolute;
+  left: -18px;
+  top: 0;
+  width: 16px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: grab;
+  user-select: none;
+  opacity: 0;
+}
+.clip-slot:hover .clip-slot__handle {
+  opacity: 1;
+}
+.clip-slot.is-dragged {
+  opacity: 0.4;
+}
+.clip-slot.is-drop-before::before,
+.clip-slot.is-drop-after::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+.clip-slot.is-drop-before::before {
+  top: -1px;
+}
+.clip-slot.is-drop-after::after {
+  bottom: -1px;
+}
+
 .clip {
   display: flex;
   align-items: center;
@@ -1313,7 +1360,8 @@ button.primary {
 .generate__options {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 8px 16px;
   margin-top: 8px;
 }
 .generate__options label {
@@ -1327,6 +1375,13 @@ button.primary {
   margin-left: auto;
   display: flex;
   gap: 8px;
+}
+
+/* The voice changer's sliders, side by side where there's room */
+.convert__sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0 24px;
 }
 
 /* Status */

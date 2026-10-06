@@ -7,6 +7,8 @@ import {
   CharacterChanges,
   CharacterEntry,
   ClipChanges,
+  ClipMove,
+  ConvertRequest,
   GenerateRequest,
   Voice,
 } from "./apiTypes";
@@ -54,6 +56,8 @@ export const api = {
     call<CharacterData>("PATCH", character(id), changes),
   updateClip: (id: string, file: string, changes: ClipChanges) =>
     call<VoiceClip>("PATCH", clip(id, file), changes),
+  moveClip: (id: string, file: string, move: ClipMove) =>
+    call<VoiceClip>("POST", `${clip(id, file)}/move`, move),
   deleteClip: (id: string, file: string) => call<{}>("DELETE", clip(id, file)),
   transcribe: (id: string, file: string) =>
     call<VoiceClip>("POST", `${clip(id, file)}/transcribe`),
@@ -63,6 +67,8 @@ export const api = {
     call<{}>("POST", `${clip(id, file)}/open`),
   generate: (id: string, request: GenerateRequest) =>
     call<VoiceClip[]>("POST", `${character(id)}/generate`, request),
+  convert: (id: string, file: string, request: ConvertRequest) =>
+    call<VoiceClip[]>("POST", `${clip(id, file)}/convert`, request),
   audioUrl: (id: string, file: string) =>
     `${character(id)}/audio/${encodeURIComponent(file)}`,
 };

@@ -22,10 +22,30 @@ import { MELEE_WEAPONS } from "../../src/highrise/weapons/melee/melee-weapons/me
 import {
   CharacterChanges,
   ClipChanges,
+  ClipMove,
+  CONVERSION_MODELS,
+  ConvertRequest,
   GenerateRequest,
 } from "../../src/tools/character-editor/apiTypes";
+import { moveClip } from "../../src/tools/character-editor/clipOrder";
 
-export type { CharacterChanges, ClipChanges, GenerateRequest };
+export type {
+  CharacterChanges,
+  ClipChanges,
+  ClipMove,
+  ConvertRequest,
+  GenerateRequest,
+};
+
+/** A performance to put in another voice */
+export interface VoiceConversion {
+  file: string;
+  voiceId: string;
+  model: string;
+  stability: number;
+  similarity: number;
+  removeBackgroundNoise: boolean;
+}
 
 /** What makes new clips' audio; the real one is in `elevenLabs.ts` */
 export interface SpeechGenerator {
@@ -35,6 +55,9 @@ export interface SpeechGenerator {
     model: string;
     stability?: number;
   }): Promise<{ audio: Buffer; extension: string }>;
+  convert(
+    request: VoiceConversion,
+  ): Promise<{ audio: Buffer; extension: string }>;
   transcribe(file: string): Promise<string>;
 }
 
@@ -185,6 +208,26 @@ export class CharacterStore {
     });
   }
 
+  /**
+   * Puts a clip before or after another (or last), for keeping lines in an
+   * order that makes sense, and with `categories`, into other categories
+   */
+  moveClip(id: string, file: string, move: ClipMove) {
+    return this.serially(async () => {
+      const data = this.read(id);
+      if (move.categories?.length === 0) {
+        throw new BadRequest("A clip needs at least one category");
+      }
+      const clips = moveClip(data.clips, file, move);
+      if (!clips) {
+        throw new NotFound(`No clip ${file}, or no clip to put it next to`);
+      }
+      data.clips = clips;
+      await this.write(id, data);
+      return findClip(data, file);
+    });
+  }
+
   deleteClip(id: string, file: string) {
     return this.serially(async () => {
       const data = this.read(id);
@@ -216,42 +259,120 @@ export class CharacterStore {
     if (request.categories.length === 0) {
       throw new BadRequest("A clip needs at least one category");
     }
-    const count = Math.max(1, Math.min(10, Math.floor(request.count)));
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), "generate-"));
     try {
-      // The slow part runs in parallel, outside the queue: generating, then
-      // trimming and leveling each take into a flac like the recordings
-      const takes = await Promise.all(
-        Array.from({ length: count }, async (_, i) => {
-          const { audio, extension } = await this.speech.generate({
-            text: request.text,
-            voiceId: voice.elevenLabsVoiceId,
-            model: GENERATION_MODEL,
-            stability: request.stability,
-          });
-          const raw = path.join(temp, `${i}.${extension}`);
-          const cleaned = path.join(temp, `${i}-cleaned.flac`);
-          fs.writeFileSync(raw, audio);
-          await this.cleanUpAudio(raw, cleaned);
-          return cleaned;
+      const takes = await this.makeTakes(temp, request.count, () =>
+        this.speech.generate({
+          text: request.text,
+          voiceId: voice.elevenLabsVoiceId,
+          model: GENERATION_MODEL,
+          stability: request.stability,
         }),
       );
-      return await this.addGeneratedClips(
-        id,
-        request,
-        voice.elevenLabsVoiceId,
-        takes,
-      );
+      return await this.addTakes(id, takes, {
+        text: request.text,
+        categories: request.categories,
+        voiceId: voice.elevenLabsVoiceId,
+        model: GENERATION_MODEL,
+        settings: { stability: request.stability, basedOn: request.basedOn },
+      });
     } finally {
       fs.rmSync(temp, { recursive: true, force: true });
     }
   }
 
-  private addGeneratedClips(
+  /**
+   * Makes `count` takes of a clip's performance in the character's voice,
+   * with ElevenLabs' voice changer: the timing and delivery are the clip's,
+   * the voice is theirs. They have the clip's text and categories, and come
+   * in disabled like generated takes. The clip is trimmed and leveled before
+   * it's sent, since a quiet recording converts badly; the original stays.
+   */
+  async convert(
     id: string,
-    request: GenerateRequest,
-    voiceId: string,
+    file: string,
+    request: ConvertRequest,
+  ): Promise<VoiceClip[]> {
+    const data = this.read(id);
+    const voiceId = data.voice?.elevenLabsVoiceId;
+    if (!voiceId) {
+      throw new BadRequest(`${id} has no ElevenLabs voice`);
+    }
+    if (!CONVERSION_MODELS.includes(request.model)) {
+      throw new BadRequest(`"${request.model}" isn't a voice changer model`);
+    }
+    const clip = findClip(data, file);
+    const source = this.clipPath(id, file);
+    if (!source) {
+      throw new NotFound(`${file} has no audio file`);
+    }
+    const settings = {
+      stability: fraction(request.stability),
+      similarity: fraction(request.similarity),
+      removeBackgroundNoise: !!request.removeBackgroundNoise,
+    };
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), "convert-"));
+    try {
+      const input = path.join(temp, "input.flac");
+      await this.cleanUpAudio(source, input);
+      const takes = await this.makeTakes(temp, request.count, () =>
+        this.speech.convert({
+          file: input,
+          voiceId,
+          model: request.model,
+          ...settings,
+        }),
+      );
+      return await this.addTakes(id, takes, {
+        text: clip.text,
+        categories: clip.categories,
+        voiceId,
+        model: request.model,
+        settings: { ...settings, basedOn: file },
+      });
+    } finally {
+      fs.rmSync(temp, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * Makes up to 10 takes into `temp`, trimmed and leveled into flacs like the
+   * recordings. They're made in parallel, outside the queue, since it's slow.
+   */
+  private makeTakes(
+    temp: string,
+    count: number,
+    make: () => Promise<{ audio: Buffer; extension: string }>,
+  ): Promise<string[]> {
+    count = Math.max(1, Math.min(10, Math.floor(count) || 1));
+    return Promise.all(
+      Array.from({ length: count }, async (_, i) => {
+        const { audio, extension } = await make();
+        const raw = path.join(temp, `${i}.${extension}`);
+        const cleaned = path.join(temp, `${i}-cleaned.flac`);
+        fs.writeFileSync(raw, audio);
+        await this.cleanUpAudio(raw, cleaned);
+        return cleaned;
+      }),
+    );
+  }
+
+  /** Adds takes as disabled ElevenLabs clips, named by their first category */
+  private addTakes(
+    id: string,
     takes: string[],
+    {
+      text,
+      categories,
+      voiceId,
+      model,
+      settings,
+    }: Pick<VoiceClip, "text" | "categories" | "voiceId" | "model"> & {
+      settings: Pick<
+        VoiceClip,
+        "stability" | "similarity" | "removeBackgroundNoise" | "basedOn"
+      >;
+    },
   ): Promise<VoiceClip[]> {
     return this.serially(async () => {
       const data = this.read(id);
@@ -260,24 +381,27 @@ export class CharacterStore {
       const dir = this.audioDir(id, false);
       fs.mkdirSync(dir, { recursive: true });
       const clips = takes.map((take) => {
-        const file = this.nextFileName(id, request.categories[0], "flac");
+        const file = this.nextFileName(id, categories[0], "flac");
         fs.copyFileSync(take, path.join(dir, file));
         const clip: VoiceClip = {
           file,
-          text: request.text,
-          categories: request.categories,
+          text,
+          categories,
           enabled: false,
           source: "elevenlabs",
           voiceId,
-          model: GENERATION_MODEL,
+          model,
           created,
         };
-        if (request.stability !== undefined) {
-          clip.stability = request.stability;
-        }
-        if (request.basedOn) {
-          clip.basedOn = request.basedOn;
-        }
+        Object.assign(
+          clip,
+          pick(settings, [
+            "stability",
+            "similarity",
+            "removeBackgroundNoise",
+            "basedOn",
+          ]),
+        );
         return clip;
       });
       data.clips.push(...clips);
@@ -392,4 +516,12 @@ function pick<T extends object, K extends keyof T>(
       .filter((key) => object[key] !== undefined)
       .map((key) => [key, object[key]]),
   ) as unknown as Partial<T>;
+}
+
+/** A setting from 0 to 1 */
+function fraction(value: number): number {
+  if (!Number.isFinite(value)) {
+    throw new BadRequest(`${value} isn't a number`);
+  }
+  return Math.max(0, Math.min(1, value));
 }

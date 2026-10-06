@@ -6,17 +6,43 @@ import {
   VoiceClip,
 } from "../../highrise/characters/CharacterData";
 import { api } from "./api";
-import { ClipChanges, GenerateRequest } from "./apiTypes";
+import {
+  ClipChanges,
+  ClipMove,
+  CONVERSION_MODELS,
+  ConversionModel,
+  ConvertRequest,
+  GenerateRequest,
+} from "./apiTypes";
 import { RunAction } from "./App";
 import { CATEGORY_INFO } from "./categories";
+import { moveClip } from "./clipOrder";
+import { Slider } from "./controls";
 import { EditableText } from "./EditableText";
 import { playInTurn, playingKey, stop, toggle } from "./player";
 import { usePlaying } from "./usePlaying";
 
 type Show = "all" | "enabled" | "disabled" | "untranscribed";
 
-/** Where a generate form is open: a category's new line, or variations of a clip */
-type FormAt = { category: CharacterSoundClass; basedOn?: VoiceClip };
+/**
+ * Where a form is open: a category's new line, or under a clip, variations
+ * of it or (`convert`) the voice changer
+ */
+type FormAt = {
+  category: CharacterSoundClass;
+  basedOn?: VoiceClip;
+  convert?: boolean;
+};
+
+/** A clip being dragged, and the category it was picked up from */
+type Dragging = { clip: VoiceClip; from: CharacterSoundClass };
+
+/** Where a dragged clip would go: next to a clip, or with neither, last in the category */
+type DropAt = {
+  category: CharacterSoundClass;
+  before?: string;
+  after?: string;
+};
 
 export function ClipsSection({
   id,
@@ -35,6 +61,12 @@ export function ClipsSection({
   const [collapsed, setCollapsed] = useState<Set<CharacterSoundClass>>(
     new Set(),
   );
+  const [dragging, setDragging] = useState<Dragging>();
+  const [dropAt, setDropAt] = useState<DropAt>();
+  // A move shown right away, until the saved clips come back (or it fails)
+  const [moved, setMoved] = useState<VoiceClip[]>();
+  useEffect(() => setMoved(undefined), [data.clips]);
+  const clips = moved ?? data.clips;
 
   const matches = (clip: VoiceClip) =>
     (show === "all" ||
@@ -44,30 +76,48 @@ export function ClipsSection({
     (!search ||
       `${clip.text} ${clip.file}`.toLowerCase().includes(search.toLowerCase()));
 
+  const takesArrived = (clips: VoiceClip[], category: CharacterSoundClass) => {
+    setFresh(new Set([...fresh, ...clips.map((clip) => clip.file)]));
+    setFormAt(undefined);
+    // Hear them one after another
+    playInTurn(
+      clips.map((clip) => ({
+        url: api.audioUrl(id, clip.file),
+        key: `${category}:${clip.file}`,
+      })),
+    );
+  };
+
   const generate = async (request: GenerateRequest) => {
     const clips = await run(
-      `Generating ${request.count} take${request.count > 1 ? "s" : ""} of “${request.text}”…`,
+      `Generating ${takes(request.count)} of “${request.text}”…`,
       () => api.generate(id, request),
     );
     if (clips) {
-      setFresh(new Set([...fresh, ...clips.map((clip) => clip.file)]));
-      setFormAt(undefined);
-      // Hear them one after another
-      playInTurn(
-        clips.map((clip) => ({
-          url: api.audioUrl(id, clip.file),
-          key: `${request.categories[0]}:${clip.file}`,
-        })),
-      );
+      takesArrived(clips, request.categories[0]);
     }
   };
 
-  const playAll = (clips: VoiceClip[], category: CharacterSoundClass) => {
+  const convert = async (
+    clip: VoiceClip,
+    category: CharacterSoundClass,
+    request: ConvertRequest,
+  ) => {
+    const clips = await run(
+      `Changing the voice of ${clip.file}: ${takes(request.count)}…`,
+      () => api.convert(id, clip.file, request),
+    );
+    if (clips) {
+      takesArrived(clips, category);
+    }
+  };
+
+  const playAll = (toPlay: VoiceClip[], category: CharacterSoundClass) => {
     if (playingKey()?.startsWith(`${category}:`)) {
       stop();
     } else {
       playInTurn(
-        clips.map((clip) => ({
+        toPlay.map((clip) => ({
           url: api.audioUrl(id, clip.file),
           key: `${category}:${clip.file}`,
         })),
@@ -75,19 +125,125 @@ export function ClipsSection({
     }
   };
 
-  const enabledCount = data.clips.filter((clip) => clip.enabled).length;
-  const untranscribed = data.clips.filter((clip) => !clip.text).length;
+  /**
+   * Where a drag over `category` (over `clip`'s row, if it's over one) would
+   * drop: before the row in its top half, after it in its bottom half
+   */
+  const dropPlace = (
+    event: DragEvent,
+    category: CharacterSoundClass,
+    clip?: VoiceClip,
+  ): DropAt => {
+    const row = (event.currentTarget as HTMLElement).querySelector(".clip");
+    if (!clip || !row) {
+      return { category };
+    }
+    const { top, height } = row.getBoundingClientRect();
+    return event.clientY < top + height / 2
+      ? { category, before: clip.file }
+      : { category, after: clip.file };
+  };
+
+  const dragOver = (
+    event: DragEvent,
+    category: CharacterSoundClass,
+    clip?: VoiceClip,
+  ) => {
+    if (!dragging) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer!.dropEffect =
+      event.altKey && category !== dragging.from ? "copy" : "move";
+    const at =
+      clip?.file === dragging.clip.file && category === dragging.from
+        ? undefined
+        : dropPlace(event, category, clip);
+    if (
+      at?.category !== dropAt?.category ||
+      at?.before !== dropAt?.before ||
+      at?.after !== dropAt?.after
+    ) {
+      setDropAt(at);
+    }
+  };
+
+  const endDrag = () => {
+    setDragging(undefined);
+    setDropAt(undefined);
+  };
+
+  /**
+   * Puts the dragged clip where it's dropped. Into another category, it
+   * leaves the one it came from, or with ⌥, it's in both.
+   */
+  const drop = (
+    event: DragEvent,
+    category: CharacterSoundClass,
+    clip?: VoiceClip,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    endDrag();
+    if (!dragging) {
+      return;
+    }
+    const { from } = dragging;
+    const dragged = clips.find((c) => c.file === dragging.clip.file);
+    if (!dragged) {
+      return;
+    }
+    const { before, after } = dropPlace(event, category, clip);
+    const move: ClipMove = before ? { before } : after ? { after } : {};
+    if (!before && !after) {
+      const last = clips.filter((c) => c.categories.includes(category)).at(-1);
+      if (last) {
+        move.after = last.file;
+      }
+    }
+    if (category !== from) {
+      const categories = CHARACTER_SOUND_CLASSES.filter(
+        (c) =>
+          c === category ||
+          (dragged.categories.includes(c) && (event.altKey || c !== from)),
+      );
+      if (categories.join() !== dragged.categories.join()) {
+        move.categories = categories;
+      }
+    }
+    const next = moveClip(clips, dragged.file, move);
+    if (!next || next.every((c, i) => c === clips[i])) {
+      return;
+    }
+    setMoved(next);
+    run(
+      move.categories
+        ? `Moving ${dragged.file} to ${CATEGORY_INFO[category].label}…`
+        : "Moving…",
+      () => api.moveClip(id, dragged.file, move),
+    );
+  };
+
+  const enabledCount = clips.filter((clip) => clip.enabled).length;
+  const untranscribed = clips.filter((clip) => !clip.text).length;
 
   return (
-    <section class="clips">
+    <section
+      class="clips"
+      onDragLeave={(event) =>
+        !(event.currentTarget as Node).contains(event.relatedTarget as Node) &&
+        setDropAt(undefined)
+      }
+    >
       <div class="clips__header">
         <h2>Voice lines</h2>
         <span class="muted">
-          {enabledCount} enabled of {data.clips.length}
+          {enabledCount} enabled of {clips.length}
         </span>
         <span
           class="muted small"
-          data-tip="Clips are files, so generating, trimming, enabling or deleting one, or changing its text or categories, doesn't wait for Save"
+          data-tip="Clips are files, so generating, trimming, enabling, deleting or moving one, or changing its text or categories, doesn't wait for Save"
         >
           · Clip changes save right away
         </span>
@@ -124,15 +280,22 @@ export function ClipsSection({
       )}
 
       {CHARACTER_SOUND_CLASSES.map((category) => {
-        const inCategory = data.clips.filter((clip) =>
+        const inCategory = clips.filter((clip) =>
           clip.categories.includes(category),
         );
         const enabled = inCategory.filter((clip) => clip.enabled);
         const visible = inCategory.filter(matches);
         const isCollapsed = collapsed.has(category);
         const info = CATEGORY_INFO[category];
+        const isDropTarget =
+          dropAt?.category === category && !dropAt.before && !dropAt.after;
         return (
-          <div key={category} class="category">
+          <div
+            key={category}
+            class={`category ${isDropTarget ? "is-drop-target" : ""}`}
+            onDragOver={(event) => dragOver(event, category)}
+            onDrop={(event) => drop(event, category)}
+          >
             <div class="category__header">
               <button
                 class="category__toggle"
@@ -183,7 +346,46 @@ export function ClipsSection({
                   />
                 )}
                 {visible.map((clip) => (
-                  <div key={clip.file}>
+                  <div
+                    key={clip.file}
+                    class={[
+                      "clip-slot",
+                      dropAt?.category === category &&
+                        dropAt.before === clip.file &&
+                        "is-drop-before",
+                      dropAt?.category === category &&
+                        dropAt.after === clip.file &&
+                        "is-drop-after",
+                      dragging?.clip.file === clip.file &&
+                        dragging.from === category &&
+                        "is-dragged",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onDragOver={(event) => dragOver(event, category, clip)}
+                    onDrop={(event) => drop(event, category, clip)}
+                  >
+                    <span
+                      class="clip-slot__handle"
+                      draggable
+                      data-tip="Drag to put it in another place, or into another category to move it there (hold ⌥ to keep it in this one too)"
+                      onDragStart={(event) => {
+                        const row = (event.currentTarget as HTMLElement)
+                          .nextElementSibling as HTMLElement;
+                        const { left, top } = row.getBoundingClientRect();
+                        event.dataTransfer!.effectAllowed = "copyMove";
+                        event.dataTransfer!.setData("text/plain", clip.file);
+                        event.dataTransfer!.setDragImage(
+                          row,
+                          Math.max(0, event.clientX - left),
+                          event.clientY - top,
+                        );
+                        setDragging({ clip, from: category });
+                      }}
+                      onDragEnd={endDrag}
+                    >
+                      ⠿
+                    </span>
                     <ClipRow
                       id={id}
                       clip={clip}
@@ -195,9 +397,22 @@ export function ClipsSection({
                       onVariations={() =>
                         setFormAt({ category, basedOn: clip })
                       }
+                      onConvert={() =>
+                        setFormAt({ category, basedOn: clip, convert: true })
+                      }
                     />
                     {formAt?.category === category &&
-                      formAt.basedOn?.file === clip.file && (
+                      formAt.basedOn?.file === clip.file &&
+                      (formAt.convert ? (
+                        <ConvertForm
+                          id={id}
+                          clip={clip}
+                          onConvert={(request) =>
+                            convert(clip, category, request)
+                          }
+                          onCancel={() => setFormAt(undefined)}
+                        />
+                      ) : (
                         <GenerateForm
                           initial={{
                             text: clip.text,
@@ -207,7 +422,7 @@ export function ClipsSection({
                           onGenerate={generate}
                           onCancel={() => setFormAt(undefined)}
                         />
-                      )}
+                      ))}
                   </div>
                 ))}
                 {visible.length === 0 && (
@@ -226,6 +441,15 @@ export function ClipsSection({
   );
 }
 
+function takes(count: number): string {
+  return `${count} take${count > 1 ? "s" : ""}`;
+}
+
+/** Whether a clip was made with the voice changer, from another clip */
+function isVoiceChanged(clip: VoiceClip): boolean {
+  return (CONVERSION_MODELS as readonly string[]).includes(clip.model ?? "");
+}
+
 /** Which take of its text a clip is, counting clips before it with the same text */
 function takeNumber(clips: VoiceClip[], clip: VoiceClip): number {
   const same = clips.filter((c) => c.text && c.text === clip.text);
@@ -241,6 +465,7 @@ function ClipRow({
   canGenerate,
   run,
   onVariations,
+  onConvert,
 }: {
   id: string;
   clip: VoiceClip;
@@ -251,6 +476,7 @@ function ClipRow({
   canGenerate: boolean;
   run: RunAction;
   onVariations: () => void;
+  onConvert: () => void;
 }) {
   const key = `${category}:${clip.file}`;
   const playing = playingKey() === key;
@@ -273,7 +499,12 @@ function ClipRow({
     clip.source === "recorded" ? "Recorded" : `ElevenLabs ${clip.model ?? ""}`,
     clip.created && `made ${clip.created}`,
     clip.stability !== undefined && `stability ${clip.stability}`,
-    clip.basedOn && `variation of ${clip.basedOn}`,
+    clip.similarity !== undefined && `similarity ${clip.similarity}`,
+    clip.removeBackgroundNoise && "background noise removed",
+    clip.basedOn &&
+      (isVoiceChanged(clip)
+        ? `voice changed from ${clip.basedOn}`
+        : `variation of ${clip.basedOn}`),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -332,6 +563,14 @@ function ClipRow({
           onClick={onVariations}
         >
           ↻
+        </button>
+        <button
+          class="icon-button"
+          data-tip="Voice changer: takes of this performance in the character's ElevenLabs voice, with its timing and delivery"
+          disabled={!canGenerate}
+          onClick={onConvert}
+        >
+          🎙
         </button>
         <button
           class="icon-button"
@@ -539,6 +778,192 @@ function GenerateForm({
           </button>
           <button type="submit" class="primary" disabled={busy || !text.trim()}>
             {busy ? "Generating…" : "Generate"}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+const VOICE_CHANGER_KEY = "characterEditorVoiceChanger";
+
+/** ElevenLabs' defaults, but for the noise, since it's for rough recordings */
+const DEFAULT_VOICE_CHANGER: ConvertRequest = {
+  count: 3,
+  model: "eleven_english_sts_v2",
+  stability: 0.5,
+  similarity: 0.75,
+  removeBackgroundNoise: true,
+};
+
+const CONVERSION_MODEL_LABELS: Record<ConversionModel, string> = {
+  eleven_english_sts_v2: "English",
+  eleven_multilingual_sts_v2: "Multilingual",
+};
+
+/** The voice changer's settings, kept from the last time it was used */
+function loadVoiceChanger(): ConvertRequest {
+  try {
+    const saved = JSON.parse(localStorage.getItem(VOICE_CHANGER_KEY) ?? "{}");
+    const settings = { ...DEFAULT_VOICE_CHANGER, ...saved };
+    return CONVERSION_MODELS.includes(settings.model)
+      ? settings
+      : DEFAULT_VOICE_CHANGER;
+  } catch {
+    return DEFAULT_VOICE_CHANGER;
+  }
+}
+
+/** Seconds of audio at `url`, once the browser has read how long it is */
+function useDuration(url: string): number | undefined {
+  const [duration, setDuration] = useState<number>();
+  useEffect(() => {
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.addEventListener("loadedmetadata", () =>
+      setDuration(Number.isFinite(audio.duration) ? audio.duration : undefined),
+    );
+    audio.src = url;
+    return () => audio.removeAttribute("src");
+  }, [url]);
+  return duration;
+}
+
+/** The voice changer: settings for performing `clip` again in the character's voice */
+function ConvertForm({
+  id,
+  clip,
+  onConvert,
+  onCancel,
+}: {
+  id: string;
+  clip: VoiceClip;
+  onConvert: (request: ConvertRequest) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [settings, setSettings] = useState(loadVoiceChanger);
+  const [busy, setBusy] = useState(false);
+  const duration = useDuration(api.audioUrl(id, clip.file));
+  const change = (changes: Partial<ConvertRequest>) => {
+    const next = { ...settings, ...changes };
+    setSettings(next);
+    try {
+      localStorage.setItem(VOICE_CHANGER_KEY, JSON.stringify(next));
+    } catch {}
+  };
+
+  const submit = async (event: Event) => {
+    event.preventDefault();
+    if (busy) {
+      return;
+    }
+    setBusy(true);
+    try {
+      await onConvert(settings);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // ElevenLabs bills the voice changer by the minute
+  const credits =
+    duration !== undefined
+      ? Math.ceil((duration / 60) * 1000 * settings.count)
+      : undefined;
+
+  return (
+    <form
+      class="generate"
+      onSubmit={submit}
+      onKeyDown={(event) => event.key === "Escape" && onCancel()}
+    >
+      <div class="generate__title small">
+        Voice changer: {clip.file} performed again in the character's voice,
+        keeping its timing and delivery. It's trimmed and leveled before it's
+        sent; the original stays. Takes come in disabled, with its text and
+        categories.
+      </div>
+      <div class="convert__sliders">
+        <Slider
+          label="Stability"
+          tip="Low: more emotional range, and more variety between takes, but it can drift from the voice. High: steadier, and flatter."
+          value={settings.stability}
+          reset={DEFAULT_VOICE_CHANGER.stability}
+          ends={["Expressive", "Steady"]}
+          onChange={(stability) => change({ stability })}
+        />
+        <Slider
+          label="Similarity"
+          tip="How closely it sticks to the voice. Very high can also copy noise or artifacts from the voice's own samples."
+          value={settings.similarity}
+          reset={DEFAULT_VOICE_CHANGER.similarity}
+          ends={["Loose", "Close to the voice"]}
+          onChange={(similarity) => change({ similarity })}
+        />
+      </div>
+      <div class="generate__options">
+        <label>
+          Takes
+          <select
+            value={settings.count}
+            onChange={(event) =>
+              change({
+                count: Number((event.target as HTMLSelectElement).value),
+              })
+            }
+          >
+            {[1, 2, 3, 4, 5].map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Model
+          <select
+            value={settings.model}
+            onChange={(event) =>
+              change({
+                model: (event.target as HTMLSelectElement)
+                  .value as ConversionModel,
+              })
+            }
+          >
+            {CONVERSION_MODELS.map((model) => (
+              <option key={model} value={model} title={model}>
+                {CONVERSION_MODEL_LABELS[model]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label data-tip="ElevenLabs takes the room's noise out of the recording before changing the voice">
+          <input
+            type="checkbox"
+            checked={settings.removeBackgroundNoise}
+            onChange={(event) =>
+              change({
+                removeBackgroundNoise: (event.target as HTMLInputElement)
+                  .checked,
+              })
+            }
+          />
+          Remove background noise
+        </label>
+        {credits !== undefined && (
+          <span
+            class="muted small"
+            data-tip={`The voice changer costs 1,000 credits a minute. This clip is ${duration!.toFixed(1)} s, a little less once its silence is trimmed.`}
+          >
+            ≈ {credits} credits
+          </span>
+        )}
+        <div class="generate__buttons">
+          <button type="button" class="text-button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="submit" class="primary" disabled={busy} autoFocus>
+            {busy ? "Changing…" : "Change voice"}
           </button>
         </div>
       </div>

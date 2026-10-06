@@ -113,6 +113,7 @@ export function Slider({
         </div>
         <span class="slider__value">{value.toFixed(2)}</span>
         <button
+          type="button"
           class={`slider__reset ${changed ? "" : "is-hidden"}`}
           tabIndex={changed ? 0 : -1}
           {...tip(
