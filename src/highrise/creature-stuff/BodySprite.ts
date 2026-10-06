@@ -118,7 +118,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.rightHandSprite = new Sprite(textures.rightHand);
     this.rightHandSprite.scale.set(scale);
 
-    // What swings goes over the torso and under the head
+    // What swings goes over the torso and under the head, but a bun on top
     const dangles =
       textures.dangles.length > 0
         ? new Dangles(textures.dangles, scale, this.legScale)
@@ -133,6 +133,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       ...(dangles?.sprites("torso") ?? []),
       ...(dangles?.sprites("head") ?? []),
       this.headSprite,
+      ...(dangles?.sprites("head", true) ?? []),
     );
 
     if (legs) {

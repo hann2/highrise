@@ -15,9 +15,21 @@ export const DANGLE_STYLES: Record<DangleKind, DangleFeel> = {
     dampingRatio: 0.22,
     drag: 1.5,
     maxAngle: 0.9,
-    minStretch: 0.55,
-    maxStretch: 1.25,
+    // It hangs down the back, so it's drawn shorter than it is: swung out
+    // behind, all of it shows (`PONYTAIL_HANGING` in `head.ts`)
+    minStretch: 0.6,
+    maxStretch: 1.45,
     step: 0.25,
+  },
+  bun: {
+    // Pinned up tight: a little wobble
+    frequency: 3.5,
+    dampingRatio: 0.3,
+    drag: 0.2,
+    maxAngle: 0.25,
+    minStretch: 0.94,
+    maxStretch: 1.1,
+    step: 0.12,
   },
   lanyard: {
     frequency: 1.8,
@@ -96,9 +108,11 @@ export class Dangles {
     });
   }
 
-  /** The sprites of the things hanging off `on`, in the order they're drawn */
-  sprites(on: "head" | "torso"): Sprite[] {
-    return this.hanging.filter((h) => h.texture.on === on).map((h) => h.sprite);
+  /** The sprites of the things hanging off `on`, under it or `above` it, in the order they're drawn */
+  sprites(on: "head" | "torso", above = false): Sprite[] {
+    return this.hanging
+      .filter((h) => h.texture.on === on && h.texture.above === above)
+      .map((h) => h.sprite);
   }
 
   get count() {

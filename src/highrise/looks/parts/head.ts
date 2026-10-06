@@ -71,6 +71,7 @@ export function drawHead(
         ry,
         colors.hair,
         random,
+        PONYTAIL_HANGING,
       );
       dangles.push(hang("ponytail", "head", tail, [-rx * 0.9, 0], tip));
     } else {
@@ -115,7 +116,17 @@ export function drawHead(
   if (hair.coverage > 0 && hair.cut) {
     drawCropped(d, look, rx, ry, colors.hair, colors.skin);
   } else if (hair.coverage > 0) {
-    drawHair(d, look, rx, ry, colors.hair, colors.skin, random);
+    // Under a hat, the bun stays put
+    drawHair(
+      d,
+      look,
+      rx,
+      ry,
+      colors.hair,
+      colors.skin,
+      random,
+      look.hat ? undefined : dangles,
+    );
   }
   if (look.glasses && !faceDown) {
     drawGlasses(d, look.glasses.shape, look.glasses.color, rx, ry);
@@ -460,6 +471,8 @@ function drawHair(
   color: Color,
   skin: Color,
   random: () => number,
+  /** Given, the bun is drawn on its own into it, to wobble */
+  dangles?: DangleDrawing[],
 ) {
   const hair = look.hair;
   const edge = hairEdge(look, random);
@@ -572,14 +585,22 @@ function drawHair(
   if (hair.bun > 0.02) {
     const r = 34 + hair.bun * 42;
     const cx = -rx * 0.6 - hair.bun * 20;
-    d.include(cx - r, -r, cx + r, r);
-    d.blob(ellipsePath(cx, 0, r, r * 0.95), color, {});
-    d.line(
+    const bun = dangles ? new Drawing(`${d.prefix}-bun`, cx, 0, cx, 0) : d;
+    bun.include(cx - r, -r, cx + r, r);
+    bun.blob(ellipsePath(cx, 0, r, r * 0.95), color, {});
+    bun.line(
       `M${n(cx + r * 0.6)} ${n(0)}A${n(r * 0.6)} ${n(r * 0.55)} 0 1 1 ${n(cx)} ${n(-r * 0.55)}A${n(r * 0.3)} ${n(r * 0.3)} 0 1 1 ${n(cx + r * 0.1)} ${n(r * 0.2)}`,
       strandColor,
       5,
       `opacity="0.6"`,
     );
+    if (dangles) {
+      // Wobbling about where it's pinned, its front edge, over the hair
+      dangles.push({
+        ...hang("bun", "head", bun, [cx + r * 0.8, 0], [cx - r, 0]),
+        above: true,
+      });
+    }
   }
 }
 
@@ -610,6 +631,12 @@ function drawLongHair(
   d.blob(smoothPath(points), color, {});
 }
 
+/**
+ * How much of a ponytail's length shows from above, standing: it hangs down
+ * the back, and only swings out to all of it (see `DANGLE_STYLES`)
+ */
+const PONYTAIL_HANGING = 0.7;
+
 function drawPonytail(
   d: Drawing,
   amount: number,
@@ -617,8 +644,10 @@ function drawPonytail(
   ry: number,
   color: Color,
   random: () => number,
+  /** How much of its length shows from above */
+  reach = 1,
 ): Pt {
-  const length = 70 + amount * 250;
+  const length = (70 + amount * 250) * reach;
   const sway = (random() - 0.5) * 60;
   const start: Pt = [-rx * 0.75, 0];
   const end: Pt = [-rx - length, sway];

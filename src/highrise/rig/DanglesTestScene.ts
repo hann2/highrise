@@ -62,6 +62,7 @@ const LOOKS: { label: string; look: PartialLook }[] = [
     label: "ponytail",
     look: { ...BASE, hair: { ...BASE.hair, ponytail: 0.9 } },
   },
+  { label: "bun", look: { ...BASE, hair: { ...BASE.hair, bun: 0.8 } } },
   {
     label: "lanyard",
     look: { ...BASE, extras: [extra("lanyard", "#2a64c8")] },
@@ -88,7 +89,7 @@ const LOOKS: { label: string; look: PartialLook }[] = [
 
 /**
  * `?scene=dangles` (development only): a lane for each kind of thing that
- * swings as a body moves (`creature-stuff/Dangles.ts`): a ponytail, a
+ * swings as a body moves (`creature-stuff/Dangles.ts`): a ponytail, a bun, a
  * lanyard, a tie, a scarf, a backpack, and all at once. Each body walks
  * along its lane and stops, turns round, sprints back and stops dead, turns
  * again, and is shoved from the side, over and over. `only=tie,scarf` picks lanes, `zoom=` sets the

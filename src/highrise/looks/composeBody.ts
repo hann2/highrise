@@ -130,18 +130,23 @@ export function composeBodySvg(
       items.push(place(hand, `translate(${n(hx)} ${n(hy)})`));
     }
     items.push(place(parts.torso, ""));
-    // What swings, hanging at rest, unless what it hangs off is hidden
-    for (const dangle of body.dangles) {
-      if (!options.hidden?.includes(dangle.on)) {
-        items.push(
+    // What swings, hanging at rest, unless what it hangs off is hidden:
+    // under the head, and over it
+    const hanging = (above: boolean) =>
+      body.dangles
+        .filter(
+          (dangle) =>
+            !!dangle.above === above && !options.hidden?.includes(dangle.on),
+        )
+        .map((dangle) =>
           place(
             dangle.drawing,
             `translate(${n(dangle.pivot[0])} ${n(dangle.pivot[1])}) rotate(${n((dangle.angle * 180) / Math.PI)})`,
           ),
         );
-      }
-    }
+    items.push(...hanging(false));
     items.push(place(parts.head, ""));
+    items.push(...hanging(true));
     // Where the dangles' corners are, hanging at rest
     const dangleCorners = body.dangles.flatMap(({ drawing: d, pivot, angle }) =>
       [

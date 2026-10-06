@@ -52,6 +52,8 @@ export interface BodyTextures {
 export interface DangleTexture {
   kind: DangleKind;
   on: "head" | "torso";
+  /** Drawn over its part, not under it */
+  above: boolean;
   texture: Texture;
   /** Where it hangs from on that part, which way, and how far to its tip, in meters for a human-sized body */
   pivot: [number, number];
@@ -224,6 +226,7 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
     const dangles = body.dangles.map((dangle, j): DangleTexture => ({
       kind: dangle.kind,
       on: dangle.on,
+      above: dangle.above ?? false,
       texture: texture(danglesByBody[i][j]),
       pivot: [dangle.pivot[0] / 1000, dangle.pivot[1] / 1000],
       angle: dangle.angle,

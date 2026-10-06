@@ -3,6 +3,7 @@ import { Drawing, hungFrom, Pt } from "./svg";
 /** The things on a body that swing as it moves, each drawn as a part of its own */
 export const DANGLE_KINDS = [
   "ponytail",
+  "bun",
   "lanyard",
   "tie",
   "scarf",
@@ -19,6 +20,8 @@ export interface DangleDrawing {
   kind: DangleKind;
   /** The part it hangs off */
   on: "head" | "torso";
+  /** Drawn over that part, not under it */
+  above?: boolean;
   drawing: Drawing;
   /** Where it hangs from on that part (mm), and which way it hangs */
   pivot: Pt;
