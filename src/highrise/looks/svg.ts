@@ -370,3 +370,38 @@ export class Drawing {
 export function stain(color: Color, alpha: number) {
   return withAlpha(color, alpha);
 }
+
+/**
+ * `inner` turned and moved so that `pivot` is at the origin and `angle`,
+ * the way it hangs from there, is along +x: for parts that swing about a
+ * pivot, so a sprite turned about its anchor swings them. It casts the
+ * shadow `inner` does.
+ */
+export function hungFrom(inner: Drawing, pivot: Pt, angle: number): Drawing {
+  const cos = Math.cos(-angle);
+  const sin = Math.sin(-angle);
+  const corners = [
+    [inner.minX, inner.minY],
+    [inner.maxX, inner.minY],
+    [inner.maxX, inner.maxY],
+    [inner.minX, inner.maxY],
+  ].map(([x, y]) => {
+    const dx = x - pivot[0];
+    const dy = y - pivot[1];
+    return [dx * cos - dy * sin, dx * sin + dy * cos];
+  });
+  const xs = corners.map(([x]) => x);
+  const ys = corners.map(([, y]) => y);
+  const d = new Drawing(
+    `${inner.prefix}-hung`,
+    Math.min(...xs),
+    Math.min(...ys),
+    Math.max(...xs),
+    Math.max(...ys),
+  );
+  d.castsShadow = false;
+  d.add(
+    `<g transform="rotate(${n((-angle * 180) / Math.PI)}) translate(${n(-pivot[0])} ${n(-pivot[1])})">${inner.content()}</g>`,
+  );
+  return d;
+}

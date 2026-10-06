@@ -5,6 +5,7 @@ import { drawArm, drawArmSegment, drawHand } from "./parts/limbs";
 import { drawFoot, drawLeg, drawLyingLegs } from "./parts/legs";
 import { drawLyingTorso, drawTorso } from "./parts/torso";
 import { Drawing } from "./svg";
+import { DangleDrawing } from "./dangles";
 
 /** Every image a body is drawn with */
 export const BODY_PARTS = [
@@ -64,6 +65,11 @@ export interface BodyDrawing {
   look: BodyLook;
   dims: BodyDimensions;
   parts: Record<BodyPart, Drawing>;
+  /**
+   * What swings as it moves, standing (lying, it's drawn on the parts),
+   * in the order it's drawn: over the torso, and under the head
+   */
+  dangles: DangleDrawing[];
 }
 
 /**
@@ -75,12 +81,16 @@ export function drawBody(look: PartialLook, prefix = "b"): BodyDrawing {
   const resolved = resolveLook(look);
   const dims = bodyDimensions(resolved);
   const p = (part: string) => `${prefix}-${part}`;
+  const dangles: DangleDrawing[] = [];
+  const torso = drawTorso(resolved, dims, p("t"), dangles);
+  const head = drawHead(resolved, dims, p("h"), false, dangles);
   return {
     look: resolved,
     dims,
+    dangles,
     parts: {
-      head: drawHead(resolved, dims, p("h")),
-      torso: drawTorso(resolved, dims, p("t")),
+      head,
+      torso,
       leftArm: drawArm(resolved, dims, -1, p("la")),
       rightArm: drawArm(resolved, dims, 1, p("ra")),
       leftUpperArm: drawArmSegment(resolved, dims, -1, "upper", p("lua")),

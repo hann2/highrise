@@ -130,7 +130,30 @@ export function composeBodySvg(
       items.push(place(hand, `translate(${n(hx)} ${n(hy)})`));
     }
     items.push(place(parts.torso, ""));
+    // What swings, hanging at rest, unless what it hangs off is hidden
+    for (const dangle of body.dangles) {
+      if (!options.hidden?.includes(dangle.on)) {
+        items.push(
+          place(
+            dangle.drawing,
+            `translate(${n(dangle.pivot[0])} ${n(dangle.pivot[1])}) rotate(${n((dangle.angle * 180) / Math.PI)})`,
+          ),
+        );
+      }
+    }
     items.push(place(parts.head, ""));
+    // Where the dangles' corners are, hanging at rest
+    const dangleCorners = body.dangles.flatMap(({ drawing: d, pivot, angle }) =>
+      [
+        [d.minX, d.minY],
+        [d.maxX, d.minY],
+        [d.maxX, d.maxY],
+        [d.minX, d.maxY],
+      ].map(([x, y]) => [
+        pivot[0] + x * Math.cos(angle) - y * Math.sin(angle),
+        pivot[1] + x * Math.sin(angle) + y * Math.cos(angle),
+      ]),
+    );
     const reach = Math.max(
       dims.shoulderHalfWidth + 40,
       elbowReach,
@@ -138,15 +161,22 @@ export function composeBodySvg(
       parts.torso.maxY,
       -parts.head.minY,
       parts.head.maxY,
+      ...dangleCorners.map(([, y]) => Math.abs(y)),
     );
     box = [
-      Math.min(-stride - 200, parts.torso.minX, parts.head.minX),
+      Math.min(
+        -stride - 200,
+        parts.torso.minX,
+        parts.head.minX,
+        ...dangleCorners.map(([x]) => x),
+      ),
       -reach,
       Math.max(
         420,
         parts.torso.maxX,
         parts.head.maxX,
         ...hands.map(([hx]) => hx + dims.handSize * 0.6),
+        ...dangleCorners.map(([x]) => x),
       ),
       reach,
     ];

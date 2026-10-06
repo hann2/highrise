@@ -17,6 +17,7 @@ import {
   hasHatDrawing,
   piecePlace,
 } from "../pieces";
+import { DangleDrawing, hang } from "../dangles";
 
 /**
  * The head from above, facing +x, the skull's middle at the origin: hair,
@@ -29,6 +30,8 @@ export function drawHead(
   dims: BodyDimensions,
   prefix: string,
   faceDown = false,
+  /** Given, things that swing are drawn on their own into it, not on the head */
+  dangles?: DangleDrawing[],
 ): Drawing {
   const { headRx: rx, headRy: ry } = dims;
   const colors = palette(look);
@@ -58,7 +61,21 @@ export function drawHead(
     drawLongHair(d, look, rx, ry, colors.hair, random);
   }
   if (hair.ponytail > 0.02 && grown) {
-    drawPonytail(d, hair.ponytail, rx, ry, colors.hair, random);
+    if (dangles) {
+      // On its own, to swing from where it's tied
+      const tail = new Drawing(`${prefix}-pt`, -rx, 0, -rx, 0);
+      const tip = drawPonytail(
+        tail,
+        hair.ponytail,
+        rx,
+        ry,
+        colors.hair,
+        random,
+      );
+      dangles.push(hang("ponytail", "head", tail, [-rx * 0.9, 0], tip));
+    } else {
+      drawPonytail(d, hair.ponytail, rx, ry, colors.hair, random);
+    }
   }
 
   // Ears, a nose, a beard: whatever sticks out from under the skull
@@ -600,7 +617,7 @@ function drawPonytail(
   ry: number,
   color: Color,
   random: () => number,
-) {
+): Pt {
   const length = 70 + amount * 250;
   const sway = (random() - 0.5) * 60;
   const start: Pt = [-rx * 0.75, 0];
@@ -628,6 +645,7 @@ function drawPonytail(
     shade: "flat",
     outline: 0,
   });
+  return end;
 }
 
 function drawBeard(

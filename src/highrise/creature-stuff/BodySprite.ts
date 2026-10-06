@@ -14,6 +14,7 @@ import { STYLE } from "../looks/style";
 import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH, LegStyle } from "./Legs";
 import FloorStains, { getFloorStains } from "../effects/FloorStains";
 import { Shoes } from "./Shoes";
+import { Dangles } from "./Dangles";
 
 export type { BodyTextures } from "../looks/bakeBodies";
 
@@ -55,6 +56,10 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   onFootLand?: (landing: FootLanding) => void;
   /** `game.simulatedTime` when the gait was last moved on */
   private gaitTime = 0;
+  /** What swings as it moves (a ponytail, a lanyard...); only for a body that has any */
+  readonly dangles?: Dangles;
+  /** `game.simulatedTime` when the dangles were last moved on */
+  private dangleTime = 0;
   /** How big the legs are next to a human's */
   private legScale: number;
   /** Meters per texture pixel */
@@ -113,12 +118,20 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.rightHandSprite = new Sprite(textures.rightHand);
     this.rightHandSprite.scale.set(scale);
 
+    // What swings goes over the torso and under the head
+    const dangles =
+      textures.dangles.length > 0
+        ? new Dangles(textures.dangles, scale, this.legScale)
+        : undefined;
+    this.dangles = dangles;
     this.sprite.addChild(
       this.leftArmSprite,
       this.rightArmSprite,
       this.leftHandSprite,
       this.rightHandSprite,
       this.torsoSprite,
+      ...(dangles?.sprites("torso") ?? []),
+      ...(dangles?.sprites("head") ?? []),
       this.headSprite,
     );
 
@@ -132,6 +145,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
           this.game.entities.getById("floorStains") as FloorStains | undefined,
           () => getFloorStains(this.game),
         );
+        this.dangles?.step(landing.side, this.getAngle(), landing.speed);
         this.onFootLand?.(landing);
       };
       const { leg, leftFoot, rightFoot, thickness } = legs.textures;
@@ -178,14 +192,33 @@ export abstract class BodySprite extends BaseEntity implements Entity {
         );
         this.gaitTime = now;
       }
+      if (this.dangles) {
+        const now = this.game.simulatedTime;
+        const [x, y] = this.getPosition();
+        this.dangles.update(
+          x,
+          y,
+          this.getAngle(),
+          this.getStanceAngle() + this.getTorsoTwist(),
+          now - this.dangleTime,
+        );
+        this.dangleTime = now;
+      }
       this.updatePose();
     }
+  }
+
+  /** Shoves what swings on it (m/s, in the world): a hit, a blast */
+  jolt(vx: number, vy: number) {
+    this.dangles?.push(vx, vy);
   }
 
   /** Leaves out some layers, to see what's under them (the character editor) */
   setHiddenLayers(hidden: ReadonlySet<BodyLayer>) {
     this.headSprite.visible = !hidden.has("head");
     this.torsoSprite.visible = !hidden.has("torso");
+    this.dangles?.setVisible("head", !hidden.has("head"));
+    this.dangles?.setVisible("torso", !hidden.has("torso"));
     this.leftArmSprite.visible = this.rightArmSprite.visible =
       !hidden.has("arms");
     this.leftHandSprite.visible = this.rightHandSprite.visible =
@@ -200,6 +233,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.sprite.rotation = this.getAngle();
 
     this.torsoSprite.rotation = this.getStanceAngle() + this.getTorsoTwist();
+    this.dangles?.pose(this.torsoSprite.rotation);
     this.poseLegs();
 
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();

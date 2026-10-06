@@ -20,6 +20,7 @@ import {
 } from "../svg";
 import { drawBlood, drawGrime, drawPattern, drawRips } from "./wear";
 import { drawPiece, piecePlace } from "../pieces";
+import { DangleDrawing, DangleKind, hang } from "../dangles";
 import { STYLE } from "../style";
 
 /** Tops that leave the shoulders to what's under them: skin, or the secondary's shirt */
@@ -209,6 +210,8 @@ export function drawTorso(
   look: BodyLook,
   dims: BodyDimensions,
   prefix: string,
+  /** Given, things that swing are drawn on their own into it, not on the torso */
+  dangles?: DangleDrawing[],
 ): Drawing {
   const colors = palette(look);
   const random = lookRandom(look, 2);
@@ -457,7 +460,7 @@ export function drawTorso(
 
   // Things worn over the top
   for (const extra of look.extras) {
-    drawExtra(d, extra.kind, extra.color, dims, torso, random);
+    drawExtra(d, extra.kind, extra.color, dims, torso, dangles);
   }
 
   d.outline(shape, band ? shoulderColor(look, colors.skin) : top.color);
@@ -580,10 +583,28 @@ function drawExtra(
   color: Color,
   dims: BodyDimensions,
   torso: string,
-  random: () => number,
+  dangles?: DangleDrawing[],
 ) {
   const w = dims.shoulderHalfWidth;
   const neck = dims.headRy * 1.06;
+  /**
+   * Draws a part that swings: on its own, hanging from `pivot` toward
+   * `tip`, when there's somewhere to put it, else on the torso
+   */
+  const swinging = (
+    swingKind: DangleKind,
+    pivot: Pt,
+    tip: Pt,
+    draw: (target: Drawing) => void,
+  ) => {
+    if (!dangles) {
+      draw(d);
+      return;
+    }
+    const part = new Drawing(`${d.prefix}-${swingKind}`, ...pivot, ...pivot);
+    draw(part);
+    dangles.push(hang(swingKind, "torso", part, pivot, tip));
+  };
   switch (kind) {
     case "backpack": {
       const x0 = -dims.backDepth - 85;
@@ -600,16 +621,20 @@ function drawExtra(
           { shade: "tube", clip: torso },
         );
       }
-      const pack = `M${n(x0 + 40)} ${n(-w * 0.52)}L${n(-dims.backDepth + 55)} ${n(-w * 0.55)}Q${n(-dims.backDepth + 75)} 0 ${n(-dims.backDepth + 55)} ${n(w * 0.55)}L${n(x0 + 40)} ${n(w * 0.52)}Q${n(x0 - 10)} 0 ${n(x0 + 40)} ${n(-w * 0.52)}Z`;
-      d.blob(pack, color, {});
-      d.blob(capsulePath(x0 + 8, x0 + 80, 0, w * 0.6), darken(color, 0.1), {
-        outline: 6,
+      // The pack hangs from the tops of the straps
+      swinging("backpack", [-dims.backDepth + 40, 0], [x0, 0], (t) => {
+        t.include(x0, -w * 0.55, -dims.backDepth + 75, w * 0.55);
+        const pack = `M${n(x0 + 40)} ${n(-w * 0.52)}L${n(-dims.backDepth + 55)} ${n(-w * 0.55)}Q${n(-dims.backDepth + 75)} 0 ${n(-dims.backDepth + 55)} ${n(w * 0.55)}L${n(x0 + 40)} ${n(w * 0.52)}Q${n(x0 - 10)} 0 ${n(x0 + 40)} ${n(-w * 0.52)}Z`;
+        t.blob(pack, color, {});
+        t.blob(capsulePath(x0 + 8, x0 + 80, 0, w * 0.6), darken(color, 0.1), {
+          outline: 6,
+        });
+        t.line(
+          `M${n(x0 + 25)} ${n(-w * 0.42)}Q${n(x0 + 5)} 0 ${n(x0 + 25)} ${n(w * 0.42)}`,
+          "#d8d0b8",
+          5,
+        );
       });
-      d.line(
-        `M${n(x0 + 25)} ${n(-w * 0.42)}Q${n(x0 + 5)} 0 ${n(x0 + 25)} ${n(w * 0.42)}`,
-        "#d8d0b8",
-        5,
-      );
       return;
     }
     case "satchel": {
@@ -633,47 +658,60 @@ function drawExtra(
         [neck * 1.55, w * 0.32],
         [neck * 1.0, w * 0.18],
       ] as Pt[];
-      d.includePoints(tail);
-      d.blob(smoothPath(tail), color, {});
+      // The end swings from where it comes out of the knot
+      swinging("scarf", [neck * 0.8, w * 0.22], [neck * 1.5, w * 0.36], (t) => {
+        t.includePoints(tail);
+        t.blob(smoothPath(tail), color, {});
+      });
       return;
     }
     case "tie": {
-      d.blob(
-        polygonPath([
+      const tip = dims.chestDepth + dims.belly + 45;
+      swinging("tie", [neck * 0.7, 0], [tip, 0], (t) => {
+        const points: Pt[] = [
           [neck * 0.7, -16],
-          [dims.chestDepth + dims.belly + 25, -24],
-          [dims.chestDepth + dims.belly + 45, 0],
-          [dims.chestDepth + dims.belly + 25, 24],
+          [tip - 20, -24],
+          [tip, 0],
+          [tip - 20, 24],
           [neck * 0.7, 16],
-        ]),
-        color,
-        { outline: 6 },
-      );
+        ];
+        t.includePoints(points);
+        t.blob(polygonPath(points), color, { outline: 6 });
+      });
       return;
     }
     case "lanyard": {
-      d.line(
-        `M${n(neck * 0.2)} ${n(-neck * 1.0)}Q${n(neck * 1.1)} ${n(-neck * 0.4)} ${n(neck * 1.2)} 0Q${n(neck * 1.1)} ${n(neck * 0.4)} ${n(neck * 0.2)} ${n(neck * 1.0)}`,
-        color,
-        12,
+      // The cord round the neck and the badge on it swing about the neck
+      swinging("lanyard", [0, 0], [neck * 1.12 + 25, 0], (t) =>
+        drawLanyard(t, neck, color),
       );
-      d.blob(
-        polygonPath([
-          [neck * 1.12, -34],
-          [neck * 1.12 + 50, -34],
-          [neck * 1.12 + 50, 34],
-          [neck * 1.12, 34],
-        ]),
-        "#f2f2ee",
-        { shade: "flat", outline: 5, outlineColor: "#777" },
-      );
-      d.include(neck * 1.12, -34, neck * 1.12 + 50, 34);
       return;
     }
     case "sack":
       // Drawn first, behind
       return;
   }
+}
+
+/** A cord round the neck, and a badge on it in front */
+function drawLanyard(d: Drawing, neck: number, color: Color) {
+  d.line(
+    `M${n(neck * 0.2)} ${n(-neck * 1.0)}Q${n(neck * 1.1)} ${n(-neck * 0.4)} ${n(neck * 1.2)} 0Q${n(neck * 1.1)} ${n(neck * 0.4)} ${n(neck * 0.2)} ${n(neck * 1.0)}`,
+    color,
+    12,
+  );
+  d.include(neck * 0.2, -neck, neck * 1.2, neck);
+  d.blob(
+    polygonPath([
+      [neck * 1.12, -34],
+      [neck * 1.12 + 50, -34],
+      [neck * 1.12 + 50, 34],
+      [neck * 1.12, 34],
+    ]),
+    "#f2f2ee",
+    { shade: "flat", outline: 5, outlineColor: "#777" },
+  );
+  d.include(neck * 1.12, -34, neck * 1.12 + 50, 34);
 }
 
 /**

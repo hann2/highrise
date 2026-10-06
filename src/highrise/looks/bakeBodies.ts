@@ -3,6 +3,7 @@ import { LegTextures } from "../creature-stuff/Legs";
 import { BodyLook } from "./BodyLook";
 import { BODY_PARTS, BodyPart, drawBody } from "./drawBody";
 import { Drawing, n } from "./svg";
+import { DangleKind } from "./dangles";
 import { lyingWaist } from "./parts/torso";
 // Hand-drawn pieces, so looks can wear them
 import "./pieces/index";
@@ -42,7 +43,20 @@ export interface BodyTextures {
   rightForearm: Texture;
   leftHand: Texture;
   rightHand: Texture;
+  /** What swings, drawn over the torso and under the head, in order (none lying down) */
+  dangles: DangleTexture[];
   metrics: BodyMetrics;
+}
+
+/** Something that swings (see `DangleDrawing`): its image hangs along +x from its anchor */
+export interface DangleTexture {
+  kind: DangleKind;
+  on: "head" | "torso";
+  texture: Texture;
+  /** Where it hangs from on that part, which way, and how far to its tip, in meters for a human-sized body */
+  pivot: [number, number];
+  angle: number;
+  length: number;
 }
 
 /** Everything a look is drawn with in the game */
@@ -119,6 +133,20 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
         }),
       ) as Record<BodyPart, Placement>,
   );
+  const danglesByBody = bodies.map((body) =>
+    body.dangles.map((dangle) => {
+      const placement: Placement = {
+        drawing: dangle.drawing,
+        page: 0,
+        x: 0,
+        y: 0,
+        width: Math.ceil(dangle.drawing.width * scale),
+        height: Math.ceil(dangle.drawing.height * scale),
+      };
+      placements.push(placement);
+      return placement;
+    }),
+  );
   const pageHeights: number[] = [];
   let page = 0;
   let x = 0;
@@ -159,8 +187,8 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
 
   bodies.forEach((body, i) => {
     const placed = byBody[i];
-    const texture = (part: BodyPart) => {
-      const p = placed[part];
+    const texture = (part: BodyPart | Placement) => {
+      const p = typeof part === "string" ? placed[part] : part;
       const d = p.drawing;
       return new Texture({
         source: sources[p.page],
@@ -193,14 +221,32 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       rightHand: texture("rightHand"),
       metrics,
     };
+    const dangles = body.dangles.map((dangle, j): DangleTexture => ({
+      kind: dangle.kind,
+      on: dangle.on,
+      texture: texture(danglesByBody[i][j]),
+      pivot: [dangle.pivot[0] / 1000, dangle.pivot[1] / 1000],
+      angle: dangle.angle,
+      length: dangle.length / 1000,
+    }));
     pagesOf.set(toBake[i], [
-      ...new Set(Object.values(placed).map((p) => sources[p.page])),
+      ...new Set(
+        [...Object.values(placed), ...danglesByBody[i]].map(
+          (p) => sources[p.page],
+        ),
+      ),
     ]);
     baked.set(toBake[i], {
       look: body.look,
-      standing: { ...limbs, head: texture("head"), torso: texture("torso") },
+      standing: {
+        ...limbs,
+        head: texture("head"),
+        torso: texture("torso"),
+        dangles,
+      },
       lying: {
         ...limbs,
+        dangles: [],
         head: texture("lyingHead"),
         torso: texture("lyingTorso"),
       },

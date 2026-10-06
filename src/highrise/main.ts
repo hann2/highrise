@@ -24,6 +24,7 @@ import FlashTestScene from "./rig/FlashTestScene";
 import RigTestScene from "./rig/RigTestScene";
 import WalkTestScene from "./rig/WalkTestScene";
 import LooksTestScene from "./rig/LooksTestScene";
+import DanglesTestScene from "./rig/DanglesTestScene";
 import PreviewScene from "./rig/PreviewScene";
 import { isHuman } from "./human/Human";
 import { getStartingCharacter } from "./lobby/Lobby";
@@ -182,6 +183,15 @@ export async function main() {
     params.get("scene") === "walk"
   ) {
     game.addEntity(new WalkTestScene());
+    return;
+  }
+
+  // ?scene=dangles (development only) is for looking at what swings on bodies
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "dangles"
+  ) {
+    game.addEntity(new DanglesTestScene());
     return;
   }
 
