@@ -62,7 +62,9 @@ As soon as the shapes are roughly right, make an options sheet (`options <gun> v
 
 - Blued steel: grays around `#4a4d54`, lit faces lighter, edges darker, a bright line where an edge catches the light. Bright steel parts (`#8d9199`, with a `#c4c7cc` highlight) stand out.
 - Wood (M1911): cocoa, `#6a3a24` at the edges to `#a3633f` down the middle, `#3e2013` for checkering and outline; smooth diamonds the same wood, faintly lighter.
-- Polished parts in openings (a barrel through the port) bright and shiny.
+- Polished parts in openings (a barrel through the port, and under a slide that's back) bright and shiny.
+- Top views at true scale, the same as the side view (he liked the 1911 that way next to the bodies).
+- Where models differ, the gun's own era over the photo's: the M1911's early wide checkered hammer, not the A1's knurled one.
 - Flat color and gradients, no textures; detail that still reads at 128 px.
 
 ## Tools
