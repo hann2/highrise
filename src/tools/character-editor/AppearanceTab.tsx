@@ -117,6 +117,7 @@ export function AppearanceTab({
   look,
   savedLook,
   startingWeapons,
+  leftHanded,
   stats,
   onChange,
 }: {
@@ -125,6 +126,7 @@ export function AppearanceTab({
   savedLook: BodyLook;
   /** For the game preview, which can show them holding the first */
   startingWeapons: string[];
+  leftHanded: boolean;
   stats: Partial<PlayerStats>;
   /** `group`: changes to the same thing close together are one step of undo */
   onChange: (look: BodyLook, group?: string) => void;
@@ -173,6 +175,7 @@ export function AppearanceTab({
         <GamePreview
           look={preview}
           startingWeapons={startingWeapons}
+          leftHanded={leftHanded}
           stats={stats}
           hidden={hidden}
         />
@@ -1125,11 +1128,13 @@ const PREVIEW_MODE_KEY = "characterEditorPreviewMode";
 function GamePreview({
   look,
   startingWeapons,
+  leftHanded,
   stats,
   hidden,
 }: {
   look: BodyLook;
   startingWeapons: string[];
+  leftHanded: boolean;
   stats: Partial<PlayerStats>;
   hidden: BodyLayer[];
 }) {
@@ -1171,6 +1176,7 @@ function GamePreview({
     type: "previewShow",
     look,
     startingWeapons,
+    leftHanded,
     stats,
     mode,
     hidden,

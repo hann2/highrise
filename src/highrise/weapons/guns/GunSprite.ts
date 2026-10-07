@@ -30,6 +30,8 @@ export class GunSprite extends Container {
   setPose(pose: GunPose) {
     this.position.copyFrom(pose.position);
     this.rotation = pose.angle;
+    // Held left-handed, the art's flipped, moving parts and all
+    this.scale.y = pose.mirrored ? -1 : 1;
     for (const { sprite, part } of this.layers) {
       if (!part) {
         continue;

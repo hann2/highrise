@@ -38,15 +38,20 @@ export default class MeleeWeapon extends BaseEntity implements Entity {
     }
   }
 
+  /** Whether whoever has it swings it left-handed: its swing mirrored across the line straight ahead of them */
+  get leftHanded(): boolean {
+    return this.parent instanceof Human && this.parent.leftHanded;
+  }
+
+  /** Where the hands are on the handle, in the holder's frame */
   getCurrentHandPositions(): [V2d, V2d] {
-    if (this.currentSwing) {
-      const t = this.currentSwing.attackProgress;
-      const p = this.swing.getHandlePosition(t);
-      return [p, p];
-    } else {
-      const p = V(this.swing.restPosition);
-      return [p, p];
+    const p = this.currentSwing
+      ? this.swing.getHandlePosition(this.currentSwing.attackProgress)
+      : V(this.swing.restPosition);
+    if (this.leftHanded) {
+      p.y = -p.y;
     }
+    return [p, p.clone()];
   }
 
   attack(holder: Human) {

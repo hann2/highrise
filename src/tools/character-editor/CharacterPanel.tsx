@@ -15,6 +15,7 @@ import { resolveLook } from "../../highrise/looks/BodyLook";
 import { portraitUrl } from "../../highrise/looks/composeBody";
 import { usePlaying } from "./usePlaying";
 import { AppearanceTab } from "./AppearanceTab";
+import { Field, Segmented } from "./controls";
 
 const NEUTRAL_STATS = new PlayerStats();
 
@@ -59,7 +60,7 @@ type Tab = (typeof TABS)[number][0];
 /** The draft fields each tab edits, for marking tabs with unsaved changes */
 const TAB_FIELDS: Record<Tab, DraftField[]> = {
   appearance: ["look"],
-  gameplay: ["startingWeapons", "stats"],
+  gameplay: ["startingWeapons", "leftHanded", "stats"],
   voice: ["voice"],
 };
 
@@ -178,6 +179,7 @@ export function CharacterPanel({
           look={look}
           savedLook={savedLook}
           startingWeapons={data.startingWeapons}
+          leftHanded={data.leftHanded ?? false}
           stats={data.stats}
           onChange={(look, group) => update({ look }, group)}
         />
@@ -203,6 +205,19 @@ export function CharacterPanel({
               data={data}
               onChange={(startingWeapons) => update({ startingWeapons })}
             />
+            <Field
+              label="Hand"
+              tip="Which hand they hold guns and swing melee weapons with. Left-handed, everything they hold is mirrored."
+            >
+              <Segmented
+                value={data.leftHanded ? "left" : "right"}
+                options={[
+                  { value: "right", label: "Right" },
+                  { value: "left", label: "Left" },
+                ]}
+                onChange={(hand) => update({ leftHanded: hand === "left" })}
+              />
+            </Field>
           </section>
 
           <section class="card card--wide">

@@ -67,6 +67,7 @@ const CHARACTER_FIELDS = [
   "look",
   "stats",
   "startingWeapons",
+  "leftHanded",
   "voice",
 ] as const;
 
@@ -169,9 +170,14 @@ export class CharacterStore {
 
   updateCharacter(id: string, changes: CharacterChanges) {
     return this.serially(async () => {
-      const data = this.read(id);
-      const { voice, ...rest } = pick(changes, [...CHARACTER_FIELDS]);
-      Object.assign(data, rest);
+      const read = this.read(id);
+      const { voice, leftHanded, ...rest } = pick(changes, [
+        ...CHARACTER_FIELDS,
+      ]);
+      Object.assign(read, rest);
+      // Right-handed is left out; left-handed goes after the starting weapons
+      const data =
+        leftHanded === undefined ? read : withLeftHanded(read, leftHanded);
       if (voice === null) {
         delete data.voice;
       } else if (voice) {
@@ -524,4 +530,17 @@ function fraction(value: number): number {
     throw new BadRequest(`${value} isn't a number`);
   }
   return Math.max(0, Math.min(1, value));
+}
+
+/** `data` with `leftHanded` set: written after `startingWeapons` when true, left out when false */
+function withLeftHanded(
+  data: CharacterData,
+  leftHanded: boolean,
+): CharacterData {
+  const entries = Object.entries(data).filter(([key]) => key !== "leftHanded");
+  if (leftHanded) {
+    const at = entries.findIndex(([key]) => key === "startingWeapons") + 1;
+    entries.splice(at, 0, ["leftHanded", true]);
+  }
+  return Object.fromEntries(entries) as unknown as CharacterData;
 }

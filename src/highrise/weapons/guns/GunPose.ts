@@ -22,6 +22,11 @@ import type { GunSoundName, GunStats } from "./GunStats";
 // held, the animation playing, recoil, a wall in the way, a push), then puts
 // the hands where they're told to be: on points of the gun, which follow it
 // wherever it goes, or at places on the body.
+//
+// It's all worked out right-handed, as the animations are written. Held
+// left-handed, the finished pose is mirrored across the line straight ahead
+// of the holder, gun and all: the hands swap jobs (the right one's on the
+// foregrip, and carries the magazine), and the gun's art is drawn flipped.
 
 /** Places on a gun, in its own frame (see `GunPoints`) */
 export type GunPointName = "grip" | "foregrip" | "magazine" | "action";
@@ -92,7 +97,7 @@ export type HandTarget =
   /** At a place in the holder's frame (x forward, y right): a pocket, a belt */
   | { readonly body: Point };
 
-/** Where the magazine (or the round being loaded) is: in the gun, where it can't be seen, in the left hand, or nowhere */
+/** Where the magazine (or the round being loaded) is: in the gun, where it can't be seen, in the support hand (the left, held right-handed), or nowhere */
 export type MagazinePlace = "gun" | "hand" | "none";
 
 /** What a gun animation moves. Anything left out stays at rest. */
@@ -108,7 +113,7 @@ export interface GunTracks {
   readonly magazine?: Track<MagazinePlace>;
   /** Turns the magazine in the hand, in radians from along the gun */
   readonly magazineAngle?: Track<number>;
-  /** Whether the left hand and arm are drawn over the gun rather than under it (keyframes are steps) */
+  /** Whether the left hand and arm (the support hand's, held left-handed) are drawn over the gun rather than under it (keyframes are steps) */
   readonly leftHandOver?: Track<boolean>;
   /** How far along their strokes moving parts are (`GunStats.parts`), 0 to 1. Parts left out move as they would without the animation */
   readonly parts?: { readonly [name in GunPartName]?: Track<number> };
@@ -150,9 +155,12 @@ export interface GunPose {
     readonly position: V2d;
     readonly angle: number;
   };
-  readonly leftHandOver: boolean;
+  /** Whether the support hand and arm (the left, held right-handed) are drawn over the gun */
+  readonly supportHandOver: boolean;
   /** How far along their strokes the moving parts are */
   readonly parts: PartAmounts;
+  /** Held left-handed: mirrored across the line straight ahead, so the gun's own frame is too (its y is to the holder's left) */
+  readonly mirrored: boolean;
 }
 
 /** What moves the gun besides its animation, all in the holder's frame */
@@ -169,6 +177,8 @@ export interface GunAdjustments {
   readonly twist: number;
   /** Where the moving parts are without an animation: cycling from a shot, or locked back */
   readonly parts: PartAmounts;
+  /** Held left-handed: the whole pose mirrored */
+  readonly leftHanded?: boolean;
 }
 
 export const NO_ADJUSTMENTS: GunAdjustments = {
@@ -279,7 +289,7 @@ export function poseGun(
   const magazineAngle = tracks?.magazineAngle
     ? sampleNumber(tracks.magazineAngle, time)
     : 0;
-  return {
+  const pose: GunPose = {
     position: gun.position,
     angle: gun.angle,
     leftHand,
@@ -290,10 +300,30 @@ export function poseGun(
         place === "hand" ? leftHand.clone() : gun.toBody(points.magazine),
       angle: gun.angle + (place === "hand" ? magazineAngle : 0),
     },
-    leftHandOver: tracks?.leftHandOver
+    supportHandOver: tracks?.leftHandOver
       ? sampleStep(tracks.leftHandOver, time)
       : false,
     parts,
+    mirrored: false,
+  };
+  return adjust.leftHanded ? mirrorPose(pose) : pose;
+}
+
+/** A right-handed pose held left-handed: mirrored across the holder's x axis, the hands swapping places */
+function mirrorPose(pose: GunPose): GunPose {
+  const flip = (v: V2d) => V(v.x, -v.y);
+  return {
+    ...pose,
+    position: flip(pose.position),
+    angle: -pose.angle,
+    leftHand: flip(pose.rightHand),
+    rightHand: flip(pose.leftHand),
+    magazine: {
+      place: pose.magazine.place,
+      position: flip(pose.magazine.position),
+      angle: -pose.magazine.angle,
+    },
+    mirrored: true,
   };
 }
 
@@ -310,8 +340,9 @@ export function blendGunPoses(from: GunPose, to: GunPose, u: number): GunPose {
       position: from.magazine.position.lerp(to.magazine.position, u),
       angle: lerp(from.magazine.angle, to.magazine.angle, u),
     },
-    leftHandOver: near.leftHandOver,
+    supportHandOver: near.supportHandOver,
     parts: blendAmounts(from.parts, to.parts, u),
+    mirrored: to.mirrored,
   };
 }
 
@@ -327,7 +358,8 @@ function blendAmounts(from: PartAmounts, to: PartAmounts, u: number) {
 
 /** Where a point on the gun (in its own frame) is with the gun posed so, in the holder's frame */
 export function pointOnGun(pose: GunPose, point: Point): V2d {
-  return V(point[0], point[1]).irotate(pose.angle).iadd(pose.position);
+  const y = pose.mirrored ? -point[1] : point[1];
+  return V(point[0], y).irotate(pose.angle).iadd(pose.position);
 }
 
 /** Where the muzzle is with the gun posed so */

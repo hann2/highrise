@@ -221,7 +221,7 @@ export default class Human extends BaseEntity implements Entity, Flammable {
    */
   aimAt(target: V2d, dt: number) {
     const toTarget = target.sub(this.getPosition());
-    const side = this.weapon instanceof Gun ? this.weapon.stats.sideOffset : 0;
+    const side = this.weapon instanceof Gun ? this.weapon.side : 0;
     const distance = Math.max(toTarget.magnitude, MIN_AIM_DISTANCE);
     this.setDirection(toTarget.angle - Math.asin(side / distance), dt);
   }
@@ -267,6 +267,11 @@ export default class Human extends BaseEntity implements Entity, Flammable {
     if (this.weapon instanceof Gun) {
       this.weapon.reload(this);
     }
+  }
+
+  /** Whether they hold weapons left-handed (their character's), which mirrors how they're held */
+  get leftHanded(): boolean {
+    return this.character.leftHanded;
   }
 
   /** The weapon in hand */

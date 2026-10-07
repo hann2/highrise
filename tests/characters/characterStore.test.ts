@@ -371,6 +371,18 @@ test("character changes keep the clips, and ignore unknown fields", async () => 
   assert.equal(data.clips.length, 2);
 });
 
+test("left-handed is written after the starting weapons, and right-handed is left out", async () => {
+  await store.updateCharacter("tess", { leftHanded: true });
+  let data = readData();
+  assert.equal(data.leftHanded, true);
+  const keys = Object.keys(data);
+  assert.equal(keys.indexOf("leftHanded"), keys.indexOf("startingWeapons") + 1);
+  await store.updateCharacter("tess", { leftHanded: false });
+  data = readData();
+  assert.equal("leftHanded" in data, false);
+  assert.equal(data.clips.length, 2);
+});
+
 test("cleaning up replaces a clip's audio in place", async () => {
   await store.cleanUp("tess", "tess-hurt-1.flac");
   assert.equal(

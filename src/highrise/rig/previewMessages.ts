@@ -12,6 +12,7 @@ export interface PreviewShow {
   look: PartialLook;
   /** Weapon names, as in the character's JSON */
   startingWeapons: string[];
+  leftHanded: boolean;
   stats: Partial<PlayerStats>;
   mode: PreviewMode;
   /** Layers left out, to see what's under them */

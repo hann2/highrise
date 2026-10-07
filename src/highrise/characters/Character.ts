@@ -40,6 +40,8 @@ export interface Character {
   /** Changes to the neutral `PlayerStats` */
   stats: Partial<PlayerStats>;
   startingWeapons: WeaponStats[];
+  /** Holds everything left-handed, mirrored */
+  leftHanded: boolean;
   /** Enabled clips' sounds, by when they're said */
   sounds: CharacterSounds;
   data: CharacterData;
@@ -86,6 +88,7 @@ function makeCharacter(id: string, data: CharacterData): Character {
     startingWeapons: data.startingWeapons.map((name) =>
       WEAPON_STATS.find((weapon) => weapon.name === name)!,
     ),
+    leftHanded: data.leftHanded ?? false,
     sounds,
     data,
   };

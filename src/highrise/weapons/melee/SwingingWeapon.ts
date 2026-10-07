@@ -40,6 +40,10 @@ export default class SwingingWeapon extends BaseEntity {
     this.sprite.scale.set(size[1] / this.sprite.height);
     this.sprite.anchor.set(...handlePosition);
     this.sprite.layerName = Layer.WEAPONS;
+    // Swung left-handed, it's mirrored
+    if (holder.leftHanded) {
+      this.sprite.scale.y *= -1;
+    }
 
     this.body = createRigid2D({
       motion: "dynamic",
@@ -57,6 +61,9 @@ export default class SwingingWeapon extends BaseEntity {
       lerp(-size[1] / 2, size[1] / 2, handlePosition[1]),
       lerp(-size[0] / 2, size[0] / 2, handlePosition[0]),
     ];
+    if (holder.leftHanded) {
+      offset[1] = -offset[1];
+    }
     this.body.addShape(shape, offset);
   }
 
@@ -73,7 +80,9 @@ export default class SwingingWeapon extends BaseEntity {
   onRender() {
     const [position, angle] = this.getWeaponPositionAndAngle();
     this.sprite.position.copyFrom(position);
-    this.sprite.rotation = angle + Math.PI / 2; // Why?
+    // The art points along its height; mirrored, the quarter turn is too
+    this.sprite.rotation =
+      angle + (this.holder.leftHanded ? -Math.PI / 2 : Math.PI / 2);
   }
 
   getKnockback() {
@@ -122,7 +131,13 @@ export default class SwingingWeapon extends BaseEntity {
     );
 
     // The angle of the weapon relative to the holder
-    const localAngle = this.weapon.swing.getAngle(this.attackProgress);
+    let localAngle = this.weapon.swing.getAngle(this.attackProgress);
+
+    // Swung left-handed, mirrored across the line straight ahead
+    if (this.holder.leftHanded) {
+      localPosition.y = -localPosition.y;
+      localAngle = -localAngle;
+    }
 
     // The location of the handle relative to the world
     const worldPosition = this.holder.localToWorld(localPosition);
