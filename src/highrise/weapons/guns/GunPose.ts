@@ -159,6 +159,8 @@ export interface GunPose {
   readonly supportHandOver: boolean;
   /** How far along their strokes the moving parts are */
   readonly parts: PartAmounts;
+  /** How far the rounds that show have slid (`GunStats.rounds`): 0 full, 1 empty */
+  readonly rounds: number;
   /** Held left-handed: mirrored across the line straight ahead, so the gun's own frame is too (its y is to the holder's left) */
   readonly mirrored: boolean;
 }
@@ -177,6 +179,8 @@ export interface GunAdjustments {
   readonly twist: number;
   /** Where the moving parts are without an animation: cycling from a shot, or locked back */
   readonly parts: PartAmounts;
+  /** How far the rounds that show have slid: 0 full, 1 empty */
+  readonly rounds?: number;
   /** Held left-handed: the whole pose mirrored */
   readonly leftHanded?: boolean;
 }
@@ -304,6 +308,7 @@ export function poseGun(
       ? sampleStep(tracks.leftHandOver, time)
       : false,
     parts,
+    rounds: adjust.rounds ?? 0,
     mirrored: false,
   };
   return adjust.leftHanded ? mirrorPose(pose) : pose;
@@ -342,6 +347,7 @@ export function blendGunPoses(from: GunPose, to: GunPose, u: number): GunPose {
     },
     supportHandOver: near.supportHandOver,
     parts: blendAmounts(from.parts, to.parts, u),
+    rounds: to.rounds,
     mirrored: to.mirrored,
   };
 }

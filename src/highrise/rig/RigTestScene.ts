@@ -66,6 +66,8 @@ export const RIG_MODES: RigMode[] = [
  * is quarter speed), and `points` marks the points on the guns and where the
  * hands are (`RigOverlay`). `?auto` hides the panel, for recording
  * (`npm run clip -- --scene rig`); `cycles` counts the demonstrations.
+ * `rounds=50` starts magazine guns' demonstrations with that many rounds
+ * (2 otherwise), all fired as fast as the gun goes.
  *
  * Keys: 1-4 the speed, Space pause, . one frame, ← → scrub the animations
  * while paused, M the mode, G the points, Enter start over.
@@ -83,6 +85,8 @@ export default class RigTestScene extends BaseEntity implements Entity {
   /** One frame to run while paused */
   private stepping = false;
   private overlay?: RigOverlay;
+  /** Rounds magazine guns start each demonstration with, if not the usual */
+  private rounds?: number;
 
   constructor() {
     super();
@@ -97,6 +101,7 @@ export default class RigTestScene extends BaseEntity implements Entity {
     this.speed = Number(params.get("speed") ?? 1) || 1;
     const anim = params.get("anim");
     this.mode = RIG_MODES.find((mode) => mode === anim) ?? "demo";
+    this.rounds = Number(params.get("rounds")) || undefined;
   }
 
   @on("add")
@@ -198,12 +203,20 @@ export default class RigTestScene extends BaseEntity implements Entity {
           }
         }
       }
-      await this.wait(longest > 0 ? longest + ANIMATION_GAP : CYCLE_TIME);
+      await this.wait(
+        longest > 0 ? longest + ANIMATION_GAP : CYCLE_TIME + this.firingTime(),
+      );
       // Started over meanwhile
       if (this.cycles !== cycle) {
         return;
       }
     }
+  }
+
+  /** Seconds the slowest gun takes to fire `rounds`, if set */
+  private firingTime(): number {
+    const rounds = this.rounds ?? 0;
+    return Math.max(0, ...this.guns.map((gun) => rounds / gun.fireRate));
   }
 
   /** Shoots a little, then reloads */
@@ -218,11 +231,19 @@ export default class RigTestScene extends BaseEntity implements Entity {
     const capacity = gun.getCapacity(human);
     gun.ammo = individual
       ? Math.max(1, capacity - INDIVIDUAL_ROUNDS + 1)
-      : Math.min(2, capacity);
-    const shots = individual ? 1 : gun.ammo;
-    for (let i = 0; i < shots; i++) {
-      gun.pullTrigger(human);
-      await this.wait(Math.max(1 / gun.stats.fireRate, 0.2));
+      : Math.min(this.rounds ?? 2, capacity);
+    if (this.rounds && !individual) {
+      // As fast as it fires
+      while (gun.ammo > 0) {
+        gun.pullTrigger(human);
+        await this.wait(1 / 120);
+      }
+    } else {
+      const shots = individual ? 1 : gun.ammo;
+      for (let i = 0; i < shots; i++) {
+        gun.pullTrigger(human);
+        await this.wait(Math.max(1 / gun.stats.fireRate, 0.2));
+      }
     }
     await this.wait(0.4);
     gun.reload(human);

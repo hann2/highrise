@@ -17,7 +17,9 @@ import { GUN_PART_NAMES, GunPartName } from "./GunPose";
  * Each is cut into layers in drawing order: every moving part (a top-level
  * group named for one, `GUN_PART_NAMES`) on a layer of its own, and what's
  * between them on layers that stay put, so the parts can move over and under
- * the rest of the gun.
+ * the rest of the gun. Rounds that show (a `rounds` group, top-level or in a
+ * moving part) are a layer of their own too, which `GunSprite` slides along
+ * the gun and crops to their window as the gun empties.
  */
 
 const GUN_ART = {
@@ -43,6 +45,8 @@ export interface GunLayer {
   readonly texture: Texture;
   /** The moving part it is, or none for the parts that stay put */
   readonly part?: GunPartName;
+  /** If it's the rounds, where along the gun they show, in meters: the x of each end of their clip path's rect */
+  readonly roundsWindow?: readonly [number, number];
 }
 
 const baked = new Map<GunArtName, GunLayer[]>();
@@ -72,7 +76,19 @@ async function bakeLayers(svg: string): Promise<GunLayer[]> {
   ).documentElement;
   const open = svg.slice(0, svg.indexOf(">") + 1);
   let defs = "";
-  const layers: { part?: GunPartName; content: string[] }[] = [];
+  const layers: (Omit<GunLayer, "texture"> & { content: string[] })[] = [];
+  /** Adds to the layer below, unless either is a part or the rounds */
+  const add = (
+    content: string,
+    part?: GunPartName,
+    roundsWindow?: readonly [number, number],
+  ) => {
+    const last = layers[layers.length - 1];
+    if (part || roundsWindow || !last || last.part || last.roundsWindow) {
+      layers.push({ part, roundsWindow, content: [] });
+    }
+    layers[layers.length - 1].content.push(content);
+  };
   for (const element of root.children) {
     if (element.tagName === "defs") {
       defs += element.outerHTML;
@@ -81,18 +97,54 @@ async function bakeLayers(svg: string): Promise<GunLayer[]> {
     const part = (GUN_PART_NAMES as readonly string[]).includes(element.id)
       ? (element.id as GunPartName)
       : undefined;
-    const last = layers[layers.length - 1];
-    if (part || !last || last.part) {
-      layers.push({ part, content: [] });
+    const children = [...element.children];
+    const rounds =
+      element.id === "rounds"
+        ? element
+        : part && children.find((child) => child.id === "rounds");
+    if (!rounds) {
+      add(element.outerHTML, part);
+      continue;
     }
-    layers[layers.length - 1].content.push(element.outerHTML);
+    // What's under the rounds, the rounds (unclipped, since they slide), and what's over them
+    const shown = windowOf(root, rounds);
+    const unclipped = rounds.cloneNode(true) as Element;
+    unclipped.removeAttribute("clip-path");
+    if (rounds === element) {
+      add(unclipped.outerHTML, undefined, shown);
+      continue;
+    }
+    // In the part's group, for anything it sets for them
+    const inPart = (...content: Element[]) => {
+      const group = element.cloneNode(false) as Element;
+      group.append(...content.map((child) => child.cloneNode(true)));
+      return group.outerHTML;
+    };
+    const index = children.indexOf(rounds);
+    add(inPart(...children.slice(0, index)), part);
+    add(inPart(unclipped), part, shown);
+    add(inPart(...children.slice(index + 1)), part);
   }
   return Promise.all(
-    layers.map(async ({ part, content }) => ({
-      part,
+    layers.map(async ({ content, ...layer }) => ({
+      ...layer,
       texture: await rasterize(`${open}${defs}${content.join("")}</svg>`),
     })),
   );
+}
+
+/** Where along the gun `rounds` show, in meters: the ends of the rect in their clip path */
+function windowOf(root: Element, rounds: Element): [number, number] {
+  const id = rounds.getAttribute("clip-path")?.match(/url\(#(.+)\)/)?.[1];
+  const rect = id && root.querySelector(`[id="${id}"] rect`);
+  if (!rect) {
+    throw new Error(
+      "A gun's rounds need a clip path of a rect to show through",
+    );
+  }
+  const x = Number(rect.getAttribute("x"));
+  const width = Number(rect.getAttribute("width"));
+  return [x / 1000, (x + width) / 1000];
 }
 
 async function rasterize(svg: string): Promise<Texture> {
