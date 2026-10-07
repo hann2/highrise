@@ -55,6 +55,7 @@ From a second design conversation, which replaced the "pick one of three" loop (
 - Tiers are by power, not one per family (Simon, 2026-09-26): pistols are naturally lower tier than long guns, and a semi-auto shotgun like the SPAS12 is hard to beat. `GUN_TIERS` stays as it is for now; more guns and tier balance come after the mechanics are in.
 - Two free weapon slots, no primary/secondary. You start with a pistol; taking two pricier guns means giving up the cheap fallback, which is a deliberate choice. Melee takes a slot.
 - Characters' starting weapons are the one chosen gun, the build's seed, so characters should spread across families.
+- Idea: a special pirate weapon for Lucky Jack, like maybe a blunderbuss.
 
 ### Items
 
