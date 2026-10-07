@@ -111,7 +111,14 @@ interface Intent {
   bend: [number, number];
 }
 
-type ArmIntent = "reach" | "bentUp" | "out" | "trail" | "under" | "kept";
+type ArmIntent =
+  | "reach"
+  | "bentUp"
+  | "clenched"
+  | "out"
+  | "trail"
+  | "under"
+  | "kept";
 type LegIntent = "straight" | "apart" | "kneeUp" | "kneeOut" | "curled";
 
 const ARM_INTENTS: Record<Exclude<ArmIntent, "kept">, Intent> = {
@@ -119,6 +126,8 @@ const ARM_INTENTS: Record<Exclude<ArmIntent, "kept">, Intent> = {
   reach: { angle: [0.55, 1.1], bend: [-0.75, -0.1] },
   /** Up by the head, bent sharply back toward it */
   bentUp: { angle: [1.15, 1.6], bend: [-1.75, -1.1] },
+  /** Drawn in as fire draws them, elbows out and fists back up by the shoulders */
+  clenched: { angle: [1.55, 2.0], bend: [-2.85, -2.45] },
   /** Flung out to the side */
   out: { angle: [1.4, 2.1], bend: [-0.2, 0.7] },
   /** Down by the side, toward the feet */
@@ -262,7 +271,8 @@ export function lyingPose(
           (otherGone ? 1 : 0) +
           (death.lying ? 2 : 0),
       ],
-      ["bentUp", limp ? 0 : 0.7 + (burnt ? 5 : 0)],
+      ["bentUp", limp ? 0 : 0.7 + (burnt ? 1 : 0)],
+      ["clenched", burnt ? 5 : 0],
       [
         "out",
         0.8 +
