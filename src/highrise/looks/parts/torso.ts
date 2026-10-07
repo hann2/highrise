@@ -556,9 +556,10 @@ function drawSack(
   color: Color,
   dims: BodyDimensions,
   random: () => number,
+  /** Where its middle is; behind the left shoulder unless given */
+  at: Pt = [-dims.backDepth - 95, -dims.shoulderHalfWidth * 0.5],
 ) {
-  const cx = -dims.backDepth - 95;
-  const cy = -dims.shoulderHalfWidth * 0.5;
+  const [cx, cy] = at;
   const wave = wobble(random, 4, 3);
   const points = ellipsePoints(cx, cy, 175, 165, 24, (a) => 0.07 * wave(a));
   d.includePoints(points);
@@ -718,11 +719,6 @@ function drawLanyard(d: Drawing, neck: number, color: Color) {
 }
 
 /**
- * The torso lying face down, from above: the shoulders at the origin and
- * toward +x, the waist toward -x, torn off and bloody (the legs, when there
- * are any, are drawn over that end). For crawlers, corpses and gibs.
- */
-/**
  * How far behind the shoulders a body lying face down has its waist, where
  * its legs go (mm): far enough down that they cover the torn end
  */
@@ -730,76 +726,200 @@ export function lyingWaist(dims: BodyDimensions): number {
   return lyingTorsoLength(dims) - 60;
 }
 
-/** Half the width of a body lying face down, at the waist (mm) */
+/**
+ * How far in front of the shoulders a body lying face down has its head's
+ * middle (mm): past the neck, tucked a little under its shoulders
+ */
+export function lyingHead(dims: BodyDimensions): number {
+  return lyingNeck(dims) + dims.headRx * 0.45;
+}
+
+/** Where the top half lying face down ends at the neck, in front of the shoulders (mm) */
+function lyingNeck(dims: BodyDimensions): number {
+  return 70 + dims.backDepth * 0.25;
+}
+
+/** How long the legs are lying face down, from the waist to the ankles (mm) */
+export const LYING_LEGS = 700;
+
+/** How far down the legs a coat comes, lying face down */
+const COAT_TAILS = 0.56;
+
+/** Tops that hang down over the trousers' waistband, rather than tucked in */
+const HANGING_TOPS: TopStyle[] = [
+  "tshirt",
+  "polo",
+  "tank",
+  "jacket",
+  "hoodie",
+  "sweater",
+  "tracksuit",
+];
+
+/** Tops with a ribbed band round the bottom */
+const RIBBED_TOPS: TopStyle[] = ["hoodie", "sweater", "tracksuit"];
+
+/**
+ * Half the width of a body lying face down across its shoulders (mm): less
+ * than standing, where they're as wide as the arms on them
+ */
+export function lyingShoulderHalf(dims: BodyDimensions): number {
+  return dims.shoulderHalfWidth * 0.85;
+}
+
+/** How far out from the middle a body lying face down has its arms (mm), just inside its shoulders */
+export function lyingShoulder(dims: BodyDimensions): number {
+  return lyingShoulderHalf(dims) - dims.armThickness * 0.55;
+}
+
+/**
+ * Half the width of a body lying face down across its hips (mm): their own
+ * width, not the shoulders' (`Build.hips`), and wider with a belly
+ */
+export function lyingHipsHalf(look: BodyLook, dims: BodyDimensions): number {
+  return 192 * (1 + 0.16 * look.build.hips) + dims.belly * 0.3;
+}
+
+/**
+ * Half the width of a body lying face down at the waist (mm): in from the
+ * hips, the more so the wider they are, and out with a belly
+ */
 export function lyingWaistHalf(look: BodyLook, dims: BodyDimensions): number {
-  return dims.shoulderHalfWidth * (0.74 + Math.max(0, look.build.belly) * 0.18);
+  const hips = 192 * (1 + 0.16 * look.build.hips);
+  return (
+    hips * (0.87 - 0.07 * Math.max(0, look.build.hips)) + dims.belly * 0.45
+  );
 }
 
 function lyingTorsoLength(dims: BodyDimensions): number {
-  return 400 + dims.belly * 0.4;
+  return 480 + dims.belly * 0.4;
 }
 
+/**
+ * The torso lying face down, from above: the shoulders at the origin and
+ * toward +x, the waist toward -x. `torn`, torn off at the waist, bloody and
+ * with its spine sticking out (crawlers, and corpses and gibs without their
+ * legs); else whole, ending at its hem, which goes on over the legs (drawn
+ * under it, their waist at `lyingWaist`): a top that hangs out over the
+ * trousers' waistband, or one tucked in just to it, or a coat all the way
+ * down over them.
+ */
 export function drawLyingTorso(
   look: BodyLook,
   dims: BodyDimensions,
   prefix: string,
+  torn: boolean,
 ): Drawing {
   const colors = palette(look);
   const random = lookRandom(look, 3);
   const top = look.top;
-  const w = dims.shoulderHalfWidth;
+  const w = lyingShoulderHalf(dims);
   const length = lyingTorsoLength(dims);
-  const front = 70 + dims.backDepth * 0.25;
+  const front = lyingNeck(dims);
   const waist = lyingWaistHalf(look, dims);
   const jag = wobble(random, 6, 5);
-  // Down the left side, ragged across the waist, back up the right
-  const points: Pt[] = [
-    [front, 0],
-    [front * 0.75, -w * 0.62],
-    [front * 0.2, -w * 0.97],
-    [-front * 0.4, -w],
-    [-length * 0.45, -w * 0.9],
-    [-length * 0.85, -waist],
+  // Down the left side, ragged across the waist, back up the right: the
+  // neck, sloping down to square shoulders, and in from under the arms to
+  // the waist
+  const side: Pt[] = [
+    [front * 0.95, w * 0.22],
+    [front * 0.55, w * 0.55],
+    [front * 0.1, w * 0.86],
+    [-front * 0.35, w * 0.99],
+    [-front, w * 0.97],
+    [-length * 0.3, w * 0.88],
+    [-length * 0.55, waist + (w * 0.88 - waist) * 0.4],
+    [-length * 0.8, waist],
   ];
-  const tornSteps = 12;
-  for (let i = 0; i <= tornSteps; i++) {
-    const y = -waist + (2 * waist * i) / tornSteps;
-    points.push([-length - 18 - (i % 2) * 30 + jag(i) * 14, y]);
+  // A coat goes on down over the legs, all one, its sides straight down
+  // from under the arms and flaring a little to the hem, with a vent up the
+  // back; anything else is torn off, ragged across the waist
+  const coat = !torn && top.style === "coat";
+  const hem = lyingWaist(dims) + LYING_LEGS * COAT_TAILS;
+  // Where a top that isn't a coat ends, over the legs, and how wide it is
+  // there: over the hips, or tucked into the trousers' waistband
+  const hanging = HANGING_TOPS.includes(top.style);
+  const ribbed = RIBBED_TOPS.includes(top.style);
+  const bottom = lyingWaist(dims) + (hanging ? (ribbed ? 70 : 55) : 8);
+  // Hanging out, it's a little wider than the trousers all the way down
+  // over their waistband and the hips, as it hangs loose over them
+  const hips = lyingHipsHalf(look, dims);
+  const bottomHalf = hanging ? Math.max(hips, waist) * 1.08 + 6 : waist;
+  if (coat) {
+    // At least as wide as the seat under it, which a belly widens
+    const half = Math.max(w * 0.82, lyingHipsHalf(look, dims) * 1.1);
+    side.splice(
+      -2,
+      2,
+      [-length * 0.6, Math.max(w * 0.84, half)],
+      [-lyingWaist(dims), half],
+      [-hem + LYING_LEGS * 0.12, half + w * 0.04],
+      [-hem, half + w * 0.08],
+      [-hem - 10, half * 0.5],
+    );
+  } else if (!torn && hanging) {
+    side.splice(
+      -1,
+      1,
+      // easing out from the waist, so wide hips don't make a step
+      [-length * 0.72, (waist * 0.7 + Math.max(hips, waist) * 0.3) * 1.03 + 4],
+      [-lyingWaist(dims) + 5, Math.max(hips, waist) * 1.04 + 4],
+      [-bottom, bottomHalf],
+      [-bottom - 6, bottomHalf * 0.5],
+    );
+  } else if (!torn) {
+    side.push([-bottom, bottomHalf], [-bottom - 6, bottomHalf * 0.5]);
   }
-  points.push(
-    [-length * 0.85, waist],
-    [-length * 0.45, w * 0.9],
-    [-front * 0.4, w],
-    [front * 0.2, w * 0.97],
-    [front * 0.75, w * 0.62],
-  );
+  const points: Pt[] = [[front, 0], ...side.map(([x, y]): Pt => [x, -y])];
+  if (coat) {
+    // Each flap of the vent, hanging a little apart at the hem
+    const gap = 2 + random() * 8;
+    points.push([-hem, -gap], [-hem + LYING_LEGS * 0.2, 0], [-hem, gap]);
+  } else if (!torn) {
+    points.push([-bottom - 8, 0]);
+  } else {
+    const tornSteps = 12;
+    for (let i = 0; i <= tornSteps; i++) {
+      const y = -waist + (2 * waist * i) / tornSteps;
+      points.push([-length - 18 - (i % 2) * 30 + jag(i) * 14, y]);
+    }
+  }
+  points.push(...[...side].reverse());
   const shape = smoothPath(points, true, 0.75);
   const d = new Drawing(prefix, 0, 0, 0, 0);
   d.includePoints(points);
   const torso = d.clipPath("torso", shape);
 
   // The raw end
-  d.blob(capsulePath(-length - 70, -length + 70, 0, waist * 1.9), "#5a0d0d", {
-    shade: "flat",
-    outline: 0,
-    clip: torso,
-  });
+  if (torn) {
+    d.blob(capsulePath(-length - 70, -length + 70, 0, waist * 1.9), "#5a0d0d", {
+      shade: "flat",
+      outline: 0,
+      clip: torso,
+    });
+  }
 
   const band = BANDED[top.style];
   const base = band ? shoulderColor(look, colors.skin) : top.color;
-  d.blob(shape, base, {});
+  // Lying flat, it's shaded across, at its sides, not as a dome
+  d.blob(shape, base, { shade: "flat" });
   let garment = torso;
   if (band || top.style === "overalls") {
     const half = band ? w * band : w * 0.36;
-    garment = d.clipPath(
-      "garment",
-      polygonPath([
-        [-999, -half],
-        [999, -half],
-        [999, half],
-        [-999, half],
-      ]),
-    );
+    // Across the back below the arms, and only a band over the shoulders,
+    // curving out round the armholes
+    const out = w * 1.3;
+    const top0 = -length * 0.16;
+    const under = -length * 0.42;
+    const garmentPath = band
+      ? `M999 ${n(-half)}L${n(top0)} ${n(-half)}Q${n(under)} ${n(-half)} ${n(under)} ${n(-out)}L-999 ${n(-out)}L-999 ${n(out)}L${n(under)} ${n(out)}Q${n(under)} ${n(half)} ${n(top0)} ${n(half)}L999 ${n(half)}Z`
+      : polygonPath([
+          [-999, -half],
+          [999, -half],
+          [999, half],
+          [-999, half],
+        ]);
+    garment = d.clipPath("garment", garmentPath);
     d.begin(`clip-path="url(#${torso})"`);
     if (top.style === "overalls") {
       // The straps cross on the back
@@ -815,16 +935,7 @@ export function drawLyingTorso(
         {},
       );
     } else {
-      d.blob(
-        polygonPath([
-          [-999, -half],
-          [999, -half],
-          [999, half],
-          [-999, half],
-        ]),
-        top.color,
-        {},
-      );
+      d.blob(garmentPath, top.color, { shade: "flat" });
     }
     d.end();
   }
@@ -833,14 +944,54 @@ export function drawLyingTorso(
     drawPattern(d, top.pattern, garment);
     d.end();
   }
-  d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("dome")})"/>`);
-  // The seam down the back, and the collar at the neck
-  d.line(
-    `M${n(front * 0.6)} 0L${n(-length * 0.8)} 0`,
-    darken(base, 0.3),
-    6,
-    `opacity="0.5"`,
-  );
+  if (!torn && !coat && ribbed) {
+    // The ribbed band round the bottom
+    d.begin(`clip-path="url(#${torso})"`);
+    d.add(
+      `<rect x="${n(-bottom - 12)}" y="${n(-w)}" width="36" height="${n(w * 2)}" fill="${darken(top.color, 0.12)}"/>`,
+    );
+    for (let y = -bottomHalf; y < bottomHalf; y += 16) {
+      d.line(
+        `M${n(-bottom - 10)} ${n(y)}L${n(-bottom + 22)} ${n(y)}`,
+        darken(top.color, 0.3),
+        3,
+        `opacity="0.5"`,
+      );
+    }
+    d.end();
+  }
+  d.add(`<path d="${shape}" fill="url(#${d.shadeGradient("side")})"/>`);
+  // The shoulder blades, just a hint of their outer edges, and the collar
+  // at the neck
+  for (const s of [-1, 1]) {
+    d.line(
+      `M${n(-length * 0.08)} ${n(s * w * 0.5)}Q${n(-length * 0.22)} ${n(s * w * 0.56)} ${n(-length * 0.34)} ${n(s * w * 0.4)}`,
+      darken(base, 0.3),
+      5,
+      `opacity="0.15"`,
+    );
+  }
+  if (coat) {
+    // Folds hanging down from the waist to the hem, and its trim round the
+    // hem, as standing
+    d.begin(`clip-path="url(#${torso})"`);
+    // (each flap's: from its outside corner round to the vent)
+    for (const flap of [
+      points.slice(side.length - 1, side.length + 2),
+      points.slice(side.length + 3, side.length + 6),
+    ]) {
+      d.line(smoothPath(flap, false, 0.5), top.secondary, 70);
+    }
+    for (const f of [-0.6, -0.3, 0.3, 0.6]) {
+      d.line(
+        `M${n(-lyingWaist(dims) + 40)} ${n(f * w * 0.8)}L${n(-hem)} ${n(f * w * (0.9 + random() * 0.1))}`,
+        darken(base, 0.3),
+        6,
+        `opacity="0.3"`,
+      );
+    }
+    d.end();
+  }
   if (top.style === "hoodie") {
     d.blob(
       smoothPath(
@@ -870,13 +1021,15 @@ export function drawLyingTorso(
       );
       d.end();
     }
-    d.blob(
-      capsulePath(front * 0.1, front * 0.55, 0, w * 0.75),
-      lighten(top.color, 0.05),
-      {
-        outline: 6,
-      },
-    );
+    // One band across the back of the neck, just below the head, its ends
+    // curving forward round the neck under it; a popped one stands up
+    // taller
+    const neck = dims.headRy * 0.62;
+    const width = top.popped ? 50 : 34;
+    const at = front * 0.2;
+    const collar = `M${n(at + 34)} ${n(-neck)}Q${n(at - 6)} ${n(-neck * 0.8)} ${n(at - 6)} 0Q${n(at - 6)} ${n(neck * 0.8)} ${n(at + 34)} ${n(neck)}`;
+    d.line(collar, darken(top.color, STYLE.outlineDarken), width + 10);
+    d.line(collar, lighten(top.color, 0.06), width);
   }
 
   const onBack = (): Pt => [
@@ -885,33 +1038,38 @@ export function drawLyingTorso(
   ];
   drawRips(d, look, colors.skin, top.color, garment, onBack, random);
   drawBlood(d, look, torso, onBack, random);
-  // Always bloody where it tore, but no further up than the legs of a
-  // whole body cover (`lyingWaist`)
-  d.begin(`clip-path="url(#${torso})"`);
-  for (let i = 0; i < 5; i++) {
-    const y = (random() - 0.5) * waist * 1.8;
-    d.add(
-      `<ellipse cx="${n(-length - 20 + random() * 20)}" cy="${n(y)}" rx="${n(25 + random() * 25)}" ry="${n(20 + random() * 20)}" fill="#6a0e0e" opacity="0.75"/>`,
-    );
-  }
-  d.end();
   drawGrime(d, look, torso);
-  // The spine sticking out
-  d.blob(capsulePath(-length - 70, -length + 10, 0, 34), "#e9e2cf", {
-    shade: "tube",
-    outline: 6,
-    outlineColor: "#8a7f68",
-  });
-  for (let i = 0; i < 3; i++) {
-    d.line(
-      `M${n(-length - 55 + i * 22)} -17L${n(-length - 55 + i * 22)} 17`,
-      "#a59a80",
-      5,
-    );
+  if (torn) {
+    // Always bloody where it tore
+    d.begin(`clip-path="url(#${torso})"`);
+    for (let i = 0; i < 5; i++) {
+      const y = (random() - 0.5) * waist * 1.8;
+      d.add(
+        `<ellipse cx="${n(-length - 20 + random() * 20)}" cy="${n(y)}" rx="${n(25 + random() * 25)}" ry="${n(20 + random() * 20)}" fill="#6a0e0e" opacity="0.75"/>`,
+      );
+    }
+    d.end();
+    // The spine sticking out
+    d.blob(capsulePath(-length - 70, -length + 10, 0, 34), "#e9e2cf", {
+      shade: "tube",
+      outline: 6,
+      outlineColor: "#8a7f68",
+    });
+    for (let i = 0; i < 3; i++) {
+      d.line(
+        `M${n(-length - 55 + i * 22)} -17L${n(-length - 55 + i * 22)} 17`,
+        "#a59a80",
+        5,
+      );
+    }
+    d.include(-length - 75, -20, 0, 20);
   }
-  d.include(-length - 75, -20, 0, 20);
 
   for (const extra of look.extras) {
+    if (extra.kind === "sack") {
+      // Fallen onto the back from over the shoulder
+      drawSack(d, extra.color, dims, random, [-length * 0.4, -w * 0.45]);
+    }
     if (extra.kind === "backpack") {
       d.blob(
         capsulePath(-length * 0.75, -front * 0.2, 0, w * 1.05),

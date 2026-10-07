@@ -4,7 +4,7 @@ import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH } from "../creature-stuff/Legs";
 import { BodyLook, PartialLook } from "./BodyLook";
 import { BodyDrawing, BodyLayer, drawBody, LAYER_PARTS } from "./drawBody";
 import { Drawing, n } from "./svg";
-import { lyingWaist } from "./parts/torso";
+import { lyingHead, lyingShoulder, lyingWaist } from "./parts/torso";
 import { armHandPosition, hasSleeve } from "./parts/limbs";
 import {
   ArmPose,
@@ -429,46 +429,51 @@ export function composeBodySvg(
       reach,
     ];
   } else {
-    // Face down: the legs, the top half, arms by its sides and the head
-    const shoulder = dims.shoulderHalfWidth - dims.armThickness / 2;
+    // Face down: the legs, then the arms, both under the top half (the
+    // arms' round ends at the shoulders hidden, as standing), its hem over
+    // the legs, and the head turned to one side. One arm's up by the head,
+    // the other down by its side, which way round by its seed
+    const shoulder = lyingShoulder(dims);
     const waist = -lyingWaist(dims);
     const handAt = armHandPosition(dims);
-    // The legs over the torn end, as a corpse has them
-    items.push(place(parts.lyingTorso, ""));
     if (!options.legless) {
       items.push(place(parts.lyingLegs, `translate(${n(waist)} 0)`));
     }
+    const up = body.look.seed % 2 === 0 ? -1 : 1;
+    const hands: [number, number][] = [];
     for (const [arm, hand, side] of [
-      [parts.leftArm, parts.leftHand, -1],
-      [parts.rightArm, parts.rightHand, 1],
+      [parts.leftArm, parts.leftFlatHand, -1],
+      [parts.rightArm, parts.rightFlatHand, 1],
     ] as const) {
-      const angle = side * 150;
-      items.push(
-        place(
-          arm,
-          `translate(0 ${n(side * shoulder)}) rotate(${angle}) scale(0.75 1)`,
-        ),
-      );
+      const angle = side === up ? side * 55 : side * 165;
       const rad = (angle * Math.PI) / 180;
+      const at: [number, number] = [
+        Math.cos(rad) * handAt,
+        side * shoulder + Math.sin(rad) * handAt,
+      ];
+      hands.push(at);
       items.push(
-        place(
-          hand,
-          `translate(${n(Math.cos(rad) * handAt * 0.75)} ${n(side * shoulder + Math.sin(rad) * handAt * 0.75)})`,
-        ),
+        place(arm, `translate(0 ${n(side * shoulder)}) rotate(${angle})`),
+        place(hand, `translate(${n(at[0])} ${n(at[1])}) rotate(${angle})`),
       );
     }
-    items.push(place(parts.lyingHead, `translate(${n(dims.headRx * 0.55)} 0)`));
-    // Out to the hands, at the ends of the arms
-    const handOut = shoulder + Math.sin((150 * Math.PI) / 180) * handAt * 0.75;
+    // Whole, or torn off at the waist without its legs
+    items.push(place(options.legless ? parts.lyingTorso : parts.lyingTop, ""));
+    const headAt = lyingHead(dims);
+    items.push(place(parts.turnedHead, `translate(${n(headAt)} 0)`));
     const reach = Math.max(
       dims.shoulderHalfWidth + 120,
-      handOut + dims.handSize * 0.6,
+      ...hands.map(([, y]) => Math.abs(y) + dims.handSize * 0.6),
       parts.lyingLegs.maxY,
+      -parts.lyingLegs.minY,
     );
     box = [
       options.legless ? parts.lyingTorso.minX : waist + parts.lyingLegs.minX,
       -reach,
-      dims.headRx * 0.55 + parts.lyingHead.maxX,
+      Math.max(
+        headAt + parts.turnedHead.maxX,
+        ...hands.map(([x]) => x + dims.handSize * 0.6),
+      ),
       reach,
     ];
   }

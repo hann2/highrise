@@ -91,7 +91,8 @@ export function capsulePath(
   );
 }
 
-export type Shade = "dome" | "tube" | "flat";
+/** `side`: lying flat, only darker right at its edges */
+export type Shade = "dome" | "tube" | "side" | "flat";
 
 export interface BlobOptions {
   /** How it's lit: a dome is brightest in the middle, a tube along its length */
@@ -243,7 +244,7 @@ export class Drawing {
     }
   }
 
-  shadeGradient(shade: "dome" | "tube"): string {
+  shadeGradient(shade: "dome" | "tube" | "side"): string {
     const { highlight: hi, shadow: sh, shading } = STYLE;
     const stops = (list: [number, string, number][]) =>
       list
@@ -287,6 +288,32 @@ export class Drawing {
         "dome",
         (id) =>
           `<radialGradient id="${id}" ${attrs}>${stops(list)}</radialGradient>`,
+      );
+    }
+    if (shade === "side") {
+      // Something lying flat, seen from above: only its edges turn away
+      const edge = shading === "soft" || shading === "gloss" ? 0.12 : 0.07;
+      const dark = sh * 0.35;
+      const list: [number, string, number][] =
+        shading === "soft" || shading === "gloss"
+          ? [
+              [0, "#000", dark],
+              [edge, "#000", 0],
+              [1 - edge, "#000", 0],
+              [1, "#000", dark],
+            ]
+          : [
+              [0, "#000", dark],
+              [edge, "#000", dark],
+              [edge, "#000", 0],
+              [1 - edge, "#000", 0],
+              [1 - edge, "#000", dark],
+              [1, "#000", dark],
+            ];
+      return this.def(
+        "side",
+        (id) =>
+          `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">${stops(list)}</linearGradient>`,
       );
     }
     const list: [number, string, number][] =

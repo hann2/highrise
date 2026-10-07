@@ -214,6 +214,8 @@ function drawCoatTails(
       { shade: "flat", outline: 5 },
     );
   }
+  // Its trim round the hem too, inside it
+  d.line(smoothPath(outer, false), top.secondary, 70);
   d.line(
     smoothPath(outer, false),
     darken(top.color, 0.25),

@@ -54,6 +54,8 @@ export interface Build {
   belly: number;
   /** A bust, from flat (-1 and 0) to big (1) */
   bust: number;
+  /** How wide the hips are, and so how much the waist goes in above them */
+  hips: number;
   /** Shoulders rolled forward */
   hunch: number;
   /** From round shoulders to square ones */
@@ -307,6 +309,7 @@ export const DEFAULT_LOOK: BodyLook = {
     chest: 0,
     belly: 0,
     bust: 0,
+    hips: 0,
     hunch: 0,
     squareness: 0,
     arms: 0,

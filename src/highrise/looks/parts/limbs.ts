@@ -390,6 +390,78 @@ export function drawSleeve(
 }
 
 /**
+ * A hand lying flat, palm down, from above, fingers toward +x: for bodies
+ * lying on the floor. The thumb's on the inside (toward the body's middle,
+ * `-side`), and a zombie's fingers are crooked and dirty-nailed.
+ */
+export function drawFlatHand(
+  look: BodyLook,
+  dims: BodyDimensions,
+  side: -1 | 1,
+  prefix: string,
+): Drawing {
+  const colors = palette(look);
+  const h = dims.handSize;
+  const rot = look.zombie?.rot ?? 0;
+  const color = look.gloves ?? colors.skin;
+  const grain = !look.gloves && rot > 0 ? "rot" : undefined;
+  const inside = -side;
+  const d = new Drawing(prefix, -h * 0.4, -h * 0.55, h * 0.95, h * 0.55);
+  const crease = darken(color, 0.4);
+  // The fingers, fanned a little, the middle one longest
+  const fingers: [number, number, number][] = [-1.5, -0.5, 0.5, 1.5].map(
+    (i) => {
+      const y = i * h * 0.115;
+      const reach =
+        h * (0.66 - Math.abs(i) * 0.06 - (i * inside > 1 ? 0.07 : 0));
+      const crook = rot > 0 ? Math.abs(i) * h * 0.04 : 0;
+      return [y, reach, crook];
+    },
+  );
+  for (const [y, reach, crook] of fingers) {
+    const path = `M${n(h * 0.1)} ${n(y)}Q${n(reach * 0.7)} ${n(y * 1.15 + crook)} ${n(reach)} ${n(y * 1.25)}`;
+    d.line(path, darken(color, 0.45), h * 0.17);
+    d.line(path, color, h * 0.13);
+    if (!look.gloves) {
+      d.add(
+        `<ellipse cx="${n(reach - h * 0.03)}" cy="${n(y * 1.25)}" rx="${n(h * 0.035)}" ry="${n(h * 0.03)}" fill="${rot > 0 ? "#3b3524" : lighten(color, 0.25)}"/>`,
+      );
+    }
+  }
+  // The thumb, out along the inside
+  const thumb = `M${n(-h * 0.05)} ${n(inside * h * 0.2)}Q${n(h * 0.15)} ${n(inside * h * 0.42)} ${n(h * 0.32)} ${n(inside * h * 0.45)}`;
+  d.line(thumb, darken(color, 0.45), h * 0.17);
+  d.line(thumb, color, h * 0.13);
+  // The back of the hand over them, and its knuckles
+  d.blob(
+    smoothPath(
+      [
+        [-h * 0.3, -h * 0.2],
+        [h * 0.05, -h * 0.27],
+        [h * 0.24, -h * 0.22],
+        [h * 0.28, 0],
+        [h * 0.24, h * 0.22],
+        [h * 0.05, h * 0.27],
+        [-h * 0.3, h * 0.2],
+      ],
+      true,
+      0.7,
+    ),
+    color,
+    { grain, shade: "flat" },
+  );
+  for (const [y] of fingers) {
+    d.line(
+      `M${n(h * 0.14)} ${n(y)}L${n(h * 0.2)} ${n(y * 1.05)}`,
+      crease,
+      4,
+      `opacity="0.5"`,
+    );
+  }
+  return d;
+}
+
+/**
  * A hand from above, fingers toward +x, its middle at the origin; the thumb
  * is on the inside, toward the body's middle
  */

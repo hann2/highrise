@@ -425,6 +425,7 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
         ? Math.round(random() * 100) / 100
         : slider(random, 0.2),
       bust: 0,
+      hips: 0,
       hunch: zombie
         ? Math.round(between(random, 0, 1) * 100) / 100
         : slider(random, 0.3),
@@ -503,6 +504,9 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
   const bustChance = look.beard ? 0 : pantsStyle === "skirt" ? 0.9 : 0.4;
   if (chance(random, bustChance)) {
     look.build.bust = Math.round(between(random, 0.25, 0.85) * 100) / 100;
+    // and wider hips, without drawing another random number, so the looks
+    // after this one stay as they were
+    look.build.hips = Math.round((0.15 + look.build.bust * 0.6) * 100) / 100;
   }
   // Hairlines, haircuts and thinning on top
   look.hair.hairline = weighted(random, {

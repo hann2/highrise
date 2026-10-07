@@ -6,7 +6,7 @@ import { Drawing, n } from "./svg";
 import { DangleKind } from "./dangles";
 import { HemKind } from "./hems";
 import type { HemShape, Oval } from "../creature-stuff/hemCloth";
-import { lyingWaist } from "./parts/torso";
+import { lyingHead, lyingShoulder, lyingWaist } from "./parts/torso";
 import { hasSleeve } from "./parts/limbs";
 // Hand-drawn pieces, so looks can wear them
 import "./pieces/index";
@@ -30,6 +30,10 @@ export interface BodyMetrics {
   headRadius: number;
   /** Lying face down, how far behind the shoulders the waist is, where the legs go */
   lyingWaist: number;
+  /** Lying face down, how far in front of the shoulders the head's middle is */
+  lyingHead: number;
+  /** Lying face down, how far out from the middle the arms are */
+  lyingShoulder: number;
 }
 
 /** The images a `BodySprite` is drawn with, and how they fit together */
@@ -52,6 +56,10 @@ export interface BodyTextures {
   rightSleeve: Texture | null;
   leftHand: Texture;
   rightHand: Texture;
+  /** Lying down, the head turned to one side, as a corpse has it */
+  turnedHead?: Texture;
+  /** Lying down, the top half of a whole body, its hem over the legs, which go under it (`torso` is torn off at the waist) */
+  wholeTorso?: Texture;
   /** What swings, drawn over the torso and under the head, in order (none lying down) */
   dangles: DangleTexture[];
   /** What hangs from round the waist and swings, over the legs and under the arms, in order (none lying down) */
@@ -245,6 +253,8 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       handSize: dims.handSize / 1000,
       headRadius: dims.headRy / 1000,
       lyingWaist: lyingWaist(dims) / 1000,
+      lyingHead: lyingHead(dims) / 1000,
+      lyingShoulder: lyingShoulder(dims) / 1000,
     };
     const limbs = {
       leftArm: texture("leftArm"),
@@ -305,7 +315,12 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
         ...limbs,
         dangles: [],
         hems: [],
+        // Flat on the floor, not fists
+        leftHand: texture("leftFlatHand"),
+        rightHand: texture("rightFlatHand"),
         head: texture("lyingHead"),
+        turnedHead: texture("turnedHead"),
+        wholeTorso: texture("lyingTop"),
         torso: texture("lyingTorso"),
       },
       lyingLegs: texture("lyingLegs"),

@@ -6,7 +6,7 @@ import { GameSprite } from "../../../core/entity/GameSprite";
 import { on } from "../../../core/entity/handler";
 import { colorLerp, darken } from "../../../core/util/ColorUtils";
 import { angleDelta, clamp, lerp } from "../../../core/util/MathUtil";
-import { choose, rUniform } from "../../../core/util/Random";
+import { choose, rSign, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
 import type { BodyPoses, BodyTextures } from "../../creature-stuff/BodySprite";
 import { HUMAN_RADIUS } from "../../constants/constants";
@@ -135,7 +135,11 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     // Sized like a crawler, the shoulders at its middle
     const size = radius / HUMAN_RADIUS;
     const scale = bodyPixelScale(size);
-    this.torsoSprite = new Sprite(textures.torso);
+    // Whole, its hem over its legs, or torn off at the waist without them
+    const hasLegs = parts.legs && !!options.legs;
+    this.torsoSprite = new Sprite(
+      hasLegs ? (textures.wholeTorso ?? textures.torso) : textures.torso,
+    );
     this.torsoSprite.scale.set(scale);
     const torsoLength = this.torsoSprite.width;
     this.torsoFrom = local(from.torso);
@@ -144,7 +148,7 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     this.standingTorsoSprite = new Sprite(standing.texture);
     this.standingTorsoSprite.scale.set(standing.scale);
 
-    if (parts.legs && options.legs) {
+    if (hasLegs && options.legs) {
       // Anchored at the waist, at the right edge of the picture
       const legs = new Sprite(options.legs);
       legs.scale.set(scale);
@@ -161,7 +165,7 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     this.armThickness = textures.metrics.armThickness * size;
     this.armThicknessFrom = from.armThickness;
     this.armScaleY = scale;
-    const shoulderOffset = textures.metrics.shoulderOffset * size;
+    const shoulderOffset = textures.metrics.lyingShoulder * size;
     for (const side of ["left", "right"] as const) {
       if (!(side === "left" ? parts.leftArm : parts.rightArm)) {
         continue;
@@ -201,19 +205,25 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     }
 
     this.headFrom = local(from.head);
-    this.headTo = { position: V(0.02, 0), angle: rUniform(-0.5, 0.5) };
+    this.headTo = {
+      position: V(textures.metrics.lyingHead * size, 0),
+      angle: rUniform(-0.3, 0.3),
+    };
     if (parts.head) {
-      this.headSprite = new Sprite(textures.head);
-      this.headSprite.scale.set(scale);
+      // Turned to one side or the other
+      this.headSprite = new Sprite(textures.turnedHead ?? textures.head);
+      this.headSprite.scale.set(scale, scale * rSign());
     }
 
-    this.bodySprite.addChild(this.torsoSprite, this.standingTorsoSprite);
+    // The legs and the arms under the torso, as standing, so the arms'
+    // round ends at the shoulders don't show, and its hem's over the legs
     if (this.legsSprite) {
       this.bodySprite.addChild(this.legsSprite);
     }
     for (const { arm, hand } of this.arms) {
       this.bodySprite.addChild(arm, hand);
     }
+    this.bodySprite.addChild(this.torsoSprite, this.standingTorsoSprite);
     if (this.headSprite) {
       this.bodySprite.addChild(this.headSprite);
     }

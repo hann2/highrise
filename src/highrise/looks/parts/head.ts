@@ -22,14 +22,17 @@ import { DangleDrawing, hang } from "../dangles";
 /**
  * The head from above, facing +x, the skull's middle at the origin: hair,
  * ears, nose, brows, a beard, glasses and a hat. `faceDown`, lying on its
- * face (a corpse, a crawler), so what shows is the back of the head, with
- * the top of it toward +x: no face, and hair right over it.
+ * face (a crawler), so what shows is the back of the head, with the top of
+ * it toward +x: no face, and hair right over it. `"turned"`, lying face down
+ * with its head turned to the side (a corpse): the side of the head, its
+ * face toward +y, with an ear in the middle, and no hat or glasses, which
+ * came off as it fell.
  */
 export function drawHead(
   look: BodyLook,
   dims: BodyDimensions,
   prefix: string,
-  faceDown = false,
+  faceDown: boolean | "turned" = false,
   /** Given, things that swing are drawn on their own into it, not on the head */
   dangles?: DangleDrawing[],
 ): Drawing {
@@ -60,7 +63,8 @@ export function drawHead(
   if (hair.coverage > 0 && hair.style === "loose" && hair.length > 0.02) {
     drawLongHair(d, look, rx, ry, colors.hair, random);
   }
-  if (hair.coverage > 0 && hair.style === "ponytail") {
+  const turned = faceDown === "turned";
+  if (hair.coverage > 0 && hair.style === "ponytail" && !turned) {
     if (dangles) {
       // On its own, to swing from where it's tied
       const tail = new Drawing(`${prefix}-pt`, -rx, 0, -rx, 0);
@@ -78,7 +82,7 @@ export function drawHead(
       drawPonytail(d, hair.length, rx, ry, colors.hair, random);
     }
   }
-  if (hair.coverage > 0 && hair.style === "pigtails") {
+  if (hair.coverage > 0 && hair.style === "pigtails" && !turned) {
     // Tied either side of the back of the head, each hanging back and out
     for (const side of [-1, 1]) {
       const way = Math.PI - side * PIGTAIL_ANGLE;
@@ -107,6 +111,10 @@ export function drawHead(
     }
   }
 
+  if (turned) {
+    drawTurnedHead(d, look, rx, ry, random);
+    return d;
+  }
   // Ears, a nose, a beard: whatever sticks out from under the skull
   for (const side of [-1, 1]) {
     d.blob(ellipsePath(-rx * 0.06, side * ry * 0.97, 24, 31), colors.skin, {
@@ -173,6 +181,315 @@ export function drawHead(
     }
   }
   return d;
+}
+
+/**
+ * A head lying face down and turned to the side (`drawHead`'s `"turned"`),
+ * its face toward +y and the top of it toward +x: the side of the face with
+ * a shut eye, the ear in the middle, and the hair over the back and top,
+ * down to a hairline in front of the ear and round under it. What was on
+ * the head (a hat, glasses) lies on the floor beside it.
+ */
+function drawTurnedHead(
+  d: Drawing,
+  look: BodyLook,
+  rx: number,
+  ry: number,
+  random: () => number,
+) {
+  const colors = palette(look);
+  const skin = colors.skin;
+  const rot = look.zombie?.rot ?? 0;
+  const grain = rot > 0 ? "rot" : undefined;
+  const hair = look.hair;
+  const long = hair.coverage > 0 && hair.style === "loose" && hair.length > 0.3;
+
+  // A ponytail or pigtails tied at the back of the head (away from the
+  // face), lying back over the shoulder
+  if (hair.coverage > 0 && hair.style === "ponytail") {
+    drawPonytail(d, hair.length, rx, ry, colors.hair, random, 1, {
+      root: [-rx * 0.1, -ry * 0.82],
+      angle: Math.PI + 0.9,
+      width: 1,
+    });
+  }
+  if (hair.coverage > 0 && hair.style === "pigtails") {
+    for (const [root, angle] of [
+      [[rx * 0.3, -ry * 0.8], -Math.PI / 2 - 0.25],
+      [[-rx * 0.45, -ry * 0.62], Math.PI + 0.75],
+    ] as [Pt, number][]) {
+      drawPonytail(d, hair.length, rx, ry, colors.hair, random, 1, {
+        root,
+        angle,
+        width: PIGTAIL_WIDTH,
+      });
+    }
+  }
+  // The nose and the chin, sticking out at the face's edge
+  d.blob(ellipsePath(-rx * 0.02, ry * 0.97, 22, 30), skin, { grain });
+  d.blob(ellipsePath(-rx * 0.74, ry * 0.74, 36, 32), skin, { grain });
+  d.include(-rx * 1.1, -ry * 1.15, rx * 1.1, ry * 1.15);
+  const skull = smoothPath(skullPoints(rx, ry, 48));
+  d.blob(skull, skin, { grain });
+  if (hair.coverage <= 0) {
+    // Bald: a shine along the top
+    d.line(
+      `M${n(rx * 0.55)} ${n(-ry * 0.55)}Q${n(rx * 0.1)} ${n(-ry * 0.8)} ${n(-rx * 0.4)} ${n(-ry * 0.6)}`,
+      lighten(skin, 0.5),
+      16,
+      `opacity="${n(0.4 * (1 - rot))}"`,
+    );
+  }
+  drawTurnedFace(d, look, rx, ry, skin, colors.hair, skull);
+  if (long) {
+    drawEar(d, rx, ry, skin, grain);
+  }
+  if (hair.coverage > 0) {
+    drawTurnedHair(d, look, rx, ry, colors.hair, random);
+  }
+  if (!long) {
+    drawEar(d, rx, ry, skin, grain);
+  }
+  if (hair.coverage > 0 && hair.style === "bun") {
+    // At the back of the head
+    const r = rx * (0.28 + hair.length * 0.12);
+    const [bx, by] = [rx * 0.2, -ry * 0.95];
+    d.include(bx - r, by - r, bx + r, by + r);
+    d.blob(ellipsePath(bx, by, r, r), colors.hair, {});
+    d.line(
+      `M${n(bx - r * 0.5)} ${n(by)}A${n(r * 0.5)} ${n(r * 0.5)} 0 1 1 ${n(bx)} ${n(by + r * 0.5)}`,
+      darken(colors.hair, 0.3),
+      6,
+      `opacity="0.6"`,
+    );
+  }
+  // What came off as it fell, on the floor beside it
+  if (look.hat) {
+    const hairOut =
+      hair.coverage > 0 && !isCropped(hair)
+        ? 0.035 + hair.volume * 0.2 + hair.curls * 0.19 + hair.messiness * 0.07
+        : 0;
+    const [hx, hy] = [rx * 2.5, -ry * 0.6];
+    d.begin(
+      `transform="translate(${n(hx)} ${n(hy)}) rotate(${n(-30 + random() * 60)})"`,
+    );
+    drawHat(d, look.hat, rx, ry, 1 + hairOut);
+    d.end();
+    const reach = rx * 2;
+    d.include(hx - reach, hy - reach, hx + reach, hy + reach);
+  }
+  if (look.glasses) {
+    const [gx, gy] = [rx * 0.6, ry * 2];
+    d.begin(
+      `transform="translate(${n(gx)} ${n(gy)}) rotate(${n(-40 + random() * 80)})"`,
+    );
+    drawGlassesOnFloor(d, look.glasses.shape, look.glasses.color);
+    d.end();
+    d.include(gx - 90, gy - 90, gx + 90, gy + 90);
+  }
+}
+
+/**
+ * The hair on a head turned to the side: out round the top and back of the
+ * head (by its volume, and bumpy with curls), and in front to a hairline
+ * from the forehead down in front of the ear and round under it to the
+ * nape
+ */
+function drawTurnedHair(
+  d: Drawing,
+  look: BodyLook,
+  rx: number,
+  ry: number,
+  color: Color,
+  random: () => number,
+) {
+  const hair = look.hair;
+  const cropped = isCropped(hair) || hair.style === "mohawk";
+  const out = cropped ? 1.01 : 1.04 + hair.volume * 0.12;
+  const wave = wobble(random, 6, 4);
+  const outer: Pt[] = [];
+  const from = Math.atan2(0.85, 0.5);
+  const to = -Math.PI * 0.83;
+  const steps = 28;
+  for (let i = 0; i <= steps; i++) {
+    const a = from + ((to - from) * i) / steps;
+    const bump = cropped
+      ? 0
+      : hair.curls * 0.07 * Math.abs(Math.sin(a * 9)) +
+        hair.messiness * 0.04 * wave(a);
+    // Square like the skull, not an ellipse
+    const e = STYLE.headSquare;
+    const c = Math.cos(a);
+    const sn = Math.sin(a);
+    const r = (Math.abs(c) ** e + Math.abs(sn) ** e) ** (-1 / e);
+    outer.push([rx * c * r * (out + bump), ry * sn * r * (out + bump)]);
+  }
+  // Back from the nape, under the ear and up in front of it, to the
+  // forehead
+  const hairline: Pt[] = [
+    [-rx * 0.62, -ry * 0.4],
+    [-rx * 0.4, -ry * 0.12],
+    [-rx * 0.24, ry * 0.18],
+    [rx * 0.05, ry * 0.3],
+    [rx * 0.32, ry * 0.42],
+    [rx * 0.44, ry * 0.7],
+  ];
+  const shape = smoothPath([...outer, ...hairline], true, 0.6);
+  d.includePoints(outer);
+  if (cropped) {
+    // Short: the skin through it
+    d.add(
+      `<path d="${shape}" fill="${color}" opacity="${hair.style === "stubble" ? 0.45 : 0.85}"/>`,
+    );
+    return;
+  }
+  d.blob(shape, color, { shade: "flat" });
+  const clip = d.clipPath("turned-hair", shape);
+  d.begin(`clip-path="url(#${clip})"`);
+  const strand = darken(color, 0.3);
+  if (hair.curls > 0.4) {
+    // Curls: little arcs all over
+    for (let i = 0; i < 26; i++) {
+      const x = rx * (-0.9 + random() * 1.9);
+      const y = ry * (-1 + random() * 1.4);
+      d.line(`M${n(x - 10)} ${n(y)}q10 -14 20 0`, strand, 5, `opacity="0.45"`);
+    }
+  } else {
+    // Combed back from the forehead over the top and down to the nape
+    for (let i = 0; i < 6; i++) {
+      const t = i / 5;
+      const y0 = ry * (0.55 - t * 0.9);
+      d.line(
+        `M${n(rx * 0.55)} ${n(y0)}Q${n(-rx * 0.1)} ${n(y0 - ry * 0.25)} ${n(-rx * 0.75)} ${n(y0 - ry * 0.55)}`,
+        strand,
+        5,
+        `opacity="0.35"`,
+      );
+    }
+  }
+  // Light along the top of it
+  d.line(
+    `M${n(rx * 0.6)} ${n(-ry * 0.45)}Q${n(rx * 0.1)} ${n(-ry * 0.78)} ${n(-rx * 0.45)} ${n(-ry * 0.65)}`,
+    lighten(color, 0.35),
+    14,
+    `opacity="0.3"`,
+  );
+  d.end();
+}
+
+/**
+ * The side of a face turned to the side, over its skin and inside the
+ * skull: a beard round the jaw, a shut eye and its brow, and the mouth
+ */
+function drawTurnedFace(
+  d: Drawing,
+  look: BodyLook,
+  rx: number,
+  ry: number,
+  skin: Color,
+  hairColor: Color,
+  skull: string,
+) {
+  if (look.beard && look.beard.length > 0) {
+    // From the sideburn down round the jaw and chin, fuller the longer it is
+    const color = look.beard.color ?? hairColor;
+    const grow = 1 + look.beard.length * 0.12;
+    const [cx, cy] = [-rx * 0.55, ry * 0.5];
+    const beard: Pt[] = (
+      [
+        [-rx * 0.2, ry * 0.2],
+        [-rx * 0.12, ry * 0.6],
+        [-rx * 0.28, ry * 1.02],
+        [-rx * 0.75, ry * 1.02],
+        [-rx * 1.0, ry * 0.6],
+        [-rx * 0.85, ry * 0.0],
+        [-rx * 0.5, -ry * 0.1],
+      ] as Pt[]
+    ).map(([x, y]): Pt => [cx + (x - cx) * grow, cy + (y - cy) * grow]);
+    d.includePoints(beard);
+    d.blob(smoothPath(beard, true, 0.7), color, {});
+  }
+  const clip = d.clipPath("face", skull);
+  d.begin(`clip-path="url(#${clip})"`);
+  const line = darken(skin, 0.5);
+  // The eye, shut: its lid curving down, with lashes
+  const [ex, ey] = [rx * 0.16, ry * 0.74];
+  d.line(
+    `M${n(ex + 22)} ${n(ey - 4)}Q${n(ex)} ${n(ey + 12)} ${n(ex - 22)} ${n(ey - 2)}`,
+    line,
+    5,
+  );
+  for (const t of [-0.5, 0, 0.5]) {
+    d.line(
+      `M${n(ex + t * 18)} ${n(ey + 5 - Math.abs(t) * 4)}l${n(-3)} ${n(8)}`,
+      line,
+      3,
+    );
+  }
+  // and the brow over it, toward the top of the head
+  d.line(
+    `M${n(ex + 44)} ${n(ey - 8)}Q${n(ex + 30)} ${n(ey - 14)} ${n(ex + 8)} ${n(ey - 10)}`,
+    look.hair.coverage > 0 ? hairColor : darken(skin, 0.25),
+    7,
+  );
+  // The mouth, at the edge, and the jaw's line up toward the ear
+  d.line(
+    `M${n(-rx * 0.42)} ${n(ry * 1.0)}L${n(-rx * 0.45)} ${n(ry * 0.84)}`,
+    look.beard && look.beard.length > 0
+      ? darken(look.beard.color ?? hairColor, 0.4)
+      : line,
+    5,
+  );
+  if (!look.beard || look.beard.length <= 0) {
+    d.line(
+      `M${n(-rx * 0.86)} ${n(ry * 0.48)}Q${n(-rx * 0.66)} ${n(ry * 0.32)} ${n(-rx * 0.48)} ${n(ry * 0.22)}`,
+      darken(skin, 0.2),
+      6,
+      `opacity="0.5"`,
+    );
+  }
+  d.end();
+}
+
+/** The ear in the middle of a head turned to the side */
+function drawEar(
+  d: Drawing,
+  rx: number,
+  ry: number,
+  skin: Color,
+  grain: "rot" | undefined,
+) {
+  const x = -rx * 0.08;
+  const y = -ry * 0.02;
+  d.blob(ellipsePath(x, y, 34, 26), skin, { grain, outline: 6 });
+  d.line(
+    `M${n(x + 22)} ${n(y - 8)}Q${n(x)} ${n(y - 20)} ${n(x - 22)} ${n(y - 6)}Q${n(x - 8)} ${n(y + 6)} ${n(x + 4)} ${n(y + 2)}`,
+    darken(skin, 0.3),
+    5,
+  );
+}
+
+/** Glasses lying on the floor, from above: their front, folded */
+function drawGlassesOnFloor(
+  d: Drawing,
+  shape: "round" | "square" | "shades",
+  color: Color,
+) {
+  const lens = shape === "shades" ? darken(color, 0.5) : "#cfe3ea";
+  const frame = shape === "shades" ? darken(color, 0.2) : color;
+  for (const side of [-1, 1]) {
+    const cx = side * 36;
+    const path =
+      shape === "round"
+        ? ellipsePath(cx, 0, 27, 27)
+        : `M${n(cx - 30)} -22L${n(cx + 30)} -22Q${n(cx + 32)} 18 ${n(cx)} 22Q${n(cx - 32)} 18 ${n(cx - 30)} -22Z`;
+    d.add(
+      `<path d="${path}" fill="${lens}" fill-opacity="${shape === "shades" ? 1 : 0.5}" stroke="${frame}" stroke-width="7"/>`,
+    );
+  }
+  // The bridge, and the arms folded behind
+  d.line(`M-10 -6Q0 -14 10 -6`, frame, 6);
+  d.line(`M-62 -16L52 -24`, frame, 5, `opacity="0.85"`);
 }
 
 /**

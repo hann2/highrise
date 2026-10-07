@@ -1,7 +1,13 @@
 import { BodyLook, PartialLook, resolveLook } from "./BodyLook";
 import { bodyDimensions, BodyDimensions } from "./dimensions";
 import { drawHead } from "./parts/head";
-import { drawArm, drawArmSegment, drawHand, drawSleeve } from "./parts/limbs";
+import {
+  drawArm,
+  drawArmSegment,
+  drawFlatHand,
+  drawHand,
+  drawSleeve,
+} from "./parts/limbs";
 import { drawFoot, drawLeg, drawLyingLegs } from "./parts/legs";
 import { drawLyingTorso, drawTorso } from "./parts/torso";
 import { Drawing } from "./svg";
@@ -26,14 +32,21 @@ export const BODY_PARTS = [
   "rightSleeve",
   "leftHand",
   "rightHand",
+  /** Lying flat, palm down: corpses and crawlers */
+  "leftFlatHand",
+  "rightFlatHand",
   /** Stretched from the hip to the ankle, the same for both */
   "leg",
   "leftFoot",
   "rightFoot",
-  /** Face down from the waist up: crawlers, corpses */
+  /** Face down from the waist up, torn off there: crawlers, and corpses and gibs without legs */
   "lyingTorso",
-  /** The back of the head, face down */
+  /** Face down, the top half of a whole body, its hem over the legs: corpses */
+  "lyingTop",
+  /** The back of the head, face down: crawlers */
   "lyingHead",
+  /** The head face down and turned to one side: corpses */
+  "turnedHead",
   /** Face down from the waist down */
   "lyingLegs",
 ] as const;
@@ -51,8 +64,8 @@ export const BODY_LAYERS = [
 export type BodyLayer = (typeof BODY_LAYERS)[number];
 
 export const LAYER_PARTS: Record<BodyLayer, BodyPart[]> = {
-  head: ["head", "lyingHead"],
-  torso: ["torso", "lyingTorso"],
+  head: ["head", "lyingHead", "turnedHead"],
+  torso: ["torso", "lyingTorso", "lyingTop"],
   arms: [
     "leftArm",
     "rightArm",
@@ -63,7 +76,7 @@ export const LAYER_PARTS: Record<BodyLayer, BodyPart[]> = {
     "leftSleeve",
     "rightSleeve",
   ],
-  hands: ["leftHand", "rightHand"],
+  hands: ["leftHand", "rightHand", "leftFlatHand", "rightFlatHand"],
   legs: ["leg", "lyingLegs"],
   feet: ["leftFoot", "rightFoot"],
 };
@@ -115,11 +128,15 @@ export function drawBody(look: PartialLook, prefix = "b"): BodyDrawing {
       rightSleeve: drawSleeve(resolved, dims, 1, p("rs")),
       leftHand: drawHand(resolved, dims, -1, p("lh")),
       rightHand: drawHand(resolved, dims, 1, p("rh")),
+      leftFlatHand: drawFlatHand(resolved, dims, -1, p("lfh")),
+      rightFlatHand: drawFlatHand(resolved, dims, 1, p("rfh")),
       leg: drawLeg(resolved, dims, p("lg")),
       leftFoot: drawFoot(resolved, dims, 1, p("lf")),
       rightFoot: drawFoot(resolved, dims, -1, p("rf")),
-      lyingTorso: drawLyingTorso(resolved, dims, p("lt")),
+      lyingTorso: drawLyingTorso(resolved, dims, p("lt"), true),
+      lyingTop: drawLyingTorso(resolved, dims, p("ltw"), false),
       lyingHead: drawHead(resolved, dims, p("lhd"), true),
+      turnedHead: drawHead(resolved, dims, p("thd"), "turned"),
       lyingLegs: drawLyingLegs(resolved, dims, p("ll")),
     },
   };

@@ -346,6 +346,12 @@ function BodySection({ look, set }: SectionProps) {
       <Group title="Figure">
         {build("belly", "Belly", ["none", "big"])}
         {build("bust", "Bust", ["none", "big"])}
+        {build(
+          "hips",
+          "Hips",
+          ["narrow", "wide"],
+          "And so how much the waist goes in above them",
+        )}
       </Group>
       <Group title="Limbs">
         {build("arms", "Arms", ["thin", "thick"])}
