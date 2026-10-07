@@ -73,62 +73,62 @@
     <!-- Full, as they are here, and slid back toward the feed as it empties (GunStats.parts.magazine.rounds), showing only through the window -->
     <g id="rounds" clip-path="url(#p90-rounds-window)">
       <g fill="url(#p90-round-shading)">
-        <rect x="-128.5" y="-30" width="9" height="56.667"/>
-        <rect x="-115.5" y="-30" width="9" height="56.667"/>
-        <rect x="-102.5" y="-30" width="9" height="56.667"/>
-        <rect x="-89.5" y="-30" width="9" height="56.667"/>
-        <rect x="-76.5" y="-30" width="9" height="56.667"/>
-        <rect x="-63.5" y="-30" width="9" height="56.667"/>
-        <rect x="-50.5" y="-30" width="9" height="56.667"/>
-        <rect x="-37.5" y="-30" width="9" height="56.667"/>
-        <rect x="-24.5" y="-30" width="9" height="56.667"/>
-        <rect x="-11.5" y="-30" width="9" height="56.667"/>
-        <rect x="1.5" y="-30" width="9" height="56.667"/>
-        <rect x="14.5" y="-30" width="9" height="56.667"/>
-        <rect x="27.5" y="-30" width="9" height="56.667"/>
-        <rect x="40.5" y="-30" width="9" height="56.667"/>
-        <rect x="53.5" y="-30" width="9" height="56.667"/>
-        <rect x="66.5" y="-30" width="9" height="56.667"/>
-        <rect x="79.5" y="-30" width="9" height="56.667"/>
-        <rect x="92.5" y="-30" width="9" height="56.667"/>
-        <rect x="105.5" y="-30" width="9" height="56.667"/>
-        <rect x="118.5" y="-30" width="9" height="56.667"/>
-        <rect x="131.5" y="-30" width="9" height="56.667"/>
-        <rect x="144.5" y="-30" width="9" height="56.667"/>
-        <rect x="157.5" y="-30" width="9" height="56.667"/>
-        <rect x="170.5" y="-30" width="9" height="56.667"/>
-        <rect x="183.5" y="-30" width="9" height="56.667"/>
-        <rect x="-122" y="-26.667" width="9" height="56.667"/>
-        <rect x="-109" y="-26.667" width="9" height="56.667"/>
-        <rect x="-96" y="-26.667" width="9" height="56.667"/>
-        <rect x="-83" y="-26.667" width="9" height="56.667"/>
-        <rect x="-70" y="-26.667" width="9" height="56.667"/>
-        <rect x="-57" y="-26.667" width="9" height="56.667"/>
-        <rect x="-44" y="-26.667" width="9" height="56.667"/>
-        <rect x="-31" y="-26.667" width="9" height="56.667"/>
-        <rect x="-18" y="-26.667" width="9" height="56.667"/>
-        <rect x="-5" y="-26.667" width="9" height="56.667"/>
-        <rect x="8" y="-26.667" width="9" height="56.667"/>
-        <rect x="21" y="-26.667" width="9" height="56.667"/>
-        <rect x="34" y="-26.667" width="9" height="56.667"/>
-        <rect x="47" y="-26.667" width="9" height="56.667"/>
-        <rect x="60" y="-26.667" width="9" height="56.667"/>
-        <rect x="73" y="-26.667" width="9" height="56.667"/>
-        <rect x="86" y="-26.667" width="9" height="56.667"/>
-        <rect x="99" y="-26.667" width="9" height="56.667"/>
-        <rect x="112" y="-26.667" width="9" height="56.667"/>
-        <rect x="125" y="-26.667" width="9" height="56.667"/>
-        <rect x="138" y="-26.667" width="9" height="56.667"/>
-        <rect x="151" y="-26.667" width="9" height="56.667"/>
-        <rect x="164" y="-26.667" width="9" height="56.667"/>
-        <rect x="177" y="-26.667" width="9" height="56.667"/>
-        <rect x="190" y="-26.667" width="9" height="56.667"/>
+        <rect x="-130" y="-30" width="9" height="56.667"/>
+        <rect x="-117" y="-30" width="9" height="56.667"/>
+        <rect x="-104" y="-30" width="9" height="56.667"/>
+        <rect x="-91" y="-30" width="9" height="56.667"/>
+        <rect x="-78" y="-30" width="9" height="56.667"/>
+        <rect x="-65" y="-30" width="9" height="56.667"/>
+        <rect x="-52" y="-30" width="9" height="56.667"/>
+        <rect x="-39" y="-30" width="9" height="56.667"/>
+        <rect x="-26" y="-30" width="9" height="56.667"/>
+        <rect x="-13" y="-30" width="9" height="56.667"/>
+        <rect x="0" y="-30" width="9" height="56.667"/>
+        <rect x="13" y="-30" width="9" height="56.667"/>
+        <rect x="26" y="-30" width="9" height="56.667"/>
+        <rect x="39" y="-30" width="9" height="56.667"/>
+        <rect x="52" y="-30" width="9" height="56.667"/>
+        <rect x="65" y="-30" width="9" height="56.667"/>
+        <rect x="78" y="-30" width="9" height="56.667"/>
+        <rect x="91" y="-30" width="9" height="56.667"/>
+        <rect x="104" y="-30" width="9" height="56.667"/>
+        <rect x="117" y="-30" width="9" height="56.667"/>
+        <rect x="130" y="-30" width="9" height="56.667"/>
+        <rect x="143" y="-30" width="9" height="56.667"/>
+        <rect x="156" y="-30" width="9" height="56.667"/>
+        <rect x="169" y="-30" width="9" height="56.667"/>
+        <rect x="182" y="-30" width="9" height="56.667"/>
+        <rect x="-123.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-110.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-97.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-84.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-71.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-58.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-45.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-32.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-19.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="-6.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="6.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="19.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="32.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="45.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="58.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="71.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="84.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="97.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="110.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="123.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="136.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="149.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="162.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="175.5" y="-26.667" width="9" height="56.667"/>
+        <rect x="188.5" y="-26.667" width="9" height="56.667"/>
       </g>
       <!-- Behind the last round -->
       <g id="follower">
-        <rect x="199.5" y="-28.333" width="12" height="56.667" fill="#2b2b2b"/>
-        <rect x="201.5" y="-28.333" width="2" height="56.667" fill="#3c3c3c"/>
-        <rect x="206.5" y="-28.333" width="2" height="56.667" fill="#3c3c3c"/>
+        <rect x="198" y="-28.333" width="12" height="56.667" fill="#2b2b2b"/>
+        <rect x="200" y="-28.333" width="2" height="56.667" fill="#3c3c3c"/>
+        <rect x="205" y="-28.333" width="2" height="56.667" fill="#3c3c3c"/>
       </g>
     </g>
     <!-- The walls along its sides -->
