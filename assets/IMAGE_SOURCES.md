@@ -33,7 +33,7 @@ Characters', zombies' and Bob's bodies aren't images: they're drawn by code from
 
 ## Weapons (`weapons/`)
 
-Guns as they're held aren't images any more: they're SVGs in `src/highrise/weapons/guns/art/`, rasterized when the game starts. Simon drew them in `assets/source/images/weapons/{pistols,rifles,shotguns}.afdesign`, probably from the pickups, and exported them to SVG in 2026; they're edited as SVG from now on.
+Guns as they're held aren't images any more: they're SVGs in `src/highrise/weapons/guns/art/`, rasterized when the game starts. Simon drew them in `assets/source/images/weapons/{pistols,rifles,shotguns}.afdesign`, probably from the pickups, and exported them to SVG in 2026; they're edited as SVG from now on. Claude drew what the moving parts uncover (barrels and frames under the slides, magazine tubes, the revolver's cylinder window, the P90's magazine well) and the AK's and AR's charging handles.
 
 | Files                                                                                                                        | Source                                                                                                       | Confidence |
 | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------- |
