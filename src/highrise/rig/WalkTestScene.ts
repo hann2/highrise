@@ -161,6 +161,12 @@ const LANES: Record<string, Lane> = {
     facing: 0,
     sprint: true,
   },
+  coatturn: {
+    label: "turning in a coat",
+    walker: { character: "clarice" },
+    facing: 0,
+    turn: true,
+  },
 };
 
 interface Walker {

@@ -5,6 +5,8 @@ import {
   HemCloth,
   HemFeel,
   hemIndices,
+  hemPictureAngles,
+  hemRest,
   HemShape,
   hemUvs,
   LegAtHem,
@@ -25,6 +27,8 @@ export const HEM_FEELS: Record<HemKind, HemFeel> = {
     dampingRatio: 0.35,
     drag: 1,
     maxSwing: 0.45,
+    // Each flap swings as one, either side of the vent
+    bend: 3,
   },
 };
 
@@ -84,7 +88,11 @@ export class Hems {
       const mesh = new MeshSimple({
         texture: texture.texture,
         vertices,
-        uvs: hemUvs(cloth.rest, from, to),
+        uvs: hemUvs(
+          hemRest(shape, hemPictureAngles(shape, cloth.angles)),
+          from,
+          to,
+        ),
         indices: hemIndices(shape, cloth.count),
       });
       // Its vertices are marked changed when it's posed, not every frame by

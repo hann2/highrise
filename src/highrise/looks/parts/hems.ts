@@ -17,6 +17,9 @@ const COAT_DROP = 0.4;
 /** Half the gap down the front of a coat (radians) */
 const COAT_OPENING = 0.2;
 
+/** How far the right flap of a coat's vent reaches under the left (radians) */
+const COAT_VENT_OVERLAP = 0.2;
+
 /** The cloth hanging from round the waist that `look` wears: a skirt, a coat's tails */
 export function drawHems(
   look: BodyLook,
@@ -138,8 +141,9 @@ function drawSkirt(
 
 /**
  * A coat's tails from above, hanging at rest from the bottom of the torso:
- * all the way round but a gap down the front, edged with its trim, and a
- * vent up the back
+ * all the way round but a gap down the front, edged with its trim, and
+ * (unless `noVent`) a vent up the back, a slit from the hem to the waist,
+ * so the flaps either side swing apart. Plain, so the shape does the talking
  */
 function drawCoatTails(
   look: BodyLook,
@@ -170,6 +174,7 @@ function drawCoatTails(
     cloth,
     drop: COAT_DROP,
     opening: COAT_OPENING,
+    vent: top.noVent ? undefined : COAT_VENT_OVERLAP,
   };
   const d = hemDrawing(prefix, shape);
   const random = lookRandom(look, 12);
@@ -187,12 +192,9 @@ function drawCoatTails(
   if (top.pattern) {
     drawPattern(d, top.pattern, clip);
   }
-  drawFolds(d, shape, 7, random() * Math.PI * 2, top.color, clip);
+  // Plain cloth: no folds or vent drawn on it, which its shape shows as it
+  // swings
   d.begin(`clip-path="url(#${clip})"`);
-  // The vent up the back
-  const [vx, vy] = ovalAt(shape.hem, Math.PI);
-  const [wx] = ovalAt(shape.waist, Math.PI);
-  d.line(`M${n(wx)} ${n(vy)}L${n(vx)} ${n(vy)}`, darken(top.color, 0.4), 6);
   // The trim down each edge of the front, on the inside of the gap
   const trim = 44;
   for (const [edge, inward] of [
@@ -211,17 +213,11 @@ function drawCoatTails(
         at(shape.waist, trim),
       ]),
       top.secondary,
-      { shade: "flat", outline: 5 },
+      { shade: "flat", outline: 0 },
     );
   }
   // Its trim round the hem too, inside it
   d.line(smoothPath(outer, false), top.secondary, 70);
-  d.line(
-    smoothPath(outer, false),
-    darken(top.color, 0.25),
-    12,
-    `opacity="0.6"`,
-  );
   d.end();
   drawWear(d, look, shape, top.color, clip, random);
   return { kind: "coat", layer: "torso", drawing: d, shape };

@@ -188,6 +188,8 @@ export interface Top {
   popped?: boolean;
   /** How many stripes a track suit has, over the shoulders and down the sleeves (3 if left out) */
   stripes?: number;
+  /** A coat with no slit up the back, so its tails swing as one */
+  noVent?: boolean;
 }
 
 /** The track suit's stripes there can be */

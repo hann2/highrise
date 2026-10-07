@@ -28,7 +28,8 @@
     "top": {
       "style": "coat",
       "color": "#c8141c",
-      "secondary": "#f4f1ea"
+      "secondary": "#f4f1ea",
+      "noVent": true
     },
     "sleeves": {
       "length": 0.85,
