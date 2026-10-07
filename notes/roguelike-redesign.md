@@ -75,6 +75,7 @@ From a second design conversation, which replaced the "pick one of three" loop (
   - **Character-specific items**: items only one character can have, both ones they start with and ones they can find later in the run.
   - **Heavy sniper rifle**: a heavy sniper rifle type gun that has a lot of pierce.
   - **Gun turrets** (2026-10-07): stationary gun turrets for defending a position.
+  - **Land mines** (2026-10-07).
 - Pool size: ~50 items to start, ~80 done. Build the structure with the cheap items first; fire, sprint and Akimbo are features of their own.
 - Keycard armory/infirmary on at most one floor per act, not every floor. Armory: ammo and an attachment. Infirmary: health. The one reward that's found rather than bought.
 
