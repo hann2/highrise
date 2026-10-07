@@ -155,7 +155,12 @@ export default class RigTestScene extends BaseEntity implements Entity {
     });
 
     this.game.camera.z = zoom;
-    this.game.camera.center(V(width / 2, height / 2));
+    // `follow`: on the first one's gun, for close ups
+    this.game.camera.center(
+      params.has("follow") && this.humans.length > 0
+        ? this.humans[0].getPosition().add(V(0.5, 0))
+        : V(width / 2, height / 2),
+    );
 
     if (params.has("points")) {
       this.togglePoints();

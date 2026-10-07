@@ -1,5 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="260" height="56.667" viewBox="-130 -28.333 260 56.667" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
   <defs>
+    <linearGradient id="five-seven-barrel-shading" gradientUnits="userSpaceOnUse" x1="0" y1="8" x2="0" y2="-8">
+      <stop offset="0" stop-color="#1e1e1e"/>
+      <stop offset="0.25" stop-color="#454545"/>
+      <stop offset="0.5" stop-color="#575757"/>
+      <stop offset="0.75" stop-color="#3e3e3e"/>
+      <stop offset="1" stop-color="#1e1e1e"/>
+    </linearGradient>
+    <linearGradient id="five-seven-hood-shading" gradientUnits="userSpaceOnUse" x1="0" y1="10.5" x2="0" y2="-10.5">
+      <stop offset="0" stop-color="#2e2e2e"/>
+      <stop offset="0.2" stop-color="#505050"/>
+      <stop offset="0.8" stop-color="#505050"/>
+      <stop offset="1" stop-color="#2e2e2e"/>
+    </linearGradient>
     <clipPath id="five-seven-serrations-clip">
       <path d="M-53.333,-14.977 L-62.223,-28.333 L-122.17,-28.333 L-123.333,-22.667 L-123.333,22.667 L-122.17,28.333 L-62.223,28.333 L-53.333,14.977 L-53.333,-14.977 Z"/>
     </clipPath>
@@ -13,10 +26,21 @@
       <path d="M-92.29,13.223 L-111.233,10 L-113.97,10.667 L-113.97,16 L-111.233,16.667 L-92.29,13.223 Z"/>
     </clipPath>
   </defs>
-  <!-- The frame's tang, behind the slide -->
+  <!-- The polymer frame: its tang behind the slide, and under the slide (seen when it's back) its top and the steel rails the slide runs on -->
   <g id="frame">
+    <path id="frame-top" d="M114,-16 L108,-21 L-94,-21 L-98,-17 L-98,17 L-94,21 L108,21 L114,16 Z" fill="#7a6840"/>
+    <g id="frame-rails" fill="#5a5a5a">
+      <rect x="-92" y="-19.5" width="30" height="3"/>
+      <rect x="-92" y="16.5" width="30" height="3"/>
+      <rect x="66" y="-19.5" width="22" height="3"/>
+      <rect x="66" y="16.5" width="22" height="3"/>
+    </g>
     <path d="M-96.667,-15 C-96.667,-18.68 -99.657,-21.667 -103.337,-21.667 L-123.333,-21.667 C-127.013,-21.667 -130.003,-18.68 -130.003,-15 L-130.003,15 C-130.003,18.68 -127.013,21.667 -123.333,21.667 L-103.337,21.667 C-99.657,21.667 -96.667,18.68 -96.667,15 L-96.667,-15 Z" fill="#947f4f"/>
   </g>
+  <!-- Under the slide: the barrel, with the squared chamber hood at the back that shows through the ejection port -->
+  <g id="barrel">
+    <rect x="-8" y="-8" width="134" height="16" fill="url(#five-seven-barrel-shading)"/>
+    <path id="chamber-hood" d="M-10,-10.5 L30,-10.5 L34,-8 L34,8 L30,10.5 L-10,10.5 Z" fill="url(#five-seven-hood-shading)"/>  </g>
   <g id="slide">
     <path id="slide-body" d="M129.947,-20 L125.263,-25 L-118.507,-25 L-123.197,-20 C-121.757,-6.303 -123.877,4.99 -123.197,20 L-118.507,25 L125.263,25 L129.947,20 L129.947,-20 Z" fill="#595959"/>
     <path id="slide-top" d="M128.133,-17.333 L123.89,-21.667 L-94.287,-21.667 L-98.53,-17.333 L-98.53,17.333 L-94.287,21.667 L123.89,21.667 L128.133,17.333 L128.133,-17.333 Z" fill="#6c6c6c"/>

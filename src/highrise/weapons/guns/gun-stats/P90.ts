@@ -42,7 +42,13 @@ export const P90: GunStats = {
     grip: [-0.15, 0],
     foregrip: [0.1, -0.03],
     magazine: [-0.03, 0],
-    action: [0.1, -0.03],
+    // The charging handle, on the left
+    action: [0.197, -0.05],
+  },
+  // Pulled back to chamber a round from empty (it doesn't move when firing).
+  // The magazine on top is hidden while it's out of the gun
+  parts: {
+    "charging-handle": { offset: [-0.09, 0], carries: ["action"] },
   },
   animations: rifleAnimations({ magazineOnTop: true }),
   magazine: { texture: "p90Magazine", length: 0.26 },

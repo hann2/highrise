@@ -31,6 +31,14 @@
   <g id="barrel">
     <path d="M190.05,-15.697 L183.637,-19.52 L-146.03,-19.52 L-152.443,-15.697 L-152.443,14.89 L-146.03,18.713 L183.637,18.713 L190.05,14.89 L190.05,-15.697 Z" fill="url(#revolver-barrel-shading)"/>
   </g>
+  <!-- The window in the frame the cylinder sits in, seen when it's swung out: the frame's bottom, the recoil shield at the back with the firing pin hole, and the crane's hinge at the front -->
+  <g id="cylinder-window">
+    <rect x="-90" y="-26" width="74" height="51" fill="#2a2a2a"/>
+    <rect x="-90" y="-26" width="74" height="51" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+    <rect id="recoil-shield" x="-93" y="-24" width="9" height="47" fill="#b9b9b9"/>
+    <circle id="firing-pin-hole" cx="-88.5" cy="-0.5" r="2.2" fill="#2a2a2a"/>
+    <rect id="crane-hinge" x="-24" y="-26" width="9" height="12" fill="#8a8a8a"/>
+  </g>
   <!-- Wider than the frame, so it shows at both sides. It swings out to the left to load -->
   <g id="cylinder">
     <path d="M-14.887,44.193 L-14.887,-45 L-85.523,-45 L-86.897,-32.747 L-93.563,-24.823 L-93.563,23.95 L-86.897,31.943 L-85.523,44.193 L-14.887,44.193 Z" fill="url(#revolver-cylinder-shading)"/>

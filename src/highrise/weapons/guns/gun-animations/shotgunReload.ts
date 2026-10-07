@@ -59,17 +59,20 @@ const reloadInsert: GunAnimation = {
   events: [{ t: 0.26, gunSound: "reloadInsert" }],
 };
 
-/** The left hand slides the pump back and forward */
+/** The left hand slides the pump back and forward (the hand's on the foregrip, which moves with the pump) */
 export const PUMP: GunAnimation = {
   name: "pump",
   duration: 0.33,
   tracks: {
-    leftHand: [
-      { t: 0, v: "foregrip" },
-      { t: 0.15, v: { gun: "foregrip", offset: [-0.2, 0] }, ease: "linear" },
-      { t: 0.2, v: { gun: "foregrip", offset: [-0.2, 0] } },
-      { t: 0.33, v: "foregrip", ease: "linear" },
-    ],
+    leftHand: [{ t: 0, v: "foregrip" }],
+    parts: {
+      pump: [
+        { t: 0, v: 0 },
+        { t: 0.15, v: 1, ease: "linear" },
+        { t: 0.2, v: 1 },
+        { t: 0.33, v: 0, ease: "linear" },
+      ],
+    },
   },
   events: [{ t: 0, gunSound: "pump" }],
 };

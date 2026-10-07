@@ -1,7 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="360" height="73.333" viewBox="-180 -36.667 360 73.333" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
-  <!-- The frame's tang, behind the slide -->
+  <defs>
+    <linearGradient id="desert-eagle-barrel-shading" gradientUnits="userSpaceOnUse" x1="0" y1="12" x2="0" y2="-14">
+      <stop offset="0" stop-color="#6e6e6e"/>
+      <stop offset="0.28" stop-color="#b0b0b0"/>
+      <stop offset="0.5" stop-color="#c8c8c8"/>
+      <stop offset="0.77" stop-color="#a8a8a8"/>
+      <stop offset="1" stop-color="#6e6e6e"/>
+    </linearGradient>
+  </defs>
+  <!-- The frame: its tang behind the slide, and under the slide (seen when it's back) its top and the rails the slide runs on -->
   <g id="frame">
+    <path id="frame-top" d="M168,-24 L160,-30 L-128,-30 L-134,-24 L-134,22 L-128,28 L160,28 L168,22 Z" fill="#3c3c3c"/>
+    <g id="frame-rails" fill="#8a8a8a">
+      <rect x="-126" y="-28" width="40" height="3.5"/>
+      <rect x="-126" y="22.5" width="40" height="3.5"/>
+      <rect x="110" y="-28" width="40" height="3.5"/>
+      <rect x="110" y="22.5" width="40" height="3.5"/>
+    </g>
     <path d="M-130.217,-14.153 C-130.217,-23.41 -137.733,-30.927 -146.993,-30.927 L-155.383,-30.927 C-164.643,-30.927 -172.16,-23.41 -172.16,-14.153 L-172.16,12.177 C-172.16,21.437 -164.643,28.953 -155.383,28.953 L-146.993,28.953 C-137.733,28.953 -130.217,21.437 -130.217,12.177 L-130.217,-14.153 Z" fill="#363636"/>
+  </g>
+  <!-- Under the slide: the barrel and its chamber -->
+  <g id="barrel">
+    <rect x="-40" y="-14" width="216" height="26" fill="url(#desert-eagle-barrel-shading)"/>
+    <path id="chamber" d="M-56,-17 L8,-17 L14,-13 L14,11 L8,15 L-56,15 Z" fill="#8c8c8c"/>
   </g>
   <!-- The slide and barrel as one, as they look from above -->
   <g id="slide">

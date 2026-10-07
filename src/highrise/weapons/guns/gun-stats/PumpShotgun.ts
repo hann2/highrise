@@ -43,6 +43,8 @@ export const PumpShotgun: GunStats = {
     magazine: [-0.1, 0],
     action: [0.2, -0.03],
   },
+  // The pump slides back along the magazine tube, with the hand on it
+  parts: { pump: { offset: [-0.12, 0], carries: ["foregrip", "action"] } },
   animations: SHOTGUN_ANIMATIONS,
   magazine: { texture: "shotgunShell", length: 0.075 },
   holdPosition: [0.5, 0],

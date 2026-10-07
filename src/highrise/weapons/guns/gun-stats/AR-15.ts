@@ -44,6 +44,10 @@ export const AR15: GunStats = {
     magazine: [-0.12, 0],
     action: [-0.3, 0],
   },
+  // Pulled back to chamber a round from empty (it doesn't move when firing)
+  parts: {
+    "charging-handle": { offset: [-0.08, 0], carries: ["action"] },
+  },
   animations: rifleAnimations(),
   magazine: { texture: "rifleMagazine", length: 0.19 },
   holdPosition: [0.55, 0],

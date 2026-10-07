@@ -9,7 +9,7 @@ import { HUMAN_GAIT } from "../creature-stuff/Legs";
 import { LaserSight } from "../effects/LaserSight";
 import Gun from "../weapons/guns/Gun";
 import { GunPose } from "../weapons/guns/GunPose";
-import { GUN_PIXELS_PER_METER, getGunTexture } from "../weapons/guns/gunArt";
+import { GunSprite } from "../weapons/guns/GunSprite";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import Human from "./Human";
 
@@ -23,7 +23,10 @@ const ARM_SWING = 0.4;
 export default class HumanSprite extends BodySprite {
   private _stanceAngle: number = 0;
 
+  /** A melee weapon in hand */
   weaponSprite?: Sprite;
+  /** A gun in hand */
+  gunSprite?: GunSprite;
   /** The magazine (or round) a gun's animation shows in the hand */
   magazineSprite?: Sprite;
   laserSight?: LaserSight;
@@ -69,9 +72,8 @@ export default class HumanSprite extends BodySprite {
       this.weaponSprite.position.copyFrom(
         V(weapon.swing.restPosition).iadd([pushOffset, 0]),
       );
-    } else if (pose && this.weaponSprite) {
-      this.weaponSprite.position.copyFrom(pose.position);
-      this.weaponSprite.rotation = pose.angle;
+    } else if (pose && this.gunSprite) {
+      this.gunSprite.setPose(pose);
     }
 
     if (this.magazineSprite) {
@@ -185,7 +187,7 @@ export default class HumanSprite extends BodySprite {
 
   handleNewWeapon(weapon: Gun | MeleeWeapon) {
     if (weapon instanceof Gun) {
-      const { art, magazine } = weapon.stats;
+      const { magazine } = weapon.stats;
       if (magazine) {
         this.magazineSprite = Sprite.from(magazine.texture);
         this.magazineSprite.anchor.set(0.5, 0.5);
@@ -196,9 +198,8 @@ export default class HumanSprite extends BodySprite {
         this.arrangeLeftHand();
       }
 
-      this.weaponSprite = new Sprite(getGunTexture(art));
-      this.weaponSprite.scale.set(1 / GUN_PIXELS_PER_METER);
-      this.sprite.addChild(this.weaponSprite);
+      this.gunSprite = new GunSprite(weapon.stats);
+      this.sprite.addChild(this.gunSprite);
 
       // Its own, or one from a Laser Sight attachment
       const { laserSightColor } = weapon.effectiveStats(this.human);
@@ -238,13 +239,18 @@ export default class HumanSprite extends BodySprite {
 
   handleDropWeapon() {
     this.setLeftHandOver(false);
-    for (const sprite of [this.weaponSprite, this.magazineSprite]) {
+    for (const sprite of [
+      this.weaponSprite,
+      this.gunSprite,
+      this.magazineSprite,
+    ]) {
       if (sprite) {
         this.sprite.removeChild(sprite);
         sprite.destroy();
       }
     }
     this.weaponSprite = undefined;
+    this.gunSprite = undefined;
     this.magazineSprite = undefined;
     this.laserSight?.destroy();
     this.laserSight = undefined;

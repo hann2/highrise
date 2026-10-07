@@ -8,6 +8,12 @@
       <stop offset="1" stop-color="#232323"/>
     </linearGradient>
   </defs>
+  <!-- Under the barrel and a little wider, seen in front of the pump when it's back, with its cap near the muzzle -->
+  <g id="magazine-tube">
+    <rect x="-40" y="-23" width="520" height="46" fill="#262626"/>
+    <rect x="-40" y="-17" width="520" height="6" fill="#383838"/>
+    <rect id="magazine-cap" x="476" y="-25" width="16" height="50" rx="3" fill="#161616"/>
+  </g>
   <!-- Slides back and forward to work the action; its grooves show at the sides of the receiver -->
   <g id="pump">
     <rect x="43.7" y="-51.667" width="413.333" height="103.337" fill="url(#spas-12-pump-shading)"/>

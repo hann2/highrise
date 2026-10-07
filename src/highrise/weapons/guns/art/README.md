@@ -25,8 +25,10 @@ Each gun as it's held, seen from above, one SVG per gun. The game rasterizes the
   | `barrels`         | a break action's barrels, which tip down to load       |
   | `top-lever`       | the lever that opens a break action                    |
 
-  Everything else stays put. What each gun has so far: the Glock and Five-seven a `slide`; the Desert Eagle a `slide` and `hammer`; the revolver a `cylinder`; the double barrel `barrels` and a `top-lever`; the 870 and SPAS-12 a `pump`; the P90 a `charging-handle` and `magazine`. The AK and AR have none drawn yet (their charging handles and bolts aren't in the art).
-- Nothing is drawn under the moving parts yet: rack a slide back and there's no barrel under it, pull a pump back and there's no magazine tube. Moving parts need that art drawn under them before they can move.
+  Everything else stays put. What each gun has: the Glock and Five-seven a `slide`; the Desert Eagle a `slide` and `hammer`; the revolver a `cylinder`; the double barrel `barrels` and a `top-lever`; the 870 and SPAS-12 a `pump`; the AK and AR a `charging-handle`; the P90 a `charging-handle` and `magazine`.
+
+- The game draws each moving part on a layer of its own, with what's between them on layers that stay put (`../gunArt.ts`), so a part moves over what's drawn before it and under what's drawn after. How far and which way each moves is in the gun's stats (`GunStats.parts`: an offset, a turn or a shortening about a pivot, at the end of its stroke), and what moves it is its animations (`GunTracks.parts`, 0 to 1 of the stroke) or each shot (`GunStats.cycles`). The `magazine` is hidden while the magazine's out of the gun.
+- Whatever a moving part uncovers has to be drawn under it, hidden until it moves: the barrel, chamber and the frame's top and rails under a pistol's slide, the magazine tube under a pump (which shows along the barrel in front of it too), the cylinder's window in a revolver's frame, the magazine well under the P90's magazine.
 - A short comment above anything that isn't obvious says what it is.
 
 ## What's allowed

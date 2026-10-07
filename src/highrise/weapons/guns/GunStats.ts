@@ -7,7 +7,13 @@ import { AmmoClass } from "./ammo";
 import { BulletStats, defaultBulletStats } from "./BulletStats";
 import { TILT_ANIMATIONS } from "./gun-animations/tiltReload";
 import type { GunArtName } from "./gunArt";
-import { GunAnimation, GunPoints, MagazineStats } from "./GunPose";
+import {
+  GunAnimation,
+  GunPartName,
+  GunParts,
+  GunPoints,
+  MagazineStats,
+} from "./GunPose";
 import { MuzzleFlashStyle } from "./MuzzleFlashStyle";
 
 /**
@@ -109,7 +115,13 @@ export interface GunStats extends BaseWeaponStats {
    * the middle of its `art`, x toward the muzzle (see `GunPose`)
    */
   points: GunPoints;
-  /** How it's reloaded and worked (see `GunAnimations`) */
+  /** How its moving parts (groups of its `art` with those names) move at the end of their strokes */
+  parts?: GunParts;
+  /** Parts that go back and forward through their strokes with each shot, like a slide */
+  cycles?: readonly GunPartName[];
+  /** Whether they stay back once the last round's fired, until it's reloaded */
+  locksBackWhenEmpty?: boolean;
+  /** How it's reloaded and worked (see `GunAnimations`), which can move its parts too */
   animations: GunAnimations;
   /** What its reload animations show outside the gun, if anything */
   magazine?: MagazineStats;

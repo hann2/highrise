@@ -58,6 +58,13 @@
   <g id="body">
     <path d="M-328.333,-27.113 C-328.333,-27.113 -214.73,-36.667 -157.797,-36.667 L261.497,-36.667 L261.497,36.667 L-157.797,36.667 C-214.73,36.667 -328.333,27.113 -328.333,27.113 L-328.333,-27.113 Z" fill="url(#p90-body-shading)"/>
     <path id="butt-pad" d="M-328.333,-30 L-314.903,-30 L-315,30 L-328.333,30 L-328.333,-30 Z" fill="#1d1d1d"/>
+    <!-- Where the magazine lies, seen when it's out: a channel along the top, with the feed ramp down into the action at the front -->
+    <g id="magazine-well">
+      <path d="M-151.667,29.817 C-166.657,28.157 -178.333,15.43 -178.333,0 C-178.333,-15.43 -166.657,-28.157 -151.667,-29.817 L-151.667,-30 L215,-30 L215,30 L-151.667,30 L-151.667,29.817 Z" fill="#2a2a2a"/>
+      <path d="M-150,22 C-162,20 -170,11 -170,0 C-170,-11 -162,-20 -150,-22 L180,-22 L180,22 Z" fill="#202020"/>
+      <path id="feed-ramp" d="M180,-14 L210,-8 L210,8 L180,14 Z" fill="#141414"/>
+      <rect x="160" y="-4" width="18" height="8" rx="2" fill="#3a3a3a"/>
+    </g>
   </g>
   <!-- Lies along the top, see-through, with its rounds in two staggered rows -->
   <g id="magazine">

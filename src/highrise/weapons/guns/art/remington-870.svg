@@ -28,7 +28,19 @@
       <stop offset="0.78" stop-color="#4d4d4d"/>
       <stop offset="1" stop-color="#313131"/>
     </linearGradient>
+    <linearGradient id="remington-870-magazine-tube-shading" gradientUnits="userSpaceOnUse" x1="0" y1="23.8" x2="0" y2="-26.2">
+      <stop offset="0" stop-color="#5e5e5e"/>
+      <stop offset="0.28" stop-color="#9c9c9c"/>
+      <stop offset="0.5" stop-color="#b4b4b4"/>
+      <stop offset="0.77" stop-color="#a0a0a0"/>
+      <stop offset="1" stop-color="#606060"/>
+    </linearGradient>
   </defs>
+  <!-- Under the barrel and a little wider, so it shows along its sides in front of the pump, with its cap near the muzzle -->
+  <g id="magazine-tube">
+    <rect x="40" y="-26.2" width="455" height="50" fill="url(#remington-870-magazine-tube-shading)"/>
+    <rect id="magazine-cap" x="490" y="-27.2" width="18" height="52" rx="3" fill="#4a4a4a"/>
+  </g>
   <!-- Slides back and forward along the magazine tube, under the barrel, to work the action -->
   <g id="pump">
     <rect x="84.56" y="-41.173" width="286.92" height="80.003" fill="#5e5e5e"/>

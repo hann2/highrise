@@ -31,6 +31,10 @@ export const FiveSeven: GunStats = {
     magazine: [-0.1, 0],
     action: [-0.115, 0],
   },
+  // The slide goes back with each shot, and stays back when it's empty
+  parts: { slide: { offset: [-0.055, 0], carries: ["action"] } },
+  cycles: ["slide"],
+  locksBackWhenEmpty: true,
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.125 },
   holdPosition: [0.5, 0],

@@ -46,6 +46,13 @@ export const DoubleBarrelShotgun: GunStats = {
     magazine: [0, 0],
     action: [0.12, -0.03],
   },
+  // Broken open: the barrels tip down on the hinge at the front of the
+  // receiver (so they look shorter from above), once the top lever's pushed
+  // aside
+  parts: {
+    barrels: { stretch: 0.8, pivot: [0.15, 0] },
+    "top-lever": { angle: -0.6, pivot: [0.022, 0] },
+  },
   animations: DOUBLE_BARREL_ANIMATIONS,
   magazine: { texture: "shotgunShellPair", length: 0.075 },
   holdPosition: [0.4, 0],
