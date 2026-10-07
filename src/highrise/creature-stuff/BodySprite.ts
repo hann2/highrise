@@ -58,6 +58,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   rightHandSprite: Sprite;
   /** The legs and feet, under everything else; only for a body with `legs` */
   legsSprite?: Container;
+  /** Just the legs, hidden when the body covers them; the feet always show */
+  private legsOnly?: Container;
   private legSprites: Sprite[] = [];
   private footSprites: Sprite[] = [];
   /** How the legs walk, worked out from how the body moves; only for a body with `legs` */
@@ -206,9 +208,11 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       this.footSprites = [leftFoot, rightFoot].map(
         (texture) => new Sprite(texture),
       );
+      this.legsOnly = new Container();
+      this.legsOnly.addChild(...this.legSprites);
       this.legsSprite = new Container();
       // Feet under the legs, so the trouser hems cover the tops of the shoes
-      this.legsSprite.addChild(...this.footSprites, ...this.legSprites);
+      this.legsSprite.addChild(...this.footSprites, this.legsOnly);
       this.sprite.addChildAt(this.legsSprite, 0);
     }
   }
@@ -402,18 +406,16 @@ export abstract class BodySprite extends BaseEntity implements Entity {
 
   /**
    * Puts the legs and feet where the walk cycle has them: each leg from its
-   * hip to where its foot is on the floor. Standing square, they're under
-   * the torso, so they aren't drawn at all.
+   * hip to where its foot is on the floor. Standing square, the legs are
+   * under the torso, so they aren't drawn, but the feet always are.
    */
   private poseLegs() {
     const gait = this.gait;
-    if (!gait || !this.legsSprite) {
+    if (!gait || !this.legsOnly) {
       return;
     }
-    this.legsSprite.visible = !gait.underBody;
-    if (!this.legsSprite.visible) {
-      return;
-    }
+    const drawLegs = !gait.underBody;
+    this.legsOnly.visible = drawLegs;
     const scale = this.legScale;
     const [x, y] = this.getPosition();
     const facing = this.getAngle();
@@ -430,20 +432,22 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       const ankleX = (step.x - x) * cos - (step.y - y) * sin;
       const ankleY = (step.x - x) * sin + (step.y - y) * cos;
 
-      const leg = this.legSprites[side];
-      const spanX = ankleX - hipX;
-      const spanY = ankleY - hipY;
-      const span = Math.sqrt(spanX * spanX + spanY * spanY);
-      // From half its thickness behind the hip to a little past the ankle
-      const behindHip = this.legThickness / 2;
-      const pastAnkle = this.legThickness * HEM_OVERLAP;
-      const shift = span > 0.0001 ? (pastAnkle - behindHip) / 2 / span : 0;
-      leg.position.set(
-        (hipX + ankleX) / 2 + spanX * shift,
-        (hipY + ankleY) / 2 + spanY * shift,
-      );
-      leg.rotation = span > 0.01 ? Math.atan2(spanY, spanX) : 0;
-      leg.width = span + behindHip + pastAnkle;
+      if (drawLegs) {
+        const leg = this.legSprites[side];
+        const spanX = ankleX - hipX;
+        const spanY = ankleY - hipY;
+        const span = Math.sqrt(spanX * spanX + spanY * spanY);
+        // From half its thickness behind the hip to a little past the ankle
+        const behindHip = this.legThickness / 2;
+        const pastAnkle = this.legThickness * HEM_OVERLAP;
+        const shift = span > 0.0001 ? (pastAnkle - behindHip) / 2 / span : 0;
+        leg.position.set(
+          (hipX + ankleX) / 2 + spanX * shift,
+          (hipY + ankleY) / 2 + spanY * shift,
+        );
+        leg.rotation = span > 0.01 ? Math.atan2(spanY, spanX) : 0;
+        leg.width = span + behindHip + pastAnkle;
+      }
 
       const foot = this.footSprites[side];
       const angle = step.angle - facing;
