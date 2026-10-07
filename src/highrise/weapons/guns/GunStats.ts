@@ -6,7 +6,14 @@ import { BaseWeaponStats } from "../WeaponStats";
 import { AmmoClass } from "./ammo";
 import { BulletStats, defaultBulletStats } from "./BulletStats";
 import { TILT_ANIMATIONS } from "./gun-animations/tiltReload";
-import { GunAnimation, GunPoints, MagazineStats } from "./GunPose";
+import type { GunArtName } from "./gunArt";
+import {
+  GunAnimation,
+  GunPartName,
+  GunParts,
+  GunPoints,
+  MagazineStats,
+} from "./GunPose";
 import { MuzzleFlashStyle } from "./MuzzleFlashStyle";
 
 /**
@@ -93,21 +100,28 @@ export interface GunStats extends BaseWeaponStats {
     readonly pump: SoundName[];
   };
 
+  /** The gun as it's held, drawn from its SVG in `art/` (see `gunArt.ts`) */
+  readonly art: GunArtName;
+
   readonly textures: {
     // Texture to use when the item's on the ground
     readonly pickup: ImageName;
-    // Texture while in person's hands
-    readonly holding: ImageName;
     // Texture of the ejected shell casing
     readonly shellCasing: ImageName;
   };
 
   /**
    * Where the hands go and things happen, in the gun's own frame: meters from
-   * the middle of `textures.holding`, x toward the muzzle (see `GunPose`)
+   * the middle of its `art`, x toward the muzzle (see `GunPose`)
    */
   points: GunPoints;
-  /** How it's reloaded and worked (see `GunAnimations`) */
+  /** How its moving parts (groups of its `art` with those names) move at the end of their strokes */
+  parts?: GunParts;
+  /** Parts that go back and forward through their strokes with each shot, like a slide */
+  cycles?: readonly GunPartName[];
+  /** Whether they stay back once the last round's fired, until it's reloaded */
+  locksBackWhenEmpty?: boolean;
+  /** How it's reloaded and worked (see `GunAnimations`), which can move its parts too */
   animations: GunAnimations;
   /** What its reload animations show outside the gun, if anything */
   magazine?: MagazineStats;
@@ -197,9 +211,9 @@ export const defaultGunStats: GunStats = {
   stanceAngle: 0,
   sideOffset: 0,
 
+  art: "glock",
   textures: {
     pickup: "glockPickup",
-    holding: "glockHold",
     shellCasing: "pistolCasing",
   },
 

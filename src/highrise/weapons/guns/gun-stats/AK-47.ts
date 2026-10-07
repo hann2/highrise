@@ -24,10 +24,10 @@ export const AK47: GunStats = {
   ammoCapacity: 30,
   ammoClass: "rifle",
 
+  art: "ak47",
   textures: {
     ...defaultGunStats.textures,
     pickup: "ak47Pickup",
-    holding: "ak47Hold",
     shellCasing: "rifleCasing",
   },
   size: [1.4, 1.4],
@@ -41,8 +41,14 @@ export const AK47: GunStats = {
     grip: [-0.23, 0],
     foregrip: [0.1, -0.03],
     magazine: [-0.1, 0],
-    action: [-0.06, 0.035],
+    // The charging handle's knob, on the right
+    action: [0.098, 0.061],
   },
+  // The charging handle's on the bolt carrier, so it goes back with each shot
+  parts: {
+    "charging-handle": { offset: [-0.11, 0], carries: ["action"] },
+  },
+  cycles: ["charging-handle"],
   animations: rifleAnimations(),
   magazine: { texture: "akMagazine", length: 0.24 },
   holdPosition: [0.55, 0],

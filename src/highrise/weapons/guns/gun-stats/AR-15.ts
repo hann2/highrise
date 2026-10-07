@@ -24,10 +24,10 @@ export const AR15: GunStats = {
   ammoCapacity: 30,
   ammoClass: "rifle",
 
+  art: "ar15",
   textures: {
     ...defaultGunStats.textures,
     pickup: "ar15Pickup",
-    holding: "ar15Hold",
     shellCasing: "rifleCasing",
   },
   size: [0.8, 0.4],
@@ -43,6 +43,10 @@ export const AR15: GunStats = {
     foregrip: [0.1, -0.03],
     magazine: [-0.12, 0],
     action: [-0.3, 0],
+  },
+  // Pulled back to chamber a round from empty (it doesn't move when firing)
+  parts: {
+    "charging-handle": { offset: [-0.08, 0], carries: ["action"] },
   },
   animations: rifleAnimations(),
   magazine: { texture: "rifleMagazine", length: 0.19 },

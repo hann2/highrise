@@ -53,7 +53,7 @@ interface Ending {
   /** The left hand after the slap (1.15 s), until it's back on the foregrip at `handBack` */
   afterSlap: Keyframe<HandTarget>[];
   handBack: number;
-  /** Bring the gun forward and across to rack the charging handle, from 1.25 s to 1.55, with the hand over the gun */
+  /** Bring the gun forward and across to rack the charging handle, from 1.25 s to 1.55, with the hand over the gun, pulling it back from 1.31 s to 1.38 and letting go at 1.5 */
   rack?: boolean;
   events: TimedEvent<GunEvent>[];
 }
@@ -138,6 +138,17 @@ function rifleReload(
             ]
           : []),
       ],
+      parts: rack
+        ? {
+            "charging-handle": [
+              { t: 0, v: 0 },
+              { t: 1.31, v: 0 },
+              { t: 1.38, v: 1, ease: "in" },
+              { t: 1.5, v: 1 },
+              { t: 1.53, v: 0, ease: "in" },
+            ],
+          }
+        : undefined,
     },
     events: [
       { t: 0.15, sound, offset: 0, duration: 0.45 },
@@ -162,14 +173,14 @@ export function rifleAnimations(options: RifleOptions = {}): GunAnimations {
       handBack: 1.62,
       events: [{ t: 1.23, sound: "ar15Reload1", offset: 1.2, duration: 0.65 }],
     }),
-    // From empty: over the gun to the charging handle, back, and let go
+    // From empty: over the gun to the charging handle, back, and let go (the
+    // hand's on `action`, which moves with the charging handle)
     reloadEmpty: rifleReload(options, {
       name: "rifle reload from empty",
       sound: "ar15ReloadEmpty",
       afterSlap: [
         { t: 1.3, v: "action" },
-        { t: 1.38, v: { gun: "action", offset: [-0.09, 0] }, ease: "in" },
-        { t: 1.5, v: { gun: "action", offset: [-0.09, 0] } },
+        { t: 1.5, v: "action" },
         { t: 1.56, v: { gun: "action", offset: [-0.07, -0.08] }, ease: "out" },
       ],
       handBack: DURATION,

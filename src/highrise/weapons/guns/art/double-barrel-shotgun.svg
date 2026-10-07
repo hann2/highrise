@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="773.333" height="96.667" viewBox="-386.667 -48.333 773.333 96.667" fill-rule="evenodd" stroke-miterlimit="1.5" clip-rule="evenodd">
+  <defs>
+    <linearGradient id="double-barrel-shotgun-forend-wood" gradientUnits="userSpaceOnUse" x1="127.533" y1="40.467" x2="127.533" y2="-42.467">
+      <stop offset="0" stop-color="#7d6643"/>
+      <stop offset="0.28" stop-color="#a28457"/>
+      <stop offset="0.5" stop-color="#b29160"/>
+      <stop offset="0.77" stop-color="#a7885a"/>
+      <stop offset="1" stop-color="#7d6643"/>
+    </linearGradient>
+    <linearGradient id="double-barrel-shotgun-left-barrel-shading" gradientUnits="userSpaceOnUse" x1="241.987" y1="-3.14" x2="241.987" y2="-37.697">
+      <stop offset="0" stop-color="#4a4a4a"/>
+      <stop offset="0.28" stop-color="#878787"/>
+      <stop offset="0.5" stop-color="#a1a1a1"/>
+      <stop offset="0.77" stop-color="#8e8e8e"/>
+      <stop offset="1" stop-color="#4a4a4a"/>
+    </linearGradient>
+    <linearGradient id="double-barrel-shotgun-right-barrel-shading" gradientUnits="userSpaceOnUse" x1="241.987" y1="36.86" x2="241.987" y2="2.307">
+      <stop offset="0" stop-color="#4a4a4a"/>
+      <stop offset="0.28" stop-color="#878787"/>
+      <stop offset="0.5" stop-color="#a1a1a1"/>
+      <stop offset="0.77" stop-color="#8e8e8e"/>
+      <stop offset="1" stop-color="#4a4a4a"/>
+    </linearGradient>
+    <linearGradient id="double-barrel-shotgun-stock-wood" gradientUnits="userSpaceOnUse" x1="-239.213" y1="51.54" x2="-239.213" y2="-49.117">
+      <stop offset="0" stop-color="#2a2216"/>
+      <stop offset="0.28" stop-color="#645135"/>
+      <stop offset="0.5" stop-color="#7d6643"/>
+      <stop offset="0.78" stop-color="#433623"/>
+      <stop offset="1" stop-color="#2a2216"/>
+    </linearGradient>
+    <linearGradient id="double-barrel-shotgun-receiver-wood" gradientUnits="userSpaceOnUse" x1="80.867" y1="40.467" x2="80.867" y2="-42.467">
+      <stop offset="0" stop-color="#7d6643"/>
+      <stop offset="0.28" stop-color="#a28457"/>
+      <stop offset="0.5" stop-color="#b29160"/>
+      <stop offset="0.77" stop-color="#a7885a"/>
+      <stop offset="1" stop-color="#7d6643"/>
+    </linearGradient>
+  </defs>
+  <!-- A break action: the barrels, and the forend under them, tip down on a hinge at the front of the receiver to load -->
+  <g id="barrels">
+    <g id="forend">
+      <path d="M203.047,40 L203.047,-40 L13.373,-40 C7.733,-32.08 -1.667,-16.667 -1.667,-16.667 L-21.667,-16.667 L-21.667,13.333 L-1.667,13.38 C-1.667,13.38 6.98,31.15 13.373,40 L203.047,40 Z" fill="url(#double-barrel-shotgun-forend-wood)"/>
+      <path d="M203.047,40 L203.047,-40 L13.373,-40 C7.733,-32.08 -1.667,-16.667 -1.667,-16.667 L-21.667,-16.667 L-21.667,13.333 L-1.667,13.38 C-1.667,13.38 6.98,31.15 13.373,40 L203.047,40 Z M199.713,36.667 L15.107,36.667 C8.967,27.64 1.33,11.923 1.33,11.923 C0.773,10.78 -0.387,10.05 -1.66,10.047 L-18.337,10.01 C-18.337,10.01 -18.337,-13.333 -18.337,-13.333 C-18.337,-13.333 -1.667,-13.333 -1.667,-13.333 C-0.507,-13.333 0.573,-13.94 1.177,-14.933 C1.177,-14.933 9.47,-28.53 15.103,-36.667 C15.103,-36.667 199.713,-36.667 199.713,-36.667 L199.713,36.667 Z" fill="#7d6643"/>
+    </g>
+    <rect id="left-barrel" x="119.123" y="-36.667" width="266.667" height="33.333" fill="url(#double-barrel-shotgun-left-barrel-shading)"/>
+    <rect id="right-barrel" x="119.123" y="3.333" width="266.667" height="33.333" fill="url(#double-barrel-shotgun-right-barrel-shading)"/>
+    <!-- The rib between the barrels, which is what you aim along -->
+    <path id="rib" d="M137.253,0.007 L373.29,0.007" fill="none" stroke="#4a4a4a" stroke-width="12.697"/>
+  </g>
+  <g id="stock">
+    <path d="M-28.337,-34.993 L-378.17,-46.67 C-387.027,-3.687 -387.527,3.683 -378.17,46.667 L-28.337,34.993 C-49.78,8.527 -49.953,-10.363 -28.337,-34.993 Z" fill="url(#double-barrel-shotgun-stock-wood)" stroke="#313131" stroke-width="3.553" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g id="receiver">
+    <path d="M156.38,40 L156.38,-40 L-33.293,-40 C-38.933,-32.08 -48.333,-16.667 -48.333,-16.667 L-68.333,-16.667 L-68.333,13.333 L-48.333,13.38 C-48.333,13.38 -39.687,31.15 -33.293,40 L156.38,40 Z" fill="url(#double-barrel-shotgun-receiver-wood)"/>
+    <path d="M156.38,40 L156.38,-40 L-33.293,-40 C-38.933,-32.08 -48.333,-16.667 -48.333,-16.667 L-68.333,-16.667 L-68.333,13.333 L-48.333,13.38 C-48.333,13.38 -39.687,31.15 -33.293,40 L156.38,40 Z M153.047,36.667 L-31.56,36.667 C-37.7,27.64 -45.337,11.923 -45.337,11.923 C-45.893,10.78 -47.053,10.05 -48.327,10.047 L-65.003,10.01 C-65.003,10.01 -65.003,-13.333 -65.003,-13.333 C-65.003,-13.333 -48.333,-13.333 -48.333,-13.333 C-47.173,-13.333 -46.093,-13.94 -45.49,-14.933 C-45.49,-14.933 -37.197,-28.53 -31.563,-36.667 C-31.563,-36.667 153.047,-36.667 153.047,-36.667 L153.047,36.667 Z" fill="#7d6643"/>
+    <!-- The steel where the barrels meet the receiver -->
+    <g id="breech">
+      <path d="M156.383,34.423 L156.383,-34.42 C134.763,-15.767 110.217,-4.987 83.517,0 C110.18,5.527 134.96,15.773 156.383,34.423 Z" fill="#404040"/>
+      <path d="M156.383,34.423 L156.383,-34.42 C134.763,-15.767 110.217,-4.987 83.517,0 C110.18,5.527 134.96,15.773 156.383,34.423 Z M153.047,27.337 C136.34,14.193 117.81,5.623 98.06,0.097 C117.797,-5.273 136.233,-14.133 153.047,-27.357 C153.05,-27.357 153.05,27.337 153.05,27.337 L153.047,27.337 Z" fill="#7d6643"/>
+    </g>
+  </g>
+  <!-- Pushed aside to open the action -->
+  <g id="top-lever">
+    <path d="M-7.803,0 L22.39,0" fill="none" stroke="#3d342b" stroke-width="8.6"/>
+  </g>
+</svg>

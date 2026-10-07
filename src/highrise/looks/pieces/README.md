@@ -7,7 +7,7 @@ under "Pieces"), each with a color and an optional secondary color.
 
 How to draw one (in Affinity or anything else that saves SVG):
 
-- Start from `assets/source/pieces/head-template.svg` or `torso-template.svg`.
+- Start from `assets/source/images/characters/pieces/head-template.svg` or `torso-template.svg`.
   1 unit is 1 mm, the middle of the page is the middle of the head or body,
   and the front is to the right (+x).
 - Keep the `guide` layer if you like; it's taken out when the piece is drawn.

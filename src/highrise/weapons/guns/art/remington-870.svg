@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1110" height="93.333" viewBox="-555 -46.667 1110 93.333" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5" clip-rule="evenodd">
+  <defs>
+    <linearGradient id="remington-870-choke-shading" gradientUnits="userSpaceOnUse" x1="267.397" y1="17.22" x2="267.397" y2="-20.473">
+      <stop offset="0" stop-color="#6f6f6f"/>
+      <stop offset="0.28" stop-color="#b4b4b4"/>
+      <stop offset="0.5" stop-color="#d1d1d1"/>
+      <stop offset="0.77" stop-color="#bcbcbc"/>
+      <stop offset="1" stop-color="#717171"/>
+    </linearGradient>
+    <linearGradient id="remington-870-barrel-shading" gradientUnits="userSpaceOnUse" x1="245.577" y1="20.9" x2="245.577" y2="-24.337">
+      <stop offset="0" stop-color="#9c9c9c"/>
+      <stop offset="0.28" stop-color="#cfcfcf"/>
+      <stop offset="0.5" stop-color="#e5e5e5"/>
+      <stop offset="0.77" stop-color="#d9d9d9"/>
+      <stop offset="1" stop-color="#adadad"/>
+    </linearGradient>
+    <linearGradient id="remington-870-receiver-shading" gradientUnits="userSpaceOnUse" x1="-69.013" y1="28.257" x2="-69.013" y2="-32.057">
+      <stop offset="0" stop-color="#9c9c9c"/>
+      <stop offset="0.28" stop-color="#cfcfcf"/>
+      <stop offset="0.5" stop-color="#e5e5e5"/>
+      <stop offset="0.77" stop-color="#d9d9d9"/>
+      <stop offset="1" stop-color="#adadad"/>
+    </linearGradient>
+    <linearGradient id="remington-870-stock-shading" gradientUnits="userSpaceOnUse" x1="-389.947" y1="36.203" x2="-389.947" y2="-36.79">
+      <stop offset="0" stop-color="#313131"/>
+      <stop offset="0.28" stop-color="#727272"/>
+      <stop offset="0.5" stop-color="#8f8f8f"/>
+      <stop offset="0.78" stop-color="#4d4d4d"/>
+      <stop offset="1" stop-color="#313131"/>
+    </linearGradient>
+    <linearGradient id="remington-870-magazine-tube-shading" gradientUnits="userSpaceOnUse" x1="0" y1="23.8" x2="0" y2="-26.2">
+      <stop offset="0" stop-color="#5e5e5e"/>
+      <stop offset="0.28" stop-color="#9c9c9c"/>
+      <stop offset="0.5" stop-color="#b4b4b4"/>
+      <stop offset="0.77" stop-color="#a0a0a0"/>
+      <stop offset="1" stop-color="#606060"/>
+    </linearGradient>
+  </defs>
+  <!-- Under the barrel and a little wider, so it shows along its sides in front of the pump, with its cap near the muzzle -->
+  <g id="magazine-tube">
+    <rect x="40" y="-26.2" width="455" height="50" fill="url(#remington-870-magazine-tube-shading)"/>
+    <rect id="magazine-cap" x="490" y="-27.2" width="18" height="52" rx="3" fill="#4a4a4a"/>
+  </g>
+  <!-- Slides back and forward along the magazine tube, under the barrel, to work the action -->
+  <g id="pump">
+    <rect x="84.56" y="-41.173" width="286.92" height="80.003" fill="#5e5e5e"/>
+    <path d="M371.48,-41.173 L84.56,-41.173 L84.56,38.827 L371.48,38.827 L371.48,-41.173 Z M368.147,-37.84 L368.147,35.497 C368.147,35.497 87.897,35.497 87.897,35.497 C87.897,35.497 87.897,-37.84 87.897,-37.84 L368.147,-37.84 Z" fill="#313131"/>
+  </g>
+  <g id="barrel">
+    <!-- Narrower, out of the end of the barrel -->
+    <rect id="choke" x="22.787" y="-19.353" width="530.913" height="36.363" fill="url(#remington-870-choke-shading)"/>
+    <rect x="0.967" y="-22.99" width="530.913" height="43.637" fill="url(#remington-870-barrel-shading)"/>
+  </g>
+  <g id="receiver">
+    <rect x="-236.26" y="-30.263" width="277.87" height="58.183" fill="url(#remington-870-receiver-shading)"/>
+    <path d="M41.613,27.92 L41.613,-30.263 L-236.26,-30.263 L-236.26,27.92 L41.613,27.92 Z M38.28,24.583 L-232.927,24.583 C-232.927,24.583 -232.927,-26.93 -232.927,-26.93 C-232.927,-26.93 38.28,-26.93 38.28,-26.93 L38.28,24.583 Z" fill="#a6a6a6"/>
+    <!-- Where spent shells come out, on the right -->
+    <g id="ejection-port">
+      <path d="M35.463,13.433 C35.463,7.573 30.707,2.817 24.843,2.817 L-52.053,2.817 C-57.917,2.817 -62.673,7.573 -62.673,13.433 C-62.673,19.293 -57.917,24.05 -52.053,24.05 L24.843,24.05 C30.707,24.05 35.463,19.293 35.463,13.433 Z" fill="#808080" fill-opacity="0.5"/>
+      <path d="M35.463,13.433 C35.463,7.573 30.707,2.817 24.843,2.817 L-52.053,2.817 C-57.917,2.817 -62.673,7.573 -62.673,13.433 C-62.673,19.293 -57.917,24.05 -52.053,24.05 L24.843,24.05 C30.707,24.05 35.463,19.293 35.463,13.433 Z M32.13,13.433 C32.13,17.453 28.867,20.713 24.843,20.713 C24.843,20.713 -52.053,20.713 -52.053,20.713 C-56.077,20.713 -59.337,17.453 -59.337,13.433 C-59.337,9.413 -56.077,6.15 -52.053,6.15 C-52.053,6.15 24.843,6.15 24.843,6.15 C28.867,6.15 32.13,9.413 32.13,13.433 Z" fill="#8f8f8f"/>
+    </g>
+  </g>
+  <g id="stock">
+    <path d="M-159.9,-28.963 L-541.537,-40.653 C-551.2,-9.483 -551.747,7.137 -541.537,38.307 L-159.9,26.617 C-164.54,8.09 -165,-10.437 -159.9,-28.963 Z" fill="url(#remington-870-stock-shading)" stroke="#313131" stroke-width="3.107"/>
+    <path id="butt-pad" d="M-523.533,-39.873 L-541.537,-40.653 C-551.2,-9.483 -551.747,7.137 -541.537,38.307 L-523.533,37.527 L-523.533,-39.873 Z" fill="#313131" stroke="#313131" stroke-width="7.04" stroke-linecap="square" stroke-linejoin="miter"/>
+  </g>
+  <g id="front-sight">
+    <path d="M469.773,-1.173 L502.71,-1.173" fill="none" stroke="#828282" stroke-width="8.583" stroke-linecap="butt" stroke-linejoin="miter"/>
+  </g>
+  <g id="rear-sight" fill="none" stroke="#828282" stroke-width="4.29" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M120.683,-8.447 L153.617,-8.447"/>
+    <path d="M120.683,6.1 L153.617,6.1"/>
+  </g>
+</svg>

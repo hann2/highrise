@@ -23,10 +23,10 @@ export const Revolver: GunStats = {
   reloadInsertTime: 0.22,
   ammoCapacity: 6,
 
+  art: "revolver",
   textures: {
     ...defaultGunStats.textures,
     pickup: "magnumPickup",
-    holding: "magnumHold",
     shellCasing: "pistolCasing",
   },
   size: [0.55, 0.55],
@@ -42,6 +42,8 @@ export const Revolver: GunStats = {
     magazine: [-0.04, 0],
     action: [-0.15, 0],
   },
+  // The cylinder swings out to the left to load, with the chamber the hand loads
+  parts: { cylinder: { offset: [0, -0.062], carries: ["magazine"] } },
   animations: REVOLVER_ANIMATIONS,
   magazine: { texture: "revolverRound", length: 0.04 },
   holdPosition: [0.55, 0],

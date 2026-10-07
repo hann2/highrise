@@ -9,6 +9,7 @@ import {
   clamp,
   degToRad,
   polarToVec,
+  smoothStep,
   stepToward,
 } from "../../../core/util/MathUtil";
 import {
@@ -38,6 +39,7 @@ import {
   GunPose,
   GunTracks,
   muzzleOf,
+  PartAmounts,
   pointOnGun,
   poseGun,
 } from "./GunPose";
@@ -69,6 +71,14 @@ const EXTEND_SPEED = 3;
 const PUMP_BACK = 0.15;
 const PUMP_HOLD = 0.05;
 const PUMP_FORWARD = 0.13;
+/**
+ * Seconds a slide or bolt takes to go back and forward after a shot (a real
+ * one's quicker, but this is a few frames), at most this share of the time
+ * between shots, and the share of it spent going back
+ */
+const CYCLE_TIME = 0.08;
+const CYCLE_SHARE = 0.8;
+const CYCLE_BACK = 0.3;
 /** Meters off the floor a dropped magazine falls from */
 const MAGAZINE_DROP_HEIGHT = 0.9;
 // TODO: A real magazine hitting the floor
@@ -103,6 +113,8 @@ export default class Gun extends BaseEntity implements Entity {
   private recoilVelocity = 0;
   /** Kicks from shots this tick, put into the spring after it's moved on */
   private recoilKick = 0;
+  /** Seconds since the last shot, for the parts that cycle with each one (`GunStats.cycles`) */
+  private sinceShot = Infinity;
   /** How far the muzzle is pulled back from its usual spot to keep it out of a wall */
   wallRetraction = 0;
   /**
@@ -265,6 +277,7 @@ export default class Gun extends BaseEntity implements Entity {
     this.shellsToEject += 1;
     this.aimOffset += rSign() * stats.recoilAmount;
     this.recoilKick += 1;
+    this.sinceShot = 0;
 
     // Various effects
     this.playSound("shoot", position);
@@ -527,6 +540,7 @@ export default class Gun extends BaseEntity implements Entity {
 
     this.aimOffset *= Math.exp(-dt * this.stats.recoilRecovery);
     this.updateRecoil(dt);
+    this.sinceShot += dt;
     this.animator.advance(dt);
   }
 
@@ -610,12 +624,43 @@ export default class Gun extends BaseEntity implements Entity {
       wallTilt: wall.tilt,
       push,
       twist,
+      parts: this.getCyclingParts(),
     };
     return this.animator.pose(
       (frame) => poseGun(this.stats, frame, adjust),
       () => poseGun(this.stats, undefined, adjust),
       blendGunPoses,
     );
+  }
+
+  /**
+   * How far back the parts that cycle with each shot are: snapped back, then
+   * eased forward, within the time between shots, or held back once the last
+   * round's gone if the gun locks back. The frame a shot goes off shows them
+   * at rest, like the recoil.
+   */
+  private getCyclingParts(): PartAmounts {
+    const { cycles, locksBackWhenEmpty, fireRate } = this.stats;
+    if (!cycles) {
+      return {};
+    }
+    const time = Math.min(CYCLE_TIME, CYCLE_SHARE / fireRate);
+    const back = time * CYCLE_BACK;
+    const t = this.sinceShot;
+    let amount =
+      t < back
+        ? t / back
+        : t < time
+          ? 1 - smoothStep((t - back) / (time - back))
+          : 0;
+    if (locksBackWhenEmpty && this.ammo === 0 && t >= back) {
+      amount = 1;
+    }
+    const parts: PartAmounts = {};
+    for (const part of cycles) {
+      parts[part] = amount;
+    }
+    return parts;
   }
 
   /** Which way the gun points, from the way its holder faces */

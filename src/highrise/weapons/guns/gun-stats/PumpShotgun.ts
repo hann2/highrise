@@ -25,10 +25,10 @@ export const PumpShotgun: GunStats = {
   ammoCapacity: 7,
   ammoClass: "shotgun",
 
+  art: "remington870",
   textures: {
     ...defaultGunStats.textures,
     pickup: "remingtonPickup",
-    holding: "remington870Hold",
     shellCasing: "shotgunCasing",
   },
   size: [1.1, 1.1],
@@ -43,6 +43,8 @@ export const PumpShotgun: GunStats = {
     magazine: [-0.1, 0],
     action: [0.2, -0.03],
   },
+  // The pump slides back along the magazine tube, with the hand on it
+  parts: { pump: { offset: [-0.12, 0], carries: ["foregrip", "action"] } },
   animations: SHOTGUN_ANIMATIONS,
   magazine: { texture: "shotgunShell", length: 0.075 },
   holdPosition: [0.5, 0],

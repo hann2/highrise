@@ -7,7 +7,7 @@ import path from "path";
  * in a browser (so filters and the like come out as they do there). For art
  * drawn as SVG in assets/source:
  *
- *   npx tsx bin/render-svg.ts --out resources/images/weapons/magazines assets/source/magazines/*.svg
+ *   npx tsx bin/render-svg.ts --out resources/images/weapons/magazines assets/source/images/weapons/magazines/*.svg
  */
 
 async function main() {

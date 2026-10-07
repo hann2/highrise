@@ -29,6 +29,8 @@ function pistolReload(
   /** When the left hand goes over the gun, and back under */
   over: [number, number] | undefined,
   events: TimedEvent<GunEvent>[],
+  /** Where the slide is, if it's not just forward */
+  slide?: Keyframe<number>[],
 ): GunAnimation {
   return {
     name,
@@ -74,6 +76,7 @@ function pistolReload(
             { t: over[1], v: false },
           ]
         : [{ t: 0, v: false }],
+      parts: slide ? { slide } : undefined,
     },
     events: [
       { t: 0, sound: SOUND, offset: 0, duration: 0.45 },
@@ -92,16 +95,23 @@ export const PISTOL_ANIMATIONS: GunAnimations = {
     undefined,
     [],
   ),
-  // From empty: over the top to rack the slide
+  // From empty: the slide's locked back, so over the top to take hold of it,
+  // tug it, and let it fly forward. The hand's on the slide's grip (`action`,
+  // which moves with it)
   reloadEmpty: pistolReload(
     "pistol reload from empty",
     [
       { t: 0.72, v: "action" },
-      { t: 0.78, v: { gun: "action", offset: [-0.06, 0] }, ease: "in" },
+      { t: 0.77, v: { gun: "action", offset: [-0.01, 0] }, ease: "in" },
       { t: 0.84, v: { gun: "action", offset: [-0.07, -0.06] }, ease: "out" },
       { t: 0.96, v: "foregrip" },
     ],
     [0.66, 0.84],
     [{ t: 0.73, sound: SOUND, offset: 0.68, duration: 0.28 }],
+    [
+      { t: 0, v: 1 },
+      { t: 0.77, v: 1 },
+      { t: 0.8, v: 0, ease: "in" },
+    ],
   ),
 };

@@ -25,10 +25,10 @@ export const SPAS12: GunStats = {
   ammoCapacity: 8,
   ammoClass: "shotgun",
 
+  art: "spas12",
   textures: {
     ...defaultGunStats.textures,
     pickup: "spas12Pickup",
-    holding: "spas12Hold",
     shellCasing: "shotgunCasing",
   },
   size: [1.1, 1.1],
@@ -43,6 +43,8 @@ export const SPAS12: GunStats = {
     magazine: [-0.18, 0],
     action: [0.05, -0.03],
   },
+  // The pump slides back along the magazine tube, with the hand on it
+  parts: { pump: { offset: [-0.12, 0], carries: ["foregrip", "action"] } },
   animations: SHOTGUN_ANIMATIONS,
   magazine: { texture: "shotgunShell", length: 0.075 },
   holdPosition: [0.6, 0],

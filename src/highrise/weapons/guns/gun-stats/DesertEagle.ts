@@ -17,10 +17,10 @@ export const DesertEagle: GunStats = {
   reloadInsertTime: 0.8,
   ammoCapacity: 7,
 
+  art: "desertEagle",
   textures: {
     ...defaultGunStats.textures,
     pickup: "desertEaglePickup",
-    holding: "desertEagleHold",
     shellCasing: "rifleCasing",
   },
   size: [0.55, 0.55],
@@ -36,6 +36,14 @@ export const DesertEagle: GunStats = {
     magazine: [-0.12, 0],
     action: [-0.15, 0],
   },
+  // The slide goes back with each shot, and stays back when it's empty,
+  // pushing the hammer back and down (shorter from above) as it goes
+  parts: {
+    slide: { offset: [-0.065, 0], carries: ["action"] },
+    hammer: { stretch: 0.35, pivot: [-0.1445, 0] },
+  },
+  cycles: ["slide", "hammer"],
+  locksBackWhenEmpty: true,
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.14 },
   holdPosition: [0.52, 0],

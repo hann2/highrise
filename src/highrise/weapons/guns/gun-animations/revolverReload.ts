@@ -30,6 +30,12 @@ const reloadStart: GunAnimation = {
       { t: 0, v: "foregrip" },
       { t: 0.25, v: AT_CYLINDER },
     ],
+    parts: {
+      cylinder: [
+        { t: 0, v: 0 },
+        { t: 0.2, v: 1, ease: "out" },
+      ],
+    },
   },
   events: [{ t: 0, gunSound: "reload" }],
 };
@@ -53,6 +59,7 @@ const reloadInsert: GunAnimation = {
       { t: 0.07, v: "hand" },
       { t: 0.18, v: "none" },
     ],
+    parts: { cylinder: [{ t: 0, v: 1 }] },
   },
   // The recordings' click is about 0.07 s in
   events: [{ t: 0.1, gunSound: "reloadInsert" }],
@@ -76,6 +83,13 @@ const reloadFinish: GunAnimation = {
       { t: 0, v: AT_CYLINDER },
       { t: 0.16, v: "foregrip" },
     ],
+    // Flicked shut
+    parts: {
+      cylinder: [
+        { t: 0, v: 1 },
+        { t: 0.06, v: 0, ease: "in" },
+      ],
+    },
   },
   // The recording's click is 0.1 s in
   events: [{ t: 0, gunSound: "reloadFinish" }],

@@ -45,6 +45,23 @@ const reload: GunAnimation = {
       { t: 0.47, v: "hand" },
       { t: 0.8, v: "gun" },
     ],
+    parts: {
+      // The thumb pushes the top lever aside, and it springs back as it shuts
+      "top-lever": [
+        { t: 0, v: 0 },
+        { t: 0.06, v: 1 },
+        { t: 1.18, v: 1 },
+        { t: 1.24, v: 0, ease: "in" },
+      ],
+      // Tipped open as the gun turns, and snapped shut
+      barrels: [
+        { t: 0, v: 0 },
+        { t: 0.06, v: 0 },
+        { t: 0.22, v: 1, ease: "out" },
+        { t: 1.1, v: 1 },
+        { t: 1.21, v: 0, ease: "in" },
+      ],
+    },
   },
   events: [
     // The recording's click is 0.07 s in
