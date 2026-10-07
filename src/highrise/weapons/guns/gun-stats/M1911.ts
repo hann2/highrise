@@ -23,7 +23,8 @@ export const M1911: GunStats = {
     pickup: "m1911Pickup",
     shellCasing: "pistolCasing",
   },
-  size: [0.45, 0.45],
+  // The pickup's square (bin/gun-art/guns/m1911.ts), so it lies on the floor at the same scale it's held at
+  size: [0.224, 0.224],
 
   // Its art is drawn to scale with its pickup (bin/gun-art/guns/m1911.ts), smaller than the other guns'
   points: {

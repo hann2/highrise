@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { GUNS } from "../../bin/gun-art/guns";
 import { arc, fixed, on, smoothCurve } from "../../bin/gun-art/lib/geometry";
 import { generatedFiles } from "../../bin/gun-art/lib/gun";
+import { GUNS as GUN_STATS } from "../../src/highrise/weapons/guns/gun-stats/gunStats";
 import { apply, homography } from "../../bin/gun-art/lib/homography";
 
 for (const gun of GUNS) {
@@ -25,6 +26,31 @@ for (const gun of GUNS) {
       );
     });
   }
+}
+
+// A drawn gun is the same size on the floor as in hand: its pickup's square (in millimeters) is the size
+// WeaponPickup stretches it to, and its top view (drawn 1:1) is its art
+for (const drawing of GUNS) {
+  const pickup =
+    drawing.name.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase()) +
+    "Pickup";
+  const stats = GUN_STATS.find((s) => s.textures.pickup === pickup);
+  test(`${drawing.name} lies on the floor at the scale it's held at`, () => {
+    assert.ok(stats, `no gun's textures.pickup is "${pickup}"`);
+    const side = drawing.frame.side / 1000;
+    assert.deepEqual(
+      stats.size,
+      [side, side],
+      `${stats.name}'s size should be [${side}, ${side}], its pickup's square in meters`,
+    );
+    if (drawing.top) {
+      assert.equal(
+        stats.art,
+        drawing.name,
+        `${stats.name}'s art should be its top view, "${drawing.name}"`,
+      );
+    }
+  });
 }
 
 test("a homography takes its four points where they go, and is a projective map between", () => {
