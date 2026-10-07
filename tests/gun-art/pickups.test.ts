@@ -1,27 +1,51 @@
-// The guns drawn by generators (bin/gun-art/guns/): each committed pickup is what its generator draws, so the
-// SVGs aren't edited by hand and drift from their source; and the geometry the generators share.
+// The guns drawn by generators (bin/gun-art/guns/): each committed file (a pickup, a top view) is what its
+// generator draws, so the SVGs aren't edited by hand and drift from their source; and the geometry they share.
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import path from "node:path";
 import { test } from "node:test";
 import { GUNS } from "../../bin/gun-art/guns";
 import { arc, fixed, on, smoothCurve } from "../../bin/gun-art/lib/geometry";
-import { pickupPath, pickupSvg } from "../../bin/gun-art/lib/gun";
+import { generatedFiles } from "../../bin/gun-art/lib/gun";
+import { apply, homography } from "../../bin/gun-art/lib/homography";
 
 for (const gun of GUNS) {
-  test(`${gun.name}'s pickup is what its generator draws`, () => {
-    const file = pickupPath(gun);
-    assert.ok(
-      fs.existsSync(file),
-      `${file} is missing: run npx tsx bin/gun-art/cli.ts build ${gun.name}`,
-    );
-    assert.equal(
-      fs.readFileSync(file, "utf8"),
-      pickupSvg(gun),
-      `${file} isn't what bin/gun-art/guns/${gun.name}.ts draws: change the generator, then run ` +
-        `npx tsx bin/gun-art/cli.ts build ${gun.name}`,
-    );
-  });
+  for (const { file, svg } of generatedFiles(gun)) {
+    const name = path.relative(process.cwd(), file);
+    test(`${name} is what its generator draws`, () => {
+      assert.ok(
+        fs.existsSync(file),
+        `${name} is missing: run npx tsx bin/gun-art/cli.ts build ${gun.name}`,
+      );
+      assert.equal(
+        fs.readFileSync(file, "utf8"),
+        svg,
+        `${name} isn't what bin/gun-art/guns/${gun.name}.ts draws: change the generator, then run ` +
+          `npx tsx bin/gun-art/cli.ts build ${gun.name}`,
+      );
+    });
+  }
 }
+
+test("a homography takes its four points where they go, and is a projective map between", () => {
+  const from: [number, number][] = [
+    [0, 0],
+    [100, 0],
+    [100, 50],
+    [0, 50],
+  ];
+  const to: [number, number][] = [
+    [10, 10],
+    [210, 20],
+    [205, 120],
+    [5, 110],
+  ];
+  const h = homography(from, to);
+  from.forEach((p, i) => {
+    const [x, y] = apply(h, p);
+    assert.ok(Math.abs(x - to[i][0]) < 1e-6 && Math.abs(y - to[i][1]) < 1e-6);
+  });
+});
 
 test("numbers round exact ties to even, as the first (Python) generators did", () => {
   assert.equal(fixed(0.25, 1), "0.2");

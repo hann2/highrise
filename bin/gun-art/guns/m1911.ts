@@ -13,7 +13,8 @@ import {
   SlantedAxis,
   smoothCurve,
 } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 
 // Blued steel
 const STEEL = "#4a4d54";
@@ -74,6 +75,8 @@ export const DEFAULT_WOOD: WoodStyle = {
 
 export interface M1911Options {
   wood?: Partial<WoodStyle>;
+  /** The hammer's spur from above: the early wide, checkered one, or the 1911 A1's round, knurled one */
+  hammer?: "early" | "a1";
 }
 
 // The grip, in three layers along one axis: the frame, the wood panel on it, and the grip safety, the one part
@@ -527,6 +530,303 @@ function drawSide(options: M1911Options = {}): string {
 `;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y, in millimeters
+// about its middle on the bore, at the same scale as the side view. Lengths along the gun are the side view's
+// (converted from its photo's pixels); widths are the real gun's, checked against the photos from above and
+// behind. The slide and the hammer move (see M1911.ts in gun-stats): what they uncover is drawn under them.
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - 1021) * (216 / 1867);
+
+const SLIDE_BACK = sx(262);
+const SLIDE_FRONT = sx(1934);
+const SLIDE_HALF = 11.6; // 0.915" wide
+const BUSHING_FRONT = sx(1958);
+const BUSHING_HALF = 8.85; // 0.697"
+const BARREL_HALF = 7.4; // 0.58"
+const HOOD_BACK = sx(845); // the barrel's chamber hood, seen through the ejection port
+const FRAME_HALF = 9.5; // the frame's top under the slide, and its tang
+const DUST_COVER_FRONT = sx(1552);
+const FRAME_TANG_TIP = sx(110);
+const GRIP_SAFETY_TIP = sx(89);
+const GRIP_SAFETY_HALF = 6.5;
+const GRIP_BACK = sx(HOUSING_FOOT[0]); // the bottom of the grip's back, which leans out behind the tang
+const GRIP_HALF = 9.5; // the frame round the grip, between the panels
+const PANEL_OUTER = 14; // the panels stand about 2.5 mm out past the slide (the photos from above and behind)
+const panelCorners = [
+  cross(PANEL_BACK, PANEL_TOP),
+  cross(PANEL_FRONT, PANEL_TOP),
+  cross(PANEL_FRONT, PANEL_BASE),
+  cross(PANEL_BACK, PANEL_BASE),
+];
+const PANEL_FROM = sx(Math.min(...panelCorners.map((p) => p[0])));
+const PANEL_TO = sx(Math.max(...panelCorners.map((p) => p[0])));
+const HAMMER_BACK = sx(128); // cocked
+const SPUR_FRONT = sx(197); // where the checkered spur ends and the hammer narrows
+const SPUR_HALF = 5;
+const HAMMER_HALF = 3.2;
+const REAR_SIGHT: [number, number] = [sx(386), sx(460)];
+const REAR_SIGHT_HALF = 7;
+const FRONT_SIGHT: [number, number] = [sx(1806), sx(1900)];
+const PORT: [number, number] = [sx(858), sx(1123)];
+const PORT_INNER = -1.5; // the port is cut from just left of the slide's middle to its right edge
+// On the left side (up the page): the thumb safety's pad by the rear sight, and the slide stop's further on
+const THUMB_SAFETY: [number, number] = [-73, -64.5];
+const THUMB_SAFETY_OUT = 16;
+const SLIDE_STOP: [number, number] = [-33.8, -22.3];
+const SLIDE_STOP_OUT = 13.2;
+
+const t1 = (v: number) => fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "");
+const tp = (x: number, y: number) => `${t1(x)},${t1(y)}`;
+
+/** A rectangle with each corner rounded by its own radius, from x0,y0 to x1,y1 */
+function box(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+) {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r; // back-left, front-left, front-right, back-right
+  const k = 0.45;
+  const corner = (
+    cx: number,
+    cy: number,
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+  ) =>
+    `C${tp(fromX + (cx - fromX) * (1 - k), fromY + (cy - fromY) * (1 - k))} ${tp(toX + (cx - toX) * (1 - k), toY + (cy - toY) * (1 - k))} ${tp(toX, toY)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A gradient across the gun (along y), lit down the middle like a rounded top */
+function acrossGradient(id: string, half: number, stops: [number, string][]) {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t1(-half)}" x2="0" y2="${t1(half)}">`,
+    ...stops.map(([o, c]) => `      <stop offset="${o}" stop-color="${c}"/>`),
+    "    </linearGradient>",
+  ].join("\n    ");
+}
+
+/** The hammer's spur from above: the early wide one with its checkered top, or the 1911 A1's round, knurled one */
+function hammer(style: "early" | "a1"): string {
+  const neck = box(
+    SPUR_FRONT - 1,
+    -HAMMER_HALF,
+    SLIDE_BACK + 2,
+    HAMMER_HALF,
+    0,
+  );
+  if (style === "a1") {
+    const cx = HAMMER_BACK + 4.4;
+    const knurl: string[] = [];
+    for (let x = cx - 3.6; x <= cx + 3.6; x += 1.2) {
+      for (let y = -5; y <= 5; y += 1.2) {
+        if (((x - cx) / 4.4) ** 2 + (y / 5.8) ** 2 < 0.8) {
+          knurl.push(`<circle cx="${t1(x)}" cy="${t1(y)}" r="0.35"/>`);
+        }
+      }
+    }
+    return `<path d="${neck}" fill="${STEEL}"/>
+    <ellipse cx="${t1(cx)}" cy="0" rx="4.4" ry="5.8" fill="${STEEL}"/>
+    <g id="hammer-knurling" fill="${STEEL_DARK}">
+      ${knurl.join("\n      ")}
+    </g>`;
+  }
+  const lines: string[] = [];
+  for (let x = HAMMER_BACK + 1.2; x < SPUR_FRONT - 0.5; x += 1.3) {
+    lines.push(
+      `<path d="M${tp(x, -SPUR_HALF + 0.8)} L${tp(x, SPUR_HALF - 0.8)}"/>`,
+    );
+  }
+  return `<path d="${neck}" fill="${STEEL}"/>
+    <path d="${box(HAMMER_BACK, -SPUR_HALF, SPUR_FRONT, SPUR_HALF, [2.5, 0.5, 0.5, 2.5])}" fill="${STEEL}"/>
+    <g id="hammer-checkering" stroke="${STEEL_DARK}" stroke-width="0.5">
+      ${lines.join("\n      ")}
+    </g>`;
+}
+
+/** Grooves along both edges of the slide, where the side view has them */
+function topSerrations(): string {
+  const out: string[] = [];
+  for (let i = 0; i < 19; i++) {
+    const x0 = sx(396 + i * 15.4);
+    const x1 = sx(396 + i * 15.4 + 5.5);
+    out.push(`<path d="${box(x0, -SLIDE_HALF, x1, -SLIDE_HALF + 1, 0)}"/>`);
+    out.push(`<path d="${box(x0, SLIDE_HALF - 1, x1, SLIDE_HALF, 0)}"/>`);
+  }
+  return out.join("\n      ");
+}
+
+/** Lines across a pad, for checkering seen from above */
+function padLines(
+  x0: number,
+  x1: number,
+  y0: number,
+  y1: number,
+  step = 1.1,
+): string {
+  const out: string[] = [];
+  for (let x = x0 + step; x < x1 - 0.3; x += step) {
+    out.push(`M${tp(x, y0)} L${tp(x, y1)}`);
+  }
+  return out.join(" ");
+}
+
+function drawTop(options: M1911Options = {}): string {
+  const hammerStyle = options.hammer ?? "early";
+  const minX = GRIP_BACK - 1;
+  const maxX = BUSHING_FRONT + 1;
+  const half = PANEL_OUTER + 1;
+  const width = t1(maxX - minX);
+  const height = t1(half * 2);
+  const portBack = PORT[0];
+  const portFront = PORT[1];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t1(minX)} ${t1(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("m1911")}
+  <!-- The M1911 from above, as it's held: muzzle along +x, its right side down the page (+y), millimeters about
+       its middle on the bore, at the same scale as its side view (the pickup); lengths along it are the side
+       view's. An early one: short grip safety, wide checkered hammer spur, small sights, walnut grips. -->
+  <defs>
+    ${acrossGradient("m1911-slide-shading", SLIDE_HALF, [
+      [0, "#2c2e33"],
+      [0.1, "#45484f"],
+      [0.42, "#5d6067"],
+      [0.5, "#62656d"],
+      [0.62, "#565960"],
+      [0.9, "#43464c"],
+      [1, "#2a2c31"],
+    ])}
+    ${acrossGradient("m1911-frame-shading", FRAME_HALF, [
+      [0, "#26282d"],
+      [0.2, "#3f4248"],
+      [0.5, "#4a4d54"],
+      [0.8, "#3b3e44"],
+      [1, "#24262a"],
+    ])}
+    ${acrossGradient("m1911-barrel-shading", BARREL_HALF, [
+      [0, "#55595f"],
+      [0.25, "#a9adb3"],
+      [0.45, "#e6e8eb"],
+      [0.6, "#c4c8cd"],
+      [1, "#5e6268"],
+    ])}
+    ${acrossGradient("m1911-panel-shading", PANEL_OUTER, [
+      [0, WOOD],
+      [0.09, WOOD_LIGHT],
+      [0.21, WOOD],
+      [0.79, WOOD],
+      [0.91, WOOD_LIGHT],
+      [1, WOOD],
+    ])}
+  </defs>
+  <!-- The grip under it all: its back leaning out behind the tang, and the walnut panels either side, wider than the slide -->
+  <g id="grip">
+    <path d="${box(GRIP_BACK, -GRIP_HALF, PANEL_TO, GRIP_HALF, [3, 0, 0, 3])}" fill="url(#m1911-frame-shading)"/>
+    <path id="left-panel" d="${box(PANEL_FROM, -PANEL_OUTER, PANEL_TO, -GRIP_HALF + 0.5, [4, 4, 0, 0])}" fill="url(#m1911-panel-shading)"/>
+    <path id="right-panel" d="${box(PANEL_FROM, GRIP_HALF - 0.5, PANEL_TO, PANEL_OUTER, [0, 0, 4, 4])}" fill="url(#m1911-panel-shading)"/>
+    <g stroke="${WOOD_DARK}" stroke-width="0.6" fill="none" opacity="0.8">
+      <path d="${box(PANEL_FROM, -PANEL_OUTER, PANEL_TO, -GRIP_HALF + 0.5, [4, 4, 0, 0])}"/>
+      <path d="${box(PANEL_FROM, GRIP_HALF - 0.5, PANEL_TO, PANEL_OUTER, [0, 0, 4, 4])}"/>
+    </g>
+  </g>
+  <!-- The frame: its tang behind the slide, and under the slide (seen when it's back) its top, the rails the slide runs on, and the dust cover -->
+  <g id="frame">
+    <path id="frame-top" d="${box(FRAME_TANG_TIP, -FRAME_HALF, DUST_COVER_FRONT, FRAME_HALF, [4, 1, 1, 4])}" fill="url(#m1911-frame-shading)"/>
+    <g id="frame-rails" fill="${STEEL_LIGHT}">
+      <path d="${box(SLIDE_BACK + 2, -FRAME_HALF + 0.6, DUST_COVER_FRONT - 2, -FRAME_HALF + 1.6)}"/>
+      <path d="${box(SLIDE_BACK + 2, FRAME_HALF - 1.6, DUST_COVER_FRONT - 2, FRAME_HALF - 0.6)}"/>
+    </g>
+  </g>
+  <!-- Bright steel, its tang out behind the frame's under the hammer -->
+  <g id="grip-safety">
+    <path d="${box(GRIP_SAFETY_TIP, -GRIP_SAFETY_HALF, FRAME_TANG_TIP + 4, GRIP_SAFETY_HALF, [4, 0, 0, 4])}" fill="${WORN}"/>
+    <path d="M${tp(GRIP_SAFETY_TIP + 1.2, -3)} C${tp(GRIP_SAFETY_TIP + 0.6, -1)} ${tp(GRIP_SAFETY_TIP + 0.6, 1)} ${tp(GRIP_SAFETY_TIP + 1.2, 3)}" stroke="#c4c7cc" stroke-width="1" fill="none"/>
+  </g>
+  <!-- On the left side: the thumb safety's pad by the hammer, and the slide stop's, both standing out past the slide -->
+  <g id="thumb-safety">
+    <path d="${box(THUMB_SAFETY[0], -THUMB_SAFETY_OUT, THUMB_SAFETY[1], -SLIDE_HALF + 1, [2, 2, 0, 0])}" fill="${STEEL}"/>
+    <path d="${padLines(THUMB_SAFETY[0], THUMB_SAFETY[1], -THUMB_SAFETY_OUT + 0.6, -SLIDE_HALF)}" stroke="${STEEL_DARK}" stroke-width="0.45" fill="none"/>
+  </g>
+  <g id="slide-stop">
+    <path d="${box(SLIDE_STOP[0], -SLIDE_STOP_OUT, SLIDE_STOP[1], -SLIDE_HALF + 1, [1.2, 1.2, 0, 0])}" fill="${STEEL}"/>
+    <path d="${padLines(SLIDE_STOP[0], SLIDE_STOP[1], -SLIDE_STOP_OUT + 0.4, -SLIDE_HALF)}" stroke="${STEEL_DARK}" stroke-width="0.4" fill="none"/>
+  </g>
+  <!-- Polished, through the ejection port, and out to the muzzle under the slide (seen when it's back) -->
+  <g id="barrel">
+    <path d="${box(HOOD_BACK, -BARREL_HALF, SLIDE_FRONT, BARREL_HALF, [1, 0, 0, 1])}" fill="url(#m1911-barrel-shading)"/>
+    <path id="chamber-hood" d="${box(HOOD_BACK, -BARREL_HALF, HOOD_BACK + 3, BARREL_HALF)}" fill="#3a3d43"/>
+  </g>
+  <!-- Cocked, its spur out behind the slide over the grip safety; it falls forward as the gun fires -->
+  <g id="hammer">
+    ${hammer(hammerStyle)}
+  </g>
+  <g id="slide">
+    <path id="slide-body" d="${box(SLIDE_BACK, -SLIDE_HALF, SLIDE_FRONT, SLIDE_HALF, [1, 2.5, 2.5, 1])}" fill="url(#m1911-slide-shading)"/>
+    <!-- The ejection port, cut from the slide's middle out through its right side, the barrel's hood in it -->
+    <path id="ejection-port" d="${box(portBack, PORT_INNER, portFront, SLIDE_HALF + 0.1, [1.5, 4, 0, 0])}" fill="url(#m1911-barrel-shading)"/>
+    <path d="${box(portBack, BARREL_HALF, portFront - 2, SLIDE_HALF + 0.1, [0, 0, 0, 0])}" fill="#26282d" opacity="0.55"/>
+    <path d="M${tp(portBack, SLIDE_HALF)} L${tp(portBack, PORT_INNER + 1.5)} C${tp(portBack, PORT_INNER + 0.5)} ${tp(portBack + 0.5, PORT_INNER)} ${tp(portBack + 1.5, PORT_INNER)} L${tp(portFront - 4, PORT_INNER)} C${tp(portFront - 1.8, PORT_INNER)} ${tp(portFront, PORT_INNER + 1.8)} ${tp(portFront, PORT_INNER + 4)} L${tp(portFront, SLIDE_HALF)}" stroke="#8a8e96" stroke-width="0.5" fill="none"/>
+    <!-- Grooves to grip it by, cut into both sides -->
+    <g id="slide-serrations" fill="${STEEL_DARK}">
+      ${topSerrations()}
+    </g>
+    <!-- The barrel's bushing, out of the front of the slide -->
+    <path id="bushing" d="${box(SLIDE_FRONT - 0.5, -BUSHING_HALF, BUSHING_FRONT, BUSHING_HALF, [0, 1.5, 1.5, 0])}" fill="${STEEL_DARK}"/>
+    <!-- Small sights: a wide rear one with a notch down its middle, and a thin blade at the front -->
+    <g id="rear-sight">
+      <path d="${box(REAR_SIGHT[0], -REAR_SIGHT_HALF, REAR_SIGHT[1], REAR_SIGHT_HALF, 1)}" fill="${STEEL}"/>
+      <path d="${box(REAR_SIGHT[0], -0.7, REAR_SIGHT[1], 0.7)}" fill="${STEEL_DARK}"/>
+    </g>
+    <path id="front-sight" d="${box(FRONT_SIGHT[0], -1.1, FRONT_SIGHT[1], 1.1, 1.1)}" fill="${STEEL}"/>
+  </g>
+</svg>
+`;
+}
+
+const TOP: TopView<M1911Options> = {
+  draw: drawTop,
+  registrations: [
+    {
+      // The slide's corners, at its back and its nose (the photo has its left side up)
+      file: "top-1911a1.jpg",
+      points: [
+        [
+          [175, 232],
+          [SLIDE_BACK, -SLIDE_HALF],
+        ],
+        [
+          [175, 412],
+          [SLIDE_BACK, SLIDE_HALF],
+        ],
+        [
+          [1760, 278],
+          [SLIDE_FRONT, -SLIDE_HALF],
+        ],
+        [
+          [1760, 478],
+          [SLIDE_FRONT, SLIDE_HALF],
+        ],
+      ],
+    },
+  ],
+};
+
 export const M1911: GunDrawing<M1911Options> = {
   name: "m1911",
   photo: {
@@ -551,6 +851,20 @@ export const M1911: GunDrawing<M1911Options> = {
       about:
         "The same from its left side: the back of the grip, under the grip safety",
     },
+    {
+      file: "top-1911a1.jpg",
+      width: 2000,
+      height: 707,
+      about:
+        "An M1911 A1 from above, muzzle to the right (its left side up), held in a gloved hand; a little tilted",
+    },
+    {
+      file: "rear-1911.png",
+      width: 600,
+      height: 400,
+      about:
+        "An M1911 from behind and above: how wide the slide, frame, grip safety, hammer and grips are",
+    },
   ],
   // The origin on the gun's middle (between the grip safety's tang and the muzzle) on the bore, and 216 mm (the
   // 1911's length) over the 1867 px they're apart
@@ -570,4 +884,5 @@ export const M1911: GunDrawing<M1911Options> = {
        with the origin on the gun's middle on the bore, as the guns' top views in weapons/guns/art/ have it;
        drawn over a photo, then simplified. The square is the pickup's, as the other pickups'. -->`,
   drawSide,
+  top: TOP,
 };

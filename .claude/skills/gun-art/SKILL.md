@@ -72,7 +72,7 @@ As soon as the shapes are roughly right, make an options sheet (`options <gun> v
 | Command | What it's for |
 |---|---|
 | `build [gun] [--check]` | Write the pickups from the generators |
-| `grid <gun> --crop x,y,w,h [--mode side\|over\|photo\|drawing] [--photo other.png] [--trace "x,y ..."]` | Compare a region with a labeled grid |
+| `grid <gun> --crop x,y,w,h [--mode side\|over\|photo\|drawing] [--photo other.png] [--trace "x,y ..."] [--view top]` | Compare a region with a labeled grid (`--view top`: the top view in millimeters, over a registered photo) |
 | `measure <gun> edges x=600 y=340` / `runs rows 300 1200 10` / `sample x,y` | Exact edges, extents and colors in the photo |
 | `options <gun> variants.json [--crop ...]` | A sheet of variations |
 | `sheet <gun>` | The photo, the pickup, and the pickup beside the others |
@@ -83,4 +83,11 @@ The geometry is in `bin/gun-art/lib/geometry.ts` (`SlantedAxis`, `smoothCurve`, 
 
 ## Top views
 
-Not built yet. The plan: the same generator draws the top view (for `src/highrise/weapons/guns/art/<gun>.svg`), taking its lengths along the gun from the side view's numbers, so the two can't disagree, with widths from measurements and photos from above or behind.
+The gun as it's held (`src/highrise/weapons/guns/art/<name>.svg`, registered in `gunArt.ts` and named by the gun's `art`) is drawn by the same generator (`top.draw`), straight in millimeters, **at the same scale as the side view** (the older guns' art is exaggerated about 1.4× along and 2× across, not on purpose; drawn to scale, the 1911 still reads as big as the Glock in hand). See the conventions in that folder's README.md.
+
+- **Lengths along the gun come from the side view's numbers** (`sx(px)` converts its photo's pixels), so the two can't disagree. Widths are the real gun's, checked against photos.
+- **Photos from above are rare and bad** (held in a hand, tilted, in perspective, often another model). Register one instead of drawing over it: four points in it whose places in millimeters we know (the slide's corners) in `top.registrations`, and `grid <gun> --view top` lays it under the drawing, straightened (a homography, `lib/homography.ts`). Use it for what parts look like from above and how far they stand out sideways; trust the side view for lengths. A photo from behind gives the widths of the stacked parts (slide, frame, grips, hammer).
+- **Specs mislead too**: the M1911's grips are 1.3" across on paper, but stand only 2.5 mm past the slide in both photos. Measure the photos.
+- **What moves, and what it uncovers**: decide with Simon. The slide goes over the frame's top and rails, the barrel (polished, it shows through the port) and the dust cover; a hammer can fall at each shot (a `stretch` about where it meets the slide, in `cycles`). Draw the moving parts as top-level groups, uncovered parts under them.
+- **Then the stats**: `art`, `points` (grip, action, magazine) where the drawing has them, the `parts` strokes, `cycles`, and `muzzleLength` (to the muzzle, in meters). Check in the rig: `npm run clip -- --scene rig --query "gun=<slug>&zoom=2400&speed=0.1&follow"` for the slide and hammer close up, and at `zoom=500` beside another gun for the size.
+- `options <gun> variants.json --view top --crop x,y,w,h` compares variations of the top view (in millimeters).

@@ -3,15 +3,18 @@
  *
  *   npx tsx bin/gun-art/cli.ts <command> [gun] [options]
  *
- *   build [gun...] [--check]   write each gun's pickup from its generator; --check fails if one isn't up to date
+ *   build [gun...] [--check]   write each gun's pickup and top view from its generator; --check fails if one
+ *                              isn't up to date
  *   grid <gun> [--crop x,y,w,h] [--mode side|over|photo|drawing] [--scale 1] [--grid 20] [--opacity 0.55]
  *        [--photo file] [--trace "x,y x,y ..."] [--options '{...}'] [--out file]
  *                              a region of the photo with a labeled grid in its pixels, and the drawing beside it
- *                              (side), over it (over), or neither (photo); --trace draws a red line over both
+ *                              (side), over it (over), or neither (photo); --trace draws a red line over both.
+ *        --view top: the top view in millimeters (--scale 6 px a mm, --grid 5 mm), beside or over a photo from
+ *        above, straightened by its registration (four points we know in it)
  *   measure <gun> edges x=600 y=340 ... [--jump 50]    where the photo's colors jump along columns or rows
  *   measure <gun> runs rows|cols <from> <to> <step> [lo hi]   the gun's extent along rows or columns
  *   measure <gun> sample x,y x,y ...                   the photo's colors there (5 px averages)
- *   options <gun> <variants.json> [--crop x,y,w,h] [--out file]
+ *   options <gun> <variants.json> [--crop x,y,w,h] [--view top] [--out file]
  *                              a sheet of variations: variants.json is {"A": {"label": "...", "options": {...}}}
  *   sheet <gun> [--out file]   the photo and the drawing, and the drawing at the pickups' size beside the others
  *   cutout <gun> [--out file]  the photo with its background removed, beside the drawing, light and dark
@@ -31,10 +34,11 @@ import {
   svgDataUrl,
   withPixels,
 } from "./lib/browser";
+import { cssMatrix, homography, type Matrix3 } from "./lib/homography";
 import {
+  generatedFiles,
   OUTPUT,
   photoPath,
-  pickupPath,
   pickupSvg,
   PICKUPS,
   REFERENCES,
@@ -130,21 +134,21 @@ async function build() {
   let stale = 0;
   for (const name of names) {
     const gun = findGun(name);
-    const file = pickupPath(gun);
-    const svg = pickupSvg(gun);
-    const current = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
-    if (flags.check) {
-      if (current !== svg) {
-        stale++;
-        console.error(
-          `${path.relative(process.cwd(), file)} isn't what bin/gun-art/guns/${name}.ts draws`,
-        );
+    for (const { file, svg } of generatedFiles(gun)) {
+      const current = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+      if (flags.check) {
+        if (current !== svg) {
+          stale++;
+          console.error(
+            `${path.relative(process.cwd(), file)} isn't what bin/gun-art/guns/${name}.ts draws`,
+          );
+        }
+      } else if (current !== svg) {
+        fs.writeFileSync(file, svg);
+        console.log(`wrote ${path.relative(process.cwd(), file)}`);
+      } else {
+        console.log(`${path.relative(process.cwd(), file)} is up to date`);
       }
-    } else if (current !== svg) {
-      fs.writeFileSync(file, svg);
-      console.log(`wrote ${path.relative(process.cwd(), file)}`);
-    } else {
-      console.log(`${path.relative(process.cwd(), file)} is up to date`);
     }
   }
   if (stale) {
@@ -181,7 +185,96 @@ function gridSvg(
   return `<svg width="${W}" height="${H}" style="position:absolute;left:0;top:0">${markup}</svg>`;
 }
 
+/** The viewBox of an SVG, as x, y, width, height */
+function viewBoxOf(svg: string): [number, number, number, number] {
+  const match = /viewBox="([^"]*)"/.exec(svg);
+  return match![1].split(/\s+/).map(Number) as [number, number, number, number];
+}
+
+/** An SVG shown at a crop of its own units, `scale` pixels a unit */
+function viewedImg(
+  svg: string,
+  [cx, cy, cw, ch]: [number, number, number, number],
+  scale: number,
+  opacity = 1,
+): string {
+  const viewed = svg
+    .replace(/viewBox="[^"]*"/, `viewBox="${cx} ${cy} ${cw} ${ch}"`)
+    .replace(
+      / width="[\d.]+" height="[\d.]+"/,
+      ` width="${cw * scale}" height="${ch * scale}"`,
+    );
+  return `<img src="${svgDataUrl(viewed)}" style="position:absolute;left:0;top:0;width:${cw * scale}px;height:${ch * scale}px;opacity:${opacity}">`;
+}
+
+/**
+ * The top view: a region of it in millimeters, with a labeled grid, beside or over a photo from above that's
+ * been registered (four points whose places we know), which undoes its tilt and perspective
+ */
+async function gridTop(gun: GunDrawing<any>) {
+  if (!gun.top) {
+    throw new Error(`${gun.name} has no top view yet`);
+  }
+  const mode = flag("mode", "side")!;
+  const drawing = gun.top.draw(options());
+  const c = crop(viewBoxOf(drawing));
+  const [cx, cy, cw, ch] = c;
+  const scale = Number(flag("scale", "6"));
+  const step = Number(flag("grid", "5"));
+  const opacity = Number(flag("opacity", "0.55"));
+  const registrations = gun.top.registrations ?? [];
+  const registration =
+    registrations.find((r) => r.file === flag("photo")) ?? registrations[0];
+  let photoImg = "";
+  if (registration) {
+    const photo = (gun.otherPhotos ?? []).find(
+      (p) => p.file === registration.file,
+    )!;
+    const file = photoPath(gun, photo);
+    const h = homography(
+      registration.points.map(([px]) => px),
+      registration.points.map(([, mm]) => mm),
+    );
+    // Then from millimeters to this panel's pixels
+    const t: Matrix3 = [scale, 0, -cx * scale, 0, scale, -cy * scale, 0, 0, 1];
+    const m = Array.from({ length: 9 }, (_, i) => {
+      const row = Math.floor(i / 3);
+      const col = i % 3;
+      return (
+        t[row * 3] * h[col] +
+        t[row * 3 + 1] * h[3 + col] +
+        t[row * 3 + 2] * h[6 + col]
+      );
+    }) as Matrix3;
+    photoImg = `<img src="${dataUrl(file)}" style="position:absolute;left:0;top:0;width:${photo.width}px;height:${photo.height}px;transform-origin:0 0;transform:${cssMatrix(m)}">`;
+  }
+  const panel = (content: string) =>
+    `<div style="flex:none;position:relative;width:${cw * scale}px;height:${ch * scale}px;overflow:hidden;background:#fff">${content}${gridSvg(c, scale, step)}</div>`;
+  const panels: string[] = [];
+  if (photoImg && (mode === "side" || mode === "photo" || mode === "over")) {
+    panels.push(
+      panel(
+        photoImg +
+          (mode === "over" ? viewedImg(drawing, c, scale, opacity) : ""),
+      ),
+    );
+  }
+  if (mode === "side" || mode === "drawing" || !photoImg) {
+    panels.push(panel(viewedImg(drawing, c, scale)));
+  }
+  const file = out(`${gun.name}-top-grid.png`);
+  await renderSheet(
+    `<div style="display:flex;flex-direction:column;gap:10px;background:#fff">${panels.join("")}</div>`,
+    file,
+    "#fff",
+  );
+  console.log(file);
+}
+
 async function grid() {
+  if (flag("view") === "top") {
+    return gridTop(findGun(positional[0]));
+  }
   const gun = findGun(positional[0]);
   const photo = photoFor(gun);
   const mode = flag("mode", "side")!;
@@ -356,6 +449,32 @@ async function optionsSheet() {
   const gun = findGun(positional[0]);
   const variants: Record<string, { label: string; options: unknown }> =
     JSON.parse(fs.readFileSync(positional[1], "utf8"));
+  if (flag("view") === "top") {
+    const top = gun.top;
+    if (!top) {
+      throw new Error(`${gun.name} has no top view yet`);
+    }
+    const c = crop(viewBoxOf(top.draw()));
+    const scale = Math.min(900 / c[2], 240 / c[3]);
+    const cards = Object.entries(variants).map(
+      ([
+        key,
+        { label, options },
+      ]) => `<div style="background:#fff;padding:12px;border-radius:6px">
+      <div style="font-weight:600;margin-bottom:6px">${key}. ${label}</div>
+      <div style="position:relative;width:${c[2] * scale}px;height:${c[3] * scale}px">${viewedImg(top.draw(options), c, scale)}</div>
+      <div style="margin-top:8px;background:#3a3a3a;display:inline-block;padding:6px;line-height:0">
+        <div style="position:relative;width:${c[2] * 0.6}px;height:${c[3] * 0.6}px">${viewedImg(top.draw(options), c, 0.6)}</div>
+      </div></div>`,
+    );
+    const file = out(`${gun.name}-top-options.png`);
+    await renderSheet(
+      `<div style="padding:20px;display:flex;flex-direction:column;gap:16px">${cards.join("")}</div>`,
+      file,
+    );
+    console.log(file);
+    return;
+  }
   const [cx, cy, cw, ch] = crop([0, 0, gun.photo.width, gun.photo.height]);
   const scale = Math.min(320 / cw, 340 / ch);
   const cards = Object.entries(variants).map(([key, { label, options }]) => {
