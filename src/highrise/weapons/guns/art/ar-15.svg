@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1163.333" height="100" viewBox="-581.667 -50 1163.333 100" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
   <defs>
-    <linearGradient id="ar-15-gradient-1" gradientUnits="userSpaceOnUse" x1="131.18" y1="28.08" x2="131.18" y2="-28.35">
+    <linearGradient id="ar-15-handguard-shading" gradientUnits="userSpaceOnUse" x1="131.18" y1="28.08" x2="131.18" y2="-28.35">
       <stop offset="0" stop-color="#232323"/>
       <stop offset="0.26" stop-color="#3b3b3b"/>
       <stop offset="0.5" stop-color="#434343"/>
       <stop offset="0.74" stop-color="#3a3a3a"/>
       <stop offset="1" stop-color="#232323"/>
     </linearGradient>
-    <clipPath id="ar-15-clip-1">
+    <clipPath id="ar-15-handguard-clip">
       <path d="M271.22,-20.833 L57.887,-33.333 L57.887,33.333 L271.22,20.833 L271.22,-20.833 Z"/>
     </clipPath>
-    <linearGradient id="ar-15-gradient-2" gradientUnits="userSpaceOnUse" x1="-174.613" y1="-1.047" x2="-101.28" y2="-1.047">
+    <linearGradient id="ar-15-red-dot" gradientUnits="userSpaceOnUse" x1="-174.613" y1="-1.047" x2="-101.28" y2="-1.047">
       <stop offset="0" stop-color="#8e3b3b"/>
       <stop offset="0.182" stop-color="#8e3b3b"/>
       <stop offset="0.182" stop-color="#822727"/>
@@ -23,114 +23,95 @@
       <stop offset="1" stop-color="#8e3b3b"/>
     </linearGradient>
   </defs>
-  <g id="stock-slide">
-    <rect x="-378.33" y="-20.84" width="106.667" height="41.667"/>
-  </g>
+  <!-- The tube the stock slides along, behind the receiver -->
+  <rect id="buffer-tube" x="-378.33" y="-20.84" width="106.667" height="41.667"/>
   <g id="barrel">
     <rect x="79.393" y="-12.5" width="500" height="25"/>
-  </g>
-  <g id="barrel-2">
-    <rect x="529.403" y="-16.663" width="50" height="33.333"/>
-  </g>
-  <g id="barrel-3">
-    <rect x="362.737" y="-16.663" width="100" height="33.333"/>
-  </g>
-  <g id="barrel-4">
-    <rect x="212.737" y="-16.663" width="100" height="33.333"/>
+    <rect id="flash-hider" x="529.403" y="-16.663" width="50" height="33.333"/>
+    <rect id="gas-block" x="362.737" y="-16.663" width="100" height="33.333"/>
+    <!-- Where the handguard ends -->
+    <rect id="barrel-nut" x="212.737" y="-16.663" width="100" height="33.333"/>
   </g>
   <g id="stock">
     <path d="M-565,-41.667 L-374.953,-33.333 L-374.953,33.333 L-565,41.667 L-565,50 L-581.667,50 L-581.667,-50 L-565,-50 L-565,-41.667 Z" fill="#1e1e1e"/>
     <path d="M-565,-41.667 L-374.953,-33.333 L-374.953,33.333 L-565,41.667 L-565,50 L-581.667,50 L-581.667,-50 L-565,-50 L-565,-41.667 Z M-568.333,-41.667 L-565.147,-38.337 L-378.287,-30.143 C-378.287,-30.143 -378.287,30.143 -378.287,30.143 C-378.287,30.143 -565.147,38.337 -565.147,38.337 L-568.333,41.667 L-568.333,46.667 C-568.333,46.667 -578.333,46.667 -578.333,46.667 C-578.333,46.667 -578.333,-46.667 -578.333,-46.667 C-578.333,-46.667 -568.333,-46.667 -568.333,-46.667 C-568.333,-46.667 -568.333,-41.667 -568.333,-41.667 Z" fill="#545454"/>
   </g>
-  <g id="reciver-base">
+  <g id="receiver">
     <path d="M18.333,-41.667 L-275,-41.667 L-275,41.667 L18.333,41.667 L18.333,29.167 L25,29.167 L25,-29.167 L18.333,-29.167 L18.333,-41.667 Z" fill="#2e2e2e"/>
     <path d="M18.333,-41.667 L-275,-41.667 L-275,41.667 L18.333,41.667 L18.333,29.167 L25,29.167 L25,-29.167 L18.333,-29.167 L18.333,-41.667 Z M14.997,-38.333 L14.997,-29.167 L18.333,-25.833 L21.667,-25.833 C21.667,-25.833 21.667,25.833 21.667,25.833 C21.667,25.833 18.333,25.833 18.333,25.833 L14.997,29.167 L14.997,38.333 C14.997,38.333 -271.667,38.333 -271.667,38.333 C-271.667,38.333 -271.667,-38.333 -271.667,-38.333 L14.997,-38.333 Z" fill="#545454"/>
   </g>
-  <g id="triangle-thing">
-    <path d="M21.667,-41.667 L61.667,-16.667 L61.667,16.667 L21.667,41.667 L21.667,-41.667 Z" fill="#1e1e1e"/>
-    <path d="M21.667,-41.667 L61.667,-16.667 L61.667,16.667 L21.667,41.667 L21.667,-41.667 Z M25,-35.653 L58.333,-14.82 C58.333,-14.82 58.333,14.82 58.333,14.82 C58.333,14.82 25,35.653 25,35.653 L25,-35.653 Z" fill="#2e2e2e"/>
-  </g>
-  <g id="barrel-shroud">
-    <path d="M271.22,-25 L57.887,-33.333 L57.887,33.333 L271.22,25 L271.22,-25 Z" fill="url(#ar-15-gradient-1)"/>
-    <path d="M271.22,-25 L57.887,-33.333 L57.887,33.333 L271.22,25 L271.22,-25 Z M267.887,-21.793 L267.887,21.797 C267.887,21.797 61.22,29.867 61.22,29.867 C61.22,29.867 61.22,-29.867 61.22,-29.867 L267.887,-21.793 Z" fill="#1e1e1e"/>
-  </g>
-  <g clip-path="url(#ar-15-clip-1)">
-    <rect x="56.477" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="56.477" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="73.143" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="73.143" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="89.81" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="89.81" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="106.477" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="106.477" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="139.81" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="139.81" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="173.143" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="173.143" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="206.477" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="206.477" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="239.81" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="239.81" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="223.143" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="223.143" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="189.81" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="189.81" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="156.477" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="156.477" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="123.143" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="123.143" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-    <rect x="256.477" y="-44.327" width="3.333" height="87.147" fill="#5d5d5d"/>
-    <rect x="256.477" y="-44.327" width="3.333" height="87.147" fill="#1e1e1e"/>
-  </g>
-  <g id="rail-3">
-    <g id="rail">
-      <g id="slots">
-        <rect x="-181.667" y="-37.5" width="6.667" height="75"/>
-        <rect x="-195" y="-37.5" width="6.667" height="75"/>
-        <rect x="-208.333" y="-37.5" width="6.667" height="75"/>
-        <rect x="-168.333" y="-37.5" width="6.667" height="75"/>
-        <rect x="-155" y="-37.5" width="6.667" height="75"/>
-        <rect x="-141.667" y="-37.5" width="6.667" height="75"/>
-        <rect x="-128.333" y="-37.5" width="6.667" height="75"/>
-        <rect x="-115" y="-37.5" width="6.667" height="75"/>
-        <rect x="-101.667" y="-37.5" width="6.667" height="75"/>
-        <rect x="-88.333" y="-37.5" width="6.667" height="75"/>
-        <rect x="-75" y="-37.5" width="6.667" height="75"/>
-        <rect x="-61.667" y="-37.5" width="6.667" height="75"/>
-        <rect x="-48.333" y="-37.5" width="6.667" height="75"/>
-        <rect x="-35" y="-37.5" width="6.667" height="75"/>
-        <rect x="-21.667" y="-37.5" width="6.667" height="75"/>
-        <rect x="-8.333" y="-31.25" width="6.667" height="62.5"/>
-        <rect x="5" y="-25" width="6.667" height="50"/>
-      </g>
+  <g id="handguard">
+    <!-- The ring at its back, tapering down from the receiver -->
+    <g id="delta-ring">
+      <path d="M21.667,-41.667 L61.667,-16.667 L61.667,16.667 L21.667,41.667 L21.667,-41.667 Z" fill="#1e1e1e"/>
+      <path d="M21.667,-41.667 L61.667,-16.667 L61.667,16.667 L21.667,41.667 L21.667,-41.667 Z M25,-35.653 L58.333,-14.82 C58.333,-14.82 58.333,14.82 58.333,14.82 C58.333,14.82 25,35.653 25,35.653 L25,-35.653 Z" fill="#2e2e2e"/>
     </g>
-    <g id="rail-2">
-      <g id="slots-2">
-        <rect x="-188.333" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-201.667" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-215" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-175" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-161.667" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-148.333" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-135" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-121.667" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-108.333" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-95" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-81.667" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-68.333" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-55" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-41.667" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-28.333" y="-37.5" width="6.667" height="75" fill="#727272"/>
-        <rect x="-15" y="-31.25" width="6.667" height="62.5" fill="#727272"/>
-        <rect x="-1.667" y="-25" width="6.667" height="50" fill="#727272"/>
-      </g>
+    <path d="M271.22,-25 L57.887,-33.333 L57.887,33.333 L271.22,25 L271.22,-25 Z" fill="url(#ar-15-handguard-shading)"/>
+    <path d="M271.22,-25 L57.887,-33.333 L57.887,33.333 L271.22,25 L271.22,-25 Z M267.887,-21.793 L267.887,21.797 C267.887,21.797 61.22,29.867 61.22,29.867 C61.22,29.867 61.22,-29.867 61.22,-29.867 L267.887,-21.793 Z" fill="#1e1e1e"/>
+    <g id="handguard-grooves" clip-path="url(#ar-15-handguard-clip)" fill="#1e1e1e">
+      <rect x="56.477" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="73.143" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="89.81" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="106.477" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="123.143" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="139.81" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="156.477" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="173.143" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="189.81" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="206.477" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="223.143" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="239.81" y="-44.327" width="3.333" height="87.147"/>
+      <rect x="256.477" y="-44.327" width="3.333" height="87.147"/>
+    </g>
+  </g>
+  <!-- The rail along the top of the receiver, its slots alternately dark and light -->
+  <g id="rail">
+    <g id="rail-dark-slots">
+      <rect x="-208.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-195" y="-37.5" width="6.667" height="75"/>
+      <rect x="-181.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-168.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-155" y="-37.5" width="6.667" height="75"/>
+      <rect x="-141.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-128.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-115" y="-37.5" width="6.667" height="75"/>
+      <rect x="-101.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-88.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-75" y="-37.5" width="6.667" height="75"/>
+      <rect x="-61.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-48.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-35" y="-37.5" width="6.667" height="75"/>
+      <rect x="-21.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-8.333" y="-31.25" width="6.667" height="62.5"/>
+      <rect x="5" y="-25" width="6.667" height="50"/>
+    </g>
+    <g id="rail-light-slots" fill="#727272">
+      <rect x="-215" y="-37.5" width="6.667" height="75"/>
+      <rect x="-201.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-188.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-175" y="-37.5" width="6.667" height="75"/>
+      <rect x="-161.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-148.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-135" y="-37.5" width="6.667" height="75"/>
+      <rect x="-121.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-108.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-95" y="-37.5" width="6.667" height="75"/>
+      <rect x="-81.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-68.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-55" y="-37.5" width="6.667" height="75"/>
+      <rect x="-41.667" y="-37.5" width="6.667" height="75"/>
+      <rect x="-28.333" y="-37.5" width="6.667" height="75"/>
+      <rect x="-15" y="-31.25" width="6.667" height="62.5"/>
+      <rect x="-1.667" y="-25" width="6.667" height="50"/>
     </g>
   </g>
   <g id="red-dot-sight">
-    <path d="M-197.077,-20.833 L-173.743,-33.333 L-95.287,-33.333 L-81.953,-16.667 L-81.953,16.667 L-95.287,33.333 L-173.743,33.333 L-197.077,20.833 L-197.077,-20.833 Z" fill="#3b3b3b"/>
-    <ellipse cx="-137.083" cy="0" rx="23.333" ry="29.17" fill="#1e1e1e"/>
-    <rect x="-174.613" y="-2.35" width="73.333" height="2.603" fill="url(#ar-15-gradient-2)"/>
-    <path d="M-197.077,-20.833 L-173.743,-33.333 L-173.743,33.333 L-197.077,20.833 L-197.077,-20.833 Z" fill="#1e1e1e"/>
-    <path d="M-112.32,-43.333 C-112.32,-47.013 -109.33,-50 -105.653,-50 L-92.32,-50 C-88.64,-50 -85.653,-47.013 -85.653,-43.333 L-85.653,43.333 C-85.653,47.013 -88.64,50 -92.32,50 L-105.653,50 C-109.33,50 -112.32,47.013 -112.32,43.333 L-112.32,-43.333 Z"/>
+    <path id="red-dot-sight-body" d="M-197.077,-20.833 L-173.743,-33.333 L-95.287,-33.333 L-81.953,-16.667 L-81.953,16.667 L-95.287,33.333 L-173.743,33.333 L-197.077,20.833 L-197.077,-20.833 Z" fill="#3b3b3b"/>
+    <ellipse id="red-dot-sight-tube" cx="-137.083" cy="0" rx="23.333" ry="29.17" fill="#1e1e1e"/>
+    <!-- The red dot, seen edge on through the tube -->
+    <rect id="red-dot-sight-dot" x="-174.613" y="-2.35" width="73.333" height="2.603" fill="url(#ar-15-red-dot)"/>
+    <path id="red-dot-sight-eyepiece" d="M-197.077,-20.833 L-173.743,-33.333 L-173.743,33.333 L-197.077,20.833 L-197.077,-20.833 Z" fill="#1e1e1e"/>
+    <!-- The knobs out at its sides -->
+    <path id="red-dot-sight-turrets" d="M-112.32,-43.333 C-112.32,-47.013 -109.33,-50 -105.653,-50 L-92.32,-50 C-88.64,-50 -85.653,-47.013 -85.653,-43.333 L-85.653,43.333 C-85.653,47.013 -88.64,50 -92.32,50 L-105.653,50 C-109.33,50 -112.32,47.013 -112.32,43.333 L-112.32,-43.333 Z"/>
   </g>
 </svg>

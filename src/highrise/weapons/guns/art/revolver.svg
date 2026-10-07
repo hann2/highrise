@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="386.667" height="90" viewBox="-193.333 -45 386.667 90" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
   <defs>
-    <linearGradient id="revolver-gradient-1" gradientUnits="userSpaceOnUse" x1="5.86" y1="18.937" x2="5.86" y2="-20.7">
+    <linearGradient id="revolver-barrel-shading" gradientUnits="userSpaceOnUse" x1="5.86" y1="18.937" x2="5.86" y2="-20.7">
       <stop offset="0" stop-color="#9c9c9c"/>
       <stop offset="0.28" stop-color="#cfcfcf"/>
       <stop offset="0.5" stop-color="#e5e5e5"/>
       <stop offset="0.77" stop-color="#d9d9d9"/>
       <stop offset="1" stop-color="#adadad"/>
     </linearGradient>
-    <linearGradient id="revolver-gradient-2" gradientUnits="userSpaceOnUse" x1="-52.977" y1="44.713" x2="-52.977" y2="-47.75">
+    <linearGradient id="revolver-cylinder-shading" gradientUnits="userSpaceOnUse" x1="-52.977" y1="44.713" x2="-52.977" y2="-47.75">
       <stop offset="0" stop-color="#9c9c9c"/>
       <stop offset="0.28" stop-color="#cfcfcf"/>
       <stop offset="0.5" stop-color="#e5e5e5"/>
       <stop offset="0.77" stop-color="#d9d9d9"/>
       <stop offset="1" stop-color="#adadad"/>
     </linearGradient>
-    <linearGradient id="revolver-gradient-3" gradientUnits="userSpaceOnUse" x1="-85.073" y1="23.823" x2="-85.073" y2="-25.827">
+    <linearGradient id="revolver-frame-shading" gradientUnits="userSpaceOnUse" x1="-85.073" y1="23.823" x2="-85.073" y2="-25.827">
       <stop offset="0" stop-color="#676666"/>
       <stop offset="0.07" stop-color="#a4a3a3"/>
       <stop offset="0.17" stop-color="#d4d4d4"/>
@@ -24,38 +24,30 @@
       <stop offset="1" stop-color="#666666"/>
     </linearGradient>
   </defs>
+  <!-- The back of the grip, behind the frame -->
   <g id="grip">
     <path d="M-100.183,-0.403 C-100.183,-14.99 -112.027,-26.833 -126.613,-26.833 L-166.907,-26.833 C-181.49,-26.833 -193.337,-14.99 -193.337,-0.403 C-193.337,14.183 -181.49,26.023 -166.907,26.023 L-126.613,26.023 C-112.027,26.023 -100.183,14.183 -100.183,-0.403 Z" fill="#303030"/>
   </g>
   <g id="barrel">
-    <path d="M190.05,-15.697 L183.637,-19.52 L-146.03,-19.52 L-152.443,-15.697 L-152.443,14.89 L-146.03,18.713 L183.637,18.713 L190.05,14.89 L190.05,-15.697 Z" fill="url(#revolver-gradient-1)"/>
+    <path d="M190.05,-15.697 L183.637,-19.52 L-146.03,-19.52 L-152.443,-15.697 L-152.443,14.89 L-146.03,18.713 L183.637,18.713 L190.05,14.89 L190.05,-15.697 Z" fill="url(#revolver-barrel-shading)"/>
   </g>
+  <!-- Wider than the frame, so it shows at both sides. It swings out to the left to load -->
   <g id="cylinder">
-    <path d="M-14.887,44.193 L-14.887,-45 L-85.523,-45 L-86.897,-32.747 L-93.563,-24.823 L-93.563,23.95 L-86.897,31.943 L-85.523,44.193 L-14.887,44.193 Z" fill="url(#revolver-gradient-2)"/>
+    <path d="M-14.887,44.193 L-14.887,-45 L-85.523,-45 L-86.897,-32.747 L-93.563,-24.823 L-93.563,23.95 L-86.897,31.943 L-85.523,44.193 L-14.887,44.193 Z" fill="url(#revolver-cylinder-shading)"/>
   </g>
-  <g id="barrel-2">
-    <path d="M-3.353,-19.563 L-6.083,-24.35 C-6.083,-24.35 -92.547,-25.15 -116.383,-24.35 C-128.46,-23.947 -146.437,-23.413 -152.447,-16.227 C-158.457,-9.047 -158.457,8.237 -152.447,15.423 C-146.437,22.607 -128.46,23.14 -116.383,23.547 C-92.547,24.343 -6.083,23.547 -6.083,23.547 L-3.353,18.757 L-3.353,-19.563 Z" fill="url(#revolver-gradient-3)"/>
-  </g>
-  <g id="hammer-slot">
-    <path d="M-87.747,3.79 L-87.747,-4.593 L-141.82,-4.593 L-153.673,-1.26 L-153.673,0.457 L-141.687,3.79 L-87.747,3.79 Z" fill="#6d6d6d"/>
-  </g>
-  <g id="hammer-slot-2">
-    <path d="M-86.543,-3.757 L-86.83,-4.593 L-101.763,-4.593 L-102.05,-3.757 L-102.05,2.95 L-101.763,3.79 L-86.83,3.79 L-86.543,2.95 L-86.543,-3.757 Z" fill="#b6b6b6"/>
-  </g>
-  <g id="front-sight-3">
-    <g id="front-sight">
-      <path d="M185.313,-4.403 L184.177,-5.403 L124.983,-5.403 L123.843,-4.403 L123.843,3.597 L124.983,4.597 L184.177,4.597 L185.313,3.597 L185.313,-4.403 Z" fill="#c9c9c9"/>
-    </g>
-    <g id="front-sight-2">
-      <path d="M185.317,-3.07 L184.743,-3.737 L154.923,-3.737 L154.35,-3.07 L154.35,2.263 L154.923,2.93 L184.743,2.93 L185.317,2.263 L185.317,-3.07 Z" fill="#999999"/>
-    </g>
+  <!-- The top strap over the cylinder, and the channel the hammer comes forward in -->
+  <g id="frame">
+    <path id="top-strap" d="M-3.353,-19.563 L-6.083,-24.35 C-6.083,-24.35 -92.547,-25.15 -116.383,-24.35 C-128.46,-23.947 -146.437,-23.413 -152.447,-16.227 C-158.457,-9.047 -158.457,8.237 -152.447,15.423 C-146.437,22.607 -128.46,23.14 -116.383,23.547 C-92.547,24.343 -6.083,23.547 -6.083,23.547 L-3.353,18.757 L-3.353,-19.563 Z" fill="url(#revolver-frame-shading)"/>
+    <path id="hammer-channel" d="M-87.747,3.79 L-87.747,-4.593 L-141.82,-4.593 L-153.673,-1.26 L-153.673,0.457 L-141.687,3.79 L-87.747,3.79 Z" fill="#6d6d6d"/>
   </g>
   <g id="rear-sight">
-    <g id="rear-sight-left">
-      <path d="M-84.597,-17.403 L-85.17,-17.903 L-115.037,-17.903 L-115.613,-17.403 L-115.613,-13.403 L-115.037,-12.903 L-85.17,-12.903 L-84.597,-13.403 L-84.597,-17.403 Z" fill="#868686"/>
-    </g>
-    <g id="rear-sight-right">
-      <path d="M-84.597,12.597 L-85.17,12.097 L-115.037,12.097 L-115.613,12.597 L-115.613,16.597 L-115.037,17.097 L-85.17,17.097 L-84.597,16.597 L-84.597,12.597 Z" fill="#868686"/>
-    </g>
+    <path id="rear-sight-blade" d="M-86.543,-3.757 L-86.83,-4.593 L-101.763,-4.593 L-102.05,-3.757 L-102.05,2.95 L-101.763,3.79 L-86.83,3.79 L-86.543,2.95 L-86.543,-3.757 Z" fill="#b6b6b6"/>
+    <path d="M-84.597,-17.403 L-85.17,-17.903 L-115.037,-17.903 L-115.613,-17.403 L-115.613,-13.403 L-115.037,-12.903 L-85.17,-12.903 L-84.597,-13.403 L-84.597,-17.403 Z" fill="#868686"/>
+    <path d="M-84.597,12.597 L-85.17,12.097 L-115.037,12.097 L-115.613,12.597 L-115.613,16.597 L-115.037,17.097 L-85.17,17.097 L-84.597,16.597 L-84.597,12.597 Z" fill="#868686"/>
+  </g>
+  <!-- A rib along the barrel, with the sight's blade at its front -->
+  <g id="front-sight">
+    <path d="M185.313,-4.403 L184.177,-5.403 L124.983,-5.403 L123.843,-4.403 L123.843,3.597 L124.983,4.597 L184.177,4.597 L185.313,3.597 L185.313,-4.403 Z" fill="#c9c9c9"/>
+    <path d="M185.317,-3.07 L184.743,-3.737 L154.923,-3.737 L154.35,-3.07 L154.35,2.263 L154.923,2.93 L184.743,2.93 L185.317,2.263 L185.317,-3.07 Z" fill="#999999"/>
   </g>
 </svg>

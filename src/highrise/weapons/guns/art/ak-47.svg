@@ -1,18 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1180" height="103.333" viewBox="-590 -51.667 1180 103.333" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5" clip-rule="evenodd">
   <defs>
-    <linearGradient id="ak-47-gradient-1" gradientUnits="userSpaceOnUse" x1="-457.13" y1="48.697" x2="-457.13" y2="-42.68">
+    <linearGradient id="ak-47-stock-wood" gradientUnits="userSpaceOnUse" x1="-457.13" y1="48.697" x2="-457.13" y2="-42.68">
       <stop offset="0" stop-color="#8f6532"/>
       <stop offset="0.22" stop-color="#c0853e"/>
       <stop offset="0.5" stop-color="#cd8d41"/>
       <stop offset="0.78" stop-color="#c0853e"/>
       <stop offset="1" stop-color="#8f6532"/>
     </linearGradient>
-    <linearGradient id="ak-47-gradient-2" gradientUnits="userSpaceOnUse" x1="391.027" y1="14.183" x2="391.027" y2="-14.44">
+    <linearGradient id="ak-47-barrel-shading" gradientUnits="userSpaceOnUse" x1="391.027" y1="14.183" x2="391.027" y2="-14.44">
       <stop offset="0" stop-color="#5d5b5b"/>
       <stop offset="0.5" stop-color="#808080"/>
       <stop offset="1" stop-color="#5d5d5d"/>
     </linearGradient>
-    <linearGradient id="ak-47-gradient-3" gradientUnits="userSpaceOnUse" x1="104.863" y1="50.347" x2="104.863" y2="-50.247">
+    <linearGradient id="ak-47-handguard-wood" gradientUnits="userSpaceOnUse" x1="104.863" y1="50.347" x2="104.863" y2="-50.247">
       <stop offset="0" stop-color="#8f6532"/>
       <stop offset="0.1" stop-color="#a97638"/>
       <stop offset="0.2" stop-color="#c2863e"/>
@@ -21,7 +21,7 @@
       <stop offset="0.9" stop-color="#a97638"/>
       <stop offset="1" stop-color="#8f6532"/>
     </linearGradient>
-    <linearGradient id="ak-47-gradient-4" gradientUnits="userSpaceOnUse" x1="-104.617" y1="24.03" x2="-104.617" y2="-26.55">
+    <linearGradient id="ak-47-dust-cover-shading" gradientUnits="userSpaceOnUse" x1="-104.617" y1="24.03" x2="-104.617" y2="-26.55">
       <stop offset="0" stop-color="#484848"/>
       <stop offset="0.24" stop-color="#777777"/>
       <stop offset="0.5" stop-color="#868686"/>
@@ -29,24 +29,25 @@
       <stop offset="1" stop-color="#484848"/>
     </linearGradient>
   </defs>
-  <ellipse cx="-530.55" cy="40.58" rx="6.647" ry="7.12" fill="#2d2d2d"/>
+  <!-- The sling swivel under the stock, on the right -->
+  <ellipse id="sling-swivel" cx="-530.55" cy="40.58" rx="6.647" ry="7.12" fill="#2d2d2d"/>
   <g id="stock">
-    <path d="M-267.353,-32.143 L-582.183,-42.857 C-590.157,-14.283 -590.607,14.283 -582.183,42.857 L-267.353,32.143 L-267.353,-32.143 Z" fill="url(#ak-47-gradient-1)" stroke="#6b4e2b" stroke-width="3.243"/>
+    <path d="M-267.353,-32.143 L-582.183,-42.857 C-590.157,-14.283 -590.607,14.283 -582.183,42.857 L-267.353,32.143 L-267.353,-32.143 Z" fill="url(#ak-47-stock-wood)" stroke="#6b4e2b" stroke-width="3.243"/>
   </g>
-  <rect x="145.23" y="-14.287" width="443.54" height="28.57" fill="url(#ak-47-gradient-2)"/>
   <g id="barrel">
-    <path d="M385.227,-18.243 L288.56,-21.817 L288.56,21.043 L385.227,17.473 L385.227,-18.243 Z" fill="#484848"/>
+    <rect x="145.23" y="-14.287" width="443.54" height="28.57" fill="url(#ak-47-barrel-shading)"/>
+    <path id="gas-block" d="M385.227,-18.243 L288.56,-21.817 L288.56,21.043 L385.227,17.473 L385.227,-18.243 Z" fill="#484848"/>
+    <rect id="front-sight" x="515.46" y="-7.143" width="56.667" height="14.283" fill="#484848"/>
   </g>
-  <rect x="515.46" y="-7.143" width="56.667" height="14.283" fill="#484848"/>
-  <path d="M217.597,-46.427 C240.45,-46.427 284.863,-32.143 284.863,-32.143 L284.863,32.143 C284.863,32.143 240.45,46.43 217.597,46.43 L104.863,46.43 L104.863,-46.427 L217.597,-46.427 Z" fill="url(#ak-47-gradient-3)" stroke="#6b4e2b" stroke-width="3.387"/>
-  <rect x="283.487" y="-32.163" width="6.667" height="64.327" fill="#484848"/>
+  <g id="handguard">
+    <path d="M217.597,-46.427 C240.45,-46.427 284.863,-32.143 284.863,-32.143 L284.863,32.143 C284.863,32.143 240.45,46.43 217.597,46.43 L104.863,46.43 L104.863,-46.427 L217.597,-46.427 Z" fill="url(#ak-47-handguard-wood)" stroke="#6b4e2b" stroke-width="3.387"/>
+    <!-- The band that holds it on, at the front -->
+    <rect id="handguard-retainer" x="283.487" y="-32.163" width="6.667" height="64.327" fill="#484848"/>
+  </g>
   <g id="receiver">
     <path d="M122.857,-50 L189.523,-37.5 L189.523,37.5 L122.857,50 L-263.653,50 L-273.653,42.307 L-273.653,-39.837 L-263.653,-50 L122.857,-50 Z" fill="#484848" stroke="#2d2d2d" stroke-width="3.393" stroke-linecap="square" stroke-linejoin="bevel"/>
-  </g>
-  <g id="receiver-2">
-    <path d="M119.523,-28.57 L119.523,28.573 L-226.987,28.573 L-236.987,24.177 L-236.987,-22.763 L-226.987,-28.57 L119.523,-28.57 Z" fill="url(#ak-47-gradient-4)" stroke="#2d2d2d" stroke-width="2.68"/>
-  </g>
-  <g id="receiver-3">
-    <path d="M189.133,-39.287 L189.133,39.287 L120.913,39.287 L119.133,33.243 L119.133,-31.3 L120.913,-39.287 L189.133,-39.287 Z" fill="#2d2d2d"/>
+    <!-- The top cover, which the bolt carrier and its charging handle (on the right) run under -->
+    <path id="dust-cover" d="M119.523,-28.57 L119.523,28.573 L-226.987,28.573 L-236.987,24.177 L-236.987,-22.763 L-226.987,-28.57 L119.523,-28.57 Z" fill="url(#ak-47-dust-cover-shading)" stroke="#2d2d2d" stroke-width="2.68"/>
+    <path id="rear-sight" d="M189.133,-39.287 L189.133,39.287 L120.913,39.287 L119.133,33.243 L119.133,-31.3 L120.913,-39.287 L189.133,-39.287 Z" fill="#2d2d2d"/>
   </g>
 </svg>
