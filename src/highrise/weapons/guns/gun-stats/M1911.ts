@@ -20,7 +20,7 @@ export const M1911: GunStats = {
   art: "glock",
   textures: {
     ...defaultGunStats.textures,
-    pickup: "glockPickup",
+    pickup: "m1911Pickup",
     shellCasing: "pistolCasing",
   },
   size: [0.45, 0.45],
