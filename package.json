@@ -31,7 +31,8 @@
     "electron": "electron-forge start --",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "test:electron": "electron-forge package && playwright test --config tests/electron/playwright.config.ts"
+    "test:electron": "electron-forge package && playwright test --config tests/electron/playwright.config.ts",
+    "test:gun-art": "tsx --test tests/gun-art/*.test.ts"
   },
   "author": "Philip Hann, Simon Baumgardt-Wellander",
   "license": "MIT",

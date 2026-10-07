@@ -16,3 +16,6 @@ playwright-report/
 # Electron Forge: the build and the packaged app
 .vite/
 out/
+
+# Reference photos for drawing guns (bin/gun-art): kept locally, since we don't own them
+assets/source/images/weapons/references/

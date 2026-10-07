@@ -17,28 +17,34 @@ export const M1911: GunStats = {
   reloadInsertTime: 0.8,
   ammoCapacity: 7,
 
-  art: "glock",
+  art: "m1911",
   textures: {
     ...defaultGunStats.textures,
     pickup: "m1911Pickup",
     shellCasing: "pistolCasing",
   },
-  size: [0.45, 0.45],
+  // The pickup's square (bin/gun-art/guns/m1911.ts), so it lies on the floor at the same scale it's held at
+  size: [0.224, 0.224],
 
+  // Its art is drawn to scale with its pickup (bin/gun-art/guns/m1911.ts), smaller than the other guns'
   points: {
-    grip: [-0.1, 0],
-    foregrip: [-0.1, 0],
-    magazine: [-0.1, 0],
-    action: [-0.12, 0],
+    grip: [-0.085, 0],
+    foregrip: [-0.085, 0],
+    magazine: [-0.085, 0],
+    action: [-0.08, 0],
   },
-  // The slide goes back with each shot, and stays back when it's empty
-  parts: { slide: { offset: [-0.06, 0], carries: ["action"] } },
-  cycles: ["slide"],
+  // The slide goes back with each shot, and stays back when it's empty. The hammer falls forward as it fires
+  // (shorter from above, tipping up against the slide), and the slide cocks it again
+  parts: {
+    slide: { offset: [-0.045, 0], carries: ["action"] },
+    hammer: { stretch: 0.55, pivot: [-0.0878, 0] },
+  },
+  cycles: ["slide", "hammer"],
   locksBackWhenEmpty: true,
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.125 },
   holdPosition: [0.5, 0],
-  muzzleLength: 0.28,
+  muzzleLength: 0.11,
 
   recoilAmount: degToRad(8),
   recoilRecovery: 10,
