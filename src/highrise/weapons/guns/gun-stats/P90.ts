@@ -50,8 +50,11 @@ export const P90: GunStats = {
   parts: {
     "charging-handle": { offset: [-0.09, 0], carries: ["action"] },
   },
+  // Fed from the back of the magazine, so they slide back as it empties, half
+  // the gap between rounds in a row at a time (they're in two staggered rows)
+  rounds: { count: 50, travel: -0.325 },
   animations: rifleAnimations({ magazineOnTop: true }),
-  magazine: { texture: "p90Magazine", length: 0.26 },
+  magazine: "art",
   holdPosition: [0.35, 0],
   stanceAngle: degToRad(50),
   sideOffset: 0.2,

@@ -52,6 +52,7 @@ import {
   GunStats,
   ReloadingStyle,
 } from "./GunStats";
+import { MagazineArt } from "./GunSprite";
 
 // Pulling the gun in when it would poke through a wall. It first slides back
 // toward the body until the grip is at MIN_GRIP_X, then swings aside around the
@@ -81,6 +82,8 @@ const CYCLE_SHARE = 0.8;
 const CYCLE_BACK = 0.3;
 /** Meters off the floor a dropped magazine falls from */
 const MAGAZINE_DROP_HEIGHT = 0.9;
+/** Seconds the rounds that show take to slide most of the way on after a shot (`GunStats.rounds`) */
+const ROUNDS_FEED_TIME = 0.015;
 // TODO: A real magazine hitting the floor
 const MAGAZINE_DROP_SOUNDS: SoundName[] = ["glowStickDrop1", "glowStickDrop2"];
 
@@ -115,6 +118,13 @@ export default class Gun extends BaseEntity implements Entity {
   private recoilKick = 0;
   /** Seconds since the last shot, for the parts that cycle with each one (`GunStats.cycles`) */
   private sinceShot = Infinity;
+  /**
+   * Rounds in the fresh magazine a reload's putting in, from when the old one
+   * is let go (until the reload's done, `ammo` is still the old one's)
+   */
+  private freshMagazine?: number;
+  /** How far the rounds that show have slid (`GunStats.rounds`): 0 full, 1 empty, catching up with the shots */
+  private roundsSlid = 0;
   /** How far the muzzle is pulled back from its usual spot to keep it out of a wall */
   wallRetraction = 0;
   /**
@@ -385,6 +395,12 @@ export default class Gun extends BaseEntity implements Entity {
 
   /** Lets the magazine fall out of the gun to the floor */
   private dropMagazine(shooter: Human) {
+    // What was left in it, before the fresh one's shown
+    const slid = this.roundsSlid;
+    this.freshMagazine = Math.min(
+      this.getCapacity(shooter),
+      this.ammo + shooter.getReserve(this.stats.ammoClass),
+    );
     const { magazine, points } = this.stats;
     if (!magazine) {
       return;
@@ -399,9 +415,19 @@ export default class Gun extends BaseEntity implements Entity {
         position,
         velocity,
         shooter.getDirection() + pose.angle,
-        magazine.texture,
+        magazine === "art"
+          ? () => {
+              const art = new MagazineArt(this.stats, "middle");
+              art.setRounds(slid);
+              return art;
+            }
+          : magazine.texture,
         MAGAZINE_DROP_SOUNDS,
-        { size: magazine.length, height: MAGAZINE_DROP_HEIGHT, spin: 0.15 },
+        {
+          size: magazine === "art" ? undefined : magazine.length,
+          height: MAGAZINE_DROP_HEIGHT,
+          spin: 0.15,
+        },
       ),
     );
   }
@@ -513,6 +539,7 @@ export default class Gun extends BaseEntity implements Entity {
     if (!this.canReload(shooter)) {
       return;
     }
+    this.freshMagazine = undefined;
     const instant = this.ammo === 0 && shooter.stats.instantEmptyReload;
     if (this.stats.ejectionType === EjectionType.RELOAD) {
       while (this.shellsToEject > 0) {
@@ -560,6 +587,35 @@ export default class Gun extends BaseEntity implements Entity {
     this.updateRecoil(dt);
     this.sinceShot += dt;
     this.animator.advance(dt);
+    this.updateRounds(dt);
+  }
+
+  /** Rounds the magazine in the gun looks to have: during a reload, the fresh one's once the old one's out */
+  private get roundsShown(): number {
+    return this.isReloading && this.freshMagazine !== undefined
+      ? this.freshMagazine
+      : this.ammo;
+  }
+
+  /**
+   * Slides the rounds that show on toward where they are with the rounds
+   * left, a whole drawn round at a time (so a bigger magazine shows its
+   * rounds in proportion), and back to full at once when it's reloaded
+   */
+  private updateRounds(dt: number) {
+    const { rounds } = this.stats;
+    if (!rounds) {
+      return;
+    }
+    const holder = this.parent instanceof Human ? this.parent : undefined;
+    const full = this.roundsShown / this.getCapacity(holder);
+    const drawn = Math.min(Math.ceil(full * rounds.count - 1e-9), rounds.count);
+    const target = 1 - drawn / rounds.count;
+    this.roundsSlid =
+      target < this.roundsSlid
+        ? target
+        : target -
+          (target - this.roundsSlid) * Math.exp(-dt / ROUNDS_FEED_TIME);
   }
 
   /**
@@ -643,6 +699,7 @@ export default class Gun extends BaseEntity implements Entity {
       push,
       twist,
       parts: this.getCyclingParts(),
+      rounds: this.roundsSlid,
       leftHanded: this.leftHanded,
     };
     return this.animator.pose(

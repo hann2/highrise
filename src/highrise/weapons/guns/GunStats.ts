@@ -121,6 +121,12 @@ export interface GunStats extends BaseWeaponStats {
   cycles?: readonly GunPartName[];
   /** Whether they stay back once the last round's fired, until it's reloaded */
   locksBackWhenEmpty?: boolean;
+  /**
+   * The rounds its art shows (a `rounds` group, see `art/README.md`): how
+   * many are drawn, and how far they slide along the gun from full to empty,
+   * in meters (negative is toward the stock)
+   */
+  rounds?: { readonly count: number; readonly travel: number };
   /** How it's reloaded and worked (see `GunAnimations`), which can move its parts too */
   animations: GunAnimations;
   /** What its reload animations show outside the gun, if anything */
