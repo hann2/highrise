@@ -25,10 +25,10 @@ export const PumpShotgun: GunStats = {
   ammoCapacity: 7,
   ammoClass: "shotgun",
 
+  art: "remington870",
   textures: {
     ...defaultGunStats.textures,
     pickup: "remingtonPickup",
-    holding: "remington870Hold",
     shellCasing: "shotgunCasing",
   },
   size: [1.1, 1.1],

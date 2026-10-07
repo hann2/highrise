@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="349" height="30" viewBox="0 0 349 30" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
+  <defs>
+    <linearGradient id="ar-15-gradient-1" gradientUnits="userSpaceOnUse" x1="213.854" y1="23.424" x2="213.854" y2="6.495">
+      <stop offset="0" stop-color="#232323"/>
+      <stop offset="0.26" stop-color="#3b3b3b"/>
+      <stop offset="0.5" stop-color="#434343"/>
+      <stop offset="0.74" stop-color="#3a3a3a"/>
+      <stop offset="1" stop-color="#232323"/>
+    </linearGradient>
+    <clipPath id="ar-15-clip-1">
+      <path d="M255.866,8.75 L191.866,5 L191.866,25 L255.866,21.25 L255.866,8.75 Z"/>
+    </clipPath>
+    <linearGradient id="ar-15-gradient-2" gradientUnits="userSpaceOnUse" x1="122.116" y1="14.686" x2="144.116" y2="14.686">
+      <stop offset="0" stop-color="#8e3b3b"/>
+      <stop offset="0.182" stop-color="#8e3b3b"/>
+      <stop offset="0.182" stop-color="#822727"/>
+      <stop offset="0.227" stop-color="#822727"/>
+      <stop offset="0.227" stop-color="#7a1e1e"/>
+      <stop offset="0.818" stop-color="#7a1e1e"/>
+      <stop offset="0.818" stop-color="#8b3535"/>
+      <stop offset="0.864" stop-color="#8b3535"/>
+      <stop offset="0.864" stop-color="#8e3b3b"/>
+      <stop offset="1" stop-color="#8e3b3b"/>
+    </linearGradient>
+  </defs>
+  <g id="stock-slide">
+    <rect x="61.001" y="8.748" width="32" height="12.5"/>
+  </g>
+  <g id="barrel">
+    <rect x="198.318" y="11.25" width="150" height="7.5"/>
+  </g>
+  <g id="barrel-2">
+    <rect x="333.321" y="10.001" width="15" height="10"/>
+  </g>
+  <g id="barrel-3">
+    <rect x="283.321" y="10.001" width="30" height="10"/>
+  </g>
+  <g id="barrel-4">
+    <rect x="238.321" y="10.001" width="30" height="10"/>
+  </g>
+  <g id="stock">
+    <path d="M5,2.5 L62.014,5 L62.014,25 L5,27.5 L5,30 L0,30 L0,0 L5,0 L5,2.5 Z" fill="#1e1e1e"/>
+    <path d="M5,2.5 L62.014,5 L62.014,25 L5,27.5 L5,30 L0,30 L0,0 L5,0 L5,2.5 Z M4,2.5 L4.956,3.499 L61.014,5.957 C61.014,5.957 61.014,24.043 61.014,24.043 C61.014,24.043 4.956,26.501 4.956,26.501 L4,27.5 L4,29 C4,29 1,29 1,29 C1,29 1,1 1,1 C1,1 4,1 4,1 C4,1 4,2.5 4,2.5 Z" fill="#545454"/>
+  </g>
+  <g id="reciver-base">
+    <path d="M180,2.5 L92,2.5 L92,27.5 L180,27.5 L180,23.75 L182,23.75 L182,6.25 L180,6.25 L180,2.5 Z" fill="#2e2e2e"/>
+    <path d="M180,2.5 L92,2.5 L92,27.5 L180,27.5 L180,23.75 L182,23.75 L182,6.25 L180,6.25 L180,2.5 Z M178.999,3.5 L178.999,6.25 L180,7.25 L181,7.25 C181,7.25 181,22.75 181,22.75 C181,22.75 180,22.75 180,22.75 L178.999,23.75 L178.999,26.5 C178.999,26.5 93,26.5 93,26.5 C93,26.5 93,3.5 93,3.5 L178.999,3.5 Z" fill="#545454"/>
+  </g>
+  <g id="triangle-thing">
+    <path d="M181,2.5 L193,10 L193,20 L181,27.5 L181,2.5 Z" fill="#1e1e1e"/>
+    <path d="M181,2.5 L193,10 L193,20 L181,27.5 L181,2.5 Z M182,4.304 L192,10.554 C192,10.554 192,19.446 192,19.446 C192,19.446 182,25.696 182,25.696 L182,4.304 Z" fill="#2e2e2e"/>
+  </g>
+  <g id="barrel-shroud">
+    <path d="M255.866,7.5 L191.866,5 L191.866,25 L255.866,22.5 L255.866,7.5 Z" fill="url(#ar-15-gradient-1)"/>
+    <path d="M255.866,7.5 L191.866,5 L191.866,25 L255.866,22.5 L255.866,7.5 Z M254.866,8.462 L254.866,21.539 C254.866,21.539 192.866,23.96 192.866,23.96 C192.866,23.96 192.866,6.04 192.866,6.04 L254.866,8.462 Z" fill="#1e1e1e"/>
+  </g>
+  <g clip-path="url(#ar-15-clip-1)">
+    <rect x="191.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="191.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="196.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="196.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="201.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="201.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="206.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="206.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="216.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="216.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="226.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="226.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="236.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="236.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="246.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="246.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="241.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="241.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="231.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="231.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="221.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="221.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="211.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="211.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+    <rect x="251.443" y="1.702" width="1" height="26.144" fill="#5d5d5d"/>
+    <rect x="251.443" y="1.702" width="1" height="26.144" fill="#1e1e1e"/>
+  </g>
+  <g id="rail-3">
+    <g id="rail">
+      <g id="slots">
+        <rect x="120" y="3.75" width="2" height="22.5"/>
+        <rect x="116" y="3.75" width="2" height="22.5"/>
+        <rect x="112" y="3.75" width="2" height="22.5"/>
+        <rect x="124" y="3.75" width="2" height="22.5"/>
+        <rect x="128" y="3.75" width="2" height="22.5"/>
+        <rect x="132" y="3.75" width="2" height="22.5"/>
+        <rect x="136" y="3.75" width="2" height="22.5"/>
+        <rect x="140" y="3.75" width="2" height="22.5"/>
+        <rect x="144" y="3.75" width="2" height="22.5"/>
+        <rect x="148" y="3.75" width="2" height="22.5"/>
+        <rect x="152" y="3.75" width="2" height="22.5"/>
+        <rect x="156" y="3.75" width="2" height="22.5"/>
+        <rect x="160" y="3.75" width="2" height="22.5"/>
+        <rect x="164" y="3.75" width="2" height="22.5"/>
+        <rect x="168" y="3.75" width="2" height="22.5"/>
+        <rect x="172" y="5.625" width="2" height="18.75"/>
+        <rect x="176" y="7.5" width="2" height="15"/>
+      </g>
+    </g>
+    <g id="rail-2">
+      <g id="slots-2">
+        <rect x="118" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="114" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="110" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="122" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="126" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="130" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="134" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="138" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="142" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="146" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="150" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="154" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="158" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="162" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="166" y="3.75" width="2" height="22.5" fill="#727272"/>
+        <rect x="170" y="5.625" width="2" height="18.75" fill="#727272"/>
+        <rect x="174" y="7.5" width="2" height="15" fill="#727272"/>
+      </g>
+    </g>
+  </g>
+  <g id="red-dot-sight">
+    <path d="M115.377,8.75 L122.377,5 L145.914,5 L149.914,10 L149.914,20 L145.914,25 L122.377,25 L115.377,21.25 L115.377,8.75 Z" fill="#3b3b3b"/>
+    <ellipse cx="133.375" cy="15" rx="7" ry="8.751" fill="#1e1e1e"/>
+    <rect x="122.116" y="14.295" width="22" height="0.781" fill="url(#ar-15-gradient-2)"/>
+    <path d="M115.377,8.75 L122.377,5 L122.377,25 L115.377,21.25 L115.377,8.75 Z" fill="#1e1e1e"/>
+    <path d="M140.804,2 C140.804,0.896 141.701,0 142.804,0 L146.804,0 C147.908,0 148.804,0.896 148.804,2 L148.804,28 C148.804,29.104 147.908,30 146.804,30 L142.804,30 C141.701,30 140.804,29.104 140.804,28 L140.804,2 Z"/>
+  </g>
+</svg>

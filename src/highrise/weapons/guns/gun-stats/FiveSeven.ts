@@ -17,10 +17,10 @@ export const FiveSeven: GunStats = {
   reloadInsertTime: 0.8,
   ammoCapacity: 20,
 
+  art: "fiveSeven",
   textures: {
     ...defaultGunStats.textures,
     pickup: "fiveSevenPickup",
-    holding: "fiveSevenHold",
     shellCasing: "pistolCasing",
   },
   size: [0.45, 0.45],

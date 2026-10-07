@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="83" height="15" viewBox="0 0 83 15" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
+  <defs>
+    <linearGradient id="glock-gradient-1" gradientUnits="userSpaceOnUse" x1="81.469" y1="9.26" x2="81.469" y2="4.946">
+      <stop offset="0" stop-color="black"/>
+      <stop offset="0.22" stop-color="#454545"/>
+      <stop offset="0.5" stop-color="#565656"/>
+      <stop offset="0.72" stop-color="#3d3d3d"/>
+      <stop offset="1" stop-color="black"/>
+    </linearGradient>
+    <clipPath id="glock-clip-1">
+      <path d="M26,3.535 L23.333,0 L7.349,0 L5,4.5 L5,10.5 L7.349,15 L23.333,15 L26,11.465 L26,3.535 Z"/>
+    </clipPath>
+  </defs>
+  <g id="grip">
+    <path d="M10,3 C10,1.896 9.103,1 7.999,1 L2,1 C0.896,1 -0.001,1.896 -0.001,3 L-0.001,12 C-0.001,13.104 0.896,14 2,14 L7.999,14 C9.103,14 10,13.104 10,12 L10,3 Z" fill="#272727"/>
+  </g>
+  <g id="tip">
+    <rect x="79.999" y="4.868" width="2.5" height="5" fill="url(#glock-gradient-1)"/>
+  </g>
+  <g id="base">
+    <path d="M80.984,1.5 L79.579,0 L10.448,0 L10.448,15 L79.579,15 L80.984,13.5 L80.984,1.5 Z" fill="#2d2d2d"/>
+  </g>
+  <g id="barrel">
+    <path d="M80.44,2.3 L79.167,1 L13.714,1 L12.441,2.3 L12.441,12.7 L13.714,14 L79.167,14 L80.44,12.7 L80.44,2.3 Z" fill="#363636"/>
+  </g>
+  <path d="M26,3.535 L23.333,0 L7.349,0 L5,4.5 L5,10.5 L7.349,15 L23.333,15 L26,11.465 L26,3.535 Z" fill="#363636"/>
+  <g clip-path="url(#glock-clip-1)">
+    <rect x="8" y="13" width="1" height="1.999" fill="#555555"/>
+    <rect x="10" y="13" width="1" height="1.999" fill="#555555"/>
+    <rect x="12" y="13" width="1" height="1.999" fill="#555555"/>
+    <rect x="14.001" y="13" width="1" height="1.999" fill="#555555"/>
+    <rect x="16" y="13" width="1" height="1.999" fill="#555555"/>
+    <rect x="18" y="13" width="1" height="1.999" fill="#555555"/>
+    <rect x="20" y="13" width="1" height="1.999" fill="#555555"/>
+    <rect x="8" y="0" width="1" height="1.999" fill="#555555"/>
+    <rect x="10" y="0" width="1" height="1.999" fill="#555555"/>
+    <rect x="12" y="0" width="1" height="1.999" fill="#555555"/>
+    <rect x="14.001" y="0" width="1" height="1.999" fill="#555555"/>
+    <rect x="16" y="0" width="1" height="1.999" fill="#555555"/>
+    <rect x="18" y="0" width="1" height="1.999" fill="#555555"/>
+    <rect x="20" y="0" width="1" height="1.999" fill="#555555"/>
+  </g>
+  <g id="front-sight">
+    <rect x="74.029" y="6.5" width="4.821" height="2" fill="#6f6f6f"/>
+  </g>
+  <g id="rear-sight">
+    <rect x="10" y="2" width="70" height="1" fill="#555555"/>
+    <rect x="10" y="12" width="70" height="1" fill="#555555"/>
+    <g id="sight">
+      <path d="M7.809,2.467 L8.492,1.5 L14.313,1.7 L14.313,3.3 L8.492,3.5 L7.809,2.467 Z" fill="#6f6f6f"/>
+    </g>
+    <g id="sight-2">
+      <path d="M7.809,12.467 L8.492,11.5 L14.313,11.7 L14.313,13.3 L8.492,13.5 L7.809,12.467 Z" fill="#6f6f6f"/>
+    </g>
+  </g>
+</svg>

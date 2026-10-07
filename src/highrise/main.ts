@@ -36,6 +36,7 @@ import SettingsController, { getSetting } from "./settings/SettingsController";
 import { createFpsPanel } from "../core/util/stats-overlay/FpsPanel";
 import Preloader from "./preloader/Preloader";
 import { bakeBodies } from "./looks/bakeBodies";
+import { bakeGuns } from "./weapons/guns/gunArt";
 import { setLookStyle } from "./looks/style";
 import { HEAVY_LOOKS, ZOMBIE_LOOKS } from "./enemies/zombie/ZombieVariants";
 import { BOB_LOOK } from "./lobby/ReceptionistBob";
@@ -102,10 +103,13 @@ export async function main() {
     ...HEAVY_LOOKS,
     BOB_LOOK,
   ]);
+  // And every gun's art
+  const bakingGuns = bakeGuns();
   const preloader = game.addEntity(new Preloader());
   await preloader.waitTillReady();
   preloader.destroy();
   await baking;
+  await bakingGuns;
 
   // Add some filters for fast lookup of certain entities later
   // Think of these like indexes in a DB

@@ -24,10 +24,10 @@ export const P90: GunStats = {
   ammoCapacity: 50,
   ammoClass: "rifle",
 
+  art: "p90",
   textures: {
     ...defaultGunStats.textures,
     pickup: "p90Pickup",
-    holding: "p90Hold",
     shellCasing: "pistolCasing",
   },
   size: [1.0, 1.0],

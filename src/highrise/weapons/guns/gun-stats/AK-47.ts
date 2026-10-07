@@ -24,10 +24,10 @@ export const AK47: GunStats = {
   ammoCapacity: 30,
   ammoClass: "rifle",
 
+  art: "ak47",
   textures: {
     ...defaultGunStats.textures,
     pickup: "ak47Pickup",
-    holding: "ak47Hold",
     shellCasing: "rifleCasing",
   },
   size: [1.4, 1.4],

@@ -33,10 +33,11 @@ Characters', zombies' and Bob's bodies aren't images: they're drawn by code from
 
 ## Weapons (`weapons/`)
 
+Guns as they're held aren't images any more: they're SVGs in `src/highrise/weapons/guns/art/`, rasterized when the game starts. Simon drew them in `assets/source/images/weapons/{pistols,rifles,shotguns}.afdesign`, probably from the pickups, and exported them to SVG in 2026; they're edited as SVG from now on.
+
 | Files                                                                                                                        | Source                                                                                                       | Confidence |
 | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------- |
 | `*-pickup.png` for guns: ak47, ar-15, desert-eagle, double-barrel-shotgun, five-seven, glock, magnum, p90, remington, spas12 | Project Cordon Sprites                                                                                       | likely     |
-| `*-hold.png` for the same guns                                                                                               | Simon, in `assets/source/images/weapons/{pistols,rifles,shotguns}.afdesign`, probably drawn from the pickups | known      |
 | `axe.png`                                                                                                                    | Simon (`assets/source/images/weapons/axe.afdesign`; it replaced an earlier axe of Philip's)                                 | known      |
 | `baseball-bat-hold.png`, `baseball-bat-pickup.png`                                                                           | Simon (`assets/source/images/weapons/bat.afdesign`)                                                                         | known      |
 | `katana.png`                                                                                                                 | Simon (`assets/source/images/weapons/katana.afdesign`)                                                                      | known      |

@@ -24,10 +24,10 @@ export const AR15: GunStats = {
   ammoCapacity: 30,
   ammoClass: "rifle",
 
+  art: "ar15",
   textures: {
     ...defaultGunStats.textures,
     pickup: "ar15Pickup",
-    holding: "ar15Hold",
     shellCasing: "rifleCasing",
   },
   size: [0.8, 0.4],

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="78" height="17" viewBox="0 0 78 17" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
+  <defs>
+    <clipPath id="five-seven-clip-1">
+      <path d="M23,4.007 L20.333,0 L2.349,0 L2,1.7 L2,15.3 L2.349,17 L20.333,17 L23,12.993 L23,4.007 Z"/>
+    </clipPath>
+    <clipPath id="five-seven-clip-2">
+      <path d="M73.028,8.467 L68.849,7.5 L68.029,7.7 L68.029,9.3 L68.849,9.5 L73.028,8.467 Z"/>
+    </clipPath>
+    <clipPath id="five-seven-clip-3">
+      <path d="M11.313,4.467 L5.63,3.5 L4.809,3.7 L4.809,5.3 L5.63,5.5 L11.313,4.467 Z"/>
+    </clipPath>
+    <clipPath id="five-seven-clip-4">
+      <path d="M11.313,12.467 L5.63,11.5 L4.809,11.7 L4.809,13.3 L5.63,13.5 L11.313,12.467 Z"/>
+    </clipPath>
+  </defs>
+  <g id="grip">
+    <path d="M10,4 C10,2.896 9.103,2 7.999,2 L2,2 C0.896,2 -0.001,2.896 -0.001,4 L-0.001,13 C-0.001,14.104 0.896,15 2,15 L7.999,15 C9.103,15 10,14.104 10,13 L10,4 Z" fill="#947f4f"/>
+  </g>
+  <g id="base">
+    <path d="M77.984,2.5 L76.579,1 L3.448,1 L2.041,2.5 C2.473,6.609 1.837,9.997 2.041,14.5 L3.448,16 L76.579,16 L77.984,14.5 L77.984,2.5 Z" fill="#595959"/>
+  </g>
+  <path d="M77.44,3.3 L76.167,2 L10.714,2 L9.441,3.3 L9.441,13.7 L10.714,15 L76.167,15 L77.44,13.7 L77.44,3.3 Z" fill="#6c6c6c"/>
+  <path d="M77.44,5.3 L76.167,4.5 L10.714,4.5 L9.441,5.3 L9.441,11.7 L10.714,12.5 L76.167,12.5 L77.44,11.7 L77.44,5.3 Z" fill="#868686"/>
+  <path d="M23,4.007 L20.333,0 L2.349,0 L2,1.7 L2,15.3 L2.349,17 L20.333,17 L23,12.993 L23,4.007 Z" fill="#595959"/>
+  <g clip-path="url(#five-seven-clip-1)">
+    <rect x="5" y="15" width="1" height="1.999" fill="#363636"/>
+    <rect x="7" y="15" width="1" height="1.999" fill="#363636"/>
+    <rect x="9" y="15" width="1" height="1.999" fill="#363636"/>
+    <rect x="11.001" y="15" width="1" height="1.999" fill="#363636"/>
+    <rect x="13" y="15" width="1" height="1.999" fill="#363636"/>
+    <rect x="15" y="15" width="1" height="1.999" fill="#363636"/>
+    <rect x="17" y="15" width="1" height="1.999" fill="#363636"/>
+    <rect x="5" y="0" width="1" height="1.999" fill="#363636"/>
+    <rect x="7" y="0" width="1" height="1.999" fill="#363636"/>
+    <rect x="9" y="0" width="1" height="1.999" fill="#363636"/>
+    <rect x="11.001" y="0" width="1" height="1.999" fill="#363636"/>
+    <rect x="13" y="0" width="1" height="1.999" fill="#363636"/>
+    <rect x="15" y="0" width="1" height="1.999" fill="#363636"/>
+    <rect x="17" y="0" width="1" height="1.999" fill="#363636"/>
+  </g>
+  <g id="front-sight">
+    <path d="M73.028,8.467 L68.849,7.5 L68.029,7.7 L68.029,9.3 L68.849,9.5 L73.028,8.467 Z" fill="#313131"/>
+    <g clip-path="url(#five-seven-clip-2)">
+      <path d="M68.849,9.5 L68.849,7.5 L68.029,7.7 L68.029,9.3 L68.849,9.5 Z" fill="#c1ffb3"/>
+    </g>
+  </g>
+  <g id="front-sight-2">
+    <path d="M11.313,4.467 L5.63,3.5 L4.809,3.7 L4.809,5.3 L5.63,5.5 L11.313,4.467 Z" fill="#313131"/>
+    <g clip-path="url(#five-seven-clip-3)">
+      <path d="M5.63,5.5 L5.63,3.5 L4.809,3.7 L4.809,5.3 L5.63,5.5 Z" fill="#c1ffb3"/>
+    </g>
+  </g>
+  <g id="front-sight-3">
+    <path d="M11.313,12.467 L5.63,11.5 L4.809,11.7 L4.809,13.3 L5.63,13.5 L11.313,12.467 Z" fill="#313131"/>
+    <g clip-path="url(#five-seven-clip-4)">
+      <path d="M5.63,13.5 L5.63,11.5 L4.809,11.7 L4.809,13.3 L5.63,13.5 Z" fill="#c1ffb3"/>
+    </g>
+  </g>
+  <g id="port">
+    <path d="M47,11.251 L45.749,10 L34.25,10 L32.999,11.251 L32.999,13.75 L34.25,15 L45.749,15 L47,13.75 L47,11.251 Z" fill="#313131"/>
+  </g>
+</svg>

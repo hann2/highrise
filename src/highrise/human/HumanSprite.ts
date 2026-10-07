@@ -9,10 +9,10 @@ import { HUMAN_GAIT } from "../creature-stuff/Legs";
 import { LaserSight } from "../effects/LaserSight";
 import Gun from "../weapons/guns/Gun";
 import { GunPose } from "../weapons/guns/GunPose";
+import { GUN_PIXELS_PER_METER, getGunTexture } from "../weapons/guns/gunArt";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import Human from "./Human";
 
-const GUN_SCALE = 1 / 300;
 const STANCE_ROTATE_SPEED = Math.PI * 2; // radians per second
 /** Radians a push twists a gun per meter it shoves it */
 const PUSH_TWIST = 1;
@@ -185,7 +185,7 @@ export default class HumanSprite extends BodySprite {
 
   handleNewWeapon(weapon: Gun | MeleeWeapon) {
     if (weapon instanceof Gun) {
-      const { textures, magazine } = weapon.stats;
+      const { art, magazine } = weapon.stats;
       if (magazine) {
         this.magazineSprite = Sprite.from(magazine.texture);
         this.magazineSprite.anchor.set(0.5, 0.5);
@@ -196,9 +196,8 @@ export default class HumanSprite extends BodySprite {
         this.arrangeLeftHand();
       }
 
-      this.weaponSprite = Sprite.from(textures.holding);
-      this.weaponSprite.scale.set(GUN_SCALE);
-      this.weaponSprite.anchor.set(0.5, 0.5);
+      this.weaponSprite = new Sprite(getGunTexture(art));
+      this.weaponSprite.scale.set(1 / GUN_PIXELS_PER_METER);
       this.sprite.addChild(this.weaponSprite);
 
       // Its own, or one from a Laser Sight attachment

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="333" height="28" viewBox="0 0 333 28" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5" clip-rule="evenodd">
+  <defs>
+    <linearGradient id="remington-870-gradient-1" gradientUnits="userSpaceOnUse" x1="246.719" y1="19.166" x2="246.719" y2="7.858">
+      <stop offset="0" stop-color="#6f6f6f"/>
+      <stop offset="0.28" stop-color="#b4b4b4"/>
+      <stop offset="0.5" stop-color="#d1d1d1"/>
+      <stop offset="0.77" stop-color="#bcbcbc"/>
+      <stop offset="1" stop-color="#717171"/>
+    </linearGradient>
+    <linearGradient id="remington-870-gradient-2" gradientUnits="userSpaceOnUse" x1="240.173" y1="20.27" x2="240.173" y2="6.699">
+      <stop offset="0" stop-color="#9c9c9c"/>
+      <stop offset="0.28" stop-color="#cfcfcf"/>
+      <stop offset="0.5" stop-color="#e5e5e5"/>
+      <stop offset="0.77" stop-color="#d9d9d9"/>
+      <stop offset="1" stop-color="#adadad"/>
+    </linearGradient>
+    <linearGradient id="remington-870-gradient-3" gradientUnits="userSpaceOnUse" x1="145.796" y1="22.477" x2="145.796" y2="4.383">
+      <stop offset="0" stop-color="#9c9c9c"/>
+      <stop offset="0.28" stop-color="#cfcfcf"/>
+      <stop offset="0.5" stop-color="#e5e5e5"/>
+      <stop offset="0.77" stop-color="#d9d9d9"/>
+      <stop offset="1" stop-color="#adadad"/>
+    </linearGradient>
+    <linearGradient id="remington-870-gradient-4" gradientUnits="userSpaceOnUse" x1="49.516" y1="24.861" x2="49.516" y2="2.963">
+      <stop offset="0" stop-color="#313131"/>
+      <stop offset="0.28" stop-color="#727272"/>
+      <stop offset="0.5" stop-color="#8f8f8f"/>
+      <stop offset="0.78" stop-color="#4d4d4d"/>
+      <stop offset="1" stop-color="#313131"/>
+    </linearGradient>
+  </defs>
+  <g id="pump-handle">
+    <g id="barrel-shroud">
+      <rect x="191.868" y="1.648" width="86.076" height="24.001" fill="#5e5e5e"/>
+      <path d="M277.944,1.648 L191.868,1.648 L191.868,25.648 L277.944,25.648 L277.944,1.648 Z M276.944,2.648 L276.944,24.649 C276.944,24.649 192.869,24.649 192.869,24.649 C192.869,24.649 192.869,2.648 192.869,2.648 L276.944,2.648 Z" fill="#313131"/>
+    </g>
+  </g>
+  <g id="barrel">
+    <rect x="173.336" y="8.194" width="159.274" height="10.909" fill="url(#remington-870-gradient-1)"/>
+  </g>
+  <g id="barrel-2">
+    <rect x="166.79" y="7.103" width="159.274" height="13.091" fill="url(#remington-870-gradient-2)"/>
+  </g>
+  <g id="receiver">
+    <rect x="95.622" y="4.921" width="83.361" height="17.455" fill="url(#remington-870-gradient-3)"/>
+    <path d="M178.984,22.376 L178.984,4.921 L95.622,4.921 L95.622,22.376 L178.984,22.376 Z M177.984,21.375 L96.622,21.375 C96.622,21.375 96.622,5.921 96.622,5.921 C96.622,5.921 177.984,5.921 177.984,5.921 L177.984,21.375 Z" fill="#a6a6a6"/>
+  </g>
+  <g id="port">
+    <path d="M177.139,18.03 C177.139,16.272 175.712,14.845 173.953,14.845 L150.884,14.845 C149.125,14.845 147.698,16.272 147.698,18.03 C147.698,19.788 149.125,21.215 150.884,21.215 L173.953,21.215 C175.712,21.215 177.139,19.788 177.139,18.03 Z" fill="#808080" fill-opacity="0.5"/>
+    <path d="M177.139,18.03 C177.139,16.272 175.712,14.845 173.953,14.845 L150.884,14.845 C149.125,14.845 147.698,16.272 147.698,18.03 C147.698,19.788 149.125,21.215 150.884,21.215 L173.953,21.215 C175.712,21.215 177.139,19.788 177.139,18.03 Z M176.139,18.03 C176.139,19.236 175.16,20.214 173.953,20.214 C173.953,20.214 150.884,20.214 150.884,20.214 C149.677,20.214 148.699,19.236 148.699,18.03 C148.699,16.824 149.677,15.845 150.884,15.845 C150.884,15.845 173.953,15.845 173.953,15.845 C175.16,15.845 176.139,16.824 176.139,18.03 Z" fill="#8f8f8f"/>
+  </g>
+  <g id="stock">
+    <path d="M118.53,5.311 L4.039,1.804 C1.14,11.155 0.976,16.141 4.039,25.492 L118.53,21.985 C117.138,16.427 117,10.869 118.53,5.311 Z" fill="url(#remington-870-gradient-4)" stroke="#313131" stroke-width="0.932"/>
+  </g>
+  <g id="butt-stock">
+    <path d="M9.44,2.038 L4.039,1.804 C1.14,11.155 0.976,16.141 4.039,25.492 L9.44,25.258 L9.44,2.038 Z" fill="#313131" stroke="#313131" stroke-width="2.112" stroke-linecap="square" stroke-linejoin="miter"/>
+  </g>
+  <g id="front-sight">
+    <path d="M307.432,13.648 L317.313,13.648" fill="none" stroke="#828282" stroke-width="2.575" stroke-linecap="butt" stroke-linejoin="miter"/>
+  </g>
+  <g id="rear-sights">
+    <g id="front-sight-2">
+      <path d="M202.705,11.466 L212.585,11.466" fill="none" stroke="#828282" stroke-width="1.287" stroke-linecap="butt" stroke-linejoin="miter"/>
+    </g>
+    <g id="front-sight-3">
+      <path d="M202.705,15.83 L212.585,15.83" fill="none" stroke="#828282" stroke-width="1.287" stroke-linecap="butt" stroke-linejoin="miter"/>
+    </g>
+  </g>
+</svg>

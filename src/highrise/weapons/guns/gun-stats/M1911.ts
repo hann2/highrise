@@ -17,10 +17,10 @@ export const M1911: GunStats = {
   reloadInsertTime: 0.8,
   ammoCapacity: 7,
 
+  art: "glock",
   textures: {
     ...defaultGunStats.textures,
     pickup: "glockPickup",
-    holding: "glockHold",
     shellCasing: "pistolCasing",
   },
   size: [0.45, 0.45],

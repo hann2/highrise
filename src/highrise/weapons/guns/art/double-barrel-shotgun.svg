@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="232" height="29" viewBox="0 0 232 29" fill-rule="evenodd" stroke-miterlimit="1.5" clip-rule="evenodd">
+  <defs>
+    <linearGradient id="double-barrel-shotgun-gradient-1" gradientUnits="userSpaceOnUse" x1="154.26" y1="26.64" x2="154.26" y2="1.76">
+      <stop offset="0" stop-color="#7d6643"/>
+      <stop offset="0.28" stop-color="#a28457"/>
+      <stop offset="0.5" stop-color="#b29160"/>
+      <stop offset="0.77" stop-color="#a7885a"/>
+      <stop offset="1" stop-color="#7d6643"/>
+    </linearGradient>
+    <linearGradient id="double-barrel-shotgun-gradient-2" gradientUnits="userSpaceOnUse" x1="188.596" y1="13.558" x2="188.596" y2="3.191">
+      <stop offset="0" stop-color="#4a4a4a"/>
+      <stop offset="0.28" stop-color="#878787"/>
+      <stop offset="0.5" stop-color="#a1a1a1"/>
+      <stop offset="0.77" stop-color="#8e8e8e"/>
+      <stop offset="1" stop-color="#4a4a4a"/>
+    </linearGradient>
+    <linearGradient id="double-barrel-shotgun-gradient-3" gradientUnits="userSpaceOnUse" x1="188.596" y1="25.558" x2="188.596" y2="15.192">
+      <stop offset="0" stop-color="#4a4a4a"/>
+      <stop offset="0.28" stop-color="#878787"/>
+      <stop offset="0.5" stop-color="#a1a1a1"/>
+      <stop offset="0.77" stop-color="#8e8e8e"/>
+      <stop offset="1" stop-color="#4a4a4a"/>
+    </linearGradient>
+    <linearGradient id="double-barrel-shotgun-gradient-4" gradientUnits="userSpaceOnUse" x1="44.236" y1="29.962" x2="44.236" y2="-0.235">
+      <stop offset="0" stop-color="#2a2216"/>
+      <stop offset="0.28" stop-color="#645135"/>
+      <stop offset="0.5" stop-color="#7d6643"/>
+      <stop offset="0.78" stop-color="#433623"/>
+      <stop offset="1" stop-color="#2a2216"/>
+    </linearGradient>
+    <linearGradient id="double-barrel-shotgun-gradient-5" gradientUnits="userSpaceOnUse" x1="140.26" y1="26.64" x2="140.26" y2="1.76">
+      <stop offset="0" stop-color="#7d6643"/>
+      <stop offset="0.28" stop-color="#a28457"/>
+      <stop offset="0.5" stop-color="#b29160"/>
+      <stop offset="0.77" stop-color="#a7885a"/>
+      <stop offset="1" stop-color="#7d6643"/>
+    </linearGradient>
+  </defs>
+  <g id="receiver-bottom">
+    <path d="M176.914,26.5 L176.914,2.5 L120.012,2.5 C118.32,4.876 115.5,9.5 115.5,9.5 L109.5,9.5 L109.5,18.5 L115.5,18.514 C115.5,18.514 118.094,23.845 120.012,26.5 L176.914,26.5 Z" fill="url(#double-barrel-shotgun-gradient-1)"/>
+    <path d="M176.914,26.5 L176.914,2.5 L120.012,2.5 C118.32,4.876 115.5,9.5 115.5,9.5 L109.5,9.5 L109.5,18.5 L115.5,18.514 C115.5,18.514 118.094,23.845 120.012,26.5 L176.914,26.5 Z M175.914,25.5 L120.532,25.5 C118.69,22.792 116.399,18.077 116.399,18.077 C116.232,17.734 115.884,17.515 115.502,17.514 L110.499,17.503 C110.499,17.503 110.499,10.5 110.499,10.5 C110.499,10.5 115.5,10.5 115.5,10.5 C115.848,10.5 116.172,10.318 116.353,10.02 C116.353,10.02 118.841,5.941 120.531,3.5 C120.531,3.5 175.914,3.5 175.914,3.5 L175.914,25.5 Z" fill="#7d6643"/>
+  </g>
+  <g id="barrels">
+    <g id="barrel">
+      <rect x="151.737" y="3.5" width="80" height="10" fill="url(#double-barrel-shotgun-gradient-2)"/>
+    </g>
+    <g id="barrel-2">
+      <rect x="151.737" y="15.5" width="80" height="10" fill="url(#double-barrel-shotgun-gradient-3)"/>
+    </g>
+    <g id="rear-sight">
+      <path d="M157.176,14.502 L227.987,14.502" fill="none" stroke="#4a4a4a" stroke-width="3.809"/>
+    </g>
+  </g>
+  <g id="stock">
+    <path d="M107.499,4.002 L2.549,0.499 C-0.108,13.394 -0.258,15.605 2.549,28.5 L107.499,24.998 C101.066,17.058 101.014,11.391 107.499,4.002 Z" fill="url(#double-barrel-shotgun-gradient-4)" stroke="#313131" stroke-width="1.066" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g id="receiver">
+    <path d="M162.914,26.5 L162.914,2.5 L106.012,2.5 C104.32,4.876 101.5,9.5 101.5,9.5 L95.5,9.5 L95.5,18.5 L101.5,18.514 C101.5,18.514 104.094,23.845 106.012,26.5 L162.914,26.5 Z" fill="url(#double-barrel-shotgun-gradient-5)"/>
+    <path d="M162.914,26.5 L162.914,2.5 L106.012,2.5 C104.32,4.876 101.5,9.5 101.5,9.5 L95.5,9.5 L95.5,18.5 L101.5,18.514 C101.5,18.514 104.094,23.845 106.012,26.5 L162.914,26.5 Z M161.914,25.5 L106.532,25.5 C104.69,22.792 102.399,18.077 102.399,18.077 C102.232,17.734 101.884,17.515 101.502,17.514 L96.499,17.503 C96.499,17.503 96.499,10.5 96.499,10.5 C96.499,10.5 101.5,10.5 101.5,10.5 C101.848,10.5 102.172,10.318 102.353,10.02 C102.353,10.02 104.841,5.941 106.531,3.5 C106.531,3.5 161.914,3.5 161.914,3.5 L161.914,25.5 Z" fill="#7d6643"/>
+  </g>
+  <g id="hammer">
+    <path d="M162.915,24.827 L162.915,4.174 C156.429,9.77 149.065,13.004 141.055,14.5 C149.054,16.158 156.488,19.232 162.915,24.827 Z" fill="#404040"/>
+    <path d="M162.915,24.827 L162.915,4.174 C156.429,9.77 149.065,13.004 141.055,14.5 C149.054,16.158 156.488,19.232 162.915,24.827 Z M161.914,22.701 C156.902,18.758 151.343,16.187 145.418,14.529 C151.339,12.918 156.87,10.26 161.914,6.293 C161.915,6.293 161.915,22.701 161.915,22.701 L161.914,22.701 Z" fill="#7d6643"/>
+  </g>
+  <g id="rear-sight-2">
+    <path d="M113.659,14.5 L122.717,14.5" fill="none" stroke="#3d342b" stroke-width="2.58"/>
+  </g>
+</svg>

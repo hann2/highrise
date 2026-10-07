@@ -25,10 +25,10 @@ export const SPAS12: GunStats = {
   ammoCapacity: 8,
   ammoClass: "shotgun",
 
+  art: "spas12",
   textures: {
     ...defaultGunStats.textures,
     pickup: "spas12Pickup",
-    holding: "spas12Hold",
     shellCasing: "shotgunCasing",
   },
   size: [1.1, 1.1],

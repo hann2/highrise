@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="116" height="27" viewBox="0 0 116 27" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
+  <defs>
+    <linearGradient id="revolver-gradient-1" gradientUnits="userSpaceOnUse" x1="59.758" y1="19.181" x2="59.758" y2="7.29">
+      <stop offset="0" stop-color="#9c9c9c"/>
+      <stop offset="0.28" stop-color="#cfcfcf"/>
+      <stop offset="0.5" stop-color="#e5e5e5"/>
+      <stop offset="0.77" stop-color="#d9d9d9"/>
+      <stop offset="1" stop-color="#adadad"/>
+    </linearGradient>
+    <linearGradient id="revolver-gradient-2" gradientUnits="userSpaceOnUse" x1="42.107" y1="26.914" x2="42.107" y2="-0.825">
+      <stop offset="0" stop-color="#9c9c9c"/>
+      <stop offset="0.28" stop-color="#cfcfcf"/>
+      <stop offset="0.5" stop-color="#e5e5e5"/>
+      <stop offset="0.77" stop-color="#d9d9d9"/>
+      <stop offset="1" stop-color="#adadad"/>
+    </linearGradient>
+    <linearGradient id="revolver-gradient-3" gradientUnits="userSpaceOnUse" x1="32.478" y1="20.647" x2="32.478" y2="5.752">
+      <stop offset="0" stop-color="#676666"/>
+      <stop offset="0.07" stop-color="#a4a3a3"/>
+      <stop offset="0.17" stop-color="#d4d4d4"/>
+      <stop offset="0.5" stop-color="#e5e5e5"/>
+      <stop offset="0.83" stop-color="#d4d4d4"/>
+      <stop offset="0.92" stop-color="#a3a3a3"/>
+      <stop offset="1" stop-color="#666666"/>
+    </linearGradient>
+  </defs>
+  <g id="grip">
+    <path d="M27.945,13.379 C27.945,9.003 24.392,5.45 20.016,5.45 L7.928,5.45 C3.553,5.45 -0.001,9.003 -0.001,13.379 C-0.001,17.755 3.553,21.307 7.928,21.307 L20.016,21.307 C24.392,21.307 27.945,17.755 27.945,13.379 Z" fill="#303030"/>
+  </g>
+  <g id="barrel">
+    <path d="M115.015,8.791 L113.091,7.644 L14.191,7.644 L12.267,8.791 L12.267,17.967 L14.191,19.114 L113.091,19.114 L115.015,17.967 L115.015,8.791 Z" fill="url(#revolver-gradient-1)"/>
+  </g>
+  <g id="cylinder">
+    <path d="M53.534,26.758 L53.534,0 L32.343,0 L31.931,3.676 L29.931,6.053 L29.931,20.685 L31.931,23.083 L32.343,26.758 L53.534,26.758 Z" fill="url(#revolver-gradient-2)"/>
+  </g>
+  <g id="barrel-2">
+    <path d="M56.994,7.631 L56.175,6.195 C56.175,6.195 30.236,5.955 23.085,6.195 C19.462,6.316 14.069,6.476 12.266,8.632 C10.463,10.786 10.463,15.971 12.266,18.127 C14.069,20.282 19.462,20.442 23.085,20.564 C30.236,20.803 56.175,20.564 56.175,20.564 L56.994,19.127 L56.994,7.631 Z" fill="url(#revolver-gradient-3)"/>
+  </g>
+  <g id="hammer-slot">
+    <path d="M31.676,14.637 L31.676,12.122 L15.454,12.122 L11.898,13.122 L11.898,13.637 L15.494,14.637 L31.676,14.637 Z" fill="#6d6d6d"/>
+  </g>
+  <g id="hammer-slot-2">
+    <path d="M32.037,12.373 L31.951,12.122 L27.471,12.122 L27.385,12.373 L27.385,14.385 L27.471,14.637 L31.951,14.637 L32.037,14.385 L32.037,12.373 Z" fill="#b6b6b6"/>
+  </g>
+  <g id="front-sight-3">
+    <g id="front-sight">
+      <path d="M113.594,12.179 L113.253,11.879 L95.495,11.879 L95.153,12.179 L95.153,14.579 L95.495,14.879 L113.253,14.879 L113.594,14.579 L113.594,12.179 Z" fill="#c9c9c9"/>
+    </g>
+    <g id="front-sight-2">
+      <path d="M113.595,12.579 L113.423,12.379 L104.477,12.379 L104.305,12.579 L104.305,14.179 L104.477,14.379 L113.423,14.379 L113.595,14.179 L113.595,12.579 Z" fill="#999999"/>
+    </g>
+  </g>
+  <g id="rear-sight">
+    <g id="rear-sight-left">
+      <path d="M32.621,8.279 L32.449,8.129 L23.489,8.129 L23.316,8.279 L23.316,9.479 L23.489,9.629 L32.449,9.629 L32.621,9.479 L32.621,8.279 Z" fill="#868686"/>
+    </g>
+    <g id="rear-sight-right">
+      <path d="M32.621,17.279 L32.449,17.129 L23.489,17.129 L23.316,17.279 L23.316,18.479 L23.489,18.629 L32.449,18.629 L32.621,18.479 L32.621,17.279 Z" fill="#868686"/>
+    </g>
+  </g>
+</svg>

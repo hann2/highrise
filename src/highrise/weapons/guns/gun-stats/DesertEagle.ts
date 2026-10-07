@@ -17,10 +17,10 @@ export const DesertEagle: GunStats = {
   reloadInsertTime: 0.8,
   ammoCapacity: 7,
 
+  art: "desertEagle",
   textures: {
     ...defaultGunStats.textures,
     pickup: "desertEaglePickup",
-    holding: "desertEagleHold",
     shellCasing: "rifleCasing",
   },
   size: [0.55, 0.55],

@@ -23,10 +23,10 @@ export const Revolver: GunStats = {
   reloadInsertTime: 0.22,
   ammoCapacity: 6,
 
+  art: "revolver",
   textures: {
     ...defaultGunStats.textures,
     pickup: "magnumPickup",
-    holding: "magnumHold",
     shellCasing: "pistolCasing",
   },
   size: [0.55, 0.55],

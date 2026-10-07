@@ -27,10 +27,10 @@ export const DoubleBarrelShotgun: GunStats = {
   ammoCapacity: 2,
   ammoClass: "shotgun",
 
+  art: "doubleBarrelShotgun",
   textures: {
     ...defaultGunStats.textures,
     pickup: "doubleBarrelShotgunPickup",
-    holding: "doubleBarrelShotgunHold",
     shellCasing: "shotgunCasing",
   },
   size: [1.1, 1.1],
