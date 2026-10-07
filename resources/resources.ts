@@ -186,527 +186,528 @@ import sounds21 from "./audio/characters/andy/andy-near-death-2.flac?url";
 import sounds22 from "./audio/characters/andy/andy-near-death-3.flac?url";
 import sounds23 from "./audio/characters/andy/andy-near-death-4.flac?url";
 import sounds24 from "./audio/characters/andy/andy-new-level-1.flac?url";
-import sounds25 from "./audio/characters/andy/andy-new-level-2.flac?url";
-import sounds26 from "./audio/characters/andy/andy-pickup-1.flac?url";
-import sounds27 from "./audio/characters/andy/andy-pickup-2.flac?url";
-import sounds28 from "./audio/characters/andy/andy-pickup-3.flac?url";
-import sounds29 from "./audio/characters/andy/andy-pickup-4.flac?url";
-import sounds30 from "./audio/characters/andy/andy-pickup-5.flac?url";
-import sounds31 from "./audio/characters/andy/andy-relief-1.flac?url";
-import sounds32 from "./audio/characters/andy/andy-relief-2.flac?url";
-import sounds33 from "./audio/characters/andy/andy-relief-3.flac?url";
-import sounds34 from "./audio/characters/andy/andy-relief-4.flac?url";
-import sounds35 from "./audio/characters/andy/andy-relief-5.flac?url";
-import sounds36 from "./audio/characters/andy/andy-relief-6.flac?url";
-import sounds37 from "./audio/characters/andy/andy-taunt-1.flac?url";
-import sounds38 from "./audio/characters/andy/andy-taunt-2.flac?url";
-import sounds39 from "./audio/characters/andy/andy-worried-1.flac?url";
-import sounds40 from "./audio/characters/andy/andy-worried-2.flac?url";
-import sounds41 from "./audio/characters/andy/andy-worried-3.flac?url";
-import sounds42 from "./audio/characters/andy/andy-worried-4.flac?url";
-import sounds43 from "./audio/characters/andy/andy-worried-5.flac?url";
-import sounds44 from "./audio/characters/chad/chad-death-1.flac?url";
-import sounds45 from "./audio/characters/chad/chad-hurt-1.flac?url";
-import sounds46 from "./audio/characters/chad/chad-hurt-2.flac?url";
-import sounds47 from "./audio/characters/chad/chad-hurt-3.flac?url";
-import sounds48 from "./audio/characters/chad/chad-hurt-4.flac?url";
-import sounds49 from "./audio/characters/chad/chad-hurt-5.flac?url";
-import sounds50 from "./audio/characters/chad/chad-hurt-6.flac?url";
-import sounds51 from "./audio/characters/chad/chad-hurt-7.flac?url";
-import sounds52 from "./audio/characters/chad/chad-join-party-1.flac?url";
-import sounds53 from "./audio/characters/chad/chad-level-complete-1.flac?url";
-import sounds54 from "./audio/characters/chad/chad-level-complete-2.flac?url";
-import sounds55 from "./audio/characters/chad/chad-level-complete-3.flac?url";
-import sounds56 from "./audio/characters/chad/chad-look-here-1.flac?url";
-import sounds57 from "./audio/characters/chad/chad-look-here-2.flac?url";
-import sounds58 from "./audio/characters/chad/chad-look-here-3.flac?url";
-import sounds59 from "./audio/characters/chad/chad-misc-1.flac?url";
-import sounds60 from "./audio/characters/chad/chad-misc-2.flac?url";
-import sounds61 from "./audio/characters/chad/chad-near-death-1.flac?url";
-import sounds62 from "./audio/characters/chad/chad-near-death-2.flac?url";
-import sounds63 from "./audio/characters/chad/chad-new-level-1.flac?url";
-import sounds64 from "./audio/characters/chad/chad-new-level-2.flac?url";
-import sounds65 from "./audio/characters/chad/chad-new-level-3.flac?url";
-import sounds66 from "./audio/characters/chad/chad-new-level-4.flac?url";
-import sounds67 from "./audio/characters/chad/chad-pickup-1.flac?url";
-import sounds68 from "./audio/characters/chad/chad-pickup-2.flac?url";
-import sounds69 from "./audio/characters/chad/chad-pickup-3.flac?url";
-import sounds70 from "./audio/characters/chad/chad-taunt-1.flac?url";
-import sounds71 from "./audio/characters/chad/chad-taunt-2.flac?url";
-import sounds72 from "./audio/characters/chad/chad-taunt-3.flac?url";
-import sounds73 from "./audio/characters/chad/chad-taunt-4.flac?url";
-import sounds74 from "./audio/characters/chad/chad-taunt-5.flac?url";
-import sounds75 from "./audio/characters/chad/chad-taunt-6.flac?url";
-import sounds76 from "./audio/characters/chad/chad-worried-1.flac?url";
-import sounds77 from "./audio/characters/chad/chad-worried-2.flac?url";
-import sounds78 from "./audio/characters/chad/chad-worried-3.flac?url";
-import sounds79 from "./audio/characters/cindy/cindy-death-1.flac?url";
-import sounds80 from "./audio/characters/cindy/cindy-hurt-1.flac?url";
-import sounds81 from "./audio/characters/cindy/cindy-hurt-2.flac?url";
-import sounds82 from "./audio/characters/cindy/cindy-hurt-3.flac?url";
-import sounds83 from "./audio/characters/cindy/cindy-join-party-1.flac?url";
-import sounds84 from "./audio/characters/cindy/cindy-look-here-1.flac?url";
-import sounds85 from "./audio/characters/cindy/cindy-look-here-2.flac?url";
-import sounds86 from "./audio/characters/cindy/cindy-misc-1.flac?url";
-import sounds87 from "./audio/characters/cindy/cindy-near-death-1.flac?url";
-import sounds88 from "./audio/characters/cindy/cindy-new-level-1.flac?url";
-import sounds89 from "./audio/characters/cindy/cindy-pickup-1.flac?url";
-import sounds90 from "./audio/characters/cindy/cindy-relief-1.flac?url";
-import sounds91 from "./audio/characters/cindy/cindy-taunt-1.flac?url";
-import sounds92 from "./audio/characters/cindy/cindy-taunt-2.flac?url";
-import sounds93 from "./audio/characters/cindy/cindy-worried-1.flac?url";
-import sounds94 from "./audio/characters/clarice/clarice-death-1.flac?url";
-import sounds95 from "./audio/characters/clarice/clarice-death-2.flac?url";
-import sounds96 from "./audio/characters/clarice/clarice-hurt-1.flac?url";
-import sounds97 from "./audio/characters/clarice/clarice-hurt-2.flac?url";
-import sounds98 from "./audio/characters/clarice/clarice-hurt-3.flac?url";
-import sounds99 from "./audio/characters/clarice/clarice-join-party-1.flac?url";
-import sounds100 from "./audio/characters/clarice/clarice-look-here-1.flac?url";
-import sounds101 from "./audio/characters/clarice/clarice-misc-1.flac?url";
-import sounds102 from "./audio/characters/clarice/clarice-misc-2.flac?url";
-import sounds103 from "./audio/characters/clarice/clarice-near-death.flac?url";
-import sounds104 from "./audio/characters/clarice/clarice-new-level-1.flac?url";
-import sounds105 from "./audio/characters/clarice/clarice-pickup-1.flac?url";
-import sounds106 from "./audio/characters/clarice/clarice-relief-1.flac?url";
-import sounds107 from "./audio/characters/clarice/clarice-relief-2.flac?url";
-import sounds108 from "./audio/characters/clarice/clarice-taunt-1.flac?url";
-import sounds109 from "./audio/characters/clarice/clarice-worried-1.flac?url";
-import sounds110 from "./audio/characters/clyde/clyde-death-1.flac?url";
-import sounds111 from "./audio/characters/clyde/clyde-hurt-1.flac?url";
-import sounds112 from "./audio/characters/clyde/clyde-hurt-2.flac?url";
-import sounds113 from "./audio/characters/clyde/clyde-join-party-1.flac?url";
-import sounds114 from "./audio/characters/clyde/clyde-look-here-1.flac?url";
-import sounds115 from "./audio/characters/clyde/clyde-look-here-2.flac?url";
-import sounds116 from "./audio/characters/clyde/clyde-misc-1.flac?url";
-import sounds117 from "./audio/characters/clyde/clyde-near-death.flac?url";
-import sounds118 from "./audio/characters/clyde/clyde-new-level-1.flac?url";
-import sounds119 from "./audio/characters/clyde/clyde-new-level-2.flac?url";
-import sounds120 from "./audio/characters/clyde/clyde-new-level-3.flac?url";
-import sounds121 from "./audio/characters/clyde/clyde-new-level-4.flac?url";
-import sounds122 from "./audio/characters/clyde/clyde-pickup-1.flac?url";
-import sounds123 from "./audio/characters/clyde/clyde-relief-1.flac?url";
-import sounds124 from "./audio/characters/clyde/clyde-relief-2.flac?url";
-import sounds125 from "./audio/characters/clyde/clyde-relief-3.flac?url";
-import sounds126 from "./audio/characters/clyde/clyde-taunt-1.flac?url";
-import sounds127 from "./audio/characters/clyde/clyde-taunt-2.flac?url";
-import sounds128 from "./audio/characters/clyde/clyde-worried-1.flac?url";
-import sounds129 from "./audio/characters/clyde/clyde-worried-2.flac?url";
-import sounds130 from "./audio/characters/clyde/clyde-worried-3.flac?url";
-import sounds131 from "./audio/characters/clyde/clyde-worried-4.flac?url";
-import sounds132 from "./audio/characters/dusty-rusty/dusty-rusty-death-1.flac?url";
-import sounds133 from "./audio/characters/dusty-rusty/dusty-rusty-death-2.flac?url";
-import sounds134 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-1.flac?url";
-import sounds135 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-10.flac?url";
-import sounds136 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-2.flac?url";
-import sounds137 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-3.flac?url";
-import sounds138 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-4.flac?url";
-import sounds139 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-5.flac?url";
-import sounds140 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-6.flac?url";
-import sounds141 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-7.flac?url";
-import sounds142 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-8.flac?url";
-import sounds143 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-9.flac?url";
-import sounds144 from "./audio/characters/dusty-rusty/dusty-rusty-join-party-1.flac?url";
-import sounds145 from "./audio/characters/dusty-rusty/dusty-rusty-join-party-2.flac?url";
-import sounds146 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-1.flac?url";
-import sounds147 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-2.flac?url";
-import sounds148 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-3.flac?url";
-import sounds149 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-4.flac?url";
-import sounds150 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-5.flac?url";
-import sounds151 from "./audio/characters/dusty-rusty/dusty-rusty-look-here-1.flac?url";
-import sounds152 from "./audio/characters/dusty-rusty/dusty-rusty-look-here-2.flac?url";
-import sounds153 from "./audio/characters/dusty-rusty/dusty-rusty-look-here-3.flac?url";
-import sounds154 from "./audio/characters/dusty-rusty/dusty-rusty-look-here-4.flac?url";
-import sounds155 from "./audio/characters/dusty-rusty/dusty-rusty-misc-1.flac?url";
-import sounds156 from "./audio/characters/dusty-rusty/dusty-rusty-misc-2.flac?url";
-import sounds157 from "./audio/characters/dusty-rusty/dusty-rusty-misc-3.flac?url";
-import sounds158 from "./audio/characters/dusty-rusty/dusty-rusty-misc-4.flac?url";
-import sounds159 from "./audio/characters/dusty-rusty/dusty-rusty-near-death-1.flac?url";
-import sounds160 from "./audio/characters/dusty-rusty/dusty-rusty-near-death-2.flac?url";
-import sounds161 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-1.flac?url";
-import sounds162 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-10.flac?url";
-import sounds163 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-11.flac?url";
-import sounds164 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-12.flac?url";
-import sounds165 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-2.flac?url";
-import sounds166 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-3.flac?url";
-import sounds167 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-4.flac?url";
-import sounds168 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-5.flac?url";
-import sounds169 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-6.flac?url";
-import sounds170 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-7.flac?url";
-import sounds171 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-8.flac?url";
-import sounds172 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-9.flac?url";
-import sounds173 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-1.flac?url";
-import sounds174 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-10-health.flac?url";
-import sounds175 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-11-health.flac?url";
-import sounds176 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-2.flac?url";
-import sounds177 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-3.flac?url";
-import sounds178 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-4.flac?url";
-import sounds179 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-5.flac?url";
-import sounds180 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-6.flac?url";
-import sounds181 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-7.flac?url";
-import sounds182 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-8.flac?url";
-import sounds183 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-9-health.flac?url";
-import sounds184 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-1.flac?url";
-import sounds185 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-2.flac?url";
-import sounds186 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-3.flac?url";
-import sounds187 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-4.flac?url";
-import sounds188 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-5.flac?url";
-import sounds189 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-6.flac?url";
-import sounds190 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-7.flac?url";
-import sounds191 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-8.flac?url";
-import sounds192 from "./audio/characters/dusty-rusty/dusty-rusty-worried-1.flac?url";
-import sounds193 from "./audio/characters/dusty-rusty/dusty-rusty-worried-2.flac?url";
-import sounds194 from "./audio/characters/dusty-rusty/dusty-rusty-worried-3.flac?url";
-import sounds195 from "./audio/characters/dusty-rusty/dusty-rusty-worried-4.flac?url";
-import sounds196 from "./audio/characters/dusty-rusty/dusty-rusty-worried-5.flac?url";
-import sounds197 from "./audio/characters/dusty-rusty/dusty-rusty-worried-6.flac?url";
-import sounds198 from "./audio/characters/kyle/kyle-death-1.flac?url";
-import sounds199 from "./audio/characters/kyle/kyle-death-2.flac?url";
-import sounds200 from "./audio/characters/kyle/kyle-death-3.flac?url";
-import sounds201 from "./audio/characters/kyle/kyle-hurt-1.flac?url";
-import sounds202 from "./audio/characters/kyle/kyle-hurt-2.flac?url";
-import sounds203 from "./audio/characters/kyle/kyle-hurt-4.flac?url";
-import sounds204 from "./audio/characters/kyle/kyle-hurt-5.flac?url";
-import sounds205 from "./audio/characters/kyle/kyle-hurt-6.flac?url";
-import sounds206 from "./audio/characters/kyle/kyle-hurt-7.flac?url";
-import sounds207 from "./audio/characters/kyle/kyle-hurt-8.flac?url";
-import sounds208 from "./audio/characters/kyle/kyle-hurt-9.flac?url";
-import sounds209 from "./audio/characters/kyle/kyle-join-party-1.flac?url";
-import sounds210 from "./audio/characters/kyle/kyle-look-here-1.flac?url";
-import sounds211 from "./audio/characters/kyle/kyle-look-here-2.flac?url";
-import sounds212 from "./audio/characters/kyle/kyle-near-death-1.flac?url";
-import sounds213 from "./audio/characters/kyle/kyle-near-death-2.flac?url";
-import sounds214 from "./audio/characters/kyle/kyle-new-level-1.flac?url";
-import sounds215 from "./audio/characters/kyle/kyle-pickup-1.flac?url";
-import sounds216 from "./audio/characters/kyle/kyle-pickup-2.flac?url";
-import sounds217 from "./audio/characters/kyle/kyle-relief-1.flac?url";
-import sounds218 from "./audio/characters/kyle/kyle-taunt-1.flac?url";
-import sounds219 from "./audio/characters/kyle/kyle-worried-1.flac?url";
-import sounds220 from "./audio/characters/kyle/kyle-worried-2.flac?url";
-import sounds221 from "./audio/characters/kyle/kyle-worried-3.flac?url";
-import sounds222 from "./audio/characters/lucky-jack/lucky-jack-death-1.flac?url";
-import sounds223 from "./audio/characters/lucky-jack/lucky-jack-death-2.flac?url";
-import sounds224 from "./audio/characters/lucky-jack/lucky-jack-hurt-1.flac?url";
-import sounds225 from "./audio/characters/lucky-jack/lucky-jack-hurt-2.flac?url";
-import sounds226 from "./audio/characters/lucky-jack/lucky-jack-hurt-3.flac?url";
-import sounds227 from "./audio/characters/lucky-jack/lucky-jack-hurt-4.flac?url";
-import sounds228 from "./audio/characters/lucky-jack/lucky-jack-hurt-6.flac?url";
-import sounds229 from "./audio/characters/lucky-jack/lucky-jack-join-party-1.flac?url";
-import sounds230 from "./audio/characters/lucky-jack/lucky-jack-look-here.flac?url";
-import sounds231 from "./audio/characters/lucky-jack/lucky-jack-misc-1.flac?url";
-import sounds232 from "./audio/characters/lucky-jack/lucky-jack-near-death-1.flac?url";
-import sounds233 from "./audio/characters/lucky-jack/lucky-jack-new-level-1.flac?url";
-import sounds234 from "./audio/characters/lucky-jack/lucky-jack-new-level-2.flac?url";
-import sounds235 from "./audio/characters/lucky-jack/lucky-jack-new-level-3.flac?url";
-import sounds236 from "./audio/characters/lucky-jack/lucky-jack-pickup-1.flac?url";
-import sounds237 from "./audio/characters/lucky-jack/lucky-jack-relief-1.flac?url";
-import sounds238 from "./audio/characters/lucky-jack/lucky-jack-taunt-1.flac?url";
-import sounds239 from "./audio/characters/lucky-jack/lucky-jack-taunt-2.flac?url";
-import sounds240 from "./audio/characters/lucky-jack/lucky-jack-taunt-3.flac?url";
-import sounds241 from "./audio/characters/lucky-jack/lucky-jack-taunt-4.flac?url";
-import sounds242 from "./audio/characters/lucky-jack/lucky-jack-taunt-5.flac?url";
-import sounds243 from "./audio/characters/lucky-jack/lucky-jack-worried-1.flac?url";
-import sounds244 from "./audio/characters/nancy/nancy-death-3.flac?url";
-import sounds245 from "./audio/characters/nancy/nancy-hurt-1.flac?url";
-import sounds246 from "./audio/characters/nancy/nancy-hurt-2.flac?url";
-import sounds247 from "./audio/characters/nancy/nancy-hurt-3.flac?url";
-import sounds248 from "./audio/characters/nancy/nancy-hurt-4.flac?url";
-import sounds249 from "./audio/characters/nancy/nancy-hurt-5.flac?url";
-import sounds250 from "./audio/characters/nancy/nancy-hurt-6.flac?url";
-import sounds251 from "./audio/characters/nancy/nancy-join-party-1.flac?url";
-import sounds252 from "./audio/characters/nancy/nancy-join-party-2.flac?url";
-import sounds253 from "./audio/characters/nancy/nancy-join-party-3.flac?url";
-import sounds254 from "./audio/characters/nancy/nancy-look-here-1.flac?url";
-import sounds255 from "./audio/characters/nancy/nancy-look-here-2.flac?url";
-import sounds256 from "./audio/characters/nancy/nancy-look-here-3.flac?url";
-import sounds257 from "./audio/characters/nancy/nancy-misc-1.flac?url";
-import sounds258 from "./audio/characters/nancy/nancy-misc-2.flac?url";
-import sounds259 from "./audio/characters/nancy/nancy-near-death-1.flac?url";
-import sounds260 from "./audio/characters/nancy/nancy-near-death-2.flac?url";
-import sounds261 from "./audio/characters/nancy/nancy-new-level-3.flac?url";
-import sounds262 from "./audio/characters/nancy/nancy-pickup-1.flac?url";
-import sounds263 from "./audio/characters/nancy/nancy-pickup-2.flac?url";
-import sounds264 from "./audio/characters/nancy/nancy-relief-1.flac?url";
-import sounds265 from "./audio/characters/nancy/nancy-relief-2.flac?url";
-import sounds266 from "./audio/characters/nancy/nancy-relief-3.flac?url";
-import sounds267 from "./audio/characters/nancy/nancy-taunt-1.flac?url";
-import sounds268 from "./audio/characters/nancy/nancy-taunt-2.flac?url";
-import sounds269 from "./audio/characters/nancy/nancy-worried-1.flac?url";
-import sounds270 from "./audio/characters/nancy/nancy-worried-2.flac?url";
-import sounds271 from "./audio/characters/nancy/nancy-worried-3.flac?url";
-import sounds272 from "./audio/characters/santa/santa-death-1.flac?url";
-import sounds273 from "./audio/characters/santa/santa-ho-ho-ho-1.flac?url";
-import sounds274 from "./audio/characters/santa/santa-ho-ho-ho-2.flac?url";
-import sounds275 from "./audio/characters/santa/santa-ho-ho-ho-3.flac?url";
-import sounds276 from "./audio/characters/santa/santa-hurt-1.flac?url";
-import sounds277 from "./audio/characters/santa/santa-hurt-2.flac?url";
-import sounds278 from "./audio/characters/santa/santa-hurt-3.flac?url";
-import sounds279 from "./audio/characters/santa/santa-hurt-4.flac?url";
-import sounds280 from "./audio/characters/santa/santa-hurt-5.flac?url";
-import sounds281 from "./audio/characters/santa/santa-hurt-6.flac?url";
-import sounds282 from "./audio/characters/santa/santa-hurt-7.flac?url";
-import sounds283 from "./audio/characters/santa/santa-hurt-8.flac?url";
-import sounds284 from "./audio/characters/santa/santa-join-1.flac?url";
-import sounds285 from "./audio/characters/santa/santa-new-level-1.flac?url";
-import sounds286 from "./audio/characters/santa/santa-new-level-2.flac?url";
-import sounds287 from "./audio/characters/santa/santa-pickup-2.flac?url";
-import sounds288 from "./audio/characters/santa/santa-pickup-gun-1.flac?url";
-import sounds289 from "./audio/characters/santa/santa-taunt-1.flac?url";
-import sounds290 from "./audio/characters/santa/santa-taunt-2.flac?url";
-import sounds291 from "./audio/characters/santa/santa-taunt-3.flac?url";
-import sounds292 from "./audio/characters/santa/santa-taunt-4.flac?url";
-import sounds293 from "./audio/characters/santa/santa-taunt-5.flac?url";
-import sounds294 from "./audio/characters/santa/santa-taunt-6.flac?url";
-import sounds295 from "./audio/characters/santa/santa-taunt-7.flac?url";
-import sounds296 from "./audio/characters/santa/santa-worried-1.flac?url";
-import sounds297 from "./audio/characters/santa/santa-worried-2.flac?url";
-import sounds298 from "./audio/characters/simon/simon-death-1.flac?url";
-import sounds299 from "./audio/characters/simon/simon-hurt-1.flac?url";
-import sounds300 from "./audio/characters/simon/simon-hurt-2.flac?url";
-import sounds301 from "./audio/characters/simon/simon-hurt-3.flac?url";
-import sounds302 from "./audio/characters/simon/simon-hurt-4.flac?url";
-import sounds303 from "./audio/characters/simon/simon-hurt-5.flac?url";
-import sounds304 from "./audio/characters/simon/simon-hurt-6.flac?url";
-import sounds305 from "./audio/characters/simon/simon-hurt-7.flac?url";
-import sounds306 from "./audio/characters/simon/simon-join-party-1.flac?url";
-import sounds307 from "./audio/characters/simon/simon-look-here-1.flac?url";
-import sounds308 from "./audio/characters/simon/simon-look-here-2.flac?url";
-import sounds309 from "./audio/characters/simon/simon-near-death-2.flac?url";
-import sounds310 from "./audio/characters/simon/simon-pickup-item-1.flac?url";
-import sounds311 from "./audio/characters/simon/simon-pickup-item-2.flac?url";
-import sounds312 from "./audio/characters/simon/simon-pickup-item-3.flac?url";
-import sounds313 from "./audio/characters/simon/simon-relief-1.flac?url";
-import sounds314 from "./audio/characters/simon/simon-taunt-1.flac?url";
-import sounds315 from "./audio/characters/simon/simon-taunt-2.flac?url";
-import sounds316 from "./audio/characters/simon/simon-worried-1.flac?url";
-import sounds317 from "./audio/characters/simon/simon-worried-2.flac?url";
-import sounds318 from "./audio/characters/simon/simon-worried-3.flac?url";
-import sounds319 from "./audio/characters/takeshi/takeshi-death-1.flac?url";
-import sounds320 from "./audio/characters/takeshi/takeshi-hurt-1.flac?url";
-import sounds321 from "./audio/characters/takeshi/takeshi-hurt-2.flac?url";
-import sounds322 from "./audio/characters/takeshi/takeshi-hurt-3.flac?url";
-import sounds323 from "./audio/characters/takeshi/takeshi-hurt-4.flac?url";
-import sounds324 from "./audio/characters/takeshi/takeshi-hurt-6.flac?url";
-import sounds325 from "./audio/characters/takeshi/takeshi-hurt-7.flac?url";
-import sounds326 from "./audio/characters/takeshi/takeshi-hurt-8.flac?url";
-import sounds327 from "./audio/characters/takeshi/takeshi-join-party-1.flac?url";
-import sounds328 from "./audio/characters/takeshi/takeshi-join-party-2.flac?url";
-import sounds329 from "./audio/characters/takeshi/takeshi-level-complete-1.flac?url";
-import sounds330 from "./audio/characters/takeshi/takeshi-level-complete-2.flac?url";
-import sounds331 from "./audio/characters/takeshi/takeshi-look-here-1.flac?url";
-import sounds332 from "./audio/characters/takeshi/takeshi-misc-1.flac?url";
-import sounds333 from "./audio/characters/takeshi/takeshi-near-death-1.flac?url";
-import sounds334 from "./audio/characters/takeshi/takeshi-new-level-1.flac?url";
-import sounds335 from "./audio/characters/takeshi/takeshi-pickup-1.flac?url";
-import sounds336 from "./audio/characters/takeshi/takeshi-pickup-2.flac?url";
-import sounds337 from "./audio/characters/takeshi/takeshi-taunt-1.flac?url";
-import sounds338 from "./audio/characters/takeshi/takeshi-taunt-2.flac?url";
-import sounds339 from "./audio/characters/takeshi/takeshi-taunt-3.flac?url";
-import sounds340 from "./audio/characters/takeshi/takeshi-taunt-4.flac?url";
-import sounds341 from "./audio/characters/takeshi/takeshi-worried-1.flac?url";
-import sounds342 from "./audio/characters/takeshi/takeshi-worried-2.flac?url";
-import sounds343 from "./audio/characters/takeshi/takeshi-worried-3.flac?url";
-import sounds344 from "./audio/characters/wendy/wendy-death-1.flac?url";
-import sounds345 from "./audio/characters/wendy/wendy-death-2.flac?url";
-import sounds346 from "./audio/characters/wendy/wendy-death-3.flac?url";
-import sounds347 from "./audio/characters/wendy/wendy-death-4.flac?url";
-import sounds348 from "./audio/characters/wendy/wendy-hurt-1.flac?url";
-import sounds349 from "./audio/characters/wendy/wendy-hurt-2.flac?url";
-import sounds350 from "./audio/characters/wendy/wendy-hurt-3.flac?url";
-import sounds351 from "./audio/characters/wendy/wendy-hurt-4.flac?url";
-import sounds352 from "./audio/characters/wendy/wendy-hurt-6.flac?url";
-import sounds353 from "./audio/characters/wendy/wendy-hurt-7.flac?url";
-import sounds354 from "./audio/characters/wendy/wendy-join-party-1.flac?url";
-import sounds355 from "./audio/characters/wendy/wendy-join-party-2.flac?url";
-import sounds356 from "./audio/characters/wendy/wendy-join-party-3.flac?url";
-import sounds357 from "./audio/characters/wendy/wendy-join-party-4.flac?url";
-import sounds358 from "./audio/characters/wendy/wendy-look-here-1.flac?url";
-import sounds359 from "./audio/characters/wendy/wendy-look-here-2.flac?url";
-import sounds360 from "./audio/characters/wendy/wendy-look-here-3.flac?url";
-import sounds361 from "./audio/characters/wendy/wendy-misc-2.flac?url";
-import sounds362 from "./audio/characters/wendy/wendy-misc-3.flac?url";
-import sounds363 from "./audio/characters/wendy/wendy-near-death-1.flac?url";
-import sounds364 from "./audio/characters/wendy/wendy-near-death-2.flac?url";
-import sounds365 from "./audio/characters/wendy/wendy-near-death-4.flac?url";
-import sounds366 from "./audio/characters/wendy/wendy-near-death-5.flac?url";
-import sounds367 from "./audio/characters/wendy/wendy-new-level-1.flac?url";
-import sounds368 from "./audio/characters/wendy/wendy-new-level-2.flac?url";
-import sounds369 from "./audio/characters/wendy/wendy-new-level-3.flac?url";
-import sounds370 from "./audio/characters/wendy/wendy-new-level-4.flac?url";
-import sounds371 from "./audio/characters/wendy/wendy-pickup-1.flac?url";
-import sounds372 from "./audio/characters/wendy/wendy-pickup-2.flac?url";
-import sounds373 from "./audio/characters/wendy/wendy-pickup-3.flac?url";
-import sounds374 from "./audio/characters/wendy/wendy-pickup-4.flac?url";
-import sounds375 from "./audio/characters/wendy/wendy-pickup-5.flac?url";
-import sounds376 from "./audio/characters/wendy/wendy-pickup-6.flac?url";
-import sounds377 from "./audio/characters/wendy/wendy-pickup-7.flac?url";
-import sounds378 from "./audio/characters/wendy/wendy-relief-1.flac?url";
-import sounds379 from "./audio/characters/wendy/wendy-relief-2.flac?url";
-import sounds380 from "./audio/characters/wendy/wendy-relief-3.flac?url";
-import sounds381 from "./audio/characters/wendy/wendy-relief-4.flac?url";
-import sounds382 from "./audio/characters/wendy/wendy-relief-5.flac?url";
-import sounds383 from "./audio/characters/wendy/wendy-relief-6.flac?url";
-import sounds384 from "./audio/characters/wendy/wendy-taunt-1.flac?url";
-import sounds385 from "./audio/characters/wendy/wendy-taunt-2.flac?url";
-import sounds386 from "./audio/characters/wendy/wendy-taunt-4.flac?url";
-import sounds387 from "./audio/characters/wendy/wendy-taunt-5.flac?url";
-import sounds388 from "./audio/characters/wendy/wendy-taunt3.flac?url";
-import sounds389 from "./audio/characters/wendy/wendy-worried-1.flac?url";
-import sounds390 from "./audio/characters/wendy/wendy-worried-2.flac?url";
-import sounds391 from "./audio/characters/wendy/wendy-worried-3.flac?url";
-import sounds392 from "./audio/characters/wendy/wendy-worried-4.flac?url";
-import sounds393 from "./audio/environment/chain-link-fence-1.flac?url";
-import sounds394 from "./audio/environment/chain-link-fence-2.flac?url";
-import sounds395 from "./audio/environment/chain-link-fence-3.flac?url";
-import sounds396 from "./audio/environment/elevator-ding.flac?url";
-import sounds397 from "./audio/environment/elevator-door-close.flac?url";
-import sounds398 from "./audio/environment/elevator-door-open.flac?url";
-import sounds399 from "./audio/environment/heavy-switch-throw.flac?url";
-import sounds400 from "./audio/environment/light-power-on-1.wav?url";
-import sounds401 from "./audio/environment/power-warm-up-1.flac?url";
-import sounds402 from "./audio/food/individual/cabbage-hit-1.flac?url";
-import sounds403 from "./audio/food/individual/cabbage-hit-10.flac?url";
-import sounds404 from "./audio/food/individual/cabbage-hit-11.flac?url";
-import sounds405 from "./audio/food/individual/cabbage-hit-2.flac?url";
-import sounds406 from "./audio/food/individual/cabbage-hit-3.flac?url";
-import sounds407 from "./audio/food/individual/cabbage-hit-4.flac?url";
-import sounds408 from "./audio/food/individual/cabbage-hit-5.flac?url";
-import sounds409 from "./audio/food/individual/cabbage-hit-6.flac?url";
-import sounds410 from "./audio/food/individual/cabbage-hit-7.flac?url";
-import sounds411 from "./audio/food/individual/cabbage-hit-8.flac?url";
-import sounds412 from "./audio/food/individual/melon-plop-1.flac?url";
-import sounds413 from "./audio/food/individual/melon-plop-2.flac?url";
-import sounds414 from "./audio/food/individual/melon-plop-3.flac?url";
-import sounds415 from "./audio/food/individual/melon-plop-4.flac?url";
-import sounds416 from "./audio/food/individual/melon-plop-5.flac?url";
-import sounds417 from "./audio/food/individual/melon-plop-6.flac?url";
-import sounds418 from "./audio/guns/casing-drops/casing-drop-board-1.flac?url";
-import sounds419 from "./audio/guns/casing-drops/casing-drop-board-2.flac?url";
-import sounds420 from "./audio/guns/casing-drops/casing-drop-board-3.flac?url";
-import sounds421 from "./audio/guns/casing-drops/casing-drop-board-4.flac?url";
-import sounds422 from "./audio/guns/casing-drops/shotgun-casing-drop-1.mp3?url";
-import sounds423 from "./audio/guns/misc/dry-fire-1.mp3?url";
-import sounds424 from "./audio/guns/misc/dry-fire-2.mp3?url";
-import sounds425 from "./audio/guns/misc/dry-fire-3.mp3?url";
-import sounds426 from "./audio/guns/misc/magazine-load-1.mp3?url";
-import sounds427 from "./audio/guns/pistol/M1911-pickup.flac?url";
-import sounds428 from "./audio/guns/pistol/deagle-shot-1.mp3?url";
-import sounds429 from "./audio/guns/pistol/deagle-shot-2.mp3?url";
-import sounds430 from "./audio/guns/pistol/m1911-dry-fire.flac?url";
-import sounds431 from "./audio/guns/pistol/m1911-reload-1.flac?url";
-import sounds432 from "./audio/guns/pistol/pistol-cock-1.mp3?url";
-import sounds433 from "./audio/guns/pistol/pistol-shot-1.mp3?url";
-import sounds434 from "./audio/guns/pistol/pistol-shot-2.mp3?url";
-import sounds435 from "./audio/guns/pistol/pistol2-shot-1.mp3?url";
-import sounds436 from "./audio/guns/revolver/revolver-dry-fire.flac?url";
-import sounds437 from "./audio/guns/revolver/revolver-insert-shell-1.flac?url";
-import sounds438 from "./audio/guns/revolver/revolver-insert-shell-2.flac?url";
-import sounds439 from "./audio/guns/revolver/revolver-insert-shell-3.flac?url";
-import sounds440 from "./audio/guns/revolver/revolver-pickup.flac?url";
-import sounds441 from "./audio/guns/revolver/revolver-reload-finish.flac?url";
-import sounds442 from "./audio/guns/revolver/revolver-reload-start.flac?url";
-import sounds443 from "./audio/guns/revolver/revolver-shot-3.mp3?url";
-import sounds444 from "./audio/guns/rifle/ar-15-reload-1.flac?url";
-import sounds445 from "./audio/guns/rifle/ar-15-reload-empty.flac?url";
-import sounds446 from "./audio/guns/rifle/rifle-shot-1.mp3?url";
-import sounds447 from "./audio/guns/rifle/rifle-shot-2.mp3?url";
-import sounds448 from "./audio/guns/rifle/rifle-shot-3.mp3?url";
-import sounds449 from "./audio/guns/rifle/rifle2-shot-1.mp3?url";
-import sounds450 from "./audio/guns/shotgun/shotgun-load-shell-2.flac?url";
-import sounds451 from "./audio/guns/shotgun/shotgun-pump-1.mp3?url";
-import sounds452 from "./audio/guns/shotgun/shotgun-shot-1.mp3?url";
-import sounds453 from "./audio/guns/shotgun/shotgun-shot-2.mp3?url";
-import sounds454 from "./audio/guns/shotgun/shotgun-shot-3.mp3?url";
-import sounds455 from "./audio/impacts/flesh-hit-1.flac?url";
-import sounds456 from "./audio/impacts/flesh-hit-2.flac?url";
-import sounds457 from "./audio/impacts/flesh-hit-3.flac?url";
-import sounds458 from "./audio/impacts/flesh-hit-4.flac?url";
-import sounds459 from "./audio/impacts/flesh-hit-bat-1.flac?url";
-import sounds460 from "./audio/impacts/flesh-hit-bat-2.flac?url";
-import sounds461 from "./audio/impacts/piano-hit-1.flac?url";
-import sounds462 from "./audio/impacts/piano-hit-2.flac?url";
-import sounds463 from "./audio/impacts/vending-machine-hit-1.flac?url";
-import sounds464 from "./audio/impacts/vending-machine-hit-2.flac?url";
-import sounds465 from "./audio/impacts/wall-hit-1.flac?url";
-import sounds466 from "./audio/impacts/wall-hit-2.flac?url";
-import sounds467 from "./audio/impacts/wall-hit-3.flac?url";
-import sounds468 from "./audio/impacts/wall-hit-4.flac?url";
-import sounds469 from "./audio/impacts/zombie-bite-1.flac?url";
-import sounds470 from "./audio/impacts/zombie-bite-2.flac?url";
-import sounds471 from "./audio/misc/glow-stick-drop-1.flac?url";
-import sounds472 from "./audio/misc/glow-stick-drop-2.flac?url";
-import sounds473 from "./audio/misc/pop1.flac?url";
-import sounds474 from "./audio/misc/quarter-drop-1.flac?url";
-import sounds475 from "./audio/moms-kitchen/machine-loop-1.flac?url";
-import sounds476 from "./audio/music/bass-groove-loop-1.flac?url";
-import sounds477 from "./audio/weapons/baseball-bat-pickup-1.flac?url";
-import sounds478 from "./audio/weapons/baseball-bat-pickup-2.flac?url";
-import sounds479 from "./audio/weapons/sword-shing-1.flac?url";
-import sounds480 from "./audio/weapons/sword-shing-2.flac?url";
-import sounds481 from "./audio/weapons/sword-shing-3.flac?url";
-import sounds482 from "./audio/weapons/sword-swoosh-1.flac?url";
-import sounds483 from "./audio/weapons/sword-swoosh-2.flac?url";
-import sounds484 from "./audio/weapons/sword-swoosh-3.flac?url";
-import sounds485 from "./audio/zombie/kevin-zombie-1.flac?url";
-import sounds486 from "./audio/zombie/kevin-zombie-10.flac?url";
-import sounds487 from "./audio/zombie/kevin-zombie-11.flac?url";
-import sounds488 from "./audio/zombie/kevin-zombie-12.flac?url";
-import sounds489 from "./audio/zombie/kevin-zombie-13.flac?url";
-import sounds490 from "./audio/zombie/kevin-zombie-14.flac?url";
-import sounds491 from "./audio/zombie/kevin-zombie-15.flac?url";
-import sounds492 from "./audio/zombie/kevin-zombie-17.flac?url";
-import sounds493 from "./audio/zombie/kevin-zombie-18.flac?url";
-import sounds494 from "./audio/zombie/kevin-zombie-19.flac?url";
-import sounds495 from "./audio/zombie/kevin-zombie-2.flac?url";
-import sounds496 from "./audio/zombie/kevin-zombie-20.flac?url";
-import sounds497 from "./audio/zombie/kevin-zombie-21.flac?url";
-import sounds498 from "./audio/zombie/kevin-zombie-23.flac?url";
-import sounds499 from "./audio/zombie/kevin-zombie-24.flac?url";
-import sounds500 from "./audio/zombie/kevin-zombie-25.flac?url";
-import sounds501 from "./audio/zombie/kevin-zombie-26.flac?url";
-import sounds502 from "./audio/zombie/kevin-zombie-27.flac?url";
-import sounds503 from "./audio/zombie/kevin-zombie-28.flac?url";
-import sounds504 from "./audio/zombie/kevin-zombie-29.flac?url";
-import sounds505 from "./audio/zombie/kevin-zombie-3.flac?url";
-import sounds506 from "./audio/zombie/kevin-zombie-30.flac?url";
-import sounds507 from "./audio/zombie/kevin-zombie-31.flac?url";
-import sounds508 from "./audio/zombie/kevin-zombie-32.flac?url";
-import sounds509 from "./audio/zombie/kevin-zombie-33.flac?url";
-import sounds510 from "./audio/zombie/kevin-zombie-34.flac?url";
-import sounds511 from "./audio/zombie/kevin-zombie-35.flac?url";
-import sounds512 from "./audio/zombie/kevin-zombie-36.flac?url";
-import sounds513 from "./audio/zombie/kevin-zombie-37.flac?url";
-import sounds514 from "./audio/zombie/kevin-zombie-38.flac?url";
-import sounds515 from "./audio/zombie/kevin-zombie-39.flac?url";
-import sounds516 from "./audio/zombie/kevin-zombie-4.flac?url";
-import sounds517 from "./audio/zombie/kevin-zombie-5.flac?url";
-import sounds518 from "./audio/zombie/kevin-zombie-7.flac?url";
-import sounds519 from "./audio/zombie/kevin-zombie-8.flac?url";
-import sounds520 from "./audio/zombie/kevin-zombie-9.flac?url";
-import sounds521 from "./audio/zombie/perry-zombie-1.flac?url";
-import sounds522 from "./audio/zombie/perry-zombie-10.flac?url";
-import sounds523 from "./audio/zombie/perry-zombie-2.flac?url";
-import sounds524 from "./audio/zombie/perry-zombie-3.flac?url";
-import sounds525 from "./audio/zombie/perry-zombie-4.flac?url";
-import sounds526 from "./audio/zombie/perry-zombie-6.flac?url";
-import sounds527 from "./audio/zombie/perry-zombie-7.flac?url";
-import sounds528 from "./audio/zombie/perry-zombie-8.flac?url";
-import sounds529 from "./audio/zombie/perry-zombie-9.flac?url";
-import sounds530 from "./audio/zombie/rachel-zombie-1.flac?url";
-import sounds531 from "./audio/zombie/rachel-zombie-10.flac?url";
-import sounds532 from "./audio/zombie/rachel-zombie-11.flac?url";
-import sounds533 from "./audio/zombie/rachel-zombie-12.flac?url";
-import sounds534 from "./audio/zombie/rachel-zombie-13.flac?url";
-import sounds535 from "./audio/zombie/rachel-zombie-2.flac?url";
-import sounds536 from "./audio/zombie/rachel-zombie-3.flac?url";
-import sounds537 from "./audio/zombie/rachel-zombie-4.flac?url";
-import sounds538 from "./audio/zombie/rachel-zombie-5.flac?url";
-import sounds539 from "./audio/zombie/rachel-zombie-6.flac?url";
-import sounds540 from "./audio/zombie/rachel-zombie-7.flac?url";
-import sounds541 from "./audio/zombie/rachel-zombie-8.flac?url";
-import sounds542 from "./audio/zombie/rachel-zombie-9.flac?url";
-import sounds543 from "./audio/zombie/spitter-spit-1.flac?url";
-import sounds544 from "./audio/zombie/spitter-spit-2.flac?url";
-import sounds545 from "./audio/zombie/spitter-spit-3.flac?url";
+import sounds25 from "./audio/characters/andy/andy-new-level-14.flac?url";
+import sounds26 from "./audio/characters/andy/andy-new-level-2.flac?url";
+import sounds27 from "./audio/characters/andy/andy-pickup-1.flac?url";
+import sounds28 from "./audio/characters/andy/andy-pickup-2.flac?url";
+import sounds29 from "./audio/characters/andy/andy-pickup-3.flac?url";
+import sounds30 from "./audio/characters/andy/andy-pickup-4.flac?url";
+import sounds31 from "./audio/characters/andy/andy-pickup-5.flac?url";
+import sounds32 from "./audio/characters/andy/andy-relief-1.flac?url";
+import sounds33 from "./audio/characters/andy/andy-relief-2.flac?url";
+import sounds34 from "./audio/characters/andy/andy-relief-3.flac?url";
+import sounds35 from "./audio/characters/andy/andy-relief-4.flac?url";
+import sounds36 from "./audio/characters/andy/andy-relief-5.flac?url";
+import sounds37 from "./audio/characters/andy/andy-relief-6.flac?url";
+import sounds38 from "./audio/characters/andy/andy-taunt-1.flac?url";
+import sounds39 from "./audio/characters/andy/andy-taunt-2.flac?url";
+import sounds40 from "./audio/characters/andy/andy-worried-1.flac?url";
+import sounds41 from "./audio/characters/andy/andy-worried-2.flac?url";
+import sounds42 from "./audio/characters/andy/andy-worried-3.flac?url";
+import sounds43 from "./audio/characters/andy/andy-worried-4.flac?url";
+import sounds44 from "./audio/characters/andy/andy-worried-5.flac?url";
+import sounds45 from "./audio/characters/chad/chad-death-1.flac?url";
+import sounds46 from "./audio/characters/chad/chad-hurt-1.flac?url";
+import sounds47 from "./audio/characters/chad/chad-hurt-2.flac?url";
+import sounds48 from "./audio/characters/chad/chad-hurt-3.flac?url";
+import sounds49 from "./audio/characters/chad/chad-hurt-4.flac?url";
+import sounds50 from "./audio/characters/chad/chad-hurt-5.flac?url";
+import sounds51 from "./audio/characters/chad/chad-hurt-6.flac?url";
+import sounds52 from "./audio/characters/chad/chad-hurt-7.flac?url";
+import sounds53 from "./audio/characters/chad/chad-join-party-1.flac?url";
+import sounds54 from "./audio/characters/chad/chad-level-complete-1.flac?url";
+import sounds55 from "./audio/characters/chad/chad-level-complete-2.flac?url";
+import sounds56 from "./audio/characters/chad/chad-level-complete-3.flac?url";
+import sounds57 from "./audio/characters/chad/chad-look-here-1.flac?url";
+import sounds58 from "./audio/characters/chad/chad-look-here-2.flac?url";
+import sounds59 from "./audio/characters/chad/chad-look-here-3.flac?url";
+import sounds60 from "./audio/characters/chad/chad-misc-1.flac?url";
+import sounds61 from "./audio/characters/chad/chad-misc-2.flac?url";
+import sounds62 from "./audio/characters/chad/chad-near-death-1.flac?url";
+import sounds63 from "./audio/characters/chad/chad-near-death-2.flac?url";
+import sounds64 from "./audio/characters/chad/chad-new-level-1.flac?url";
+import sounds65 from "./audio/characters/chad/chad-new-level-2.flac?url";
+import sounds66 from "./audio/characters/chad/chad-new-level-3.flac?url";
+import sounds67 from "./audio/characters/chad/chad-new-level-4.flac?url";
+import sounds68 from "./audio/characters/chad/chad-pickup-1.flac?url";
+import sounds69 from "./audio/characters/chad/chad-pickup-2.flac?url";
+import sounds70 from "./audio/characters/chad/chad-pickup-3.flac?url";
+import sounds71 from "./audio/characters/chad/chad-taunt-1.flac?url";
+import sounds72 from "./audio/characters/chad/chad-taunt-2.flac?url";
+import sounds73 from "./audio/characters/chad/chad-taunt-3.flac?url";
+import sounds74 from "./audio/characters/chad/chad-taunt-4.flac?url";
+import sounds75 from "./audio/characters/chad/chad-taunt-5.flac?url";
+import sounds76 from "./audio/characters/chad/chad-taunt-6.flac?url";
+import sounds77 from "./audio/characters/chad/chad-worried-1.flac?url";
+import sounds78 from "./audio/characters/chad/chad-worried-2.flac?url";
+import sounds79 from "./audio/characters/chad/chad-worried-3.flac?url";
+import sounds80 from "./audio/characters/cindy/cindy-death-1.flac?url";
+import sounds81 from "./audio/characters/cindy/cindy-hurt-1.flac?url";
+import sounds82 from "./audio/characters/cindy/cindy-hurt-2.flac?url";
+import sounds83 from "./audio/characters/cindy/cindy-hurt-3.flac?url";
+import sounds84 from "./audio/characters/cindy/cindy-join-party-1.flac?url";
+import sounds85 from "./audio/characters/cindy/cindy-look-here-1.flac?url";
+import sounds86 from "./audio/characters/cindy/cindy-look-here-2.flac?url";
+import sounds87 from "./audio/characters/cindy/cindy-misc-1.flac?url";
+import sounds88 from "./audio/characters/cindy/cindy-near-death-1.flac?url";
+import sounds89 from "./audio/characters/cindy/cindy-new-level-1.flac?url";
+import sounds90 from "./audio/characters/cindy/cindy-pickup-1.flac?url";
+import sounds91 from "./audio/characters/cindy/cindy-relief-1.flac?url";
+import sounds92 from "./audio/characters/cindy/cindy-taunt-1.flac?url";
+import sounds93 from "./audio/characters/cindy/cindy-taunt-2.flac?url";
+import sounds94 from "./audio/characters/cindy/cindy-worried-1.flac?url";
+import sounds95 from "./audio/characters/clarice/clarice-death-1.flac?url";
+import sounds96 from "./audio/characters/clarice/clarice-death-2.flac?url";
+import sounds97 from "./audio/characters/clarice/clarice-hurt-1.flac?url";
+import sounds98 from "./audio/characters/clarice/clarice-hurt-2.flac?url";
+import sounds99 from "./audio/characters/clarice/clarice-hurt-3.flac?url";
+import sounds100 from "./audio/characters/clarice/clarice-join-party-1.flac?url";
+import sounds101 from "./audio/characters/clarice/clarice-look-here-1.flac?url";
+import sounds102 from "./audio/characters/clarice/clarice-misc-1.flac?url";
+import sounds103 from "./audio/characters/clarice/clarice-misc-2.flac?url";
+import sounds104 from "./audio/characters/clarice/clarice-near-death.flac?url";
+import sounds105 from "./audio/characters/clarice/clarice-new-level-1.flac?url";
+import sounds106 from "./audio/characters/clarice/clarice-pickup-1.flac?url";
+import sounds107 from "./audio/characters/clarice/clarice-relief-1.flac?url";
+import sounds108 from "./audio/characters/clarice/clarice-relief-2.flac?url";
+import sounds109 from "./audio/characters/clarice/clarice-taunt-1.flac?url";
+import sounds110 from "./audio/characters/clarice/clarice-worried-1.flac?url";
+import sounds111 from "./audio/characters/clyde/clyde-death-1.flac?url";
+import sounds112 from "./audio/characters/clyde/clyde-hurt-1.flac?url";
+import sounds113 from "./audio/characters/clyde/clyde-hurt-2.flac?url";
+import sounds114 from "./audio/characters/clyde/clyde-join-party-1.flac?url";
+import sounds115 from "./audio/characters/clyde/clyde-look-here-1.flac?url";
+import sounds116 from "./audio/characters/clyde/clyde-look-here-2.flac?url";
+import sounds117 from "./audio/characters/clyde/clyde-misc-1.flac?url";
+import sounds118 from "./audio/characters/clyde/clyde-near-death.flac?url";
+import sounds119 from "./audio/characters/clyde/clyde-new-level-1.flac?url";
+import sounds120 from "./audio/characters/clyde/clyde-new-level-2.flac?url";
+import sounds121 from "./audio/characters/clyde/clyde-new-level-3.flac?url";
+import sounds122 from "./audio/characters/clyde/clyde-new-level-4.flac?url";
+import sounds123 from "./audio/characters/clyde/clyde-pickup-1.flac?url";
+import sounds124 from "./audio/characters/clyde/clyde-relief-1.flac?url";
+import sounds125 from "./audio/characters/clyde/clyde-relief-2.flac?url";
+import sounds126 from "./audio/characters/clyde/clyde-relief-3.flac?url";
+import sounds127 from "./audio/characters/clyde/clyde-taunt-1.flac?url";
+import sounds128 from "./audio/characters/clyde/clyde-taunt-2.flac?url";
+import sounds129 from "./audio/characters/clyde/clyde-worried-1.flac?url";
+import sounds130 from "./audio/characters/clyde/clyde-worried-2.flac?url";
+import sounds131 from "./audio/characters/clyde/clyde-worried-3.flac?url";
+import sounds132 from "./audio/characters/clyde/clyde-worried-4.flac?url";
+import sounds133 from "./audio/characters/dusty-rusty/dusty-rusty-death-1.flac?url";
+import sounds134 from "./audio/characters/dusty-rusty/dusty-rusty-death-2.flac?url";
+import sounds135 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-1.flac?url";
+import sounds136 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-10.flac?url";
+import sounds137 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-2.flac?url";
+import sounds138 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-3.flac?url";
+import sounds139 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-4.flac?url";
+import sounds140 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-5.flac?url";
+import sounds141 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-6.flac?url";
+import sounds142 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-7.flac?url";
+import sounds143 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-8.flac?url";
+import sounds144 from "./audio/characters/dusty-rusty/dusty-rusty-hurt-9.flac?url";
+import sounds145 from "./audio/characters/dusty-rusty/dusty-rusty-join-party-1.flac?url";
+import sounds146 from "./audio/characters/dusty-rusty/dusty-rusty-join-party-2.flac?url";
+import sounds147 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-1.flac?url";
+import sounds148 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-2.flac?url";
+import sounds149 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-3.flac?url";
+import sounds150 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-4.flac?url";
+import sounds151 from "./audio/characters/dusty-rusty/dusty-rusty-level-complete-5.flac?url";
+import sounds152 from "./audio/characters/dusty-rusty/dusty-rusty-look-here-1.flac?url";
+import sounds153 from "./audio/characters/dusty-rusty/dusty-rusty-look-here-2.flac?url";
+import sounds154 from "./audio/characters/dusty-rusty/dusty-rusty-look-here-3.flac?url";
+import sounds155 from "./audio/characters/dusty-rusty/dusty-rusty-look-here-4.flac?url";
+import sounds156 from "./audio/characters/dusty-rusty/dusty-rusty-misc-1.flac?url";
+import sounds157 from "./audio/characters/dusty-rusty/dusty-rusty-misc-2.flac?url";
+import sounds158 from "./audio/characters/dusty-rusty/dusty-rusty-misc-3.flac?url";
+import sounds159 from "./audio/characters/dusty-rusty/dusty-rusty-misc-4.flac?url";
+import sounds160 from "./audio/characters/dusty-rusty/dusty-rusty-near-death-1.flac?url";
+import sounds161 from "./audio/characters/dusty-rusty/dusty-rusty-near-death-2.flac?url";
+import sounds162 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-1.flac?url";
+import sounds163 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-10.flac?url";
+import sounds164 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-11.flac?url";
+import sounds165 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-12.flac?url";
+import sounds166 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-2.flac?url";
+import sounds167 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-3.flac?url";
+import sounds168 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-4.flac?url";
+import sounds169 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-5.flac?url";
+import sounds170 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-6.flac?url";
+import sounds171 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-7.flac?url";
+import sounds172 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-8.flac?url";
+import sounds173 from "./audio/characters/dusty-rusty/dusty-rusty-new-level-9.flac?url";
+import sounds174 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-1.flac?url";
+import sounds175 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-10-health.flac?url";
+import sounds176 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-11-health.flac?url";
+import sounds177 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-2.flac?url";
+import sounds178 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-3.flac?url";
+import sounds179 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-4.flac?url";
+import sounds180 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-5.flac?url";
+import sounds181 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-6.flac?url";
+import sounds182 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-7.flac?url";
+import sounds183 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-8.flac?url";
+import sounds184 from "./audio/characters/dusty-rusty/dusty-rusty-pickup-9-health.flac?url";
+import sounds185 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-1.flac?url";
+import sounds186 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-2.flac?url";
+import sounds187 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-3.flac?url";
+import sounds188 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-4.flac?url";
+import sounds189 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-5.flac?url";
+import sounds190 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-6.flac?url";
+import sounds191 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-7.flac?url";
+import sounds192 from "./audio/characters/dusty-rusty/dusty-rusty-taunt-8.flac?url";
+import sounds193 from "./audio/characters/dusty-rusty/dusty-rusty-worried-1.flac?url";
+import sounds194 from "./audio/characters/dusty-rusty/dusty-rusty-worried-2.flac?url";
+import sounds195 from "./audio/characters/dusty-rusty/dusty-rusty-worried-3.flac?url";
+import sounds196 from "./audio/characters/dusty-rusty/dusty-rusty-worried-4.flac?url";
+import sounds197 from "./audio/characters/dusty-rusty/dusty-rusty-worried-5.flac?url";
+import sounds198 from "./audio/characters/dusty-rusty/dusty-rusty-worried-6.flac?url";
+import sounds199 from "./audio/characters/kyle/kyle-death-1.flac?url";
+import sounds200 from "./audio/characters/kyle/kyle-death-2.flac?url";
+import sounds201 from "./audio/characters/kyle/kyle-death-3.flac?url";
+import sounds202 from "./audio/characters/kyle/kyle-hurt-1.flac?url";
+import sounds203 from "./audio/characters/kyle/kyle-hurt-2.flac?url";
+import sounds204 from "./audio/characters/kyle/kyle-hurt-4.flac?url";
+import sounds205 from "./audio/characters/kyle/kyle-hurt-5.flac?url";
+import sounds206 from "./audio/characters/kyle/kyle-hurt-6.flac?url";
+import sounds207 from "./audio/characters/kyle/kyle-hurt-7.flac?url";
+import sounds208 from "./audio/characters/kyle/kyle-hurt-8.flac?url";
+import sounds209 from "./audio/characters/kyle/kyle-hurt-9.flac?url";
+import sounds210 from "./audio/characters/kyle/kyle-join-party-1.flac?url";
+import sounds211 from "./audio/characters/kyle/kyle-look-here-1.flac?url";
+import sounds212 from "./audio/characters/kyle/kyle-look-here-2.flac?url";
+import sounds213 from "./audio/characters/kyle/kyle-near-death-1.flac?url";
+import sounds214 from "./audio/characters/kyle/kyle-near-death-2.flac?url";
+import sounds215 from "./audio/characters/kyle/kyle-new-level-1.flac?url";
+import sounds216 from "./audio/characters/kyle/kyle-pickup-1.flac?url";
+import sounds217 from "./audio/characters/kyle/kyle-pickup-2.flac?url";
+import sounds218 from "./audio/characters/kyle/kyle-relief-1.flac?url";
+import sounds219 from "./audio/characters/kyle/kyle-taunt-1.flac?url";
+import sounds220 from "./audio/characters/kyle/kyle-worried-1.flac?url";
+import sounds221 from "./audio/characters/kyle/kyle-worried-2.flac?url";
+import sounds222 from "./audio/characters/kyle/kyle-worried-3.flac?url";
+import sounds223 from "./audio/characters/lucky-jack/lucky-jack-death-1.flac?url";
+import sounds224 from "./audio/characters/lucky-jack/lucky-jack-death-2.flac?url";
+import sounds225 from "./audio/characters/lucky-jack/lucky-jack-hurt-1.flac?url";
+import sounds226 from "./audio/characters/lucky-jack/lucky-jack-hurt-2.flac?url";
+import sounds227 from "./audio/characters/lucky-jack/lucky-jack-hurt-3.flac?url";
+import sounds228 from "./audio/characters/lucky-jack/lucky-jack-hurt-4.flac?url";
+import sounds229 from "./audio/characters/lucky-jack/lucky-jack-hurt-6.flac?url";
+import sounds230 from "./audio/characters/lucky-jack/lucky-jack-join-party-1.flac?url";
+import sounds231 from "./audio/characters/lucky-jack/lucky-jack-look-here.flac?url";
+import sounds232 from "./audio/characters/lucky-jack/lucky-jack-misc-1.flac?url";
+import sounds233 from "./audio/characters/lucky-jack/lucky-jack-near-death-1.flac?url";
+import sounds234 from "./audio/characters/lucky-jack/lucky-jack-new-level-1.flac?url";
+import sounds235 from "./audio/characters/lucky-jack/lucky-jack-new-level-2.flac?url";
+import sounds236 from "./audio/characters/lucky-jack/lucky-jack-new-level-3.flac?url";
+import sounds237 from "./audio/characters/lucky-jack/lucky-jack-pickup-1.flac?url";
+import sounds238 from "./audio/characters/lucky-jack/lucky-jack-relief-1.flac?url";
+import sounds239 from "./audio/characters/lucky-jack/lucky-jack-taunt-1.flac?url";
+import sounds240 from "./audio/characters/lucky-jack/lucky-jack-taunt-2.flac?url";
+import sounds241 from "./audio/characters/lucky-jack/lucky-jack-taunt-3.flac?url";
+import sounds242 from "./audio/characters/lucky-jack/lucky-jack-taunt-4.flac?url";
+import sounds243 from "./audio/characters/lucky-jack/lucky-jack-taunt-5.flac?url";
+import sounds244 from "./audio/characters/lucky-jack/lucky-jack-worried-1.flac?url";
+import sounds245 from "./audio/characters/nancy/nancy-death-3.flac?url";
+import sounds246 from "./audio/characters/nancy/nancy-hurt-1.flac?url";
+import sounds247 from "./audio/characters/nancy/nancy-hurt-2.flac?url";
+import sounds248 from "./audio/characters/nancy/nancy-hurt-3.flac?url";
+import sounds249 from "./audio/characters/nancy/nancy-hurt-4.flac?url";
+import sounds250 from "./audio/characters/nancy/nancy-hurt-5.flac?url";
+import sounds251 from "./audio/characters/nancy/nancy-hurt-6.flac?url";
+import sounds252 from "./audio/characters/nancy/nancy-join-party-1.flac?url";
+import sounds253 from "./audio/characters/nancy/nancy-join-party-2.flac?url";
+import sounds254 from "./audio/characters/nancy/nancy-join-party-3.flac?url";
+import sounds255 from "./audio/characters/nancy/nancy-look-here-1.flac?url";
+import sounds256 from "./audio/characters/nancy/nancy-look-here-2.flac?url";
+import sounds257 from "./audio/characters/nancy/nancy-look-here-3.flac?url";
+import sounds258 from "./audio/characters/nancy/nancy-misc-1.flac?url";
+import sounds259 from "./audio/characters/nancy/nancy-misc-2.flac?url";
+import sounds260 from "./audio/characters/nancy/nancy-near-death-1.flac?url";
+import sounds261 from "./audio/characters/nancy/nancy-near-death-2.flac?url";
+import sounds262 from "./audio/characters/nancy/nancy-new-level-3.flac?url";
+import sounds263 from "./audio/characters/nancy/nancy-pickup-1.flac?url";
+import sounds264 from "./audio/characters/nancy/nancy-pickup-2.flac?url";
+import sounds265 from "./audio/characters/nancy/nancy-relief-1.flac?url";
+import sounds266 from "./audio/characters/nancy/nancy-relief-2.flac?url";
+import sounds267 from "./audio/characters/nancy/nancy-relief-3.flac?url";
+import sounds268 from "./audio/characters/nancy/nancy-taunt-1.flac?url";
+import sounds269 from "./audio/characters/nancy/nancy-taunt-2.flac?url";
+import sounds270 from "./audio/characters/nancy/nancy-worried-1.flac?url";
+import sounds271 from "./audio/characters/nancy/nancy-worried-2.flac?url";
+import sounds272 from "./audio/characters/nancy/nancy-worried-3.flac?url";
+import sounds273 from "./audio/characters/santa/santa-death-1.flac?url";
+import sounds274 from "./audio/characters/santa/santa-ho-ho-ho-1.flac?url";
+import sounds275 from "./audio/characters/santa/santa-ho-ho-ho-2.flac?url";
+import sounds276 from "./audio/characters/santa/santa-ho-ho-ho-3.flac?url";
+import sounds277 from "./audio/characters/santa/santa-hurt-1.flac?url";
+import sounds278 from "./audio/characters/santa/santa-hurt-2.flac?url";
+import sounds279 from "./audio/characters/santa/santa-hurt-3.flac?url";
+import sounds280 from "./audio/characters/santa/santa-hurt-4.flac?url";
+import sounds281 from "./audio/characters/santa/santa-hurt-5.flac?url";
+import sounds282 from "./audio/characters/santa/santa-hurt-6.flac?url";
+import sounds283 from "./audio/characters/santa/santa-hurt-7.flac?url";
+import sounds284 from "./audio/characters/santa/santa-hurt-8.flac?url";
+import sounds285 from "./audio/characters/santa/santa-join-1.flac?url";
+import sounds286 from "./audio/characters/santa/santa-new-level-1.flac?url";
+import sounds287 from "./audio/characters/santa/santa-new-level-2.flac?url";
+import sounds288 from "./audio/characters/santa/santa-pickup-2.flac?url";
+import sounds289 from "./audio/characters/santa/santa-pickup-gun-1.flac?url";
+import sounds290 from "./audio/characters/santa/santa-taunt-1.flac?url";
+import sounds291 from "./audio/characters/santa/santa-taunt-2.flac?url";
+import sounds292 from "./audio/characters/santa/santa-taunt-3.flac?url";
+import sounds293 from "./audio/characters/santa/santa-taunt-4.flac?url";
+import sounds294 from "./audio/characters/santa/santa-taunt-5.flac?url";
+import sounds295 from "./audio/characters/santa/santa-taunt-6.flac?url";
+import sounds296 from "./audio/characters/santa/santa-taunt-7.flac?url";
+import sounds297 from "./audio/characters/santa/santa-worried-1.flac?url";
+import sounds298 from "./audio/characters/santa/santa-worried-2.flac?url";
+import sounds299 from "./audio/characters/simon/simon-death-1.flac?url";
+import sounds300 from "./audio/characters/simon/simon-hurt-1.flac?url";
+import sounds301 from "./audio/characters/simon/simon-hurt-2.flac?url";
+import sounds302 from "./audio/characters/simon/simon-hurt-3.flac?url";
+import sounds303 from "./audio/characters/simon/simon-hurt-4.flac?url";
+import sounds304 from "./audio/characters/simon/simon-hurt-5.flac?url";
+import sounds305 from "./audio/characters/simon/simon-hurt-6.flac?url";
+import sounds306 from "./audio/characters/simon/simon-hurt-7.flac?url";
+import sounds307 from "./audio/characters/simon/simon-join-party-1.flac?url";
+import sounds308 from "./audio/characters/simon/simon-look-here-1.flac?url";
+import sounds309 from "./audio/characters/simon/simon-look-here-2.flac?url";
+import sounds310 from "./audio/characters/simon/simon-near-death-2.flac?url";
+import sounds311 from "./audio/characters/simon/simon-pickup-item-1.flac?url";
+import sounds312 from "./audio/characters/simon/simon-pickup-item-2.flac?url";
+import sounds313 from "./audio/characters/simon/simon-pickup-item-3.flac?url";
+import sounds314 from "./audio/characters/simon/simon-relief-1.flac?url";
+import sounds315 from "./audio/characters/simon/simon-taunt-1.flac?url";
+import sounds316 from "./audio/characters/simon/simon-taunt-2.flac?url";
+import sounds317 from "./audio/characters/simon/simon-worried-1.flac?url";
+import sounds318 from "./audio/characters/simon/simon-worried-2.flac?url";
+import sounds319 from "./audio/characters/simon/simon-worried-3.flac?url";
+import sounds320 from "./audio/characters/takeshi/takeshi-death-1.flac?url";
+import sounds321 from "./audio/characters/takeshi/takeshi-hurt-1.flac?url";
+import sounds322 from "./audio/characters/takeshi/takeshi-hurt-2.flac?url";
+import sounds323 from "./audio/characters/takeshi/takeshi-hurt-3.flac?url";
+import sounds324 from "./audio/characters/takeshi/takeshi-hurt-4.flac?url";
+import sounds325 from "./audio/characters/takeshi/takeshi-hurt-6.flac?url";
+import sounds326 from "./audio/characters/takeshi/takeshi-hurt-7.flac?url";
+import sounds327 from "./audio/characters/takeshi/takeshi-hurt-8.flac?url";
+import sounds328 from "./audio/characters/takeshi/takeshi-join-party-1.flac?url";
+import sounds329 from "./audio/characters/takeshi/takeshi-join-party-2.flac?url";
+import sounds330 from "./audio/characters/takeshi/takeshi-level-complete-1.flac?url";
+import sounds331 from "./audio/characters/takeshi/takeshi-level-complete-2.flac?url";
+import sounds332 from "./audio/characters/takeshi/takeshi-look-here-1.flac?url";
+import sounds333 from "./audio/characters/takeshi/takeshi-misc-1.flac?url";
+import sounds334 from "./audio/characters/takeshi/takeshi-near-death-1.flac?url";
+import sounds335 from "./audio/characters/takeshi/takeshi-new-level-1.flac?url";
+import sounds336 from "./audio/characters/takeshi/takeshi-pickup-1.flac?url";
+import sounds337 from "./audio/characters/takeshi/takeshi-pickup-2.flac?url";
+import sounds338 from "./audio/characters/takeshi/takeshi-taunt-1.flac?url";
+import sounds339 from "./audio/characters/takeshi/takeshi-taunt-2.flac?url";
+import sounds340 from "./audio/characters/takeshi/takeshi-taunt-3.flac?url";
+import sounds341 from "./audio/characters/takeshi/takeshi-taunt-4.flac?url";
+import sounds342 from "./audio/characters/takeshi/takeshi-worried-1.flac?url";
+import sounds343 from "./audio/characters/takeshi/takeshi-worried-2.flac?url";
+import sounds344 from "./audio/characters/takeshi/takeshi-worried-3.flac?url";
+import sounds345 from "./audio/characters/wendy/wendy-death-1.flac?url";
+import sounds346 from "./audio/characters/wendy/wendy-death-2.flac?url";
+import sounds347 from "./audio/characters/wendy/wendy-death-3.flac?url";
+import sounds348 from "./audio/characters/wendy/wendy-death-4.flac?url";
+import sounds349 from "./audio/characters/wendy/wendy-hurt-1.flac?url";
+import sounds350 from "./audio/characters/wendy/wendy-hurt-2.flac?url";
+import sounds351 from "./audio/characters/wendy/wendy-hurt-3.flac?url";
+import sounds352 from "./audio/characters/wendy/wendy-hurt-4.flac?url";
+import sounds353 from "./audio/characters/wendy/wendy-hurt-6.flac?url";
+import sounds354 from "./audio/characters/wendy/wendy-hurt-7.flac?url";
+import sounds355 from "./audio/characters/wendy/wendy-join-party-1.flac?url";
+import sounds356 from "./audio/characters/wendy/wendy-join-party-2.flac?url";
+import sounds357 from "./audio/characters/wendy/wendy-join-party-3.flac?url";
+import sounds358 from "./audio/characters/wendy/wendy-join-party-4.flac?url";
+import sounds359 from "./audio/characters/wendy/wendy-look-here-1.flac?url";
+import sounds360 from "./audio/characters/wendy/wendy-look-here-2.flac?url";
+import sounds361 from "./audio/characters/wendy/wendy-look-here-3.flac?url";
+import sounds362 from "./audio/characters/wendy/wendy-misc-2.flac?url";
+import sounds363 from "./audio/characters/wendy/wendy-misc-3.flac?url";
+import sounds364 from "./audio/characters/wendy/wendy-near-death-1.flac?url";
+import sounds365 from "./audio/characters/wendy/wendy-near-death-2.flac?url";
+import sounds366 from "./audio/characters/wendy/wendy-near-death-4.flac?url";
+import sounds367 from "./audio/characters/wendy/wendy-near-death-5.flac?url";
+import sounds368 from "./audio/characters/wendy/wendy-new-level-1.flac?url";
+import sounds369 from "./audio/characters/wendy/wendy-new-level-2.flac?url";
+import sounds370 from "./audio/characters/wendy/wendy-new-level-3.flac?url";
+import sounds371 from "./audio/characters/wendy/wendy-new-level-4.flac?url";
+import sounds372 from "./audio/characters/wendy/wendy-pickup-1.flac?url";
+import sounds373 from "./audio/characters/wendy/wendy-pickup-2.flac?url";
+import sounds374 from "./audio/characters/wendy/wendy-pickup-3.flac?url";
+import sounds375 from "./audio/characters/wendy/wendy-pickup-4.flac?url";
+import sounds376 from "./audio/characters/wendy/wendy-pickup-5.flac?url";
+import sounds377 from "./audio/characters/wendy/wendy-pickup-6.flac?url";
+import sounds378 from "./audio/characters/wendy/wendy-pickup-7.flac?url";
+import sounds379 from "./audio/characters/wendy/wendy-relief-1.flac?url";
+import sounds380 from "./audio/characters/wendy/wendy-relief-2.flac?url";
+import sounds381 from "./audio/characters/wendy/wendy-relief-3.flac?url";
+import sounds382 from "./audio/characters/wendy/wendy-relief-4.flac?url";
+import sounds383 from "./audio/characters/wendy/wendy-relief-5.flac?url";
+import sounds384 from "./audio/characters/wendy/wendy-relief-6.flac?url";
+import sounds385 from "./audio/characters/wendy/wendy-taunt-1.flac?url";
+import sounds386 from "./audio/characters/wendy/wendy-taunt-2.flac?url";
+import sounds387 from "./audio/characters/wendy/wendy-taunt-4.flac?url";
+import sounds388 from "./audio/characters/wendy/wendy-taunt-5.flac?url";
+import sounds389 from "./audio/characters/wendy/wendy-taunt3.flac?url";
+import sounds390 from "./audio/characters/wendy/wendy-worried-1.flac?url";
+import sounds391 from "./audio/characters/wendy/wendy-worried-2.flac?url";
+import sounds392 from "./audio/characters/wendy/wendy-worried-3.flac?url";
+import sounds393 from "./audio/characters/wendy/wendy-worried-4.flac?url";
+import sounds394 from "./audio/environment/chain-link-fence-1.flac?url";
+import sounds395 from "./audio/environment/chain-link-fence-2.flac?url";
+import sounds396 from "./audio/environment/chain-link-fence-3.flac?url";
+import sounds397 from "./audio/environment/elevator-ding.flac?url";
+import sounds398 from "./audio/environment/elevator-door-close.flac?url";
+import sounds399 from "./audio/environment/elevator-door-open.flac?url";
+import sounds400 from "./audio/environment/heavy-switch-throw.flac?url";
+import sounds401 from "./audio/environment/light-power-on-1.wav?url";
+import sounds402 from "./audio/environment/power-warm-up-1.flac?url";
+import sounds403 from "./audio/food/individual/cabbage-hit-1.flac?url";
+import sounds404 from "./audio/food/individual/cabbage-hit-10.flac?url";
+import sounds405 from "./audio/food/individual/cabbage-hit-11.flac?url";
+import sounds406 from "./audio/food/individual/cabbage-hit-2.flac?url";
+import sounds407 from "./audio/food/individual/cabbage-hit-3.flac?url";
+import sounds408 from "./audio/food/individual/cabbage-hit-4.flac?url";
+import sounds409 from "./audio/food/individual/cabbage-hit-5.flac?url";
+import sounds410 from "./audio/food/individual/cabbage-hit-6.flac?url";
+import sounds411 from "./audio/food/individual/cabbage-hit-7.flac?url";
+import sounds412 from "./audio/food/individual/cabbage-hit-8.flac?url";
+import sounds413 from "./audio/food/individual/melon-plop-1.flac?url";
+import sounds414 from "./audio/food/individual/melon-plop-2.flac?url";
+import sounds415 from "./audio/food/individual/melon-plop-3.flac?url";
+import sounds416 from "./audio/food/individual/melon-plop-4.flac?url";
+import sounds417 from "./audio/food/individual/melon-plop-5.flac?url";
+import sounds418 from "./audio/food/individual/melon-plop-6.flac?url";
+import sounds419 from "./audio/guns/casing-drops/casing-drop-board-1.flac?url";
+import sounds420 from "./audio/guns/casing-drops/casing-drop-board-2.flac?url";
+import sounds421 from "./audio/guns/casing-drops/casing-drop-board-3.flac?url";
+import sounds422 from "./audio/guns/casing-drops/casing-drop-board-4.flac?url";
+import sounds423 from "./audio/guns/casing-drops/shotgun-casing-drop-1.mp3?url";
+import sounds424 from "./audio/guns/misc/dry-fire-1.mp3?url";
+import sounds425 from "./audio/guns/misc/dry-fire-2.mp3?url";
+import sounds426 from "./audio/guns/misc/dry-fire-3.mp3?url";
+import sounds427 from "./audio/guns/misc/magazine-load-1.mp3?url";
+import sounds428 from "./audio/guns/pistol/M1911-pickup.flac?url";
+import sounds429 from "./audio/guns/pistol/deagle-shot-1.mp3?url";
+import sounds430 from "./audio/guns/pistol/deagle-shot-2.mp3?url";
+import sounds431 from "./audio/guns/pistol/m1911-dry-fire.flac?url";
+import sounds432 from "./audio/guns/pistol/m1911-reload-1.flac?url";
+import sounds433 from "./audio/guns/pistol/pistol-cock-1.mp3?url";
+import sounds434 from "./audio/guns/pistol/pistol-shot-1.mp3?url";
+import sounds435 from "./audio/guns/pistol/pistol-shot-2.mp3?url";
+import sounds436 from "./audio/guns/pistol/pistol2-shot-1.mp3?url";
+import sounds437 from "./audio/guns/revolver/revolver-dry-fire.flac?url";
+import sounds438 from "./audio/guns/revolver/revolver-insert-shell-1.flac?url";
+import sounds439 from "./audio/guns/revolver/revolver-insert-shell-2.flac?url";
+import sounds440 from "./audio/guns/revolver/revolver-insert-shell-3.flac?url";
+import sounds441 from "./audio/guns/revolver/revolver-pickup.flac?url";
+import sounds442 from "./audio/guns/revolver/revolver-reload-finish.flac?url";
+import sounds443 from "./audio/guns/revolver/revolver-reload-start.flac?url";
+import sounds444 from "./audio/guns/revolver/revolver-shot-3.mp3?url";
+import sounds445 from "./audio/guns/rifle/ar-15-reload-1.flac?url";
+import sounds446 from "./audio/guns/rifle/ar-15-reload-empty.flac?url";
+import sounds447 from "./audio/guns/rifle/rifle-shot-1.mp3?url";
+import sounds448 from "./audio/guns/rifle/rifle-shot-2.mp3?url";
+import sounds449 from "./audio/guns/rifle/rifle-shot-3.mp3?url";
+import sounds450 from "./audio/guns/rifle/rifle2-shot-1.mp3?url";
+import sounds451 from "./audio/guns/shotgun/shotgun-load-shell-2.flac?url";
+import sounds452 from "./audio/guns/shotgun/shotgun-pump-1.mp3?url";
+import sounds453 from "./audio/guns/shotgun/shotgun-shot-1.mp3?url";
+import sounds454 from "./audio/guns/shotgun/shotgun-shot-2.mp3?url";
+import sounds455 from "./audio/guns/shotgun/shotgun-shot-3.mp3?url";
+import sounds456 from "./audio/impacts/flesh-hit-1.flac?url";
+import sounds457 from "./audio/impacts/flesh-hit-2.flac?url";
+import sounds458 from "./audio/impacts/flesh-hit-3.flac?url";
+import sounds459 from "./audio/impacts/flesh-hit-4.flac?url";
+import sounds460 from "./audio/impacts/flesh-hit-bat-1.flac?url";
+import sounds461 from "./audio/impacts/flesh-hit-bat-2.flac?url";
+import sounds462 from "./audio/impacts/piano-hit-1.flac?url";
+import sounds463 from "./audio/impacts/piano-hit-2.flac?url";
+import sounds464 from "./audio/impacts/vending-machine-hit-1.flac?url";
+import sounds465 from "./audio/impacts/vending-machine-hit-2.flac?url";
+import sounds466 from "./audio/impacts/wall-hit-1.flac?url";
+import sounds467 from "./audio/impacts/wall-hit-2.flac?url";
+import sounds468 from "./audio/impacts/wall-hit-3.flac?url";
+import sounds469 from "./audio/impacts/wall-hit-4.flac?url";
+import sounds470 from "./audio/impacts/zombie-bite-1.flac?url";
+import sounds471 from "./audio/impacts/zombie-bite-2.flac?url";
+import sounds472 from "./audio/misc/glow-stick-drop-1.flac?url";
+import sounds473 from "./audio/misc/glow-stick-drop-2.flac?url";
+import sounds474 from "./audio/misc/pop1.flac?url";
+import sounds475 from "./audio/misc/quarter-drop-1.flac?url";
+import sounds476 from "./audio/moms-kitchen/machine-loop-1.flac?url";
+import sounds477 from "./audio/music/bass-groove-loop-1.flac?url";
+import sounds478 from "./audio/weapons/baseball-bat-pickup-1.flac?url";
+import sounds479 from "./audio/weapons/baseball-bat-pickup-2.flac?url";
+import sounds480 from "./audio/weapons/sword-shing-1.flac?url";
+import sounds481 from "./audio/weapons/sword-shing-2.flac?url";
+import sounds482 from "./audio/weapons/sword-shing-3.flac?url";
+import sounds483 from "./audio/weapons/sword-swoosh-1.flac?url";
+import sounds484 from "./audio/weapons/sword-swoosh-2.flac?url";
+import sounds485 from "./audio/weapons/sword-swoosh-3.flac?url";
+import sounds486 from "./audio/zombie/kevin-zombie-1.flac?url";
+import sounds487 from "./audio/zombie/kevin-zombie-10.flac?url";
+import sounds488 from "./audio/zombie/kevin-zombie-11.flac?url";
+import sounds489 from "./audio/zombie/kevin-zombie-12.flac?url";
+import sounds490 from "./audio/zombie/kevin-zombie-13.flac?url";
+import sounds491 from "./audio/zombie/kevin-zombie-14.flac?url";
+import sounds492 from "./audio/zombie/kevin-zombie-15.flac?url";
+import sounds493 from "./audio/zombie/kevin-zombie-17.flac?url";
+import sounds494 from "./audio/zombie/kevin-zombie-18.flac?url";
+import sounds495 from "./audio/zombie/kevin-zombie-19.flac?url";
+import sounds496 from "./audio/zombie/kevin-zombie-2.flac?url";
+import sounds497 from "./audio/zombie/kevin-zombie-20.flac?url";
+import sounds498 from "./audio/zombie/kevin-zombie-21.flac?url";
+import sounds499 from "./audio/zombie/kevin-zombie-23.flac?url";
+import sounds500 from "./audio/zombie/kevin-zombie-24.flac?url";
+import sounds501 from "./audio/zombie/kevin-zombie-25.flac?url";
+import sounds502 from "./audio/zombie/kevin-zombie-26.flac?url";
+import sounds503 from "./audio/zombie/kevin-zombie-27.flac?url";
+import sounds504 from "./audio/zombie/kevin-zombie-28.flac?url";
+import sounds505 from "./audio/zombie/kevin-zombie-29.flac?url";
+import sounds506 from "./audio/zombie/kevin-zombie-3.flac?url";
+import sounds507 from "./audio/zombie/kevin-zombie-30.flac?url";
+import sounds508 from "./audio/zombie/kevin-zombie-31.flac?url";
+import sounds509 from "./audio/zombie/kevin-zombie-32.flac?url";
+import sounds510 from "./audio/zombie/kevin-zombie-33.flac?url";
+import sounds511 from "./audio/zombie/kevin-zombie-34.flac?url";
+import sounds512 from "./audio/zombie/kevin-zombie-35.flac?url";
+import sounds513 from "./audio/zombie/kevin-zombie-36.flac?url";
+import sounds514 from "./audio/zombie/kevin-zombie-37.flac?url";
+import sounds515 from "./audio/zombie/kevin-zombie-38.flac?url";
+import sounds516 from "./audio/zombie/kevin-zombie-39.flac?url";
+import sounds517 from "./audio/zombie/kevin-zombie-4.flac?url";
+import sounds518 from "./audio/zombie/kevin-zombie-5.flac?url";
+import sounds519 from "./audio/zombie/kevin-zombie-7.flac?url";
+import sounds520 from "./audio/zombie/kevin-zombie-8.flac?url";
+import sounds521 from "./audio/zombie/kevin-zombie-9.flac?url";
+import sounds522 from "./audio/zombie/perry-zombie-1.flac?url";
+import sounds523 from "./audio/zombie/perry-zombie-10.flac?url";
+import sounds524 from "./audio/zombie/perry-zombie-2.flac?url";
+import sounds525 from "./audio/zombie/perry-zombie-3.flac?url";
+import sounds526 from "./audio/zombie/perry-zombie-4.flac?url";
+import sounds527 from "./audio/zombie/perry-zombie-6.flac?url";
+import sounds528 from "./audio/zombie/perry-zombie-7.flac?url";
+import sounds529 from "./audio/zombie/perry-zombie-8.flac?url";
+import sounds530 from "./audio/zombie/perry-zombie-9.flac?url";
+import sounds531 from "./audio/zombie/rachel-zombie-1.flac?url";
+import sounds532 from "./audio/zombie/rachel-zombie-10.flac?url";
+import sounds533 from "./audio/zombie/rachel-zombie-11.flac?url";
+import sounds534 from "./audio/zombie/rachel-zombie-12.flac?url";
+import sounds535 from "./audio/zombie/rachel-zombie-13.flac?url";
+import sounds536 from "./audio/zombie/rachel-zombie-2.flac?url";
+import sounds537 from "./audio/zombie/rachel-zombie-3.flac?url";
+import sounds538 from "./audio/zombie/rachel-zombie-4.flac?url";
+import sounds539 from "./audio/zombie/rachel-zombie-5.flac?url";
+import sounds540 from "./audio/zombie/rachel-zombie-6.flac?url";
+import sounds541 from "./audio/zombie/rachel-zombie-7.flac?url";
+import sounds542 from "./audio/zombie/rachel-zombie-8.flac?url";
+import sounds543 from "./audio/zombie/rachel-zombie-9.flac?url";
+import sounds544 from "./audio/zombie/spitter-spit-1.flac?url";
+import sounds545 from "./audio/zombie/spitter-spit-2.flac?url";
+import sounds546 from "./audio/zombie/spitter-spit-3.flac?url";
 import fonts0 from "./fonts/Oswald/oswald.ttf?url";
 import fonts1 from "./fonts/capture_it/capture_it.ttf?url";
 const images = {
@@ -899,527 +900,528 @@ const sounds = {
   "andyNearDeath3": sounds22,
   "andyNearDeath4": sounds23,
   "andyNewLevel1": sounds24,
-  "andyNewLevel2": sounds25,
-  "andyPickup1": sounds26,
-  "andyPickup2": sounds27,
-  "andyPickup3": sounds28,
-  "andyPickup4": sounds29,
-  "andyPickup5": sounds30,
-  "andyRelief1": sounds31,
-  "andyRelief2": sounds32,
-  "andyRelief3": sounds33,
-  "andyRelief4": sounds34,
-  "andyRelief5": sounds35,
-  "andyRelief6": sounds36,
-  "andyTaunt1": sounds37,
-  "andyTaunt2": sounds38,
-  "andyWorried1": sounds39,
-  "andyWorried2": sounds40,
-  "andyWorried3": sounds41,
-  "andyWorried4": sounds42,
-  "andyWorried5": sounds43,
-  "chadDeath1": sounds44,
-  "chadHurt1": sounds45,
-  "chadHurt2": sounds46,
-  "chadHurt3": sounds47,
-  "chadHurt4": sounds48,
-  "chadHurt5": sounds49,
-  "chadHurt6": sounds50,
-  "chadHurt7": sounds51,
-  "chadJoinParty1": sounds52,
-  "chadLevelComplete1": sounds53,
-  "chadLevelComplete2": sounds54,
-  "chadLevelComplete3": sounds55,
-  "chadLookHere1": sounds56,
-  "chadLookHere2": sounds57,
-  "chadLookHere3": sounds58,
-  "chadMisc1": sounds59,
-  "chadMisc2": sounds60,
-  "chadNearDeath1": sounds61,
-  "chadNearDeath2": sounds62,
-  "chadNewLevel1": sounds63,
-  "chadNewLevel2": sounds64,
-  "chadNewLevel3": sounds65,
-  "chadNewLevel4": sounds66,
-  "chadPickup1": sounds67,
-  "chadPickup2": sounds68,
-  "chadPickup3": sounds69,
-  "chadTaunt1": sounds70,
-  "chadTaunt2": sounds71,
-  "chadTaunt3": sounds72,
-  "chadTaunt4": sounds73,
-  "chadTaunt5": sounds74,
-  "chadTaunt6": sounds75,
-  "chadWorried1": sounds76,
-  "chadWorried2": sounds77,
-  "chadWorried3": sounds78,
-  "cindyDeath1": sounds79,
-  "cindyHurt1": sounds80,
-  "cindyHurt2": sounds81,
-  "cindyHurt3": sounds82,
-  "cindyJoinParty1": sounds83,
-  "cindyLookHere1": sounds84,
-  "cindyLookHere2": sounds85,
-  "cindyMisc1": sounds86,
-  "cindyNearDeath1": sounds87,
-  "cindyNewLevel1": sounds88,
-  "cindyPickup1": sounds89,
-  "cindyRelief1": sounds90,
-  "cindyTaunt1": sounds91,
-  "cindyTaunt2": sounds92,
-  "cindyWorried1": sounds93,
-  "clariceDeath1": sounds94,
-  "clariceDeath2": sounds95,
-  "clariceHurt1": sounds96,
-  "clariceHurt2": sounds97,
-  "clariceHurt3": sounds98,
-  "clariceJoinParty1": sounds99,
-  "clariceLookHere1": sounds100,
-  "clariceMisc1": sounds101,
-  "clariceMisc2": sounds102,
-  "clariceNearDeath": sounds103,
-  "clariceNewLevel1": sounds104,
-  "claricePickup1": sounds105,
-  "clariceRelief1": sounds106,
-  "clariceRelief2": sounds107,
-  "clariceTaunt1": sounds108,
-  "clariceWorried1": sounds109,
-  "clydeDeath1": sounds110,
-  "clydeHurt1": sounds111,
-  "clydeHurt2": sounds112,
-  "clydeJoinParty1": sounds113,
-  "clydeLookHere1": sounds114,
-  "clydeLookHere2": sounds115,
-  "clydeMisc1": sounds116,
-  "clydeNearDeath": sounds117,
-  "clydeNewLevel1": sounds118,
-  "clydeNewLevel2": sounds119,
-  "clydeNewLevel3": sounds120,
-  "clydeNewLevel4": sounds121,
-  "clydePickup1": sounds122,
-  "clydeRelief1": sounds123,
-  "clydeRelief2": sounds124,
-  "clydeRelief3": sounds125,
-  "clydeTaunt1": sounds126,
-  "clydeTaunt2": sounds127,
-  "clydeWorried1": sounds128,
-  "clydeWorried2": sounds129,
-  "clydeWorried3": sounds130,
-  "clydeWorried4": sounds131,
-  "dustyRustyDeath1": sounds132,
-  "dustyRustyDeath2": sounds133,
-  "dustyRustyHurt1": sounds134,
-  "dustyRustyHurt10": sounds135,
-  "dustyRustyHurt2": sounds136,
-  "dustyRustyHurt3": sounds137,
-  "dustyRustyHurt4": sounds138,
-  "dustyRustyHurt5": sounds139,
-  "dustyRustyHurt6": sounds140,
-  "dustyRustyHurt7": sounds141,
-  "dustyRustyHurt8": sounds142,
-  "dustyRustyHurt9": sounds143,
-  "dustyRustyJoinParty1": sounds144,
-  "dustyRustyJoinParty2": sounds145,
-  "dustyRustyLevelComplete1": sounds146,
-  "dustyRustyLevelComplete2": sounds147,
-  "dustyRustyLevelComplete3": sounds148,
-  "dustyRustyLevelComplete4": sounds149,
-  "dustyRustyLevelComplete5": sounds150,
-  "dustyRustyLookHere1": sounds151,
-  "dustyRustyLookHere2": sounds152,
-  "dustyRustyLookHere3": sounds153,
-  "dustyRustyLookHere4": sounds154,
-  "dustyRustyMisc1": sounds155,
-  "dustyRustyMisc2": sounds156,
-  "dustyRustyMisc3": sounds157,
-  "dustyRustyMisc4": sounds158,
-  "dustyRustyNearDeath1": sounds159,
-  "dustyRustyNearDeath2": sounds160,
-  "dustyRustyNewLevel1": sounds161,
-  "dustyRustyNewLevel10": sounds162,
-  "dustyRustyNewLevel11": sounds163,
-  "dustyRustyNewLevel12": sounds164,
-  "dustyRustyNewLevel2": sounds165,
-  "dustyRustyNewLevel3": sounds166,
-  "dustyRustyNewLevel4": sounds167,
-  "dustyRustyNewLevel5": sounds168,
-  "dustyRustyNewLevel6": sounds169,
-  "dustyRustyNewLevel7": sounds170,
-  "dustyRustyNewLevel8": sounds171,
-  "dustyRustyNewLevel9": sounds172,
-  "dustyRustyPickup1": sounds173,
-  "dustyRustyPickup10Health": sounds174,
-  "dustyRustyPickup11Health": sounds175,
-  "dustyRustyPickup2": sounds176,
-  "dustyRustyPickup3": sounds177,
-  "dustyRustyPickup4": sounds178,
-  "dustyRustyPickup5": sounds179,
-  "dustyRustyPickup6": sounds180,
-  "dustyRustyPickup7": sounds181,
-  "dustyRustyPickup8": sounds182,
-  "dustyRustyPickup9Health": sounds183,
-  "dustyRustyTaunt1": sounds184,
-  "dustyRustyTaunt2": sounds185,
-  "dustyRustyTaunt3": sounds186,
-  "dustyRustyTaunt4": sounds187,
-  "dustyRustyTaunt5": sounds188,
-  "dustyRustyTaunt6": sounds189,
-  "dustyRustyTaunt7": sounds190,
-  "dustyRustyTaunt8": sounds191,
-  "dustyRustyWorried1": sounds192,
-  "dustyRustyWorried2": sounds193,
-  "dustyRustyWorried3": sounds194,
-  "dustyRustyWorried4": sounds195,
-  "dustyRustyWorried5": sounds196,
-  "dustyRustyWorried6": sounds197,
-  "kyleDeath1": sounds198,
-  "kyleDeath2": sounds199,
-  "kyleDeath3": sounds200,
-  "kyleHurt1": sounds201,
-  "kyleHurt2": sounds202,
-  "kyleHurt4": sounds203,
-  "kyleHurt5": sounds204,
-  "kyleHurt6": sounds205,
-  "kyleHurt7": sounds206,
-  "kyleHurt8": sounds207,
-  "kyleHurt9": sounds208,
-  "kyleJoinParty1": sounds209,
-  "kyleLookHere1": sounds210,
-  "kyleLookHere2": sounds211,
-  "kyleNearDeath1": sounds212,
-  "kyleNearDeath2": sounds213,
-  "kyleNewLevel1": sounds214,
-  "kylePickup1": sounds215,
-  "kylePickup2": sounds216,
-  "kyleRelief1": sounds217,
-  "kyleTaunt1": sounds218,
-  "kyleWorried1": sounds219,
-  "kyleWorried2": sounds220,
-  "kyleWorried3": sounds221,
-  "luckyJackDeath1": sounds222,
-  "luckyJackDeath2": sounds223,
-  "luckyJackHurt1": sounds224,
-  "luckyJackHurt2": sounds225,
-  "luckyJackHurt3": sounds226,
-  "luckyJackHurt4": sounds227,
-  "luckyJackHurt6": sounds228,
-  "luckyJackJoinParty1": sounds229,
-  "luckyJackLookHere": sounds230,
-  "luckyJackMisc1": sounds231,
-  "luckyJackNearDeath1": sounds232,
-  "luckyJackNewLevel1": sounds233,
-  "luckyJackNewLevel2": sounds234,
-  "luckyJackNewLevel3": sounds235,
-  "luckyJackPickup1": sounds236,
-  "luckyJackRelief1": sounds237,
-  "luckyJackTaunt1": sounds238,
-  "luckyJackTaunt2": sounds239,
-  "luckyJackTaunt3": sounds240,
-  "luckyJackTaunt4": sounds241,
-  "luckyJackTaunt5": sounds242,
-  "luckyJackWorried1": sounds243,
-  "nancyDeath3": sounds244,
-  "nancyHurt1": sounds245,
-  "nancyHurt2": sounds246,
-  "nancyHurt3": sounds247,
-  "nancyHurt4": sounds248,
-  "nancyHurt5": sounds249,
-  "nancyHurt6": sounds250,
-  "nancyJoinParty1": sounds251,
-  "nancyJoinParty2": sounds252,
-  "nancyJoinParty3": sounds253,
-  "nancyLookHere1": sounds254,
-  "nancyLookHere2": sounds255,
-  "nancyLookHere3": sounds256,
-  "nancyMisc1": sounds257,
-  "nancyMisc2": sounds258,
-  "nancyNearDeath1": sounds259,
-  "nancyNearDeath2": sounds260,
-  "nancyNewLevel3": sounds261,
-  "nancyPickup1": sounds262,
-  "nancyPickup2": sounds263,
-  "nancyRelief1": sounds264,
-  "nancyRelief2": sounds265,
-  "nancyRelief3": sounds266,
-  "nancyTaunt1": sounds267,
-  "nancyTaunt2": sounds268,
-  "nancyWorried1": sounds269,
-  "nancyWorried2": sounds270,
-  "nancyWorried3": sounds271,
-  "santaDeath1": sounds272,
-  "santaHoHoHo1": sounds273,
-  "santaHoHoHo2": sounds274,
-  "santaHoHoHo3": sounds275,
-  "santaHurt1": sounds276,
-  "santaHurt2": sounds277,
-  "santaHurt3": sounds278,
-  "santaHurt4": sounds279,
-  "santaHurt5": sounds280,
-  "santaHurt6": sounds281,
-  "santaHurt7": sounds282,
-  "santaHurt8": sounds283,
-  "santaJoin1": sounds284,
-  "santaNewLevel1": sounds285,
-  "santaNewLevel2": sounds286,
-  "santaPickup2": sounds287,
-  "santaPickupGun1": sounds288,
-  "santaTaunt1": sounds289,
-  "santaTaunt2": sounds290,
-  "santaTaunt3": sounds291,
-  "santaTaunt4": sounds292,
-  "santaTaunt5": sounds293,
-  "santaTaunt6": sounds294,
-  "santaTaunt7": sounds295,
-  "santaWorried1": sounds296,
-  "santaWorried2": sounds297,
-  "simonDeath1": sounds298,
-  "simonHurt1": sounds299,
-  "simonHurt2": sounds300,
-  "simonHurt3": sounds301,
-  "simonHurt4": sounds302,
-  "simonHurt5": sounds303,
-  "simonHurt6": sounds304,
-  "simonHurt7": sounds305,
-  "simonJoinParty1": sounds306,
-  "simonLookHere1": sounds307,
-  "simonLookHere2": sounds308,
-  "simonNearDeath2": sounds309,
-  "simonPickupItem1": sounds310,
-  "simonPickupItem2": sounds311,
-  "simonPickupItem3": sounds312,
-  "simonRelief1": sounds313,
-  "simonTaunt1": sounds314,
-  "simonTaunt2": sounds315,
-  "simonWorried1": sounds316,
-  "simonWorried2": sounds317,
-  "simonWorried3": sounds318,
-  "takeshiDeath1": sounds319,
-  "takeshiHurt1": sounds320,
-  "takeshiHurt2": sounds321,
-  "takeshiHurt3": sounds322,
-  "takeshiHurt4": sounds323,
-  "takeshiHurt6": sounds324,
-  "takeshiHurt7": sounds325,
-  "takeshiHurt8": sounds326,
-  "takeshiJoinParty1": sounds327,
-  "takeshiJoinParty2": sounds328,
-  "takeshiLevelComplete1": sounds329,
-  "takeshiLevelComplete2": sounds330,
-  "takeshiLookHere1": sounds331,
-  "takeshiMisc1": sounds332,
-  "takeshiNearDeath1": sounds333,
-  "takeshiNewLevel1": sounds334,
-  "takeshiPickup1": sounds335,
-  "takeshiPickup2": sounds336,
-  "takeshiTaunt1": sounds337,
-  "takeshiTaunt2": sounds338,
-  "takeshiTaunt3": sounds339,
-  "takeshiTaunt4": sounds340,
-  "takeshiWorried1": sounds341,
-  "takeshiWorried2": sounds342,
-  "takeshiWorried3": sounds343,
-  "wendyDeath1": sounds344,
-  "wendyDeath2": sounds345,
-  "wendyDeath3": sounds346,
-  "wendyDeath4": sounds347,
-  "wendyHurt1": sounds348,
-  "wendyHurt2": sounds349,
-  "wendyHurt3": sounds350,
-  "wendyHurt4": sounds351,
-  "wendyHurt6": sounds352,
-  "wendyHurt7": sounds353,
-  "wendyJoinParty1": sounds354,
-  "wendyJoinParty2": sounds355,
-  "wendyJoinParty3": sounds356,
-  "wendyJoinParty4": sounds357,
-  "wendyLookHere1": sounds358,
-  "wendyLookHere2": sounds359,
-  "wendyLookHere3": sounds360,
-  "wendyMisc2": sounds361,
-  "wendyMisc3": sounds362,
-  "wendyNearDeath1": sounds363,
-  "wendyNearDeath2": sounds364,
-  "wendyNearDeath4": sounds365,
-  "wendyNearDeath5": sounds366,
-  "wendyNewLevel1": sounds367,
-  "wendyNewLevel2": sounds368,
-  "wendyNewLevel3": sounds369,
-  "wendyNewLevel4": sounds370,
-  "wendyPickup1": sounds371,
-  "wendyPickup2": sounds372,
-  "wendyPickup3": sounds373,
-  "wendyPickup4": sounds374,
-  "wendyPickup5": sounds375,
-  "wendyPickup6": sounds376,
-  "wendyPickup7": sounds377,
-  "wendyRelief1": sounds378,
-  "wendyRelief2": sounds379,
-  "wendyRelief3": sounds380,
-  "wendyRelief4": sounds381,
-  "wendyRelief5": sounds382,
-  "wendyRelief6": sounds383,
-  "wendyTaunt1": sounds384,
-  "wendyTaunt2": sounds385,
-  "wendyTaunt4": sounds386,
-  "wendyTaunt5": sounds387,
-  "wendyTaunt3": sounds388,
-  "wendyWorried1": sounds389,
-  "wendyWorried2": sounds390,
-  "wendyWorried3": sounds391,
-  "wendyWorried4": sounds392,
-  "chainLinkFence1": sounds393,
-  "chainLinkFence2": sounds394,
-  "chainLinkFence3": sounds395,
-  "elevatorDing": sounds396,
-  "elevatorDoorClose": sounds397,
-  "elevatorDoorOpen": sounds398,
-  "heavySwitchThrow": sounds399,
-  "lightPowerOn1": sounds400,
-  "powerWarmUp1": sounds401,
-  "cabbageHit1": sounds402,
-  "cabbageHit10": sounds403,
-  "cabbageHit11": sounds404,
-  "cabbageHit2": sounds405,
-  "cabbageHit3": sounds406,
-  "cabbageHit4": sounds407,
-  "cabbageHit5": sounds408,
-  "cabbageHit6": sounds409,
-  "cabbageHit7": sounds410,
-  "cabbageHit8": sounds411,
-  "melonPlop1": sounds412,
-  "melonPlop2": sounds413,
-  "melonPlop3": sounds414,
-  "melonPlop4": sounds415,
-  "melonPlop5": sounds416,
-  "melonPlop6": sounds417,
-  "casingDropBoard1": sounds418,
-  "casingDropBoard2": sounds419,
-  "casingDropBoard3": sounds420,
-  "casingDropBoard4": sounds421,
-  "shotgunCasingDrop1": sounds422,
-  "dryFire1": sounds423,
-  "dryFire2": sounds424,
-  "dryFire3": sounds425,
-  "magazineLoad1": sounds426,
-  "m1911Pickup": sounds427,
-  "deagleShot1": sounds428,
-  "deagleShot2": sounds429,
-  "m1911DryFire": sounds430,
-  "m1911Reload1": sounds431,
-  "pistolCock1": sounds432,
-  "pistolShot1": sounds433,
-  "pistolShot2": sounds434,
-  "pistol2Shot1": sounds435,
-  "revolverDryFire": sounds436,
-  "revolverInsertShell1": sounds437,
-  "revolverInsertShell2": sounds438,
-  "revolverInsertShell3": sounds439,
-  "revolverPickup": sounds440,
-  "revolverReloadFinish": sounds441,
-  "revolverReloadStart": sounds442,
-  "revolverShot3": sounds443,
-  "ar15Reload1": sounds444,
-  "ar15ReloadEmpty": sounds445,
-  "rifleShot1": sounds446,
-  "rifleShot2": sounds447,
-  "rifleShot3": sounds448,
-  "rifle2Shot1": sounds449,
-  "shotgunLoadShell2": sounds450,
-  "shotgunPump1": sounds451,
-  "shotgunShot1": sounds452,
-  "shotgunShot2": sounds453,
-  "shotgunShot3": sounds454,
-  "fleshHit1": sounds455,
-  "fleshHit2": sounds456,
-  "fleshHit3": sounds457,
-  "fleshHit4": sounds458,
-  "fleshHitBat1": sounds459,
-  "fleshHitBat2": sounds460,
-  "pianoHit1": sounds461,
-  "pianoHit2": sounds462,
-  "vendingMachineHit1": sounds463,
-  "vendingMachineHit2": sounds464,
-  "wallHit1": sounds465,
-  "wallHit2": sounds466,
-  "wallHit3": sounds467,
-  "wallHit4": sounds468,
-  "zombieBite1": sounds469,
-  "zombieBite2": sounds470,
-  "glowStickDrop1": sounds471,
-  "glowStickDrop2": sounds472,
-  "pop1": sounds473,
-  "quarterDrop1": sounds474,
-  "machineLoop1": sounds475,
-  "bassGrooveLoop1": sounds476,
-  "baseballBatPickup1": sounds477,
-  "baseballBatPickup2": sounds478,
-  "swordShing1": sounds479,
-  "swordShing2": sounds480,
-  "swordShing3": sounds481,
-  "swordSwoosh1": sounds482,
-  "swordSwoosh2": sounds483,
-  "swordSwoosh3": sounds484,
-  "kevinZombie1": sounds485,
-  "kevinZombie10": sounds486,
-  "kevinZombie11": sounds487,
-  "kevinZombie12": sounds488,
-  "kevinZombie13": sounds489,
-  "kevinZombie14": sounds490,
-  "kevinZombie15": sounds491,
-  "kevinZombie17": sounds492,
-  "kevinZombie18": sounds493,
-  "kevinZombie19": sounds494,
-  "kevinZombie2": sounds495,
-  "kevinZombie20": sounds496,
-  "kevinZombie21": sounds497,
-  "kevinZombie23": sounds498,
-  "kevinZombie24": sounds499,
-  "kevinZombie25": sounds500,
-  "kevinZombie26": sounds501,
-  "kevinZombie27": sounds502,
-  "kevinZombie28": sounds503,
-  "kevinZombie29": sounds504,
-  "kevinZombie3": sounds505,
-  "kevinZombie30": sounds506,
-  "kevinZombie31": sounds507,
-  "kevinZombie32": sounds508,
-  "kevinZombie33": sounds509,
-  "kevinZombie34": sounds510,
-  "kevinZombie35": sounds511,
-  "kevinZombie36": sounds512,
-  "kevinZombie37": sounds513,
-  "kevinZombie38": sounds514,
-  "kevinZombie39": sounds515,
-  "kevinZombie4": sounds516,
-  "kevinZombie5": sounds517,
-  "kevinZombie7": sounds518,
-  "kevinZombie8": sounds519,
-  "kevinZombie9": sounds520,
-  "perryZombie1": sounds521,
-  "perryZombie10": sounds522,
-  "perryZombie2": sounds523,
-  "perryZombie3": sounds524,
-  "perryZombie4": sounds525,
-  "perryZombie6": sounds526,
-  "perryZombie7": sounds527,
-  "perryZombie8": sounds528,
-  "perryZombie9": sounds529,
-  "rachelZombie1": sounds530,
-  "rachelZombie10": sounds531,
-  "rachelZombie11": sounds532,
-  "rachelZombie12": sounds533,
-  "rachelZombie13": sounds534,
-  "rachelZombie2": sounds535,
-  "rachelZombie3": sounds536,
-  "rachelZombie4": sounds537,
-  "rachelZombie5": sounds538,
-  "rachelZombie6": sounds539,
-  "rachelZombie7": sounds540,
-  "rachelZombie8": sounds541,
-  "rachelZombie9": sounds542,
-  "spitterSpit1": sounds543,
-  "spitterSpit2": sounds544,
-  "spitterSpit3": sounds545,
+  "andyNewLevel14": sounds25,
+  "andyNewLevel2": sounds26,
+  "andyPickup1": sounds27,
+  "andyPickup2": sounds28,
+  "andyPickup3": sounds29,
+  "andyPickup4": sounds30,
+  "andyPickup5": sounds31,
+  "andyRelief1": sounds32,
+  "andyRelief2": sounds33,
+  "andyRelief3": sounds34,
+  "andyRelief4": sounds35,
+  "andyRelief5": sounds36,
+  "andyRelief6": sounds37,
+  "andyTaunt1": sounds38,
+  "andyTaunt2": sounds39,
+  "andyWorried1": sounds40,
+  "andyWorried2": sounds41,
+  "andyWorried3": sounds42,
+  "andyWorried4": sounds43,
+  "andyWorried5": sounds44,
+  "chadDeath1": sounds45,
+  "chadHurt1": sounds46,
+  "chadHurt2": sounds47,
+  "chadHurt3": sounds48,
+  "chadHurt4": sounds49,
+  "chadHurt5": sounds50,
+  "chadHurt6": sounds51,
+  "chadHurt7": sounds52,
+  "chadJoinParty1": sounds53,
+  "chadLevelComplete1": sounds54,
+  "chadLevelComplete2": sounds55,
+  "chadLevelComplete3": sounds56,
+  "chadLookHere1": sounds57,
+  "chadLookHere2": sounds58,
+  "chadLookHere3": sounds59,
+  "chadMisc1": sounds60,
+  "chadMisc2": sounds61,
+  "chadNearDeath1": sounds62,
+  "chadNearDeath2": sounds63,
+  "chadNewLevel1": sounds64,
+  "chadNewLevel2": sounds65,
+  "chadNewLevel3": sounds66,
+  "chadNewLevel4": sounds67,
+  "chadPickup1": sounds68,
+  "chadPickup2": sounds69,
+  "chadPickup3": sounds70,
+  "chadTaunt1": sounds71,
+  "chadTaunt2": sounds72,
+  "chadTaunt3": sounds73,
+  "chadTaunt4": sounds74,
+  "chadTaunt5": sounds75,
+  "chadTaunt6": sounds76,
+  "chadWorried1": sounds77,
+  "chadWorried2": sounds78,
+  "chadWorried3": sounds79,
+  "cindyDeath1": sounds80,
+  "cindyHurt1": sounds81,
+  "cindyHurt2": sounds82,
+  "cindyHurt3": sounds83,
+  "cindyJoinParty1": sounds84,
+  "cindyLookHere1": sounds85,
+  "cindyLookHere2": sounds86,
+  "cindyMisc1": sounds87,
+  "cindyNearDeath1": sounds88,
+  "cindyNewLevel1": sounds89,
+  "cindyPickup1": sounds90,
+  "cindyRelief1": sounds91,
+  "cindyTaunt1": sounds92,
+  "cindyTaunt2": sounds93,
+  "cindyWorried1": sounds94,
+  "clariceDeath1": sounds95,
+  "clariceDeath2": sounds96,
+  "clariceHurt1": sounds97,
+  "clariceHurt2": sounds98,
+  "clariceHurt3": sounds99,
+  "clariceJoinParty1": sounds100,
+  "clariceLookHere1": sounds101,
+  "clariceMisc1": sounds102,
+  "clariceMisc2": sounds103,
+  "clariceNearDeath": sounds104,
+  "clariceNewLevel1": sounds105,
+  "claricePickup1": sounds106,
+  "clariceRelief1": sounds107,
+  "clariceRelief2": sounds108,
+  "clariceTaunt1": sounds109,
+  "clariceWorried1": sounds110,
+  "clydeDeath1": sounds111,
+  "clydeHurt1": sounds112,
+  "clydeHurt2": sounds113,
+  "clydeJoinParty1": sounds114,
+  "clydeLookHere1": sounds115,
+  "clydeLookHere2": sounds116,
+  "clydeMisc1": sounds117,
+  "clydeNearDeath": sounds118,
+  "clydeNewLevel1": sounds119,
+  "clydeNewLevel2": sounds120,
+  "clydeNewLevel3": sounds121,
+  "clydeNewLevel4": sounds122,
+  "clydePickup1": sounds123,
+  "clydeRelief1": sounds124,
+  "clydeRelief2": sounds125,
+  "clydeRelief3": sounds126,
+  "clydeTaunt1": sounds127,
+  "clydeTaunt2": sounds128,
+  "clydeWorried1": sounds129,
+  "clydeWorried2": sounds130,
+  "clydeWorried3": sounds131,
+  "clydeWorried4": sounds132,
+  "dustyRustyDeath1": sounds133,
+  "dustyRustyDeath2": sounds134,
+  "dustyRustyHurt1": sounds135,
+  "dustyRustyHurt10": sounds136,
+  "dustyRustyHurt2": sounds137,
+  "dustyRustyHurt3": sounds138,
+  "dustyRustyHurt4": sounds139,
+  "dustyRustyHurt5": sounds140,
+  "dustyRustyHurt6": sounds141,
+  "dustyRustyHurt7": sounds142,
+  "dustyRustyHurt8": sounds143,
+  "dustyRustyHurt9": sounds144,
+  "dustyRustyJoinParty1": sounds145,
+  "dustyRustyJoinParty2": sounds146,
+  "dustyRustyLevelComplete1": sounds147,
+  "dustyRustyLevelComplete2": sounds148,
+  "dustyRustyLevelComplete3": sounds149,
+  "dustyRustyLevelComplete4": sounds150,
+  "dustyRustyLevelComplete5": sounds151,
+  "dustyRustyLookHere1": sounds152,
+  "dustyRustyLookHere2": sounds153,
+  "dustyRustyLookHere3": sounds154,
+  "dustyRustyLookHere4": sounds155,
+  "dustyRustyMisc1": sounds156,
+  "dustyRustyMisc2": sounds157,
+  "dustyRustyMisc3": sounds158,
+  "dustyRustyMisc4": sounds159,
+  "dustyRustyNearDeath1": sounds160,
+  "dustyRustyNearDeath2": sounds161,
+  "dustyRustyNewLevel1": sounds162,
+  "dustyRustyNewLevel10": sounds163,
+  "dustyRustyNewLevel11": sounds164,
+  "dustyRustyNewLevel12": sounds165,
+  "dustyRustyNewLevel2": sounds166,
+  "dustyRustyNewLevel3": sounds167,
+  "dustyRustyNewLevel4": sounds168,
+  "dustyRustyNewLevel5": sounds169,
+  "dustyRustyNewLevel6": sounds170,
+  "dustyRustyNewLevel7": sounds171,
+  "dustyRustyNewLevel8": sounds172,
+  "dustyRustyNewLevel9": sounds173,
+  "dustyRustyPickup1": sounds174,
+  "dustyRustyPickup10Health": sounds175,
+  "dustyRustyPickup11Health": sounds176,
+  "dustyRustyPickup2": sounds177,
+  "dustyRustyPickup3": sounds178,
+  "dustyRustyPickup4": sounds179,
+  "dustyRustyPickup5": sounds180,
+  "dustyRustyPickup6": sounds181,
+  "dustyRustyPickup7": sounds182,
+  "dustyRustyPickup8": sounds183,
+  "dustyRustyPickup9Health": sounds184,
+  "dustyRustyTaunt1": sounds185,
+  "dustyRustyTaunt2": sounds186,
+  "dustyRustyTaunt3": sounds187,
+  "dustyRustyTaunt4": sounds188,
+  "dustyRustyTaunt5": sounds189,
+  "dustyRustyTaunt6": sounds190,
+  "dustyRustyTaunt7": sounds191,
+  "dustyRustyTaunt8": sounds192,
+  "dustyRustyWorried1": sounds193,
+  "dustyRustyWorried2": sounds194,
+  "dustyRustyWorried3": sounds195,
+  "dustyRustyWorried4": sounds196,
+  "dustyRustyWorried5": sounds197,
+  "dustyRustyWorried6": sounds198,
+  "kyleDeath1": sounds199,
+  "kyleDeath2": sounds200,
+  "kyleDeath3": sounds201,
+  "kyleHurt1": sounds202,
+  "kyleHurt2": sounds203,
+  "kyleHurt4": sounds204,
+  "kyleHurt5": sounds205,
+  "kyleHurt6": sounds206,
+  "kyleHurt7": sounds207,
+  "kyleHurt8": sounds208,
+  "kyleHurt9": sounds209,
+  "kyleJoinParty1": sounds210,
+  "kyleLookHere1": sounds211,
+  "kyleLookHere2": sounds212,
+  "kyleNearDeath1": sounds213,
+  "kyleNearDeath2": sounds214,
+  "kyleNewLevel1": sounds215,
+  "kylePickup1": sounds216,
+  "kylePickup2": sounds217,
+  "kyleRelief1": sounds218,
+  "kyleTaunt1": sounds219,
+  "kyleWorried1": sounds220,
+  "kyleWorried2": sounds221,
+  "kyleWorried3": sounds222,
+  "luckyJackDeath1": sounds223,
+  "luckyJackDeath2": sounds224,
+  "luckyJackHurt1": sounds225,
+  "luckyJackHurt2": sounds226,
+  "luckyJackHurt3": sounds227,
+  "luckyJackHurt4": sounds228,
+  "luckyJackHurt6": sounds229,
+  "luckyJackJoinParty1": sounds230,
+  "luckyJackLookHere": sounds231,
+  "luckyJackMisc1": sounds232,
+  "luckyJackNearDeath1": sounds233,
+  "luckyJackNewLevel1": sounds234,
+  "luckyJackNewLevel2": sounds235,
+  "luckyJackNewLevel3": sounds236,
+  "luckyJackPickup1": sounds237,
+  "luckyJackRelief1": sounds238,
+  "luckyJackTaunt1": sounds239,
+  "luckyJackTaunt2": sounds240,
+  "luckyJackTaunt3": sounds241,
+  "luckyJackTaunt4": sounds242,
+  "luckyJackTaunt5": sounds243,
+  "luckyJackWorried1": sounds244,
+  "nancyDeath3": sounds245,
+  "nancyHurt1": sounds246,
+  "nancyHurt2": sounds247,
+  "nancyHurt3": sounds248,
+  "nancyHurt4": sounds249,
+  "nancyHurt5": sounds250,
+  "nancyHurt6": sounds251,
+  "nancyJoinParty1": sounds252,
+  "nancyJoinParty2": sounds253,
+  "nancyJoinParty3": sounds254,
+  "nancyLookHere1": sounds255,
+  "nancyLookHere2": sounds256,
+  "nancyLookHere3": sounds257,
+  "nancyMisc1": sounds258,
+  "nancyMisc2": sounds259,
+  "nancyNearDeath1": sounds260,
+  "nancyNearDeath2": sounds261,
+  "nancyNewLevel3": sounds262,
+  "nancyPickup1": sounds263,
+  "nancyPickup2": sounds264,
+  "nancyRelief1": sounds265,
+  "nancyRelief2": sounds266,
+  "nancyRelief3": sounds267,
+  "nancyTaunt1": sounds268,
+  "nancyTaunt2": sounds269,
+  "nancyWorried1": sounds270,
+  "nancyWorried2": sounds271,
+  "nancyWorried3": sounds272,
+  "santaDeath1": sounds273,
+  "santaHoHoHo1": sounds274,
+  "santaHoHoHo2": sounds275,
+  "santaHoHoHo3": sounds276,
+  "santaHurt1": sounds277,
+  "santaHurt2": sounds278,
+  "santaHurt3": sounds279,
+  "santaHurt4": sounds280,
+  "santaHurt5": sounds281,
+  "santaHurt6": sounds282,
+  "santaHurt7": sounds283,
+  "santaHurt8": sounds284,
+  "santaJoin1": sounds285,
+  "santaNewLevel1": sounds286,
+  "santaNewLevel2": sounds287,
+  "santaPickup2": sounds288,
+  "santaPickupGun1": sounds289,
+  "santaTaunt1": sounds290,
+  "santaTaunt2": sounds291,
+  "santaTaunt3": sounds292,
+  "santaTaunt4": sounds293,
+  "santaTaunt5": sounds294,
+  "santaTaunt6": sounds295,
+  "santaTaunt7": sounds296,
+  "santaWorried1": sounds297,
+  "santaWorried2": sounds298,
+  "simonDeath1": sounds299,
+  "simonHurt1": sounds300,
+  "simonHurt2": sounds301,
+  "simonHurt3": sounds302,
+  "simonHurt4": sounds303,
+  "simonHurt5": sounds304,
+  "simonHurt6": sounds305,
+  "simonHurt7": sounds306,
+  "simonJoinParty1": sounds307,
+  "simonLookHere1": sounds308,
+  "simonLookHere2": sounds309,
+  "simonNearDeath2": sounds310,
+  "simonPickupItem1": sounds311,
+  "simonPickupItem2": sounds312,
+  "simonPickupItem3": sounds313,
+  "simonRelief1": sounds314,
+  "simonTaunt1": sounds315,
+  "simonTaunt2": sounds316,
+  "simonWorried1": sounds317,
+  "simonWorried2": sounds318,
+  "simonWorried3": sounds319,
+  "takeshiDeath1": sounds320,
+  "takeshiHurt1": sounds321,
+  "takeshiHurt2": sounds322,
+  "takeshiHurt3": sounds323,
+  "takeshiHurt4": sounds324,
+  "takeshiHurt6": sounds325,
+  "takeshiHurt7": sounds326,
+  "takeshiHurt8": sounds327,
+  "takeshiJoinParty1": sounds328,
+  "takeshiJoinParty2": sounds329,
+  "takeshiLevelComplete1": sounds330,
+  "takeshiLevelComplete2": sounds331,
+  "takeshiLookHere1": sounds332,
+  "takeshiMisc1": sounds333,
+  "takeshiNearDeath1": sounds334,
+  "takeshiNewLevel1": sounds335,
+  "takeshiPickup1": sounds336,
+  "takeshiPickup2": sounds337,
+  "takeshiTaunt1": sounds338,
+  "takeshiTaunt2": sounds339,
+  "takeshiTaunt3": sounds340,
+  "takeshiTaunt4": sounds341,
+  "takeshiWorried1": sounds342,
+  "takeshiWorried2": sounds343,
+  "takeshiWorried3": sounds344,
+  "wendyDeath1": sounds345,
+  "wendyDeath2": sounds346,
+  "wendyDeath3": sounds347,
+  "wendyDeath4": sounds348,
+  "wendyHurt1": sounds349,
+  "wendyHurt2": sounds350,
+  "wendyHurt3": sounds351,
+  "wendyHurt4": sounds352,
+  "wendyHurt6": sounds353,
+  "wendyHurt7": sounds354,
+  "wendyJoinParty1": sounds355,
+  "wendyJoinParty2": sounds356,
+  "wendyJoinParty3": sounds357,
+  "wendyJoinParty4": sounds358,
+  "wendyLookHere1": sounds359,
+  "wendyLookHere2": sounds360,
+  "wendyLookHere3": sounds361,
+  "wendyMisc2": sounds362,
+  "wendyMisc3": sounds363,
+  "wendyNearDeath1": sounds364,
+  "wendyNearDeath2": sounds365,
+  "wendyNearDeath4": sounds366,
+  "wendyNearDeath5": sounds367,
+  "wendyNewLevel1": sounds368,
+  "wendyNewLevel2": sounds369,
+  "wendyNewLevel3": sounds370,
+  "wendyNewLevel4": sounds371,
+  "wendyPickup1": sounds372,
+  "wendyPickup2": sounds373,
+  "wendyPickup3": sounds374,
+  "wendyPickup4": sounds375,
+  "wendyPickup5": sounds376,
+  "wendyPickup6": sounds377,
+  "wendyPickup7": sounds378,
+  "wendyRelief1": sounds379,
+  "wendyRelief2": sounds380,
+  "wendyRelief3": sounds381,
+  "wendyRelief4": sounds382,
+  "wendyRelief5": sounds383,
+  "wendyRelief6": sounds384,
+  "wendyTaunt1": sounds385,
+  "wendyTaunt2": sounds386,
+  "wendyTaunt4": sounds387,
+  "wendyTaunt5": sounds388,
+  "wendyTaunt3": sounds389,
+  "wendyWorried1": sounds390,
+  "wendyWorried2": sounds391,
+  "wendyWorried3": sounds392,
+  "wendyWorried4": sounds393,
+  "chainLinkFence1": sounds394,
+  "chainLinkFence2": sounds395,
+  "chainLinkFence3": sounds396,
+  "elevatorDing": sounds397,
+  "elevatorDoorClose": sounds398,
+  "elevatorDoorOpen": sounds399,
+  "heavySwitchThrow": sounds400,
+  "lightPowerOn1": sounds401,
+  "powerWarmUp1": sounds402,
+  "cabbageHit1": sounds403,
+  "cabbageHit10": sounds404,
+  "cabbageHit11": sounds405,
+  "cabbageHit2": sounds406,
+  "cabbageHit3": sounds407,
+  "cabbageHit4": sounds408,
+  "cabbageHit5": sounds409,
+  "cabbageHit6": sounds410,
+  "cabbageHit7": sounds411,
+  "cabbageHit8": sounds412,
+  "melonPlop1": sounds413,
+  "melonPlop2": sounds414,
+  "melonPlop3": sounds415,
+  "melonPlop4": sounds416,
+  "melonPlop5": sounds417,
+  "melonPlop6": sounds418,
+  "casingDropBoard1": sounds419,
+  "casingDropBoard2": sounds420,
+  "casingDropBoard3": sounds421,
+  "casingDropBoard4": sounds422,
+  "shotgunCasingDrop1": sounds423,
+  "dryFire1": sounds424,
+  "dryFire2": sounds425,
+  "dryFire3": sounds426,
+  "magazineLoad1": sounds427,
+  "m1911Pickup": sounds428,
+  "deagleShot1": sounds429,
+  "deagleShot2": sounds430,
+  "m1911DryFire": sounds431,
+  "m1911Reload1": sounds432,
+  "pistolCock1": sounds433,
+  "pistolShot1": sounds434,
+  "pistolShot2": sounds435,
+  "pistol2Shot1": sounds436,
+  "revolverDryFire": sounds437,
+  "revolverInsertShell1": sounds438,
+  "revolverInsertShell2": sounds439,
+  "revolverInsertShell3": sounds440,
+  "revolverPickup": sounds441,
+  "revolverReloadFinish": sounds442,
+  "revolverReloadStart": sounds443,
+  "revolverShot3": sounds444,
+  "ar15Reload1": sounds445,
+  "ar15ReloadEmpty": sounds446,
+  "rifleShot1": sounds447,
+  "rifleShot2": sounds448,
+  "rifleShot3": sounds449,
+  "rifle2Shot1": sounds450,
+  "shotgunLoadShell2": sounds451,
+  "shotgunPump1": sounds452,
+  "shotgunShot1": sounds453,
+  "shotgunShot2": sounds454,
+  "shotgunShot3": sounds455,
+  "fleshHit1": sounds456,
+  "fleshHit2": sounds457,
+  "fleshHit3": sounds458,
+  "fleshHit4": sounds459,
+  "fleshHitBat1": sounds460,
+  "fleshHitBat2": sounds461,
+  "pianoHit1": sounds462,
+  "pianoHit2": sounds463,
+  "vendingMachineHit1": sounds464,
+  "vendingMachineHit2": sounds465,
+  "wallHit1": sounds466,
+  "wallHit2": sounds467,
+  "wallHit3": sounds468,
+  "wallHit4": sounds469,
+  "zombieBite1": sounds470,
+  "zombieBite2": sounds471,
+  "glowStickDrop1": sounds472,
+  "glowStickDrop2": sounds473,
+  "pop1": sounds474,
+  "quarterDrop1": sounds475,
+  "machineLoop1": sounds476,
+  "bassGrooveLoop1": sounds477,
+  "baseballBatPickup1": sounds478,
+  "baseballBatPickup2": sounds479,
+  "swordShing1": sounds480,
+  "swordShing2": sounds481,
+  "swordShing3": sounds482,
+  "swordSwoosh1": sounds483,
+  "swordSwoosh2": sounds484,
+  "swordSwoosh3": sounds485,
+  "kevinZombie1": sounds486,
+  "kevinZombie10": sounds487,
+  "kevinZombie11": sounds488,
+  "kevinZombie12": sounds489,
+  "kevinZombie13": sounds490,
+  "kevinZombie14": sounds491,
+  "kevinZombie15": sounds492,
+  "kevinZombie17": sounds493,
+  "kevinZombie18": sounds494,
+  "kevinZombie19": sounds495,
+  "kevinZombie2": sounds496,
+  "kevinZombie20": sounds497,
+  "kevinZombie21": sounds498,
+  "kevinZombie23": sounds499,
+  "kevinZombie24": sounds500,
+  "kevinZombie25": sounds501,
+  "kevinZombie26": sounds502,
+  "kevinZombie27": sounds503,
+  "kevinZombie28": sounds504,
+  "kevinZombie29": sounds505,
+  "kevinZombie3": sounds506,
+  "kevinZombie30": sounds507,
+  "kevinZombie31": sounds508,
+  "kevinZombie32": sounds509,
+  "kevinZombie33": sounds510,
+  "kevinZombie34": sounds511,
+  "kevinZombie35": sounds512,
+  "kevinZombie36": sounds513,
+  "kevinZombie37": sounds514,
+  "kevinZombie38": sounds515,
+  "kevinZombie39": sounds516,
+  "kevinZombie4": sounds517,
+  "kevinZombie5": sounds518,
+  "kevinZombie7": sounds519,
+  "kevinZombie8": sounds520,
+  "kevinZombie9": sounds521,
+  "perryZombie1": sounds522,
+  "perryZombie10": sounds523,
+  "perryZombie2": sounds524,
+  "perryZombie3": sounds525,
+  "perryZombie4": sounds526,
+  "perryZombie6": sounds527,
+  "perryZombie7": sounds528,
+  "perryZombie8": sounds529,
+  "perryZombie9": sounds530,
+  "rachelZombie1": sounds531,
+  "rachelZombie10": sounds532,
+  "rachelZombie11": sounds533,
+  "rachelZombie12": sounds534,
+  "rachelZombie13": sounds535,
+  "rachelZombie2": sounds536,
+  "rachelZombie3": sounds537,
+  "rachelZombie4": sounds538,
+  "rachelZombie5": sounds539,
+  "rachelZombie6": sounds540,
+  "rachelZombie7": sounds541,
+  "rachelZombie8": sounds542,
+  "rachelZombie9": sounds543,
+  "spitterSpit1": sounds544,
+  "spitterSpit2": sounds545,
+  "spitterSpit3": sounds546,
 };
 export type SoundName = keyof typeof sounds;
 const fonts = {
