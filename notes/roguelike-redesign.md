@@ -56,6 +56,7 @@ From a second design conversation, which replaced the "pick one of three" loop (
 - Two free weapon slots, no primary/secondary. You start with a pistol; taking two pricier guns means giving up the cheap fallback, which is a deliberate choice. Melee takes a slot.
 - Characters' starting weapons are the one chosen gun, the build's seed, so characters should spread across families.
 - Idea: a special pirate weapon for Lucky Jack, like maybe a blunderbuss.
+- Idea: the DP-12, a double-barreled pump shotgun, as the top-tier shotgun.
 
 ### Items
 
