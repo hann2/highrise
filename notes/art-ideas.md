@@ -19,6 +19,7 @@ Started 2026-10-03.
 - Better reload animations.
   - 2026-10-03: done on branch `rig-animations` (keyframed per gun family, see `CLAUDE.md`). Left: real magazine, shell and round art (the ones in `weapons/magazines/` are placeholders); the P90's magazine is drawn into its holding image, so it stays on the gun while the hand carries the new one; the revolver's cylinder and the double barrel don't open (no art for it); the animations could be tuned by eye in `?scene=rig`. Melee swings, the push and the zombies' attacks are still code, and could move onto `core/animation` when they're next touched.
 - The P90's magazine is see-through, so show the rounds inside it, and have it visibly empty as you shoot.
+  - 2026-10-07: done on branch `p90-rounds`: 50 rounds and a follower slide back to the feed at the rear as it empties (a `rounds` group in the art, `GunStats.rounds`), and the magazine out of the gun is drawn from the art too, the old one with what was left in it. Other guns could show rounds the same way wherever they're in a straight line (a see-through pistol magazine, a window onto a tube); a cylinder or a drum would need something else.
 - Right and left handed characters.
 - Hair, and maybe clothing or other things on the characters, that can have some dynamic movement.
 - Cowboy boots for Rusty.
