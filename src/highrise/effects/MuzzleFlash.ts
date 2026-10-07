@@ -67,7 +67,8 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
   /**
    * `muzzle` says where the muzzle is now, for the root to follow.
    * `frozenAt` holds it at that fraction of its life forever, for looking at
-   * (the flash test scene's gallery)
+   * (the flash test scene's gallery). `mirrored` flips it across the barrel,
+   * for a gun held left-handed, whose art is mirrored too
    */
   constructor(
     position: V2d,
@@ -75,6 +76,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     private style: MuzzleFlashStyle = DEFAULT_FLASH,
     private muzzle?: MuzzleTracker,
     private frozenAt?: number,
+    mirrored = false,
   ) {
     super();
     this.duration = pick(style.duration);
@@ -151,6 +153,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     this.origin = position.clone();
     this.sprite.position.copyFrom(position);
     this.sprite.rotation = angle + (random() * 2 - 1) * (style.wobble ?? 0);
+    this.sprite.scale.y = mirrored ? -1 : 1;
   }
 
   @on("add")
@@ -187,7 +190,7 @@ export default class MuzzleFlash extends BaseEntity implements Entity {
     const cos = Math.cos(this.sprite.rotation);
     const sin = Math.sin(this.sprite.rotation);
     root[0] = dx * cos + dy * sin;
-    root[1] = dy * cos - dx * sin;
+    root[1] = (dy * cos - dx * sin) * this.sprite.scale.y;
   }
 
   @on("destroy")

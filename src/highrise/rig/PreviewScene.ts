@@ -135,6 +135,7 @@ export default class PreviewScene extends BaseEntity implements Entity {
       startingWeapons: message.startingWeapons
         .map((name) => weapons.find((weapon) => weapon.name === name))
         .filter((weapon) => weapon !== undefined),
+      leftHanded: message.leftHanded,
     });
     if (old) {
       // Once the renderer has let go of its pages

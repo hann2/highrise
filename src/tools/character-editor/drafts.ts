@@ -13,6 +13,7 @@ export const DRAFT_FIELDS = [
   "look",
   "stats",
   "startingWeapons",
+  "leftHanded",
   "voice",
 ] as const;
 export type DraftField = (typeof DRAFT_FIELDS)[number];
@@ -23,6 +24,7 @@ export const FIELD_LABELS: Record<DraftField, string> = {
   look: "look",
   stats: "stats",
   startingWeapons: "starting weapons",
+  leftHanded: "handedness",
   voice: "voice",
 };
 
@@ -74,6 +76,8 @@ function diskValue(data: CharacterData, field: DraftField): unknown {
       return resolveLook(data.look);
     case "voice":
       return data.voice ?? null;
+    case "leftHanded":
+      return data.leftHanded ?? false;
     default:
       return data[field];
   }

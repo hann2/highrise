@@ -127,6 +127,16 @@ export default class Gun extends BaseEntity implements Entity {
   /** Who's working the gun in the animation playing, for its events */
   private animatedBy?: Human;
 
+  /** Whether whoever has it holds it left-handed, which mirrors how it's held (see `poseGun`) */
+  get leftHanded(): boolean {
+    return this.parent instanceof Human && this.parent.leftHanded;
+  }
+
+  /** How far to the holder's right it's held: `sideOffset`, mirrored left-handed */
+  get side(): number {
+    return this.leftHanded ? -this.stats.sideOffset : this.stats.sideOffset;
+  }
+
   constructor(stats: GunStats) {
     super();
     this.stats = stats;
@@ -282,10 +292,16 @@ export default class Gun extends BaseEntity implements Entity {
     // Various effects
     this.playSound("shoot", position);
     this.game.addEntity(
-      new MuzzleFlash(position, direction, stats.flash, () =>
-        shooter.weapon === this && !shooter.isDestroyed
-          ? shooter.localToWorld(this.getMuzzlePosition())
-          : undefined,
+      new MuzzleFlash(
+        position,
+        direction,
+        stats.flash,
+        () =>
+          shooter.weapon === this && !shooter.isDestroyed
+            ? shooter.localToWorld(this.getMuzzlePosition())
+            : undefined,
+        undefined,
+        this.leftHanded,
       ),
     );
     this.makeSmoke(position, direction);
@@ -394,15 +410,17 @@ export default class Gun extends BaseEntity implements Entity {
     this.shellsToEject -= 1;
     const shooterDirection = shooter.getDirection();
     const position = shooter.localToWorld(
-      V(this.stats.holdPosition).iadd([0, this.stats.sideOffset]),
+      V(this.stats.holdPosition).iadd([0, this.side]),
     );
+    // Out of its right side, which held left-handed (mirrored) is its left
+    const out = this.leftHanded ? -Math.PI / 2 : Math.PI / 2;
 
     let velocity;
     if (this.stats.ejectionType === EjectionType.RELOAD) {
       velocity = polarToVec(rDirection(), rUniform(0, 1));
     } else {
       velocity = polarToVec(
-        rNormal(shooterDirection + Math.PI / 2, degToRad(20)),
+        rNormal(shooterDirection + out, degToRad(20)),
         4 * rNormal(1, 0.3),
       );
     }
@@ -566,7 +584,7 @@ export default class Gun extends BaseEntity implements Entity {
   /** Pulls the gun in (or lets it back out) depending on how close the wall in front of `holder` is */
   updateWallRetraction(holder: Human, dt: number) {
     const reach = this.stats.holdPosition[0] + this.stats.muzzleLength / 2;
-    const side = this.stats.sideOffset;
+    const side = this.side;
     const hit = this.game.world.raycast(
       holder.localToWorld([0, side]),
       holder.localToWorld([reach + WALL_MARGIN, side]),
@@ -625,6 +643,7 @@ export default class Gun extends BaseEntity implements Entity {
       push,
       twist,
       parts: this.getCyclingParts(),
+      leftHanded: this.leftHanded,
     };
     return this.animator.pose(
       (frame) => poseGun(this.stats, frame, adjust),

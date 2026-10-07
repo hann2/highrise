@@ -39,6 +39,8 @@ export interface CharacterData {
   stats: Partial<PlayerStats>;
   /** Weapon names (`WeaponStats.name`), given at the start of a run and to them as a survivor */
   startingWeapons: string[];
+  /** Whether they hold guns and swing melee weapons left-handed: everything they hold is mirrored */
+  leftHanded?: boolean;
   /** The ElevenLabs voice their lines are generated with */
   voice?: { elevenLabsVoiceId: string };
   clips: VoiceClip[];
@@ -108,6 +110,10 @@ export function characterDataProblems(
         `stat ${stat} should be a ${typeof neutral[stat as keyof PlayerStats]}`,
       );
     }
+  }
+
+  if (data.leftHanded !== undefined && typeof data.leftHanded !== "boolean") {
+    problem("leftHanded should be true or false");
   }
 
   for (const weapon of data.startingWeapons ?? []) {

@@ -61,7 +61,7 @@ export const RIG_MODES: RigMode[] = [
  * little and reloading, over and over (or with `anim=reload`, playing one of
  * the guns' animations over and over: any of `RIG_MODES`). `gun=ar15,glock`
  * picks the guns (by `slug`; all of them by default), `character=nancy` who
- * holds them, `columns` how many to a row (4), `zoom` the pixels per meter
+ * holds them, `lefty` makes them left-handed, `columns` how many to a row (4), `zoom` the pixels per meter
  * (else the lineup fills the view), `speed` how fast it plays (`speed=0.25`
  * is quarter speed), and `points` marks the points on the guns and where the
  * hands are (`RigOverlay`). `?auto` hides the panel, for recording
@@ -102,10 +102,13 @@ export default class RigTestScene extends BaseEntity implements Entity {
   @on("add")
   async onAdd() {
     const params = new URLSearchParams(window.location.search);
-    const character =
+    const chosen =
       CHARACTERS.find(
         (c) => slug(c.name) === slug(params.get("character") ?? ""),
       ) ?? CHARACTERS[0];
+    const character = params.has("lefty")
+      ? { ...chosen, leftHanded: true }
+      : chosen;
 
     const columns = Math.min(
       this.guns.length,

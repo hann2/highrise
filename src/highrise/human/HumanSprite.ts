@@ -32,8 +32,8 @@ export default class HumanSprite extends BodySprite {
   laserSight?: LaserSight;
   /** The gun in hand's pose, worked out at the start of `updatePose` */
   private gunPose?: GunPose;
-  /** Whether the left hand and arm are drawn over the weapon right now */
-  private leftHandOver = false;
+  /** Whether the support hand and arm (the left, or the right if they're left-handed) are drawn over the weapon right now */
+  private supportHandOver = false;
 
   constructor(private human: Human) {
     const appearance = getAppearance(human.character.look);
@@ -69,8 +69,10 @@ export default class HumanSprite extends BodySprite {
     const pose = this.gunPose;
     if (weapon instanceof MeleeWeapon && this.weaponSprite) {
       this.weaponSprite.visible = weapon.currentCooldown <= 0;
-      this.weaponSprite.position.copyFrom(
-        V(weapon.swing.restPosition).iadd([pushOffset, 0]),
+      const [x, y] = weapon.swing.restPosition;
+      this.weaponSprite.position.set(
+        x + pushOffset,
+        this.human.leftHanded ? -y : y,
       );
     } else if (pose && this.gunSprite) {
       this.gunSprite.setPose(pose);
@@ -82,44 +84,62 @@ export default class HumanSprite extends BodySprite {
       if (inHand) {
         this.magazineSprite.position.copyFrom(pose.magazine.position);
         this.magazineSprite.rotation = pose.magazine.angle;
+        this.magazineSprite.scale.y =
+          Math.abs(this.magazineSprite.scale.y) * (pose.mirrored ? -1 : 1);
       }
     }
 
-    this.setLeftHandOver(pose?.leftHandOver ?? false);
+    this.setSupportHandOver(pose?.supportHandOver ?? false);
   }
 
-  /** Draws the left hand and arm over the weapon, or back under the body where they belong */
-  private setLeftHandOver(over: boolean) {
-    if (over !== this.leftHandOver) {
-      this.leftHandOver = over;
-      this.arrangeLeftHand();
+  /** Draws the support hand and arm over the weapon, or back under the body where they belong */
+  private setSupportHandOver(over: boolean) {
+    if (over !== this.supportHandOver) {
+      this.supportHandOver = over;
+      this.arrangeHands();
     }
   }
 
   /**
-   * Puts the left arm and hand, and the magazine it carries, on top of
-   * everything, or under the body (where `BodySprite` has the arms and
-   * hands, over the legs) but over the right arm, so the magazine's seen.
-   * The hand's over the magazine.
+   * Puts the support arm and hand (the left, or the right if they're
+   * left-handed), and the magazine it carries, on top of everything, or
+   * under the body (where `BodySprite` has the arms and hands, over the legs)
+   * but over the other arm, so the magazine's seen. The hand's over the
+   * magazine.
    */
-  private arrangeLeftHand() {
-    const left = [this.leftArmSprite, this.leftHandSprite];
+  private arrangeHands() {
+    const [support, other] = this.human.leftHanded
+      ? [
+          [this.rightArmSprite, this.rightHandSprite],
+          [this.leftArmSprite, this.leftHandSprite],
+        ]
+      : [
+          [this.leftArmSprite, this.leftHandSprite],
+          [this.rightArmSprite, this.rightHandSprite],
+        ];
     if (this.magazineSprite) {
-      left.splice(1, 0, this.magazineSprite);
+      support.splice(1, 0, this.magazineSprite);
     }
-    if (this.leftHandOver) {
-      this.sprite.addChild(...left);
+    if (this.supportHandOver) {
+      this.sprite.addChild(...support);
     } else {
-      const bottom = this.legsSprite ? 1 : 0;
-      [this.rightArmSprite, this.rightHandSprite, ...left].forEach(
-        (sprite, i) => this.sprite.addChildAt(sprite, bottom + i),
+      // Where the arms and hands are, over the legs and anything hanging from the waist
+      const bottom = Math.min(
+        ...[...other, this.leftArmSprite, this.rightArmSprite].map((sprite) =>
+          this.sprite.getChildIndex(sprite),
+        ),
+      );
+      [...other, ...support].forEach((sprite, i) =>
+        this.sprite.addChildAt(sprite, bottom + i),
       );
     }
   }
 
   getTargetStanceAngle(): number {
     if (this.human.weapon instanceof Gun) {
-      return this.human.weapon.stats.stanceAngle;
+      // Bladed toward the gun: the support shoulder forward
+      const { stanceAngle } = this.human.weapon.stats;
+      return this.human.leftHanded ? -stanceAngle : stanceAngle;
     } else {
       return 0;
     }
@@ -195,8 +215,8 @@ export default class HumanSprite extends BodySprite {
           magazine.length / this.magazineSprite.texture.width,
         );
         this.magazineSprite.visible = false;
-        this.arrangeLeftHand();
       }
+      this.arrangeHands();
 
       this.gunSprite = new GunSprite(weapon.stats);
       this.sprite.addChild(this.gunSprite);
@@ -222,6 +242,12 @@ export default class HumanSprite extends BodySprite {
       this.weaponSprite.anchor.set(...pivotPosition);
       this.weaponSprite.rotation = Math.PI / 2 + restAngle;
       this.weaponSprite.position.set(...restPosition);
+      // Held left-handed, mirrored across the line straight ahead
+      if (this.human.leftHanded) {
+        this.weaponSprite.scale.y *= -1;
+        this.weaponSprite.rotation *= -1;
+        this.weaponSprite.position.y *= -1;
+      }
       this.sprite.addChild(this.weaponSprite);
     }
   }
@@ -238,7 +264,7 @@ export default class HumanSprite extends BodySprite {
   }
 
   handleDropWeapon() {
-    this.setLeftHandOver(false);
+    this.setSupportHandOver(false);
     for (const sprite of [
       this.weaponSprite,
       this.gunSprite,
