@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="83" height="15" viewBox="0 0 83 15" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
+<svg xmlns="http://www.w3.org/2000/svg" width="276.667" height="50" viewBox="-138.333 -25 276.667 50" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" clip-rule="evenodd">
   <defs>
-    <linearGradient id="glock-gradient-1" gradientUnits="userSpaceOnUse" x1="81.469" y1="9.26" x2="81.469" y2="4.946">
+    <linearGradient id="glock-gradient-1" gradientUnits="userSpaceOnUse" x1="133.23" y1="5.867" x2="133.23" y2="-8.513">
       <stop offset="0" stop-color="black"/>
       <stop offset="0.22" stop-color="#454545"/>
       <stop offset="0.5" stop-color="#565656"/>
@@ -8,49 +8,49 @@
       <stop offset="1" stop-color="black"/>
     </linearGradient>
     <clipPath id="glock-clip-1">
-      <path d="M26,3.535 L23.333,0 L7.349,0 L5,4.5 L5,10.5 L7.349,15 L23.333,15 L26,11.465 L26,3.535 Z"/>
+      <path d="M-51.667,-13.217 L-60.557,-25 L-113.837,-25 L-121.667,-10 L-121.667,10 L-113.837,25 L-60.557,25 L-51.667,13.217 L-51.667,-13.217 Z"/>
     </clipPath>
   </defs>
   <g id="grip">
-    <path d="M10,3 C10,1.896 9.103,1 7.999,1 L2,1 C0.896,1 -0.001,1.896 -0.001,3 L-0.001,12 C-0.001,13.104 0.896,14 2,14 L7.999,14 C9.103,14 10,13.104 10,12 L10,3 Z" fill="#272727"/>
+    <path d="M-105,-15 C-105,-18.68 -107.99,-21.667 -111.67,-21.667 L-131.667,-21.667 C-135.347,-21.667 -138.337,-18.68 -138.337,-15 L-138.337,15 C-138.337,18.68 -135.347,21.667 -131.667,21.667 L-111.67,21.667 C-107.99,21.667 -105,18.68 -105,15 L-105,-15 Z" fill="#272727"/>
   </g>
   <g id="tip">
-    <rect x="79.999" y="4.868" width="2.5" height="5" fill="url(#glock-gradient-1)"/>
+    <rect x="128.33" y="-8.773" width="8.333" height="16.667" fill="url(#glock-gradient-1)"/>
   </g>
   <g id="base">
-    <path d="M80.984,1.5 L79.579,0 L10.448,0 L10.448,15 L79.579,15 L80.984,13.5 L80.984,1.5 Z" fill="#2d2d2d"/>
+    <path d="M131.613,-20 L126.93,-25 L-103.507,-25 L-103.507,25 L126.93,25 L131.613,20 L131.613,-20 Z" fill="#2d2d2d"/>
   </g>
   <g id="barrel">
-    <path d="M80.44,2.3 L79.167,1 L13.714,1 L12.441,2.3 L12.441,12.7 L13.714,14 L79.167,14 L80.44,12.7 L80.44,2.3 Z" fill="#363636"/>
+    <path d="M129.8,-17.333 L125.557,-21.667 L-92.62,-21.667 L-96.863,-17.333 L-96.863,17.333 L-92.62,21.667 L125.557,21.667 L129.8,17.333 L129.8,-17.333 Z" fill="#363636"/>
   </g>
-  <path d="M26,3.535 L23.333,0 L7.349,0 L5,4.5 L5,10.5 L7.349,15 L23.333,15 L26,11.465 L26,3.535 Z" fill="#363636"/>
+  <path d="M-51.667,-13.217 L-60.557,-25 L-113.837,-25 L-121.667,-10 L-121.667,10 L-113.837,25 L-60.557,25 L-51.667,13.217 L-51.667,-13.217 Z" fill="#363636"/>
   <g clip-path="url(#glock-clip-1)">
-    <rect x="8" y="13" width="1" height="1.999" fill="#555555"/>
-    <rect x="10" y="13" width="1" height="1.999" fill="#555555"/>
-    <rect x="12" y="13" width="1" height="1.999" fill="#555555"/>
-    <rect x="14.001" y="13" width="1" height="1.999" fill="#555555"/>
-    <rect x="16" y="13" width="1" height="1.999" fill="#555555"/>
-    <rect x="18" y="13" width="1" height="1.999" fill="#555555"/>
-    <rect x="20" y="13" width="1" height="1.999" fill="#555555"/>
-    <rect x="8" y="0" width="1" height="1.999" fill="#555555"/>
-    <rect x="10" y="0" width="1" height="1.999" fill="#555555"/>
-    <rect x="12" y="0" width="1" height="1.999" fill="#555555"/>
-    <rect x="14.001" y="0" width="1" height="1.999" fill="#555555"/>
-    <rect x="16" y="0" width="1" height="1.999" fill="#555555"/>
-    <rect x="18" y="0" width="1" height="1.999" fill="#555555"/>
-    <rect x="20" y="0" width="1" height="1.999" fill="#555555"/>
+    <rect x="-111.667" y="18.333" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-105" y="18.333" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-98.333" y="18.333" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-91.663" y="18.333" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-85" y="18.333" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-78.333" y="18.333" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-71.667" y="18.333" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-111.667" y="-25" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-105" y="-25" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-98.333" y="-25" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-91.663" y="-25" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-85" y="-25" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-78.333" y="-25" width="3.333" height="6.663" fill="#555555"/>
+    <rect x="-71.667" y="-25" width="3.333" height="6.663" fill="#555555"/>
   </g>
   <g id="front-sight">
-    <rect x="74.029" y="6.5" width="4.821" height="2" fill="#6f6f6f"/>
+    <rect x="108.43" y="-3.333" width="16.07" height="6.667" fill="#6f6f6f"/>
   </g>
   <g id="rear-sight">
-    <rect x="10" y="2" width="70" height="1" fill="#555555"/>
-    <rect x="10" y="12" width="70" height="1" fill="#555555"/>
+    <rect x="-105" y="-18.333" width="233.333" height="3.333" fill="#555555"/>
+    <rect x="-105" y="15" width="233.333" height="3.333" fill="#555555"/>
     <g id="sight">
-      <path d="M7.809,2.467 L8.492,1.5 L14.313,1.7 L14.313,3.3 L8.492,3.5 L7.809,2.467 Z" fill="#6f6f6f"/>
+      <path d="M-112.303,-16.777 L-110.027,-20 L-90.623,-19.333 L-90.623,-14 L-110.027,-13.333 L-112.303,-16.777 Z" fill="#6f6f6f"/>
     </g>
     <g id="sight-2">
-      <path d="M7.809,12.467 L8.492,11.5 L14.313,11.7 L14.313,13.3 L8.492,13.5 L7.809,12.467 Z" fill="#6f6f6f"/>
+      <path d="M-112.303,16.557 L-110.027,13.333 L-90.623,14 L-90.623,19.333 L-110.027,20 L-112.303,16.557 Z" fill="#6f6f6f"/>
     </g>
   </g>
 </svg>

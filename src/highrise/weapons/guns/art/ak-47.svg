@@ -1,18 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="354" height="31" viewBox="0 0 354 31" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5" clip-rule="evenodd">
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="103.333" viewBox="-590 -51.667 1180 103.333" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5" clip-rule="evenodd">
   <defs>
-    <linearGradient id="ak-47-gradient-1" gradientUnits="userSpaceOnUse" x1="39.861" y1="30.109" x2="39.861" y2="2.696">
+    <linearGradient id="ak-47-gradient-1" gradientUnits="userSpaceOnUse" x1="-457.13" y1="48.697" x2="-457.13" y2="-42.68">
       <stop offset="0" stop-color="#8f6532"/>
       <stop offset="0.22" stop-color="#c0853e"/>
       <stop offset="0.5" stop-color="#cd8d41"/>
       <stop offset="0.78" stop-color="#c0853e"/>
       <stop offset="1" stop-color="#8f6532"/>
     </linearGradient>
-    <linearGradient id="ak-47-gradient-2" gradientUnits="userSpaceOnUse" x1="294.308" y1="19.755" x2="294.308" y2="11.168">
+    <linearGradient id="ak-47-gradient-2" gradientUnits="userSpaceOnUse" x1="391.027" y1="14.183" x2="391.027" y2="-14.44">
       <stop offset="0" stop-color="#5d5b5b"/>
       <stop offset="0.5" stop-color="#808080"/>
       <stop offset="1" stop-color="#5d5d5d"/>
     </linearGradient>
-    <linearGradient id="ak-47-gradient-3" gradientUnits="userSpaceOnUse" x1="208.459" y1="30.604" x2="208.459" y2="0.426">
+    <linearGradient id="ak-47-gradient-3" gradientUnits="userSpaceOnUse" x1="104.863" y1="50.347" x2="104.863" y2="-50.247">
       <stop offset="0" stop-color="#8f6532"/>
       <stop offset="0.1" stop-color="#a97638"/>
       <stop offset="0.2" stop-color="#c2863e"/>
@@ -21,7 +21,7 @@
       <stop offset="0.9" stop-color="#a97638"/>
       <stop offset="1" stop-color="#8f6532"/>
     </linearGradient>
-    <linearGradient id="ak-47-gradient-4" gradientUnits="userSpaceOnUse" x1="145.615" y1="22.709" x2="145.615" y2="7.535">
+    <linearGradient id="ak-47-gradient-4" gradientUnits="userSpaceOnUse" x1="-104.617" y1="24.03" x2="-104.617" y2="-26.55">
       <stop offset="0" stop-color="#484848"/>
       <stop offset="0.24" stop-color="#777777"/>
       <stop offset="0.5" stop-color="#868686"/>
@@ -29,24 +29,24 @@
       <stop offset="1" stop-color="#484848"/>
     </linearGradient>
   </defs>
-  <ellipse cx="17.835" cy="27.674" rx="1.994" ry="2.136" fill="#2d2d2d"/>
+  <ellipse cx="-530.55" cy="40.58" rx="6.647" ry="7.12" fill="#2d2d2d"/>
   <g id="stock">
-    <path d="M96.794,5.857 L2.345,2.643 C-0.047,11.215 -0.182,19.785 2.345,28.357 L96.794,25.143 L96.794,5.857 Z" fill="url(#ak-47-gradient-1)" stroke="#6b4e2b" stroke-width="0.973"/>
+    <path d="M-267.353,-32.143 L-582.183,-42.857 C-590.157,-14.283 -590.607,14.283 -582.183,42.857 L-267.353,32.143 L-267.353,-32.143 Z" fill="url(#ak-47-gradient-1)" stroke="#6b4e2b" stroke-width="3.243"/>
   </g>
-  <rect x="220.569" y="11.214" width="133.062" height="8.571" fill="url(#ak-47-gradient-2)"/>
+  <rect x="145.23" y="-14.287" width="443.54" height="28.57" fill="url(#ak-47-gradient-2)"/>
   <g id="barrel">
-    <path d="M292.568,10.027 L263.568,8.955 L263.568,21.813 L292.568,20.742 L292.568,10.027 Z" fill="#484848"/>
+    <path d="M385.227,-18.243 L288.56,-21.817 L288.56,21.043 L385.227,17.473 L385.227,-18.243 Z" fill="#484848"/>
   </g>
-  <rect x="331.638" y="13.357" width="17" height="4.285" fill="#484848"/>
-  <path d="M242.279,1.572 C249.135,1.572 262.459,5.857 262.459,5.857 L262.459,25.143 C262.459,25.143 249.135,29.429 242.279,29.429 L208.459,29.429 L208.459,1.572 L242.279,1.572 Z" fill="url(#ak-47-gradient-3)" stroke="#6b4e2b" stroke-width="1.016"/>
-  <rect x="262.046" y="5.851" width="2" height="19.298" fill="#484848"/>
+  <rect x="515.46" y="-7.143" width="56.667" height="14.283" fill="#484848"/>
+  <path d="M217.597,-46.427 C240.45,-46.427 284.863,-32.143 284.863,-32.143 L284.863,32.143 C284.863,32.143 240.45,46.43 217.597,46.43 L104.863,46.43 L104.863,-46.427 L217.597,-46.427 Z" fill="url(#ak-47-gradient-3)" stroke="#6b4e2b" stroke-width="3.387"/>
+  <rect x="283.487" y="-32.163" width="6.667" height="64.327" fill="#484848"/>
   <g id="receiver">
-    <path d="M213.857,0.5 L233.857,4.25 L233.857,26.75 L213.857,30.5 L97.904,30.5 L94.904,28.192 L94.904,3.549 L97.904,0.5 L213.857,0.5 Z" fill="#484848" stroke="#2d2d2d" stroke-width="1.018" stroke-linecap="square" stroke-linejoin="bevel"/>
+    <path d="M122.857,-50 L189.523,-37.5 L189.523,37.5 L122.857,50 L-263.653,50 L-273.653,42.307 L-273.653,-39.837 L-263.653,-50 L122.857,-50 Z" fill="#484848" stroke="#2d2d2d" stroke-width="3.393" stroke-linecap="square" stroke-linejoin="bevel"/>
   </g>
   <g id="receiver-2">
-    <path d="M212.857,6.929 L212.857,24.072 L108.904,24.072 L105.904,22.753 L105.904,8.671 L108.904,6.929 L212.857,6.929 Z" fill="url(#ak-47-gradient-4)" stroke="#2d2d2d" stroke-width="0.804"/>
+    <path d="M119.523,-28.57 L119.523,28.573 L-226.987,28.573 L-236.987,24.177 L-236.987,-22.763 L-226.987,-28.57 L119.523,-28.57 Z" fill="url(#ak-47-gradient-4)" stroke="#2d2d2d" stroke-width="2.68"/>
   </g>
   <g id="receiver-3">
-    <path d="M233.74,3.714 L233.74,27.286 L213.274,27.286 L212.74,25.473 L212.74,6.11 L213.274,3.714 L233.74,3.714 Z" fill="#2d2d2d"/>
+    <path d="M189.133,-39.287 L189.133,39.287 L120.913,39.287 L119.133,33.243 L119.133,-31.3 L120.913,-39.287 L189.133,-39.287 Z" fill="#2d2d2d"/>
   </g>
 </svg>

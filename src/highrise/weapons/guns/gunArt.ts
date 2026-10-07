@@ -30,14 +30,12 @@ const GUN_ART = {
 
 export type GunArtName = keyof typeof GUN_ART;
 
-/** How big the art is drawn: an SVG unit is this many meters */
-export const GUN_ART_METERS_PER_UNIT = 1 / 300;
 /** How many pixels a meter of gun gets when it's rasterized */
 export const GUN_PIXELS_PER_METER = 600;
 
 const textures = new Map<GunArtName, Texture>();
 
-/** A gun's art, anchored in its middle; scale it by `1 / GUN_PIXELS_PER_METER` */
+/** A gun's art, anchored at its origin; scale it by `1 / GUN_PIXELS_PER_METER` */
 export function getGunTexture(name: GunArtName): Texture {
   const texture = textures.get(name);
   if (!texture) {
@@ -56,11 +54,12 @@ export async function bakeGuns(): Promise<void> {
 }
 
 async function rasterize(svg: string): Promise<Texture> {
-  const [, , width, height] = svg
+  const [minX, minY, width, height] = svg
     .match(/viewBox="([^"]+)"/)![1]
     .split(/[\s,]+/)
     .map(Number);
-  const scale = GUN_PIXELS_PER_METER * GUN_ART_METERS_PER_UNIT;
+  // Pixels per millimeter
+  const scale = GUN_PIXELS_PER_METER / 1000;
   const canvas = document.createElement("canvas");
   canvas.width = Math.ceil(width * scale);
   canvas.height = Math.ceil(height * scale);
@@ -78,8 +77,8 @@ async function rasterize(svg: string): Promise<Texture> {
   return new Texture({
     source: new CanvasSource({ resource: canvas, autoGenerateMipmaps: true }),
     defaultAnchor: {
-      x: (width * scale) / 2 / canvas.width,
-      y: (height * scale) / 2 / canvas.height,
+      x: (-minX * scale) / canvas.width,
+      y: (-minY * scale) / canvas.height,
     },
   });
 }
