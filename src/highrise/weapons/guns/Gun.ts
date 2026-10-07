@@ -52,6 +52,7 @@ import {
   GunStats,
   ReloadingStyle,
 } from "./GunStats";
+import { MagazineArt } from "./GunSprite";
 
 // Pulling the gun in when it would poke through a wall. It first slides back
 // toward the body until the grip is at MIN_GRIP_X, then swings aside around the
@@ -394,6 +395,8 @@ export default class Gun extends BaseEntity implements Entity {
 
   /** Lets the magazine fall out of the gun to the floor */
   private dropMagazine(shooter: Human) {
+    // What was left in it, before the fresh one's shown
+    const slid = this.roundsSlid;
     this.freshMagazine = Math.min(
       this.getCapacity(shooter),
       this.ammo + shooter.getReserve(this.stats.ammoClass),
@@ -412,9 +415,19 @@ export default class Gun extends BaseEntity implements Entity {
         position,
         velocity,
         shooter.getDirection() + pose.angle,
-        magazine.texture,
+        magazine === "art"
+          ? () => {
+              const art = new MagazineArt(this.stats, "middle");
+              art.setRounds(slid);
+              return art;
+            }
+          : magazine.texture,
         MAGAZINE_DROP_SOUNDS,
-        { size: magazine.length, height: MAGAZINE_DROP_HEIGHT, spin: 0.15 },
+        {
+          size: magazine === "art" ? undefined : magazine.length,
+          height: MAGAZINE_DROP_HEIGHT,
+          spin: 0.15,
+        },
       ),
     );
   }

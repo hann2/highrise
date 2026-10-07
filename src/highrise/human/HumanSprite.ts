@@ -1,5 +1,5 @@
 import { getAppearance } from "../looks/bakeBodies";
-import { Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import { on } from "../../core/entity/handler";
 import { lerp, smoothStep, stepToward } from "../../core/util/MathUtil";
 import { V, V2d } from "../../core/Vector";
@@ -9,7 +9,7 @@ import { HUMAN_GAIT } from "../creature-stuff/Legs";
 import { LaserSight } from "../effects/LaserSight";
 import Gun from "../weapons/guns/Gun";
 import { GunPose } from "../weapons/guns/GunPose";
-import { GunSprite } from "../weapons/guns/GunSprite";
+import { GunSprite, MagazineArt } from "../weapons/guns/GunSprite";
 import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import Human from "./Human";
 
@@ -28,7 +28,7 @@ export default class HumanSprite extends BodySprite {
   /** A gun in hand */
   gunSprite?: GunSprite;
   /** The magazine (or round) a gun's animation shows in the hand */
-  magazineSprite?: Sprite;
+  magazineSprite?: Container;
   laserSight?: LaserSight;
   /** The gun in hand's pose, worked out at the start of `updatePose` */
   private gunPose?: GunPose;
@@ -86,6 +86,10 @@ export default class HumanSprite extends BodySprite {
         this.magazineSprite.rotation = pose.magazine.angle;
         this.magazineSprite.scale.y =
           Math.abs(this.magazineSprite.scale.y) * (pose.mirrored ? -1 : 1);
+        if (this.magazineSprite instanceof MagazineArt) {
+          // The old one with what was left in it, or the fresh one
+          this.magazineSprite.setRounds(pose.rounds);
+        }
       }
     }
 
@@ -208,12 +212,15 @@ export default class HumanSprite extends BodySprite {
   handleNewWeapon(weapon: Gun | MeleeWeapon) {
     if (weapon instanceof Gun) {
       const { magazine } = weapon.stats;
-      if (magazine) {
-        this.magazineSprite = Sprite.from(magazine.texture);
-        this.magazineSprite.anchor.set(0.5, 0.5);
-        this.magazineSprite.scale.set(
-          magazine.length / this.magazineSprite.texture.width,
-        );
+      if (magazine === "art") {
+        this.magazineSprite = new MagazineArt(weapon.stats, "hand");
+      } else if (magazine) {
+        const sprite = Sprite.from(magazine.texture);
+        sprite.anchor.set(0.5, 0.5);
+        sprite.scale.set(magazine.length / sprite.texture.width);
+        this.magazineSprite = sprite;
+      }
+      if (this.magazineSprite) {
         this.magazineSprite.visible = false;
       }
       this.arrangeHands();
@@ -272,7 +279,7 @@ export default class HumanSprite extends BodySprite {
     ]) {
       if (sprite) {
         this.sprite.removeChild(sprite);
-        sprite.destroy();
+        sprite.destroy({ children: true });
       }
     }
     this.weaponSprite = undefined;

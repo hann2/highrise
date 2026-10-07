@@ -135,12 +135,18 @@ export type GunEvent =
 
 export type GunAnimation = Animation<GunTracks, GunEvent>;
 
-/** The magazine (or round) a gun's animations show outside it */
-export interface MagazineStats {
-  readonly texture: ImageName;
-  /** Meters long */
-  readonly length: number;
-}
+/**
+ * The magazine (or round) a gun's animations show outside it: an image, or
+ * `"art"`, the `magazine` part of the gun's art, as it is in the gun
+ * (see `MagazineArt`)
+ */
+export type MagazineStats =
+  | {
+      readonly texture: ImageName;
+      /** Meters long */
+      readonly length: number;
+    }
+  | "art";
 
 /** Where everything is, in the holder's frame */
 export interface GunPose {

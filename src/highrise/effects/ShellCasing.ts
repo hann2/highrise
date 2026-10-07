@@ -1,4 +1,4 @@
-import { Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import { ImageName, SoundName } from "../../../resources/resources";
 import { CollisionGroups } from "../../config/CollisionGroups";
 import { Layer } from "../../config/layers";
@@ -28,7 +28,7 @@ const PORT_HEIGHT = 1.0; // meters off the ground
 
 /** For things other than shell casings that fall from a gun, like magazines */
 export interface FallingOptions {
-  /** Meters wide (`texture`'s width), else a shell casing's */
+  /** Meters wide (an image's width), else a shell casing's */
   size?: number;
   /** Meters off the floor it starts */
   height?: number;
@@ -38,31 +38,33 @@ export interface FallingOptions {
 
 export default class ShellCasing extends BaseEntity implements Entity {
   tickLayer = "effects" as const;
-  sprite: Sprite & GameSprite;
+  sprite: Container & GameSprite;
   body: Body;
   z: number;
   zVelocity: number;
   bounceSounds: ShuffleRing<SoundName>;
-  private size: number;
+  /** Its scale on the floor, before it's scaled up for its height */
+  private scale: number;
 
   constructor(
     position: V2d,
     velocity: V2d,
     rotation: number,
-    texture: ImageName,
+    /** An image, `size` wide, or what to draw, in meters about its middle (made again when it comes to rest) */
+    private readonly look: ImageName | (() => Container),
     sounds: SoundName[],
     { size = SIZE, height = PORT_HEIGHT, spin = 1 }: FallingOptions = {},
   ) {
     super();
 
-    this.size = size;
     this.z = height;
     this.zVelocity = rUniform(0, velocity.magnitude * 0.3);
 
-    this.sprite = Sprite.from(texture);
+    this.sprite = this.makeSprite();
+    this.scale =
+      this.sprite instanceof Sprite ? size / this.sprite.texture.width : 1;
     this.sprite.layerName = Layer.FLOOR_STUFF;
-    this.sprite.scale.set(size / this.sprite.texture.width);
-    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.scale.set(this.scale);
     this.sprite.rotation = rotation;
 
     this.body = createRigid2D({
@@ -87,6 +89,15 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.body.addShape(shape, undefined, imageHeight > width ? Math.PI / 2 : 0);
 
     this.bounceSounds = new ShuffleRing(sounds);
+  }
+
+  private makeSprite(): Container & GameSprite {
+    if (typeof this.look !== "string") {
+      return this.look();
+    }
+    const sprite = Sprite.from(this.look);
+    sprite.anchor.set(0.5, 0.5);
+    return sprite;
   }
 
   @on("tick")
@@ -122,8 +133,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
     this.sprite.position.copyFrom(this.body.position);
     this.sprite.rotation = this.body.angle;
 
-    const scale = 1 + this.z * 0.8;
-    this.sprite.scale.set((this.size / this.sprite.texture.width) * scale);
+    this.sprite.scale.set(this.scale * (1 + this.z * 0.8));
   }
 
   @on("impact")
@@ -136,9 +146,8 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
   // Turn this into a static thing so we don't have any more on ticks or on renders or physics or whatnot
   turnToStatic() {
-    const sprite: Sprite & GameSprite = new Sprite(this.sprite.texture);
+    const sprite = this.makeSprite();
     sprite.scale.copyFrom(this.sprite.scale);
-    sprite.anchor.copyFrom(this.sprite.anchor);
     sprite.tint = this.sprite.tint;
     sprite.position.copyFrom(this.sprite.position);
     sprite.rotation = this.sprite.rotation;
@@ -152,7 +161,7 @@ export default class ShellCasing extends BaseEntity implements Entity {
 
 // A cheaper non-moving effect
 class StaticShellCasing extends BaseEntity {
-  constructor(public sprite: Sprite & GameSprite) {
+  constructor(public sprite: Container & GameSprite) {
     super();
     sprite.layerName = Layer.FLOOR_STUFF;
   }

@@ -14,14 +14,10 @@ export class GunSprite extends Container {
   constructor(private readonly stats: GunStats) {
     super();
     this.layers = getGunLayers(stats.art).map((layer) => {
-      let display: Container;
-      if (layer.roundsWindow) {
-        this.rounds = new Rounds(layer);
-        display = this.rounds;
-      } else {
-        display = new Sprite(layer.texture);
+      const display = makeLayer(layer);
+      if (display instanceof Rounds) {
+        this.rounds = display;
       }
-      display.scale.set(1 / GUN_PIXELS_PER_METER);
       this.addChild(display);
       return { display, part: layer.part };
     });
@@ -82,6 +78,55 @@ export class GunSprite extends Container {
 }
 
 /**
+ * A gun's magazine out of it, when it's drawn from the gun's art
+ * (`MagazineStats` `"art"`): the layers of its `magazine` part, with its
+ * rounds slid as they were in the gun. In meters, with `around` at its origin:
+ * the magazine point (`GunStats.points`), where a hand holds it, or its
+ * middle.
+ */
+export class MagazineArt extends Container {
+  private rounds?: Rounds;
+
+  constructor(
+    private readonly stats: GunStats,
+    around: "hand" | "middle",
+  ) {
+    super();
+    for (const layer of getGunLayers(stats.art)) {
+      if (layer.part === "magazine") {
+        const display = makeLayer(layer);
+        if (display instanceof Rounds) {
+          this.rounds = display;
+        }
+        this.addChild(display);
+      }
+    }
+    let [x, y] = stats.points.magazine;
+    if (around === "middle") {
+      const bounds = this.getLocalBounds();
+      [x, y] = [bounds.x + bounds.width / 2, bounds.y + bounds.height / 2];
+    }
+    for (const child of this.children) {
+      child.position.set(-x, -y);
+    }
+  }
+
+  /** Slides its rounds as a gun pose's are (`GunPose.rounds`): 0 full, 1 empty */
+  setRounds(slid: number) {
+    this.rounds?.slide(slid * (this.stats.rounds?.travel ?? 0));
+  }
+}
+
+/** A layer of a gun's art, in meters */
+function makeLayer(layer: GunLayer): Container {
+  const display = layer.roundsWindow
+    ? new Rounds(layer)
+    : new Sprite(layer.texture);
+  display.scale.set(1 / GUN_PIXELS_PER_METER);
+  return display;
+}
+
+/**
  * The rounds that show in a gun's art, slid along it as it empties and
  * cropped to where they show: a window onto their texture, which is the whole
  * gun's size, with them where they are when it's full. In pixels, from the
@@ -137,5 +182,12 @@ class Rounds extends Container {
       left - this.gunOrigin.x + slide,
       -this.gunOrigin.y,
     );
+  }
+
+  override destroy(options?: Parameters<Container["destroy"]>[0]) {
+    const { texture } = this.sprite;
+    super.destroy(options);
+    // Its own, which the shared source would otherwise hold on to
+    texture.destroy(false);
   }
 }

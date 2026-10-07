@@ -54,7 +54,7 @@ export const P90: GunStats = {
   // the gap between rounds in a row at a time (they're in two staggered rows)
   rounds: { count: 50, travel: -0.325 },
   animations: rifleAnimations({ magazineOnTop: true }),
-  magazine: { texture: "p90Magazine", length: 0.26 },
+  magazine: "art",
   holdPosition: [0.35, 0],
   stanceAngle: degToRad(50),
   sideOffset: 0.2,
