@@ -528,16 +528,18 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       rightShoulder: this.toWorld(rightShoulder),
       headRadius: this.headRadius,
       armThickness: this.armThickness,
-      ...(this.gait && {
-        hips: [
-          V(this.gait.hipX(0), this.gait.hipY(0)),
-          V(this.gait.hipX(1), this.gait.hipY(1)),
-        ],
-        feet: [
-          V(this.gait.feet[0].x, this.gait.feet[0].y),
-          V(this.gait.feet[1].x, this.gait.feet[1].y),
-        ],
-      }),
+      // Once the walk cycle's started: it only moves on in view
+      ...(this.gait &&
+        Number.isFinite(this.gait.hipX(0)) && {
+          hips: [
+            V(this.gait.hipX(0), this.gait.hipY(0)),
+            V(this.gait.hipX(1), this.gait.hipY(1)),
+          ],
+          feet: [
+            V(this.gait.feet[0].x, this.gait.feet[0].y),
+            V(this.gait.feet[1].x, this.gait.feet[1].y),
+          ],
+        }),
     };
   }
 }

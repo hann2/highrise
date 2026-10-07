@@ -112,13 +112,7 @@ interface Intent {
 }
 
 type ArmIntent =
-  | "reach"
-  | "bentUp"
-  | "clenched"
-  | "out"
-  | "trail"
-  | "under"
-  | "kept";
+  "reach" | "bentUp" | "clenched" | "out" | "trail" | "under" | "kept";
 type LegIntent = "straight" | "apart" | "kneeUp" | "kneeOut" | "curled";
 
 const ARM_INTENTS: Record<Exclude<ArmIntent, "kept">, Intent> = {
@@ -197,6 +191,14 @@ export function lyingPose(
     intent === "kneeUp" || intent === "curled";
   if (!burnt && bent(legIntents[0]) && bent(legIntents[1]) && random() < 0.75) {
     legIntents[random() < 0.5 ? 0 : 1] = "straight";
+  }
+  // and even then, both drawn up just as far looks like a frog
+  if (
+    legIntents[0] === "curled" &&
+    legIntents[1] === "curled" &&
+    random() < 0.6
+  ) {
+    legIntents[random() < 0.5 ? 0 : 1] = "kneeOut";
   }
 
   const shoulderY = body.shoulder;

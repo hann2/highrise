@@ -14,12 +14,9 @@ import {
   type BodyTextures,
   type Sleeve,
 } from "../../creature-stuff/BodySprite";
-import {
-  ArmPose,
-  SLEEVE_BEND,
-  sleeveStrip,
-} from "../../creature-stuff/sleeveStrip";
+import { ArmPose, SLEEVE_BEND } from "../../creature-stuff/sleeveStrip";
 import { DeathContext, limbJoints, lyingPose } from "../../looks/lyingPose";
+import { layLimb, lyingBodyOf } from "./lyingLimbs";
 import { HUMAN_RADIUS } from "../../constants/constants";
 import { bodyPixelScale } from "../../looks/bakeBodies";
 import { WET_RADIUS } from "../../effects/BloodSplat";
@@ -182,18 +179,7 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     const metrics = textures.metrics;
     const pose = lyingPose(
       () => rUniform(0, 1),
-      {
-        shoulder: metrics.lyingShoulder * size,
-        upperArm: metrics.upperArm * size,
-        forearm: metrics.forearm * size,
-        hipX: (metrics.lyingWaist + metrics.lyingHipDrop) * size,
-        hipY: metrics.lyingHip * size,
-        thigh: metrics.lyingThigh * size,
-        shin: metrics.lyingShin * size,
-        headX: metrics.lyingHead * size,
-        headRadius: metrics.headRadius * size,
-        handRadius: metrics.handSize * size * 0.5,
-      },
+      lyingBodyOf(metrics, size),
       options.death,
     );
     this.scale = scale;
@@ -455,15 +441,7 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     }
     for (const leg of this.legs) {
       const [hip, knee, ankle] = lerpJoints(leg.from, leg.to);
-      this.bendStrip(
-        leg.strip,
-        hip,
-        knee,
-        ankle,
-        leg.upper,
-        leg.lower,
-        leg.bend,
-      );
+      layLimb(leg.strip, hip, knee, ankle, leg.upper, leg.lower, leg.bend);
       leg.strip.mesh.alpha = fadeIn;
       const shin = Math.atan2(ankle[1] - knee[1], ankle[0] - knee[0]);
       leg.shoe.position.set(ankle[0], ankle[1]);
@@ -478,45 +456,11 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
 
     for (const arm of this.arms) {
       const [shoulder, elbow, hand] = lerpJoints(arm.from, arm.to);
-      this.bendStrip(
-        arm.strip,
-        shoulder,
-        elbow,
-        hand,
-        arm.upper,
-        arm.lower,
-        arm.bend,
-      );
+      layLimb(arm.strip, shoulder, elbow, hand, arm.upper, arm.lower, arm.bend);
       arm.hand.position.set(hand[0], hand[1]);
       arm.hand.rotation =
         arm.handFrom + angleDelta(arm.handFrom, arm.handTo) * t;
     }
-  }
-
-  /** Lays a limb's strip along its joints */
-  private bendStrip(
-    strip: Sleeve,
-    root: ArmPose["shoulder"],
-    middle: ArmPose["shoulder"],
-    end: ArmPose["shoulder"],
-    upper: number,
-    lower: number,
-    bend: number,
-  ) {
-    sleeveStrip(
-      strip.picture,
-      {
-        shoulder: root,
-        elbow: middle,
-        hand: end,
-        upperArm: upper,
-        forearm: lower,
-        bend,
-      },
-      strip.along,
-      strip.vertices,
-    );
-    strip.mesh.geometry.getBuffer("aPosition").update();
   }
 
   /** The middle of the body, for the fire on it */

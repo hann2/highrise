@@ -24,6 +24,8 @@ import type {
   StandingLimb,
 } from "../../looks/lyingPose";
 import Gib from "./Gib";
+import { bentArm, lyingBodyOf, posedLegs } from "./lyingLimbs";
+import { lyingPose, NO_DEATH } from "../../looks/lyingPose";
 
 // How much damage (the blow plus what came just before) it takes to...
 /** ...pop the head, with a bullet or a swing to it */
@@ -493,6 +495,8 @@ function awayFromWalls(game: Game, from: V2d, wanted: V2d): V2d {
 /** Makes the pieces of a body for flinging, sized like it */
 class PartMaker {
   readonly scale: number;
+  /** How big it is next to a human */
+  readonly size: number;
   readonly armThickness: number;
   readonly legsLength: number;
   private torsoLength: number;
@@ -503,6 +507,7 @@ class PartMaker {
     private tint: number,
   ) {
     const size = remains.radius / HUMAN_RADIUS;
+    this.size = size;
     this.scale = bodyPixelScale(size);
     this.torsoLength = remains.lying.torso.width * this.scale;
     this.legsLength = remains.legs ? remains.legs.width * this.scale : 0;
@@ -526,7 +531,7 @@ class PartMaker {
     return stump;
   }
 
-  private display(...children: Sprite[]): Container {
+  private display(...children: Container[]): Container {
     const display = new Container();
     display.addChild(...children);
     display.tint = this.tint;
@@ -540,16 +545,24 @@ class PartMaker {
     );
   }
 
-  /** An arm and its hand, pointing along +x, torn off at the left */
+  /**
+   * An arm and its hand, pointing along +x, torn off at the left, bent at
+   * the elbow some way or other
+   */
   arm(left: boolean): Container {
-    const textures = this.remains.lying;
-    const length = 0.3;
-    const arm = this.sprite(left ? textures.leftArm : textures.rightArm);
-    arm.width = length;
-    const hand = this.sprite(left ? textures.leftHand : textures.rightHand);
-    hand.position.set(length / 2, 0);
+    const metrics = this.remains.lying.metrics;
+    const length = (metrics.upperArm + metrics.forearm) * this.size;
+    const arm = bentArm(
+      this.remains.lying,
+      this.size,
+      this.scale,
+      left,
+      rSign() * rUniform(0.2, 1.4),
+    );
+    // Its middle about where the gib's is
+    arm.position.set(-length / 2, 0);
     const stump = this.stump(V(-length / 2, 0), this.armThickness * 1.3);
-    return this.display(arm, stump, hand);
+    return this.display(arm, stump);
   }
 
   /** The top half, torn off at the waist */
@@ -558,14 +571,25 @@ class PartMaker {
     return this.display(torso);
   }
 
-  /** Legs, torn off at the waist */
+  /**
+   * Legs, torn off at the waist, lying some way or other, the waist toward
+   * +x: in parts, each bent at the knee, when it has them, else straight
+   */
   legs(texture: Texture): Container {
-    const legs = this.sprite(texture);
-    const stump = this.stump(
-      V(this.legsLength * 0.45, 0),
-      this.remains.radius * 1.3,
+    const waist = this.legsLength * 0.45;
+    const stump = this.stump(V(waist, 0), this.remains.radius * 1.3);
+    const lying = this.remains.lying;
+    const pose = lyingPose(
+      () => rUniform(0, 1),
+      lyingBodyOf(lying.metrics, this.size),
+      { ...NO_DEATH, force: rUniform(0.3, 1) },
     );
-    return this.display(legs, stump);
+    const posed = posedLegs(lying, this.size, this.scale, pose.legs, pose.feet);
+    if (!posed) {
+      return this.display(this.sprite(texture), stump);
+    }
+    posed.position.set(waist, 0);
+    return this.display(posed, stump);
   }
 
   /** A piece of `display` thrown from `pose`, roughly along `direction` */
