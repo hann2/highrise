@@ -528,6 +528,16 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       rightShoulder: this.toWorld(rightShoulder),
       headRadius: this.headRadius,
       armThickness: this.armThickness,
+      ...(this.gait && {
+        hips: [
+          V(this.gait.hipX(0), this.gait.hipY(0)),
+          V(this.gait.hipX(1), this.gait.hipY(1)),
+        ],
+        feet: [
+          V(this.gait.feet[0].x, this.gait.feet[0].y),
+          V(this.gait.feet[1].x, this.gait.feet[1].y),
+        ],
+      }),
     };
   }
 }
@@ -606,4 +616,7 @@ export interface BodyPoses {
   rightShoulder: V2d;
   headRadius: number;
   armThickness: number;
+  /** Where each hip and foot (the ankle) is, left then right, for a body that walks */
+  hips?: [V2d, V2d];
+  feet?: [V2d, V2d];
 }

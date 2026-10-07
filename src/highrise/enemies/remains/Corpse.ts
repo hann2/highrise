@@ -19,7 +19,7 @@ import {
   SLEEVE_BEND,
   sleeveStrip,
 } from "../../creature-stuff/sleeveStrip";
-import { limbJoints, lyingPose } from "../../looks/lyingPose";
+import { DeathContext, limbJoints, lyingPose } from "../../looks/lyingPose";
 import { HUMAN_RADIUS } from "../../constants/constants";
 import { bodyPixelScale } from "../../looks/bakeBodies";
 import { WET_RADIUS } from "../../effects/BloodSplat";
@@ -75,6 +75,8 @@ export interface CorpseOptions {
   /** The torso it had standing, to fade from, with where its anchor was */
   standingTorso: { texture: Texture; scale: number };
   parts: CorpseParts;
+  /** How it died, which decides how it lies (`lyingPose`); else it just dropped */
+  death?: DeathContext;
   /** Tint on all of it, like a sprinter's */
   tint?: number;
   /** How charred it is, 0 to 1. It gets more charred while it burns. */
@@ -176,9 +178,24 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     this.standingTorsoSprite = new Sprite(standing.texture);
     this.standingTorsoSprite.scale.set(standing.scale);
 
-    // How it lies: which way each limb's bent
-    const pose = lyingPose(() => rUniform(0, 1));
+    // How it lies, from how it died: which way each limb's bent
     const metrics = textures.metrics;
+    const pose = lyingPose(
+      () => rUniform(0, 1),
+      {
+        shoulder: metrics.lyingShoulder * size,
+        upperArm: metrics.upperArm * size,
+        forearm: metrics.forearm * size,
+        hipX: (metrics.lyingWaist + metrics.lyingHipDrop) * size,
+        hipY: metrics.lyingHip * size,
+        thigh: metrics.lyingThigh * size,
+        shin: metrics.lyingShin * size,
+        headX: metrics.lyingHead * size,
+        headRadius: metrics.headRadius * size,
+        handRadius: metrics.handSize * size * 0.5,
+      },
+      options.death,
+    );
     this.scale = scale;
 
     // The legs, bent at the knee, come out from under it as it falls

@@ -18,6 +18,11 @@ import type { DeathBlow } from "../base/DeathBlow";
 import { bodyPixelScale } from "../../looks/bakeBodies";
 import { HUMAN_RADIUS } from "../../constants/constants";
 import Corpse, { CHARRED_TINT, CorpseParts } from "./Corpse";
+import type {
+  DeathContext,
+  DeathKind,
+  StandingLimb,
+} from "../../looks/lyingPose";
 import Gib from "./Gib";
 
 // How much damage (the blow plus what came just before) it takes to...
@@ -297,6 +302,9 @@ export function comeApart(
   const wanted = position
     .add(direction.mul(fall + thrown))
     .iaddScaled(remains.velocity, SLIDE_TIME);
+  const death = deathContext(blow, poses, remains, parts, direction.angle);
+  // A blow off to one side spins it as it goes down
+  const spin = remains.lyingDown ? 0 : -death.side * death.force * 0.35;
   game.addEntity(
     new Corpse({
       textures: remains.lying,
@@ -305,7 +313,8 @@ export function comeApart(
       position: awayFromWalls(game, position, wanted),
       angle: remains.lyingDown
         ? sprite.sprite.rotation + rNormal(0, 0.2)
-        : direction.angle,
+        : direction.angle + spin,
+      death,
       from: poses,
       standingTorso: {
         texture: sprite.textures.torso,
@@ -320,6 +329,90 @@ export function comeApart(
       },
     }),
   );
+}
+
+/** How hard a blow of this much damage is, 0 to 1, for how it lies */
+const FORCE_DAMAGE = 120;
+/** How fast it has to be going to fall like a sprinter flat out (m/s) */
+const FALL_SPEED = 5;
+
+/**
+ * How a body died, as `lyingPose` wants it: in the frame of the corpse,
+ * which lies with its head toward `angle` (the way it fell), what hit it,
+ * how hard and where, what it lost, how fast it was going, and where its
+ * hands and feet were
+ */
+function deathContext(
+  blow: DeathBlow,
+  poses: BodyPoses,
+  remains: BodyRemains,
+  parts: CorpseParts,
+  angle: number,
+): DeathContext {
+  const kind: DeathKind =
+    blow.kind === "bullet" ||
+    blow.kind === "melee" ||
+    blow.kind === "explosion" ||
+    blow.kind === "burn"
+      ? blow.kind
+      : "none";
+  const force =
+    kind === "burn"
+      ? 0.1
+      : Math.min(
+          1,
+          blow.damage / FORCE_DAMAGE + (kind === "explosion" ? 0.3 : 0),
+        );
+  // Into the corpse's frame: +x toward its head, +y its right
+  const lying = (v: V2d) => v.rotate(-angle);
+  let side = 0;
+  if (kind === "bullet" || kind === "melee") {
+    const part = hitPart(poses, blow);
+    side = part === "leftArm" ? -1 : part === "rightArm" ? 1 : 0;
+  }
+  if (side === 0 && blow.position) {
+    const across = lying(blow.position.sub(poses.torso.position))[1];
+    side = Math.max(-1, Math.min(1, across / 0.25));
+  }
+  const metrics = remains.lying.metrics;
+  const size = remains.radius / HUMAN_RADIUS;
+  // Which way a hand or foot was from its shoulder or hip, standing, on its
+  // own side, and how far out
+  const standing = (
+    from: V2d,
+    to: V2d,
+    length: number,
+  ): StandingLimb | undefined => {
+    const [x, y] = lying(to.sub(from));
+    const reach = Math.hypot(x, y) / length;
+    return reach > 1.5
+      ? undefined
+      : { angle: Math.atan2(Math.abs(y), x), reach };
+  };
+  const arm = (metrics.upperArm + metrics.forearm) * size;
+  const leg = (metrics.lyingThigh + metrics.lyingShin) * size;
+  const { hips, feet } = poses;
+  return {
+    kind,
+    force,
+    side,
+    speed: Math.min(1, remains.velocity.magnitude / FALL_SPEED),
+    missing: {
+      head: !parts.head,
+      leftArm: !parts.leftArm,
+      rightArm: !parts.rightArm,
+      legs: !parts.legs,
+    },
+    arms: [
+      standing(poses.leftShoulder, poses.leftHand.position, arm),
+      standing(poses.rightShoulder, poses.rightHand.position, arm),
+    ],
+    legs:
+      hips && feet
+        ? [standing(hips[0], feet[0], leg), standing(hips[1], feet[1], leg)]
+        : undefined,
+    lying: remains.lyingDown,
+  };
 }
 
 /**

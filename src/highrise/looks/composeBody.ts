@@ -6,7 +6,8 @@ import { BodyDrawing, BodyLayer, drawBody, LAYER_PARTS } from "./drawBody";
 import { Drawing, n } from "./svg";
 import { lyingHead, lyingShoulder, lyingWaist } from "./parts/torso";
 import { lyingLegShape } from "./parts/legs";
-import { limbJoints, lyingPose } from "./lyingPose";
+import { DeathContext, limbJoints, lyingPose, NO_DEATH } from "./lyingPose";
+import { makeRandom } from "../../core/util/Random";
 import { lookRandom } from "./dimensions";
 import { armShoulderJoint, hasSleeve } from "./parts/limbs";
 import {
@@ -42,6 +43,13 @@ export interface ComposeOptions {
   legless?: boolean;
   /** Layers left out, to see what's under them */
   hidden?: readonly BodyLayer[];
+  /**
+   * Lying, how it died, which decides how it lies (`lyingPose`): what's
+   * missing is left out, a stump where it was. Else it just dropped
+   */
+  death?: DeathContext;
+  /** Lying, what picks its pose, else its look's seed */
+  poseSeed?: number;
 }
 
 function place(part: Drawing, transform: string): string {
@@ -472,14 +480,33 @@ export function composeBodySvg(
     // hands; then the top half over all that (the arms' round ends at the
     // shoulders hidden, as standing, and its hem over the legs), and the
     // head turned to one side
-    const pose = lyingPose(lookRandom(body.look, 21));
+    const death = options.death ?? NO_DEATH;
+    const legShape = lyingLegShape(body.look, dims);
+    const pose = lyingPose(
+      options.poseSeed === undefined
+        ? lookRandom(body.look, 21)
+        : makeRandom(options.poseSeed),
+      {
+        shoulder: lyingShoulder(dims),
+        upperArm: dims.upperArm,
+        forearm: dims.forearm,
+        hipX: lyingWaist(dims) + legShape.drop,
+        hipY: legShape.hip,
+        thigh: legShape.thigh,
+        shin: legShape.shin,
+        headX: lyingHead(dims),
+        headRadius: dims.headRx,
+        handRadius: dims.handSize * 0.5,
+      },
+      death,
+    );
+    const legless = options.legless || death.missing.legs;
     const waist = -lyingWaist(dims);
     const shoulder = lyingShoulder(dims);
-    const legShape = lyingLegShape(body.look, dims);
     const bare =
       body.look.pantsStyle === "shorts" || body.look.pantsStyle === "skirt";
     const corners: [number, number][] = [];
-    if (!options.legless) {
+    if (!legless) {
       for (const side of [-1, 1] as const) {
         const i = side < 0 ? 0 : 1;
         const hip: [number, number] = [
@@ -524,9 +551,17 @@ export function composeBodySvg(
         [waist + parts.lyingSeat.maxX, parts.lyingSeat.maxY],
       );
     }
+    // Where something's come off, a stump
+    const stump = (x: number, y: number, r: number) =>
+      `<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" fill="#5a0d0d"/>`;
+    const stumps: string[] = [];
     for (const side of [-1, 1] as const) {
       const i = side < 0 ? 0 : 1;
       const at: [number, number] = [0, side * shoulder];
+      if (side < 0 ? death.missing.leftArm : death.missing.rightArm) {
+        stumps.push(stump(0, side * shoulder, dims.armThickness * 0.7));
+        continue;
+      }
       const { middle, end, endAngle } = limbJoints(
         at,
         pose.arms[i],
@@ -560,16 +595,18 @@ export function composeBodySvg(
       );
     }
     // Whole, or torn off at the waist without its legs
-    const torso = options.legless ? parts.lyingTorso : parts.lyingTop;
-    items.push(place(torso, ""));
+    const torso = legless ? parts.lyingTorso : parts.lyingTop;
+    items.push(place(torso, ""), ...stumps);
     corners.push([torso.minX, torso.minY], [torso.maxX, torso.maxY]);
     const headAt = lyingHead(dims);
     const head = parts.turnedHead;
     items.push(
-      place(
-        head,
-        `translate(${n(headAt)} 0) rotate(${n((pose.head.angle * 180) / Math.PI)}) scale(1 ${pose.head.facesLeft ? -1 : 1})`,
-      ),
+      death.missing.head
+        ? stump(headAt * 0.5, 0, dims.headRy * 0.7)
+        : place(
+            head,
+            `translate(${n(headAt)} 0) rotate(${n((pose.head.angle * 180) / Math.PI)}) scale(1 ${pose.head.facesLeft ? -1 : 1})`,
+          ),
     );
     const headReach = Math.max(
       Math.abs(head.minX),
