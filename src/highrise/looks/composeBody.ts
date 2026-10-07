@@ -5,7 +5,10 @@ import { BodyLook, PartialLook } from "./BodyLook";
 import { BodyDrawing, BodyLayer, drawBody, LAYER_PARTS } from "./drawBody";
 import { Drawing, n } from "./svg";
 import { lyingHead, lyingShoulder, lyingWaist } from "./parts/torso";
-import { armHandPosition, hasSleeve } from "./parts/limbs";
+import { lyingLegShape } from "./parts/legs";
+import { limbJoints, lyingPose } from "./lyingPose";
+import { lookRandom } from "./dimensions";
+import { armShoulderJoint, hasSleeve } from "./parts/limbs";
 import {
   ArmPose,
   SLEEVE_BEND,
@@ -46,14 +49,48 @@ function place(part: Drawing, transform: string): string {
 }
 
 /**
- * A sleeve's straight picture bent over an arm as `BodySprite` bends it
- * (`sleeveStrip`), drawn from the shoulder to the hand. `pixel` is how big
- * a pixel is (mm).
+ * A limb's straight picture, bent at its middle joint, as two straight
+ * halves: the lower one, then the upper one over it, with a round end at
+ * the joint that covers the bend's outside, as the standing arm's halves
+ * are. For limbs lying still: a strip of triangles (`bentSleeve`) shows
+ * faint seams between them in an SVG. `start` is how far along the picture
+ * it's attached (the shoulder joint, a hip).
  */
-function bentSleeve(part: Drawing, pose: ArmPose, pixel: number): string {
+function jointedLimb(part: Drawing, pose: ArmPose, start = 0): string {
+  const { shoulder, elbow, hand, upperArm } = pose;
+  const id = `${part.prefix}-limb`;
+  const joint = start + upperArm;
+  const upperAngle = Math.atan2(elbow[1] - shoulder[1], elbow[0] - shoulder[0]);
+  const lowerAngle = Math.atan2(hand[1] - elbow[1], hand[0] - elbow[0]);
+  const deg = (angle: number) => n((angle * 180) / Math.PI);
+  const radius = Math.max(-part.minY, part.maxY) * 0.85;
+  const far = 9999;
+  const upperClip = `${id}-u`;
+  const lowerClip = `${id}-l`;
+  return (
+    `<defs><g id="${id}">${part.content(false)}</g>` +
+    `<clipPath id="${upperClip}"><rect x="${-far}" y="${-far}" width="${n(far + joint)}" height="${far * 2}"/><circle cx="${n(joint)}" cy="0" r="${n(radius)}"/></clipPath>` +
+    `<clipPath id="${lowerClip}"><rect x="${n(joint)}" y="${-far}" width="${far}" height="${far * 2}"/></clipPath></defs>` +
+    `<g transform="translate(${n(elbow[0])} ${n(elbow[1])}) rotate(${deg(lowerAngle)}) translate(${n(-joint)} 0)"><g clip-path="url(#${lowerClip})"><use href="#${id}"/></g></g>` +
+    `<g transform="translate(${n(shoulder[0])} ${n(shoulder[1])}) rotate(${deg(upperAngle)}) translate(${n(-start)} 0)"><g clip-path="url(#${upperClip})"><use href="#${id}"/></g></g>`
+  );
+}
+
+/**
+ * A sleeve's straight picture bent over an arm as `BodySprite` bends it
+ * (`sleeveStrip`), drawn from the shoulder to the hand; or any limb's,
+ * `start` along it from where it's attached (the shoulder joint, a hip).
+ * `pixel` is how big a pixel is (mm).
+ */
+function bentSleeve(
+  part: Drawing,
+  pose: ArmPose,
+  pixel: number,
+  start = 0,
+): string {
   const picture = {
-    from: part.minX,
-    to: part.maxX,
+    from: part.minX - start,
+    to: part.maxX - start,
     top: part.minY,
     bottom: part.maxY,
   };
@@ -87,7 +124,7 @@ function bentSleeve(part: Drawing, pose: ArmPose, pixel: number): string {
   return meshSvg(
     part,
     (v) => [
-      picture.from + uvs[v * 2] * (picture.to - picture.from),
+      start + picture.from + uvs[v * 2] * (picture.to - picture.from),
       picture.top + uvs[v * 2 + 1] * (picture.bottom - picture.top),
     ],
     (v) => [posed[v * 2], posed[v * 2 + 1]],
@@ -429,52 +466,126 @@ export function composeBodySvg(
       reach,
     ];
   } else {
-    // Face down: the legs, then the arms, both under the top half (the
-    // arms' round ends at the shoulders hidden, as standing), its hem over
-    // the legs, and the head turned to one side. One arm's up by the head,
-    // the other down by its side, which way round by its seed
-    const shoulder = lyingShoulder(dims);
+    // Face down, in a pose a corpse might lie in (`lyingPose`, picked by
+    // its seed): the legs, each bent at the knee, with its shoe, and the
+    // seat over their tops; then the arms, bent at the elbow, and their
+    // hands; then the top half over all that (the arms' round ends at the
+    // shoulders hidden, as standing, and its hem over the legs), and the
+    // head turned to one side
+    const pose = lyingPose(lookRandom(body.look, 21));
     const waist = -lyingWaist(dims);
-    const handAt = armHandPosition(dims);
+    const shoulder = lyingShoulder(dims);
+    const legShape = lyingLegShape(body.look, dims);
+    const bare =
+      body.look.pantsStyle === "shorts" || body.look.pantsStyle === "skirt";
+    const corners: [number, number][] = [];
     if (!options.legless) {
-      items.push(place(parts.lyingLegs, `translate(${n(waist)} 0)`));
+      for (const side of [-1, 1] as const) {
+        const i = side < 0 ? 0 : 1;
+        const hip: [number, number] = [
+          waist - legShape.drop,
+          side * legShape.hip,
+        ];
+        const { middle, end, endAngle } = limbJoints(
+          hip,
+          pose.legs[i],
+          legShape.thigh,
+          legShape.shin,
+        );
+        const footAngle = ((endAngle + pose.feet[i]) * 180) / Math.PI;
+        const shoe = place(
+          parts.lyingShoe,
+          `translate(${n(end[0])} ${n(end[1])}) rotate(${n(footAngle)}) scale(1 ${side})`,
+        );
+        const leg = jointedLimb(
+          side < 0 ? parts.leftLyingLeg : parts.rightLyingLeg,
+          {
+            shoulder: hip,
+            elbow: middle,
+            hand: end,
+            upperArm: legShape.thigh,
+            forearm: legShape.shin,
+            bend: 0,
+          },
+        );
+        // The trouser leg over the top of the shoe; a bare leg under it
+        items.push(...(bare ? [leg, shoe] : [shoe, leg]));
+        const reach = legShape.thickness + 200;
+        corners.push(
+          [middle[0] - reach, middle[1] - reach],
+          [middle[0] + reach, middle[1] + reach],
+          [end[0] - reach, end[1] - reach],
+          [end[0] + reach, end[1] + reach],
+        );
+      }
+      items.push(place(parts.lyingSeat, `translate(${n(waist)} 0)`));
+      corners.push(
+        [waist + parts.lyingSeat.minX, parts.lyingSeat.minY],
+        [waist + parts.lyingSeat.maxX, parts.lyingSeat.maxY],
+      );
     }
-    const up = body.look.seed % 2 === 0 ? -1 : 1;
-    const hands: [number, number][] = [];
-    for (const [arm, hand, side] of [
-      [parts.leftArm, parts.leftFlatHand, -1],
-      [parts.rightArm, parts.rightFlatHand, 1],
-    ] as const) {
-      const angle = side === up ? side * 55 : side * 165;
-      const rad = (angle * Math.PI) / 180;
-      const at: [number, number] = [
-        Math.cos(rad) * handAt,
-        side * shoulder + Math.sin(rad) * handAt,
-      ];
-      hands.push(at);
+    for (const side of [-1, 1] as const) {
+      const i = side < 0 ? 0 : 1;
+      const at: [number, number] = [0, side * shoulder];
+      const { middle, end, endAngle } = limbJoints(
+        at,
+        pose.arms[i],
+        dims.upperArm,
+        dims.forearm,
+      );
       items.push(
-        place(arm, `translate(0 ${n(side * shoulder)}) rotate(${angle})`),
-        place(hand, `translate(${n(at[0])} ${n(at[1])}) rotate(${angle})`),
+        jointedLimb(
+          side < 0 ? parts.leftArm : parts.rightArm,
+          {
+            shoulder: at,
+            elbow: middle,
+            hand: end,
+            upperArm: dims.upperArm,
+            forearm: dims.forearm,
+            bend: 0,
+          },
+          armShoulderJoint(dims),
+        ),
+        place(
+          side < 0 ? parts.leftFlatHand : parts.rightFlatHand,
+          `translate(${n(end[0])} ${n(end[1])}) rotate(${n((endAngle * 180) / Math.PI)})`,
+        ),
+      );
+      const reach = dims.handSize + dims.armThickness;
+      corners.push(
+        [middle[0] - reach, middle[1] - reach],
+        [middle[0] + reach, middle[1] + reach],
+        [end[0] - reach, end[1] - reach],
+        [end[0] + reach, end[1] + reach],
       );
     }
     // Whole, or torn off at the waist without its legs
-    items.push(place(options.legless ? parts.lyingTorso : parts.lyingTop, ""));
+    const torso = options.legless ? parts.lyingTorso : parts.lyingTop;
+    items.push(place(torso, ""));
+    corners.push([torso.minX, torso.minY], [torso.maxX, torso.maxY]);
     const headAt = lyingHead(dims);
-    items.push(place(parts.turnedHead, `translate(${n(headAt)} 0)`));
-    const reach = Math.max(
-      dims.shoulderHalfWidth + 120,
-      ...hands.map(([, y]) => Math.abs(y) + dims.handSize * 0.6),
-      parts.lyingLegs.maxY,
-      -parts.lyingLegs.minY,
+    const head = parts.turnedHead;
+    items.push(
+      place(
+        head,
+        `translate(${n(headAt)} 0) rotate(${n((pose.head.angle * 180) / Math.PI)}) scale(1 ${pose.head.facesLeft ? -1 : 1})`,
+      ),
+    );
+    const headReach = Math.max(
+      Math.abs(head.minX),
+      Math.abs(head.maxX),
+      Math.abs(head.minY),
+      Math.abs(head.maxY),
+    );
+    corners.push(
+      [headAt - headReach, -headReach],
+      [headAt + headReach, headReach],
     );
     box = [
-      options.legless ? parts.lyingTorso.minX : waist + parts.lyingLegs.minX,
-      -reach,
-      Math.max(
-        headAt + parts.turnedHead.maxX,
-        ...hands.map(([x]) => x + dims.handSize * 0.6),
-      ),
-      reach,
+      Math.min(...corners.map(([x]) => x)),
+      Math.min(...corners.map(([, y]) => y)),
+      Math.max(...corners.map(([x]) => x)),
+      Math.max(...corners.map(([, y]) => y)),
     ];
   }
 

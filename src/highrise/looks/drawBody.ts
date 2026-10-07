@@ -8,7 +8,14 @@ import {
   drawHand,
   drawSleeve,
 } from "./parts/limbs";
-import { drawFoot, drawLeg, drawLyingLegs } from "./parts/legs";
+import {
+  drawFoot,
+  drawLeg,
+  drawLyingLeg,
+  drawLyingLegs,
+  drawLyingSeat,
+  drawLyingShoe,
+} from "./parts/legs";
 import { drawLyingTorso, drawTorso } from "./parts/torso";
 import { Drawing } from "./svg";
 import { DangleDrawing } from "./dangles";
@@ -47,8 +54,13 @@ export const BODY_PARTS = [
   "lyingHead",
   /** The head face down and turned to one side: corpses */
   "turnedHead",
-  /** Face down from the waist down */
+  /** Face down from the waist down, straight: legs that come off */
   "lyingLegs",
+  /** Face down, a leg straight from the hip, the seat, and a shoe on its side: a corpse's, posed */
+  "leftLyingLeg",
+  "rightLyingLeg",
+  "lyingSeat",
+  "lyingShoe",
 ] as const;
 export type BodyPart = (typeof BODY_PARTS)[number];
 
@@ -77,8 +89,8 @@ export const LAYER_PARTS: Record<BodyLayer, BodyPart[]> = {
     "rightSleeve",
   ],
   hands: ["leftHand", "rightHand", "leftFlatHand", "rightFlatHand"],
-  legs: ["leg", "lyingLegs"],
-  feet: ["leftFoot", "rightFoot"],
+  legs: ["leg", "lyingLegs", "leftLyingLeg", "rightLyingLeg", "lyingSeat"],
+  feet: ["leftFoot", "rightFoot", "lyingShoe"],
 };
 
 export interface BodyDrawing {
@@ -138,6 +150,10 @@ export function drawBody(look: PartialLook, prefix = "b"): BodyDrawing {
       lyingHead: drawHead(resolved, dims, p("lhd"), true),
       turnedHead: drawHead(resolved, dims, p("thd"), "turned"),
       lyingLegs: drawLyingLegs(resolved, dims, p("ll")),
+      leftLyingLeg: drawLyingLeg(resolved, dims, -1, p("lll")),
+      rightLyingLeg: drawLyingLeg(resolved, dims, 1, p("rll")),
+      lyingSeat: drawLyingSeat(resolved, dims, p("lst")),
+      lyingShoe: drawLyingShoe(resolved, dims, p("lsh")),
     },
   };
 }

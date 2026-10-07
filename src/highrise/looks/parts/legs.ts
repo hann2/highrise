@@ -505,109 +505,147 @@ export function drawFoot(
 }
 
 /**
- * Both legs lying face down, from above: the waist at the origin, the feet
- * toward -x, soles up. For corpses, and legs left behind.
+ * Where the legs of a body lying face down go, from its waist (mm): each
+ * hip joint behind it and out to the side, so the outside of the leg's the
+ * outside of the hips, and how long the thigh and shin are
  */
-export function drawLyingLegs(
+export interface LyingLegShape {
+  /** How far out from the middle each hip joint is, and behind the waist */
+  hip: number;
+  drop: number;
+  thigh: number;
+  shin: number;
+  /** How thick the leg is at the top */
+  thickness: number;
+}
+
+export function lyingLegShape(
+  look: BodyLook,
+  dims: BodyDimensions,
+): LyingLegShape {
+  const thickness =
+    dims.legThickness * (0.94 + Math.max(0, look.build.belly) * 0.2);
+  const drop = 70;
+  const length = LYING_LEGS - 20 - drop;
+  return {
+    hip: Math.max(thickness * 0.5, lyingHipsHalf(look, dims) - thickness * 0.5),
+    drop,
+    thigh: length * 0.5,
+    shin: length * 0.5,
+    thickness,
+  };
+}
+
+/**
+ * A leg lying face down, straight, from above: from its hip joint at the
+ * origin along +x to the ankle (`lyingLegShape`), its outside toward `side`
+ * (-1 or 1, the body's left or right). A corpse bends it at the knee.
+ */
+export function drawLyingLeg(
+  look: BodyLook,
+  dims: BodyDimensions,
+  side: -1 | 1,
+  prefix: string,
+): Drawing {
+  const colors = palette(look);
+  const random = lookRandom(look, side === -1 ? 6 : 7);
+  const shape = lyingLegShape(look, dims);
+  const length = shape.thigh + shape.shin;
+  const thigh = shape.thickness;
+  const pants = look.pants;
+  const style = look.pantsStyle;
+  const rot = look.zombie?.rot ?? 0;
+  const bare = style === "shorts" || style === "skirt";
+  const coverage = pantsCoverage(look);
+  const leg = lyingLeg(
+    side,
+    [0, 0.25, 0.5, 0.75, 1].map((t): Pt => [t * length, 0]),
+    (bare ? [0.5, 0.45, 0.33, 0.37, 0.25] : [0.5, 0.45, 0.4, 0.4, 0.36]).map(
+      (share) => share * thigh,
+    ),
+  );
+  const d = new Drawing(
+    prefix,
+    -thigh * 0.5,
+    -thigh * 0.6,
+    length + 30,
+    thigh * 0.6,
+  );
+  d.includePoints(leg.points(1, true));
+  // Its round top goes under the seat
+  d.blob(
+    ellipsePath(0, 0, thigh * 0.5, thigh * 0.5),
+    bare ? colors.skin : pants,
+    { shade: "flat", outline: 0 },
+  );
+  // Lying flat, shaded along its sides
+  const path = leg.outline(1, true);
+  d.blob(path, bare ? colors.skin : pants, {
+    grain: bare && rot > 0 ? "rot" : undefined,
+    shade: "tube",
+  });
+  if (style === "shorts") {
+    // Square across the leg where they end, a little wider than it
+    const cover = (LYING_LEGS * coverage - shape.drop) / length;
+    d.blob(leg.outline(cover, false, pantsFlare(look)), pants, {
+      shade: "tube",
+    });
+  }
+  if (style === "trackpants") {
+    // Stripes down the outside of the leg
+    for (const inset of [0.12, 0.3]) {
+      d.line(
+        leg.along(1 - inset * 2, 0, 1),
+        look.pantsTrim ?? "#f2f2ee",
+        thigh * 0.07,
+      );
+    }
+  } else if (!bare) {
+    // The crease down the back of the leg
+    d.line(leg.along(0, 0.2, 0.85), darken(pants, 0.35), 6, `opacity="0.6"`);
+  }
+  drawBlood(
+    d,
+    look,
+    d.clipPath("leg", path),
+    () => [random() * length * 0.9, (random() - 0.5) * thigh * 0.7],
+    random,
+  );
+  return d;
+}
+
+/**
+ * The seat of a body lying face down, from above: the waist at the origin,
+ * the hips and the bottom toward -x, closing the gap between the tops of
+ * the legs, with the trousers' back pockets and waistband, or a skirt over
+ * the tops of the legs
+ */
+export function drawLyingSeat(
   look: BodyLook,
   dims: BodyDimensions,
   prefix: string,
 ): Drawing {
-  const colors = palette(look);
-  const random = lookRandom(look, 6);
-  const w = dims.shoulderHalfWidth;
-  const length = LYING_LEGS;
+  const random = lookRandom(look, 8);
+  const shape = lyingLegShape(look, dims);
+  const { hip } = shape;
+  const thigh = shape.thickness;
   const hipsHalf = lyingHipsHalf(look, dims);
   const waistHalf = lyingWaistHalf(look, dims);
-  const d = new Drawing(prefix, -length - 80, -hipsHalf, 0, hipsHalf);
-  const thigh =
-    dims.legThickness * (0.94 + Math.max(0, look.build.belly) * 0.2);
-  // Each leg's middle at the hip, so its outside is the outside of the hips
-  const hip = Math.max(thigh * 0.5, hipsHalf - thigh * 0.5);
   const pants = look.pants;
   const style = look.pantsStyle;
-  const rot = look.zombie?.rot ?? 0;
-  const skinGrain = rot > 0 ? "rot" : undefined;
-  const bare = style === "shorts" || style === "skirt";
-  const coverage = pantsCoverage(look);
-
-  // Sometimes a knee's drawn up and out to the side
-  const bent = random() < 0.4 ? (random() < 0.5 ? -1 : 1) : 0;
-  const legs: LyingLeg[] = [];
-  for (const side of [-1, 1]) {
-    const knee = bent === side;
-    // Down the middle of the leg, from the hip to the ankle, and how wide it
-    // is at each (as a share of the thigh)
-    const out =
-      side * (knee ? thigh * (0.75 + random() * 0.35) : random() * w * 0.15);
-    const ankleY = side * hip * 0.9 + out * (knee ? 0.4 : 1);
-    const ankleX = knee ? -length * 0.86 : -length + 20;
-    const kneeY = (side * hip + ankleY) / 2 + (knee ? out : out * 0.1);
-    const leg = lyingLeg(
-      side,
-      [
-        // From the hip joint, under the seat, not the waist
-        [-70, side * hip],
-        [-length * 0.27, (side * hip * 3 + kneeY) / 4],
-        [-length * 0.5, kneeY],
-        [(-length * 0.5 + ankleX) / 2 - 20, (kneeY + ankleY) / 2],
-        [ankleX, ankleY],
-      ],
-      (bare ? [0.5, 0.45, 0.33, 0.37, 0.25] : [0.5, 0.45, 0.4, 0.4, 0.36]).map(
-        (share) => share * thigh,
-      ),
+  const d = new Drawing(prefix, -240, -hipsHalf, 20, hipsHalf);
+  if (style === "skirt") {
+    drawLyingSkirt(
+      d,
+      look,
+      waistHalf,
+      hipsHalf,
+      LYING_LEGS * pantsCoverage(look),
     );
-    legs.push(leg);
-    // The foot fallen onto its side, so its side's up, bent at the ankle
-    // with its toe out to the side and its sole down toward the feet; the
-    // trouser leg over the top of the shoe, bare legs under it
-    const splay = -side * (0.9 + random() * 0.5);
-    const shoe = () =>
-      drawShoeSide(
-        d,
-        look,
-        colors.skin,
-        [ankleX, ankleY],
-        dims.footScale,
-        leg.end + splay,
-        side,
-      );
-    if (!bare) {
-      shoe();
-    }
-    const path = leg.outline(1, true);
-    d.includePoints(leg.points(1, true));
-    // Lying flat, shaded along its sides
-    d.blob(path, bare ? colors.skin : pants, {
-      grain: bare ? skinGrain : undefined,
-      shade: "tube",
-    });
-    if (style === "shorts") {
-      // Square across the leg where they end, a little wider than it
-      d.blob(leg.outline(coverage, false, pantsFlare(look)), pants, {
-        shade: "tube",
-      });
-    }
-    if (style === "trackpants") {
-      // Stripes down the outside of the leg
-      for (const inset of [0.12, 0.3]) {
-        d.line(
-          leg.along(1 - inset * 2, 0, 1),
-          look.pantsTrim ?? "#f2f2ee",
-          thigh * 0.07,
-        );
-      }
-    } else if (!bare) {
-      // The crease down the back of the leg
-      d.line(leg.along(0, 0.2, 0.85), darken(pants, 0.35), 6, `opacity="0.6"`);
-    }
-    if (bare) {
-      shoe();
-    }
+    return d;
   }
-
-  // The seat: from the waist out over the hips, and rounding off over the
-  // top of each leg, as wide as them
+  // From the waist out over the hips, and rounding off over the top of
+  // each leg, as wide as them
   const seat: Pt[] = [
     [14, -waistHalf],
     [-70, -hipsHalf * 0.99],
@@ -622,49 +660,101 @@ export function drawLyingLegs(
     [14, waistHalf],
   ];
   d.includePoints(seat);
-  if (style !== "skirt") {
-    d.blob(smoothPath(seat, true, 0.8), pants, { shade: "side" });
-    if (style !== "trackpants") {
-      drawBackPockets(d, look, hip);
-    }
-    d.line(
-      `M${n(-50)} 0L${n(-205)} 0`,
-      darken(pants, 0.35),
-      6,
-      `opacity="0.6"`,
-    );
+  const path = smoothPath(seat, true, 0.8);
+  d.blob(path, pants, { shade: "side" });
+  if (style !== "trackpants") {
+    drawBackPockets(d, look, hip);
   }
-  if (style === "skirt") {
-    drawLyingSkirt(d, look, legs, waistHalf, hipsHalf, length * coverage);
-  }
+  d.line(`M${n(-50)} 0L${n(-205)} 0`, darken(pants, 0.35), 6, `opacity="0.6"`);
   drawBlood(
     d,
     look,
-    d.clipPath(
-      "all",
-      polygonPath([
-        [0, -waistHalf],
-        [-length, -w],
-        [-length, w],
-        [0, waistHalf],
-      ]),
-    ),
-    () => [-random() * length * 0.9, (random() - 0.5) * waistHalf * 1.6],
+    d.clipPath("seat", path),
+    () => [-random() * 200, (random() - 0.5) * hipsHalf * 1.6],
     random,
   );
-  if (style !== "skirt") {
-    // The waistband, which a top that hangs out covers
-    d.blob(
-      polygonPath([
-        [-44, -waistHalf * 1.01],
-        [-4, -waistHalf],
-        [-4, waistHalf],
-        [-44, waistHalf * 1.01],
-      ]),
-      darken(pants, 0.25),
-      { outline: 6, shade: "flat" },
-    );
+  // The waistband, which a top that hangs out covers
+  d.blob(
+    polygonPath([
+      [-44, -waistHalf * 1.01],
+      [-4, -waistHalf],
+      [-4, waistHalf],
+      [-44, waistHalf * 1.01],
+    ]),
+    darken(pants, 0.25),
+    { outline: 6, shade: "flat" },
+  );
+  return d;
+}
+
+/**
+ * A shoe (or a bare foot) lying on its side, from the side, for a body
+ * lying face down: the ankle at the origin, the toe along +x and the sole
+ * toward +y (`drawShoeSide`); a corpse turns it and flips it for each foot
+ */
+export function drawLyingShoe(
+  look: BodyLook,
+  dims: BodyDimensions,
+  prefix: string,
+): Drawing {
+  const d = new Drawing(prefix, 0, 0, 0, 0);
+  drawShoeSide(d, look, palette(look).skin, [0, 0], dims.footScale, 0, 1);
+  return d;
+}
+
+/**
+ * Both legs lying face down, from above, straight and a little apart: the
+ * waist at the origin, the feet toward -x. For legs that come off, flung
+ * away; a corpse lies its own way, from the parts (`drawLyingLeg`,
+ * `drawLyingSeat`, `drawLyingShoe`).
+ */
+export function drawLyingLegs(
+  look: BodyLook,
+  dims: BodyDimensions,
+  prefix: string,
+): Drawing {
+  const shape = lyingLegShape(look, dims);
+  const bare = look.pantsStyle === "shorts" || look.pantsStyle === "skirt";
+  const d = new Drawing(prefix, 0, 0, 0, 0);
+  const part = (drawing: Drawing, transform: string, corners: Pt[]) => {
+    d.add(`<g transform="${transform}">${drawing.content(false)}</g>`);
+    d.includePoints(corners);
+  };
+  const length = shape.thigh + shape.shin;
+  for (const side of [-1, 1] as const) {
+    const angle = Math.PI - side * 0.06;
+    const [hx, hy] = [-shape.drop, side * shape.hip];
+    const [ax, ay] = [
+      hx + Math.cos(angle) * length,
+      hy + Math.sin(angle) * length,
+    ];
+    const leg = drawLyingLeg(look, dims, side, `${prefix}-l${side}`);
+    const shoe = drawLyingShoe(look, dims, `${prefix}-s${side}`);
+    const deg = (angle * 180) / Math.PI;
+    const shoeAt = `translate(${n(ax)} ${n(ay)}) rotate(${n(deg - side * 70)}) scale(1 ${side})`;
+    const reach = 300;
+    const shoeCorners: Pt[] = [
+      [ax - reach, ay - reach],
+      [ax + reach, ay + reach],
+    ];
+    const legAt = `translate(${n(hx)} ${n(hy)}) rotate(${n(deg)})`;
+    const legCorners: Pt[] = [
+      [hx + 40, hy - side * 80],
+      [ax - 40, ay + side * 80],
+    ];
+    if (!bare) {
+      part(shoe, shoeAt, shoeCorners);
+    }
+    part(leg, legAt, legCorners);
+    if (bare) {
+      part(shoe, shoeAt, shoeCorners);
+    }
   }
+  const seat = drawLyingSeat(look, dims, `${prefix}-st`);
+  part(seat, "", [
+    [seat.minX, seat.minY],
+    [seat.maxX, seat.maxY],
+  ]);
   return d;
 }
 
@@ -709,42 +799,35 @@ function drawBackPockets(d: Drawing, look: BodyLook, hip: number) {
 }
 
 /**
- * A skirt lying over the legs, face down: out from the waist over the hips
- * and on down, as wide as the legs under it where it ends, its hem curving
- * round and scalloped where it folds
+ * A skirt lying over the tops of the legs, face down: out from the waist
+ * over the hips and on down to `depth`, its hem curving round and
+ * scalloped where it folds; a leg drawn up comes out from under it
  */
 function drawLyingSkirt(
   d: Drawing,
   look: BodyLook,
-  legs: LyingLeg[],
   waistHalf: number,
   hipsHalf: number,
   depth: number,
 ) {
   const color = look.pants;
-  // Out past each leg where it ends, a bent one too
-  const at = depth / LYING_LEGS;
-  const [left, right] = legs.map((leg) => {
-    const [x, y, half] = leg.sample(at);
-    return { x, y: y + leg.side * (half + 30) };
-  });
+  const half = hipsHalf * 1.15 + depth * 0.18;
   const hem: Pt[] = [];
   const steps = 12;
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
-    const y = left.y + (right.y - left.y) * t;
-    const x =
-      left.x +
-      (right.x - left.x) * t -
-      22 * Math.sin(Math.PI * t) -
-      8 * Math.abs(Math.sin(Math.PI * t * 5));
-    hem.push([x, y]);
+    hem.push([
+      -depth -
+        22 * Math.sin(Math.PI * t) -
+        8 * Math.abs(Math.sin(Math.PI * t * 5)),
+      -half + 2 * half * t,
+    ]);
   }
   const shape: Pt[] = [
     [10, -waistHalf * 1.04],
-    [-depth * 0.35, -Math.max(hipsHalf * 1.06, -left.y * 0.9)],
+    [-depth * 0.35, -hipsHalf * 1.08],
     ...hem,
-    [-depth * 0.35, Math.max(hipsHalf * 1.06, right.y * 0.9)],
+    [-depth * 0.35, hipsHalf * 1.08],
     [10, waistHalf * 1.04],
   ];
   d.includePoints(shape);
@@ -970,10 +1053,10 @@ function drawShoeSide(
         // Up round the ankle, the way the leg comes in
         d.blob(
           polygonPath([
-            [-0.18 * L, -0.3 * H],
-            [0.16 * L, -0.4 * H],
-            [0.14 * L, -1.0 * H],
-            [-0.16 * L, -1.0 * H],
+            [-0.16 * L, -0.3 * H],
+            [0.14 * L, -0.4 * H],
+            [0.06 * L, -1.0 * H],
+            [-0.2 * L, -0.96 * H],
           ]),
           look.shoes,
           { shade: "flat" },
@@ -1009,10 +1092,10 @@ function drawShoeSide(
       // Up the leg, the way it comes in
       d.blob(
         polygonPath([
-          [-0.2 * L, -0.3 * H],
-          [0.18 * L, -0.4 * H],
-          [0.16 * L, -1.5 * H],
-          [-0.18 * L, -1.5 * H],
+          [-0.16 * L, -0.3 * H],
+          [0.14 * L, -0.4 * H],
+          [0.02 * L, -1.4 * H],
+          [-0.24 * L, -1.35 * H],
         ]),
         look.shoes,
         { shade: "flat" },

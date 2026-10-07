@@ -6,9 +6,20 @@ import { GameSprite } from "../../../core/entity/GameSprite";
 import { on } from "../../../core/entity/handler";
 import { colorLerp, darken } from "../../../core/util/ColorUtils";
 import { angleDelta, clamp, lerp } from "../../../core/util/MathUtil";
-import { choose, rSign, rUniform } from "../../../core/util/Random";
+import { choose, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
-import type { BodyPoses, BodyTextures } from "../../creature-stuff/BodySprite";
+import {
+  makeSleeve,
+  type BodyPoses,
+  type BodyTextures,
+  type Sleeve,
+} from "../../creature-stuff/BodySprite";
+import {
+  ArmPose,
+  SLEEVE_BEND,
+  sleeveStrip,
+} from "../../creature-stuff/sleeveStrip";
+import { limbJoints, lyingPose } from "../../looks/lyingPose";
 import { HUMAN_RADIUS } from "../../constants/constants";
 import { bodyPixelScale } from "../../looks/bakeBodies";
 import { WET_RADIUS } from "../../effects/BloodSplat";
@@ -33,8 +44,12 @@ export const CHARRED_TINT = 0x584840;
 /** How red the blood is */
 const BLOOD_COLOR = 0xff0000;
 
-/** Where the hands can end up, for the arm on the right (+y); mirrored for the left */
-const HAND_SPOTS: V2d[] = [V(0.34, 0.12), V(0.12, 0.34), V(-0.26, 0.2)];
+/** Where a limb's joints are: where it's attached, its elbow or knee, and its hand or ankle */
+interface Joints {
+  root: [number, number];
+  middle: [number, number];
+  end: [number, number];
+}
 
 /** Which parts it still has */
 export interface CorpseParts {
@@ -47,7 +62,7 @@ export interface CorpseParts {
 export interface CorpseOptions {
   /** Lying down, from the waist up (a crawler's) */
   textures: BodyTextures;
-  /** Its legs lying down, waist on the right */
+  /** Its legs lying down, waist on the right; given, it has its legs */
   legs?: Texture;
   /** Half the width of the body lying down, in meters */
   radius: number;
@@ -96,22 +111,35 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
   private standingTorsoSprite: Sprite;
   private torsoSprite: Sprite;
   private headSprite?: Sprite;
-  private legsSprite?: Sprite;
+  /** Each arm bent at the elbow, and its hand */
   private arms: {
-    arm: Sprite;
+    strip: Sleeve;
     hand: Sprite;
-    from: { shoulder: V2d; hand: Pose };
-    to: { shoulder: V2d; hand: Pose };
+    from: Joints;
+    to: Joints;
+    handFrom: number;
+    handTo: number;
+    upper: number;
+    lower: number;
+    bend: number;
   }[] = [];
+  /** Each leg bent at the knee, and its shoe, and the seat over their tops */
+  private legs: {
+    strip: Sleeve;
+    shoe: Sprite;
+    side: number;
+    from: Joints;
+    to: Joints;
+    foot: number;
+    upper: number;
+    lower: number;
+    bend: number;
+  }[] = [];
+  private seat?: Sprite;
   private headFrom: Pose;
   private headTo: Pose;
   private torsoFrom: Pose;
-  private legsTo: Pose;
-  private armThicknessFrom: number;
-  private armThickness: number;
-  /** The scale arms and hands are drawn at */
-  private armScaleY: number;
-  private legsLength: number;
+  private scale: number;
 
   constructor(private options: CorpseOptions) {
     super();
@@ -148,80 +176,133 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     this.standingTorsoSprite = new Sprite(standing.texture);
     this.standingTorsoSprite.scale.set(standing.scale);
 
-    if (hasLegs && options.legs) {
-      // Anchored at the waist, at the right edge of the picture
-      const legs = new Sprite(options.legs);
-      legs.scale.set(scale);
-      this.legsLength = legs.width;
-      this.legsSprite = legs;
-    } else {
-      this.legsLength = 0;
-    }
-    this.legsTo = {
-      position: V(-textures.metrics.lyingWaist * size, 0),
-      angle: rUniform(-0.15, 0.15),
-    };
+    // How it lies: which way each limb's bent
+    const pose = lyingPose(() => rUniform(0, 1));
+    const metrics = textures.metrics;
+    this.scale = scale;
 
-    this.armThickness = textures.metrics.armThickness * size;
-    this.armThicknessFrom = from.armThickness;
-    this.armScaleY = scale;
-    const shoulderOffset = textures.metrics.lyingShoulder * size;
-    for (const side of ["left", "right"] as const) {
-      if (!(side === "left" ? parts.leftArm : parts.rightArm)) {
+    // The legs, bent at the knee, come out from under it as it falls
+    const legParts = textures.legParts;
+    if (hasLegs && legParts) {
+      const waist = -metrics.lyingWaist * size;
+      const thigh = metrics.lyingThigh * size;
+      const shin = metrics.lyingShin * size;
+      const bend = metrics.lyingLegThickness * size * 0.5;
+      this.seat = new Sprite(legParts.seat);
+      this.seat.scale.set(scale);
+      this.seat.position.set(waist, 0);
+      for (const side of [-1, 1] as const) {
+        const i = side < 0 ? 0 : 1;
+        const hip: [number, number] = [
+          waist - metrics.lyingHipDrop * size,
+          side * metrics.lyingHip * size,
+        ];
+        const { middle, end } = limbJoints(hip, pose.legs[i], thigh, shin);
+        const tucked = (at: [number, number]): [number, number] => [
+          hip[0] + (at[0] - hip[0]) * 0.3,
+          hip[1] + (at[1] - hip[1]) * 0.3,
+        ];
+        const shoe = new Sprite(legParts.shoe);
+        this.legs.push({
+          strip: makeSleeve(
+            side < 0 ? legParts.left : legParts.right,
+            scale,
+            thigh,
+            bend,
+          ),
+          shoe,
+          side,
+          from: { root: hip, middle: tucked(middle), end: tucked(end) },
+          to: { root: hip, middle, end },
+          foot: pose.feet[i],
+          upper: thigh,
+          lower: shin,
+          bend,
+        });
+      }
+    }
+
+    // The arms, bent at the elbow, from where they were standing
+    const shoulderOffset = metrics.lyingShoulder * size;
+    const upperArm = metrics.upperArm * size;
+    const forearm = metrics.forearm * size;
+    const armBend = metrics.armThickness * size * SLEEVE_BEND;
+    for (const side of [-1, 1] as const) {
+      if (!(side < 0 ? parts.leftArm : parts.rightArm)) {
         continue;
       }
-      const sign = side === "left" ? -1 : 1;
-      const arm = new Sprite(
-        side === "left" ? textures.leftArm : textures.rightArm,
+      const i = side < 0 ? 0 : 1;
+      const shoulder: [number, number] = [0, side * shoulderOffset];
+      const { middle, end, endAngle } = limbJoints(
+        shoulder,
+        pose.arms[i],
+        upperArm,
+        forearm,
       );
-      arm.anchor.set(0.5);
-      arm.scale.set(scale);
+      const standingShoulder = local({
+        position: side < 0 ? from.leftShoulder : from.rightShoulder,
+        angle: 0,
+      }).position;
+      const standingHand = local(side < 0 ? from.leftHand : from.rightHand);
+      // Its elbow standing: halfway, out to the side
+      const elbowFrom = standingShoulder
+        .lerp(standingHand.position, 0.5)
+        .iadd(V(0, side * 0.06 * size));
       const hand = new Sprite(
-        side === "left" ? textures.leftHand : textures.rightHand,
+        side < 0 ? textures.leftHand : textures.rightHand,
       );
       hand.scale.set(scale);
-      const spot = choose(...HAND_SPOTS);
-      const shoulder = V(0, sign * shoulderOffset);
       this.arms.push({
-        arm,
+        strip: makeSleeve(
+          side < 0 ? textures.leftArm : textures.rightArm,
+          scale,
+          upperArm,
+          armBend,
+          metrics.armJoint * size,
+        ),
         hand,
         from: {
-          shoulder: local({
-            position: side === "left" ? from.leftShoulder : from.rightShoulder,
-            angle: 0,
-          }).position,
-          hand: local(side === "left" ? from.leftHand : from.rightHand),
+          root: [standingShoulder.x, standingShoulder.y],
+          middle: [elbowFrom.x, elbowFrom.y],
+          end: [standingHand.position.x, standingHand.position.y],
         },
-        to: {
-          shoulder,
-          hand: {
-            position: shoulder
-              .add(V(spot.x, sign * spot.y))
-              .iadd(V(rUniform(-0.04, 0.04), rUniform(-0.04, 0.04))),
-            angle: rUniform(-1, 1),
-          },
-        },
+        to: { root: shoulder, middle, end },
+        handFrom: standingHand.angle,
+        handTo: endAngle,
+        upper: upperArm,
+        lower: forearm,
+        bend: armBend,
       });
     }
 
     this.headFrom = local(from.head);
     this.headTo = {
       position: V(textures.metrics.lyingHead * size, 0),
-      angle: rUniform(-0.3, 0.3),
+      angle: pose.head.angle,
     };
     if (parts.head) {
       // Turned to one side or the other
       this.headSprite = new Sprite(textures.turnedHead ?? textures.head);
-      this.headSprite.scale.set(scale, scale * rSign());
+      this.headSprite.scale.set(scale, pose.head.facesLeft ? -scale : scale);
     }
 
-    // The legs and the arms under the torso, as standing, so the arms'
-    // round ends at the shoulders don't show, and its hem's over the legs
-    if (this.legsSprite) {
-      this.bodySprite.addChild(this.legsSprite);
+    // The legs, their shoes (under trouser legs, over bare ones) and the
+    // seat over their tops, then the arms and their hands, all under the
+    // torso, as standing, so the arms' round ends at the shoulders don't
+    // show, and its hem's over the legs
+    const bare = textures.metrics.lyingBareLegs;
+    for (const leg of this.legs) {
+      if (bare) {
+        this.bodySprite.addChild(leg.strip.mesh, leg.shoe);
+      } else {
+        this.bodySprite.addChild(leg.shoe, leg.strip.mesh);
+      }
     }
-    for (const { arm, hand } of this.arms) {
-      this.bodySprite.addChild(arm, hand);
+    if (this.seat) {
+      this.bodySprite.addChild(this.seat);
+    }
+    for (const { strip, hand } of this.arms) {
+      this.bodySprite.addChild(strip.mesh, hand);
     }
     this.bodySprite.addChild(this.torsoSprite, this.standingTorsoSprite);
     if (this.headSprite) {
@@ -233,10 +314,10 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
       this.addStump(V(0.05, 0), radius * 0.6);
     }
     if (!parts.leftArm) {
-      this.addStump(V(0, -shoulderOffset), this.armThickness * 1.6);
+      this.addStump(V(0, -shoulderOffset), metrics.armThickness * size * 1.6);
     }
     if (!parts.rightArm) {
-      this.addStump(V(0, shoulderOffset), this.armThickness * 1.6);
+      this.addStump(V(0, shoulderOffset), metrics.armThickness * size * 1.6);
     }
 
     // The pool of blood, bigger where it lost parts
@@ -346,34 +427,79 @@ export default class Corpse extends BaseEntity implements Entity, Flammable {
     this.torsoSprite.alpha = clamp(t * 1.6);
 
     // The legs come out from under it
-    const legs = this.legsSprite;
-    if (legs) {
-      lerpPose(
-        { position: torso.position, angle: this.legsTo.angle },
-        this.legsTo,
-        legs,
+    const lerpJoints = (from: Joints, to: Joints): ArmPose["shoulder"][] =>
+      (["root", "middle", "end"] as const).map((joint) => [
+        lerp(from[joint][0], to[joint][0], t),
+        lerp(from[joint][1], to[joint][1], t),
+      ]);
+    const fadeIn = clamp(t * 2);
+    if (this.seat) {
+      this.seat.alpha = fadeIn;
+    }
+    for (const leg of this.legs) {
+      const [hip, knee, ankle] = lerpJoints(leg.from, leg.to);
+      this.bendStrip(
+        leg.strip,
+        hip,
+        knee,
+        ankle,
+        leg.upper,
+        leg.lower,
+        leg.bend,
       );
-      legs.scale.x = (this.legsLength * lerp(0.3, 1, t)) / legs.texture.width;
-      legs.alpha = clamp(t * 2);
+      leg.strip.mesh.alpha = fadeIn;
+      const shin = Math.atan2(ankle[1] - knee[1], ankle[0] - knee[0]);
+      leg.shoe.position.set(ankle[0], ankle[1]);
+      leg.shoe.rotation = shin + leg.foot * t;
+      leg.shoe.scale.set(this.scale, this.scale * leg.side);
+      leg.shoe.alpha = fadeIn;
     }
 
     if (this.headSprite) {
       lerpPose(this.headFrom, this.headTo, this.headSprite);
     }
 
-    // Arms thicken or thin from what they were standing
-    const thickness =
-      lerp(this.armThicknessFrom, this.armThickness, t) / this.armThickness;
-    for (const { arm, hand, from, to } of this.arms) {
-      const shoulder = from.shoulder.lerp(to.shoulder, t);
-      lerpPose(from.hand, to.hand, hand);
-      const span = V(hand.position.x, hand.position.y).isub(shoulder);
-      arm.position.copyFrom(shoulder.iaddScaled(span, 0.5));
-      arm.rotation = span.angle;
-      arm.width = span.magnitude;
-      arm.scale.y = this.armScaleY * thickness;
-      hand.scale.set(this.armScaleY * thickness);
+    for (const arm of this.arms) {
+      const [shoulder, elbow, hand] = lerpJoints(arm.from, arm.to);
+      this.bendStrip(
+        arm.strip,
+        shoulder,
+        elbow,
+        hand,
+        arm.upper,
+        arm.lower,
+        arm.bend,
+      );
+      arm.hand.position.set(hand[0], hand[1]);
+      arm.hand.rotation =
+        arm.handFrom + angleDelta(arm.handFrom, arm.handTo) * t;
     }
+  }
+
+  /** Lays a limb's strip along its joints */
+  private bendStrip(
+    strip: Sleeve,
+    root: ArmPose["shoulder"],
+    middle: ArmPose["shoulder"],
+    end: ArmPose["shoulder"],
+    upper: number,
+    lower: number,
+    bend: number,
+  ) {
+    sleeveStrip(
+      strip.picture,
+      {
+        shoulder: root,
+        elbow: middle,
+        hand: end,
+        upperArm: upper,
+        forearm: lower,
+        bend,
+      },
+      strip.along,
+      strip.vertices,
+    );
+    strip.mesh.geometry.getBuffer("aPosition").update();
   }
 
   /** The middle of the body, for the fire on it */

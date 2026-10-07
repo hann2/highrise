@@ -533,7 +533,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
 }
 
 /** A sleeve as a strip of triangles, and where its picture is on the unbent arm */
-interface Sleeve {
+export interface Sleeve {
   mesh: MeshSimple;
   /** The mesh's own vertices, posed in place */
   vertices: Float32Array;
@@ -544,20 +544,23 @@ interface Sleeve {
 
 /**
  * A sleeve for its straight picture, drawn `scale` meters a pixel, on an arm
- * `upperArm` from shoulder to elbow, turning `bend` either side of the elbow
+ * `upperArm` from shoulder to elbow, turning `bend` either side of the elbow;
+ * or any limb's straight picture, bent at its middle joint (a whole arm, a
+ * leg lying down), attached `start` along it from its origin
  */
-function makeSleeve(
+export function makeSleeve(
   texture: Texture,
   scale: number,
   upperArm: number,
   bend: number,
+  start = 0,
 ): Sleeve {
   const { width, height } = texture.frame;
   // The picture's origin, the shoulder joint, is the texture's anchor
   const anchor = texture.defaultAnchor ?? { x: 0, y: 0 };
   const picture: SleevePicture = {
-    from: -anchor.x * width * scale,
-    to: (1 - anchor.x) * width * scale,
+    from: -anchor.x * width * scale - start,
+    to: (1 - anchor.x) * width * scale - start,
     top: -anchor.y * height * scale,
     bottom: (1 - anchor.y) * height * scale,
   };

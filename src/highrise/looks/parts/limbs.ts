@@ -61,6 +61,11 @@ export const ARM_WIDTHS: { upper?: number; fore?: number; width: number }[] = [
 ];
 
 /** Where along a whole arm's drawing (`drawArm`) the middle of the hand goes (mm) */
+/** Where along an arm's drawing (`drawArm`) the shoulder joint is (mm) */
+export function armShoulderJoint(dims: BodyDimensions): number {
+  return armJoints(dims).shoulder;
+}
+
 export function armHandPosition(dims: BodyDimensions): number {
   return armJoints(dims).hand;
 }

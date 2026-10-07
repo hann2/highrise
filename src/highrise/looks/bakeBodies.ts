@@ -7,7 +7,8 @@ import { DangleKind } from "./dangles";
 import { HemKind } from "./hems";
 import type { HemShape, Oval } from "../creature-stuff/hemCloth";
 import { lyingHead, lyingShoulder, lyingWaist } from "./parts/torso";
-import { hasSleeve } from "./parts/limbs";
+import { armShoulderJoint, hasSleeve } from "./parts/limbs";
+import { lyingLegShape } from "./parts/legs";
 // Hand-drawn pieces, so looks can wear them
 import "./pieces/index";
 
@@ -25,6 +26,8 @@ export interface BodyMetrics {
   armThickness: number;
   /** From the shoulder to the elbow, and the elbow to the middle of the hand */
   upperArm: number;
+  /** How far along a whole arm's picture (`leftArm`, `rightArm`) the shoulder joint is */
+  armJoint: number;
   forearm: number;
   handSize: number;
   headRadius: number;
@@ -34,6 +37,16 @@ export interface BodyMetrics {
   lyingHead: number;
   /** Lying face down, how far out from the middle the arms are */
   lyingShoulder: number;
+  /** Lying face down, how far out from the middle each hip joint is, and behind the waist */
+  lyingHip: number;
+  lyingHipDrop: number;
+  /** Lying face down, how long the thigh and shin are */
+  lyingThigh: number;
+  lyingShin: number;
+  /** How thick the legs are lying face down, at the top */
+  lyingLegThickness: number;
+  /** Whether its legs are bare (shorts, a skirt), so its shoes go over them, not under trouser legs */
+  lyingBareLegs: boolean;
 }
 
 /** The images a `BodySprite` is drawn with, and how they fit together */
@@ -60,6 +73,17 @@ export interface BodyTextures {
   turnedHead?: Texture;
   /** Lying down, the top half of a whole body, its hem over the legs, which go under it (`torso` is torn off at the waist) */
   wholeTorso?: Texture;
+  /**
+   * Lying down, the legs in parts, to pose: each straight from its hip
+   * joint along +x, the seat (anchored at the waist) and a shoe on its side
+   * (at the ankle, its toe along +x and its sole toward +y)
+   */
+  legParts?: {
+    left: Texture;
+    right: Texture;
+    seat: Texture;
+    shoe: Texture;
+  };
   /** What swings, drawn over the torso and under the head, in order (none lying down) */
   dangles: DangleTexture[];
   /** What hangs from round the waist and swings, over the legs and under the arms, in order (none lying down) */
@@ -245,16 +269,25 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       });
     };
     const { dims } = body;
+    const legShape = lyingLegShape(body.look, dims);
     const metrics: BodyMetrics = {
       shoulderOffset: (dims.shoulderHalfWidth - dims.armThickness / 2) / 1000,
       armThickness: dims.armThickness / 1000,
       upperArm: dims.upperArm / 1000,
+      armJoint: armShoulderJoint(dims) / 1000,
       forearm: dims.forearm / 1000,
       handSize: dims.handSize / 1000,
       headRadius: dims.headRy / 1000,
       lyingWaist: lyingWaist(dims) / 1000,
       lyingHead: lyingHead(dims) / 1000,
       lyingShoulder: lyingShoulder(dims) / 1000,
+      lyingHip: legShape.hip / 1000,
+      lyingHipDrop: legShape.drop / 1000,
+      lyingThigh: legShape.thigh / 1000,
+      lyingShin: legShape.shin / 1000,
+      lyingLegThickness: legShape.thickness / 1000,
+      lyingBareLegs:
+        body.look.pantsStyle === "shorts" || body.look.pantsStyle === "skirt",
     };
     const limbs = {
       leftArm: texture("leftArm"),
@@ -321,6 +354,12 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
         head: texture("lyingHead"),
         turnedHead: texture("turnedHead"),
         wholeTorso: texture("lyingTop"),
+        legParts: {
+          left: texture("leftLyingLeg"),
+          right: texture("rightLyingLeg"),
+          seat: texture("lyingSeat"),
+          shoe: texture("lyingShoe"),
+        },
         torso: texture("lyingTorso"),
       },
       lyingLegs: texture("lyingLegs"),
