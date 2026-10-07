@@ -56,7 +56,7 @@ As soon as the shapes are roughly right, make an options sheet (`options <gun> v
 
 - `build`, then `sheet <gun>` (photo, pickup, at size beside the other pickups) and `ingame <gun> --port <dev server>` (the pickup on the arena's floor, close up, and in the HUD).
 - `npm run test:gun-art`, `npm run tsc`, and a row in `assets/IMAGE_SOURCES.md` (drawn by Claude over reference photos).
-- Point the gun's stats at the pickup (`textures.pickup: "<name>Pickup"`) and regenerate the manifest.
+- Point the gun's stats at the pickup (`textures.pickup: "<name>Pickup"`) and regenerate the manifest, and set its `size` to the pickup's square in meters (`frame.side / 1000`), which `WeaponPickup` stretches the image to, so it lies on the floor at the scale it's held at (`test:gun-art` checks).
 
 ## Simon's style so far
 
