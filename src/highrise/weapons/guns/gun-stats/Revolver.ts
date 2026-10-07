@@ -42,8 +42,14 @@ export const Revolver: GunStats = {
     magazine: [-0.04, 0],
     action: [-0.15, 0],
   },
-  // The cylinder swings out to the left to load, with the chamber the hand loads
-  parts: { cylinder: { offset: [0, -0.062], carries: ["magazine"] } },
+  // The cylinder swings out to the left to load, with the chamber the hand
+  // loads. Each shot, the hammer's cocked (tipping up and back over the grip,
+  // which from above is back and longer) and falls
+  parts: {
+    cylinder: { offset: [0, -0.062], carries: ["magazine"] },
+    hammer: { offset: [-0.016, 0], stretch: 1.2, pivot: [-0.112, 0] },
+  },
+  cycles: ["hammer"],
   animations: REVOLVER_ANIMATIONS,
   magazine: { texture: "revolverRound", length: 0.04 },
   holdPosition: [0.55, 0],

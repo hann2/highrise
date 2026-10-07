@@ -48,6 +48,17 @@
     <path id="top-strap" d="M-3.353,-19.563 L-6.083,-24.35 C-6.083,-24.35 -92.547,-25.15 -116.383,-24.35 C-128.46,-23.947 -146.437,-23.413 -152.447,-16.227 C-158.457,-9.047 -158.457,8.237 -152.447,15.423 C-146.437,22.607 -128.46,23.14 -116.383,23.547 C-92.547,24.343 -6.083,23.547 -6.083,23.547 L-3.353,18.757 L-3.353,-19.563 Z" fill="url(#revolver-frame-shading)"/>
     <path id="hammer-channel" d="M-87.747,3.79 L-87.747,-4.593 L-141.82,-4.593 L-153.673,-1.26 L-153.673,0.457 L-141.687,3.79 L-87.747,3.79 Z" fill="#6d6d6d"/>
   </g>
+  <!-- Down, at rest: its nose forward in the channel against the frame, the spur lying back over the frame's rounded back. Cocked, it tips up and back over the grip, which from above is back and longer -->
+  <g id="hammer">
+    <path id="hammer-body" d="M-112,-3.4 L-114,-4.2 L-140,-4.2 L-147,-7.2 L-158,-7.2 L-162,-5 L-162,4.2 L-158,6.4 L-147,6.4 L-140,3.4 L-114,3.4 L-112,2.6 Z" fill="#8f8f8f"/>
+    <path id="hammer-spur" d="M-145,-6.4 L-147.5,-7.2 L-158,-7.2 L-162,-5 L-162,4.2 L-158,6.4 L-147.5,6.4 L-145,5.6 Z" fill="#b8b8b8"/>
+    <g id="spur-checkering" stroke="#7d7d7d" stroke-width="0.9">
+      <path d="M-148,-6.6 L-148,5.8"/>
+      <path d="M-151,-6.8 L-151,6"/>
+      <path d="M-154,-6.8 L-154,6"/>
+      <path d="M-157,-6.6 L-157,5.8"/>
+    </g>
+  </g>
   <g id="rear-sight">
     <path id="rear-sight-blade" d="M-86.543,-3.757 L-86.83,-4.593 L-101.763,-4.593 L-102.05,-3.757 L-102.05,2.95 L-101.763,3.79 L-86.83,3.79 L-86.543,2.95 L-86.543,-3.757 Z" fill="#b6b6b6"/>
     <path d="M-84.597,-17.403 L-85.17,-17.903 L-115.037,-17.903 L-115.613,-17.403 L-115.613,-13.403 L-115.037,-12.903 L-85.17,-12.903 L-84.597,-13.403 L-84.597,-17.403 Z" fill="#868686"/>
