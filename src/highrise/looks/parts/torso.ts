@@ -1,4 +1,4 @@
-import { BodyLook, TopStyle } from "../BodyLook";
+import { BodyLook, stripeCount, TopStyle } from "../BodyLook";
 import { Color, darken, lighten } from "../color";
 import {
   BELLY_DEPTH,
@@ -40,10 +40,12 @@ function drawShoulderStripes(
   to: number,
   color: Color,
   width: number,
+  count: number,
 ) {
   for (const side of [-1, 1]) {
-    for (const offset of [-1, 0, 1]) {
-      const sx = x + offset * width * 2;
+    for (let i = 0; i < count; i++) {
+      // Side by side, centered on `x`
+      const sx = x + (i - (count - 1) / 2) * width * 2;
       d.line(
         `M${n(sx)} ${n(side * from)}L${n(sx)} ${n(side * to)}`,
         color,
@@ -429,6 +431,7 @@ export function drawTorso(
       w + 20,
       top.secondary,
       13,
+      stripeCount(top),
     );
     d.end();
     d.line(
@@ -856,7 +859,15 @@ export function drawLyingTorso(
   } else if (COLLARED.includes(top.style)) {
     if (top.style === "tracksuit") {
       d.begin(`clip-path="url(#${torso})"`);
-      drawShoulderStripes(d, front * 0.05, w * 0.3, w + 20, top.secondary, 13);
+      drawShoulderStripes(
+        d,
+        front * 0.05,
+        w * 0.3,
+        w + 20,
+        top.secondary,
+        13,
+        stripeCount(top),
+      );
       d.end();
     }
     d.blob(

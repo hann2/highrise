@@ -2,30 +2,39 @@
   "name": "Wendy",
   "description": "",
   "look": {
-    "skin": "#e2b48c",
+    "skin": "#d39f78",
     "build": {
-      "shoulders": -0.5,
-      "chest": 0,
+      "shoulders": -0.45,
+      "chest": -0.73,
       "belly": 0,
-      "bust": 0.6,
-      "hunch": 0,
-      "squareness": 0,
-      "arms": -0.5,
+      "bust": 0.26,
+      "hunch": 0.11,
+      "squareness": -1,
+      "arms": -0.65,
       "hands": -0.3,
+      "feet": -1,
       "head": -0.1,
-      "legs": 0
+      "legs": -1
     },
     "hair": {
-      "color": "#6b4024",
-      "coverage": 0.85,
-      "volume": 0.3,
-      "messiness": 0.3,
+      "color": "#5a3a22",
+      "coverage": 0.75,
+      "volume": 0.18,
+      "messiness": 0.2,
       "curls": 0,
-      "length": 0.6,
-      "fringe": -0.4,
-      "bun": 0,
-      "ponytail": 0,
-      "mohawk": 0
+      "style": "ponytail",
+      "length": 0.19,
+      "hairline": "parted",
+      "fringe": 1,
+      "balding": 0,
+      "lean": -0.8,
+      "mohawkWidth": 0.3,
+      "part": 0.05
+    },
+    "brows": {
+      "bushiness": 0.35,
+      "arch": 0.4,
+      "tilt": 0
     },
     "top": {
       "style": "tshirt",
@@ -36,11 +45,13 @@
       "length": 0.3
     },
     "extras": [],
-    "pantsStyle": "jeans",
-    "pants": "#5b78a8",
+    "pantsStyle": "skirt",
+    "pants": "#f0d81a",
     "shoeStyle": "sneakers",
     "shoes": "#d84040",
-    "seed": 13
+    "seed": 13,
+    "pantsLength": 0.48,
+    "eyes": "#5d7a4a"
   },
   "stats": {},
   "startingWeapons": ["M1911"],

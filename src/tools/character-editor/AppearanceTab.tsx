@@ -6,6 +6,8 @@ import {
   DEFAULT_LOOK,
   EYE_COLOR,
   Extra,
+  MAX_STRIPES,
+  stripeCount,
   Zombification,
 } from "../../highrise/looks/BodyLook";
 import { composeBodySvg, svgDataUrl } from "../../highrise/looks/composeBody";
@@ -33,11 +35,11 @@ import {
 import {
   capitalize,
   COLLARED,
-  CUT_OPTIONS,
   EXTRA_OPTIONS,
   EYE_PRESETS,
   GLASSES_OPTIONS,
   HAIR_PRESETS,
+  HAIR_STYLE_OPTIONS,
   HAIRLINE_OPTIONS,
   HAT_OPTIONS,
   PANTS_OPTIONS,
@@ -47,9 +49,10 @@ import {
   SNEAKERS,
   TOP_OPTIONS,
   TOP_SECONDARY,
-  cutOf,
-  withCut,
+  StyleChoice,
+  styleOf,
   withHat,
+  withStyle,
 } from "./lookOptions";
 import { thumbnailUrl } from "./thumbnails";
 import { tip } from "./tooltips";
@@ -426,20 +429,23 @@ function FaceSection({ look, set }: SectionProps) {
   );
 }
 
+/** What length means for the styles that show it */
+const HAIR_LENGTHS: Partial<
+  Record<StyleChoice, [string, [string, string], string]>
+> = {
+  loose: ["Length", ["short", "long"], "How far it hangs down the back"],
+  ponytail: ["Length", ["short", "long"], "How long the ponytail is"],
+  pigtails: ["Length", ["short", "long"], "How long the pigtails are"],
+  bun: ["Size", ["small", "big"], "How much hair's in the bun"],
+};
+
 function HairSection({ look, set }: SectionProps) {
   const hair = look.hair;
   const setHair = (changes: Partial<typeof hair>) =>
     set("hair", { ...hair, ...changes });
-  const cut = cutOf(hair);
+  const style = styleOf(hair);
   const slider = (
-    key:
-      | "volume"
-      | "length"
-      | "curls"
-      | "messiness"
-      | "bun"
-      | "ponytail"
-      | "mohawk",
+    key: "volume" | "length" | "curls" | "messiness",
     label: string,
     ends: [string, string],
     about?: string,
@@ -453,9 +459,11 @@ function HairSection({ look, set }: SectionProps) {
       onChange={(value) => setHair({ [key]: value })}
     />
   );
+  // Grown out, not cut right down
+  const grown = style !== "bald" && style !== "buzz" && style !== "stubble";
   return (
     <>
-      <Group title="Color and cut">
+      <Group title="Color and style">
         <ColorField
           label="Color"
           tip="Bald, it's still the brows' and the beard's"
@@ -463,25 +471,19 @@ function HairSection({ look, set }: SectionProps) {
           presets={HAIR_PRESETS}
           onChange={(color) => color && setHair({ color })}
         />
-        <Field label="Cut">
+        <Field label="Style">
           <Picker
             look={look}
             kind="head"
-            options={CUT_OPTIONS}
-            selected={(choice) => cut === choice}
-            vary={(l, choice) => ({ ...l, hair: withCut(l.hair, choice) })}
-            onPick={(choice) => set("hair", withCut(hair, choice))}
+            options={HAIR_STYLE_OPTIONS}
+            selected={(choice) => style === choice}
+            vary={(l, choice) => ({ ...l, hair: withStyle(l.hair, choice) })}
+            onPick={(choice) => set("hair", withStyle(hair, choice))}
           />
         </Field>
-        {/* What only grown hair has */}
-        {cut === "" && (
+        {HAIR_LENGTHS[style] && slider("length", ...HAIR_LENGTHS[style])}
+        {grown && (
           <>
-            {slider(
-              "length",
-              "Length",
-              ["short", "long"],
-              "How far it hangs down the back",
-            )}
             {slider(
               "volume",
               "Volume",
@@ -495,29 +497,48 @@ function HairSection({ look, set }: SectionProps) {
               ["neat", "messy"],
               "How uneven its edge is",
             )}
-            {slider("bun", "Bun", ["none", "big"])}
-            {slider("ponytail", "Ponytail", ["none", "long"])}
-            {slider(
-              "mohawk",
-              "Mohawk",
-              ["none", "wide"],
-              "Shaved but for a strip down the middle this wide",
-            )}
           </>
         )}
+        {style === "mohawk" && (
+          <Slider
+            label="Width"
+            tip="How wide the strip down the middle is"
+            ends={["narrow", "wide"]}
+            value={hair.mohawkWidth}
+            reset={DEFAULT_LOOK.hair.mohawkWidth}
+            onChange={(mohawkWidth) => setHair({ mohawkWidth })}
+          />
+        )}
+        {style === "spiky" && (
+          <Slider
+            label="Lean"
+            tip="Which way the tufts lean"
+            ends={["left", "right"]}
+            value={hair.lean}
+            min={-1}
+            reset={DEFAULT_LOOK.hair.lean}
+            onChange={(lean) => setHair({ lean })}
+          />
+        )}
       </Group>
-      {cut !== "bald" && (
+      {style !== "bald" && (
         <Group title="Hairline">
-          <Field label="Shape">
-            <Picker
-              look={look}
-              kind="face"
-              options={HAIRLINE_OPTIONS}
-              selected={(hairline) => hair.hairline === hairline}
-              vary={(l, hairline) => ({ ...l, hair: { ...l.hair, hairline } })}
-              onPick={(hairline) => setHair({ hairline })}
-            />
-          </Field>
+          {/* Spikes make their own */}
+          {style !== "spiky" && (
+            <Field label="Shape">
+              <Picker
+                look={look}
+                kind="face"
+                options={HAIRLINE_OPTIONS}
+                selected={(hairline) => hair.hairline === hairline}
+                vary={(l, hairline) => ({
+                  ...l,
+                  hair: { ...l.hair, hairline },
+                })}
+                onPick={(hairline) => setHair({ hairline })}
+              />
+            </Field>
+          )}
           <Slider
             label="Coverage"
             tip="How far forward the hair comes. For no hair at all, pick Bald"
@@ -545,18 +566,7 @@ function HairSection({ look, set }: SectionProps) {
             reset={0}
             onChange={(balding) => setHair({ balding })}
           />
-          {hair.hairline === "spiky" && !hair.cut && (
-            <Slider
-              label="Lean"
-              tip="Which way the tufts lean"
-              ends={["left", "right"]}
-              value={hair.lean}
-              min={-1}
-              reset={DEFAULT_LOOK.hair.lean}
-              onChange={(lean) => setHair({ lean })}
-            />
-          )}
-          {hair.hairline === "parted" && !hair.cut && (
+          {hair.hairline === "parted" && grown && style !== "spiky" && (
             <Slider
               label="Parted at"
               ends={["left", "right"]}
@@ -607,6 +617,24 @@ function TopSection({ look, set }: SectionProps) {
               color && set("top", { ...top, secondary: color })
             }
           />
+        )}
+        {top.style === "tracksuit" && (
+          <Field label="Stripes" tip="Over the shoulders and down the sleeves">
+            <Segmented
+              value={String(stripeCount(top))}
+              options={Array.from({ length: MAX_STRIPES }, (_, i) => ({
+                value: String(i + 1),
+                label: String(i + 1),
+              }))}
+              onChange={(count) =>
+                set("top", {
+                  ...top,
+                  // Left out at the usual number
+                  stripes: Number(count) === 3 ? undefined : Number(count),
+                })
+              }
+            />
+          </Field>
         )}
         {COLLARED.includes(top.style) && (
           <Toggle

@@ -1,6 +1,6 @@
 {
-  "name": "Simon",
-  "description": "",
+  "name": "Demitri",
+  "description": "Tracksuit-wearing Russian party boy.",
   "look": {
     "skin": "#ecc3a2",
     "build": {
@@ -12,30 +12,39 @@
       "squareness": 0,
       "arms": -0.1,
       "hands": 0,
+      "feet": 0,
       "head": 0,
       "legs": 0
     },
     "hair": {
       "color": "#6b4428",
-      "coverage": 0.8,
+      "coverage": 0.68,
       "volume": 0.35,
       "messiness": 0.4,
       "curls": 0,
+      "style": "stubble",
       "length": 0,
-      "hairline": "parted",
-      "fringe": 0.2,
-      "bun": 0,
-      "ponytail": 0,
-      "mohawk": 0,
+      "hairline": "straight",
+      "fringe": -0.72,
+      "balding": 0,
+      "lean": -0.8,
+      "mohawkWidth": 0.3,
       "part": -0.4
     },
+    "brows": {
+      "bushiness": 0.35,
+      "arch": 0.4,
+      "tilt": 0
+    },
     "top": {
-      "style": "tshirt",
+      "style": "tracksuit",
       "color": "#2e3a8a",
-      "secondary": "#e8e4dc"
+      "secondary": "#e8e4dc",
+      "popped": true,
+      "stripes": 2
     },
     "sleeves": {
-      "length": 0.35
+      "length": 0.73
     },
     "extras": [],
     "pantsStyle": "jeans",

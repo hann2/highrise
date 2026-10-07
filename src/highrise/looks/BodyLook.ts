@@ -78,26 +78,48 @@ export interface Hair {
   messiness: number;
   /** Tight bumps round the edge, up to an afro */
   curls: number;
-  /** How far it hangs down the back */
+  /** What's done with it (`HAIR_STYLES`) */
+  style: HairStyle;
+  /**
+   * How long it is, which shows by its style: how far it hangs down the
+   * back, how long a ponytail or pigtails, how big a bun
+   */
   length: number;
   /** The hairline's shape (`HAIRLINES`) */
   hairline: Hairline;
   /** The hairline's curve across the forehead: -1 arched (forward in the middle), 1 straight across */
   fringe: number;
-  /** Cut right down: a buzz cut, or just stubble; else as long as the sliders say */
-  cut?: HairCut;
   /** Bald on top, from a thin crown (a little) to only a ring round the sides (1) */
   balding: number;
   /** Where a `parted` hairline is parted, from -1 (the left) to 1; the middle if left out */
   part?: number;
-  /** Which way a `spiky` hairline's tufts lean, from -1 (the left) to 1 */
+  /** Which way `spiky` hair's tufts lean, from -1 (the left) to 1 */
   lean: number;
-  /** A bun on the back of the head, this big */
-  bun: number;
-  /** A ponytail down the back, this long */
-  ponytail: number;
-  /** Shaved but for a strip down the middle this wide, if more than 0 */
-  mohawk: number;
+  /** How wide a `mohawk`'s strip is, from 0 to 1 */
+  mohawkWidth: number;
+}
+
+/**
+ * What's done with the hair: `loose`, hanging down the back as long as it
+ * is; tied back in a `ponytail`, two `pigtails` (one each side) or a `bun`; `spiky`, tufts sticking forward
+ * over the forehead; a `mohawk`, shaved but for a strip down the middle; or
+ * cut right down, a `buzz` cut or just `stubble`. Bald is no coverage at all
+ */
+export const HAIR_STYLES = [
+  "loose",
+  "ponytail",
+  "pigtails",
+  "bun",
+  "spiky",
+  "mohawk",
+  "buzz",
+  "stubble",
+] as const;
+export type HairStyle = (typeof HAIR_STYLES)[number];
+
+/** Whether `hair` is cut right down, so there's nothing to style */
+export function isCropped(hair: Hair) {
+  return hair.style === "buzz" || hair.style === "stubble";
 }
 
 /**
@@ -106,8 +128,7 @@ export interface Hair {
  * `straight` is bangs cut across; `peak` a widow's peak; `receding` far
  * back at the temples; `parted` parted where `Hair.part` says, the hair
  * falling away to both sides (in the middle, curtains), the bigger side
- * sweeping across the forehead; `spiky` tufts that stick forward over the
- * forehead, leaning as `Hair.lean` says
+ * sweeping across the forehead. `spiky` hair has its own
  */
 export const HAIRLINES = [
   "natural",
@@ -115,12 +136,8 @@ export const HAIRLINES = [
   "peak",
   "receding",
   "parted",
-  "spiky",
 ] as const;
 export type Hairline = (typeof HAIRLINES)[number];
-
-export const HAIR_CUTS = ["buzz", "stubble"] as const;
-export type HairCut = (typeof HAIR_CUTS)[number];
 
 export interface Brows {
   /** From thin lines (0) to thick and bushy (1) */
@@ -167,6 +184,16 @@ export interface Top {
   pattern?: Pattern;
   /** A collar turned up round the neck, on tops that have one */
   popped?: boolean;
+  /** How many stripes a track suit has, over the shoulders and down the sleeves (3 if left out) */
+  stripes?: number;
+}
+
+/** The track suit's stripes there can be */
+export const MAX_STRIPES = 4;
+
+/** How many stripes `top` has, if it's a track suit */
+export function stripeCount(top: Top): number {
+  return top.stripes ?? 3;
 }
 
 export const PATTERN_KINDS = ["stripes", "plaid", "dots"] as const;
@@ -294,14 +321,13 @@ export const DEFAULT_LOOK: BodyLook = {
     volume: 0.2,
     messiness: 0.2,
     curls: 0,
+    style: "loose",
     length: 0,
     hairline: "natural",
     fringe: 0.2,
     balding: 0,
     lean: -0.8,
-    bun: 0,
-    ponytail: 0,
-    mohawk: 0,
+    mohawkWidth: 0.3,
   },
   brows: { bushiness: 0.35, arch: 0.4, tilt: 0 },
   top: { style: "tshirt", color: "#6b7c8f", secondary: "#e8e4dc" },
@@ -332,12 +358,52 @@ export function resolveLook(look: PartialLook | undefined): BodyLook {
     ...DEFAULT_LOOK,
     ...l,
     build: { ...DEFAULT_LOOK.build, ...l.build },
-    hair: { ...DEFAULT_LOOK.hair, ...l.hair },
+    hair: { ...DEFAULT_LOOK.hair, ...withHairStyle(l.hair) },
     brows: { ...DEFAULT_LOOK.brows, ...l.brows },
     top: { ...DEFAULT_LOOK.top, ...l.top },
     sleeves: { ...DEFAULT_LOOK.sleeves, ...l.sleeves },
     extras: l.extras ?? [],
   };
+}
+
+/**
+ * `hair` as stored, with the hair stored before there were styles (when a
+ * bun, a ponytail and a mohawk were each an amount, a cut was a setting of
+ * its own and spikes were a hairline, as old drafts in the editor's
+ * localStorage have it) given its style
+ */
+function withHairStyle(hair: Partial<Hair> | undefined): Partial<Hair> {
+  const old = hair as
+    | (Omit<Partial<Hair>, "hairline"> & {
+        cut?: "buzz" | "stubble";
+        bun?: number;
+        ponytail?: number;
+        mohawk?: number;
+        hairline?: Hairline | "spiky";
+      })
+    | undefined;
+  if (!old) {
+    return {};
+  }
+  const { cut, bun, ponytail, mohawk, hairline, ...rest } = old;
+  const updated: Partial<Hair> = rest;
+  if (hairline && hairline !== "spiky") {
+    updated.hairline = hairline;
+  }
+  if (updated.style) {
+    return updated;
+  } else if (cut) {
+    updated.style = cut;
+  } else if (mohawk) {
+    return { ...updated, style: "mohawk", mohawkWidth: mohawk };
+  } else if (ponytail) {
+    return { ...updated, style: "ponytail", length: ponytail };
+  } else if (bun) {
+    return { ...updated, style: "bun", length: bun };
+  } else if (hairline === "spiky") {
+    updated.style = "spiky";
+  }
+  return updated;
 }
 
 /** Everything wrong with a stored look, or nothing */
@@ -367,6 +433,18 @@ export function lookProblems(look: PartialLook | undefined): string[] {
 
   color("skin", r.skin);
   color("eyes", r.eyes);
+  if (
+    r.top.stripes !== undefined &&
+    !(
+      Number.isInteger(r.top.stripes) &&
+      r.top.stripes >= 1 &&
+      r.top.stripes <= MAX_STRIPES
+    )
+  ) {
+    problems.push(
+      `look top.stripes ${r.top.stripes} isn't a whole number from 1 to ${MAX_STRIPES}`,
+    );
+  }
   color("pants", r.pants);
   oneOf("pantsStyle", r.pantsStyle, PANTS_STYLES);
   oneOf("shoeStyle", r.shoeStyle, SHOE_STYLES);
@@ -387,22 +465,18 @@ export function lookProblems(look: PartialLook | undefined): string[] {
     "messiness",
     "curls",
     "length",
-    "bun",
-    "ponytail",
-    "mohawk",
   ] as const) {
     range(`hair.${key}`, r.hair[key], 0, 1);
   }
   range("hair.fringe", r.hair.fringe, -1, 1);
   range("hair.balding", r.hair.balding, 0, 1);
+  oneOf("hair.style", r.hair.style, HAIR_STYLES);
   oneOf("hair.hairline", r.hair.hairline, HAIRLINES);
-  if (r.hair.cut !== undefined) {
-    oneOf("hair.cut", r.hair.cut, HAIR_CUTS);
-  }
   if (r.hair.part !== undefined) {
     range("hair.part", r.hair.part, -1, 1);
   }
   range("hair.lean", r.hair.lean, -1, 1);
+  range("hair.mohawkWidth", r.hair.mohawkWidth, 0, 1);
   range("brows.bushiness", r.brows.bushiness, 0, 1);
   range("brows.arch", r.brows.arch, 0, 1);
   range("brows.tilt", r.brows.tilt, -1, 1);

@@ -132,6 +132,35 @@ const LANES: Record<string, Lane> = {
     facing: 0,
     turn: true,
   },
+  // What hangs from the waist and swings
+  skirt: {
+    label: "in a skirt",
+    walker: { character: "cindy" },
+    facing: 0,
+  },
+  skirtsprint: {
+    label: "sprinting in a skirt",
+    walker: { character: "nancy" },
+    facing: 0,
+    sprint: true,
+  },
+  skirtturn: {
+    label: "turning in a skirt",
+    walker: { character: "wendy" },
+    facing: 0,
+    turn: true,
+  },
+  coat: {
+    label: "in a coat",
+    walker: { character: "lucky-jack" },
+    facing: 0,
+  },
+  coatsprint: {
+    label: "sprinting in a coat",
+    walker: { character: "clarice" },
+    facing: 0,
+    sprint: true,
+  },
 };
 
 interface Walker {

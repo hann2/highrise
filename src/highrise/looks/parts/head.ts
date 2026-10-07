@@ -1,4 +1,4 @@
-import { BodyLook, EYE_COLOR, Hat } from "../BodyLook";
+import { BodyLook, EYE_COLOR, Hat, isCropped } from "../BodyLook";
 import { Color, darken, lighten, mix } from "../color";
 import { BodyDimensions, lookRandom, palette, wobble } from "../dimensions";
 import {
@@ -46,6 +46,7 @@ export function drawHead(
         coverage: 1,
         fringe: -0.4,
         hairline: "natural",
+        style: look.hair.style === "spiky" ? "loose" : look.hair.style,
         part: undefined,
       },
     };
@@ -56,17 +57,16 @@ export function drawHead(
   d.include(-rx * 1.1, -ry * 1.15, rx * 1.1, ry * 1.15);
 
   // Hair down the back, under everything
-  const grown = hair.coverage > 0 && !hair.cut;
-  if (hair.length > 0.02 && grown) {
+  if (hair.coverage > 0 && hair.style === "loose" && hair.length > 0.02) {
     drawLongHair(d, look, rx, ry, colors.hair, random);
   }
-  if (hair.ponytail > 0.02 && grown) {
+  if (hair.coverage > 0 && hair.style === "ponytail") {
     if (dangles) {
       // On its own, to swing from where it's tied
       const tail = new Drawing(`${prefix}-pt`, -rx, 0, -rx, 0);
       const tip = drawPonytail(
         tail,
-        hair.ponytail,
+        hair.length,
         rx,
         ry,
         colors.hair,
@@ -75,7 +75,35 @@ export function drawHead(
       );
       dangles.push(hang("ponytail", "head", tail, [-rx * 0.9, 0], tip));
     } else {
-      drawPonytail(d, hair.ponytail, rx, ry, colors.hair, random);
+      drawPonytail(d, hair.length, rx, ry, colors.hair, random);
+    }
+  }
+  if (hair.coverage > 0 && hair.style === "pigtails") {
+    // Tied either side of the back of the head, each hanging back and out
+    for (const side of [-1, 1]) {
+      const way = Math.PI - side * PIGTAIL_ANGLE;
+      const root: Pt = [Math.cos(way) * rx * 0.75, Math.sin(way) * ry * 0.75];
+      const place = { root, angle: way, width: PIGTAIL_WIDTH };
+      if (dangles) {
+        const tail = new Drawing(`${prefix}-pg${side}`, ...root, ...root);
+        const tip = drawPonytail(
+          tail,
+          hair.length,
+          rx,
+          ry,
+          colors.hair,
+          random,
+          PONYTAIL_HANGING,
+          place,
+        );
+        const pivot: Pt = [
+          root[0] + Math.cos(way) * rx * 0.15,
+          root[1] + Math.sin(way) * rx * 0.15,
+        ];
+        dangles.push(hang("ponytail", "head", tail, pivot, tip));
+      } else {
+        drawPonytail(d, hair.length, rx, ry, colors.hair, random, 1, place);
+      }
     }
   }
 
@@ -113,7 +141,7 @@ export function drawHead(
     drawBrows(d, look, rx, ry, colors.hair);
   }
 
-  if (hair.coverage > 0 && hair.cut) {
+  if (hair.coverage > 0 && isCropped(hair)) {
     drawCropped(d, look, rx, ry, colors.hair, colors.skin);
   } else if (hair.coverage > 0) {
     // Under a hat, the bun stays put
@@ -134,7 +162,7 @@ export function drawHead(
   if (look.hat) {
     // Big enough to cover the hair's edge at its furthest
     const hairOut =
-      hair.coverage > 0 && !hair.cut
+      hair.coverage > 0 && !isCropped(hair)
         ? 0.035 + hair.volume * 0.2 + hair.curls * 0.19 + hair.messiness * 0.07
         : 0;
     drawHat(d, look.hat, rx, ry, 1 + hairOut);
@@ -195,7 +223,8 @@ const PART_AT = 0.41;
 
 /**
  * Where the hairline is (x, mm) across the head at `y`: how far forward the
- * hair comes there, by its coverage, fringe and shape (`Hairline`)
+ * hair comes there, by its coverage, fringe and shape (`Hairline`), or
+ * where spiky hair's tufts start
  */
 function hairlineAt(look: BodyLook, rx: number, ry: number, y: number) {
   const hair = look.hair;
@@ -207,7 +236,7 @@ function hairlineAt(look: BodyLook, rx: number, ry: number, y: number) {
   // Forward to the sideburns at the sides, by the ears
   const sideburns = 0.05 * smoothstep(0.9, 1.2, a);
   let shape: number;
-  switch (hair.hairline) {
+  switch (hair.style === "spiky" ? "spiky" : hair.hairline) {
     case "natural":
       shape = 0.1 * (1 - t) - 0.09 * bell(a, 0.72, 0.16) + sideburns;
       break;
@@ -239,7 +268,7 @@ function hairlineAt(look: BodyLook, rx: number, ry: number, y: number) {
       break;
     }
     case "spiky":
-      // Where the tufts start (`spikyHairline` adds them)
+      // Where the tufts start (`spikes` adds them)
       shape = 0.02 * (1 - t) - 0.06 * bell(a, 0.75, 0.16) + sideburns;
       break;
   }
@@ -247,7 +276,7 @@ function hairlineAt(look: BodyLook, rx: number, ry: number, y: number) {
 }
 
 /**
- * The tufts of a `spiky` hairline across the front, each a point sticking
+ * The tufts of `spiky` hair across the front, each a point sticking
  * forward from where the hairline would be, leaning as `Hair.lean` says, as
  * `[left foot, tip, right foot]`, the feet joined from one tuft to the next.
  * More volume makes fewer, bigger ones.
@@ -283,8 +312,7 @@ function spikes(look: BodyLook, rx: number, ry: number): [Pt, Pt, Pt][] {
 
 /** The region behind the hairline, as a path, `forward` mm further forward */
 function hairlinePath(look: BodyLook, rx: number, ry: number, forward = 0) {
-  // Cropped hair's too short for tufts
-  if (look.hair.hairline === "spiky" && !look.hair.cut) {
+  if (look.hair.style === "spiky") {
     // Sharp: straight lines between the tufts' points
     const tufts = spikes(look, rx, ry);
     const points: Pt[] = [];
@@ -362,7 +390,7 @@ function drawCropped(
   color: Color,
   skin: Color,
 ) {
-  const buzz = look.hair.cut === "buzz";
+  const buzz = look.hair.style === "buzz";
   const shade = buzz ? mix(skin, color, 0.82) : mix(skin, color, 0.7);
   const shape = smoothPath(skullPoints(rx, ry, 48, () => (buzz ? 0.015 : 0)));
   // Fainter where it starts, so the hairline isn't a hard edge
@@ -483,8 +511,8 @@ function drawHair(
 
   // Clipped to behind the hairline, and to a strip for a mohawk
   const clips = [d.clipPath("hairline", hairlinePath(look, rx, ry))];
-  if (hair.mohawk > 0) {
-    const half = ry * (0.12 + hair.mohawk * 0.35);
+  if (hair.style === "mohawk") {
+    const half = ry * (0.12 + hair.mohawkWidth * 0.35);
     clips.push(
       d.clipPath(
         "mohawk",
@@ -505,7 +533,7 @@ function drawHair(
   }
   // Thinner just in front of the hairline, so it isn't a hard edge (but
   // spikes are sharp)
-  if (hair.mohawk <= 0 && hair.hairline !== "spiky") {
+  if (hair.style !== "mohawk" && hair.style !== "spiky") {
     // Only the band between the two
     d.begin(
       `clip-path="url(#${d.clipPath("thin", hairlinePath(look, rx, ry, 10) + hairlinePath(look, rx, ry), true)})"`,
@@ -582,9 +610,9 @@ function drawHair(
     d.end();
   }
 
-  if (hair.bun > 0.02) {
-    const r = 34 + hair.bun * 42;
-    const cx = -rx * 0.6 - hair.bun * 20;
+  if (hair.style === "bun") {
+    const r = 34 + hair.length * 42;
+    const cx = -rx * 0.6 - hair.length * 20;
     const bun = dangles ? new Drawing(`${d.prefix}-bun`, cx, 0, cx, 0) : d;
     bun.include(cx - r, -r, cx + r, r);
     bun.blob(ellipsePath(cx, 0, r, r * 0.95), color, {});
@@ -637,6 +665,18 @@ function drawLongHair(
  */
 const PONYTAIL_HANGING = 0.7;
 
+/** How far round from straight back each pigtail's tied (radians) */
+const PIGTAIL_ANGLE = 0.8;
+/** How thick a pigtail is next to a ponytail: there's half the hair in each */
+const PIGTAIL_WIDTH = 0.72;
+
+/** Where a ponytail's tied, which way it hangs from there, and how thick it is next to one tied at the back */
+interface TailPlace {
+  root: Pt;
+  angle: number;
+  width: number;
+}
+
 function drawPonytail(
   d: Drawing,
   amount: number,
@@ -646,34 +686,50 @@ function drawPonytail(
   random: () => number,
   /** How much of its length shows from above */
   reach = 1,
+  /** Else at the back, hanging straight back */
+  place: TailPlace = { root: [-rx * 0.75, 0], angle: Math.PI, width: 1 },
 ): Pt {
   const length = (70 + amount * 250) * reach;
   const sway = (random() - 0.5) * 60;
-  const start: Pt = [-rx * 0.75, 0];
-  const end: Pt = [-rx - length, sway];
-  const width = 34 + amount * 18;
+  // Drawn along the way it hangs (`u`, from its root) and across it (`v`)
+  const cos = Math.cos(place.angle);
+  const sin = Math.sin(place.angle);
+  const at = (u: number, v: number): Pt => [
+    place.root[0] + u * cos + v * sin,
+    place.root[1] + u * sin - v * cos,
+  ];
+  const endU = rx * 0.25 + length;
+  const end = at(endU, sway);
+  const width = (34 + amount * 18) * place.width;
   const points: Pt[] = [
-    [start[0], -width],
-    [(start[0] + end[0]) / 2, sway * 0.4 - width * 1.15],
-    [end[0], end[1] - width * 0.35],
-    [end[0] - 18, end[1]],
-    [end[0], end[1] + width * 0.35],
-    [(start[0] + end[0]) / 2, sway * 0.4 + width * 1.15],
-    [start[0], width],
+    at(0, -width),
+    at(endU / 2, sway * 0.4 - width * 1.15),
+    at(endU, sway - width * 0.35),
+    at(endU + 18, sway),
+    at(endU, sway + width * 0.35),
+    at(endU / 2, sway * 0.4 + width * 1.15),
+    at(0, width),
   ];
   d.includePoints(points);
   d.blob(smoothPath(points), color, {});
+  const [sx, sy] = at(10, 0);
+  const [mx, my] = at(endU / 2, sway * 0.5);
   d.line(
-    `M${n(start[0] - 10)} ${n(0)}Q${n((start[0] + end[0]) / 2)} ${n(sway * 0.5)} ${n(end[0])} ${n(end[1])}`,
+    `M${n(sx)} ${n(sy)}Q${n(mx)} ${n(my)} ${n(end[0])} ${n(end[1])}`,
     darken(color, 0.3),
     5,
     `opacity="0.45"`,
   );
   // The band round it
-  d.blob(ellipsePath(-rx * 0.98, 0, 14, width * 0.8), darken(color, 0.55), {
+  const [bx, by] = at(rx * 0.23, 0);
+  d.add(
+    `<g transform="translate(${n(bx)} ${n(by)}) rotate(${n(((place.angle - Math.PI) * 180) / Math.PI)})">`,
+  );
+  d.blob(ellipsePath(0, 0, 14, width * 0.8), darken(color, 0.55), {
     shade: "flat",
     outline: 0,
   });
+  d.add("</g>");
   return end;
 }
 

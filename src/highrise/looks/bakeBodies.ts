@@ -4,7 +4,10 @@ import { BodyLook } from "./BodyLook";
 import { BODY_PARTS, BodyPart, drawBody } from "./drawBody";
 import { Drawing, n } from "./svg";
 import { DangleKind } from "./dangles";
+import { HemKind } from "./hems";
+import type { HemShape, Oval } from "../creature-stuff/hemCloth";
 import { lyingWaist } from "./parts/torso";
+import { hasSleeve } from "./parts/limbs";
 // Hand-drawn pieces, so looks can wear them
 import "./pieces/index";
 
@@ -41,11 +44,28 @@ export interface BodyTextures {
   leftForearm: Texture;
   rightUpperArm: Texture;
   rightForearm: Texture;
+  /**
+   * Sleeves, straight, with their origins at the shoulder joints and running
+   * along +x; bent over the arms (`sleeveStrip`). Null without sleeves
+   */
+  leftSleeve: Texture | null;
+  rightSleeve: Texture | null;
   leftHand: Texture;
   rightHand: Texture;
   /** What swings, drawn over the torso and under the head, in order (none lying down) */
   dangles: DangleTexture[];
+  /** What hangs from round the waist and swings, over the legs and under the arms, in order (none lying down) */
+  hems: HemTexture[];
   metrics: BodyMetrics;
+}
+
+/** Cloth hanging from round the waist (see `HemDrawing`): its image is it hanging at rest, the waist's middle at its anchor */
+export interface HemTexture {
+  kind: HemKind;
+  layer: "legs" | "torso";
+  texture: Texture;
+  /** Its waist and hem, in meters for a human-sized body */
+  shape: HemShape;
 }
 
 /** Something that swings (see `DangleDrawing`): its image hangs along +x from its anchor */
@@ -149,6 +169,20 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       return placement;
     }),
   );
+  const hemsByBody = bodies.map((body) =>
+    body.hems.map((hem) => {
+      const placement: Placement = {
+        drawing: hem.drawing,
+        page: 0,
+        x: 0,
+        y: 0,
+        width: Math.ceil(hem.drawing.width * scale),
+        height: Math.ceil(hem.drawing.height * scale),
+      };
+      placements.push(placement);
+      return placement;
+    }),
+  );
   const pageHeights: number[] = [];
   let page = 0;
   let x = 0;
@@ -219,6 +253,8 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       leftForearm: texture("leftForearm"),
       rightUpperArm: texture("rightUpperArm"),
       rightForearm: texture("rightForearm"),
+      leftSleeve: hasSleeve(body.look) ? texture("leftSleeve") : null,
+      rightSleeve: hasSleeve(body.look) ? texture("rightSleeve") : null,
       leftHand: texture("leftHand"),
       rightHand: texture("rightHand"),
       metrics,
@@ -232,9 +268,26 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
       angle: dangle.angle,
       length: dangle.length / 1000,
     }));
+    const meters = (oval: Oval): Oval => ({
+      front: oval.front / 1000,
+      back: oval.back / 1000,
+      side: oval.side / 1000,
+    });
+    const hems = body.hems.map((hem, j): HemTexture => ({
+      kind: hem.kind,
+      layer: hem.layer,
+      texture: texture(hemsByBody[i][j]),
+      shape: {
+        ...hem.shape,
+        waist: meters(hem.shape.waist),
+        hem: meters(hem.shape.hem),
+        margin: hem.shape.margin / 1000,
+        cloth: hem.shape.cloth / 1000,
+      },
+    }));
     pagesOf.set(toBake[i], [
       ...new Set(
-        [...Object.values(placed), ...danglesByBody[i]].map(
+        [...Object.values(placed), ...danglesByBody[i], ...hemsByBody[i]].map(
           (p) => sources[p.page],
         ),
       ),
@@ -246,10 +299,12 @@ export async function bakeBodies(looks: BodyLook[]): Promise<void> {
         head: texture("head"),
         torso: texture("torso"),
         dangles,
+        hems,
       },
       lying: {
         ...limbs,
         dangles: [],
+        hems: [],
         head: texture("lyingHead"),
         torso: texture("lyingTorso"),
       },

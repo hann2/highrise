@@ -4,8 +4,8 @@ import {
   EYE_COLORS,
   GLASSES_SHAPES,
   Hair,
-  HAIR_CUTS,
-  HairCut,
+  HAIR_STYLES,
+  HairStyle,
   HAIRLINES,
   HAT_STYLES,
   PANTS_STYLES,
@@ -153,43 +153,46 @@ export const HAIRLINE_OPTIONS = options(HAIRLINES, {
     "Parted",
     "The hair falling away to both sides of a parting: in the middle, curtains; to one side, the bigger side sweeps across the forehead",
   ],
-  spiky: [
-    "Spiky",
-    "Tufts sticking forward over the forehead, leaning whichever way Lean says. Volume makes them bigger, messiness less even",
-  ],
 });
 
 /**
- * What the hair is, as the cut picker has it: grown, cut right down, or
- * none (bald, which in the look is no coverage)
+ * What the hair is, as the style picker has it: one of the styles, or none
+ * (bald, which in the look is no coverage)
  */
-export type CutChoice = "" | HairCut | "bald";
+export type StyleChoice = HairStyle | "bald";
 
-export const CUT_OPTIONS: Option<CutChoice>[] = [
-  {
-    value: "",
-    label: "As grown",
-    tip: "Its length, volume, curls and how it's tied are below",
-  },
-  ...options(HAIR_CUTS, {
+export const HAIR_STYLE_OPTIONS: Option<StyleChoice>[] = [
+  ...options(HAIR_STYLES, {
+    loose: ["Loose", "Short, or hanging down the back as far as Length says"],
+    ponytail: ["Ponytail", "Tied back, hanging down the back"],
+    pigtails: [
+      "Pigtails",
+      "Tied in two, one each side of the back of the head",
+    ],
+    bun: ["Bun", "Tied up in a bun on the back of the head"],
+    spiky: [
+      "Spiky",
+      "Tufts sticking forward over the forehead. Volume makes them bigger, messiness less even",
+    ],
+    mohawk: ["Mohawk", "Shaved but for a strip down the middle"],
     buzz: ["Buzz cut", "Clipped right down, the color showing over the scalp"],
     stubble: ["Stubble", "Shaved, and growing back: just a shadow"],
   }),
   { value: "bald", label: "Bald" },
 ];
 
-export function cutOf(hair: Hair): CutChoice {
-  return hair.coverage <= 0 ? "bald" : (hair.cut ?? "");
+export function styleOf(hair: Hair): StyleChoice {
+  return hair.coverage <= 0 ? "bald" : hair.style;
 }
 
-/** `hair` cut as `choice`; hair grown back on a bald head is the usual amount */
-export function withCut(hair: Hair, choice: CutChoice): Hair {
+/** `hair` styled as `choice`; hair grown back on a bald head is the usual amount */
+export function withStyle(hair: Hair, choice: StyleChoice): Hair {
   if (choice === "bald") {
-    return { ...hair, coverage: 0, cut: undefined };
+    return { ...hair, coverage: 0 };
   }
   return {
     ...hair,
-    cut: choice || undefined,
+    style: choice,
     coverage: hair.coverage > 0 ? hair.coverage : DEFAULT_LOOK.hair.coverage,
   };
 }

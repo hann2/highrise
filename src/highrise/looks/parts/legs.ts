@@ -26,12 +26,9 @@ export function pantsCoverage(look: BodyLook): number {
   return look.pantsLength ?? (style === "shorts" ? SHORTS : SKIRT);
 }
 
-/** How much wider than the leg the bottom of shorts or a skirt is */
+/** How much wider than the leg the bottom of shorts is */
 function pantsFlare(look: BodyLook): number {
   switch (look.pantsStyle) {
-    case "skirt":
-      // A long skirt flares out more by the time it gets down there
-      return 1.35 + pantsCoverage(look) * 0.45;
     case "shorts":
       return 1.12;
     default:
@@ -88,12 +85,20 @@ export function drawLeg(
   const pants = look.pants;
 
   let cloth: string;
-  if (style === "shorts" || style === "skirt") {
+  if (style === "skirt") {
+    // Bare: the skirt's drawn on its own, over the legs (`parts/hems.ts`)
     d.blob(leg, colors.skin, {
       shade: "tube",
       grain: rot > 0 ? "rot" : undefined,
     });
-    const half0 = (t / 2) * (style === "skirt" ? 1.05 : 1.1);
+    // Nothing for rips to tear
+    cloth = "M0 0Z";
+  } else if (style === "shorts") {
+    d.blob(leg, colors.skin, {
+      shade: "tube",
+      grain: rot > 0 ? "rot" : undefined,
+    });
+    const half0 = (t / 2) * 1.1;
     // At least past the round top
     const end = Math.max(
       pad + half0 + 30,
@@ -104,16 +109,6 @@ export function drawLeg(
       `M${n(pad + half0)} ${n(-half0)}L${n(end)} ${n(-half1)}L${n(end)} ${n(half1)}L${n(pad + half0)} ${n(half0)}` +
       `A${n(half0)} ${n(half0)} 0 0 1 ${n(pad + half0)} ${n(-half0)}Z`;
     d.blob(cloth, pants, { shade: "tube" });
-    if (style === "skirt") {
-      for (const y of [-0.5, 0, 0.5]) {
-        d.line(
-          `M${n(pad + half0)} ${n(y * half0)}L${n(end - 4)} ${n(y * half1)}`,
-          darken(pants, 0.3),
-          5,
-          `opacity="0.5"`,
-        );
-      }
-    }
     d.line(
       `M${n(end - 10)} ${n(-half1 + 4)}L${n(end - 10)} ${n(half1 - 4)}`,
       darken(pants, 0.35),

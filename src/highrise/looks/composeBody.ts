@@ -5,7 +5,24 @@ import { BodyLook, PartialLook } from "./BodyLook";
 import { BodyDrawing, BodyLayer, drawBody, LAYER_PARTS } from "./drawBody";
 import { Drawing, n } from "./svg";
 import { lyingWaist } from "./parts/torso";
-import { armHandPosition } from "./parts/limbs";
+import { armHandPosition, hasSleeve } from "./parts/limbs";
+import {
+  ArmPose,
+  SLEEVE_BEND,
+  sleeveColumnCount,
+  sleeveColumns,
+  sleeveStrip,
+  sleeveUvs,
+} from "../creature-stuff/sleeveStrip";
+import {
+  hemAngles,
+  hemRest,
+  hemStill,
+  isClosed,
+  LegAtHem,
+  RINGS,
+} from "../creature-stuff/hemCloth";
+import { HemDrawing } from "./hems";
 
 export interface ComposeOptions {
   /** Standing mid-stride, or lying face down like a corpse */
@@ -26,6 +43,195 @@ export interface ComposeOptions {
 
 function place(part: Drawing, transform: string): string {
   return `<g transform="${transform}">${part.content()}</g>`;
+}
+
+/**
+ * A sleeve's straight picture bent over an arm as `BodySprite` bends it
+ * (`sleeveStrip`), drawn from the shoulder to the hand. `pixel` is how big
+ * a pixel is (mm).
+ */
+function bentSleeve(part: Drawing, pose: ArmPose, pixel: number): string {
+  const picture = {
+    from: part.minX,
+    to: part.maxX,
+    top: part.minY,
+    bottom: part.maxY,
+  };
+  const along = sleeveColumns(
+    picture,
+    pose.upperArm,
+    pose.bend,
+    sleeveColumnCount(picture, pose.upperArm, pose.bend),
+  );
+  const columns = along.length;
+  const posed = sleeveStrip(
+    picture,
+    pose,
+    along,
+    new Float32Array(columns * 4),
+  );
+  const uvs = sleeveUvs(picture, along);
+  const triangles: MeshTriangle[] = [];
+  for (let i = 0; i < columns - 1; i++) {
+    // Each quad's two triangles, as `sleeveIndices` has them: the first past
+    // the diagonal, which the second covers, and the second past the next
+    // column, which the next quad covers
+    triangles.push([i * 2, i * 2 + 1, i * 2 + 2, [[1, 2]]]);
+    triangles.push([
+      i * 2 + 1,
+      i * 2 + 2,
+      i * 2 + 3,
+      i < columns - 2 ? [[1, 2]] : [],
+    ]);
+  }
+  return meshSvg(
+    part,
+    (v) => [
+      picture.from + uvs[v * 2] * (picture.to - picture.from),
+      picture.top + uvs[v * 2 + 1] * (picture.bottom - picture.top),
+    ],
+    (v) => [posed[v * 2], posed[v * 2 + 1]],
+    triangles,
+    pixel,
+  );
+}
+
+/**
+ * Cloth hanging from the waist (`HemCloth`) as it hangs still, pushed out
+ * by the legs where they come through it (in the hips' frame), drawn round
+ * from the front. `pixel` is how big a pixel is (mm).
+ */
+function hangingHem(hem: HemDrawing, legs: LegAtHem[], pixel: number): string {
+  const angles = hemAngles(hem.shape);
+  const rest = hemRest(hem.shape, angles);
+  const posed = hemStill(hem.shape, angles, legs);
+  const count = angles.length;
+  const closed = isClosed(hem.shape);
+  const v = (i: number, ring: number) => (i % count) * RINGS + ring;
+  const triangles: MeshTriangle[] = [];
+  if (closed) {
+    // The middle's fan, each past its edge round the waist, which the ring covers
+    for (let i = 0; i < count; i++) {
+      triangles.push([count * RINGS, v(i, 0), v(i + 1, 0), [[1, 2]]]);
+    }
+  }
+  const quads = closed ? count : count - 1;
+  for (let r = 0; r < RINGS - 1; r++) {
+    // Each ring's quads, from the waist out: the first triangle past the
+    // diagonal, and the second past the next point's edge (but the last's,
+    // which comes round to the first) and the ring's edge further out
+    const outer = r < RINGS - 2;
+    for (let i = 0; i < quads; i++) {
+      const last = i === quads - 1;
+      triangles.push([v(i, r), v(i, r + 1), v(i + 1, r), [[1, 2]]]);
+      triangles.push([
+        v(i, r + 1),
+        v(i + 1, r),
+        v(i + 1, r + 1),
+        [
+          ...(last ? [] : [[1, 2] as [number, number]]),
+          ...(outer ? [[0, 2] as [number, number]] : []),
+        ],
+      ]);
+    }
+  }
+  return meshSvg(
+    hem.drawing,
+    (i) => [rest[i * 2], rest[i * 2 + 1]],
+    (i) => [posed[i * 2], posed[i * 2 + 1]],
+    triangles,
+    pixel,
+  );
+}
+
+/**
+ * A triangle of a mesh, by its vertices, and which of its edges (by the
+ * corners' places in the triangle) to draw a band past, away from its
+ * other corner, which what's drawn after it covers
+ */
+type MeshTriangle = [number, number, number, [number, number][]];
+
+/**
+ * `part`'s picture laid over a mesh of triangles: each triangle the
+ * picture's own triangle (`flat`) mapped onto where it's posed (`at`). They're
+ * drawn in order, each clipped to itself and a band a couple of pixels wide
+ * past an edge that the next covers: so the edges inside the mesh fall on
+ * something already there, and no seams show between them. `pixel` is how
+ * big a pixel is (mm).
+ */
+function meshSvg(
+  part: Drawing,
+  flat: (v: number) => [number, number],
+  at: (v: number) => [number, number],
+  triangles: MeshTriangle[],
+  pixel: number,
+): string {
+  const id = `${part.prefix}-mesh`;
+  const polygon = (points: [number, number][]) =>
+    `<polygon points="${points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ")}"/>`;
+  const defs: string[] = [];
+  const drawn: string[] = [];
+  for (const [a, b, c, bands] of triangles) {
+    const corners = [at(a), at(b), at(c)];
+    const [o, p, q] = corners;
+    const shapes = [polygon([o, p, q])];
+    for (const [from, to] of bands) {
+      const p = corners[from];
+      const q = corners[to];
+      const o = corners[3 - from - to];
+      // Square to the edge, away from the triangle's other corner
+      const [ex, ey] = [q[1] - p[1], p[0] - q[0]];
+      const away = ex * (p[0] - o[0]) + ey * (p[1] - o[1]) >= 0 ? 1 : -1;
+      const out = (away * pixel * 2) / (Math.hypot(ex, ey) || 1);
+      shapes.push(
+        polygon([
+          p,
+          q,
+          [q[0] + ex * out, q[1] + ey * out],
+          [p[0] + ex * out, p[1] + ey * out],
+        ]),
+      );
+    }
+    const clip = `${id}-${drawn.length}`;
+    defs.push(`<clipPath id="${clip}">${shapes.join("")}</clipPath>`);
+    const matrix = affine([flat(a), flat(b), flat(c)], [o, p, q]);
+    drawn.push(
+      `<g clip-path="url(#${clip})"><use href="#${id}" transform="matrix(${matrix.map((v) => v.toFixed(4)).join(" ")})"/></g>`,
+    );
+  }
+  return (
+    // Without the shadow it casts, which each triangle would cast again
+    `<defs><g id="${id}">${part.content(false)}</g>${defs.join("")}</defs>` +
+    drawn.join("")
+  );
+}
+
+/** The affine map taking the triangle `from` onto `to`, as SVG's `matrix(a b c d e f)` */
+function affine(
+  [p0, p1, p2]: [number, number][],
+  [q0, q1, q2]: [number, number][],
+): number[] {
+  const t00 = p1[0] - p0[0];
+  const t01 = p2[0] - p0[0];
+  const t10 = p1[1] - p0[1];
+  const t11 = p2[1] - p0[1];
+  const det = t00 * t11 - t01 * t10;
+  const q00 = q1[0] - q0[0];
+  const q01 = q2[0] - q0[0];
+  const q10 = q1[1] - q0[1];
+  const q11 = q2[1] - q0[1];
+  const a = (q00 * t11 - q01 * t10) / det;
+  const c = (q01 * t00 - q00 * t01) / det;
+  const b = (q10 * t11 - q11 * t10) / det;
+  const d = (q11 * t00 - q10 * t01) / det;
+  return [
+    a,
+    b,
+    c,
+    d,
+    q0[0] - a * p0[0] - c * p0[1],
+    q0[1] - b * p0[0] - d * p0[1],
+  ];
 }
 
 /**
@@ -86,6 +292,24 @@ export function composeBodySvg(
         ),
       );
     }
+    // What hangs from the waist, over the legs, pushed out where they
+    // come through it
+    const hems = body.hems.filter(
+      (hem) => !options.hidden?.includes(hem.layer),
+    );
+    for (const hem of hems) {
+      items.push(
+        hangingHem(
+          hem,
+          [-1, 1].map((side) => ({
+            x: -side * stride * hem.shape.drop,
+            y: side * hip,
+            radius: legThickness / 2,
+          })),
+          1000 / scale,
+        ),
+      );
+    }
     const shoulder = dims.shoulderHalfWidth - dims.armThickness / 2;
     const hands = options.hands ?? [
       [300, -200],
@@ -125,6 +349,22 @@ export function composeBodySvg(
       );
       items.push(segment(upper, shoulderAt, elbow, dims.upperArm));
       items.push(segment(fore, elbow, hand, dims.forearm));
+      if (hasSleeve(body.look)) {
+        items.push(
+          bentSleeve(
+            side < 0 ? parts.leftSleeve : parts.rightSleeve,
+            {
+              shoulder: shoulderAt,
+              elbow,
+              hand,
+              upperArm: dims.upperArm,
+              forearm: dims.forearm,
+              bend: dims.armThickness * SLEEVE_BEND,
+            },
+            1000 / scale,
+          ),
+        );
+      }
     }
     for (const [, , hand, , [hx, hy]] of arms) {
       items.push(place(hand, `translate(${n(hx)} ${n(hy)})`));
@@ -167,6 +407,7 @@ export function composeBodySvg(
       -parts.head.minY,
       parts.head.maxY,
       ...dangleCorners.map(([, y]) => Math.abs(y)),
+      ...hems.map((hem) => Math.max(-hem.drawing.minY, hem.drawing.maxY)),
     );
     box = [
       Math.min(
@@ -174,6 +415,7 @@ export function composeBodySvg(
         parts.torso.minX,
         parts.head.minX,
         ...dangleCorners.map(([x]) => x),
+        ...hems.map((hem) => hem.drawing.minX - stride * hem.shape.drop),
       ),
       -reach,
       Math.max(
@@ -182,6 +424,7 @@ export function composeBodySvg(
         parts.head.maxX,
         ...hands.map(([hx]) => hx + dims.handSize * 0.6),
         ...dangleCorners.map(([x]) => x),
+        ...hems.map((hem) => hem.drawing.maxX + stride * hem.shape.drop),
       ),
       reach,
     ];

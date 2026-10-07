@@ -5,13 +5,14 @@
     "skin": "#e2b48c",
     "build": {
       "shoulders": -0.6,
-      "chest": -0.2,
+      "chest": -0.77,
       "belly": 0,
-      "bust": 0.45,
-      "hunch": 0,
-      "squareness": 0,
+      "bust": 0.75,
+      "hunch": -0.02,
+      "squareness": -0.71,
       "arms": -0.6,
       "hands": -0.4,
+      "feet": -1,
       "head": -0.2,
       "legs": 0
     },
@@ -21,11 +22,16 @@
       "volume": 0.15,
       "messiness": 0.2,
       "curls": 0,
-      "length": 0,
+      "style": "bun",
+      "length": 0.5,
+      "hairline": "natural",
       "fringe": -0.2,
-      "bun": 0.5,
-      "ponytail": 0,
-      "mohawk": 0
+      "balding": 0
+    },
+    "brows": {
+      "bushiness": 0.35,
+      "arch": 0.4,
+      "tilt": 0
     },
     "top": {
       "style": "tank",
@@ -36,9 +42,9 @@
       "length": 0
     },
     "extras": [],
-    "pantsStyle": "jeans",
-    "pants": "#7d9cc4",
-    "shoeStyle": "sneakers",
+    "pantsStyle": "skirt",
+    "pants": "#742092",
+    "shoeStyle": "heels",
     "shoes": "#f0f0f0",
     "seed": 3
   },

@@ -2,16 +2,17 @@
   "name": "Clarice",
   "description": "",
   "look": {
-    "skin": "#b07a48",
+    "skin": "#764e2e",
     "build": {
       "shoulders": -0.4,
-      "chest": 0,
+      "chest": -0.22,
       "belly": 0,
       "bust": 0.5,
       "hunch": 0,
-      "squareness": 0,
+      "squareness": -0.77,
       "arms": -0.5,
       "hands": -0.2,
+      "feet": 0,
       "head": 0,
       "legs": 0
     },
@@ -21,11 +22,16 @@
       "volume": 0.25,
       "messiness": 0.2,
       "curls": 0.4,
-      "length": 0,
+      "style": "bun",
+      "length": 0.35,
+      "hairline": "natural",
       "fringe": 0.3,
-      "bun": 0.35,
-      "ponytail": 0,
-      "mohawk": 0
+      "balding": 0
+    },
+    "brows": {
+      "bushiness": 0.35,
+      "arch": 0.4,
+      "tilt": 0
     },
     "top": {
       "style": "coat",

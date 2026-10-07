@@ -1,11 +1,13 @@
 import { BodyLook, PartialLook, resolveLook } from "./BodyLook";
 import { bodyDimensions, BodyDimensions } from "./dimensions";
 import { drawHead } from "./parts/head";
-import { drawArm, drawArmSegment, drawHand } from "./parts/limbs";
+import { drawArm, drawArmSegment, drawHand, drawSleeve } from "./parts/limbs";
 import { drawFoot, drawLeg, drawLyingLegs } from "./parts/legs";
 import { drawLyingTorso, drawTorso } from "./parts/torso";
 import { Drawing } from "./svg";
 import { DangleDrawing } from "./dangles";
+import { HemDrawing } from "./hems";
+import { drawHems } from "./parts/hems";
 
 /** Every image a body is drawn with */
 export const BODY_PARTS = [
@@ -19,6 +21,9 @@ export const BODY_PARTS = [
   "leftForearm",
   "rightUpperArm",
   "rightForearm",
+  /** Sleeves on their own, straight, bent over the arms standing */
+  "leftSleeve",
+  "rightSleeve",
   "leftHand",
   "rightHand",
   /** Stretched from the hip to the ankle, the same for both */
@@ -55,6 +60,8 @@ export const LAYER_PARTS: Record<BodyLayer, BodyPart[]> = {
     "leftForearm",
     "rightUpperArm",
     "rightForearm",
+    "leftSleeve",
+    "rightSleeve",
   ],
   hands: ["leftHand", "rightHand"],
   legs: ["leg", "lyingLegs"],
@@ -70,6 +77,12 @@ export interface BodyDrawing {
    * in the order it's drawn: over the torso, and under the head
    */
   dangles: DangleDrawing[];
+  /**
+   * The cloth hanging from round the waist, standing (a skirt, a coat's
+   * tails; lying, it's drawn on the parts), in the order it's drawn: over
+   * the legs, under the arms
+   */
+  hems: HemDrawing[];
 }
 
 /**
@@ -88,6 +101,7 @@ export function drawBody(look: PartialLook, prefix = "b"): BodyDrawing {
     look: resolved,
     dims,
     dangles,
+    hems: drawHems(resolved, dims, p("hm")),
     parts: {
       head,
       torso,
@@ -97,6 +111,8 @@ export function drawBody(look: PartialLook, prefix = "b"): BodyDrawing {
       leftForearm: drawArmSegment(resolved, dims, -1, "fore", p("lfa")),
       rightUpperArm: drawArmSegment(resolved, dims, 1, "upper", p("rua")),
       rightForearm: drawArmSegment(resolved, dims, 1, "fore", p("rfa")),
+      leftSleeve: drawSleeve(resolved, dims, -1, p("ls")),
+      rightSleeve: drawSleeve(resolved, dims, 1, p("rs")),
       leftHand: drawHand(resolved, dims, -1, p("lh")),
       rightHand: drawHand(resolved, dims, 1, p("rh")),
       leg: drawLeg(resolved, dims, p("lg")),

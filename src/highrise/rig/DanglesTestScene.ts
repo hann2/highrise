@@ -60,9 +60,16 @@ const extra = (kind: Extra["kind"], color: string): Extra => ({
 const LOOKS: { label: string; look: PartialLook }[] = [
   {
     label: "ponytail",
-    look: { ...BASE, hair: { ...BASE.hair, ponytail: 0.9 } },
+    look: { ...BASE, hair: { ...BASE.hair, style: "ponytail", length: 0.9 } },
   },
-  { label: "bun", look: { ...BASE, hair: { ...BASE.hair, bun: 0.8 } } },
+  {
+    label: "pigtails",
+    look: { ...BASE, hair: { ...BASE.hair, style: "pigtails", length: 0.7 } },
+  },
+  {
+    label: "bun",
+    look: { ...BASE, hair: { ...BASE.hair, style: "bun", length: 0.8 } },
+  },
   {
     label: "lanyard",
     look: { ...BASE, extras: [extra("lanyard", "#2a64c8")] },
@@ -77,7 +84,7 @@ const LOOKS: { label: string; look: PartialLook }[] = [
     label: "everything",
     look: {
       ...BASE,
-      hair: { ...BASE.hair, ponytail: 0.6 },
+      hair: { ...BASE.hair, style: "ponytail", length: 0.6 },
       extras: [
         extra("backpack", "#3f6b3a"),
         extra("tie", "#a32828"),
@@ -89,11 +96,11 @@ const LOOKS: { label: string; look: PartialLook }[] = [
 
 /**
  * `?scene=dangles` (development only): a lane for each kind of thing that
- * swings as a body moves (`creature-stuff/Dangles.ts`): a ponytail, a bun, a
+ * swings as a body moves (`creature-stuff/Dangles.ts`): a ponytail, pigtails, a bun, a
  * lanyard, a tie, a scarf, a backpack, and all at once. Each body walks
  * along its lane and stops, turns round, sprints back and stops dead, turns
  * again, and is shoved from the side, over and over. `only=tie,scarf` picks lanes, `zoom=` sets the
- * camera, `zombie` makes them zombies (they walk like one too), and `?auto`
+ * camera, `follow` keeps it on the bodies as they go (for close ups), `zombie` makes them zombies (they walk like one too), and `?auto`
  * is for recording (`npm run clip -- --scene dangles`).
  */
 export default class DanglesTestScene extends BaseEntity implements Entity {
@@ -104,11 +111,14 @@ export default class DanglesTestScene extends BaseEntity implements Entity {
   private movers: Mover[] = [];
   private step = 0;
   private stepTime = 0;
+  /** The camera goes along with the bodies */
+  private follow = false;
 
   @on("add")
   async onAdd() {
     const params = new URLSearchParams(window.location.search);
     const zombie = params.has("zombie");
+    this.follow = params.has("follow");
     const only = params.get("only")?.split(",");
     const lanes = LOOKS.filter(({ label }) => !only || only.includes(label));
     const looks: BodyLook[] = lanes.map(({ look }) =>
@@ -150,6 +160,17 @@ export default class DanglesTestScene extends BaseEntity implements Entity {
       return this.addChild(new Mover(looks[i], start, zombie));
     });
     this.cycles = 1;
+  }
+
+  @on("render")
+  onRender() {
+    if (this.follow && this.movers.length > 0) {
+      const middle = V(0, 0);
+      for (const mover of this.movers) {
+        middle.iadd(mover.getPosition());
+      }
+      this.game.camera.center(middle.imul(1 / this.movers.length));
+    }
   }
 
   @on("tick")

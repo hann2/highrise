@@ -1,5 +1,6 @@
 import {
   BodyLook,
+  Hair,
   DEFAULT_LOOK,
   EYE_COLORS,
   Extra,
@@ -376,6 +377,35 @@ function pickOutfit(random: Random): Outfit {
 }
 
 /** Someone who works (worked) in the building */
+/**
+ * Long hair's sometimes tied in a ponytail, short hair now and then in a bun,
+ * and there's the odd mohawk; else it's loose. A ponytail or a bun is as long
+ * as it says, whatever the hair's length was
+ */
+function randomHairStyle(
+  random: Random,
+  long: boolean,
+): Pick<Hair, "style"> & Partial<Hair> {
+  // In the order they always were, so the looks made after don't change
+  const bun =
+    !long && chance(random, 0.08)
+      ? Math.round(between(random, 0.3, 1) * 100) / 100
+      : 0;
+  const ponytail =
+    long && chance(random, 0.3)
+      ? Math.round(between(random, 0.3, 1) * 100) / 100
+      : 0;
+  const mohawk = chance(random, 0.02);
+  if (mohawk) {
+    return { style: "mohawk", length: 0 };
+  } else if (ponytail) {
+    return { style: "ponytail", length: ponytail };
+  } else if (bun) {
+    return { style: "bun", length: bun };
+  }
+  return { style: "loose" };
+}
+
 export function randomLook(random: Random, zombie: boolean): BodyLook {
   const outfit = pickOutfit(random);
   const [pantsStyle, shoeStyle] = pickLegwear(random, outfit);
@@ -421,15 +451,8 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
       balding: 0,
       part: chance(random, 0.3) ? slider(random, 0.8) : undefined,
       lean: DEFAULT_LOOK.hair.lean,
-      bun:
-        !long && chance(random, 0.08)
-          ? Math.round(between(random, 0.3, 1) * 100) / 100
-          : 0,
-      ponytail:
-        long && chance(random, 0.3)
-          ? Math.round(between(random, 0.3, 1) * 100) / 100
-          : 0,
-      mohawk: chance(random, 0.02) ? 0.3 : 0,
+      mohawkWidth: DEFAULT_LOOK.hair.mohawkWidth,
+      ...randomHairStyle(random, long),
     },
     brows: DEFAULT_LOOK.brows,
     beard: chance(random, 0.2)
@@ -490,8 +513,8 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
     parted: 3,
   });
 
-  if (look.hair.coverage > 0 && !look.hair.length && chance(random, 0.12)) {
-    look.hair.cut = chance(random, 0.6) ? "buzz" : "stubble";
+  if (look.hair.coverage > 0 && !long && chance(random, 0.12)) {
+    look.hair.style = chance(random, 0.6) ? "buzz" : "stubble";
   }
   if (look.hair.coverage > 0 && look.build.bust === 0 && chance(random, 0.18)) {
     look.hair.balding = Math.round(between(random, 0.2, 1) * 100) / 100;
@@ -533,13 +556,11 @@ export function randomLook(random: Random, zombie: boolean): BodyLook {
   const hair = look.hair;
   if (
     hair.coverage > 0.4 &&
-    !hair.cut &&
+    hair.style === "loose" &&
     hair.length < 0.2 &&
-    !hair.ponytail &&
-    !hair.bun &&
     spiky() < 0.12
   ) {
-    hair.hairline = "spiky";
+    hair.style = "spiky";
     hair.volume = Math.max(
       hair.volume,
       Math.round(between(spiky, 0.3, 0.8) * 100) / 100,

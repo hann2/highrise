@@ -21,24 +21,31 @@
       "volume": 0,
       "messiness": 0,
       "curls": 0,
+      "style": "loose",
       "length": 0,
-      "fringe": -0.3,
-      "bun": 0,
-      "ponytail": 0,
-      "mohawk": 0
+      "fringe": -0.3
+    },
+    "brows": {
+      "bushiness": 0.35,
+      "arch": 0.4,
+      "tilt": 0
     },
     "top": {
       "style": "polo",
       "color": "#f08070",
       "secondary": "#e8e4dc",
-      "popped": true
+      "popped": true,
+      "pattern": {
+        "kind": "dots",
+        "color": "#ffffff"
+      }
     },
     "sleeves": {
       "length": 0.3
     },
     "extras": [],
     "pantsStyle": "shorts",
-    "pants": "#c2ad84",
+    "pants": "#3836c9",
     "shoeStyle": "sneakers",
     "shoes": "#e6e6e6",
     "seed": 2,

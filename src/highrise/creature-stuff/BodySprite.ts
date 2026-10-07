@@ -1,4 +1,4 @@
-import { Container, Sprite } from "pixi.js";
+import { Container, MeshSimple, Sprite, Texture } from "pixi.js";
 import { BodyTextures, bodyPixelScale } from "../looks/bakeBodies";
 import { BodyLayer } from "../looks/drawBody";
 import BaseEntity from "../../core/entity/BaseEntity";
@@ -15,6 +15,16 @@ import { FOOT_FORWARD, HEM_OVERLAP, HIP_WIDTH, LegStyle } from "./Legs";
 import FloorStains, { getFloorStains } from "../effects/FloorStains";
 import { Shoes } from "./Shoes";
 import { Dangles } from "./Dangles";
+import { Hems, LegLine } from "./Hems";
+import {
+  SLEEVE_BEND,
+  SleevePicture,
+  sleeveColumnCount,
+  sleeveColumns,
+  sleeveIndices,
+  sleeveStrip,
+  sleeveUvs,
+} from "./sleeveStrip";
 
 export type { BodyTextures } from "../looks/bakeBodies";
 
@@ -42,6 +52,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   private headRadius: number;
   rightArmSprite: Container;
   private armSegments: [Sprite, Sprite][];
+  /** Each arm's sleeve, bent over it as one (see `sleeveStrip`), if it has them */
+  private sleeves: (Sleeve | undefined)[];
   leftHandSprite: Sprite;
   rightHandSprite: Sprite;
   /** The legs and feet, under everything else; only for a body with `legs` */
@@ -60,6 +72,12 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   readonly dangles?: Dangles;
   /** `game.simulatedTime` when the dangles were last moved on */
   private dangleTime = 0;
+  /** What hangs from round the waist and swings (a skirt, a coat's tails); only for a body that has any */
+  readonly hems?: Hems;
+  /** `game.simulatedTime` when the hems were last moved on */
+  private hemTime = 0;
+  /** The legs from the hips to the ankles, in the world, for the hems; reused */
+  private hemLegs: LegLine[] = [];
   /** How big the legs are next to a human's */
   private legScale: number;
   /** Meters per texture pixel */
@@ -106,13 +124,32 @@ export abstract class BodySprite extends BaseEntity implements Entity {
           return sprite;
         }) as [Sprite, Sprite],
     );
+    this.upperArm = metrics.upperArm * this.legScale;
+    this.forearm = metrics.forearm * this.legScale;
+    this.sleeves = [textures.leftSleeve, textures.rightSleeve].map((texture) =>
+      texture
+        ? makeSleeve(
+            texture,
+            scale,
+            this.upperArm,
+            this.armThickness * SLEEVE_BEND,
+          )
+        : undefined,
+    );
+    // The sleeve over the arm's halves
     this.leftArmSprite = new Container();
     this.leftArmSprite.addChild(...this.armSegments[0]);
     this.rightArmSprite = new Container();
     this.rightArmSprite.addChild(...this.armSegments[1]);
-    this.upperArm = metrics.upperArm * this.legScale;
-    this.forearm = metrics.forearm * this.legScale;
-
+    for (const [i, arm] of [
+      this.leftArmSprite,
+      this.rightArmSprite,
+    ].entries()) {
+      const sleeve = this.sleeves[i];
+      if (sleeve) {
+        arm.addChild(sleeve.mesh);
+      }
+    }
     this.leftHandSprite = new Sprite(textures.leftHand);
     this.leftHandSprite.scale.set(scale);
     this.rightHandSprite = new Sprite(textures.rightHand);
@@ -124,7 +161,14 @@ export abstract class BodySprite extends BaseEntity implements Entity {
         ? new Dangles(textures.dangles, scale, this.legScale)
         : undefined;
     this.dangles = dangles;
+    // What hangs from the waist goes over the legs and under the arms
+    const hems =
+      textures.hems.length > 0
+        ? new Hems(textures.hems, scale, this.legScale)
+        : undefined;
+    this.hems = hems;
     this.sprite.addChild(
+      ...(hems?.meshes ?? []),
       this.leftArmSprite,
       this.rightArmSprite,
       this.leftHandSprite,
@@ -147,6 +191,7 @@ export abstract class BodySprite extends BaseEntity implements Entity {
           () => getFloorStains(this.game),
         );
         this.dangles?.step(landing.side, this.getAngle(), landing.speed);
+        this.hems?.step(landing.side, this.getAngle(), landing.speed);
         this.onFootLand?.(landing);
       };
       const { leg, leftFoot, rightFoot, thickness } = legs.textures;
@@ -205,13 +250,51 @@ export abstract class BodySprite extends BaseEntity implements Entity {
         );
         this.dangleTime = now;
       }
+      if (this.hems) {
+        const now = this.game.simulatedTime;
+        this.updateHems(now - this.hemTime);
+        this.hemTime = now;
+      }
       this.updatePose();
     }
+  }
+
+  /**
+   * Moves the hems on by `dt` seconds: they hang from the middle of the
+   * hips, turned the way the hips are, and the legs push them out
+   */
+  private updateHems(dt: number) {
+    const [x, y] = this.getPosition();
+    const gait = this.gait;
+    const legs = this.hemLegs;
+    if (gait) {
+      for (const side of SIDES) {
+        const foot = gait.feet[side];
+        const leg = (legs[side] ??= {} as LegLine);
+        leg.hipX = gait.hipX(side);
+        leg.hipY = gait.hipY(side);
+        leg.ankleX = foot.x;
+        leg.ankleY = foot.y;
+        leg.radius = this.legThickness / 2;
+      }
+    } else {
+      legs.length = 0;
+    }
+    const facing = this.getAngle();
+    this.hems!.update(
+      x,
+      y,
+      gait ? gait.hipAngle : facing,
+      facing + this.getStanceAngle() + this.getTorsoTwist(),
+      legs,
+      dt,
+    );
   }
 
   /** Shoves what swings on it (m/s, in the world): a hit, a blast */
   jolt(vx: number, vy: number) {
     this.dangles?.push(vx, vy);
+    this.hems?.push(vx, vy);
   }
 
   /** Leaves out some layers, to see what's under them (the character editor) */
@@ -220,6 +303,8 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     this.torsoSprite.visible = !hidden.has("torso");
     this.dangles?.setVisible("head", !hidden.has("head"));
     this.dangles?.setVisible("torso", !hidden.has("torso"));
+    this.hems?.setVisible("torso", !hidden.has("torso"));
+    this.hems?.setVisible("legs", !hidden.has("legs"));
     this.leftArmSprite.visible = this.rightArmSprite.visible =
       !hidden.has("arms");
     this.leftHandSprite.visible = this.rightHandSprite.visible =
@@ -235,13 +320,27 @@ export abstract class BodySprite extends BaseEntity implements Entity {
 
     this.torsoSprite.rotation = this.getStanceAngle() + this.getTorsoTwist();
     this.dangles?.pose(this.torsoSprite.rotation);
+    if (this.hems) {
+      const [x, y] = this.getPosition();
+      this.hems.pose(x, y, this.getAngle());
+    }
     this.poseLegs();
 
     const [leftShoulderPos, rightShoulderPos] = this.getShoulderPositions();
     const [leftHandPos, rightHandPos] = this.getHandPositions();
 
-    this.poseArm(this.armSegments[0], leftShoulderPos, leftHandPos);
-    this.poseArm(this.armSegments[1], rightShoulderPos, rightHandPos);
+    this.poseArm(
+      this.armSegments[0],
+      this.sleeves[0],
+      leftShoulderPos,
+      leftHandPos,
+    );
+    this.poseArm(
+      this.armSegments[1],
+      this.sleeves[1],
+      rightShoulderPos,
+      rightHandPos,
+    );
 
     this.leftHandSprite.position.copyFrom(leftHandPos);
     this.rightHandSprite.position.copyFrom(rightHandPos);
@@ -250,9 +349,15 @@ export abstract class BodySprite extends BaseEntity implements Entity {
   /**
    * Puts an arm's two halves from the shoulder to the elbow to the hand,
    * the elbow where a bent arm's would be seen from above (`elbowPosition`),
-   * each half shortened as much as it's foreshortened
+   * each half shortened as much as it's foreshortened, and its sleeve bent
+   * over the two
    */
-  private poseArm([upper, fore]: [Sprite, Sprite], shoulder: V2d, hand: V2d) {
+  private poseArm(
+    [upper, fore]: [Sprite, Sprite],
+    sleeve: Sleeve | undefined,
+    shoulder: V2d,
+    hand: V2d,
+  ) {
     const [ex, ey] = elbowPosition(
       [shoulder.x, shoulder.y],
       [hand.x, hand.y],
@@ -277,6 +382,22 @@ export abstract class BodySprite extends BaseEntity implements Entity {
     };
     place(upper, shoulder.x, shoulder.y, ex, ey, this.upperArm);
     place(fore, ex, ey, hand.x, hand.y, this.forearm);
+    if (sleeve) {
+      sleeveStrip(
+        sleeve.picture,
+        {
+          shoulder: [shoulder.x, shoulder.y],
+          elbow: [ex, ey],
+          hand: [hand.x, hand.y],
+          upperArm: this.upperArm,
+          forearm: this.forearm,
+          bend: this.armThickness * SLEEVE_BEND,
+        },
+        sleeve.along,
+        sleeve.vertices,
+      );
+      sleeve.mesh.geometry.getBuffer("aPosition").update();
+    }
   }
 
   /**
@@ -405,6 +526,60 @@ export abstract class BodySprite extends BaseEntity implements Entity {
       armThickness: this.armThickness,
     };
   }
+}
+
+/** A sleeve as a strip of triangles, and where its picture is on the unbent arm */
+interface Sleeve {
+  mesh: MeshSimple;
+  /** The mesh's own vertices, posed in place */
+  vertices: Float32Array;
+  /** Where along the unbent arm each column of the strip is */
+  along: Float64Array;
+  picture: SleevePicture;
+}
+
+/**
+ * A sleeve for its straight picture, drawn `scale` meters a pixel, on an arm
+ * `upperArm` from shoulder to elbow, turning `bend` either side of the elbow
+ */
+function makeSleeve(
+  texture: Texture,
+  scale: number,
+  upperArm: number,
+  bend: number,
+): Sleeve {
+  const { width, height } = texture.frame;
+  // The picture's origin, the shoulder joint, is the texture's anchor
+  const anchor = texture.defaultAnchor ?? { x: 0, y: 0 };
+  const picture: SleevePicture = {
+    from: -anchor.x * width * scale,
+    to: (1 - anchor.x) * width * scale,
+    top: -anchor.y * height * scale,
+    bottom: (1 - anchor.y) * height * scale,
+  };
+  const along = sleeveColumns(
+    picture,
+    upperArm,
+    bend,
+    sleeveColumnCount(picture, upperArm, bend),
+  );
+  const vertices = new Float32Array(along.length * 4);
+  const mesh = new MeshSimple({
+    texture,
+    vertices,
+    uvs: sleeveUvs(picture, along),
+    indices: sleeveIndices(along.length),
+  });
+  // Its vertices are marked changed when it's posed, not every frame by a
+  // callback of its own, which Pixi calls for every mesh, in view or not
+  mesh.autoUpdate = false;
+  mesh.onRender = null;
+  return {
+    mesh,
+    vertices,
+    along,
+    picture,
+  };
 }
 
 export interface PartPose {

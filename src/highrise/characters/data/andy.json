@@ -21,11 +21,9 @@
       "volume": 0.25,
       "messiness": 0.3,
       "curls": 0,
+      "style": "loose",
       "length": 0,
-      "fringe": 0.2,
-      "bun": 0,
-      "ponytail": 0,
-      "mohawk": 0
+      "fringe": 0.2
     },
     "top": {
       "style": "tshirt",
