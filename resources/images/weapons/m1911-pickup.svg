@@ -72,8 +72,8 @@
   </g>
   <!-- A long, plain trigger, filling the back of the guard's opening, curved at the front -->
   <g id="trigger">
-    <path d="M-9.83,23.35 C-14.73,21.62 -20.17,23.29 -23.25,27.45 C-26.34,31.63 -26.34,37.32 -23.25,41.5 C-20.17,45.66 -14.73,47.33 -9.83,45.61 C-14.55,43.94 -17.7,39.47 -17.7,34.48 C-17.7,29.48 -14.55,25.01 -9.83,23.35 Z" fill="#7b7f87"/>
-    <path d="M-11.71,44.75 C-15.41,42.66 -17.7,38.73 -17.7,34.48 C-17.7,30.22 -15.41,26.3 -11.71,24.2" stroke="#9fa3aa" stroke-width="0.58" fill="none"/>
+    <path d="M-13.56,22.68 C-17.83,22.61 -21.8,24.84 -23.95,28.52 C-26.11,32.2 -26.11,36.76 -23.95,40.43 C-21.8,44.11 -17.83,46.35 -13.56,46.28 C-19.08,39.38 -19.08,29.57 -13.56,22.68 Z" fill="#7b7f87"/>
+    <path d="M-14.53,44.95 C-18.75,38.61 -18.75,30.35 -14.53,24.01" stroke="#9fa3aa" stroke-width="0.58" fill="none"/>
   </g>
   <!-- Bright steel down the back of the grip: from its tang under the hammer, under the frame's edge, standing
        proud of the frame's back down to where it ends on the flat mainspring housing -->
