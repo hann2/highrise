@@ -42,6 +42,12 @@ export interface HemShape {
   drop: number;
   /** Half the gap at the front, in radians: 0 is all the way round (a skirt) */
   opening: number;
+  /**
+   * A slit up the back from the hem to the waist, if it's open at the
+   * front: how far past the back the flap on the right reaches under the
+   * one on the left (radians), so they overlap and no gap shows at rest
+   */
+  vent?: number;
 }
 
 /** How it swings, as a `Dangle` does */
@@ -54,6 +60,12 @@ export interface HemFeel {
   drag: number;
   /** The most it swings out, as a fraction of the cloth's length */
   maxSwing: number;
+  /**
+   * How much each point's pulled along with its neighbors, as a multiple of
+   * the pull toward rest: how much a piece of it moves as one, so a flap
+   * swings whole when a leg pushes it
+   */
+  bend?: number;
 }
 
 /** A leg where it comes through the hem: its middle, and half its thickness */
@@ -64,8 +76,9 @@ export interface LegAtHem {
 }
 
 /**
- * How many points round a hem. Each has 3 vertices (`RINGS`), and a mesh
- * of up to 100 vertices is batched with the sprites
+ * How many points round a hem (two more with a vent, `hemPointCount`).
+ * Each has 3 vertices (`RINGS`), and a mesh of up to 100 vertices is
+ * batched with the sprites
  */
 export const HEM_POINTS = 30;
 
@@ -92,15 +105,89 @@ export function isClosed(shape: HemShape): boolean {
   return shape.opening <= 0;
 }
 
-/** Which way each point round the hem is from the middle (0 is in front) */
-export function hemAngles(shape: HemShape, count = HEM_POINTS): Float64Array {
+/** Whether it's split up the back into two flaps */
+export function isVented(shape: HemShape): boolean {
+  return !isClosed(shape) && shape.vent !== undefined;
+}
+
+/** How many points round its hem: a vent has a point either side of the slit, and one where the flap under reaches to */
+export function hemPointCount(shape: HemShape): number {
+  return isVented(shape) ? HEM_POINTS + 2 : HEM_POINTS;
+}
+
+/**
+ * The runs of points round the hem that are joined up, by index: all of
+ * them (coming round to the first again if it's closed), or each flap
+ * either side of a vent, the right then the left, which is drawn over it
+ */
+export function hemStrips(
+  shape: HemShape,
+  count = hemPointCount(shape),
+): { from: number; to: number }[] {
+  if (!isVented(shape)) {
+    return [{ from: 0, to: count }];
+  }
+  const half = Math.floor(count / 2);
+  return [
+    { from: 0, to: half },
+    { from: half, to: count },
+  ];
+}
+
+/**
+ * Which way each point round the hem is from the middle (0 is in front),
+ * strip by strip (`hemStrips`). With a vent, the right flap runs from the
+ * front round to the back, with one more point reaching past it under the
+ * left, which runs from the back round to the front.
+ */
+export function hemAngles(
+  shape: HemShape,
+  count = hemPointCount(shape),
+): Float64Array {
   const angles = new Float64Array(count);
-  for (let i = 0; i < count; i++) {
-    angles[i] = isClosed(shape)
-      ? (i / count) * Math.PI * 2
-      : shape.opening + (i / (count - 1)) * (Math.PI * 2 - shape.opening * 2);
+  if (isClosed(shape)) {
+    for (let i = 0; i < count; i++) {
+      angles[i] = (i / count) * Math.PI * 2;
+    }
+    return angles;
+  }
+  const end = Math.PI * 2 - shape.opening;
+  if (!isVented(shape)) {
+    for (let i = 0; i < count; i++) {
+      angles[i] = shape.opening + (i / (count - 1)) * (end - shape.opening);
+    }
+    return angles;
+  }
+  const [right, left] = hemStrips(shape, count);
+  const rightPoints = right.to - right.from - 1;
+  for (let i = 0; i < rightPoints; i++) {
+    angles[i] =
+      shape.opening + (i / (rightPoints - 1)) * (Math.PI - shape.opening);
+  }
+  angles[rightPoints] = Math.PI + shape.vent!;
+  const leftPoints = left.to - left.from;
+  for (let i = 0; i < leftPoints; i++) {
+    angles[left.from + i] = Math.PI + (i / (leftPoints - 1)) * (end - Math.PI);
   }
   return angles;
+}
+
+/**
+ * Where on the picture each point round the hem is drawn from: where it
+ * hangs, but where the flap under a vent reaches past the back, the cloth
+ * on its own side of it, mirrored, so it never shows the left flap's edge
+ */
+export function hemPictureAngles(
+  shape: HemShape,
+  angles: Float64Array,
+): Float64Array {
+  if (!isVented(shape)) {
+    return angles;
+  }
+  const [right] = hemStrips(shape, angles.length);
+  return angles.map((angle, i) =>
+    i < right.to && angle > Math.PI ? Math.PI * 2 - angle : angle,
+  );
 }
 
 /** The point on `oval` at `angle` from the middle */
@@ -133,11 +220,18 @@ function grown(oval: Oval, by: number): Oval {
 /**
  * The triangles, for vertices in the order `hemRest` gives them (`RINGS` a
  * point round the hem, then the middle if it's closed): the middle's fan
- * first, then round each ring from the waist out
+ * first, then each strip (`hemStrips`) round each ring from the waist out
  */
-export function hemIndices(shape: HemShape, count = HEM_POINTS): Uint32Array {
+export function hemIndices(
+  shape: HemShape,
+  count = hemPointCount(shape),
+): Uint32Array {
   const closed = isClosed(shape);
-  const quads = closed ? count : count - 1;
+  const strips = hemStrips(shape, count);
+  const quads = strips.reduce(
+    (sum, { from, to }) => sum + (closed ? count : to - from - 1),
+    0,
+  );
   const indices = new Uint32Array(
     (quads * 2 * (RINGS - 1) + (closed ? count : 0)) * 3,
   );
@@ -150,12 +244,14 @@ export function hemIndices(shape: HemShape, count = HEM_POINTS): Uint32Array {
       k += 3;
     }
   }
-  for (let r = 0; r < RINGS - 1; r++) {
-    for (let i = 0; i < quads; i++) {
-      const a = i * RINGS + r;
-      const b = ((i + 1) % count) * RINGS + r;
-      indices.set([a, a + 1, b, b, a + 1, b + 1], k);
-      k += 6;
+  for (const { from, to } of strips) {
+    for (let r = 0; r < RINGS - 1; r++) {
+      for (let i = from; i < (closed ? to : to - 1); i++) {
+        const a = i * RINGS + r;
+        const b = (i + 1 === to ? from : i + 1) * RINGS + r;
+        indices.set([a, a + 1, b, b, a + 1, b + 1], k);
+        k += 6;
+      }
     }
   }
   return indices;
@@ -202,7 +298,8 @@ export function hemUvs(
  * How far out from the middle the hem has to be at each of `angles`, in the
  * hips' frame, to go round `legs`: the cloth's drawn taut over a leg pushed
  * out through it and back to the waist either side, as it hangs between
- * them (the outline round the waist and the legs). Into `out`.
+ * them (the outline round the waist and the legs). Split by a vent, each
+ * flap only goes round the legs on its own side. Into `out`.
  */
 export function legClearance(
   shape: HemShape,
@@ -243,6 +340,11 @@ export class LegClearance {
   private ys: Float64Array;
   private order: Int32Array;
   private hull: Int32Array;
+  /**
+   * The runs of points that go round the legs together, and which side of
+   * the middle the legs they go round are on (0 for both)
+   */
+  private strips: { from: number; to: number; side: number }[];
 
   constructor(
     shape: HemShape,
@@ -270,11 +372,32 @@ export class LegClearance {
     this.ys = new Float64Array(capacity);
     this.order = new Int32Array(capacity);
     this.hull = new Int32Array(capacity + 1);
+    // Either side of a vent, the right flap (+y), then the left
+    this.strips = isVented(shape)
+      ? hemStrips(shape, count).map((strip, i) => ({
+          ...strip,
+          side: i === 0 ? 1 : -1,
+        }))
+      : [{ from: 0, to: count, side: 0 }];
     this.waistOnly = this.compute([], new Float64Array(count));
   }
 
   /** How far out each point round the hem has to be for `legs` (in the hips' frame), into `out` */
   compute(legs: readonly LegAtHem[], out: Float64Array): Float64Array {
+    for (const { from, to, side } of this.strips) {
+      this.computeStrip(legs, side, from, to, out);
+    }
+    return out;
+  }
+
+  /** `compute` for points `from` to `to`, going round the legs on `side` (0 for all) */
+  private computeStrip(
+    legs: readonly LegAtHem[],
+    side: number,
+    from: number,
+    to: number,
+    out: Float64Array,
+  ) {
     const { xs, ys } = this;
     let n = 0;
     for (let i = 0; i < WAIST_POINTS; i++) {
@@ -284,6 +407,9 @@ export class LegClearance {
     }
     for (let l = 0; l < legs.length && n < xs.length; l++) {
       const leg = legs[l];
+      if (side !== 0 && (side > 0 ? leg.y < 0 : leg.y >= 0)) {
+        continue;
+      }
       const r = leg.radius * (1 + LEG_CLEARANCE);
       for (let i = 0; i < LEG_POINTS; i++) {
         xs[n] = leg.x + LEG_COS[i] * r;
@@ -292,13 +418,13 @@ export class LegClearance {
       }
     }
     if (n === WAIST_POINTS && this.waistOnly) {
-      out.set(this.waistOnly);
-      return out;
+      out.set(this.waistOnly.subarray(from, to), from);
+      return;
     }
     const size = this.convexHull(n);
     const { hull } = this;
     // How far along each way the hull's edge is: the middle's always inside
-    for (let i = 0; i < this.ux.length; i++) {
+    for (let i = from; i < to; i++) {
       const ux = this.ux[i];
       const uy = this.uy[i];
       let far = 0;
@@ -323,7 +449,6 @@ export class LegClearance {
       }
       out[i] = far;
     }
-    return out;
   }
 
   /** The convex hull of the first `n` points, anticlockwise, into `hull`; gives its size (monotone chain) */
@@ -489,6 +614,12 @@ export class HemCloth {
   /** How far out each point has to be for the legs (`legClearance`) */
   private clear: Float64Array;
   private clearance: LegClearance;
+  /** Each point's neighbors in its strip, or -1 at a strip's end */
+  private prev: Int32Array;
+  private next: Int32Array;
+  /** How far each weight is from where it hangs at rest, reused each step */
+  private offX: Float64Array;
+  private offY: Float64Array;
   private local: LegAtHem[] = [];
   private middleX = 0;
   private middleY = 0;
@@ -498,7 +629,7 @@ export class HemCloth {
   constructor(
     readonly shape: HemShape,
     readonly feel: HemFeel,
-    count = HEM_POINTS,
+    count = hemPointCount(shape),
   ) {
     this.angles = hemAngles(shape, count);
     this.rest = hemRest(shape, this.angles);
@@ -522,6 +653,24 @@ export class HemCloth {
     this.vy = new Float64Array(count);
     this.clear = new Float64Array(count);
     this.clearance = new LegClearance(shape, this.angles);
+    this.prev = new Int32Array(count).fill(-1);
+    this.next = new Int32Array(count).fill(-1);
+    for (const { from, to } of hemStrips(shape, count)) {
+      for (let i = from; i < to; i++) {
+        if (i > from) {
+          this.prev[i] = i - 1;
+        } else if (isClosed(shape)) {
+          this.prev[i] = to - 1;
+        }
+        if (i < to - 1) {
+          this.next[i] = i + 1;
+        } else if (isClosed(shape)) {
+          this.next[i] = from;
+        }
+      }
+    }
+    this.offX = new Float64Array(count);
+    this.offY = new Float64Array(count);
   }
 
   get count() {
@@ -596,6 +745,8 @@ export class HemCloth {
     const omega = feel.frequency * Math.PI * 2;
     const stiffness = omega * omega;
     const damping = 2 * feel.dampingRatio * omega;
+    const bend = (feel.bend ?? 0) * stiffness;
+    const { offX, offY, prev, next } = this;
     const fromX = this.middleX;
     const fromY = this.middleY;
     const fromAngle = this.angle;
@@ -619,18 +770,35 @@ export class HemCloth {
       for (let i = 0; i < this.count; i++) {
         const hx = this.hem[i * 2];
         const hy = this.hem[i * 2 + 1];
+        offX[i] = this.x[i] - (mx + hx * c0 - hy * s0);
+        offY[i] = this.y[i] - (my + hx * s0 + hy * c0);
+      }
+      for (let i = 0; i < this.count; i++) {
+        const hx = this.hem[i * 2];
+        const hy = this.hem[i * 2 + 1];
         const ox = hx * c0 - hy * s0;
         const oy = hx * s0 + hy * c0;
         const restVX = middleVX - oy * spin;
         const restVY = middleVY + ox * spin;
+        // Pulled toward rest, and along with its neighbors in the strip
+        let pullX = -offX[i] * stiffness;
+        let pullY = -offY[i] * stiffness;
+        if (bend > 0) {
+          const p = prev[i];
+          const q = next[i];
+          if (p >= 0) {
+            pullX += (offX[p] - offX[i]) * bend;
+            pullY += (offY[p] - offY[i]) * bend;
+          }
+          if (q >= 0) {
+            pullX += (offX[q] - offX[i]) * bend;
+            pullY += (offY[q] - offY[i]) * bend;
+          }
+        }
         const ax =
-          stiffness * (mx + ox - this.x[i]) -
-          damping * (this.vx[i] - restVX) -
-          feel.drag * this.vx[i];
+          pullX - damping * (this.vx[i] - restVX) - feel.drag * this.vx[i];
         const ay =
-          stiffness * (my + oy - this.y[i]) -
-          damping * (this.vy[i] - restVY) -
-          feel.drag * this.vy[i];
+          pullY - damping * (this.vy[i] - restVY) - feel.drag * this.vy[i];
         this.vx[i] += ax * h;
         this.vy[i] += ay * h;
         this.x[i] += this.vx[i] * h;

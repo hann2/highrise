@@ -4,7 +4,7 @@
  * hem hangs at rest; it trails behind walking, flares out spinning, and
  * stays within the cloth's reach; a leg striding through it pushes it out;
  * it comes out the same whatever the frame rate; and a teleport hangs it at
- * rest. Plain node: `npm run test:core`.
+ * rest; a vent splits it into flaps that part. Plain node: `npm run test:core`.
  */
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -17,6 +17,9 @@ import {
   HemShape,
   hemStill,
   hemAngles,
+  hemPictureAngles,
+  hemPointCount,
+  hemStrips,
   LegAtHem,
   ovalAt,
   RINGS,
@@ -168,5 +171,72 @@ test("a teleport or a long gap hangs it at rest", () => {
   cloth.update(x + 5.5, 0, 0, [], 1);
   reach(cloth, x + 5.5).forEach((r, i) =>
     assert.ok(Math.abs(r - atRest(i)) < 1e-6),
+  );
+});
+
+/** A coat's tails, open at the front and split up the back */
+const VENTED: HemShape = { ...SKIRT, opening: 0.2, vent: 0.2 };
+
+test("a vent splits it into two flaps that overlap at the back", () => {
+  const count = hemPointCount(VENTED);
+  assert.ok(count * RINGS <= 100, `${count * RINGS} vertices`);
+  const [right, left] = hemStrips(VENTED);
+  assert.deepEqual([right.from, right.to, left.to], [0, count / 2, count]);
+  const angles = hemAngles(VENTED);
+  // The right flap from the front round past the back, the left from the back
+  assert.ok(Math.abs(angles[0] - 0.2) < 1e-9);
+  assert.ok(Math.abs(angles[right.to - 2] - Math.PI) < 1e-9);
+  assert.ok(Math.abs(angles[right.to - 1] - (Math.PI + 0.2)) < 1e-9);
+  assert.ok(Math.abs(angles[left.from] - Math.PI) < 1e-9);
+  assert.ok(Math.abs(angles[count - 1] - (Math.PI * 2 - 0.2)) < 1e-9);
+  // The right flap's reach past the back is drawn from its own side
+  const picture = hemPictureAngles(VENTED, angles);
+  assert.ok(Math.abs(picture[right.to - 1] - (Math.PI - 0.2)) < 1e-9);
+  // No triangle joins the flaps
+  const indices = hemIndices(VENTED);
+  const flap = (v: number) => (Math.floor(v / RINGS) < right.to ? 0 : 1);
+  assert.equal(indices.length, (count - 2) * 2 * (RINGS - 1) * 3);
+  for (let k = 0; k < indices.length; k += 3) {
+    const sides = new Set([0, 1, 2].map((c) => flap(indices[k + c])));
+    assert.equal(sides.size, 1, `triangle ${k / 3}`);
+  }
+});
+
+test("a leg behind on the left pushes the left flap out, not the right", () => {
+  const feel = { ...FEEL, bend: 3 };
+  const cloth = new HemCloth(VENTED, feel);
+  const back: LegAtHem = { x: -0.25, y: -0.08, radius: 0.08 };
+  for (let t = 0; t < 0.3; t += 1 / 60) {
+    cloth.update(0, 0, 0, [back, STANDING[1]], 1 / 60);
+  }
+  const [right, left] = hemStrips(VENTED);
+  const hem = hems(cloth);
+  const angles = hemAngles(VENTED);
+  const pushed = (i: number) =>
+    Math.hypot(...hem[i]) - Math.hypot(...ovalAt(VENTED.hem, angles[i]));
+  // The left flap's edge at the back is out past the leg, and the right's
+  // edge, at the same place at rest, has hardly moved
+  assert.ok(pushed(left.from) > 0.05, `left ${pushed(left.from)}`);
+  assert.ok(pushed(right.to - 2) < 0.02, `right ${pushed(right.to - 2)}`);
+  // and bending, more of the left flap than the leg touches comes with it
+  const quarter = left.from + Math.floor((left.to - left.from) / 4);
+  assert.ok(pushed(quarter) > 0.005, `left ${pushed(quarter)}`);
+});
+
+test("bending, it still hangs at rest left alone, and walking trails as before", () => {
+  const cloth = new HemCloth(VENTED, { ...FEEL, bend: 3 });
+  const angles = hemAngles(VENTED);
+  let x = 0;
+  for (let t = 0; t < 3; t += 1 / 60) {
+    x += 3 / 60;
+    cloth.update(x, 0, 0, [], 1 / 60);
+  }
+  for (let t = 0; t < 4; t += 1 / 60) {
+    cloth.update(x, 0, 0, [], 1 / 60);
+  }
+  reach(cloth, x).forEach((r, i) =>
+    assert.ok(
+      Math.abs(r - Math.hypot(...ovalAt(VENTED.hem, angles[i]))) < 1e-4,
+    ),
   );
 });

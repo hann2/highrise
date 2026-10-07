@@ -20,8 +20,10 @@ import {
 } from "../creature-stuff/sleeveStrip";
 import {
   hemAngles,
+  hemPictureAngles,
   hemRest,
   hemStill,
+  hemStrips,
   isClosed,
   LegAtHem,
   RINGS,
@@ -148,7 +150,7 @@ function bentSleeve(
  */
 function hangingHem(hem: HemDrawing, legs: LegAtHem[], pixel: number): string {
   const angles = hemAngles(hem.shape);
-  const rest = hemRest(hem.shape, angles);
+  const rest = hemRest(hem.shape, hemPictureAngles(hem.shape, angles));
   const posed = hemStill(hem.shape, angles, legs);
   const count = angles.length;
   const closed = isClosed(hem.shape);
@@ -160,24 +162,29 @@ function hangingHem(hem: HemDrawing, legs: LegAtHem[], pixel: number): string {
       triangles.push([count * RINGS, v(i, 0), v(i + 1, 0), [[1, 2]]]);
     }
   }
-  const quads = closed ? count : count - 1;
-  for (let r = 0; r < RINGS - 1; r++) {
-    // Each ring's quads, from the waist out: the first triangle past the
-    // diagonal, and the second past the next point's edge (but the last's,
-    // which comes round to the first) and the ring's edge further out
-    const outer = r < RINGS - 2;
-    for (let i = 0; i < quads; i++) {
-      const last = i === quads - 1;
-      triangles.push([v(i, r), v(i, r + 1), v(i + 1, r), [[1, 2]]]);
-      triangles.push([
-        v(i, r + 1),
-        v(i + 1, r),
-        v(i + 1, r + 1),
-        [
-          ...(last ? [] : [[1, 2] as [number, number]]),
-          ...(outer ? [[0, 2] as [number, number]] : []),
-        ],
-      ]);
+  // Each strip (a flap either side of a vent), the right first, under the left
+  for (const { from, to } of hemStrips(hem.shape, count)) {
+    const end = closed ? to : to - 1;
+    const after = (i: number) => (i + 1 === to ? from : i + 1);
+    for (let r = 0; r < RINGS - 1; r++) {
+      // Each ring's quads, from the waist out: the first triangle past the
+      // diagonal, and the second past the next point's edge (but the last's,
+      // which comes round to the first, or is the strip's end) and the
+      // ring's edge further out
+      const outer = r < RINGS - 2;
+      for (let i = from; i < end; i++) {
+        const last = i === end - 1;
+        triangles.push([v(i, r), v(i, r + 1), v(after(i), r), [[1, 2]]]);
+        triangles.push([
+          v(i, r + 1),
+          v(after(i), r),
+          v(after(i), r + 1),
+          [
+            ...(last ? [] : [[1, 2] as [number, number]]),
+            ...(outer ? [[0, 2] as [number, number]] : []),
+          ],
+        ]);
+      }
     }
   }
   return meshSvg(

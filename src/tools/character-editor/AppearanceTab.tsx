@@ -645,6 +645,16 @@ function TopSection({ look, set }: SectionProps) {
             />
           </Field>
         )}
+        {top.style === "coat" && (
+          <Toggle
+            label="Vent"
+            tip="A slit up the back, so the tails either side swing apart"
+            on={!top.noVent}
+            onChange={(vent) =>
+              set("top", { ...top, noVent: vent ? undefined : true })
+            }
+          />
+        )}
         {COLLARED.includes(top.style) && (
           <Toggle
             label="Popped collar"
