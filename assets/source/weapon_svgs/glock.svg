@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 83 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-561,-80)">
+        <g id="glock-hold" transform="matrix(0.752617,0,0,1,556.37,-64)">
+            <g id="grip" transform="matrix(1.05596,0,0,0.658358,-0.799207,51.4091)">
+                <path d="M19.165,145.196C19.165,143.519 18.037,142.158 16.648,142.158L9.099,142.158C7.71,142.158 6.582,143.519 6.582,145.196L6.582,158.866C6.582,160.543 7.71,161.904 9.099,161.904L16.648,161.904C18.037,161.904 19.165,160.543 19.165,158.866L19.165,145.196Z" style="fill:rgb(39,39,39);"/>
+            </g>
+            <g id="tip" transform="matrix(0.852124,0,0,0.749833,-433.139,85.981)">
+                <rect x="640.265" y="83.868" width="3.898" height="6.668" style="fill:url(#_Linear1);"/>
+            </g>
+            <g id="base" transform="matrix(1.16308,0,0,0.708056,-5.37867,38.4764)">
+                <path d="M102.43,151.151L100.824,149.033L21.849,149.033L21.849,170.218L100.824,170.218L102.43,168.099L102.43,151.151Z" style="fill:rgb(45,45,45);"/>
+            </g>
+            <g id="barrel" transform="matrix(1.05292,0,0,0.613648,6.17928,53.5462)">
+                <path d="M101.483,151.151L99.876,149.033L17.28,149.033L15.673,151.151L15.673,168.099L17.28,170.218L99.876,170.218L101.483,168.099L101.483,151.151Z" style="fill:rgb(54,54,54);"/>
+            </g>
+            <g transform="matrix(0.289293,0,0,0.708056,8.26068,38.4764)">
+                <path d="M112.124,154.026L99.876,149.033L26.465,149.033L15.673,155.388L15.673,163.862L26.465,170.218L99.876,170.218L112.124,165.225L112.124,154.026Z" style="fill:rgb(54,54,54);"/>
+                <clipPath id="_clip2">
+                    <path d="M112.124,154.026L99.876,149.033L26.465,149.033L15.673,155.388L15.673,163.862L26.465,170.218L99.876,170.218L112.124,165.225L112.124,154.026Z"/>
+                </clipPath>
+                <g clip-path="url(#_clip2)">
+                    <g transform="matrix(3.4567,0,0,1.41232,795.819,-55.8868)">
+                        <g transform="matrix(1.55959,0,0,1.78827,-840.099,-11.3653)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-837.441,-11.3653)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-834.784,-11.3653)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-832.126,-11.3653)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-829.469,-11.3653)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-826.812,-11.3653)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-824.154,-11.3653)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                    </g>
+                    <g transform="matrix(3.4567,0,0,1.41232,795.819,-54.1866)">
+                        <g transform="matrix(1.55959,0,0,1.78827,-840.099,-25.5692)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-837.441,-25.5692)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-834.784,-25.5692)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-832.126,-25.5692)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-829.469,-25.5692)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-826.812,-25.5692)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                        <g transform="matrix(1.55959,0,0,1.78827,-824.154,-25.5692)">
+                            <rect x="396.511" y="94.762" width="0.852" height="1.118" style="fill:rgb(85,85,85);"/>
+                        </g>
+                    </g>
+                </g>
+            </g>
+            <g id="front-sight" transform="matrix(0.0765588,0,0,0.0944074,103.314,136.43)">
+                <rect x="15.673" y="149.033" width="83.666" height="21.185" style="fill:rgb(111,111,111);"/>
+            </g>
+            <g id="rear-sight" transform="matrix(1,0,0,1,0,-0.492686)">
+                <g transform="matrix(1.08389,0,0,0.0590047,2.45049,137.574)">
+                    <rect x="15.673" y="151.151" width="85.81" height="16.948" style="fill:rgb(85,85,85);"/>
+                </g>
+                <g transform="matrix(1.08389,0,0,0.0590047,2.45049,147.574)">
+                    <rect x="15.673" y="151.151" width="85.81" height="16.948" style="fill:rgb(85,85,85);"/>
+                </g>
+                <g id="sight" transform="matrix(-0.0765588,0,0,0.0944074,26.3694,131.923)">
+                    <path d="M128.554,159.278L116.694,149.033L15.673,151.151L15.673,168.099L116.694,170.218L128.554,159.278Z" style="fill:rgb(111,111,111);"/>
+                </g>
+                <g id="sight1" serif:id="sight" transform="matrix(-0.0765588,0,0,0.0944074,26.3694,141.923)">
+                    <path d="M128.554,159.278L116.694,149.033L15.673,151.151L15.673,168.099L116.694,170.218L128.554,159.278Z" style="fill:rgb(111,111,111);"/>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(5.14863e-16,-5.75326,8.40836,3.52286e-16,642.558,89.7257)"><stop offset="0" style="stop-color:black;stop-opacity:1"/><stop offset="0.22" style="stop-color:rgb(69,69,69);stop-opacity:1"/><stop offset="0.5" style="stop-color:rgb(86,86,86);stop-opacity:1"/><stop offset="0.72" style="stop-color:rgb(61,61,61);stop-opacity:1"/><stop offset="1" style="stop-color:black;stop-opacity:1"/></linearGradient>
+    </defs>
+</svg>
