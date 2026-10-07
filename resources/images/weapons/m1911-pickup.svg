@@ -25,12 +25,12 @@
       <stop offset="0.52" stop-color="#43464c"/>
       <stop offset="1" stop-color="#3b3d43"/>
     </linearGradient>
-    <linearGradient id="m1911-barrel-shading" gradientUnits="userSpaceOnUse" x1="0" y1="-16.89" x2="0" y2="-8.79">
-      <stop offset="0" stop-color="#8d9198"/>
-      <stop offset="0.12" stop-color="#e4e7eb"/>
-      <stop offset="0.3" stop-color="#c3c7cd"/>
-      <stop offset="0.75" stop-color="#9599a1"/>
-      <stop offset="1" stop-color="#5a5e66"/>
+    <linearGradient id="m1911-barrel-shading" gradientUnits="userSpaceOnUse" x1="0" y1="-16.2" x2="0" y2="-9.72">
+      <stop offset="0" stop-color="#7e828a"/>
+      <stop offset="0.06" stop-color="#eef0f3"/>
+      <stop offset="0.35" stop-color="#cdd1d6"/>
+      <stop offset="0.55" stop-color="#8e929a"/>
+      <stop offset="1" stop-color="#3c3f45"/>
     </linearGradient>
     <linearGradient id="m1911-wood-shading" gradientUnits="userSpaceOnUse" x1="-104.24" y1="-26.84" x2="-38.29" y2="-26.84">
       <stop offset="0" stop-color="#5b2a15"/>
@@ -50,7 +50,7 @@
   </g>
   <!-- Seen through the ejection port, and its bushing out of the front of the slide -->
   <g id="barrel">
-    <rect x="-20.36" y="-16.89" width="33.55" height="8.1" fill="url(#m1911-barrel-shading)"/>
+    <rect x="-20.36" y="-16.2" width="33.55" height="7.29" fill="url(#m1911-barrel-shading)"/>
     <path d="M104.93,-13.42 L107.48,-13.42 C108.06,-13.42 108.4,-12.96 108.4,-12.26 L108.4,12.73 C108.4,13.42 108.06,13.88 107.48,13.88 L104.93,13.88 Z" fill="#26282d"/>
   </g>
   <!-- A long, plain trigger, curved at the front; behind the frame, showing through the guard -->
@@ -97,9 +97,11 @@
     <path d="M-88.51,100.88 L-82.26,98.11" stroke="#26282d" stroke-width="0.81"/>
   </g>
   <g id="slide">
-    <path d="M-79.94,-18.28 L-21.17,-18.28 C-20.01,-18.05 -19.21,-16.89 -18.86,-15.27 L-17.93,-10.41 C-17.7,-9.6 -17.12,-9.26 -16.31,-9.26 L9.6,-9.26 C10.41,-9.26 10.88,-9.6 11.11,-10.41 L11.8,-15.5 C12.03,-17.12 12.26,-18.05 13.3,-18.28 L102.27,-18.28 C103.78,-18.28 105.17,-17.01 105.4,-15.27 L105.63,13.65 C105.63,16.2 104.01,18.05 101.46,18.05 L61.43,18.05 L61.43,6.02 L-87.81,6.02 L-87.81,-3.7 C-87.81,-10.64 -84.57,-16.43 -79.94,-18.28 Z" fill="url(#m1911-slide-shading)"/>
+    <path d="M-79.94,-18.28 L-20.48,-18.28 C-19.55,-18.16 -18.97,-17.35 -18.86,-16.2 L-18.74,-14.11 C-18.63,-11.57 -16.78,-9.95 -13.54,-9.95 L6.59,-9.95 C9.6,-9.95 11.45,-11.57 11.69,-13.88 L11.8,-15.97 C11.92,-17.12 12.15,-17.93 13.07,-18.28 L102.27,-18.28 C103.78,-18.28 105.17,-17.01 105.4,-15.27 L105.63,13.65 C105.63,16.2 104.01,18.05 101.46,18.05 L61.43,18.05 L61.43,6.02 L-87.81,6.02 L-87.81,-3.7 C-87.81,-10.64 -84.57,-16.43 -79.94,-18.28 Z" fill="url(#m1911-slide-shading)"/>
     <!-- Its nose, under the dust cover's front: rounded below the step -->
     <path d="M61.43,6.02 L64.9,6.02 C69.53,3.47 74.16,0.69 81.1,0.23 L105.51,0 L105.63,13.65 C105.63,16.2 104.01,18.05 101.46,18.05 L61.43,18.05 Z" fill="url(#m1911-nose-shading)"/>
+    <!-- The ejection port's cut edge, catching the light -->
+    <path d="M-18.86,-16.2 L-18.74,-14.11 C-18.63,-11.57 -16.78,-9.95 -13.54,-9.95 L6.59,-9.95 C9.6,-9.95 11.45,-11.57 11.69,-13.88 L11.8,-15.97" stroke="#8a8e96" stroke-width="0.29" fill="none"/>
     <!-- Grooves to grip it by -->
     <g id="serrations">
       <rect x="-72.31" y="-12.73" width="0.64" height="18.74" fill="#26282d"/>
