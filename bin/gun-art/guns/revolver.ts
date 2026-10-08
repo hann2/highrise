@@ -8,109 +8,159 @@
  * - The barrel is the photographed 8 3/8", not a 6 1/2": these were the only photos he found with the tapered
  *   ejector rod shroud under the barrel (not the 629 Classic's full-length underlug). Drawn as photographed.
  * - The side is the LEFT side, mirrored (sw-629-mirrored.jpg, muzzle to the right), cylinder release and all.
- *   What that means for the drawing: on an S&W the side plate (its seams and its three or four screws) is on the
- *   RIGHT side, so the left side's frame is one plain surface; what the left side has instead is the cylinder
- *   release (a checkered thumbpiece held on by a screw, proud of the frame) and the grip's medallion on this
- *   panel. The yoke (crane) shows on both sides, in front of the cylinder.
- *
- * ROUND 1 is construction: the notes below, and a blockout of the main silhouettes in flat colors. No shading
- * or detail yet.
+ *   On an S&W the side plate (its seams and screws) is on the RIGHT side, so the left side's frame is one plain
+ *   surface; what the left side has instead is the cylinder release (a thumbpiece held on by a screw, proud of
+ *   the frame) and the grip's medallion on this panel. The yoke (crane) shows on both sides.
+ * - The wood is the M1911's cocoa walnut, not the photo's honey color. True scale (a 380 mm square). The rear
+ *   sight is black.
+ * - The polish (the whole set's): chrome-like, hard bands reflecting a bright sky above and a dark floor below,
+ *   two or three to a face, along each face's own axis (along the barrel, round the cylinder), a near-white
+ *   highlight on edges, and darks darker than POLISHED_STAINLESS.dark in the floor's reflection.
+ * - The gaps round the cylinder are see-through, and the barrel's breech shows in the gap in front of it.
  *
  * ## Dimensions (the scale)
  *
  * - Barrel 8 3/8" = 212.7 mm, which S&W measure from the barrel's breech face (at the front of the cylinder
- *   window) to the muzzle. In the photo the breech is at x 739 (the window's front, where the gap in front of
- *   the cylinder ends) and the muzzle at x 1728: 989 px, so 0.2151 mm a pixel. That's the scale.
- * - Checks: the cylinder is 205 px across (y 132 to 337 at x 600) = 44.1 mm, and the N frame's cylinder is
- *   1.740" = 44.2 mm. The cylinder's length is 205 px too (x 518 to 723) = 44.1 mm, about the N frame .44's
- *   1.75". The whole gun is 1673 px (the grip's heel at x 55 to the muzzle) = 360 mm = 14.2"; the 6" 629 is
- *   11.6" long by the spec sheets (IMFDB), so an 8 3/8" is about 14.0" from the frame, and the target grips'
- *   heel reaches back a little past the frame's.
+ *   window) to the muzzle. In the photo the breech is at x 739 and the muzzle at x 1728: 989 px, so 0.2151 mm a
+ *   pixel. That's the scale.
+ * - Checks: the cylinder is about 202 px across (y 129 to 331) = 43.5 mm, against the N frame's 1.740" = 44.2 mm;
+ *   its length is about the same (x 520 to 726). The whole gun is 1673 px (the grip's heel at x 55 to the muzzle)
+ *   = 360 mm = 14.2"; the 6" 629 is 11.6" long by the spec sheets (IMFDB), so an 8 3/8" is about 14.0" from the
+ *   frame, and the target grips' heel reaches back a little past the frame's.
  * - Height: the front sight's top (y 57) to the grip's base (y 797) = 159 mm.
- * - The bore's axis is y 160 (the barrel is 106 at its rib's top to 207 under it); the cylinder's axis is y 234.5,
- *   74 px (16 mm) under the bore, where the chamber at the top lines up with it.
+ * - The bore's axis is y 160 (the barrel is 106 at its rib's top to 207 under it); the cylinder's axis is y 230,
+ *   70 px (15 mm) under the bore, where the chamber at the top lines up with it.
  *
  * ## Construction
  *
  * Parts, in drawing order (back to front), and how they sit:
  *
- * - HAMMER, behind the frame: it pivots inside the frame's hammer slot, so only what sticks out shows: the spur
- *   reaching back over the grip (tip at x 300, its top checkered where the thumb goes, a target hammer's wide
- *   spur), the concave throat under the spur's front, and the hammer's top in front of it, up to the frame's top
- *   behind the rear sight. Down, at rest, as it's carried. Its lower half is under the frame's side.
- * - TRIGGER, behind the frame, showing through the guard: a smooth, wide target trigger, a crescent whose front
- *   (finger) face is concave, hanging from the frame's underside in the guard's opening, its tip curling forward.
- * - FRAME, one piece of stainless with the trigger guard: the topstrap over the cylinder (its top flat at y 100,
- *   stepping down to 104 for the last 40 px before the frame's front at x 830); the window round the cylinder
- *   (top y 126, bottom 345, front 740, and a back that curves out round the cylinder's rear, the recoil shield,
- *   x 491 at its deepest); the lump in front of the window that the barrel screws into, down to the frame's front
- *   corner (830, 395); the frame's underside (y 404) back to the guard; the guard, a ring integral to the frame,
- *   about 15 px (3 mm) thick, tilted a little forward, whose opening's top is the frame's underside (y 393); the
- *   frame's back, a long curve from the topstrap's rear (458, 119) down to the grip's tang (285, 268); and the
- *   grip frame, entirely under the wood. Planes: the frame's side is one flat face (on this side, no side plate);
- *   the guard is rounded, a step down from it, and so are the frame's back and the topstrap's edges.
- * - YOKE (crane), flush with the frame's side, in front of the cylinder: its seam runs forward under the barrel's
- *   shank at y 200 to the frame's front, and back along y 333. The ejector rod comes out of its front. A seam
- *   only: drawn as the frame (a line, round 2).
- * - CYLINDER, in the window, in front of the frame's side: a true cylinder, 205 px long and across, with a
- *   chamfered rear edge and a bevelled front. Six chambers, six flutes between them. With a chamber at the top
- *   (under the bore), the flutes are at 30, 90 and 150 degrees from the top on this side: the middle one faces us
- *   (centered on the axis, y 234; full width, its rear end a half circle), and the other two are near the top
- *   and bottom edges (y 234 -+ 0.866 R = 145 and 323), foreshortened to half their width (sin 30), their ends
- *   half ellipses. Flutes are ball-end cuts that stop short of both faces, from about x 580 to 718. The cylinder
- *   stop notches (two small slots near the rear, at y 170 and 280, x 520 to 555) show too. The gap in front of
- *   the cylinder (x 723 to 739) shows the center pin and the ejector's collar, dark.
- * - BARREL, screwed into the frame's front (x 830), in front of everything but the sights: a tube tapering very
- *   slightly (its underside y 207 at the shroud to 204 at the muzzle), a narrow flat rib along its top (the dark
- *   band y 106 to 112, the rib's side), the muzzle's crown rounded. "SMITH & WESSON" is rolled into its side
- *   (drops out at 128 px).
- * - EJECTOR ROD SHROUD, one piece with the barrel, under it: a lug from the frame's front to x 1072 (its
- *   underside y 277), whose front sweeps up and forward in one concave curve into the barrel's underside at
- *   x 1140. The rod lies in an open channel between the barrel and the lug (y 208 to 250), its front end a half
- *   circle (the pocket the rod's tip locks into). The ROD, round (y 218 to 240), comes out of the yoke and ends
- *   at x 1017 in a rounded tip, behind a knurled band (x 970 to 998).
- * - FRONT SIGHT, standing on the rib: a ramp rising from the rib at x 1540 (concave, to y 88 at x 1630), then
- *   the blade, sloping up to a rounded top (y 57) and dropping straight at the front (x 1721). Its red insert is
- *   a parallelogram on the blade's slope, the one bit of color on the gun. Pinned to the rib (a pin, which drops
- *   out at 128 px).
- * - REAR SIGHT, on the topstrap: S&W's adjustable sight, black (blued) on a stainless gun. A long, thin leaf
- *   lying on the topstrap from the sight's body to x 792, sloping down from y 81 to 97; at its back the body,
- *   taller and rounded, with the elevation screw's head (470, 92) in its side, and the notched blade on top
- *   (y 68). The body sits on the frame's top where it curves down behind the topstrap.
- * - CYLINDER RELEASE (the thumbpiece), on the frame's side behind the window, standing proud of it: a checkered
- *   pad, wider than tall (x 362 to 440, y 250 to 306), and a plate reaching forward from it round its screw
- *   (452, 272), which is slotted. Its checkering is a grid of small domes; at 128 px it's a flat lighter pad.
- * - GRIP, wood, over everything round the grip: a target stock that wraps the whole grip frame, front strap and
- *   backstrap (no metal shows below the tang), and fills the space behind the trigger guard with a "horn"
- *   (x 442 to 461, y 403 to 480). Its top meets the frame along a curve from the tang (290, 276) down and
- *   forward to the horn. The back runs straight down, leaning back (about -0.44 x per y), the front is
- *   concave under the horn and flares out at the base. Planes: the checkered field is sunk into the panel, a
- *   step down with a raised, smooth border all round it, its back edge along the back's lean; checkering in two
- *   sets of lines along the grip's axis, like the M1911's (and one axis for all of it, SlantedAxis). The
- *   medallion (silver S&W monogram, a disc of 24 px radius at (300, 423)) is set in the border above the field,
- *   flush; the grip screw's escutcheon (r 12 at (200, 573)) is in the field.
- * - Pins: a pin in the frame's side above the thumbpiece (441, 152), and a round boss under the window's rear
- *   corner (505, 350).
+ * - HAMMER, behind the frame, down (at rest): only what sticks out shows. The spur reaching back over the grip
+ *   (tip at x 301), its top checkered where the thumb goes; under its front a concave throat; then the hammer's
+ *   front rising to its top (y 123), which meets the frame behind the rear sight. Lower down it disappears behind
+ *   the frame's side, whose edge is the bright line curving from the topstrap's rear down toward the grip.
+ * - TRIGGER, behind the frame, showing through the guard: a smooth, wide target trigger, a crescent between two
+ *   true circles (its front, finger face concave), hanging from inside the frame, its tip curling forward.
+ * - FRAME, one piece of stainless with the trigger guard. Its side is one flat face: the topstrap over the
+ *   cylinder (flat at y 100, stepping down to 104 for its last stretch before the frame's front at x 830), the
+ *   window round the cylinder (a hole: top y 126, bottom 336, front 740, its back curving out round the cylinder's
+ *   rear), the lump in front of the window, which the barrel screws into, its front straight down to the shroud's
+ *   underside, then sweeping back in a concave curve (the yoke's lug) to x 814 and down to its underside (y 403).
+ *   The guard is a ring round an oval opening (a true ellipse fitted to the photo, 206 by 151 px, its long axis tipped 13.65 degrees up
+ *   toward the muzzle), its own width (16 px, 3.4 mm) all round, rounded, a step down from the side; it grows out
+ *   of the frame's underside, with a fillet at its front, and at its back it runs up under the grip's horn. The
+ *   frame's back: a rounded face behind the side, between the bright line (the side's edge) and the outline, from
+ *   the hammer down to the top of the grip, where it rounds over and runs down the back of the grip as a strip of
+ *   bare backstrap behind the wood (12 px at the top, nothing by y 363, where the wood wraps round it).
+ * - YOKE (crane), flush with the frame's side: seams only. One runs forward under the barrel at y 200; the yoke's
+ *   lug is outlined below the window (y 331, and a step at y 372).
+ * - CYLINDER, in the window: a true cylinder, its rear edge chamfered, its front's edge rounded. Six chambers,
+ *   six flutes between them. With a chamber at the top (under the bore), the flutes are at 30, 90 and 150 degrees
+ *   from the top on this side: the middle one faces us (y 202 to 258), the others are near the top and bottom
+ *   edges, foreshortened to the projection of their arcs (y 132 to 160, and 300 to 328). Each is a ball-end cut,
+ *   its rear end rounded (drawn as a half ellipse, longer than it's wide, since the cut runs out shallow), running
+ *   out at the front face. Two cylinder stop notches show near the rear. Shaded round its axis: the flutes are
+ *   grooves, so they're lit the other way up (dark under their top edges, bright along their bottoms).
+ * - In the gap in front of the cylinder: the barrel's breech end (in the bore's line, its forcing cone meeting the
+ *   chamber at the top), and the ejector's center pin. The rest of the gaps round the cylinder are see-through.
+ * - BARREL, screwed into the frame's front (x 830): a tube tapering very slightly (its underside y 207 to 204 at
+ *   the muzzle), with a narrow flat rib along its top (shading, not a line), the muzzle's crown rounded.
+ *   "SMITH & WESSON" rolled into its side drops out at 128 px.
+ * - EJECTOR ROD SHROUD, one piece with the barrel: a lug under it from the frame to x 1072 (its underside y 277),
+ *   its front one concave sweep up into the barrel at x 1140. The rod lies in an open channel between the barrel
+ *   and the lug (y 208 to 250), ending in a half circle. The ROD (y 218 to 240) has a rounded tip and a knurled
+ *   band behind it.
+ * - FRONT SIGHT, on the rib: a concave ramp, then the blade sloping up to a rounded top, square at the front; a
+ *   red insert on its slope.
+ * - REAR SIGHT, black: a long thin leaf on the topstrap, and at its back the rounded body with the elevation
+ *   screw, and the notched blade on top.
+ * - CYLINDER RELEASE (the thumbpiece), proud of the frame's side behind the window: one part, symmetrical about
+ *   its own axis (y 277.5): a round checkered pad (r 28), and a round end (r 19) round its slotted screw, joined
+ *   by concave flanks (circles tangent to both). It sits in a round recess cut in the frame, whose far wall shows
+ *   as a shadowed crescent in front of it.
+ * - GRIP, wood, over the grip frame: a target stock that wraps the front strap and, below y 363, the backstrap,
+ *   and fills behind the guard with a horn. Long simple curves: its top along the frame from the backstrap round
+ *   to the horn, the front concave under the horn and flaring to the base, the back leaning back. The checkered
+ *   field is sunk into it (a step down, shadowed along its top and back, lit along its front and bottom) inside a
+ *   smooth raised border; checkering in two sets of lines either side of the grip's axis. The silver medallion is
+ *   flush in the border above the field; the grip screw's escutcheon is in the field.
  *
- * At 128 px (a pixel is about 2.9 mm): the silhouette, the cylinder and its three flutes, the window's dark
- * gaps, the ejector rod in its channel, the hammer spur, the guard and trigger, the front sight's red, the black
- * rear sight, the wood with a hint of its field and the medallion survive. The flutes' end shapes, the stop
- * notches, the knurling on the rod, the thumbpiece's checkering (as a lighter pad), the yoke seam, the rolled
- * marking, the pins and the grip screw go, or are kept only as a line or a dot.
+ * At 128 px (a pixel is about 2.9 mm): the silhouette, the cylinder and its flutes, the see-through gaps, the rod
+ * in its channel, the spur, the guard and trigger, the red front sight, the black rear sight, the wood and its
+ * field, the medallion. Gone or only a hint: the flutes' ends, the stop notches, the knurling, the thumbpiece's
+ * checkering, the yoke's seams, the roll mark, the grip screw.
  */
 import type { Point } from "../lib/geometry";
-import { arc, fmt, on, polygon, rounded, smoothCurve } from "../lib/geometry";
+import {
+  arc,
+  fixed,
+  fmt,
+  on,
+  polygon,
+  rounded,
+  smoothCurve,
+} from "../lib/geometry";
 import type { GunDrawing } from "../lib/gun";
 import { BLUED_STEEL, POLISHED_STAINLESS, WALNUT } from "../lib/style";
 
-const STAINLESS = POLISHED_STAINLESS.base;
-const STAINLESS_LIGHT = POLISHED_STAINLESS.light;
-const STAINLESS_DARK = POLISHED_STAINLESS.dark;
-const GAP = BLUED_STEEL.dark; // the dark gaps round the cylinder and in the rod's channel
-const SIGHT = BLUED_STEEL.base; // the rear sight, blued
-// Not in style.ts yet: the front sight's red insert, taken from the photo (to propose for style.ts)
+// Not in style.ts yet: the front sight's red insert, from the photo (the lead moves it to style.ts)
 const SIGHT_RED = "#e8553c";
-const WOOD = WALNUT.base;
+const SIGHT_RED_DARK = "#a93424";
+
+/**
+ * Chrome-like polished stainless, the Desert Eagle's (desert-eagle.ts, copied here until the lead moves it to
+ * style.ts): each face reflects a bright sky above and a dark floor below, so it's banded rather than shaded:
+ * from `sky` at its top fading to `skyLow` at its horizon, a hard drop (`hardness`, as a fraction of the face) to
+ * `floor`, rising to `floorLow` at its bottom edge. Edges that catch the light are a line of `edge` with
+ * `edgeDark` just below; the outline is `edgeDark` too. Bead-blasted (matte) planes are a step darker.
+ */
+export interface Polish {
+  readonly sky: string;
+  readonly skyLow: string;
+  readonly floor: string;
+  readonly floorLow: string;
+  /** Where on a face the floor's reflection starts, 0 at its top to 1 at its bottom */
+  readonly horizon: number;
+  /** How quickly the sky gives way to the floor, as a fraction of the face: 0 is a hard line */
+  readonly hardness: number;
+  readonly edge: string;
+  readonly edgeDark: string;
+  readonly matte: string;
+  readonly matteLight: string;
+  readonly matteDark: string;
+}
+
+/** The recommended polish, the Desert Eagle's: neutral to slightly cool, a hard horizon, a dark floor */
+export const CHROME_STAINLESS: Polish = {
+  sky: "#f5f7f9",
+  skyLow: "#c4c9cf",
+  floor: "#3e434a",
+  floorLow: "#8c9199",
+  horizon: 0.64,
+  hardness: 0.02,
+  edge: "#ffffff",
+  edgeDark: "#25282d",
+  matte: "#868b92",
+  matteLight: "#a9aeb4",
+  matteDark: "#5a5f66",
+};
+
+export interface WoodColors {
+  edge: string;
+  middle: string;
+  dark: string;
+}
+
+export const DEFAULT_WOOD: WoodColors = {
+  edge: WALNUT.base,
+  middle: WALNUT.light,
+  dark: WALNUT.dark,
+};
+
+export interface RevolverOptions {
+  polish?: Partial<Polish>;
+  wood?: Partial<WoodColors>;
+}
 
 // ---------------------------------------------------------------------------------------------------------
 // The scale's numbers, in the photo's pixels
@@ -123,91 +173,80 @@ const BORE_Y = 160;
 // ---------------------------------------------------------------------------------------------------------
 // The frame
 const TOPSTRAP_TOP = 100;
-const FRAME_FRONT_TOP = 104; // the topstrap steps down for the last stretch before the frame's front
+const FRAME_FRONT_TOP = 104; // the topstrap steps down for its last stretch before the frame's front
 const STEP_X = 792;
 const FRAME_FRONT = 830;
-const FRAME_FRONT_BOTTOM = 395;
-const FRAME_UNDER = 404; // the frame's underside, in front of the guard
-const FRAME_TOP_BACK: Point = [458, 119]; // the topstrap's rear, under the rear sight's body
-const TANG: Point = [285, 268]; // the frame's back meets the wood at the top of the grip
-// The frame's back, from the tang up to the topstrap (measured along its edge in the photo)
-const FRAME_BACK: Point[] = [
-  TANG,
-  [300, 262],
-  [335, 248],
-  [370, 228],
-  [400, 207],
-  [425, 190],
-  [445, 165],
-  [455, 140],
-  FRAME_TOP_BACK,
+const LUG_FRONT = 814; // the frame's front below the shroud, swept back
+const FRAME_UNDER = 403; // the frame's underside, in front of the guard
+const FRAME_TOP_BACK: Point = [457, 120]; // the topstrap's rear, under the rear sight's body
+// The frame's outline behind the hammer: from where the hammer disappears behind it, down its rounded back to
+// the top of the grip, round over it, and down the bare backstrap to where the wood wraps round it
+const HAMMER_FOOT: Point = [381, 205];
+const BACK_OUTLINE: Point[] = [
+  HAMMER_FOOT,
+  [353, 220],
+  [324, 242],
+  [290, 252],
+  [262, 259],
+  [250, 272],
+  [246, 300],
+  [238, 363],
+];
+// The edge of the frame's flat side: a bright line from the topstrap's rear down toward the grip; behind it the
+// frame's back is rounded (and above HAMMER_FOOT, the hammer shows)
+const SIDE_EDGE: Point[] = [
+  [459, 126],
+  [455, 150],
+  [445, 172],
+  [430, 190],
+  [412, 204],
+  [385, 222],
+  [352, 240],
+  [318, 254],
+  [285, 264],
+  [262, 274],
 ];
 
 // The window round the cylinder: its back curves out round the cylinder's rear (the recoil shield)
 const WINDOW_TOP = 126;
-const WINDOW_BOTTOM = 345;
+const WINDOW_BOTTOM = 336;
 const WINDOW_FRONT = 740;
 const WINDOW_BACK: Point[] = [
   [514, WINDOW_BOTTOM],
-  [508, 310],
-  [497, 280],
+  [500, 290],
   [491, 245],
-  [498, 215],
-  [509, 170],
+  [500, 195],
   [515, WINDOW_TOP],
 ];
 
-// The trigger guard, a ring: its outside from where it leaves the frame's underside, round, and back up into
-// the frame behind it (under the wood's horn); its opening, whose top is the frame's underside
-const GUARD_OUTSIDE: Point[] = [
-  [706, 412],
-  [701, 430],
-  [697, 450],
-  [689, 470],
-  [681, 490],
-  [667, 510],
-  [645, 530],
-  [610, 544],
-  [580, 551],
-  [550, 553],
-  [520, 550],
-  [498, 540],
-  [480, 524],
-  [468, 505],
-  [463, 485],
-  [466, 460],
-  [472, 432],
-  [482, 412],
-];
-const OPENING_TOP = 393;
-const OPENING: Point[] = [
-  [682, OPENING_TOP],
-  [684, 412],
-  [685, 432],
-  [681, 450],
-  [674, 470],
-  [666, 488],
-  [647, 508],
-  [610, 526],
-  [580, 534],
-  [550, 537],
-  [522, 533],
-  [505, 523],
-  [491, 508],
-  [481, 490],
-  [478, 470],
-  [483, 450],
-  [491, 430],
-  [503, 410],
-  [520, OPENING_TOP],
-];
+// The trigger guard's opening: an oval, a true ellipse fitted to 38 points on its edge in the photo (measured
+// along rows and columns, every point within 4% of it), its long axis tipped up 13.65 degrees toward the muzzle.
+// The guard round it is the same ellipse GUARD_WIDTH bigger along both axes, about its own width all round.
+const OPENING_CENTER: Point = [577.2, 462.3];
+const OPENING_RX = 102.8;
+const OPENING_RY = 75.7;
+const OPENING_TILT = -13.65; // degrees, clockwise on screen
+const GUARD_WIDTH = 16;
+// Where the guard leaves the frame's underside at its front, and where its back meets the grip's horn (the
+// ellipse's parameter angles)
+const GUARD_FRONT_AT = -35;
+const GUARD_HORN_AT = 185;
 
 // ---------------------------------------------------------------------------------------------------------
-// The cylinder: a true cylinder, as long as it is across
-const CYLINDER_BACK = 518;
-const CYLINDER_FRONT = 723;
-const CYLINDER_TOP = 132;
-const CYLINDER_BOTTOM = 337;
+// The cylinder: a true cylinder
+const CYLINDER_BACK = 520;
+const CYLINDER_FRONT = 726;
+const CYLINDER_TOP = 129;
+const CYLINDER_BOTTOM = 331;
+const CYLINDER_AXIS = (CYLINDER_TOP + CYLINDER_BOTTOM) / 2;
+const CYLINDER_R = (CYLINDER_BOTTOM - CYLINDER_TOP) / 2;
+const REAR_CHAMFER = 7;
+const FLUTE_HALF = 16.4; // degrees: half a flute's width round the cylinder (the middle one is 56 px wide)
+const FLUTE_BACK = 582; // the rear ends' rearmost point
+const FLUTE_END = 52; // how long the rounded rear ends are
+// The barrel's breech end, seen in the gap in front of the cylinder, and the ejector's center pin
+const BREECH_END: [number, number] = [131, 189];
+const CENTER_PIN: [number, number] = [206, 252];
 
 // ---------------------------------------------------------------------------------------------------------
 // The barrel and the ejector rod shroud under it
@@ -216,13 +255,10 @@ const BARREL_UNDER = 207; // at the shroud
 const BARREL_UNDER_MUZZLE = 204; // the taper
 const CROWN = 4; // the muzzle's rounded edges
 const SHROUD_UNDER = 277;
-// The shroud's front, sweeping up into the barrel's underside
 const SHROUD_FRONT: Point[] = [
   [1140, BARREL_UNDER],
-  [1115, 212],
-  [1098, 222],
-  [1087, 240],
-  [1078, 262],
+  [1100, 220],
+  [1080, 256],
   [1072, SHROUD_UNDER],
 ];
 const CHANNEL_TOP = 208;
@@ -235,7 +271,6 @@ const KNURL: [number, number] = [970, 998];
 
 // ---------------------------------------------------------------------------------------------------------
 // The sights
-// The front sight: a ramp off the rib, then the blade
 const RAMP_START = 1540;
 const RAMP: Point[] = [
   [RAMP_START, RIB_TOP],
@@ -250,182 +285,371 @@ const BLADE: Point[] = [
   [1694, 59],
 ];
 const RED_INSERT: Point[] = [
-  [1667, 70],
-  [1694, 57],
-  [1700, 63],
-  [1672, 77],
+  [1666, 73],
+  [1690, 62],
+  [1696, 69],
+  [1672, 80],
 ];
-// The rear sight: its body at the back (rounded), the blade on it, and the leaf along the topstrap
 const LEAF_FRONT = STEP_X;
 const LEAF_TOP_BACK = 81;
 const LEAF_TOP_FRONT = 97;
 const ELEVATION_SCREW: Point = [470, 92];
 
 // ---------------------------------------------------------------------------------------------------------
-// The hammer, at rest. Its top outline: from the spur's tip, along the spur's checkered top, down into the
-// throat and up the hammer's front to its top; then its underside back to the tip
-const SPUR_TIP: Point = [303, 155.5];
-const SPUR_TIP_R = 5.5;
+// The hammer: from the spur's tip along its checkered top, down into the throat, up its front to its top; and
+// its underside, from where it goes behind the frame back to the tip
+const SPUR_TIP: Point = [303, 156];
+const SPUR_TIP_R = 6;
 const HAMMER_TOP: Point[] = [
   [303, 150],
-  [320, 145],
-  [345, 145],
-  [368, 150],
-  [385, 163],
-  [398, 174],
-  [415, 171],
-  [428, 158],
-  [434, 140],
-  [440, 123],
+  [325, 145],
+  [355, 146],
+  [378, 160],
+  [393, 174],
+  [407, 163],
+  [418, 141],
+  [428, 124],
+  [447, 122],
 ];
 const HAMMER_UNDER: Point[] = [
-  [378, 215],
-  [370, 190],
-  [355, 172],
-  [330, 163],
-  [303, 161],
+  HAMMER_FOOT,
+  [374, 186],
+  [355, 170],
+  [325, 162],
+  [303, 162],
 ];
 
 // ---------------------------------------------------------------------------------------------------------
-// The trigger: a crescent, its front (finger) face concave
-const TRIGGER_FRONT: Point[] = [
-  [592, OPENING_TOP],
-  [590, 410],
-  [578, 430],
-  [567, 450],
-  [568, 470],
-  [578, 490],
-  [598, 508],
-  [612, 515],
-];
-const TRIGGER_BACK: Point[] = [
-  [608, 518],
-  [585, 516],
-  [562, 505],
-  [548, 480],
-  [543, 450],
-  [543, 420],
-  [548, OPENING_TOP],
-];
+// The trigger: a crescent between two circles, each through three points on its face in the photo
+const TRIGGER_TIP: Point = [630, 514];
+const TRIGGER_FRONT: [Point, Point, Point] = [[590, 395], [568, 455], TRIGGER_TIP];
+const TRIGGER_BACK: [Point, Point, Point] = [[545, 395], [546, 465], TRIGGER_TIP];
 
 // ---------------------------------------------------------------------------------------------------------
-// The cylinder release: a checkered pad, and its plate round the screw
-const THUMBPIECE = rounded(
-  [
-    [362, 250],
-    [440, 250],
-    [440, 306],
-    [362, 306],
-  ],
-  [26, 12, 12, 26],
-);
-const THUMB_SCREW: Point = [452, 272];
-const THUMB_PLATE_R = 22;
+// The cylinder release: a checkered pad and a round end round its screw, joined by concave flanks, symmetrical
+// about its axis
+const PAD_CENTER: Point = [385, 277.5];
+const PAD_R = 28;
+const THUMB_SCREW: Point = [431.5, 277.5];
+const SCREW_END_R = 19;
+const FLANK_R = 70; // the concave flanks' radius: a shallow waist
+const SCREW_R = 14;
+const RECESS_R = 27; // the round recess in the frame the thumbpiece sits in, a little ahead of its screw end
+const RECESS_CENTER: Point = [444, 277.5];
 
 // ---------------------------------------------------------------------------------------------------------
-// The grip: wood all round the grip frame. Its top meets the frame along a curve from the tang to the horn
-// behind the guard; then down its front, concave under the horn and flaring at the base; along the base; and
-// up its back, leaning back
-const WOOD_TOP: Point = [250, 276];
-const WOOD_BORDER: Point[] = [
-  [290, 276],
-  [312, 288],
-  [330, 305],
-  [341, 325],
-  [345, 350],
-  [352, 372],
-  [365, 390],
-  [390, 399],
-  [420, 401],
+// The grip: wood round the grip frame, in long simple curves
+const WOOD_CORNER: Point = [262, 276]; // its top back corner, against the bare backstrap
+const WOOD_TOP: Point[] = [
+  [270, 271],
+  [300, 278],
+  [328, 300],
+  [343, 335],
+  [352, 370],
+  [375, 393],
   [442, 403],
 ];
 const WOOD_FRONT: Point[] = [
   [442, 403],
-  [452, 415],
-  [459, 440],
-  [461, 462],
-  [447, 480],
-  [420, 492],
-  [389, 501],
-  [368, 520],
-  [358, 540],
-  [351, 560],
-  [347, 580],
-  [344, 620],
-  [343, 660],
-  [346, 700],
-  [350, 740],
-  [356, 770],
+  [458, 425],
+  [461, 458],
+  [445, 481],
+  [395, 500],
+  [360, 536],
+  [345, 610],
+  [347, 700],
   [360, 795],
 ];
 const GRIP_BASE = 797;
 const WOOD_BACK: Point[] = [
   [GRIP_HEEL, 790],
-  [61, 760],
-  [77, 720],
-  [92, 680],
-  [104, 640],
-  [115, 600],
-  [128, 560],
-  [145, 520],
+  [110, 620],
   [164, 480],
-  [187, 440],
-  [213, 400],
-  [238, 360],
-  [245, 335],
-  [247, 300],
-  WOOD_TOP,
+  [238, 363],
+  [252, 330],
+  [260, 284],
 ];
-// The sunken checkered field, its back along the grip's back
-const FIELD = rounded(
-  [
-    [210, 440],
-    [275, 440],
-    [330, 480],
-    [318, 700],
-    [118, 705],
-  ],
-  [18, 18, 18, 14, 14],
-);
+// The sunk, checkered field, its back along the grip's back
+const FIELD_CORNERS: Point[] = [
+  [212, 440],
+  [272, 440],
+  [330, 478],
+  [320, 700],
+  [118, 706],
+];
+const FIELD = rounded(FIELD_CORNERS, [18, 18, 18, 14, 14]);
+const GRIP_LEAN = (118 - 212) / (706 - 440); // x per y down the field's back edge
+const CHECK_SPREAD = 0.42; // radians either side of the grip's axis
+const CHECK_SPACING = 11;
 const MEDALLION: Point = [300, 423];
 const MEDALLION_R = 24;
 const GRIP_SCREW: Point = [200, 573];
 const GRIP_SCREW_R = 12;
 
 // ---------------------------------------------------------------------------------------------------------
+// Geometry
 
-const c = (p: Point, r: number, fill: string) =>
-  `<circle cx="${p[0]}" cy="${p[1]}" r="${r}" fill="${fill}"/>`;
+const f1 = (v: number) => fixed(v, 1);
 
-function drawSide(): string {
+/** A point on an ellipse at parameter angle `t` degrees */
+function onEllipse(
+  c: Point,
+  rx: number,
+  ry: number,
+  tilt: number,
+  t: number,
+): Point {
+  const a = (t * Math.PI) / 180;
+  const r = (tilt * Math.PI) / 180;
+  const x = rx * Math.cos(a);
+  const y = ry * Math.sin(a);
+  return [
+    c[0] + x * Math.cos(r) - y * Math.sin(r),
+    c[1] + x * Math.sin(r) + y * Math.cos(r),
+  ];
+}
+
+/** Béziers along an ellipse from parameter angle t0 to t1 (degrees): the unit circle's arcs, mapped onto it */
+function ellipseArc(
+  c: Point,
+  rx: number,
+  ry: number,
+  tilt: number,
+  t0: number,
+  t1: number,
+): string {
+  const pieces = Math.max(1, Math.ceil(Math.abs(t1 - t0) / 90 - 1e-9));
+  const step = ((t1 - t0) / pieces) * (Math.PI / 180);
+  const k = (4 / 3) * Math.tan(step / 4);
+  const r = (tilt * Math.PI) / 180;
+  const map = ([x, y]: Point): Point => [
+    c[0] + rx * x * Math.cos(r) - ry * y * Math.sin(r),
+    c[1] + rx * x * Math.sin(r) + ry * y * Math.cos(r),
+  ];
+  const parts: string[] = [];
+  let a = (t0 * Math.PI) / 180;
+  for (let i = 0; i < pieces; i++) {
+    const b = a + step;
+    const p0: Point = [Math.cos(a), Math.sin(a)];
+    const p3: Point = [Math.cos(b), Math.sin(b)];
+    const c1: Point = [p0[0] - k * p0[1], p0[1] + k * p0[0]];
+    const c2: Point = [p3[0] + k * p3[1], p3[1] - k * p3[0]];
+    parts.push(`C${fmt(map(c1))} ${fmt(map(c2))} ${fmt(map(p3))}`);
+    a = b;
+  }
+  return parts.join(" ");
+}
+
+/** The guard's opening's edge, `grow` bigger along both axes, from parameter angle t0 to t1 (with its M) */
+function openingEdge(grow: number, t0: number, t1: number): string {
+  const rx = OPENING_RX + grow;
+  const ry = OPENING_RY + grow;
+  return `M${fmt(onEllipse(OPENING_CENTER, rx, ry, OPENING_TILT, t0))} ${ellipseArc(OPENING_CENTER, rx, ry, OPENING_TILT, t0, t1)}`;
+}
+
+/** The whole opening, `grow` bigger */
+function openingShape(grow: number): string {
+  return `${openingEdge(grow, 0, 360)} Z`;
+}
+
+/** The circle through three points: its center and radius */
+function circleThrough(a: Point, b: Point, c: Point): [Point, number] {
+  const d =
+    2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]));
+  const sq = (p: Point) => p[0] * p[0] + p[1] * p[1];
+  const x =
+    (sq(a) * (b[1] - c[1]) + sq(b) * (c[1] - a[1]) + sq(c) * (a[1] - b[1])) /
+    d;
+  const y =
+    (sq(a) * (c[0] - b[0]) + sq(b) * (a[0] - c[0]) + sq(c) * (b[0] - a[0])) /
+    d;
+  return [[x, y], Math.hypot(a[0] - x, a[1] - y)];
+}
+
+const angleOf = (c: Point, p: Point) =>
+  (Math.atan2(p[1] - c[1], p[0] - c[0]) * 180) / Math.PI;
+
+/** `arc` the short way round, from angle a0 to a1 */
+function shortArc(c: Point, r: number, a0: number, a1: number): string {
+  let end = a1;
+  while (end - a0 > 180) end -= 360;
+  while (end - a0 < -180) end += 360;
+  return arc(c, r, a0, end);
+}
+
+/** Where two circles cross: the crossing on the left of the line from a to b, and the one on its right */
+function crossings(a: Point, ra: number, b: Point, rb: number): [Point, Point] {
+  const d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const along = (d * d + ra * ra - rb * rb) / (2 * d);
+  const h = Math.sqrt(Math.max(0, ra * ra - along * along));
+  const ux = (b[0] - a[0]) / d;
+  const uy = (b[1] - a[1]) / d;
+  const m: Point = [a[0] + ux * along, a[1] + uy * along];
+  return [
+    [m[0] + uy * h, m[1] - ux * h],
+    [m[0] - uy * h, m[1] + ux * h],
+  ];
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Shading: the Desert Eagle's bands (faceStops, roundStops, upStops), and a groove's
+
+type Stops = readonly (readonly [number, string])[];
+
+/** A flat face's bands, top to bottom */
+function faceStops(p: Polish): Stops {
+  return [
+    [0, p.sky],
+    [p.horizon, p.skyLow],
+    [Math.min(1, p.horizon + p.hardness), p.floor],
+    [1, p.floorLow],
+  ];
+}
+
+/** A horizontal cylinder's bands, top to bottom: a streak of sky near its top, the floor below its middle */
+function roundStops(p: Polish): Stops {
+  return [
+    [0, p.floorLow],
+    [0.1, p.edge],
+    [0.22, p.sky],
+    [0.48, p.skyLow],
+    [0.48 + p.hardness, p.floor],
+    [0.82, p.floorLow],
+    [1, p.floor],
+  ];
+}
+
+/** A face turned up toward the sky (a top bevel): bright, a little darker at its far edge */
+function upStops(p: Polish): Stops {
+  return [
+    [0, p.edge],
+    [0.4, p.sky],
+    [1, p.skyLow],
+  ];
+}
+
+/** A groove along a cylinder (a flute), across it: concave, so it reflects the other way up, floor above sky */
+function grooveStops(p: Polish): Stops {
+  return [
+    [0, p.floor],
+    [0.42, p.floorLow],
+    [0.42 + p.hardness, p.sky],
+    [0.75, p.edge],
+    [1, p.skyLow],
+  ];
+}
+
+function linear(id: string, from: Point, to: Point, stops: Stops): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${fixed(from[0], 1)}" y1="${fixed(from[1], 1)}" x2="${fixed(to[0], 1)}" y2="${fixed(to[1], 1)}">`,
+    ...stops.map(
+      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
+    ),
+    "    </linearGradient>",
+  ].join("\n");
+}
+
+/** A gradient over each shape's own box, top to bottom */
+function boxGradient(id: string, stops: Stops): string {
+  return [
+    `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">`,
+    ...stops.map(
+      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
+    ),
+    "    </linearGradient>",
+  ].join("\n");
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+function drawSide(options: RevolverOptions = {}): string {
+  const p: Polish = { ...CHROME_STAINLESS, ...options.polish };
+  // Tones for the small marks (pins, seams, notches): the polish's own colors
+  const P = {
+    hi: p.edge,
+    sky: p.sky,
+    base: p.skyLow,
+    dark: p.floorLow,
+    floor: p.floor,
+  };
+  const outline = (d: string, w = 4) =>
+    `<path d="${d}" stroke="${p.edgeDark}" stroke-width="${w}" fill="none"/>`;
+  const W: WoodColors = { ...DEFAULT_WOOD, ...options.wood };
+
+  // The hammer
   const hammer =
-    `M${fmt(HAMMER_TOP[0])} ${smoothCurve(HAMMER_TOP, [1, -0.3], [0.3, -1])} ` +
-    `L470,119 L470,250 L372,250 L${fmt(HAMMER_UNDER[0])} ` +
-    `${smoothCurve(HAMMER_UNDER, [-0.2, -1], [-1, 0])} ${arc(SPUR_TIP, SPUR_TIP_R, 90, 270)} Z`;
+    `M${fmt(HAMMER_TOP[0])} ${smoothCurve(HAMMER_TOP, [1, -0.25], [1, 0])} ` +
+    `L470,122 L470,250 L${fmt(HAMMER_FOOT)} ` +
+    `${smoothCurve(HAMMER_UNDER, [-0.25, -1], [-1, 0])} ${arc(SPUR_TIP, SPUR_TIP_R, 90, 270)} Z`;
+  const spurChecks: string[] = [];
+  for (let x = 322; x <= 358; x += 6) {
+    spurChecks.push(`M${x},${146} L${x + 3},${152}`);
+  }
 
+  // The trigger: the back circle's arc down to the tip, then back up the front face
+  const [frontC, frontR] = circleThrough(...TRIGGER_FRONT);
+  const [backC, backR] = circleThrough(...TRIGGER_BACK);
+  const tip = TRIGGER_TIP;
+  const backTop = angleOf(backC, [550, 370]);
+  const backTip = angleOf(backC, tip);
+  const frontTip = angleOf(frontC, tip);
+  const frontTop = angleOf(frontC, [596, 370]);
   const trigger =
-    `M${fmt(TRIGGER_FRONT[0])} ${smoothCurve(TRIGGER_FRONT, [0, 1], [1, 0.3])} ` +
-    `C616,516 613,518 ${fmt(TRIGGER_BACK[0])} ${smoothCurve(TRIGGER_BACK, [-1, 0], [0.2, -1])} ` +
-    `L548,${OPENING_TOP - 20} L592,${OPENING_TOP - 20} Z`;
+    `M${fmt(on(backC, backR, backTop))} ${shortArc(backC, backR, backTop, backTip)} ` +
+    `${shortArc(frontC, frontR, frontTip, frontTop)} Z`;
+  const triggerFace = `M${fmt(on(frontC, frontR - 4, frontTop))} ${shortArc(frontC, frontR - 4, frontTop, frontTip)}`;
 
-  // The frame, round from the topstrap's rear: along the top, down the front, along the underside, round the
-  // guard, back under the wood to the tang, and up its back. The guard's opening is a hole in it.
+  // The frame: round from the topstrap's rear, along the top, down the front and the lug, along the underside to
+  // the guard, under the grip's horn and the wood (hidden), up the bare backstrap and the frame's back, and up the
+  // side's edge to the topstrap. The window and the guard's opening are holes in it.
+  const opening = openingShape(0);
+  const guardFront = onEllipse(
+    OPENING_CENTER,
+    OPENING_RX + GUARD_WIDTH,
+    OPENING_RY + GUARD_WIDTH,
+    OPENING_TILT,
+    GUARD_FRONT_AT,
+  );
+  // Round the guard's outside, from the frame's underside to the grip's horn
+  const guardEdge = openingEdge(GUARD_WIDTH, GUARD_FRONT_AT, GUARD_HORN_AT);
+  const sideEdgeUp = [...SIDE_EDGE.slice(0, 5)].reverse();
   const frame =
     `M${fmt(FRAME_TOP_BACK)} C470,110 488,${TOPSTRAP_TOP} 510,${TOPSTRAP_TOP} ` +
     `L${STEP_X},${TOPSTRAP_TOP} L${STEP_X + 2},${FRAME_FRONT_TOP} L${FRAME_FRONT - 6},${FRAME_FRONT_TOP} ` +
     `C${FRAME_FRONT - 2},${FRAME_FRONT_TOP} ${FRAME_FRONT},${FRAME_FRONT_TOP + 2} ${FRAME_FRONT},${FRAME_FRONT_TOP + 6} ` +
-    `L${FRAME_FRONT},${FRAME_FRONT_BOTTOM} ` +
-    `C${FRAME_FRONT},${FRAME_UNDER - 3} ${FRAME_FRONT - 4},${FRAME_UNDER} ${FRAME_FRONT - 9},${FRAME_UNDER} ` +
-    `L722,${FRAME_UNDER} C714,${FRAME_UNDER} 709,406 ${fmt(GUARD_OUTSIDE[0])} ` +
-    `${smoothCurve(GUARD_OUTSIDE, [-0.25, 1], [0.6, -1])} ` +
-    `L440,404 L380,430 L340,520 L300,700 L200,700 L262,330 L${fmt(TANG)} ` +
-    `${smoothCurve(FRAME_BACK, [1, -0.4], [0.1, -1])} Z ` +
-    `M${fmt(OPENING[0])} ${smoothCurve(OPENING, [0.1, 1], [1, -0.5])} Z`;
+    `L${FRAME_FRONT},${SHROUD_UNDER} ` +
+    `${smoothCurve(
+      [
+        [FRAME_FRONT, SHROUD_UNDER],
+        [822, 298],
+        [LUG_FRONT, 324],
+      ],
+      [0, 1],
+      [0, 1],
+    )} L${LUG_FRONT},${FRAME_UNDER - 5} ` +
+    `C${LUG_FRONT},${FRAME_UNDER - 1} ${LUG_FRONT - 2},${FRAME_UNDER} ${LUG_FRONT - 6},${FRAME_UNDER} ` +
+    `L745,${FRAME_UNDER} C722,${FRAME_UNDER} ${f1(guardFront[0] + 8)},${f1(guardFront[1] - 14)} ${fmt(guardFront)} ` +
+    `${guardEdge.slice(guardEdge.indexOf(" ") + 1)} L445,478 L380,470 L330,520 L300,700 L200,700 L250,400 L${fmt(BACK_OUTLINE[BACK_OUTLINE.length - 1])} ` +
+    `${smoothCurve([...BACK_OUTLINE].reverse(), [0.05, -1], [1, -0.6])} ` +
+    `L${fmt(sideEdgeUp[0])} ${smoothCurve(sideEdgeUp, [0.8, -0.6], [0.05, -1])} L${fmt(FRAME_TOP_BACK)} Z ` +
+    `M${fmt(WINDOW_BACK[0])} ${smoothCurve(WINDOW_BACK, [-0.3, -1], [0.3, -1])} ` +
+    `L${WINDOW_FRONT},${WINDOW_TOP} L${WINDOW_FRONT},${WINDOW_BOTTOM} Z ` +
+    opening;
+  // The guard: a ring, its own width all round, drawn over the frame
+  const guard = `${openingShape(GUARD_WIDTH)} ${opening}`;
+  // Lit round the bottom of the opening's edge, dark round the bottom of the guard's outside and along the
+  // opening's top, under the frame
+  const guardBevel = openingEdge(3, -5, 175);
+  const guardShadow = openingEdge(GUARD_WIDTH - 3, -25, 165);
+  const guardTop = openingEdge(2, 215, 320);
 
-  const window =
-    `M${fmt(WINDOW_BACK[0])} ${smoothCurve(WINDOW_BACK, [-0.3, -1], [0.15, -1])} ` +
-    `L${WINDOW_FRONT},${WINDOW_TOP} L${WINDOW_FRONT},${WINDOW_BOTTOM} Z`;
+  // The frame's rounded back, between the side's edge and the outline
+  const roundedBack =
+    `M${fmt(SIDE_EDGE[4])} ${smoothCurve(SIDE_EDGE.slice(4), [-0.8, 0.6], [-1, 0.45])} ` +
+    `L${fmt(BACK_OUTLINE[BACK_OUTLINE.length - 1])} ${smoothCurve([...BACK_OUTLINE].reverse(), [0.05, -1], [1, -0.6])} Z`;
+  const sideEdgeLine = `M${fmt(SIDE_EDGE[0])} ${smoothCurve(SIDE_EDGE, [-0.15, 1], [-1, 0.45])}`;
 
+  // The cylinder, chamfered at its rear, rounded at its front
   const cylinder = rounded(
     [
       [CYLINDER_BACK, CYLINDER_TOP],
@@ -433,16 +657,33 @@ function drawSide(): string {
       [CYLINDER_FRONT, CYLINDER_BOTTOM],
       [CYLINDER_BACK, CYLINDER_BOTTOM],
     ],
-    [6, 4, 4, 6],
+    [REAR_CHAMFER, 4, 4, REAR_CHAMFER],
   );
+  // The flutes: the projections of their arcs round the axis, each with its rounded rear end
+  const flutes = [30, 90, 150].map((at) => {
+    const yOf = (deg: number) =>
+      CYLINDER_AXIS - CYLINDER_R * Math.cos((deg * Math.PI) / 180);
+    const top = yOf(at - FLUTE_HALF);
+    const bottom = yOf(at + FLUTE_HALF);
+    const mid = (top + bottom) / 2;
+    const half = (bottom - top) / 2;
+    const endC: Point = [FLUTE_BACK + FLUTE_END, mid];
+    const path =
+      `M${CYLINDER_FRONT},${f1(top)} L${f1(endC[0])},${f1(top)} ` +
+      `${ellipseArc(endC, FLUTE_END, half, 0, 270, 90)} L${CYLINDER_FRONT},${f1(bottom)} Z`;
+    return { path, top, bottom, id: `revolver-flute-${at}` };
+  });
 
-  const barrel =
+  // The barrel's tube, and the shroud's lug under it
+  const tube =
     `M${FRAME_FRONT},${RIB_TOP} L${MUZZLE - CROWN},${RIB_TOP} ` +
     `C${MUZZLE - 1},${RIB_TOP} ${MUZZLE},${RIB_TOP + 2} ${MUZZLE},${RIB_TOP + CROWN} ` +
     `L${MUZZLE},${BARREL_UNDER_MUZZLE - CROWN} ` +
     `C${MUZZLE},${BARREL_UNDER_MUZZLE - 1} ${MUZZLE - 1},${BARREL_UNDER_MUZZLE} ${MUZZLE - CROWN},${BARREL_UNDER_MUZZLE} ` +
-    `L${fmt(SHROUD_FRONT[0])} ${smoothCurve(SHROUD_FRONT, [-1, 0], [-0.35, 1])} ` +
-    `L${FRAME_FRONT},${SHROUD_UNDER} Z`;
+    `L${FRAME_FRONT},${BARREL_UNDER} Z`;
+  const lug =
+    `M${FRAME_FRONT},${BARREL_UNDER - 4} L${fmt(SHROUD_FRONT[0])} ` +
+    `${smoothCurve(SHROUD_FRONT, [-1, 0], [-0.3, 1])} L${FRAME_FRONT},${SHROUD_UNDER} Z`;
   const channelR = (CHANNEL_BOTTOM - CHANNEL_TOP) / 2;
   const channelCenter: Point = [CHANNEL_END - channelR, CHANNEL_TOP + channelR];
   const channel =
@@ -453,6 +694,11 @@ function drawSide(): string {
   const rod =
     `M${FRAME_FRONT},${ROD_TOP} L${fmt(on(rodCenter, rodR, -90))} ` +
     `${arc(rodCenter, rodR, -90, 90)} L${FRAME_FRONT},${ROD_BOTTOM} Z`;
+  const knurl: string[] = [];
+  for (let x = KNURL[0] + 2; x < KNURL[1]; x += 4) {
+    knurl.push(`M${x},${ROD_TOP + 1} L${x + 3},${ROD_BOTTOM - 1}`);
+    knurl.push(`M${x + 3},${ROD_TOP + 1} L${x},${ROD_BOTTOM - 1}`);
+  }
 
   const frontSight =
     `M${fmt(RAMP[0])} ${smoothCurve(RAMP, [1, -0.1], [1, -0.1])} L${fmt(BLADE[0])} ` +
@@ -461,7 +707,6 @@ function drawSide(): string {
     `C1717,${BLADE_TOP} ${BLADE_FRONT},${BLADE_TOP + 4} ${BLADE_FRONT},${BLADE_TOP + 9} ` +
     `L${BLADE_FRONT},${RIB_TOP + 1} L${RAMP_START},${RIB_TOP + 1} Z`;
 
-  // The rear sight: the leaf along the topstrap, and the body at its back with the blade on top
   const rearSight =
     `M470,${TOPSTRAP_TOP + 2} L470,${LEAF_TOP_BACK} L520,${LEAF_TOP_BACK} ` +
     `C560,${LEAF_TOP_BACK + 2} 585,${LEAF_TOP_FRONT - 4} 620,${LEAF_TOP_FRONT - 3} ` +
@@ -470,68 +715,226 @@ function drawSide(): string {
     `C456,120 453,112 453,100 C453,88 458,${LEAF_TOP_BACK} 466,${LEAF_TOP_BACK} Z ` +
     `M466,${LEAF_TOP_BACK + 1} L466,70 C466,68 467,67 469,67 L479,67 C481,67 482,68 482,70 L482,${LEAF_TOP_BACK + 1} Z`;
 
-  const thumbPlate =
-    `M410,252 L${fmt(on(THUMB_SCREW, THUMB_PLATE_R, -90))} ` +
-    `${arc(THUMB_SCREW, THUMB_PLATE_R, -90, 90)} L410,300 Z`;
+  // The thumbpiece: round the pad from its upper flank's tangent point, over the back, to the lower; along the
+  // lower flank (concave), round the screw end, and back along the upper flank
+  const upperFlank = crossings(
+    PAD_CENTER,
+    PAD_R + FLANK_R,
+    THUMB_SCREW,
+    SCREW_END_R + FLANK_R,
+  )[0];
+  const lowerFlank = crossings(
+    PAD_CENTER,
+    PAD_R + FLANK_R,
+    THUMB_SCREW,
+    SCREW_END_R + FLANK_R,
+  )[1];
+  const padUp = angleOf(PAD_CENTER, upperFlank);
+  const padDown = angleOf(PAD_CENTER, lowerFlank);
+  const endUp = angleOf(THUMB_SCREW, upperFlank);
+  const endDown = angleOf(THUMB_SCREW, lowerFlank);
+  const thumbpiece =
+    `M${fmt(on(PAD_CENTER, PAD_R, padUp))} ${arc(PAD_CENTER, PAD_R, padUp, padDown - 360)} ` +
+    `${shortArc(lowerFlank, FLANK_R, angleOf(lowerFlank, PAD_CENTER), angleOf(lowerFlank, THUMB_SCREW))} ` +
+    `${arc(THUMB_SCREW, SCREW_END_R, endDown, endUp)} ` +
+    `${shortArc(upperFlank, FLANK_R, angleOf(upperFlank, THUMB_SCREW), angleOf(upperFlank, PAD_CENTER))} Z`;
+  const padChecks: string[] = [];
+  for (let k = -6; k <= 6; k++) {
+    const o = k * 6;
+    padChecks.push(
+      `M${f1(PAD_CENTER[0] + o - 40)},${f1(PAD_CENTER[1] - 40)} L${f1(PAD_CENTER[0] + o + 40)},${f1(PAD_CENTER[1] + 40)}`,
+    );
+    padChecks.push(
+      `M${f1(PAD_CENTER[0] + o + 40)},${f1(PAD_CENTER[1] - 40)} L${f1(PAD_CENTER[0] + o - 40)},${f1(PAD_CENTER[1] + 40)}`,
+    );
+  }
+  const recess = `M${fmt(on(RECESS_CENTER, RECESS_R, -60))} ${arc(RECESS_CENTER, RECESS_R, -60, 60)}`;
+  const slot = (c: Point, r: number) =>
+    `M${f1(c[0] - r * 0.95)},${f1(c[1] - r * 0.25)} L${f1(c[0] + r * 0.95)},${f1(c[1] + r * 0.25)}`;
 
+  // The wood
   const wood =
-    `M${fmt(WOOD_TOP)} L${fmt(WOOD_BORDER[0])} ${smoothCurve(WOOD_BORDER, [1, 0.4], [1, 0.05])} ` +
-    `${smoothCurve(WOOD_FRONT, [1, 1], [0.15, 1])} L${GRIP_HEEL + 2},${GRIP_BASE} ` +
+    `M${fmt(WOOD_CORNER)} C${WOOD_CORNER[0]},272 265,271 ${fmt(WOOD_TOP[0])} ` +
+    `${smoothCurve(WOOD_TOP, [1, 0], [1, 0.05])} ` +
+    `${smoothCurve(WOOD_FRONT, [1, 1.2], [0.12, 1])} L${GRIP_HEEL + 3},${GRIP_BASE} ` +
     `C${GRIP_HEEL},${GRIP_BASE} ${GRIP_HEEL - 1},${GRIP_BASE - 3} ${fmt(WOOD_BACK[0])} ` +
-    `${smoothCurve(WOOD_BACK, [0.15, -1], [0.05, -1])} Z`;
+    `${smoothCurve(WOOD_BACK, [0.3, -1], [0.1, -1])} L${fmt(WOOD_CORNER)} Z`;
+  // The checkering: two sets of lines either side of the grip's axis
+  const axis = Math.atan2(1, GRIP_LEAN);
+  const checks: string[] = [];
+  for (const spread of [-CHECK_SPREAD, CHECK_SPREAD]) {
+    const a = axis + spread;
+    const dir: Point = [Math.cos(a), Math.sin(a)];
+    const n: Point = [-dir[1], dir[0]];
+    for (let k = -30; k <= 30; k++) {
+      const px = GRIP_SCREW[0] + n[0] * k * CHECK_SPACING;
+      const py = GRIP_SCREW[1] + n[1] * k * CHECK_SPACING;
+      checks.push(
+        `M${f1(px - dir[0] * 400)},${f1(py - dir[1] * 400)} L${f1(px + dir[0] * 400)},${f1(py + dir[1] * 400)}`,
+      );
+    }
+  }
+  // The field's step: shadowed along its top and back, lit along its front and bottom
+  const [fa, fb, fc, fd, fe] = FIELD_CORNERS;
+  const fieldShadow = `M${fmt(fe)} L${fmt(fa)} L${fmt(fb)} L${fmt(fc)}`;
+  const fieldLight = `M${fmt(fc)} L${fmt(fd)} L${fmt(fe)}`;
+  // The wood's gradient runs across the grip, square to its lean, lighter down the middle
+  const gripAcross: [Point, Point] = [
+    [120, 560],
+    [120 + 260 * Math.cos(Math.atan(-GRIP_LEAN) * 1), 560 + 260 * Math.sin(Math.atan(-GRIP_LEAN))],
+  ];
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="863" viewBox="0 0 1800 863" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
-  <!-- Blockout (round 1): the main silhouettes in flat colors, in drawing order -->
-  <!-- Behind the frame, at rest: only the spur and the top show -->
+  <defs>
+    <!-- Round parts, shaded round their axes: the barrel, the rod, the cylinder (its flutes are grooves) -->
+    ${linear("revolver-tube", [0, RIB_TOP], [0, BARREL_UNDER], roundStops(p))}
+    ${linear("revolver-rod", [0, ROD_TOP], [0, ROD_BOTTOM], roundStops(p))}
+    ${linear("revolver-cylinder", [0, CYLINDER_TOP], [0, CYLINDER_BOTTOM], roundStops(p))}
+    ${flutes.map((fl) => linear(fl.id, [0, fl.top], [0, fl.bottom], grooveStops(p))).join("\n    ")}
+    <!-- Flat faces, one horizon each: the frame's side, the shroud's lug -->
+    ${linear("revolver-flat", [0, TOPSTRAP_TOP], [0, FRAME_UNDER], faceStops(p))}
+    ${linear("revolver-lug", [0, BARREL_UNDER], [0, SHROUD_UNDER], faceStops(p))}
+    <!-- The frame's rounded back, turned up toward the sky -->
+    ${linear("revolver-back", [400, 200], [250, 330], upStops(p))}
+    <!-- The guard, its own face -->
+    ${linear("revolver-guard", [0, 386], [0, 556], faceStops(p))}
+    <!-- Small parts, each over its own box -->
+    ${boxGradient("revolver-part", faceStops(p))}
+    ${boxGradient("revolver-up", upStops(p))}
+    ${boxGradient("revolver-pin", [
+      [0, p.floorLow],
+      [0.5, p.floor],
+      [1, p.floorLow],
+    ])}
+    <linearGradient id="revolver-wood" gradientUnits="userSpaceOnUse" x1="${f1(gripAcross[0][0])}" y1="${f1(gripAcross[0][1])}" x2="${f1(gripAcross[1][0])}" y2="${f1(gripAcross[1][1])}">
+      <stop offset="0" stop-color="${W.edge}"/>
+      <stop offset="0.5" stop-color="${W.middle}"/>
+      <stop offset="1" stop-color="${W.edge}"/>
+    </linearGradient>
+    <clipPath id="revolver-cylinder-clip"><path d="${cylinder}"/></clipPath>
+    <clipPath id="revolver-field-clip"><path d="${FIELD}"/></clipPath>
+    <clipPath id="revolver-pad-clip"><circle cx="${PAD_CENTER[0]}" cy="${PAD_CENTER[1]}" r="${PAD_R - 3}"/></clipPath>
+    <clipPath id="revolver-rod-clip"><path d="${rod}"/></clipPath>
+  </defs>
+  <!-- Behind the frame, down: only the spur, the throat and the top show -->
   <g id="revolver-hammer">
-    <path d="${hammer}" fill="${STAINLESS_LIGHT}"/>
+    <path d="${hammer}" fill="url(#revolver-part)"/>
+    <path d="${spurChecks.join(" ")}" stroke="${P.dark}" stroke-width="2" fill="none"/>
+    ${outline(hammer)}
   </g>
-  <!-- Behind the frame, through the guard's opening -->
+  <!-- Behind the frame, through the guard's opening: a crescent between two circles -->
   <g id="revolver-trigger">
-    <path d="${trigger}" fill="${STAINLESS_LIGHT}"/>
+    <path d="${trigger}" fill="url(#revolver-part)"/>
+    <path d="${triggerFace}" stroke="${P.hi}" stroke-width="3" fill="none"/>
+    ${outline(trigger)}
   </g>
-  <!-- Topstrap, window, the lump in front of it, the underside, the guard (one piece with it) and the back -->
+  <!-- In the gap in front of the cylinder: the barrel's breech end, in the bore's line, and the center pin -->
+  <g id="revolver-breech">
+    <path d="M${CYLINDER_FRONT - 1},${BREECH_END[0]} L${WINDOW_FRONT},${BREECH_END[0]} L${WINDOW_FRONT},${BREECH_END[1]} L${CYLINDER_FRONT - 1},${BREECH_END[1]} Z" fill="${P.dark}"/>
+    <path d="M${CYLINDER_FRONT - 1},${BREECH_END[0] + 4} L${WINDOW_FRONT},${BREECH_END[0] + 4}" stroke="${P.sky}" stroke-width="3"/>
+    <path d="M${CYLINDER_FRONT - 1},${CENTER_PIN[0]} L${WINDOW_FRONT},${CENTER_PIN[0]} L${WINDOW_FRONT},${CENTER_PIN[1]} L${CYLINDER_FRONT - 1},${CENTER_PIN[1]} Z" fill="url(#revolver-pin)"/>
+  </g>
+  <!-- One piece with the guard; the window and the guard's opening are holes in it -->
   <g id="revolver-frame">
-    <path d="${frame}" fill="${STAINLESS}"/>
-    <!-- The window round the cylinder: the gaps round it are dark -->
-    <path d="${window}" fill="${GAP}"/>
+    <path d="${frame}" fill="url(#revolver-flat)"/>
+    ${outline(frame)}
+    <!-- Its rounded back, behind the side's edge, and the edge catching the light -->
+    <path d="${roundedBack}" fill="url(#revolver-back)"/>
+    <path d="${sideEdgeLine}" stroke="${P.hi}" stroke-width="3" fill="none"/>
+    <!-- The topstrap's edge, and the window's cut edges -->
+    <path d="M510,${TOPSTRAP_TOP + 1.5} L${STEP_X},${TOPSTRAP_TOP + 1.5} M${STEP_X + 2},${FRAME_FRONT_TOP + 1.5} L${FRAME_FRONT - 4},${FRAME_FRONT_TOP + 1.5}" stroke="${P.hi}" stroke-width="3" fill="none"/>
+    <path d="M${WINDOW_BACK[0][0] + 2},${WINDOW_BOTTOM + 2} L${WINDOW_FRONT},${WINDOW_BOTTOM + 2}" stroke="${P.hi}" stroke-width="3" fill="none"/>
+    <path d="M${WINDOW_BACK[4][0]},${WINDOW_TOP - 2} L${WINDOW_FRONT + 1},${WINDOW_TOP - 2} L${WINDOW_FRONT + 1},${WINDOW_BOTTOM}" stroke="${P.dark}" stroke-width="2.5" fill="none"/>
+    <!-- The frame's front, and its lug swept back under the shroud -->
+    <path d="M${FRAME_FRONT - 1.5},${FRAME_FRONT_TOP + 6} L${FRAME_FRONT - 1.5},${SHROUD_UNDER}" stroke="${P.dark}" stroke-width="3" fill="none"/>
+    <!-- The yoke's seams -->
+    <path d="M${WINDOW_FRONT + 2},200 L${FRAME_FRONT - 2},200 M745,331 L${LUG_FRONT - 1},331 M748,345 L748,372 L800,372 L811,386" stroke="${P.dark}" stroke-width="2" fill="none"/>
+    <path d="M${WINDOW_FRONT + 2},202.5 L${FRAME_FRONT - 2},202.5 M749,374.5 L800,374.5" stroke="${P.hi}" stroke-width="2" fill="none"/>
+    <!-- The round recess round the thumbpiece's screw end: its far wall in shadow -->
+    <path d="${recess}" stroke="${P.dark}" stroke-width="5" fill="none"/>
+    <path d="M${fmt(on(RECESS_CENTER, RECESS_R + 3, -50))} ${arc(RECESS_CENTER, RECESS_R + 3, -50, 50)}" stroke="${P.hi}" stroke-width="2" fill="none"/>
+    <!-- Pins -->
+    <circle cx="441" cy="153" r="5" fill="${P.dark}"/>
+    <circle cx="505" cy="350" r="9" fill="${P.sky}" stroke="${P.dark}" stroke-width="2"/>
   </g>
+  <!-- A ring round the oval opening, its own width all round; grows out of the frame's underside -->
+  <g id="revolver-guard">
+    <path d="${guard}" fill="url(#revolver-guard)"/>
+    <path d="${guardShadow}" stroke="${P.floor}" stroke-width="5" fill="none" opacity="0.6"/>
+    <path d="${guardBevel}" stroke="${P.hi}" stroke-width="4" fill="none"/>
+    <path d="${guardTop}" stroke="${P.dark}" stroke-width="3" fill="none"/>
+    ${outline(guard)}
+  </g>
+  <!-- A true cylinder, shaded round its axis; the flutes are grooves, lit the other way up -->
   <g id="revolver-cylinder">
-    <path d="${cylinder}" fill="${STAINLESS_LIGHT}"/>
+    <path d="${cylinder}" fill="url(#revolver-cylinder)"/>
+    <g clip-path="url(#revolver-cylinder-clip)">
+      ${flutes.map((fl) => `<path d="${fl.path}" fill="url(#${fl.id})"/>`).join("\n      ")}
+      <!-- The cylinder stop notches -->
+      <path d="M523,168 L556,168 L556,177 L523,177 Z M523,274 L556,274 L556,284 L523,284 Z" fill="${P.sky}"/>
+      <path d="M528,170 L548,170 L548,175 L528,175 Z M528,277 L548,277 L548,282 L528,282 Z" fill="${P.floor}"/>
+      <!-- The rear chamfer and the front's rounded edge -->
+      <path d="M${CYLINDER_BACK + 2},${CYLINDER_TOP + REAR_CHAMFER} L${CYLINDER_BACK + 2},${CYLINDER_BOTTOM - REAR_CHAMFER}" stroke="${P.hi}" stroke-width="4"/>
+      <path d="M${CYLINDER_FRONT - 2},${CYLINDER_TOP} L${CYLINDER_FRONT - 2},${CYLINDER_BOTTOM}" stroke="${P.dark}" stroke-width="4"/>
+    </g>
+    ${outline(cylinder)}
   </g>
-  <!-- The rod, out of the yoke through the gap and along the shroud's channel -->
+  <!-- The barrel: its lug, the tube, the rod's channel and the rod -->
   <g id="revolver-barrel">
-    <path d="${barrel}" fill="${STAINLESS}"/>
-    <path d="${channel}" fill="${GAP}"/>
-    <path d="${rod}" fill="${STAINLESS_LIGHT}"/>
-    <path d="M${KNURL[0]},${ROD_TOP} L${KNURL[1]},${ROD_TOP} L${KNURL[1]},${ROD_BOTTOM} L${KNURL[0]},${ROD_BOTTOM} Z" fill="${STAINLESS_DARK}"/>
-    <path d="M${FRAME_FRONT},${RIB_TOP} L${MUZZLE - CROWN},${RIB_TOP} L${MUZZLE - CROWN},112 L${FRAME_FRONT},112 Z" fill="${STAINLESS_DARK}"/>
+    ${outline(lug, 8)}
+    ${outline(tube, 8)}
+    <path d="${lug}" fill="url(#revolver-lug)"/>
+    <path d="${tube}" fill="url(#revolver-tube)"/>
+    <path d="M${MUZZLE - 3},${RIB_TOP + 3} L${MUZZLE - 3},${BARREL_UNDER_MUZZLE - 3}" stroke="${P.dark}" stroke-width="2" opacity="0.6"/>
+    <path d="${channel}" fill="${P.floor}"/>
+    <path d="M${FRAME_FRONT},${CHANNEL_BOTTOM - 1.5} L${CHANNEL_END - channelR},${CHANNEL_BOTTOM - 1.5}" stroke="${P.hi}" stroke-width="3"/>
+    <path d="${rod}" fill="url(#revolver-rod)"/>
+    <g clip-path="url(#revolver-rod-clip)">
+      <path d="${knurl.join(" ")}" stroke="${P.dark}" stroke-width="1.5" fill="none"/>
+    </g>
   </g>
   <g id="revolver-front-sight">
-    <path d="${frontSight}" fill="${STAINLESS}"/>
+    <path d="${frontSight}" fill="url(#revolver-part)"/>
+    ${outline(frontSight)}
     <path d="${polygon(RED_INSERT)}" fill="${SIGHT_RED}"/>
+    <path d="M${fmt(RED_INSERT[3])} L${fmt(RED_INSERT[2])}" stroke="${SIGHT_RED_DARK}" stroke-width="3"/>
   </g>
   <g id="revolver-rear-sight">
-    <path d="${rearSight}" fill="${SIGHT}"/>
-    ${c(ELEVATION_SCREW, 9, BLUED_STEEL.light)}
+    <path d="${rearSight}" fill="${BLUED_STEEL.base}"/>
+    <path d="M470,${LEAF_TOP_BACK + 1} L520,${LEAF_TOP_BACK + 1} C560,${LEAF_TOP_BACK + 3} 585,${LEAF_TOP_FRONT - 3} 620,${LEAF_TOP_FRONT - 2} L${LEAF_FRONT - 4},${LEAF_TOP_FRONT + 1}" stroke="${BLUED_STEEL.highlight}" stroke-width="2.5" fill="none"/>
+    <circle cx="${ELEVATION_SCREW[0]}" cy="${ELEVATION_SCREW[1]}" r="9" fill="${BLUED_STEEL.dark}"/>
+    <path d="${slot(ELEVATION_SCREW, 8)}" stroke="${BLUED_STEEL.light}" stroke-width="2"/>
   </g>
-  <!-- Proud of the frame's side -->
+  <!-- One part, symmetrical about its axis, proud of the frame: the checkered pad and the end round its screw -->
   <g id="revolver-cylinder-release">
-    <path d="${thumbPlate}" fill="${STAINLESS}"/>
-    <path d="${THUMBPIECE}" fill="${STAINLESS_LIGHT}"/>
-    ${c(THUMB_SCREW, 13, STAINLESS_LIGHT)}
+    <path d="${thumbpiece}" fill="url(#revolver-up)"/>
+    ${outline(thumbpiece, 3)}
+    <g clip-path="url(#revolver-pad-clip)">
+      <path d="${padChecks.join(" ")}" stroke="${P.dark}" stroke-width="2.5" fill="none" opacity="0.7"/>
+    </g>
+    <circle cx="${THUMB_SCREW[0]}" cy="${THUMB_SCREW[1]}" r="${SCREW_R}" fill="${P.sky}" stroke="${P.dark}" stroke-width="2"/>
+    <path d="${slot(THUMB_SCREW, SCREW_R)}" stroke="${P.floor}" stroke-width="4"/>
   </g>
-  <!-- Wraps the whole grip frame; the checkered field is sunk into it, the medallion flush in its border -->
+  <!-- Wraps the grip frame below the backstrap's top; the checkered field is sunk in a smooth raised border -->
   <g id="revolver-grip">
-    <path d="${wood}" fill="${WOOD}"/>
-    <path d="${FIELD}" fill="${WALNUT.dark}" opacity="0.35"/>
-    ${c(MEDALLION, MEDALLION_R, STAINLESS_LIGHT)}
-    ${c(GRIP_SCREW, GRIP_SCREW_R, STAINLESS_DARK)}
+    <path d="${wood}" fill="url(#revolver-wood)"/>
+    <path d="${wood}" stroke="${W.dark}" stroke-width="4" fill="none"/>
+    <path d="${FIELD}" fill="${W.edge}" opacity="0.55"/>
+    <g clip-path="url(#revolver-field-clip)">
+      <path d="${checks.join(" ")}" stroke="${W.dark}" stroke-width="3" fill="none" opacity="0.55"/>
+      <path d="${fieldShadow}" stroke="${W.dark}" stroke-width="10" fill="none" opacity="0.8"/>
+      <path d="${fieldLight}" stroke="${W.middle}" stroke-width="6" fill="none"/>
+    </g>
+    <path d="${FIELD}" stroke="${W.dark}" stroke-width="2.5" fill="none"/>
+    <circle cx="${MEDALLION[0]}" cy="${MEDALLION[1]}" r="${MEDALLION_R}" fill="${P.sky}" stroke="${P.dark}" stroke-width="3"/>
+    <circle cx="${MEDALLION[0]}" cy="${MEDALLION[1]}" r="${MEDALLION_R - 7}" fill="none" stroke="${P.base}" stroke-width="2.5"/>
+    <circle cx="${GRIP_SCREW[0]}" cy="${GRIP_SCREW[1]}" r="${GRIP_SCREW_R}" fill="${P.sky}" stroke="${P.dark}" stroke-width="2"/>
+    <circle cx="${GRIP_SCREW[0]}" cy="${GRIP_SCREW[1]}" r="${GRIP_SCREW_R - 5}" fill="${P.dark}"/>
   </g>
 </svg>`;
 }
 
-export const REVOLVER: GunDrawing = {
+export const REVOLVER: GunDrawing<RevolverOptions> = {
   name: "revolver",
   draft: true,
   photo: {
