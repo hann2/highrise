@@ -103,9 +103,9 @@ export interface P90Options {
 
 /** Smoky translucent plastic, a little warm, as the photo's magazine */
 export const P90_SMOKE: Smoke = {
-  color: "#5b5249",
-  opacity: 0.6,
-  tint: 0.28,
+  color: "#8a7c6c",
+  opacity: 0.55,
+  tint: 0.2,
   edge: "#2a2622",
 };
 
@@ -187,6 +187,10 @@ const WELL_STEP = 598; // where the stock's top steps down into the magazine's w
 const WELL_BACK = 616; // the well's back, behind the magazine
 const RECEIVER_TOP = 371; // the receiver's top under the magazine
 const FRONT = 1705; // the receiver's front face
+// Round the barrel the front face is set back, so the barrel comes out of a recess
+const RECESS_BACK = 1677;
+const RECESS_TOP = 399;
+const RECESS_BOTTOM = 467;
 const GROOVE_TOP = 470;
 const GROOVE_BOTTOM = 496;
 const BUTT_SEAM = 74; // the rubber butt plate's front edge
@@ -250,7 +254,8 @@ const SLOPE_TO: Point = [768, 774];
 
 const BODY_OUTLINE =
   `M58,${STOCK_TOP - 1} L${WELL_STEP},${STOCK_TOP} L${WELL_STEP + 3},297 L${WELL_BACK},297 ` +
-  `L${WELL_BACK},${RECEIVER_TOP} L${FRONT},${RECEIVER_TOP} L${FRONT + 1},480 ` +
+  `L${WELL_BACK},${RECEIVER_TOP} L${FRONT},${RECEIVER_TOP} L${FRONT},${RECESS_TOP} L${RECESS_BACK},${RECESS_TOP} ` +
+  `L${RECESS_BACK},${RECESS_BOTTOM} L${FRONT + 1},${RECESS_BOTTOM} L${FRONT + 1},480 ` +
   // The hand stop at the front: its front edge leaning back, round under it, up its back
   `C${FRONT},530 1698,600 1690,640 C1688,650 1683,653 1676,653 L1657,653 C1649,653 1645,648 1645,640 L1645,598 ` +
   `C1645,582 1636,573 1620,573 L1562,573 C1550,573 1542,580 1541,592 ` +
@@ -296,13 +301,17 @@ const THUMBHOLE_LIT = `M${fmt(THUMBHOLE_BOTTOM[0])} ${smoothCurve(THUMBHOLE_BOTT
 const OPENING_CENTER: Point = [1350, 575];
 const OPENING_TOP: Point[] = [
   [1278, 572],
-  [1284, 535],
-  [1302, 512],
-  [1330, 504],
-  [1360, 508],
-  [1380, 521],
-  [1392, 537],
-  [1410, 555],
+  [1279, 540],
+  [1288, 524],
+  [1300, 512],
+  [1332, 505],
+  [1355, 508],
+  [1369, 516],
+  [1380, 526],
+  [1387, 533],
+  [1397, 540],
+  [1407, 548],
+  [1416, 563],
   [1421, 582],
 ];
 const OPENING_BOTTOM: Point[] = [
@@ -374,7 +383,7 @@ const FEED = box(MAG_BACK + 2, 300, 708, 369, 6);
 // The rounds' heads: two rows, half a pitch apart, and the feed's few at the back
 const PITCH = 28.6;
 const HEAD_R = 12;
-const UPPER_ROW = 321;
+const UPPER_ROW = 318;
 const LOWER_ROW = 346;
 const ROUNDS: Point[] = [
   [700, 317],
@@ -444,7 +453,7 @@ const HOUSING_OUTLINE =
   ` L${fmt(UNDERSIDE_TO)} C1521,286 1522,${MAG_TOP - 1} 1526,${MAG_TOP - 1} L${MAG_FRONT},${MAG_TOP - 1} ` +
   `L${MAG_FRONT},${MAG_BOTTOM + 4} L1508,${MAG_BOTTOM + 4} C1496,${MAG_BOTTOM + 4} 1492,380 1498,390 ` +
   `C1502,396 1508,${JAW_BOTTOM} 1518,${JAW_BOTTOM} L${BLOCK_LEFT},${JAW_BOTTOM} L${BLOCK_LEFT},${BLOCK_BOTTOM} ` +
-  `L${FRONT + 1},${BLOCK_BOTTOM} L${fmt(FRONT_EDGE[0])} ` +
+  `L${RECESS_BACK},${BLOCK_BOTTOM} L${RECESS_BACK},${RECESS_TOP} L${FRONT + 1},${RECESS_TOP} L${fmt(FRONT_EDGE[0])} ` +
   smoothCurve(FRONT_EDGE, [0, -1], [-0.6, -1]) +
   ` C1670,144 1662,142 1650,142 L1626,141 L1600,127 L1575,112 L1552,90 L1546,${HOUSING_TOP + 3} ` +
   `C1545,${HOUSING_TOP} 1543,${HOUSING_TOP} 1540,${HOUSING_TOP} L1325,${HOUSING_TOP} L1300,85 L1275,108 ` +
@@ -511,7 +520,8 @@ const CAP_CENTER: Point = [1612, 194];
 const CAP_R = 44;
 const CAP_FACE_R = 31;
 // The recessed window in its front block
-const FRONT_RECESS = box(1598, 308, 1687, 369, 9);
+const FRONT_RECESS = box(1592, 300, 1696, 378, 10);
+const FRONT_PANEL = box(1600, 309, 1688, 370, 6);
 
 // ---------------------------------------------------------------------------------------------------------
 // The cocking handle, its slot and guide rod
@@ -541,7 +551,7 @@ const SELECTOR_RIDGES = Array.from({ length: 13 }, (_, i) => 1247 + i * 4.6);
 // The muzzle
 
 const BORE = ORIGIN[1];
-const BARREL = box(1696, 400, 1710, 460, 0);
+const BARREL = box(RECESS_BACK - 4, 398, 1710, 466, 0);
 const COLLAR = box(1708, 388, 1734, 465, 3);
 const COLLAR_GROOVE = box(1732, 393, 1743, 460, 0);
 const RING = box(1741, 388, 1754, 465, 3);
@@ -623,14 +633,17 @@ function drawSide(options: P90Options = {}): string {
          the groove in its shadow, the lower half's lit lip, then darker toward the bottom -->
     ${vertical("p90-body-shading", STOCK_TOP, GRIP_BOTTOM, [
       [0, P.dark],
-      [+gy(296), P.light],
-      [+gy(345), mix(P.light, P.base, 0.4)],
-      [+gy(440), P.base],
-      [+gy(GROOVE_TOP - 4), mix(P.base, P.dark, 0.4)],
-      [+gy(GROOVE_TOP + 4), P.dark],
+      [+gy(296), P.highlight],
+      [+gy(305), P.light],
+      [+gy(350), mix(P.light, P.highlight, 0.3)],
+      [+gy(400), P.light],
+      [+gy(450), mix(P.light, P.base, 0.6)],
+      [+gy(GROOVE_TOP - 2), mix(P.base, P.dark, 0.5)],
+      [+gy(GROOVE_TOP + 6), P.dark],
       [+gy(GROOVE_BOTTOM - 3), P.dark],
-      [+gy(GROOVE_BOTTOM + 2), P.light],
-      [+gy(GROOVE_BOTTOM + 14), P.base],
+      [+gy(GROOVE_BOTTOM + 2), P.highlight],
+      [+gy(GROOVE_BOTTOM + 10), P.light],
+      [+gy(560), mix(P.light, P.base, 0.5)],
       [+gy(640), P.base],
       [1, lower],
     ])}
@@ -644,15 +657,18 @@ function drawSide(options: P90Options = {}): string {
     <!-- The housing, down its side: lit along its top, the box's face, darker toward the bottom -->
     ${vertical("p90-housing-shading", HOUSING_TOP, BLOCK_BOTTOM, [
       [0, P.highlight],
-      [0.025, P.light],
-      [0.2, mix(P.light, P.base, 0.5)],
-      [0.45, P.base],
+      [0.025, mix(P.light, P.highlight, 0.5)],
+      [0.2, P.light],
+      [0.24, P.base],
+      [0.45, mix(P.base, P.dark, 0.3)],
+      [0.55, P.base],
       [1, mix(P.base, P.dark, 0.3)],
     ])}
     ${vertical("p90-rail-shading", 170, 239, [
       [0, P.light],
-      [0.08, P.base],
-      [1, mix(P.base, P.dark, 0.5)],
+      [0.06, P.base],
+      [0.2, mix(P.base, P.dark, 0.5)],
+      [1, P.dark],
     ])}
     ${vertical("p90-rod-shading", ROD_TOP, ROD_BOTTOM, [
       [0, M.dark],
@@ -685,8 +701,8 @@ function drawSide(options: P90Options = {}): string {
 ${stops([0, B.highlight], [0.45, B.light], [1, B.base])}
     </radialGradient>
     ${vertical("p90-trigger-shading", 510, 630, [
-      [0, P.light],
-      [0.5, mix(P.light, P.base, 0.5)],
+      [0, P.highlight],
+      [0.5, P.light],
       [1, P.base],
     ])}
     <clipPath id="p90-body-clip">
@@ -707,6 +723,8 @@ ${stops([0, B.highlight], [0.45, B.light], [1, B.base])}
        the flash hider, its front cut on a slant, a slot along its top and a port through its middle -->
   <g id="p90-muzzle">
     <path d="${BARREL}" fill="url(#p90-muzzle-shading)"/>
+    <!-- In the recess's shadow -->
+    <path d="${box(RECESS_BACK - 4, 398, 1686, 466)}" fill="${M.dark}" opacity="0.5"/>
     <path d="${COLLAR}" fill="url(#p90-muzzle-shading)"/>
     <path d="${COLLAR_GROOVE}" fill="${M.dark}"/>
     <path d="${RING}" fill="url(#p90-muzzle-shading)"/>
@@ -764,8 +782,10 @@ ${stops([0, B.highlight], [0.45, B.light], [1, B.base])}
   <g id="p90-cocking-handle">
     <path d="${SLOT}" fill="${P.dark}"/>
     <path d="${ROD}" fill="url(#p90-rod-shading)"/>
-    <path d="${HANDLE} ${HANDLE_SLOT}" fill="url(#p90-housing-shading)"/>
-    <path d="${HANDLE}" fill="${P.base}" opacity="0.5"/>
+    <path d="${HANDLE}" fill="${P.dark}"/>
+    <path d="${HANDLE_SLOT}" fill="${mix(P.dark, "#000000", 0.4)}"/>
+    <path d="M1498,421 L${fmt(on(HANDLE_CENTER, HANDLE_R, -90))} ${arc(HANDLE_CENTER, HANDLE_R, -90, 90)} L1498,473" stroke="${P.light}" stroke-width="5" fill="none"/>
+    <path d="${HANDLE_SLOT}" stroke="${P.light}" stroke-width="3" fill="none"/>
     <path d="M1498,423 L${fmt(on(HANDLE_CENTER, HANDLE_R - 2, -90))} ${arc(HANDLE_CENTER, HANDLE_R - 2, -90, -20)}" stroke="${P.highlight}" stroke-width="3" fill="none"/>
   </g>
   <!-- Behind the magazine: the catch in its recess in the stock's top, and the boss under it -->
@@ -805,13 +825,14 @@ ${stops([0, B.highlight], [0.45, B.light], [1, B.base])}
       <!-- The rear leg, a step proud of the magazine's sides: its edges -->
       <path d="M${fmt(LEG_RIGHT[0])} ${smoothCurve(LEG_RIGHT, [0.1, -1], [0.4, -1])}" stroke="${P.dark}" stroke-width="10" opacity="0.6"/>
       <path d="M1094,${LEG_BOTTOM} L1197,${LEG_BOTTOM}" stroke="${P.dark}" stroke-width="14" opacity="0.6"/>
-      <!-- The strut's top edge, slanting down from the window to the front, lit -->
-      <path d="M1166,232 L1440,262" stroke="${P.dark}" stroke-width="5" opacity="0.6"/>
-      <path d="M1166,236 L1440,266" stroke="${P.light}" stroke-width="2.5" opacity="0.7"/>
+      <!-- The rear leg's top, where it steps out from under the window, lit -->
+      <path d="M1112,237 L1244,241" stroke="${P.dark}" stroke-width="5" opacity="0.6"/>
+      <path d="M1112,241 L1242,245" stroke="${P.light}" stroke-width="2.5" opacity="0.8"/>
       <path d="M${fmt(UNDERSIDE_FROM)} L${fmt(UNDERSIDE_TO)}" stroke="${P.dark}" stroke-width="10" opacity="0.7"/>
       <!-- The front block: a recessed window in it, and its edge stepping down to the receiver -->
       <path d="${FRONT_RECESS}" fill="${P.dark}"/>
-      <path d="M1602,365 L1683,365" stroke="${P.light}" stroke-width="3" opacity="0.6"/>
+      <path d="${FRONT_PANEL}" fill="${P.base}"/>
+      <path d="M1604,311 L1684,311" stroke="${P.light}" stroke-width="3"/>
       <path d="M${BLOCK_LEFT},${JAW_BOTTOM} L${BLOCK_LEFT},${BLOCK_BOTTOM} L${FRONT + 1},${BLOCK_BOTTOM}" stroke="${P.dark}" stroke-width="8" opacity="0.8"/>
       <path d="M1498,390 C1502,396 1508,${JAW_BOTTOM} 1518,${JAW_BOTTOM} L${BLOCK_LEFT},${JAW_BOTTOM}" stroke="${P.dark}" stroke-width="8" opacity="0.8"/>
       <!-- The rim light along its top edges -->
@@ -825,7 +846,7 @@ ${stops([0, B.highlight], [0.45, B.light], [1, B.base])}
     ${RAIL_SCREWS.map((c) => screw(c, P, 14)).join("\n    ")}
     <!-- The cap at its front, a hex socket in its face -->
     <circle cx="${CAP_CENTER[0]}" cy="${CAP_CENTER[1]}" r="${CAP_R}" fill="${P.dark}"/>
-    <circle cx="${CAP_CENTER[0]}" cy="${CAP_CENTER[1]}" r="${CAP_R - 5}" fill="${P.base}"/>
+    <circle cx="${CAP_CENTER[0]}" cy="${CAP_CENTER[1]}" r="${CAP_R - 5}" fill="${P.light}"/>
     <circle cx="${CAP_CENTER[0]}" cy="${CAP_CENTER[1]}" r="${CAP_FACE_R}" fill="${mix(P.base, P.dark, 0.45)}"/>
     <path d="M${fmt(on(CAP_CENTER, CAP_R - 3, 200))} ${arc(CAP_CENTER, CAP_R - 3, 200, 300)}" stroke="${P.light}" stroke-width="3" fill="none"/>
     <path d="${polygon([0, 60, 120, 180, 240, 300].map((a) => on(CAP_CENTER, 9, a)))}" fill="${P.dark}"/>
