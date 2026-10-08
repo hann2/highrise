@@ -50,7 +50,8 @@
  */
 import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, smoothCurve, unit } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import type { Material } from "../lib/style";
 import { BLUED_STEEL, WALNUT } from "../lib/style";
 
@@ -512,13 +513,23 @@ const FOREND_STEP = "M1188,686 C1192,700 1193,725 1189,748";
 const OUTLINE = 0.4 / MM_PER_PX;
 const RIM_LIGHT = mm(0.8);
 
-function drawSide(options: DoubleBarrelOptions = {}): string {
+/** The gun's materials from its options, the same for both views: steel, wood, the lock plate's metal, the hammers' */
+function materials(options: DoubleBarrelOptions): {
+  S: Material;
+  W: Material;
+  P: Material;
+  H: Material;
+} {
   const S: Material = { ...BLUED_STEEL, ...options.steel };
   const W: Material = { ...WALNUT, ...options.wood };
-  // The plate's metal, and the hammers'
   const P: Material =
     options.plate === "blued" ? S : { ...GOLDEN_BRASS, ...options.brass };
   const H: Material = options.hammerFinish === "steel" ? S : P;
+  return { S, W, P, H };
+}
+
+function drawSide(options: DoubleBarrelOptions = {}): string {
+  const { S, W, P, H } = materials(options);
   const border: PlateBorder = options.border ?? "single";
   const ring = options.ring ?? border === "single"; // a double border leaves no room for it
   // The border's bands, from the plate's edge in: [how far in each ends, its paint]
@@ -782,6 +793,413 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
 const FRAME_BACK = BUTT_HEEL_X;
 const FRAME_FRONT = Math.ceil(MUZZLE) + 1;
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y, in millimeters
+// about its middle on the bore, at the same scale as the side view. Lengths along the gun are the side view's
+// numbers (sx converts its photo's pixels); widths are the real gun's.
+//
+// Widths. There's no photo from above, and no spec sheet gives them, so they're a 12 gauge side-by-side's usual
+// ones, checked against the side view's heights where it has them:
+// - Barrels: two 12 gauge tubes touching, so the pair is twice one barrel's outside diameter: 25 mm at the breech
+//   (the side view's 64 px less its rib) to 22.5 mm at the 12" cut (a 0.729" bore with walls thickening toward
+//   the chamber), so 50 mm across at the breech, 45 at the muzzle. The concave rib lies in the valley between
+//   them, 8 mm wide at the breech to 6 at the muzzle.
+// - The action as wide as the barrels at the breech (50 mm); the fences swell out to it from the top tang (14 mm
+//   wide, as on most doubles); the lock plates stand 1 mm proud of the stock's head either side.
+// - The hammers stand outside the lock plates (about 7 mm thick), their noses reaching in over the fences to the
+//   strikers above each bore (12.5 mm either side of the middle), their spurs flaring out to about 35 mm either
+//   side ("rabbit ears").
+// - The stock: 50 mm at its head (the action's width), 35 mm at the wrist, 40 mm along the comb and 43 at the
+//   butt, as on a typical game gun's stock.
+// - The forend wraps the barrels' lower halves, so from above it shows only as a millimeter of wood either side.
+//
+// What moves:
+// - `barrels` (with the forend): broken open, they tip down on the hinge pin, which is at the front of the action's
+//   bar (the side view's knuckle, x 1088 px: 97 mm) 27 mm under the bore. Tipped 37 degrees, the barrels look 0.8
+//   as long from above, and their breech ends swing up and forward about 28 mm: so the game's stretch (0.8) is
+//   about T_STRETCH_PIVOT (175 mm), not the hinge pin, which puts both the muzzle and the breech where they'd be.
+//   Open, they uncover the action's bar (its flat top, the "water table", with the slot the barrels' lumps drop
+//   into), and their breech ends show, tipped up toward us: the chambers with the shells' brass heads in them.
+//   Those are drawn at the back of the barrels' group, under the fences while it's shut.
+// - `top-lever`: it pivots on a spindle at its front end, just behind the fences (T_LEVER_PIVOT, 5 mm), and the
+//   thumb swings its tail to the right (+y) to open the gun, about 35 degrees.
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - (FRAME_BACK + MUZZLE) / 2) * MM_PER_PX;
+
+const T_BUTT = sx(FRAME_BACK);
+const T_BREECH = sx(BREECH);
+const T_FENCES = sx(862); // where the fences start swelling out from the top tang
+const T_FENCES_FULL = 24; // where they're the action's full width
+const T_TANG_BACK = sx(TANG_BACK[0]);
+const T_TANG_HALF = 7;
+const T_ACTION_HALF = 25;
+const T_PLATE: [number, number] = [
+  sx(PLATE_BACK[0] - PLATE_R),
+  sx(PLATE_FRONT[0] + PLATE_R),
+];
+const T_KNUCKLE = sx(KNUCKLE_X - 8);
+const T_STRETCH_PIVOT = 175;
+const T_BREECH_OD = 25;
+const T_MUZZLE_OD = 22.5;
+const T_RIB_BREECH = 8;
+const T_RIB_MUZZLE = 6;
+const T_FOREND_BACK = sx(FOREND_BACK_TOP[0]);
+const T_LEVER_PIVOT = sx(860);
+const T_LEVER_TAIL = sx(781);
+const T_THUMB_FRONT = sx(812);
+// The stock's half width from above, back to front: [x, half]
+const T_STOCK: [number, number][] = [
+  [T_BUTT, 21.5],
+  [sx(300), 20.5],
+  [sx(480), 19.5],
+  [sx(560), 17.5],
+  [sx(640), 18],
+  [sx(700), 20],
+  [sx(760), 23.5],
+  [sx(800), 25],
+  [T_BREECH, 25], // under the action and lock plates
+];
+const T_PISTOL_BACK = sx(486);
+
+const t1 = (v: number) =>
+  fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "").replace(/^-0$/, "0");
+const tp = (x: number, y: number) => `${t1(x)},${t1(y)}`;
+const tpt = ([x, y]: Point) => tp(x, y);
+
+/** A rectangle with each corner rounded by its own radius (back-left, front-left, front-right, back-right) */
+function tbox(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+): string {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (
+    cx: number,
+    cy: number,
+    fx: number,
+    fy: number,
+    tx: number,
+    ty: number,
+  ) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A gradient across the gun (along y), from y0 to y1 */
+function acrossTop(
+  id: string,
+  y0: number,
+  y1: number,
+  list: [number, string][],
+): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t1(y0)}" x2="0" y2="${t1(y1)}">`,
+    ...list.map(([o, c]) => `      <stop offset="${o}" stop-color="${c}"/>`),
+    "    </linearGradient>",
+  ].join("\n    ");
+}
+
+/** A smooth outline through points in millimeters, from the first, mirrored for the left side if `mirror` */
+function smoothTop(
+  points: readonly Point[],
+  startDir: Point,
+  endDir: Point,
+): string {
+  // smoothCurve writes to a tenth of a millimeter, plenty for these
+  return smoothCurve(points, startDir, endDir);
+}
+
+const mirrorY = (points: readonly Point[]) =>
+  points.map(([x, y]) => [x, -y] as Point).reverse();
+
+/** The stock from above, back to its head under the action: the full stock or the pistol grip */
+function topStock(pistol: boolean): string {
+  const half = pistol
+    ? T_STOCK.filter(([x]) => x > T_PISTOL_BACK + 8)
+    : T_STOCK;
+  const back = pistol ? T_PISTOL_BACK : T_BUTT;
+  const backHalf = pistol ? 18 : T_STOCK[0][1];
+  const right: Point[] = [
+    [back + 6, backHalf],
+    ...half.slice(pistol ? 0 : 1).map(([x, h]) => [x, h] as Point),
+  ];
+  const left = mirrorY(right);
+  const r = pistol ? 10 : 4; // the pistol grip's cut is rounded off; the butt's corners just eased
+  return (
+    `M${tpt(left[left.length - 1])} ` +
+    `C${tp(back + 6 - r * 0.6, -backHalf)} ${tp(back, -backHalf + r * 0.6)} ${tp(back, -backHalf + r)} ` +
+    `L${tp(back, backHalf - r)} C${tp(back, backHalf - r * 0.6)} ${tp(back + 6 - r * 0.6, backHalf)} ${tpt(right[0])} ` +
+    `${smoothTop(right, [1, 0], [1, 0])} L${tpt(left[0])} ${smoothTop(left, [-1, 0], [-1, 0])} Z`
+  );
+}
+
+/** One barrel's outline from above, `side` 1 for the right, -1 the left: from the middle out, breech to muzzle */
+function topBarrel(side: 1 | -1, muzzle: number): string {
+  const back = T_BREECH;
+  return (
+    `M${tp(back, 0)} L${tp(muzzle, 0)} L${tp(muzzle, side * T_MUZZLE_OD)} ` +
+    `L${tp(back, side * T_BREECH_OD)} Z`
+  );
+}
+
+/** The action's top: the top tang along the wrist, swelling out over the fences to the action's full width */
+function topAction(): string {
+  const right: Point[] = [
+    [T_FENCES, T_TANG_HALF],
+    [T_FENCES + 6, 12],
+    [T_FENCES + 12, 19.5],
+    [T_FENCES_FULL, T_ACTION_HALF],
+  ];
+  const left = mirrorY(right);
+  return (
+    `M${tp(T_TANG_BACK, -T_TANG_HALF + 2)} C${tp(T_TANG_BACK, -T_TANG_HALF + 1)} ${tp(T_TANG_BACK + 1, -T_TANG_HALF)} ${tp(T_TANG_BACK + 2, -T_TANG_HALF)} ` +
+    `L${tpt(left[left.length - 1])} ${smoothTop([...left].reverse(), [1, 0], [1, -0.2])} ` +
+    `L${tp(T_BREECH, -T_ACTION_HALF)} L${tp(T_BREECH, T_ACTION_HALF)} L${tpt(right[right.length - 1])} ` +
+    `${smoothTop([...right].reverse(), [-1, -0.2], [-1, 0])} ` +
+    `L${tp(T_TANG_BACK + 2, T_TANG_HALF)} C${tp(T_TANG_BACK + 1, T_TANG_HALF)} ${tp(T_TANG_BACK, T_TANG_HALF - 1)} ${tp(T_TANG_BACK, T_TANG_HALF - 2)} Z`
+  );
+}
+
+// The right hammer from above (the left is its mirror): its spur flaring out behind, the head over the side of the
+// fence, and its nose reaching in to the striker over the bore
+// fence, and its nose reaching in to the striker over the bore. A band along its centerline, from the nose (square,
+// on the striker) to the spur's round tip; as thick as a hammer (about 6 mm), the head a little thicker.
+const T_HAMMER: Point[] = [
+  [21, 12.5],
+  [22.5, 17],
+  [20.5, 22],
+  [16, 26],
+  [11, 29.5],
+  [6.5, 33],
+];
+const T_HAMMER_PAD: Point[] = [
+  [8, 31.6],
+  [9.6, 30.5],
+  [11.2, 29.4],
+];
+
+function topHammer(side: 1 | -1): string {
+  return band(
+    T_HAMMER.map(([x, y]) => [x, side * y] as Point),
+    7,
+    5,
+  );
+}
+
+/** The top lever: a spindle at its front, a tapering arm back along the tang, a round thumbpiece at its tail */
+function topLever(): string {
+  const p = T_LEVER_PIVOT;
+  return (
+    `M${tp(p, -5)} C${tp(p + 2.8, -5)} ${tp(p + 5, -2.8)} ${tp(p + 5, 0)} C${tp(p + 5, 2.8)} ${tp(p + 2.8, 5)} ${tp(p, 5)} ` +
+    `L${tp(T_THUMB_FRONT, 4)} C${tp(T_THUMB_FRONT - 2, 6.5)} ${tp(T_LEVER_TAIL + 4, 8)} ${tp(T_LEVER_TAIL + 1, 6.5)} ` +
+    `C${tp(T_LEVER_TAIL - 0.5, 4)} ${tp(T_LEVER_TAIL - 0.5, -4)} ${tp(T_LEVER_TAIL + 1, -6.5)} ` +
+    `C${tp(T_LEVER_TAIL + 4, -8)} ${tp(T_THUMB_FRONT - 2, -6.5)} ${tp(T_THUMB_FRONT, -4)} Z`
+  );
+}
+
+function drawTop(options: DoubleBarrelOptions = {}): string {
+  const { S, W, P, H } = materials(options);
+  const outline = options.outline !== false;
+  const pistol = options.stock === "pistol";
+  const muzzle = sx(muzzleAt(options.barrelInches ?? BARREL_INCHES));
+  const forendFront = muzzle - (options.forendShort ?? FOREND_SHORT);
+  const sawn = options.sawn === undefined ? S.highlight : options.sawn;
+  const odAt = (x: number) =>
+    T_BREECH_OD +
+    ((T_MUZZLE_OD - T_BREECH_OD) * (x - T_BREECH)) / (muzzle - T_BREECH);
+  const ribAt = (x: number) =>
+    T_RIB_BREECH +
+    ((T_RIB_MUZZLE - T_RIB_BREECH) * (x - T_BREECH)) / (muzzle - T_BREECH);
+  const minX = (pistol ? T_PISTOL_BACK : T_BUTT) - 1;
+  const maxX = muzzle + 1;
+  const half = 37;
+  const width = t1(maxX - minX);
+  const height = t1(half * 2);
+  const edge = (d: string, color: string) =>
+    outline
+      ? `<path d="${d}" stroke="${color}" stroke-width="${t1(OUTLINE_TOP * 2)}" fill="none"/>\n    `
+      : "";
+  const STOCK = topStock(pistol);
+  const ACTION_TOP = topAction();
+  const PAIR = `M${tp(T_BREECH, -T_BREECH_OD)} L${tp(muzzle, -odAt(muzzle))} L${tp(muzzle, odAt(muzzle))} L${tp(T_BREECH, T_BREECH_OD)} Z`;
+  const FOREND_TOP =
+    `M${tp(T_FOREND_BACK, -odAt(T_FOREND_BACK) - 1)} L${tp(forendFront - 6, -odAt(forendFront) - 1)} ` +
+    `C${tp(forendFront - 2, -odAt(forendFront) - 1)} ${tp(forendFront, -odAt(forendFront) + 2)} ${tp(forendFront, -odAt(forendFront) + 5)} ` +
+    `L${tp(forendFront, odAt(forendFront) - 5)} C${tp(forendFront, odAt(forendFront) - 2)} ${tp(forendFront - 2, odAt(forendFront) + 1)} ${tp(forendFront - 6, odAt(forendFront) + 1)} ` +
+    `L${tp(T_FOREND_BACK, odAt(T_FOREND_BACK) + 1)} Z`;
+  const RIB = `M${tp(T_BREECH, -ribAt(T_BREECH) / 2)} L${tp(muzzle, -ribAt(muzzle) / 2)} L${tp(muzzle, ribAt(muzzle) / 2)} L${tp(T_BREECH, ribAt(T_BREECH) / 2)} Z`;
+  const BAR = tbox(
+    T_BREECH - 2,
+    -T_ACTION_HALF + 2,
+    T_KNUCKLE,
+    T_ACTION_HALF - 2,
+    [0, 6, 6, 0],
+  );
+  const LUMP_SLOT = tbox(T_BREECH + 6, -6, T_KNUCKLE - 10, 6, 5);
+  const plates = [-1, 1].map((side) =>
+    tbox(
+      T_PLATE[0],
+      side < 0 ? -T_ACTION_HALF - 1 : T_ACTION_HALF - 1,
+      T_PLATE[1],
+      side < 0 ? -T_ACTION_HALF + 1 : T_ACTION_HALF + 1,
+      1,
+    ),
+  );
+  // The barrels' breech ends, tipped up toward us when it's open: each chamber with a shell's brass head in it
+  const breechEnds = [-1, 1].map((side) => {
+    const cy = (side * T_BREECH_OD) / 2;
+    return `<ellipse cx="${t1(T_BREECH - 6)}" cy="${t1(cy)}" rx="6" ry="${t1(T_BREECH_OD / 2)}" fill="${S.base}" stroke="${S.dark}" stroke-width="${t1(OUTLINE_TOP)}"/>
+      <ellipse cx="${t1(T_BREECH - 6)}" cy="${t1(cy)}" rx="5" ry="11" fill="${P.light}" stroke="${P.dark}" stroke-width="0.5"/>
+      <ellipse cx="${t1(T_BREECH - 6)}" cy="${t1(cy)}" rx="1.6" ry="3" fill="${P.highlight}" stroke="${P.dark}" stroke-width="0.4"/>`;
+  });
+  const lever = topLever();
+  const hammers = [-1, 1].map((side) => topHammer(side as 1 | -1));
+  const pads = [-1, 1].flatMap((side) =>
+    T_HAMMER_PAD.map(
+      ([x, y]) =>
+        `<path d="M${tp(x - 1.6, side * (y - 1.6))} L${tp(x + 1.6, side * (y + 1.6))}"/>`,
+    ),
+  );
+  const sawnEnds = sawn
+    ? `<path d="${tbox(muzzle - 1, -odAt(muzzle), muzzle, odAt(muzzle))}" fill="${sawn}"/>`
+    : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t1(minX)} ${t1(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("double-barrel-shotgun")}
+  <!-- The sawn-off double from above, as it's held: muzzle along +x, its right side down the page (+y), millimeters
+       about its middle on the bore, at the same scale as its side view (the pickup); lengths along it are the side
+       view's. Blued barrels and action, walnut, the hammers in the lock plates' golden brass; lit from above. -->
+  <defs>
+    ${acrossTop("double-barrel-shotgun-top-stock", -25, 25, [
+      [0, W.dark],
+      [0.12, W.base],
+      [0.35, mix(W.base, W.light, 0.7)],
+      [0.5, W.light],
+      [0.65, mix(W.base, W.light, 0.7)],
+      [0.88, W.base],
+      [1, W.dark],
+    ])}
+    ${acrossTop("double-barrel-shotgun-top-forend", -26, 26, [
+      [0, W.dark],
+      [0.08, W.base],
+      [0.5, W.light],
+      [0.92, W.base],
+      [1, W.dark],
+    ])}
+    ${acrossTop("double-barrel-shotgun-top-left-barrel", -T_BREECH_OD, 0, [
+      [0, S.dark],
+      [0.18, S.base],
+      [0.42, S.light],
+      [0.52, mix(S.highlight, "#ffffff", 0.3)],
+      [0.62, S.light],
+      [0.85, S.base],
+      [1, S.dark],
+    ])}
+    ${acrossTop("double-barrel-shotgun-top-right-barrel", 0, T_BREECH_OD, [
+      [0, S.dark],
+      [0.15, S.base],
+      [0.38, S.light],
+      [0.48, mix(S.highlight, "#ffffff", 0.3)],
+      [0.58, S.light],
+      [0.82, S.base],
+      [1, S.dark],
+    ])}
+    ${acrossTop(
+      "double-barrel-shotgun-top-action",
+      -T_ACTION_HALF,
+      T_ACTION_HALF,
+      [
+        [0, S.dark],
+        [0.15, S.base],
+        [0.5, S.light],
+        [0.85, S.base],
+        [1, S.dark],
+      ],
+    )}
+    ${acrossTop("double-barrel-shotgun-top-lever", -8, 8, [
+      [0, S.base],
+      [0.5, S.highlight],
+      [1, S.base],
+    ])}
+    ${acrossTop("double-barrel-shotgun-top-hammer", -36, 36, [
+      [0, H.dark],
+      [0.15, H.base],
+      [0.3, H.light],
+      [0.5, H.base],
+      [0.7, H.light],
+      [0.85, H.base],
+      [1, H.dark],
+    ])}
+  </defs>
+  <!-- Walnut: the butt, the comb, the wrist, and the head round the action, with the lock plates' top edges at
+       its sides -->
+  <g id="stock">
+    ${edge(STOCK, W.dark)}<path d="${STOCK}" fill="url(#double-barrel-shotgun-top-stock)"/>
+    ${plates.map((d) => `${edge(d, P.dark)}<path d="${d}" fill="${P.light}"/>`).join("\n    ")}
+  </g>
+  <!-- Under the barrels, seen when they're tipped open: the action's bar, its flat top (the water table) and the
+       slot the barrels' lumps drop into -->
+  <g id="action-bar">
+    ${edge(BAR, S.dark)}<path d="${BAR}" fill="${S.light}"/>
+    <path d="${LUMP_SLOT}" fill="${S.dark}"/>
+  </g>
+  <!-- A break action: the barrels and the forend tip down on the hinge to load, so they look shorter from above.
+       At their back, under the fences while it's shut, their breech ends, which tip up into view as it opens: the
+       chambers with the shells' brass heads in them -->
+  <g id="barrels">
+    ${breechEnds.join("\n      ")}
+    ${edge(FOREND_TOP, W.dark)}<path id="forend" d="${FOREND_TOP}" fill="url(#double-barrel-shotgun-top-forend)"/>
+    ${edge(PAIR, S.dark)}<path id="left-barrel" d="${topBarrel(-1, muzzle)}" fill="url(#double-barrel-shotgun-top-left-barrel)"/>
+    <path id="right-barrel" d="${topBarrel(1, muzzle)}" fill="url(#double-barrel-shotgun-top-right-barrel)"/>
+    <!-- The concave rib in the valley between them, matte, which is what you aim along -->
+    <path id="rib" d="${RIB}" fill="${S.base}" stroke="${S.dark}" stroke-width="0.5"/>
+    <path d="M${tp(T_BREECH, 0)} L${tp(muzzle, 0)}" stroke="${S.light}" stroke-width="0.6"/>
+    <!-- The sawn ends, bright steel -->
+    ${sawnEnds}
+  </g>
+  <!-- The action's top: the top tang along the wrist, and the fences swelling out to the barrels' breech -->
+  <g id="action">
+    ${edge(ACTION_TOP, S.dark)}<path d="${ACTION_TOP}" fill="url(#double-barrel-shotgun-top-action)"/>
+    <!-- The strikers in the fences, over each bore -->
+    <circle cx="${t1(sx(STRIKER[0]))}" cy="${t1(-T_BREECH_OD / 2)}" r="1.6" fill="${S.highlight}"/>
+    <circle cx="${t1(sx(STRIKER[0]))}" cy="${t1(T_BREECH_OD / 2)}" r="1.6" fill="${S.highlight}"/>
+  </g>
+  <!-- On the tang: pushed aside (its tail to the right) to open the gun, about the spindle at its front -->
+  <g id="top-lever">
+    ${edge(lever, S.dark)}<path d="${lever}" fill="url(#double-barrel-shotgun-top-lever)"/>
+    <circle cx="${t1(T_LEVER_PIVOT)}" cy="0" r="2.2" fill="${S.dark}"/>
+  </g>
+  <!-- The hammers, in the lock plates' brass, outside the plates: their spurs flaring out either side, their noses
+       reaching in over the fences to the strikers -->
+  <g id="hammers">
+    ${hammers.map((d) => `${edge(d, H.dark)}<path d="${d}" fill="url(#double-barrel-shotgun-top-hammer)"/>`).join("\n    ")}
+    <g stroke="${H.dark}" stroke-width="0.5" fill="none">
+      ${pads.join("\n      ")}
+    </g>
+  </g>
+</svg>
+`;
+}
+
+const OUTLINE_TOP = 0.4;
+
+const TOP: TopView<DoubleBarrelOptions> = { draw: drawTop };
+
 export const DOUBLE_BARREL_SHOTGUN: GunDrawing<DoubleBarrelOptions> = {
   name: "double-barrel-shotgun",
   photo: {
@@ -828,4 +1246,5 @@ export const DOUBLE_BARREL_SHOTGUN: GunDrawing<DoubleBarrelOptions> = {
        12" barrels cut square, exposed hammers, a brass lock plate, two triggers, walnut. Millimeters, with the
        origin on the gun's middle on the bore, as the guns' top views in weapons/guns/art/ have it. -->`,
   drawSide,
+  top: TOP,
 };
