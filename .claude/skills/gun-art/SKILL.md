@@ -12,6 +12,7 @@ The aim is few rounds with Simon. The M1911 took about fifteen; almost all were 
 
 - Ask Simon for photos (or use his), and look for a second, **evenly lit** one: the first photo's lighting misleads (blown-out highlights read as background, shadows as edges). Ideally a straight side view from the right (muzzle to the right), plus anything showing what the side view can't (the back of the grip, the top).
 - Put them in `assets/source/images/weapons/references/<name>/` (gitignored: we don't own them), and list them in the generator (`photo`, `otherPhotos`, with what each shows).
+- A 3D model (glTF) is a good reference too, kept in `references/<name>/model/` (and its license with it; reference only, never shipped): `model <name>` renders its six views straight on with no perspective, to find its right side and up, and `model <name> --from +z` writes one into the references folder to grid and measure like a photo (`--photo model-pz.png`). Best for the top, back and front, which photos rarely show square on; take colors from photos, not the model's textures, and check its proportions against the real gun.
 - Find the real gun's length and barrel length. The scale is the real length over its length in the photo's pixels (`scale.mmPerPixel`); the origin is the gun's middle on the bore (`scale.origin`), the same origin as the top view's art in `src/highrise/weapons/guns/art/`.
 
 ## 2. Construction pass, before drawing
@@ -89,6 +90,7 @@ As soon as the shapes are roughly right, make an options sheet (`options <gun> v
 | `sheet <gun>` | The photo, the pickup, and the pickup beside the others |
 | `cutout <gun>` | The photo without its background, beside the drawing |
 | `ingame <gun> --port 1234` | The pickup in the running game |
+| `model <gun> [folder] [--from +z] [--up +y] [--mirror]` | Render a 3D model straight on (all six views without `--from`) |
 
 The geometry is in `bin/gun-art/lib/geometry.ts` (`SlantedAxis`, `smoothCurve`, `arc`, `on`, `rounded`, `polygon`, `fixed`/`fmt`), the conversion to millimeters in `lib/svg.ts`.
 

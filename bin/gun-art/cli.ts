@@ -21,6 +21,12 @@
  *                              a sheet of variations: variants.json is {"A": {"label": "...", "options": {...}}}
  *   sheet <gun> [--out file]   the photo and the drawing, and the drawing at the pickups' size beside the others
  *   cutout <gun> [--out file]  the photo with its background removed, beside the drawing, light and dark
+ *   model <gun> [folder] [--from +x --up +y] [--mirror] [--width 2400] [--background #fff] [--out file]
+ *                              renders the 3D model in references/<gun>/<folder> (default "model", a .gltf) straight
+ *                              on, with no perspective and even light, to a PNG to draw over like a photo: from
+ *                              --from (an axis: the camera on +x looking back), into references/<gun>/<folder>-<from>.png.
+ *                              Without --from, all six views on one sheet, to find which is the right side and
+ *                              which is up
  *   ingame <gun> --port 1234   screenshots of the pickup in the arena (on the floor, and in the HUD), from a
  *                              running dev server
  *
@@ -48,6 +54,7 @@ import {
   type GunDrawing,
 } from "./lib/gun";
 import { GUNS } from "./guns";
+import { AXES, defaultUp, renderModel, type Axis } from "./lib/model";
 import { GUNS as GUN_STATS } from "../../src/highrise/weapons/guns/gun-stats/gunStats";
 
 const [command, ...rest] = process.argv.slice(2);
@@ -650,6 +657,63 @@ async function cutout() {
   console.log(file);
 }
 
+async function model() {
+  const [gun, folder = "model"] = positional;
+  const dir = path.join(REFERENCES, gun ?? "", folder);
+  if (!gun || !fs.existsSync(dir)) {
+    throw new Error(`No model folder ${dir}`);
+  }
+  const width = Number(flag("width", "2400"));
+  const background = flag("background");
+  const from = flag("from") as Axis | undefined;
+  if (from) {
+    if (!AXES.includes(from)) {
+      throw new Error(`--from is one of ${AXES.join(", ")}`);
+    }
+    const up = (flag("up") as Axis | undefined) ?? defaultUp(from);
+    const out =
+      flag("out") ??
+      path.join(
+        REFERENCES,
+        gun,
+        `${folder}-${from.replace("+", "p").replace("-", "m")}.png`,
+      );
+    const [render] = await renderModel(
+      dir,
+      [{ from, up, mirror: flags.mirror === true, out }],
+      { width, background },
+    );
+    console.log(
+      `${render.file}: ${render.width} by ${render.height} px, ${render.unitsPerPixel.toPrecision(4)} model ` +
+        `units a pixel; the model is ${render.size.map((v) => v.toPrecision(4)).join(" by ")} units (x, y, z)`,
+    );
+    return;
+  }
+  const renders = await renderModel(
+    dir,
+    AXES.map((axis) => ({
+      from: axis,
+      up: defaultUp(axis),
+      out: path.join(OUTPUT, `model-${gun}-${folder}-${axis}.png`),
+    })),
+    { width: 900, background: background ?? "#ffffff" },
+  );
+  const out = flag("out") ?? path.join(OUTPUT, `model-${gun}-${folder}.png`);
+  await renderSheet(
+    renders
+      .map(
+        (r, i) =>
+          `<div style="display:inline-block;margin:10px;vertical-align:top"><div>--from ${AXES[i]} ` +
+          `(up ${defaultUp(AXES[i])})</div><img src="${dataUrl(r.file)}" style="width:900px;border:1px solid #999"></div>`,
+      )
+      .join(""),
+    out,
+  );
+  console.log(
+    `${out}\nThe model is ${renders[0].size.map((v) => v.toPrecision(4)).join(" by ")} units (x, y, z)`,
+  );
+}
+
 async function ingame() {
   const gun = findGun(positional[0]);
   const port = flag("port", "1234");
@@ -721,6 +785,7 @@ const COMMANDS: Record<string, () => Promise<void>> = {
   sheet,
   cutout,
   ingame,
+  model,
 };
 
 async function main() {
