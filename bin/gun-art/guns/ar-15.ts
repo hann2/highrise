@@ -782,7 +782,19 @@ const PMAG_FRONT: Point[] = MAG_FRONT.map(([x, y]) => [x + Math.max(0, (y - 1040
 const PMAG_BACK: Point[] = MAG_BACK.map(([x, y]) => [x - Math.max(0, (y - 1040) / 260) * 4, y]);
 /** The base's line: y at x, sloping down to the back as the GI magazine's does */
 const pmagBaseY = (x: number) => 1306 + ((x - 1012) * (1268 - 1306)) / (1174 - 1012);
-const PMAG = `M${fmt(PMAG_BACK[0])} L${fmt(PMAG_FRONT[0])} ${smoothCurve(PMAG_FRONT.slice(0, -1), [0, 1], [0.2, 1])} L${f1(1172)},${f1(pmagBaseY(1172))} L${f1(1006)},${f1(pmagBaseY(1006))} ${smoothCurve([[1006, pmagBaseY(1006)], ...[...PMAG_BACK].reverse().slice(1)], [-0.25, -1], [0, -1])} Z`;
+/** Where an edge (its points down the magazine) meets the base */
+function baseCorner(edge: Point[]): Point {
+  let y = 1290;
+  for (let i = 0; i < 20; i++) {
+    y = pmagBaseY(interpolateX(edge, y));
+  }
+  return [interpolateX(edge, y), y];
+}
+const PMAG_FRONT_CORNER = baseCorner(PMAG_FRONT);
+const PMAG_BACK_CORNER = baseCorner(PMAG_BACK);
+const PMAG_FRONT_EDGE = [...PMAG_FRONT.filter((p) => p[1] < PMAG_FRONT_CORNER[1] - 4), PMAG_FRONT_CORNER];
+const PMAG_BACK_EDGE = [...PMAG_BACK.filter((p) => p[1] < PMAG_BACK_CORNER[1] - 4), PMAG_BACK_CORNER];
+const PMAG = `M${fmt(PMAG_BACK[0])} L${fmt(PMAG_FRONT[0])} ${smoothCurve(PMAG_FRONT_EDGE, [0, 1], [0.2, 1])} L${fmt(PMAG_BACK_CORNER)} ${smoothCurve([...PMAG_BACK_EDGE].reverse(), [-0.25, -1], [0, -1])} Z`;
 const PMAG_PLATE = rounded(
   [
     [998, pmagBaseY(998) - 4],
@@ -822,14 +834,20 @@ export interface HexLook {
    * stock is lit, light under the magazine well and darker toward the floor plate; "flat", nearly even
    */
   shading: "across" | "grip" | "above" | "flat";
-  /** The hexes' bevels: lit along all three upper edges and shaded along the lower ones ("full", round 4's), or
-   *  faintly, lit only along the two upper-left edges and the lower-right ones a little dark ("soft") */
-  bevel: "full" | "soft";
+  /**
+   * How strong the hexes' bevels are, 0 to 1: at 0 ("soft", round 5's) faintly lit along their two upper-left edges
+   * and a little dark along the lower-right ones; at 1 ("full", round 4's) lit along all three upper edges and dark
+   * along the lower ones. Between, the upper-left edges are lit and the lower-right dark, a step stronger each way,
+   * and all six edges faintly outlined.
+   */
+  bevel: number | "full" | "soft";
   /** The grooves between the hexes: their width (px) and how far toward the dark they are (0 to 1) */
   groove: number;
   grooveDark: number;
 }
-export const DEFAULT_HEX_LOOK: HexLook = { shading: "grip", bevel: "soft", groove: 3, grooveDark: 0.35 };
+/** Simon's pick (round 6): lit from above like the stock (round 5's C), with the bevels a little stronger than soft */
+export const DEFAULT_HEX_LOOK: HexLook = { shading: "above", bevel: 0.4, groove: 3, grooveDark: 0.35 };
+const bevelStrength = (b: HexLook["bevel"]) => (b === "full" ? 1 : b === "soft" ? 0 : b);
 const HEX_TOP = 1048; // where the hexes start, just under the magazine well's lip
 const hexBackX = (y: number) => interpolateX(PMAG_BACK, y);
 const hexFrontX = (y: number) => interpolateX(PMAG_FRONT, y);
@@ -856,7 +874,7 @@ function hexagons(look: HexLook): { faces: string; lit: string; shade: string } 
       });
       faces.push(polygon(pts));
       // The bevel: lit along its upper edges, in shadow along its lower ones (soft: only the upper-left ones lit)
-      if (look.bevel === "full") {
+      if (bevelStrength(look.bevel) >= 1) {
         lit.push(`M${fmt(pts[4])} L${fmt(pts[5])} L${fmt(pts[0])} L${fmt(pts[1])}`);
         shade.push(`M${fmt(pts[1])} L${fmt(pts[2])} L${fmt(pts[3])} L${fmt(pts[4])}`);
       } else {
@@ -882,15 +900,27 @@ function hexmagRidges(): string {
   }
   return out.join(" ");
 }
-// The floor plate: a solid band along the base, 3 px wider than the body at each end and 15 deep, its ends square to
-// the base, their corners just rounded
-const PLATE_BACK = 1002;
-const PLATE_FRONT = 1177;
-const PLATE_DOWN = { x: 0.23, y: 0.97 }; // square to the base's slope
-const plateAt = (x: number, down: number): Point => [x + PLATE_DOWN.x * down, pmagBaseY(x) + PLATE_DOWN.y * down];
+// The floor plate: a plain rectangle in the magazine's own frame, along its base: its top 5 px up into the body, its
+// bottom 10 px below the base and parallel to it, its ends square to the base, 3 px proud of the body's back and front
+// corners, their corners just rounded
+const BASE_ALONG: Point = (() => {
+  const dx = PMAG_FRONT_CORNER[0] - PMAG_BACK_CORNER[0];
+  const dy = PMAG_FRONT_CORNER[1] - PMAG_BACK_CORNER[1];
+  const l = Math.hypot(dx, dy);
+  return [dx / l, dy / l];
+})();
+const BASE_DOWN: Point = [-BASE_ALONG[1], BASE_ALONG[0]];
+/** A point `along` px from the body's back corner along the base, `down` px below it */
+const plateAt = (along: number, down: number): Point => [
+  PMAG_BACK_CORNER[0] + BASE_ALONG[0] * along + BASE_DOWN[0] * down,
+  PMAG_BACK_CORNER[1] + BASE_ALONG[1] * along + BASE_DOWN[1] * down,
+];
+const BASE_LENGTH = Math.hypot(PMAG_FRONT_CORNER[0] - PMAG_BACK_CORNER[0], PMAG_FRONT_CORNER[1] - PMAG_BACK_CORNER[1]);
+const PLATE_BACK = -3;
+const PLATE_FRONT = BASE_LENGTH + 3;
 const HEXMAG_PLATE = rounded(
   [plateAt(PLATE_BACK, -5), plateAt(PLATE_FRONT, -5), plateAt(PLATE_FRONT, 10), plateAt(PLATE_BACK, 10)],
-  [2.5, 2.5, 4, 4],
+  [2.5, 2.5, 3.5, 3.5],
 );
 
 function magLine(t: number, y0 = 1042, y1 = 1300): string {
@@ -1758,13 +1788,17 @@ function drawSide(options: Ar15Options = {}): string {
     <path d="${magazine}" fill="${mix(M.base, M.dark, hexLook.grooveDark)}"/>
     <g clip-path="url(#ar-15-magazine-clip)">
       <path d="${hexes.faces}" fill="url(#ar-15-magazine-shading)"/>
-      ${
-        hexLook.bevel === "full"
-          ? `<path d="${hexes.lit}" stroke="${M.light}" stroke-width="2.5" fill="none"/>
-      <path d="${hexes.shade}" stroke="${M.dark}" stroke-width="2" fill="none" opacity="0.8"/>`
-          : `<path d="${hexes.lit}" stroke="${mix(M.base, M.light, 0.7)}" stroke-width="1.5" fill="none" opacity="0.7"/>
-      <path d="${hexes.shade}" stroke="${M.dark}" stroke-width="1.5" fill="none" opacity="0.35"/>`
-      }
+      ${(() => {
+        const b = bevelStrength(hexLook.bevel);
+        if (b >= 1) {
+          return `<path d="${hexes.lit}" stroke="${M.light}" stroke-width="2.5" fill="none"/>
+      <path d="${hexes.shade}" stroke="${M.dark}" stroke-width="2" fill="none" opacity="0.8"/>`;
+        }
+        // From soft (b 0) toward full: brighter and darker edges, a little wider, and every edge faintly outlined
+        return `${b > 0 ? `<path d="${hexes.faces}" stroke="${M.dark}" stroke-width="1" fill="none" opacity="${fixed(0.25 * b, 2)}"/>` : ""}
+      <path d="${hexes.lit}" stroke="${mix(M.base, M.light, 0.7 + 0.3 * b)}" stroke-width="${fixed(1.5 + 0.8 * b, 2)}" fill="none" opacity="${fixed(0.7 + 0.3 * b, 2)}"/>
+      <path d="${hexes.shade}" stroke="${M.dark}" stroke-width="${fixed(1.5 + 0.5 * b, 2)}" fill="none" opacity="${fixed(0.35 + 0.35 * b, 2)}"/>`;
+      })()}
       <!-- The rim light down its back edge, as the grip's -->
       <path d="${magBackEdge}" stroke="${M.highlight}" stroke-width="${f1(rim * 2)}" fill="none" opacity="0.7"/>
     </g>
