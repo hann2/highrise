@@ -9,7 +9,7 @@ As the pistols were (`notes/gun-art-pistols-plan.md`, and the `gun-art` skill's 
 | `remington-870.ts` | Remington 870 Marine Magnum, 18" | nickel, black synthetic stock and pump | `remington-870-marine.jpeg` (main, small), `-black-and-wood.jpg`, `-tactical.jpg` (shapes, and skins later) |
 | `spas-12.ts` | Franchi SPAS-12, **no stock** | black and parkerized gray | `spas-12-unfolded.jpg` (main), `spas-12-folded.webp`, `model/` (3D, stockless) |
 | `double-barrel-shotgun.ts` | Sawn-off side-by-side, from a hammer coach gun | blued, case-hardened lock, walnut | `hammer-coach-gun.png` (main), `stoeger-coach-gun.png`, `old-hammerless.jpg`, `percussion-double.png` |
-| `ar-15` | AR-15 | | No photos yet: starts when Simon adds them |
+| `ar-15.ts` | AR-15: a KAC SR-15 carbine with an M-LOK rail, a Magpul DT-PR Carbine stock and a Vortex AMG UH-1 Gen II | black | `ar-15.jpg` (main), `ar-15-stock.jpg`, `ar-15-optic.webp`, `ar-15-optic-alternate.jpg`; started a round behind the others |
 
 Simon wants gun skins someday (the 870's other finishes): keep each gun's colors as generator options, so a skin is a set of them.
 
