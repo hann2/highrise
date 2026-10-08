@@ -104,13 +104,13 @@ const ORIGIN: Point = [(DEFAULT_BACK + DEFAULT_FRONT) / 2, BORE_Y];
 // the ears, its bar dropping to y 1074 at x 885 and rising to the front pin at 1100,1050), the magazine well's front
 // with the flared lip at its bottom (1132 to 1139, y 1015 to 1035), and the pivot pin's boss at its top front. The
 // guard's opening is a hole (the floor shows): straight along its top (the grip boss), round at its front. On its
-// side: the safety selector (a lever 712 to 790 at y 935 to 955 on a round hub), the takedown pin's head (690,910),
+// side: the safety selector (a lever 738 to 800 at y 934 to 954 on a round hub at 794,941), the takedown pin's head (738,912),
 // the bolt catch's paddle and rod (KAC's ambidextrous one: 892 to 990, y 900 to 926), the magazine release in its
 // raised fence (927 to 973, y 922 to 978), the magazine well's raised flat panel (the lettering on it dropped), and
 // pins.
 // THE BUFFER TUBE (anodized), y 820 to 893, round: banded. Its threads (610 to 630) show in front of the castle nut
 // (630 to 660, y 812 to 896, staked), which holds the end plate (627 to 668, down to 945, with its QD sling socket at
-// 645,920) against the lower's ring (668 to 700, from y 812).
+// 646,921) against the lower's ring (668 to 700, from y 812).
 // THE GRIP (an A2 grip, black polymer): it leans back about 32°; a horn for the middle finger on its front (794 at
 // y 1120); its bottom slopes from the heel (596,1200) to the toe (732,1222). A checkered panel on its side, along
 // its lean.
@@ -528,8 +528,8 @@ const LOWER = rounded(
 );
 const OPENING = rounded(
   [
-    [828, 986],
-    [945, 986],
+    [828, 983],
+    [945, 983],
     [958, 1040],
     [918, 1056],
     [846, 1052],
@@ -553,10 +553,10 @@ const MAG_FENCE = rbox(927, 922, 973, 978, 10);
 const MAG_BUTTON = rbox(940, 936, 962, 966, 10);
 const BOLT_PADDLE = rbox(892, 900, 926, 926, 9);
 const BOLT_ROD = rbox(920, 906, 990, 917, 5);
-const SELECTOR_LEVER = rbox(712, 935, 795, 955, 10);
-const SELECTOR_HUB: Point = [790, 942];
-const SELECTOR_POINTER = `M806,931 L826,941 L806,952 Z`;
-const TAKEDOWN_PIN: Point = [690, 910];
+const SELECTOR_LEVER = rbox(738, 934, 800, 954, 10);
+const SELECTOR_HUB: Point = [794, 941];
+const SELECTOR_POINTER = `M810,931 L832,941 L810,951 Z`;
+const TAKEDOWN_PIN: Point = [738, 912];
 const PIVOT_PIN: Point = [1148, 914];
 const SMALL_PINS: Point[] = [
   [845, 962],
@@ -618,7 +618,7 @@ const END_PLATE = rounded(
   ],
   [2, 0, 0, 6, 2, 0, 0],
 );
-const QD_SOCKET: Point = [645, 920];
+const QD_SOCKET: Point = [646, 921];
 
 // ---------------------------------------------------------------------------------------------------------
 // The grip (A2), along its lean
@@ -659,12 +659,12 @@ const GRIP = `M800,985 L800,1060 ${smoothCurve(
 const GRIP_LEAN = -0.62; // x per y down the grip
 const GRIP_PANEL = rounded(
   [
-    [722, 1030],
-    [779, 1030],
-    [729, 1172],
-    [650, 1172],
+    [712, 1040],
+    [772, 1040],
+    [690, 1194],
+    [613, 1194],
   ],
-  [10, 10, 10, 10],
+  [8, 10, 10, 8],
 );
 
 function checkering(): string {
@@ -1043,15 +1043,13 @@ function opticShapes() {
       [340, 143],
       [958, 143],
       [982, 235],
-      [982, 262],
-      [946, 350],
-      [945, 440],
-      [963, 500],
+      [978, 290],
+      [962, 350],
       [958, 548],
       [80, 548],
       [93, 280],
     ],
-    [10, 20, 10, 10, 6, 10, 20, 10, 10, 6, 6, 12],
+    [10, 20, 10, 10, 6, 20, 20, 6, 6, 12],
   );
   const body = roundedO(
     [
@@ -1408,7 +1406,7 @@ function drawSide(options: Ar15Options = {}): string {
     <path d="${lugs(HG_LUGS, RAIL_LUG_TOP, RAIL_LUG_TOP + 2)}" fill="${H.highlight}"/>
     <g clip-path="url(#ar-15-handguard-clip)" fill="none">
       <!-- The middle row: the barrel through them, in the handguard's shadow -->
-      <path d="${BARREL_SLOTS}" fill="${S.dark}" opacity="0.55"/>
+      <path d="${BARREL_SLOTS}" fill="${S.dark}" opacity="0.3"/>
       <!-- The slots' cut edges: lit along their bottoms, in shadow along their tops -->
       <path d="${THROUGH_SLOTS} ${BARREL_SLOTS}" stroke="${H.dark}" stroke-width="3"/>
       <!-- The QD socket at the back -->
@@ -1588,3 +1586,37 @@ export const AR_15: GunDrawing<Ar15Options> = {
        weapons/guns/art/ have it; drawn over photos, then simplified. -->`,
   drawSide,
 };
+
+/**
+ * How the stock's and the optic's photos map onto the base photo's pixels, as the affine matrices [a, b, c, d, e,
+ * f] (base = a·x + c·y + e, b·x + d·y + f), for laying those photos under the drawing to check it
+ */
+export function partPhotoMaps(notch = DEFAULT_NOTCH): Record<
+  "stock" | "optic",
+  { file: string; matrix: [number, number, number, number, number, number] }
+> {
+  return {
+    stock: {
+      file: "ar-15-stock.jpg",
+      matrix: [
+        -STOCK_SCALE,
+        0,
+        0,
+        STOCK_SCALE,
+        buttX(notch) + STOCK_BUTT_SX * STOCK_SCALE,
+        BORE_Y - STOCK_AXIS_SY * STOCK_SCALE,
+      ],
+    },
+    optic: {
+      file: "ar-15-optic.webp",
+      matrix: [
+        OPTIC_SCALE,
+        0,
+        0,
+        OPTIC_SCALE,
+        OPTIC_FRONT_X - OPTIC_FRONT_OX * OPTIC_SCALE,
+        RAIL_LUG_TOP - OPTIC_RAIL_OY * OPTIC_SCALE,
+      ],
+    },
+  };
+}
