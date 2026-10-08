@@ -102,61 +102,21 @@ import {
 } from "../lib/geometry";
 import type { GunDrawing, TopView } from "../lib/gun";
 import { generatedNote } from "../lib/gun";
-import { BLUED_STEEL, POLISHED_STAINLESS, WALNUT } from "../lib/style";
-
-// Not in style.ts yet: the front sight's red insert, from the photo (the lead moves it to style.ts)
-const SIGHT_RED = "#e8553c";
-const SIGHT_RED_DARK = "#a93424";
-
-/**
- * Chrome-like polished stainless, the Desert Eagle's (desert-eagle.ts, copied here until the lead moves it to
- * style.ts): each face reflects a bright sky above and a dark floor below, so it's banded rather than shaded:
- * from `sky` at its top fading to `skyLow` at its horizon, a hard drop (`hardness`, as a fraction of the face) to
- * `floor`, rising to `floorLow` at its bottom edge. Edges that catch the light are a line of `edge` with
- * `edgeDark` just below (shading, not an outline: the outline is a thin line in each part's own dark shade).
- * Bead-blasted (matte) planes are a step darker.
- */
-export interface Polish {
-  readonly sky: string;
-  readonly skyLow: string;
-  readonly floor: string;
-  readonly floorLow: string;
-  /** Where on a face the floor's reflection starts, 0 at its top to 1 at its bottom */
-  readonly horizon: number;
-  /** How quickly the sky gives way to the floor, as a fraction of the face: 0 is a hard line */
-  readonly hardness: number;
-  readonly edge: string;
-  readonly edgeDark: string;
-  readonly matte: string;
-  readonly matteLight: string;
-  readonly matteDark: string;
-}
-
-/** The recommended polish, the Desert Eagle's: neutral to slightly cool, a hard horizon, a dark floor */
-export const CHROME_STAINLESS: Polish = {
-  sky: "#f5f7f9",
-  skyLow: "#c4c9cf",
-  floor: "#3e434a",
-  floorLow: "#8c9199",
-  horizon: 0.64,
-  hardness: 0.02,
-  edge: "#ffffff",
-  edgeDark: "#25282d",
-  matte: "#868b92",
-  matteLight: "#a9aeb4",
-  matteDark: "#5a5f66",
-};
-
-/**
- * The revolver's polish, Simon's pick (variant D of round 2): the Desert Eagle's, with a lighter floor (the
- * floor POLISHED_STAINLESS.dark), which brings the frame's lower half and the barrel's underside closer to the
- * photo. Same horizon, bands and edges.
- */
-export const REVOLVER_POLISH: Polish = {
-  ...CHROME_STAINLESS,
-  floor: "#6c7178",
-  floorLow: "#a7acb3",
-};
+import type { Polish, Stops } from "../lib/style";
+import {
+  BLUED_STEEL,
+  boxGradient,
+  faceStops,
+  grooveStops,
+  linear,
+  POLISHED_STAINLESS,
+  REVOLVER_POLISH,
+  roundStops,
+  SIGHT_RED,
+  SIGHT_RED_DARK,
+  upStops,
+  WALNUT,
+} from "../lib/style";
 
 export interface WoodColors {
   edge: string;
@@ -516,75 +476,6 @@ function crossings(a: Point, ra: number, b: Point, rb: number): [Point, Point] {
     [m[0] + uy * h, m[1] - ux * h],
     [m[0] - uy * h, m[1] + ux * h],
   ];
-}
-
-// ---------------------------------------------------------------------------------------------------------
-// Shading: the Desert Eagle's bands (faceStops, roundStops, upStops), and a groove's
-
-type Stops = readonly (readonly [number, string])[];
-
-/** A flat face's bands, top to bottom */
-function faceStops(p: Polish): Stops {
-  return [
-    [0, p.sky],
-    [p.horizon, p.skyLow],
-    [Math.min(1, p.horizon + p.hardness), p.floor],
-    [1, p.floorLow],
-  ];
-}
-
-/** A horizontal cylinder's bands, top to bottom: a streak of sky near its top, the floor below its middle */
-function roundStops(p: Polish): Stops {
-  return [
-    [0, p.floorLow],
-    [0.1, p.edge],
-    [0.22, p.sky],
-    [0.48, p.skyLow],
-    [0.48 + p.hardness, p.floor],
-    [0.82, p.floorLow],
-    [1, p.floor],
-  ];
-}
-
-/** A face turned up toward the sky (a top bevel): bright, a little darker at its far edge */
-function upStops(p: Polish): Stops {
-  return [
-    [0, p.edge],
-    [0.4, p.sky],
-    [1, p.skyLow],
-  ];
-}
-
-/** A groove along a cylinder (a flute), across it: concave, so it reflects the other way up, floor above sky */
-function grooveStops(p: Polish): Stops {
-  return [
-    [0, p.floor],
-    [0.42, p.floorLow],
-    [0.42 + p.hardness, p.sky],
-    [0.75, p.edge],
-    [1, p.skyLow],
-  ];
-}
-
-function linear(id: string, from: Point, to: Point, stops: Stops): string {
-  return [
-    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${fixed(from[0], 1)}" y1="${fixed(from[1], 1)}" x2="${fixed(to[0], 1)}" y2="${fixed(to[1], 1)}">`,
-    ...stops.map(
-      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
-    ),
-    "    </linearGradient>",
-  ].join("\n");
-}
-
-/** A gradient over each shape's own box, top to bottom */
-function boxGradient(id: string, stops: Stops): string {
-  return [
-    `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">`,
-    ...stops.map(
-      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
-    ),
-    "    </linearGradient>",
-  ].join("\n");
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -1045,7 +936,8 @@ const T_FLUTE_BACK = sx(FLUTE_BACK);
 const T_FLUTE_END = FLUTE_END * (BARREL_MM / (MUZZLE - BREECH));
 // The ejector rod, under the barrel at rest, and the crane's barrel round it in front of the cylinder
 const T_ROD_TIP = sx(ROD_TIP);
-const T_ROD_HALF = ((ROD_BOTTOM - ROD_TOP) / 2) * (BARREL_MM / (MUZZLE - BREECH));
+const T_ROD_HALF =
+  ((ROD_BOTTOM - ROD_TOP) / 2) * (BARREL_MM / (MUZZLE - BREECH));
 const T_KNURL: [number, number] = [sx(KNURL[0]), sx(KNURL[1])];
 const T_CRANE_FRONT = sx(760);
 const T_CRANE_HALF = 4.5;
@@ -1084,7 +976,14 @@ function tbox(
 ): string {
   const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
   const k = 0.45;
-  const corner = (cx: number, cy: number, fx: number, fy: number, tx: number, ty: number) =>
+  const corner = (
+    cx: number,
+    cy: number,
+    fx: number,
+    fy: number,
+    tx: number,
+    ty: number,
+  ) =>
     `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
   return [
     `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
@@ -1181,9 +1080,26 @@ function drawTop(options: RevolverOptions = {}): string {
       [-1, -0.4],
     )} ` +
     `C${tp(T_BACKSTRAP - 4, T_BACKSTRAP_HALF)} ${tp(T_BACKSTRAP - 4, -T_BACKSTRAP_HALF)} ${tp(T_BACKSTRAP, -T_BACKSTRAP_HALF)} Z`;
-  const strap = tbox(T_WINDOW[0] - 0.5, -T_STRAP_HALF, T_WINDOW[1] + 0.5, T_STRAP_HALF);
-  const front = tbox(T_WINDOW[1], -T_FRONT_HALF, T_BARREL_BACK + 0.5, T_FRONT_HALF, [0, 1.5, 1.5, 0]);
-  const thumb = tbox(T_THUMB[0], -T_SIDE_HALF - T_THUMB_OUT, T_THUMB[1], -T_SIDE_HALF + 1, [3, 3, 0, 0]);
+  const strap = tbox(
+    T_WINDOW[0] - 0.5,
+    -T_STRAP_HALF,
+    T_WINDOW[1] + 0.5,
+    T_STRAP_HALF,
+  );
+  const front = tbox(
+    T_WINDOW[1],
+    -T_FRONT_HALF,
+    T_BARREL_BACK + 0.5,
+    T_FRONT_HALF,
+    [0, 1.5, 1.5, 0],
+  );
+  const thumb = tbox(
+    T_THUMB[0],
+    -T_SIDE_HALF - T_THUMB_OUT,
+    T_THUMB[1],
+    -T_SIDE_HALF + 1,
+    [3, 3, 0, 0],
+  );
 
   // The cylinder: a band with its flutes' ends showing either side of the top strap, chamfered at the back
   const [cb, cf] = T_CYL;
@@ -1203,9 +1119,25 @@ function drawTop(options: RevolverOptions = {}): string {
   };
   // The flutes at the sides (90 degrees), where the cylinder's edge dips in
   const sideFlute = (s: 1 | -1) =>
-    tbox(T_FLUTE_BACK + T_FLUTE_END * 0.6, s > 0 ? T_CYL_HALF - 0.9 : -T_CYL_HALF, cf, s > 0 ? T_CYL_HALF : -T_CYL_HALF + 0.9);
-  const rod = tbox(cf - 1, -T_ROD_HALF, T_ROD_TIP, T_ROD_HALF, [0, T_ROD_HALF, T_ROD_HALF, 0]);
-  const crane = tbox(cf - 1, -T_CRANE_HALF, T_CRANE_FRONT, T_CRANE_HALF, [0, 1, 1, 0]);
+    tbox(
+      T_FLUTE_BACK + T_FLUTE_END * 0.6,
+      s > 0 ? T_CYL_HALF - 0.9 : -T_CYL_HALF,
+      cf,
+      s > 0 ? T_CYL_HALF : -T_CYL_HALF + 0.9,
+    );
+  const rod = tbox(cf - 1, -T_ROD_HALF, T_ROD_TIP, T_ROD_HALF, [
+    0,
+    T_ROD_HALF,
+    T_ROD_HALF,
+    0,
+  ]);
+  const crane = tbox(
+    cf - 1,
+    -T_CRANE_HALF,
+    T_CRANE_FRONT,
+    T_CRANE_HALF,
+    [0, 1, 1, 0],
+  );
   const knurl: string[] = [];
   for (let x = T_KNURL[0] + 0.5; x < T_KNURL[1]; x += 1) {
     knurl.push(`M${tp(x, -T_ROD_HALF + 0.3)} L${tp(x, T_ROD_HALF - 0.3)}`);
@@ -1219,8 +1151,20 @@ function drawTop(options: RevolverOptions = {}): string {
     `C${tp(T_MUZZLE, T_BARREL_HALF_MUZZLE - 0.4)} ${tp(T_MUZZLE - 0.4, T_BARREL_HALF_MUZZLE)} ${tp(T_MUZZLE - 1.2, T_BARREL_HALF_MUZZLE)} ` +
     `L${tp(T_BARREL_BACK, T_BARREL_HALF)} Z`;
   const rib = tbox(T_BARREL_BACK, -T_RIB_HALF, T_MUZZLE - 0.6, T_RIB_HALF);
-  const ramp = tbox(T_RAMP[0], -T_RIB_HALF, T_RAMP[1], T_RIB_HALF, [0, 1, 1, 0]);
-  const blade = tbox(T_BLADE_BACK, -T_BLADE_HALF, T_RAMP[1], T_BLADE_HALF, [0, 0.8, 0.8, 0]);
+  const ramp = tbox(
+    T_RAMP[0],
+    -T_RIB_HALF,
+    T_RAMP[1],
+    T_RIB_HALF,
+    [0, 1, 1, 0],
+  );
+  const blade = tbox(
+    T_BLADE_BACK,
+    -T_BLADE_HALF,
+    T_RAMP[1],
+    T_BLADE_HALF,
+    [0, 0.8, 0.8, 0],
+  );
   const red = tbox(T_RED[0], -T_BLADE_HALF + 0.3, T_RED[1], T_BLADE_HALF - 0.3);
   const ribLines: string[] = [];
   for (let x = T_BARREL_BACK + 3; x < T_RAMP[0] - 1; x += 1.6) {
@@ -1234,19 +1178,37 @@ function drawTop(options: RevolverOptions = {}): string {
     `L${tp(T_HAMMER_FRONT, -T_HAMMER_HALF)} L${tp(T_HAMMER_FRONT, T_HAMMER_HALF)} L${tp(T_SPUR_FRONT + 5, T_HAMMER_HALF)} ` +
     `C${tp(T_SPUR_FRONT + 2, T_HAMMER_HALF)} ${tp(T_SPUR_FRONT + 1, T_SPUR_HALF)} ${tp(T_SPUR_FRONT - 2, T_SPUR_HALF)} ` +
     `L${tp(T_SPUR_TIP + 2, T_SPUR_HALF)} C${tp(T_SPUR_TIP, T_SPUR_HALF)} ${tp(T_SPUR_TIP, -T_SPUR_HALF)} ${tp(T_SPUR_TIP + 2, -T_SPUR_HALF)} Z`;
-  const spur = tbox(T_SPUR_TIP + 0.5, -T_SPUR_HALF + 0.5, T_SPUR_FRONT - 3, T_SPUR_HALF - 0.5, [2, 1, 1, 2]);
+  const spur = tbox(
+    T_SPUR_TIP + 0.5,
+    -T_SPUR_HALF + 0.5,
+    T_SPUR_FRONT - 3,
+    T_SPUR_HALF - 0.5,
+    [2, 1, 1, 2],
+  );
   const checks: string[] = [];
   for (let x = sx(322); x < sx(360); x += 1.3) {
     checks.push(`M${tp(x, -T_SPUR_HALF + 1)} L${tp(x, T_SPUR_HALF - 1)}`);
   }
 
   // The rear sight
-  const sightBody = tbox(T_SIGHT_BODY[0], -T_SIGHT_BODY_HALF, T_SIGHT_BODY[1], T_SIGHT_BODY_HALF, [2.5, 1, 1, 2.5]);
+  const sightBody = tbox(
+    T_SIGHT_BODY[0],
+    -T_SIGHT_BODY_HALF,
+    T_SIGHT_BODY[1],
+    T_SIGHT_BODY_HALF,
+    [2.5, 1, 1, 2.5],
+  );
   const leaf =
     `M${tp(T_SIGHT_BODY[1] - 1, -T_LEAF_HALF - 1)} L${tp(T_LEAF_FRONT - 2, -T_LEAF_HALF)} ` +
     `C${tp(T_LEAF_FRONT, -T_LEAF_HALF)} ${tp(T_LEAF_FRONT, T_LEAF_HALF)} ${tp(T_LEAF_FRONT - 2, T_LEAF_HALF)} ` +
     `L${tp(T_SIGHT_BODY[1] - 1, T_LEAF_HALF + 1)} Z`;
-  const sightBlade = tbox(T_SIGHT_BLADE[0], -T_SIGHT_BODY_HALF + 0.5, T_SIGHT_BLADE[1], T_SIGHT_BODY_HALF - 0.5, 0.6);
+  const sightBlade = tbox(
+    T_SIGHT_BLADE[0],
+    -T_SIGHT_BODY_HALF + 0.5,
+    T_SIGHT_BLADE[1],
+    T_SIGHT_BODY_HALF - 0.5,
+    0.6,
+  );
   const notch = tbox(T_SIGHT_BLADE[0] - 0.2, -1.6, T_SIGHT_BLADE[1] + 0.2, 1.6);
 
   const viewW = t2(maxX - minX);

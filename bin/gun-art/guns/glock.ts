@@ -20,18 +20,7 @@ import {
 import type { GunDrawing, TopView } from "../lib/gun";
 import { generatedNote } from "../lib/gun";
 import type { Material } from "../lib/style";
-import { BLACK_POLYMER } from "../lib/style";
-
-/**
- * Black nitride (the Glock's slide, and its steel parts: the slide stop, the takedown lever, the pins): near
- * black, a touch bluer and darker than the polymer frame. A starting point, picked on the materials sheet.
- */
-export const BLACK_NITRIDE: Material = {
-  base: "#2b2e34",
-  dark: "#15161a",
-  light: "#41454e",
-  highlight: "#5f6570",
-};
+import { BLACK_NITRIDE, BLACK_POLYMER } from "../lib/style";
 
 export interface GlockOptions {
   /** The slide's material, and its steel parts' */

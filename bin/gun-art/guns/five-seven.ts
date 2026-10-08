@@ -1444,7 +1444,14 @@ function box(
 ): string {
   const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
   const k = 0.45;
-  const corner = (cx: number, cy: number, fx: number, fy: number, tx: number, ty: number) =>
+  const corner = (
+    cx: number,
+    cy: number,
+    fx: number,
+    fy: number,
+    tx: number,
+    ty: number,
+  ) =>
     `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
   return [
     `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
@@ -1464,7 +1471,11 @@ function box(
 const tpoly = (pts: [number, number][]) =>
   "M" + pts.map(([x, y]) => tp(x, y)).join(" L") + " Z";
 
-function acrossGradient(id: string, half: number, stops: [number, string][]): string {
+function acrossGradient(
+  id: string,
+  half: number,
+  stops: [number, string][],
+): string {
   return [
     `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t2(-half)}" x2="0" y2="${t2(half)}">`,
     ...stops.map(([o, c]) => `      <stop offset="${o}" stop-color="${c}"/>`),
@@ -1491,7 +1502,13 @@ function drawTop(options: FiveSevenOptions = {}): string {
 
   // The slide from above: its outline; the top flat, full width behind the port but for its broken edges, and
   // between the facets ahead of it
-  const slideOutline = box(T_SLIDE_BACK, -SLIDE_HALF, T_SLIDE_FRONT, SLIDE_HALF, [2, 2.5, 2.5, 2]);
+  const slideOutline = box(
+    T_SLIDE_BACK,
+    -SLIDE_HALF,
+    T_SLIDE_FRONT,
+    SLIDE_HALF,
+    [2, 2.5, 2.5, 2],
+  );
   const facetStart = T_PORT[1];
   const flat = SLIDE_HALF - FACET_WIDTH;
   const topFlat = tpoly([

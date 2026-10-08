@@ -109,7 +109,17 @@ import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
 import type { GunDrawing, TopView } from "../lib/gun";
 import { generatedNote } from "../lib/gun";
-import { BLACK_POLYMER, BLUED_STEEL } from "../lib/style";
+import type { Polish, Stops } from "../lib/style";
+import {
+  BLACK_POLYMER,
+  BLUED_STEEL,
+  boxGradient,
+  CHROME_STAINLESS,
+  faceStops,
+  linear,
+  roundStops,
+  upStops,
+} from "../lib/style";
 
 /** The photo's scale: 273 mm (the DE50SRMB's 10.75") over the 1857 px from the beavertail's tip to the muzzle */
 const MM_PER_PIXEL = 273 / 1857;
@@ -119,107 +129,10 @@ const OUTLINE_MM = 0.4;
 // ---------------------------------------------------------------------------------------------------------
 // Materials
 
-/**
- * Chrome-like polished stainless: each face reflects a bright sky above and a dark floor below, so it's banded
- * rather than shaded: from `sky` at its top fading to `skyLow` at its horizon, a hard drop (`hardness`, as a
- * fraction of the face) to `floor`, rising to `floorLow` at its bottom edge. Edges that catch the light are a
- * line of `edge` with `edgeDark` just below (shading, not outline); the outline round the silhouette is `outline`,
- * a mid gray. Bead-blasted (matte) planes are a
- * step darker and much flatter. Meant to be shared with the revolver.
- */
-export interface Polish {
-  readonly sky: string;
-  readonly skyLow: string;
-  readonly floor: string;
-  readonly floorLow: string;
-  /** Where on a face the floor's reflection starts, 0 at its top to 1 at its bottom */
-  readonly horizon: number;
-  /** How quickly the sky gives way to the floor, as a fraction of the face: 0 is a hard line */
-  readonly hardness: number;
-  readonly edge: string;
-  readonly edgeDark: string;
-  /** The outline round the silhouette: a mid gray, never near-black */
-  readonly outline: string;
-  readonly matte: string;
-  readonly matteLight: string;
-  readonly matteDark: string;
-}
-
-/** The recommended polish: neutral to slightly cool, a hard horizon, a dark floor */
-export const CHROME_STAINLESS: Polish = {
-  sky: "#f5f7f9",
-  skyLow: "#c4c9cf",
-  floor: "#3e434a",
-  floorLow: "#8c9199",
-  horizon: 0.64,
-  hardness: 0.02,
-  edge: "#ffffff",
-  edgeDark: "#25282d",
-  outline: "#5b6067",
-  matte: "#868b92",
-  matteLight: "#a9aeb4",
-  matteDark: "#5a5f66",
-};
-
 export interface DesertEagleOptions {
   polish?: Partial<Polish>;
   /** A thin outline round each part, in its own material's dark (default true) */
   outline?: boolean;
-}
-
-type Stops = readonly (readonly [number, string])[];
-
-/** A flat face's bands, top to bottom */
-function faceStops(p: Polish): Stops {
-  return [
-    [0, p.sky],
-    [p.horizon, p.skyLow],
-    [Math.min(1, p.horizon + p.hardness), p.floor],
-    [1, p.floorLow],
-  ];
-}
-
-/** A horizontal cylinder's bands, top to bottom: a streak of sky near its top, the floor below its middle */
-function roundStops(p: Polish): Stops {
-  return [
-    [0, p.floorLow],
-    [0.1, p.edge],
-    [0.22, p.sky],
-    [0.48, p.skyLow],
-    [0.48 + p.hardness, p.floor],
-    [0.82, p.floorLow],
-    [1, p.floor],
-  ];
-}
-
-/** A face turned up toward the sky (a top bevel): bright, a little darker at its far edge */
-function upStops(p: Polish): Stops {
-  return [
-    [0, p.edge],
-    [0.4, p.sky],
-    [1, p.skyLow],
-  ];
-}
-
-function linear(id: string, from: Point, to: Point, stops: Stops): string {
-  return [
-    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${fixed(from[0], 1)}" y1="${fixed(from[1], 1)}" x2="${fixed(to[0], 1)}" y2="${fixed(to[1], 1)}">`,
-    ...stops.map(
-      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
-    ),
-    "    </linearGradient>",
-  ].join("\n");
-}
-
-/** A gradient over each shape's own box, top to bottom */
-function boxGradient(id: string, stops: Stops): string {
-  return [
-    `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">`,
-    ...stops.map(
-      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
-    ),
-    "    </linearGradient>",
-  ].join("\n");
 }
 
 // Blued (black) steel: the hammer, sights, slide stop, trigger, magazine
