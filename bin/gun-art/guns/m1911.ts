@@ -16,16 +16,18 @@ import {
 import type { GunDrawing, TopView } from "../lib/gun";
 import { generatedNote } from "../lib/gun";
 
+import { BLUED_STEEL, BRIGHT_STEEL, WALNUT } from "../lib/style";
+
 // Blued steel
-const STEEL = "#4a4d54";
-const STEEL_DARK = "#26282d";
-const STEEL_LIGHT = "#6a6e76";
-const STEEL_EDGE = "#787d87";
-const WORN = "#8d9199"; // the grip safety, bright steel
+const STEEL = BLUED_STEEL.base;
+const STEEL_DARK = BLUED_STEEL.dark;
+const STEEL_LIGHT = BLUED_STEEL.light;
+const STEEL_EDGE = BLUED_STEEL.highlight;
+const WORN = BRIGHT_STEEL.base; // the grip safety, bright steel
 // Cocoa-brown wood: WOOD at the panel's edges, WOOD_LIGHT down its middle, WOOD_DARK for its checkering and edge
-const WOOD = "#6a3a24";
-const WOOD_DARK = "#3e2013";
-const WOOD_LIGHT = "#a3633f";
+const WOOD = WALNUT.base;
+const WOOD_DARK = WALNUT.dark;
+const WOOD_LIGHT = WALNUT.light;
 
 /** How the wood panel looks: its colors and shading, and how its edges and diamonds are drawn */
 export interface WoodStyle {

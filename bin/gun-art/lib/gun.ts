@@ -44,6 +44,11 @@ export interface GunDrawing<Options = unknown> {
   drawSide(options?: Options): string;
   /** The gun seen from above, as it's held, if it's drawn yet */
   readonly top?: TopView<Options>;
+  /**
+   * Still being drawn: `build` writes its files to tests/output/gun-art/ instead of the game's folders (where an
+   * old pickup of the same name may still be), and the tests leave it alone. Removed when it goes into the game.
+   */
+  readonly draft?: boolean;
 }
 
 /** A photo from above, and four points in it whose places in the top view (millimeters) we know */
@@ -72,11 +77,11 @@ export function photoPath(
 }
 
 export function pickupPath(gun: GunDrawing<any>): string {
-  return path.join(PICKUPS, `${gun.name}-pickup.svg`);
+  return path.join(gun.draft ? OUTPUT : PICKUPS, `${gun.name}-pickup.svg`);
 }
 
 export function topPath(gun: GunDrawing<any>): string {
-  return path.join(TOP_VIEWS, `${gun.name}.svg`);
+  return path.join(gun.draft ? OUTPUT : TOP_VIEWS, `${gun.name}.svg`);
 }
 
 /** The note at the top of every generated file */

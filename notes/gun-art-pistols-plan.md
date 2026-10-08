@@ -6,18 +6,18 @@ Redraw the four pistols still on old art, each by its own agent following the `g
 
 | Generator (`bin/gun-art/guns/`) | Model | Finish | Photos (`assets/source/images/weapons/references/<name>/`) | Replaces |
 |---|---|---|---|---|
-| `glock.ts` | Glock 19 | black polymer frame, black slide | `glock.webp`, `glock-alternate.jpg` | `glock-pickup.png`; top `art/glock.svg` |
-| `five-seven.ts` | FN Five-seven **MK3** (its features read better at game scale) | **FDE** (flat dark earth) frame and slide | `five-seven.webp`, `-alternate.webp`, `-alternate-2.webp` | `five-seven-pickup.png`; top `art/five-seven.svg` |
+| `glock.ts` | Glock 19 | black polymer frame, black slide | `glock-19.webp`, `glock-19-alternate.jpg` (from behind) | `glock-pickup.png`; top `art/glock.svg` |
+| `five-seven.ts` | FN Five-seven **MK3** (its features read better at game scale) | **FDE** (flat dark earth) frame and slide | `five-seven-mk3.webp` (with a red dot, drawn without), `-alternate.webp`, `-alternate-2.webp` | `five-seven-pickup.png`; top `art/five-seven.svg` |
 | `desert-eagle.ts` | Desert Eagle (.50 AE) | **polished stainless**, very shiny | `desert-eagle.png`, `desert-eagle-alternate.jpg` | `desert-eagle-pickup.png`; top `art/desert-eagle.svg` |
-| `revolver.ts` | S&W Model 629, 6.5" tapered barrel (not the Classic's full underlug) | **polished stainless**, very shiny | **still needed**: a clean right side, an evenly lit one, the cylinder swung out, anything from above | `magnum-pickup.png` (the pickup becomes `revolverPickup`); top `art/revolver.svg` |
+| `revolver.ts` | S&W Model 629, 6.5" tapered barrel (not the Classic's full underlug) | **polished stainless**, very shiny | `sw-629.jpg` (an 8⅜" from its left side; `sw-629-mirrored.jpg` is it flipped to draw over), `sw-629-alternate.jpg`, `sw-629-rosewood-grip.jpg` (a Classic from the right) | `magnum-pickup.png` (the pickup becomes `revolverPickup`); top `art/revolver.svg` |
 
-The revolver goes ahead when its photos are in; the other three don't wait for it. The M1911's photos are the model for what each needs.
+All four have photos (2026-10-07). The M1911's photos are the model for what each needs.
 
 ## Setup (lead, before any agent starts)
 
-1. Sort the loose photos into `references/<name>/` folders, and look at each: which side, how straight, what it shows. Note any that won't do.
-2. Shared style, so ten hands draw one set: move the M1911's colors into `bin/gun-art/lib/style.ts` (blued steel, polished stainless, black polymer, FDE polymer, the barrel's polish, walnut) for every generator to import.
-3. A stub generator per gun (`guns/<name>.ts`, photo list and scale only, an empty drawing) registered in `guns/index.ts`, so the agents never touch shared files and the CLI finds their gun from the start.
+1. ~~Sort the loose photos into `references/<name>/` folders, and look at each: which side, how straight, what it shows. Note any that won't do.~~ Done
+2. ~~Shared style, so ten hands draw one set: move the M1911's colors into `bin/gun-art/lib/style.ts` (blued steel, polished stainless, black polymer, FDE polymer, the barrel's polish, walnut) for every generator to import.~~ Done
+3. ~~A stub generator per gun (`guns/<name>.ts`, photo list and scale only, an empty drawing) registered in `guns/index.ts`, so the agents never touch shared files and the CLI finds their gun from the start.~~ Done: each is a `draft` (built into `tests/output/gun-art/`, skipped by the tests) until it's integrated.
 4. Commit that on master; each agent then works in its own worktree off it.
 
 ## The agents
@@ -43,5 +43,5 @@ Merge each agent's branch; per gun: `build`, regenerate the manifest, delete the
 
 ## Open
 
-- The revolver's photos.
+- The revolver: its photos are of an 8⅜" barrel, and of its left side.
 - Top views this round, or pickups only first? (The plan above does both, pickups first.)

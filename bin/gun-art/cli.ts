@@ -4,7 +4,8 @@
  *   npx tsx bin/gun-art/cli.ts <command> [gun] [options]
  *
  *   build [gun...] [--check]   write each gun's pickup and top view from its generator; --check fails if one
- *                              isn't up to date
+ *                              isn't up to date. A draft gun (still being drawn) is only built when named, into
+ *                              tests/output/gun-art/
  *   grid <gun> [--crop x,y,w,h] [--mode side|over|photo|drawing] [--scale 1] [--grid 20] [--opacity 0.55]
  *        [--photo file] [--trace "x,y x,y ..."] [--options '{...}'] [--out file]
  *                              a region of the photo with a labeled grid in its pixels, and the drawing beside it
@@ -130,7 +131,10 @@ function options(): unknown {
 }
 
 async function build() {
-  const names = positional.length ? positional : GUNS.map((g) => g.name);
+  // Drafts only when asked for by name (--check never asks for them)
+  const names = positional.length
+    ? positional
+    : GUNS.filter((g) => !g.draft).map((g) => g.name);
   let stale = 0;
   for (const name of names) {
     const gun = findGun(name);
@@ -144,6 +148,7 @@ async function build() {
           );
         }
       } else if (current !== svg) {
+        fs.mkdirSync(path.dirname(file), { recursive: true });
         fs.writeFileSync(file, svg);
         console.log(`wrote ${path.relative(process.cwd(), file)}`);
       } else {

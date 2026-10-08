@@ -10,7 +10,10 @@ import { generatedFiles } from "../../bin/gun-art/lib/gun";
 import { GUNS as GUN_STATS } from "../../src/highrise/weapons/guns/gun-stats/gunStats";
 import { apply, homography } from "../../bin/gun-art/lib/homography";
 
-for (const gun of GUNS) {
+// Drafts (guns still being drawn) aren't in the game yet
+const FINISHED = GUNS.filter((gun) => !gun.draft);
+
+for (const gun of FINISHED) {
   for (const { file, svg } of generatedFiles(gun)) {
     const name = path.relative(process.cwd(), file);
     test(`${name} is what its generator draws`, () => {
@@ -30,7 +33,7 @@ for (const gun of GUNS) {
 
 // A drawn gun is the same size on the floor as in hand: its pickup's square (in millimeters) is the size
 // WeaponPickup stretches it to, and its top view (drawn 1:1) is its art
-for (const drawing of GUNS) {
+for (const drawing of FINISHED) {
   const pickup =
     drawing.name.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase()) +
     "Pickup";
