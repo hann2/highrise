@@ -36,7 +36,10 @@ In the generator, in the photo's pixels. Rules:
 - **Shapes from the true structure**, not traced: measure (`measure edges`, `measure runs`), don't eyeball against the lighting. By-eye corrections against the photo were always wrong; when an edge is ambiguous, check the second photo or ask Simon to trace it.
 - **Gradients run along the part's own axis** (a grip panel's highlight down its centerline, square to the grip's lean).
 - **Outlines follow cutouts at full width**: a stroke is centered on its line, so one clipped to a shape loses half; stroke notches on the shape's side.
-- Paths use absolute M/L/C/Z only (the conversion to millimeters relies on it), ids are `<name>-<what>`, and groups are named parts in drawing order with comments on what isn't obvious.
+- **Holes are holes**: what you'd see through (a brake's ports, a guard's opening, the gaps round a revolver's cylinder, between a rail's lugs) is cut out so the floor shows, not painted dark.
+- **Shadows under overhangs**: where a part stands over a lower plane (a rail on a barrel's face, a slide's bottom edge on the frame), a short dark gradient fading down from it, so it reads as recessed.
+- **The outline** (the set's rule): 0.4 mm round the silhouette, in each part's own `dark` (a mid gray on stainless, never near-black), as an `outline` option: each part's shape stroked twice as wide under everything, so only the outer half shows. Dark guns also want a thin lit rim along their top edges, or they vanish on the dark floor (the Glock's `rimLight`).
+- Paths use absolute M/L/C/Z only (the conversion to millimeters relies on it), and no `transform`, `gradientTransform`, `rx` or `ry` (they'd stay in pixels; `toMillimeters` refuses them): build shapes where they go. Ids are `<name>-<what>`, and groups are named parts in drawing order with comments on what isn't obvious.
 
 ## 4. Check, region by region
 
@@ -55,17 +58,23 @@ As soon as the shapes are roughly right, make an options sheet (`options <gun> v
 ## 6. In the game
 
 - `build`, then `sheet <gun>` (photo, pickup, at size beside the other pickups) and `ingame <gun> --port <dev server>` (the pickup on the arena's floor, close up, and in the HUD).
+- A new gun is a `draft` while it's drawn: `build <name>` writes it into `tests/output/gun-art/` (not over the old pickup) and the tests leave it alone. Remove `draft` to put it in the game.
 - `npm run test:gun-art`, `npm run tsc`, and a row in `assets/IMAGE_SOURCES.md` (drawn by Claude over reference photos).
 - Point the gun's stats at the pickup (`textures.pickup: "<name>Pickup"`) and regenerate the manifest, and set its `size` to the pickup's square in meters (`frame.side / 1000`), which `WeaponPickup` stretches the image to, so it lies on the floor at the scale it's held at (`test:gun-art` checks).
 
 ## Simon's style so far
 
+- The materials he picked are in `bin/gun-art/lib/style.ts`; use them (and add new ones there once picked):
 - Blued steel: grays around `#4a4d54`, lit faces lighter, edges darker, a bright line where an edge catches the light. Bright steel parts (`#8d9199`, with a `#c4c7cc` highlight) stand out.
 - Wood (M1911): cocoa, `#6a3a24` at the edges to `#a3633f` down the middle, `#3e2013` for checkering and outline; smooth diamonds the same wood, faintly lighter.
 - Polished parts in openings (a barrel through the port, and under a slide that's back) bright and shiny.
 - Top views at true scale, the same as the side view (he liked the 1911 that way next to the bodies).
 - Where models differ, the gun's own era over the photo's: the M1911's early wide checkered hammer, not the A1's knurled one.
-- Flat color and gradients, no textures; detail that still reads at 128 px.
+- Flat color and gradients, no textures; detail that still reads at 128 px. Grip texture is fine drawn as shapes (the Glock's studs as a regular grid of small squares along the grip's axis, the Five-seven's stipple as speckled panels), but no lettering or logos.
+- Black nitride for the Glock's slide (`BLACK_NITRIDE`), a step bluer than its polymer frame; FDE with the slide clearly lighter than the frame (Five-seven); a shiny black barrel through a port (Five-seven).
+- Polished stainless as chrome (`Polish`): faces reflecting a bright sky above and a dark floor below, two or three hard bands per face along its own axis, cylinders banded round (`roundStops`), flutes the other way up (`grooveStops`), bead-blasted planes matte. The revolver's floor is lighter (`REVOLVER_POLISH`).
+- Black parts on a bright gun stay black (the Desert Eagle's hammer and sights); parts of one material share one color (its grip panel, safety and magazine catch).
+- Draw what's really there at the moment you'd see it: the Desert Eagle's well under its slide is empty, since the slide only stays back once it's empty. Optics as photographed (the Five-seven's red dot).
 
 ## Tools
 
@@ -91,5 +100,14 @@ The gun as it's held (`src/highrise/weapons/guns/art/<name>.svg`, registered in 
 - **Photos from above are rare and bad** (held in a hand, tilted, in perspective, often another model). Register one instead of drawing over it: four points in it whose places in millimeters we know (the slide's corners) in `top.registrations`, and `grid <gun> --view top` lays it under the drawing, straightened (a homography, `lib/homography.ts`). Use it for what parts look like from above and how far they stand out sideways; trust the side view for lengths. A photo from behind gives the widths of the stacked parts (slide, frame, grips, hammer).
 - **Specs mislead too**: the M1911's grips are 1.3" across on paper, but stand only 2.5 mm past the slide in both photos. Measure the photos.
 - **What moves, and what it uncovers**: decide with Simon. The slide goes over the frame's top and rails, the barrel (polished, it shows through the port) and the dust cover; a hammer can fall at each shot (a `stretch` about where it meets the slide, in `cycles`). Draw the moving parts as top-level groups, uncovered parts under them.
-- **Then the stats**: `art`, `points` (grip, action, magazine) where the drawing has them, the `parts` strokes, `cycles`, and `muzzleLength` (to the muzzle, in meters). Check in the rig: `npm run clip -- --scene rig --query "gun=<slug>&zoom=2400&speed=0.1&follow"` for the slide and hammer close up, and at `zoom=500` beside another gun for the size.
+- **Then the stats**: `art`, `points` (grip, action, magazine) where the drawing has them, the `parts` strokes, `cycles`, and `muzzleLength` (to the muzzle, in meters). Every pistol's hands go in the same place: `holdPosition` is 0.415 m plus how far back its grip is (the M1911's 0.5 for its -0.085), so a gun with its grip further forward is held further back. A part's stroke is the real one (a slide clears its cartridge; a revolver's cylinder swings just clear of the frame). Check in the rig: `npm run clip -- --scene rig --query "gun=<slug>&zoom=2400&speed=0.1&follow"` for the slide and hammer close up, and at `zoom=500` beside another gun for the size.
 - `options <gun> variants.json --view top --crop x,y,w,h` compares variations of the top view (in millimeters).
+
+## A team of agents
+
+The pistols were drawn by one agent per gun, in parallel (`notes/gun-art-pistols-plan.md`), with the lead integrating. What worked:
+
+- **Setup first, by the lead**: photos sorted into `references/<name>/`, the shared materials in `style.ts`, and a `draft` stub generator per gun registered in `guns/index.ts`, all committed, so agents only ever write their own `guns/<name>.ts`.
+- **Agents in worktrees**: they symlink `node_modules` and the gitignored references from the main checkout. A worktree can start on an old commit: fast-forward it to master first. Once the lead has merged an agent's branch, the agent only ever `git merge master`, never rebases.
+- **Rounds**: construction (dimensions, notes, a flat blockout over the photo), then drawing (shaded, region by region, plus a materials options sheet), then polish, then top views. Each agent stops at the end of a round; the lead makes one combined sheet (each gun beside its photo, all of them together at true scale and at 128 px on white and the floor's #3a3a3a) and one list of questions, and continues each agent with Simon's notes.
+- **Shared fixes go through the lead**: an agent that finds a shared tool's bug reports it; the lead fixes it on master and tells the others.
