@@ -12,14 +12,14 @@ import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
 import type { GunDrawing } from "../lib/gun";
 import type { Material } from "../lib/style";
-import { BLUED_STEEL, BRIGHT_STEEL } from "../lib/style";
+import { BRIGHT_STEEL } from "../lib/style";
 
 export interface AkOptions {
   /** The receiver, dust cover, sights, barrel, gas tube and the other steel parts */
   steel?: Partial<Material>;
   /** The stock, pistol grip and both handguards */
   wood?: Partial<Material>;
-  /** The magazine (stamped steel, painted or blued; a step blacker than the receiver by default) */
+  /** The magazine (stamped steel, a touch darker than the receiver by default) */
   magazine?: Partial<Material>;
   /** Small bright steel: the selector's pivot, the trigger guard, the pins' heads */
   bright?: Partial<Material>;
@@ -532,19 +532,29 @@ const MAG_PLATE_SEAM = "M1046,934 L1124,826";
 // ---------------------------------------------------------------------------------------------------------
 // Colors
 
-/** The default wood: a dark reddish walnut, between the worn photo's dark wood and the model's red-brown */
+/** The wood (Simon's pick, variant B of round 1): the worn photo's dark brown */
 export const AK_WOOD: Material = {
-  base: "#5e3322",
-  dark: "#2f1810",
-  light: "#83492f",
-  highlight: "#a1603f",
+  base: "#4a3127",
+  dark: "#24160f",
+  light: "#6a4a3b",
+  highlight: "#86624f",
 };
-/** The magazine: stamped steel, a step blacker than the receiver */
+/** The steel (Simon's pick, variant B of round 1): the worn photo's grayer, worn bluing */
+export const AK_STEEL: Material = {
+  base: "#565851",
+  dark: "#2c2d29",
+  light: "#73756d",
+  highlight: "#8c8e86",
+};
+/**
+ * The magazine: stamped steel, close to the receiver's (Simon: near-black was too dark), only a touch darker and
+ * cooler so it separates from the receiver
+ */
 export const AK_MAGAZINE: Material = {
-  base: "#35383d",
-  dark: "#191b1e",
-  light: "#4d5157",
-  highlight: "#686d75",
+  base: "#4e514e",
+  dark: "#282a28",
+  light: "#6a6d69",
+  highlight: "#848782",
 };
 
 /** A color between two hex colors */
@@ -609,7 +619,7 @@ const OUTLINE_MM = 0.4;
 const OUTLINE = OUTLINE_MM / MM_PER_PX;
 
 function drawSide(options: AkOptions = {}): string {
-  const S: Material = { ...BLUED_STEEL, ...options.steel };
+  const S: Material = { ...AK_STEEL, ...options.steel };
   const W: Material = { ...AK_WOOD, ...options.wood };
   const M: Material = { ...AK_MAGAZINE, ...options.magazine };
   const B: Material = { ...BRIGHT_STEEL, ...options.bright };
