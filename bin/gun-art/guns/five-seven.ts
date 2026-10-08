@@ -179,8 +179,7 @@ function linear(
 }
 
 /** A polyline through points */
-const line = (points: readonly Point[]) =>
-  "M" + points.map(fmt).join(" L");
+const line = (points: readonly Point[]) => "M" + points.map(fmt).join(" L");
 
 /** x along a piecewise straight edge given as points sorted by y */
 function xAt(points: readonly Point[], y: number): number {
@@ -217,7 +216,10 @@ function seeded(seed: number) {
 }
 
 /** A polyline through points, its inner corners rounded by their radii (0 for a sharp one), open at both ends */
-function roundedOpen(points: readonly Point[], radii: readonly number[]): string {
+function roundedOpen(
+  points: readonly Point[],
+  radii: readonly number[],
+): string {
   const k = 0.45;
   const parts = [`M${fmt(points[0])}`];
   for (let i = 1; i < points.length - 1; i++) {
@@ -329,17 +331,16 @@ const REAR_BEVEL =
   `M${SLIDE_BACK_BOTTOM},${SLIDE_BOTTOM} L${fmt(REAR_CHAMFER[0])} ${smoothCurve(REAR_CHAMFER, [18, -143], [1, 0])} ` +
   `L${fmt(REAR_BEVEL_INNER[0])} ${smoothCurve(REAR_BEVEL_INNER, [-1, 0.3], [-0.12, 1])} Z`;
 
-const NOSE_EDGE =
-  `M2440,${SLIDE_TOP + 40} ${smoothCurve(
-    [
-      [2440, 346],
-      [2450, 360],
-      [2460, 372],
-      [2463, 378],
-    ],
-    [0.6, 1],
-    [0.3, 1],
-  )} L${SLIDE_FRONT_BOTTOM},${SLIDE_BOTTOM} L${fmt(NOSE_EDGE_INNER[2])} L${fmt(NOSE_EDGE_INNER[1])} L${fmt(NOSE_EDGE_INNER[0])} Z`;
+const NOSE_EDGE = `M2440,${SLIDE_TOP + 40} ${smoothCurve(
+  [
+    [2440, 346],
+    [2450, 360],
+    [2460, 372],
+    [2463, 378],
+  ],
+  [0.6, 1],
+  [0.3, 1],
+)} L${SLIDE_FRONT_BOTTOM},${SLIDE_BOTTOM} L${fmt(NOSE_EDGE_INNER[2])} L${fmt(NOSE_EDGE_INNER[1])} L${fmt(NOSE_EDGE_INNER[0])} Z`;
 
 // The ejection port, and the barrel in it
 const PORT_BACK = 1127;
@@ -866,7 +867,12 @@ function pin([x, y]: Point, r: number, shine = BLACK_SHINE): string {
 }
 
 /** Grooves across a strap: a dark line, a lit one just under it */
-function grooves(lines: Point[][], dark: string, light: string, width: number): string {
+function grooves(
+  lines: Point[][],
+  dark: string,
+  light: string,
+  width: number,
+): string {
   const d = lines.map(line).join(" ");
   const lit = lines
     .map((l) => line(l.map(([x, y]) => [x, y + width * 0.9] as Point)))
@@ -892,7 +898,12 @@ function groove(
 }
 
 /** A stippled panel: darker, with a speckle of dark and light grains, clipped to it */
-function speckle(id: string, corners: Point[], seed: number, p: Palette): string {
+function speckle(
+  id: string,
+  corners: Point[],
+  seed: number,
+  p: Palette,
+): string {
   const random = seeded(seed);
   const xs = corners.map((c) => c[0]);
   const ys = corners.map((c) => c[1]);
@@ -970,27 +981,44 @@ function drawSide(options: FiveSevenOptions = {}): string {
   const ticks: string[] = [];
   for (let a = -150; a <= 150; a += 25) {
     const t = a - 90;
-    ticks.push(`M${pt(...on(DIAL, DIAL_R + 3, t))} L${pt(...on(DIAL, DIAL_R + 9, t))}`);
+    ticks.push(
+      `M${pt(...on(DIAL, DIAL_R + 3, t))} L${pt(...on(DIAL, DIAL_R + 9, t))}`,
+    );
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1967" viewBox="0 0 2560 1967" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
   <defs>
-    ${linear("five-seven-slide-side", [0, SLIDE_TOP], [0, SLIDE_BOTTOM], [
-      [0, mix(S.base, S.light, 0.5)],
-      [0.35, S.base],
-      [1, p.slideShade(0.45)],
-    ])}
-    ${linear("five-seven-facet", [0, SLIDE_TOP], [0, 430], [
-      [0, S.highlight],
-      [0.08, S.light],
-      [1, mix(S.light, S.base, 0.35)],
-    ])}
-    ${linear("five-seven-frame-face", [0, FRAME_TOP], [0, 800], [
-      [0, mix(F.base, F.light, 0.6)],
-      [0.06, mix(F.base, F.light, 0.25)],
-      [0.6, F.base],
-      [1, p.frameShade(0.35)],
-    ])}
+    ${linear(
+      "five-seven-slide-side",
+      [0, SLIDE_TOP],
+      [0, SLIDE_BOTTOM],
+      [
+        [0, mix(S.base, S.light, 0.5)],
+        [0.35, S.base],
+        [1, p.slideShade(0.45)],
+      ],
+    )}
+    ${linear(
+      "five-seven-facet",
+      [0, SLIDE_TOP],
+      [0, 430],
+      [
+        [0, S.highlight],
+        [0.08, S.light],
+        [1, mix(S.light, S.base, 0.35)],
+      ],
+    )}
+    ${linear(
+      "five-seven-frame-face",
+      [0, FRAME_TOP],
+      [0, 800],
+      [
+        [0, mix(F.base, F.light, 0.6)],
+        [0.06, mix(F.base, F.light, 0.25)],
+        [0.6, F.base],
+        [1, p.frameShade(0.35)],
+      ],
+    )}
     ${linear("five-seven-grip", gripBack, gripFront, [
       [0, p.frameShade(0.65)],
       [0.12, p.frameShade(0.25)],
@@ -998,60 +1026,110 @@ function drawSide(options: FiveSevenOptions = {}): string {
       [0.8, p.frameShade(0.2)],
       [1, p.frameShade(0.6)],
     ])}
-    ${linear("five-seven-grip-fade", [0, 840], [0, 1000], [
-      [0, "#ffffff", 0],
-      [1, "#ffffff", 1],
-    ])}
-    ${linear("five-seven-underside", [0, FACE_BOTTOM], [0, 840], [
-      [0, p.frameShade(0.62)],
-      [0.6, p.frameShade(0.55)],
-      [1, p.frameShade(0.45)],
-    ])}
-    ${linear("five-seven-thumb-rest", [0, 930], [0, 1020], [
-      [0, F.dark, 0],
-      [0.45, F.dark, 0.8],
-      [1, F.dark, 0],
-    ])}
-    ${linear("five-seven-barrel", [0, BARREL_TOP], [0, PORT_BOTTOM], [
-      [0, "#141416"],
-      [0.1, "#3c3e43"],
-      [0.2, "#b4b7bd"],
-      [0.28, "#5b5e64"],
-      [0.65, "#2a2c30"],
-      [1, "#161719"],
-    ])}
-    ${linear("five-seven-chamber", [0, BARREL_TOP], [0, PORT_BOTTOM], [
-      [0, "#2a2c30"],
-      [0.12, "#6a6d74"],
-      [0.22, "#d7dade"],
-      [0.32, "#878a91"],
-      [0.7, "#4b4e54"],
-      [1, "#2a2b2f"],
-    ])}
-    ${linear("five-seven-black", [0, 0], [0, 1], [
-      [0, BLACK_LIGHT],
-      [1, BLACK_DARK],
-    ])}
-    ${linear("five-seven-mag-base", [0, 1740], [0, 1873], [
-      [0, BLACK_EDGE],
-      [0.3, BLACK],
-      [1, BLACK_DARK],
-    ])}
-    ${linear("five-seven-trigger", [1120, 0], [1215, 0], [
-      [0, BLACK_DARK],
-      [0.6, BLACK],
-      [1, BLACK_LIGHT],
-    ])}
-    ${linear("five-seven-optic", [0, 38], [0, OPTIC_BOTTOM], [
-      [0, S.light],
-      [0.5, S.base],
-      [1, p.slideShade(0.35)],
-    ])}
-    ${linear("five-seven-serial", [0, 678], [0, 731], [
-      [0, BRIGHT_STEEL.light],
-      [0.25, BRIGHT_STEEL.base],
-      [1, BRIGHT_STEEL.dark],
-    ])}
+    ${linear(
+      "five-seven-grip-fade",
+      [0, 840],
+      [0, 1000],
+      [
+        [0, "#ffffff", 0],
+        [1, "#ffffff", 1],
+      ],
+    )}
+    ${linear(
+      "five-seven-underside",
+      [0, FACE_BOTTOM],
+      [0, 840],
+      [
+        [0, p.frameShade(0.62)],
+        [0.6, p.frameShade(0.55)],
+        [1, p.frameShade(0.45)],
+      ],
+    )}
+    ${linear(
+      "five-seven-thumb-rest",
+      [0, 930],
+      [0, 1020],
+      [
+        [0, F.dark, 0],
+        [0.45, F.dark, 0.8],
+        [1, F.dark, 0],
+      ],
+    )}
+    ${linear(
+      "five-seven-barrel",
+      [0, BARREL_TOP],
+      [0, PORT_BOTTOM],
+      [
+        [0, "#141416"],
+        [0.1, "#3c3e43"],
+        [0.2, "#b4b7bd"],
+        [0.28, "#5b5e64"],
+        [0.65, "#2a2c30"],
+        [1, "#161719"],
+      ],
+    )}
+    ${linear(
+      "five-seven-chamber",
+      [0, BARREL_TOP],
+      [0, PORT_BOTTOM],
+      [
+        [0, "#2a2c30"],
+        [0.12, "#6a6d74"],
+        [0.22, "#d7dade"],
+        [0.32, "#878a91"],
+        [0.7, "#4b4e54"],
+        [1, "#2a2b2f"],
+      ],
+    )}
+    ${linear(
+      "five-seven-black",
+      [0, 0],
+      [0, 1],
+      [
+        [0, BLACK_LIGHT],
+        [1, BLACK_DARK],
+      ],
+    )}
+    ${linear(
+      "five-seven-mag-base",
+      [0, 1740],
+      [0, 1873],
+      [
+        [0, BLACK_EDGE],
+        [0.3, BLACK],
+        [1, BLACK_DARK],
+      ],
+    )}
+    ${linear(
+      "five-seven-trigger",
+      [1120, 0],
+      [1215, 0],
+      [
+        [0, BLACK_DARK],
+        [0.6, BLACK],
+        [1, BLACK_LIGHT],
+      ],
+    )}
+    ${linear(
+      "five-seven-optic",
+      [0, 38],
+      [0, OPTIC_BOTTOM],
+      [
+        [0, S.light],
+        [0.5, S.base],
+        [1, p.slideShade(0.35)],
+      ],
+    )}
+    ${linear(
+      "five-seven-serial",
+      [0, 678],
+      [0, 731],
+      [
+        [0, BRIGHT_STEEL.light],
+        [0.25, BRIGHT_STEEL.base],
+        [1, BRIGHT_STEEL.dark],
+      ],
+    )}
     <clipPath id="five-seven-frame-clip">
       <path d="${FRAME_OUTLINE} ${OPENING}" clip-rule="evenodd"/>
     </clipPath>
@@ -1110,7 +1188,15 @@ function drawSide(options: FiveSevenOptions = {}): string {
     <!-- The frame's top edge, catching the light under the seam -->
     <path d="M152,${FRAME_TOP + 2} L2440,${FRAME_TOP + 2}" stroke="${F.light}" stroke-width="3" fill="none"/>
     <!-- The marking panel: a groove round its sides and bottom, no top -->
-    ${groove(roundedOpen(MARK_GROOVE, MARK_GROOVE_RADII), roundedOpen(MARK_GROOVE.map(([x, y]) => [x + 3.5, y + 3.5] as Point), MARK_GROOVE_RADII), p.frameShade(0.85), mix(F.base, F.light, 0.6))}
+    ${groove(
+      roundedOpen(MARK_GROOVE, MARK_GROOVE_RADII),
+      roundedOpen(
+        MARK_GROOVE.map(([x, y]) => [x + 3.5, y + 3.5] as Point),
+        MARK_GROOVE_RADII,
+      ),
+      p.frameShade(0.85),
+      mix(F.base, F.light, 0.6),
+    )}
     <path id="five-seven-frame-slot" d="${FRAME_SLOT}" fill="${BLACK_DARK}"/>
     <!-- The steel serial plate on the rail -->
     <path id="five-seven-serial-plate" d="${rounded(
@@ -1122,7 +1208,19 @@ function drawSide(options: FiveSevenOptions = {}): string {
       ],
       [6, 6, 6, 6],
     )}" fill="url(#five-seven-serial)"/>
-    <path d="${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => rounded([[1812 + i * 33.5, 690], [1828 + i * 33.5, 690], [1826 + i * 33.5, 720], [1810 + i * 33.5, 720]], [5, 5, 5, 5])).join(" ")}" fill="none" stroke="${BRIGHT_STEEL.dark}" stroke-width="3"/>
+    <path d="${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+      .map((i) =>
+        rounded(
+          [
+            [1812 + i * 33.5, 690],
+            [1828 + i * 33.5, 690],
+            [1826 + i * 33.5, 720],
+            [1810 + i * 33.5, 720],
+          ],
+          [5, 5, 5, 5],
+        ),
+      )
+      .join(" ")}" fill="none" stroke="${BRIGHT_STEEL.dark}" stroke-width="3"/>
     <!-- The guard's front: grooves across it -->
     <g clip-path="url(#five-seven-frame-clip)">
       ${grooves(GUARD_GROOVES, p.frameShade(0.9), mix(F.base, F.light, 0.6), 5)}
@@ -1277,7 +1375,6 @@ function drawSide(options: FiveSevenOptions = {}): string {
 
 export const FIVE_SEVEN: GunDrawing<FiveSevenOptions> = {
   name: "five-seven",
-  draft: true,
   photo: {
     file: "five-seven-mk3.webp",
     width: 2560,

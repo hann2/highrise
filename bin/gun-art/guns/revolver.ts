@@ -341,8 +341,16 @@ const HAMMER_UNDER: Point[] = [
 // (Remeasured in round 3 at 6x: the front face's dark edge from the frame at x 596 to its deepest at 565, the
 // tip at 617, and the back's faint edge at 548 halfway down: a narrow blade, about 17 px across at its middle)
 const TRIGGER_TIP: Point = [617, 514];
-const TRIGGER_FRONT: [Point, Point, Point] = [[596, 395], [566, 458], TRIGGER_TIP];
-const TRIGGER_BACK: [Point, Point, Point] = [[545, 395], [549, 462], TRIGGER_TIP];
+const TRIGGER_FRONT: [Point, Point, Point] = [
+  [596, 395],
+  [566, 458],
+  TRIGGER_TIP,
+];
+const TRIGGER_BACK: [Point, Point, Point] = [
+  [545, 395],
+  [549, 462],
+  TRIGGER_TIP,
+];
 
 // ---------------------------------------------------------------------------------------------------------
 // The cylinder release: a checkered pad and a round end round its screw, joined by concave flanks, symmetrical
@@ -478,11 +486,9 @@ function circleThrough(a: Point, b: Point, c: Point): [Point, number] {
     2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]));
   const sq = (p: Point) => p[0] * p[0] + p[1] * p[1];
   const x =
-    (sq(a) * (b[1] - c[1]) + sq(b) * (c[1] - a[1]) + sq(c) * (a[1] - b[1])) /
-    d;
+    (sq(a) * (b[1] - c[1]) + sq(b) * (c[1] - a[1]) + sq(c) * (a[1] - b[1])) / d;
   const y =
-    (sq(a) * (c[0] - b[0]) + sq(b) * (a[0] - c[0]) + sq(c) * (b[0] - a[0])) /
-    d;
+    (sq(a) * (c[0] - b[0]) + sq(b) * (a[0] - c[0]) + sq(c) * (b[0] - a[0])) / d;
   return [[x, y], Math.hypot(a[0] - x, a[1] - y)];
 }
 
@@ -782,7 +788,10 @@ function drawSide(options: RevolverOptions = {}): string {
   // between them, so the grip looks round
   const baseFront = WOOD_FRONT[WOOD_FRONT.length - 1];
   const baseBack: Point = [GRIP_HEEL + 3, GRIP_BASE];
-  const chord = Math.hypot(baseBack[0] - baseFront[0], baseBack[1] - baseFront[1]);
+  const chord = Math.hypot(
+    baseBack[0] - baseFront[0],
+    baseBack[1] - baseFront[1],
+  );
   const baseR = (chord * chord) / (8 * GRIP_SAG) + GRIP_SAG / 2;
   const up: Point = [
     (baseBack[1] - baseFront[1]) / chord,
@@ -822,7 +831,10 @@ function drawSide(options: RevolverOptions = {}): string {
   // The wood's gradient runs across the grip, square to its lean, lighter down the middle
   const gripAcross: [Point, Point] = [
     [120, 560],
-    [120 + 260 * Math.cos(Math.atan(-GRIP_LEAN) * 1), 560 + 260 * Math.sin(Math.atan(-GRIP_LEAN))],
+    [
+      120 + 260 * Math.cos(Math.atan(-GRIP_LEAN) * 1),
+      560 + 260 * Math.sin(Math.atan(-GRIP_LEAN)),
+    ],
   ];
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="863" viewBox="0 0 1800 863" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
@@ -978,7 +990,6 @@ function drawSide(options: RevolverOptions = {}): string {
 
 export const REVOLVER: GunDrawing<RevolverOptions> = {
   name: "revolver",
-  draft: true,
   photo: {
     file: "sw-629-mirrored.jpg",
     width: 1800,

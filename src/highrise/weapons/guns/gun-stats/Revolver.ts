@@ -26,10 +26,10 @@ export const Revolver: GunStats = {
   art: "revolver",
   textures: {
     ...defaultGunStats.textures,
-    pickup: "magnumPickup",
+    pickup: "revolverPickup",
     shellCasing: "pistolCasing",
   },
-  size: [0.55, 0.55],
+  size: [0.38, 0.38],
 
   recoilAmount: degToRad(8.5),
   recoilRecovery: 8,

@@ -1037,7 +1037,6 @@ ${stops([0, P.dark, 0], [0.18, P.dark, 0.55], [0.36, P.base, 0], [0.5, P.light, 
 
 export const GLOCK: GunDrawing<GlockOptions> = {
   name: "glock",
-  draft: true,
   photo: {
     file: "glock-19.webp",
     width: 1500,

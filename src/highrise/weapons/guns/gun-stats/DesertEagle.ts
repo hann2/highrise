@@ -23,7 +23,7 @@ export const DesertEagle: GunStats = {
     pickup: "desertEaglePickup",
     shellCasing: "rifleCasing",
   },
-  size: [0.55, 0.55],
+  size: [0.288, 0.288],
 
   recoilAmount: degToRad(6),
   recoilRecovery: 4,

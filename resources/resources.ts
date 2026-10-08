@@ -125,10 +125,10 @@ import images121 from "./images/weapons/ar-15-pickup.png?url";
 import images122 from "./images/weapons/axe.png?url";
 import images123 from "./images/weapons/baseball-bat-hold.png?url";
 import images124 from "./images/weapons/baseball-bat-pickup.png?url";
-import images125 from "./images/weapons/desert-eagle-pickup.png?url";
+import images125 from "./images/weapons/desert-eagle-pickup.svg?url";
 import images126 from "./images/weapons/double-barrel-shotgun-pickup.png?url";
-import images127 from "./images/weapons/five-seven-pickup.png?url";
-import images128 from "./images/weapons/glock-pickup.png?url";
+import images127 from "./images/weapons/five-seven-pickup.svg?url";
+import images128 from "./images/weapons/glock-pickup.svg?url";
 import images129 from "./images/weapons/katana.png?url";
 import images130 from "./images/weapons/m1911-pickup.svg?url";
 import images131 from "./images/weapons/magazines/ak-magazine.png?url";
@@ -137,9 +137,9 @@ import images133 from "./images/weapons/magazines/revolver-round.png?url";
 import images134 from "./images/weapons/magazines/rifle-magazine.png?url";
 import images135 from "./images/weapons/magazines/shotgun-shell-pair.png?url";
 import images136 from "./images/weapons/magazines/shotgun-shell.png?url";
-import images137 from "./images/weapons/magnum-pickup.png?url";
-import images138 from "./images/weapons/p90-pickup.png?url";
-import images139 from "./images/weapons/remington-pickup.png?url";
+import images137 from "./images/weapons/p90-pickup.png?url";
+import images138 from "./images/weapons/remington-pickup.png?url";
+import images139 from "./images/weapons/revolver-pickup.svg?url";
 import images140 from "./images/weapons/spas12-pickup.png?url";
 import images141 from "./images/zombies/crawler-1.png?url";
 import images142 from "./images/zombies/crawler-2.png?url";
@@ -838,9 +838,9 @@ const images = {
   "rifleMagazine": images134,
   "shotgunShellPair": images135,
   "shotgunShell": images136,
-  "magnumPickup": images137,
-  "p90Pickup": images138,
-  "remingtonPickup": images139,
+  "p90Pickup": images137,
+  "remingtonPickup": images138,
+  "revolverPickup": images139,
   "spas12Pickup": images140,
   "crawler1": images141,
   "crawler2": images142,
