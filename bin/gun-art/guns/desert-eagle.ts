@@ -3,7 +3,14 @@
  * shiny. Drawn in the pixels of its photo (1920 by 1151) by named numbers, following the gun-art skill
  * (.claude/skills/gun-art/SKILL.md), with guns/m1911.ts as the worked example. A draft until it goes into the game.
  *
- * Round 1: construction notes and a blockout (each part's silhouette, flat colors, no shading or detail yet).
+ * Round 2: drawn and shaded. The finish is chrome-like polish (`Polish`, `CHROME_STAINLESS` below, meant to be
+ * shared with the revolver): every face banded rather than shaded, a bright sky above a hard horizon and a dark
+ * floor below, along the face's own axis. The slide, its arms and the barrel's flat face are one plane and share
+ * one horizon (y 254); the frame's face under the slide has its own. Bead-blasted planes (the trigger guard, the
+ * band round the back of its opening, the front strap, the foot under the grip, the dust cover and its rail) are
+ * matte, a step darker and flat. Black steel (hammer, sights, slide stop, trigger, magazine) is blued; the dark
+ * plastic (the grip panel, the safety, the magazine catch) is one material. Holes are holes: the brake's ports,
+ * the barrel rail's slots, the gaps between the accessory rail's lugs and the guard's opening.
  *
  * ## Dimensions
  *
@@ -28,8 +35,10 @@
  *   bottoms at y 115), plain from the last slot to the muzzle (y 95), with the front sight in a dovetail near the
  *   muzzle. Its side is one long flat face (the "long flat face"), from the rail's base (a step at y 118) down to
  *   the seam with the slide (the groove, a dark line at y 205 to 212). At its back the flat runs out into the
- *   round of the chamber in a sweeping concave curve, from (1040, 119) back and down to (840, 205): behind it,
- *   the barrel is round, and shaded as a cylinder, where it goes into the slide. Ahead of the slide's arm (x 1683
+ *   round of the chamber where the cutter left it, a curve measured along rows from (1032, 118) down and forward
+ *   to (1114, 208): behind it (x 816 to there), the barrel is round, shaded as a cylinder, where it goes into the
+ *   slide. The rail's lugs are square at the front and slope at the back (10 px); the slots go right across,
+ *   so they're open (the background shows through). Ahead of the slide's arm (x 1683
  *   on) the barrel's flat face goes all the way down: its nose is a block from y 95 to 345 (and its foot, x 1767
  *   to 1830, down to 381, in front of the frame), the front chamfered back from (1882, 200) to (1830, 381), with
  *   a lower chamfer band along its bottom (y 336 to 345). The muzzle brake is four ports through the barrel's
@@ -43,16 +52,18 @@
  *   y 101 at x 420, and a rounded corner over to its back face (322, 112). The back face leans back going down
  *   (from (269, 160) to (210, 347)), with a lit chamfer along it. The rear sight sits in a dovetail across the
  *   top (x 333 to 415, top y 52), a square-backed blade sloping down to the front.
- *   On its back half the slide is cut into a recess (a lower plane, matte in the photo) round the safety: from
- *   (320, 120) to (540, 255), rounded at the front bottom. The safety lever lies in it: a round hub (center
+ *   On its back half the slide is cut into a pocket (a lower plane, matte in the photo) the safety turns in: a
+ *   circle round the hub (r 57), its top along the arm's top (y 128), its front at x 541, its bottom a line
+ *   rising back from its rounded front corner (517, 258) to the circle at (364, 238); its top and back walls in
+ *   shadow, its bottom and front lit. The safety lever lies in it: a round hub (center
  *   (376, 184), r 53) with a slotted screw (r 25) and an arm forward to x 540 along y 131, with a raised thumb
  *   pad on its front end. Serrations: 13 grooves leaning back going down (-0.25 x per y), 35.8 px apart, from
  *   the slide's bottom up to y 165 (cut short by the recess under the safety), the front one ending on a line
  *   from (775, 165) to (730, 347).
  * - **The frame**: everything below y 347. Under the barrel, a dust cover (y 347 to 381, ending at x 1766 in a
  *   front face, with the recoil spring guide rod's black tip poking out of it at (1770 to 1792, 349 to 368)),
- *   and below it an accessory rail (y 381 to 420, rounded at its back end at x 1040) with 11 lugs underneath
- *   (35 px wide every 67.3, from x 1043, down to y 445). Behind that, the trigger guard: square-ish, its front
+ *   and below it an accessory rail (y 381 to 430, the same depth all along, rounded at its back end at x 1040) with 11 lugs underneath
+ *   (35 px wide every 67.25, from x 1043, down to y 448, their corners chamfered). Behind that, the trigger guard: square-ish, its front
  *   nearly vertical (x 1004 to 991, from the rail down to its bottom at y 646), round at the bottom front, its
  *   bottom straight back into the front strap. The opening is a rounded rectangle, square at its front (x 964),
  *   flat on top and bottom (y 433, 615), round at the back (x 700). The face round the trigger is two planes like
@@ -75,7 +86,7 @@
  *   rear and front sights, the safety lever and its screw, the slide stop (a lever over the trigger guard's top
  *   front, x 876 to 1007, y 353 to 453, pivoting on a round pin at (978, 435), r 18), the trigger (a crescent,
  *   its back at x 717, its tip at (798, 604), going into the frame at the opening's top), the magazine catch
- *   (a small round button with a slot by the panel's front, (690, 575)), the magazine and its base plate (y 1092
+ *   (a small round button with a slot by the panel's front, (686, 582)), the magazine and its base plate (y 1092
  *   to 1113, x 272 to 640, with a lip to 650), and the guide rod's tip.
  *
  * What goes through what: the trigger goes up into the frame and shows through the opening; the slide stop's
@@ -90,21 +101,114 @@
  * medallion, the red dot by the safety, the pins smaller than about 10 px, the sights' dovetails.
  */
 import type { Point } from "../lib/geometry";
-import { arc, fmt, on, rounded, smoothCurve } from "../lib/geometry";
+import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
 import type { GunDrawing } from "../lib/gun";
-import {
-  BLACK_POLYMER,
-  BLUED_STEEL,
-  POLISHED_STAINLESS,
-} from "../lib/style";
+import { BLACK_POLYMER, BLUED_STEEL } from "../lib/style";
 
-// Blockout colors: one flat tone per part, so the parts read apart
-const BARREL_COLOR = POLISHED_STAINLESS.light;
-const SLIDE_COLOR = POLISHED_STAINLESS.base;
-const FRAME_COLOR = POLISHED_STAINLESS.dark;
-const BLACK = BLUED_STEEL.dark;
-const BLACK_PART = BLUED_STEEL.base;
-const RUBBER = BLACK_POLYMER.base;
+// ---------------------------------------------------------------------------------------------------------
+// Materials
+
+/**
+ * Chrome-like polished stainless: each face reflects a bright sky above and a dark floor below, so it's banded
+ * rather than shaded: from `sky` at its top fading to `skyLow` at its horizon, a hard drop (`hardness`, as a
+ * fraction of the face) to `floor`, rising to `floorLow` at its bottom edge. Edges that catch the light are a
+ * line of `edge` with `edgeDark` just below; the outline is `edgeDark` too. Bead-blasted (matte) planes are a
+ * step darker and much flatter. Meant to be shared with the revolver.
+ */
+export interface Polish {
+  readonly sky: string;
+  readonly skyLow: string;
+  readonly floor: string;
+  readonly floorLow: string;
+  /** Where on a face the floor's reflection starts, 0 at its top to 1 at its bottom */
+  readonly horizon: number;
+  /** How quickly the sky gives way to the floor, as a fraction of the face: 0 is a hard line */
+  readonly hardness: number;
+  readonly edge: string;
+  readonly edgeDark: string;
+  readonly matte: string;
+  readonly matteLight: string;
+  readonly matteDark: string;
+}
+
+/** The recommended polish: neutral to slightly cool, a hard horizon, a dark floor */
+export const CHROME_STAINLESS: Polish = {
+  sky: "#f5f7f9",
+  skyLow: "#c4c9cf",
+  floor: "#3e434a",
+  floorLow: "#8c9199",
+  horizon: 0.64,
+  hardness: 0.02,
+  edge: "#ffffff",
+  edgeDark: "#25282d",
+  matte: "#868b92",
+  matteLight: "#a9aeb4",
+  matteDark: "#5a5f66",
+};
+
+export interface DesertEagleOptions {
+  polish?: Partial<Polish>;
+}
+
+type Stops = readonly (readonly [number, string])[];
+
+/** A flat face's bands, top to bottom */
+function faceStops(p: Polish): Stops {
+  return [
+    [0, p.sky],
+    [p.horizon, p.skyLow],
+    [Math.min(1, p.horizon + p.hardness), p.floor],
+    [1, p.floorLow],
+  ];
+}
+
+/** A horizontal cylinder's bands, top to bottom: a streak of sky near its top, the floor below its middle */
+function roundStops(p: Polish): Stops {
+  return [
+    [0, p.floorLow],
+    [0.1, p.edge],
+    [0.22, p.sky],
+    [0.48, p.skyLow],
+    [0.48 + p.hardness, p.floor],
+    [0.82, p.floorLow],
+    [1, p.floor],
+  ];
+}
+
+/** A face turned up toward the sky (a top bevel): bright, a little darker at its far edge */
+function upStops(p: Polish): Stops {
+  return [
+    [0, p.edge],
+    [0.4, p.sky],
+    [1, p.skyLow],
+  ];
+}
+
+function linear(id: string, from: Point, to: Point, stops: Stops): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${fixed(from[0], 1)}" y1="${fixed(from[1], 1)}" x2="${fixed(to[0], 1)}" y2="${fixed(to[1], 1)}">`,
+    ...stops.map(
+      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
+    ),
+    "    </linearGradient>",
+  ].join("\n");
+}
+
+/** A gradient over each shape's own box, top to bottom */
+function boxGradient(id: string, stops: Stops): string {
+  return [
+    `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">`,
+    ...stops.map(
+      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
+    ),
+    "    </linearGradient>",
+  ].join("\n");
+}
+
+// Blued (black) steel: the hammer, sights, slide stop, trigger, magazine
+const STEEL = BLUED_STEEL;
+// The dark plastic: the grip panel, the safety and the magazine catch
+const POLYMER = BLACK_POLYMER;
 
 // ---------------------------------------------------------------------------------------------------------
 // The barrel: fixed, its top a rail of cross slots, its side one long flat face down to the seam with the slide
@@ -112,51 +216,65 @@ const RUBBER = BLACK_POLYMER.base;
 const BARREL_BACK = 816; // the slide's front face, where the barrel comes out
 const MUZZLE = 1888; // the chamfered nose's furthest point
 const BARREL_FRONT = 1882; // the front face, above the chamfer
-const RAIL_TOP = 90; // the rail's lugs
+const BARREL_TOP = 90; // the round chamber's top, and the rail's lugs
 const SLOT_BOTTOM = 115;
+const RAIL_BASE = 118; // where the rail stands up from the flat face: a ledge
 const BARREL_TOP_FRONT = 95; // plain from the last slot to the muzzle
+const RAIL_START = 1032; // where the flat face (and the rail on it) starts, out of the round chamber
 const SLOTS = 8;
 const FIRST_SLOT = 1122;
 const SLOT_WIDTH = 36;
 const SLOT_PITCH = 73.5;
-const LAST_SLOT_END = FIRST_SLOT + (SLOTS - 1) * SLOT_PITCH + SLOT_WIDTH;
+const LUG_BACK_SLOPE = 10; // each lug's back face slopes, its front is square
 const BARREL_FOOT = 381; // the nose's foot, in front of the frame
 const FOOT_BACK = 1767; // the frame's front face, behind the foot
 const NOSE_BOTTOM = 345; // the nose's bottom between the slide's arms and the foot
+const NOSE_CHAMFER = 336; // a narrow chamfer along the nose's bottom edge, turned down to the floor
 const CHAMFER_TOP: Point = [MUZZLE, 225]; // where the front chamfer starts
 const FOOT_CORNER: Point = [1830, BARREL_FOOT];
+const SEAM = 208; // the slide arms' top, under the barrel's flat face: a groove
+// The flat's back end, where the cutter ran out into the round chamber: measured along rows
+const RUNOUT: Point[] = [
+  [RAIL_START, RAIL_BASE],
+  [1036, 140],
+  [1045, 157],
+  [1059, 171],
+  [1077, 182],
+  [1096, 195],
+  [1114, SEAM],
+];
 
-/** The barrel's top, from its back to its front, down into each slot of the rail */
+/** The barrel's top, from its back to its front, down into each slot of the rail (open: the slots go across) */
 function barrelTop(): string {
-  const parts = [`M${BARREL_BACK},${RAIL_TOP + 2}`];
+  const parts = [`M${BARREL_BACK},${BARREL_TOP}`];
   for (let i = 0; i < SLOTS; i++) {
     const x0 = FIRST_SLOT + i * SLOT_PITCH;
     const x1 = x0 + SLOT_WIDTH;
     parts.push(
-      `L${x0},${RAIL_TOP} L${x0},${SLOT_BOTTOM} L${x1},${SLOT_BOTTOM} L${x1},${i === SLOTS - 1 ? BARREL_TOP_FRONT : RAIL_TOP}`,
+      `L${fixed(x0, 1)},${BARREL_TOP} L${fixed(x0, 1)},${SLOT_BOTTOM} L${fixed(x1 - LUG_BACK_SLOPE, 1)},${SLOT_BOTTOM} ` +
+        `L${fixed(x1, 1)},${i === SLOTS - 1 ? BARREL_TOP_FRONT : BARREL_TOP}`,
     );
   }
   return parts.join(" ");
 }
 
-const BARREL =
-  `${barrelTop()} L${BARREL_FRONT - 8},${BARREL_TOP_FRONT} ` +
-  `C${BARREL_FRONT - 3},${BARREL_TOP_FRONT} ${BARREL_FRONT},${BARREL_TOP_FRONT + 3} ${BARREL_FRONT},${BARREL_TOP_FRONT + 8} ` +
-  `L${BARREL_FRONT},200 C${BARREL_FRONT + 2},208 ${MUZZLE},215 ${fmt(CHAMFER_TOP)} ` +
-  `L${FOOT_CORNER[0] + 4},${BARREL_FOOT - 6} C${FOOT_CORNER[0] + 2},${BARREL_FOOT - 2} ${FOOT_CORNER[0]},${BARREL_FOOT} ${FOOT_CORNER[0] - 4},${BARREL_FOOT} ` +
-  `L${FOOT_BACK},${BARREL_FOOT} L${FOOT_BACK},${NOSE_BOTTOM} L${BARREL_BACK},${NOSE_BOTTOM} Z`;
-
-// The muzzle brake: four ports through the barrel's side near the muzzle, pills with round ends
+// The muzzle brake: four ports through the barrel near the muzzle, pills with round ends, cut right through
 const PORTS = 4;
 const PORT_BACK = 1714; // the first port's back edge
 const PORT_WIDTH = 31;
 const PORT_PITCH = 41.3;
 const PORT_TOP = 105;
 const PORT_BOTTOM = 181;
+const PORT_WALL = 139; // how far down the port's far wall (its top, seen from a little above) shows
+const PORT_SIDE = 12; // the port's front wall, seen past its edge
+
+function portLeft(i: number): number {
+  return PORT_BACK + i * PORT_PITCH;
+}
 
 function port(i: number): string {
   const r = PORT_WIDTH / 2;
-  const cx = PORT_BACK + i * PORT_PITCH + r;
+  const cx = portLeft(i) + r;
   const top: Point = [cx, PORT_TOP + r];
   const bottom: Point = [cx, PORT_BOTTOM - r];
   return (
@@ -164,21 +282,55 @@ function port(i: number): string {
     `${arc(bottom, r, 0, 180)} Z`
   );
 }
+const PORT_HOLES = Array.from({ length: PORTS }, (_, i) => port(i)).join(" ");
+// What shows inside each port: its far wall at the top, its front wall down the side (the rest is a hole)
+const PORT_WALLS = Array.from({ length: PORTS }, (_, i) => {
+  const x0 = portLeft(i);
+  const x1 = x0 + PORT_WIDTH;
+  return (
+    `M${fixed(x0, 1)},${PORT_TOP} L${fixed(x1, 1)},${PORT_TOP} L${fixed(x1, 1)},${PORT_BOTTOM} ` +
+    `L${fixed(x1 - PORT_SIDE, 1)},${PORT_BOTTOM} L${fixed(x1 - PORT_SIDE, 1)},${PORT_WALL + 6} ` +
+    `C${fixed(x1 - PORT_SIDE - 2, 1)},${PORT_WALL + 1} ${fixed(x1 - PORT_SIDE - 6, 1)},${PORT_WALL} ${fixed(x1 - PORT_SIDE - 10, 1)},${PORT_WALL} ` +
+    `L${fixed(x0, 1)},${PORT_WALL} Z`
+  );
+}).join(" ");
 
-// The front sight: a blade sloping up to a square front, in a dovetail across the barrel near the muzzle
-const FRONT_SIGHT = "M1772,88 L1772,74 C1790,60 1808,46 1822,38 C1826,36 1830,36 1834,36 L1852,36 L1852,88 Z";
+const BARREL =
+  `${barrelTop()} L${BARREL_FRONT - 8},${BARREL_TOP_FRONT} ` +
+  `C${BARREL_FRONT - 3},${BARREL_TOP_FRONT} ${BARREL_FRONT},${BARREL_TOP_FRONT + 3} ${BARREL_FRONT},${BARREL_TOP_FRONT + 8} ` +
+  `L${BARREL_FRONT},200 C${BARREL_FRONT + 2},208 ${MUZZLE},215 ${fmt(CHAMFER_TOP)} ` +
+  `L${FOOT_CORNER[0] + 4},${BARREL_FOOT - 6} C${FOOT_CORNER[0] + 2},${BARREL_FOOT - 2} ${FOOT_CORNER[0]},${BARREL_FOOT} ${FOOT_CORNER[0] - 4},${BARREL_FOOT} ` +
+  `L${FOOT_BACK},${BARREL_FOOT} L${FOOT_BACK},${NOSE_BOTTOM} L${BARREL_BACK},${NOSE_BOTTOM} Z ${PORT_HOLES}`;
+
+// The round chamber behind the flat, where the barrel goes into the slide
+const CHAMBER =
+  `M${BARREL_BACK},${BARREL_TOP} L${RAIL_START},${BARREL_TOP} L${RAIL_START},${RAIL_BASE} ` +
+  `${smoothCurve(RUNOUT, [0, 1], [1, 0.55])} L${BARREL_BACK},${SEAM} Z`;
+// The ledge where the rail stands up from the flat face, lit; and its shadow on the flat
+const RAIL_LEDGE = `M${RAIL_START},${RAIL_BASE} L${BARREL_FRONT},${RAIL_BASE}`;
+// The nose's bottom chamfer, between the slide's arms and the foot
+const NOSE_UNDER = `M1683,${NOSE_CHAMFER} L1858,${NOSE_CHAMFER} L1854,${NOSE_BOTTOM} L1683,${NOSE_BOTTOM} Z`;
+// The front chamfer's edge, catching the light
+const NOSE_EDGE = `M${BARREL_FRONT},${BARREL_TOP_FRONT + 10} L${BARREL_FRONT},200 C${BARREL_FRONT + 2},208 ${MUZZLE},215 ${fmt(CHAMFER_TOP)} L${FOOT_CORNER[0] + 4},${BARREL_FOOT - 6}`;
+// The front sight's dovetail, across the barrel's top under it
+const FRONT_DOVETAIL = "M1781,88 L1850,88 L1850,95 L1781,95 Z";
+
+// The front sight: a blade sloping up to a square front, in its dovetail near the muzzle
+const FRONT_SIGHT =
+  "M1772,88 L1772,74 C1790,60 1808,46 1822,38 C1826,36 1830,36 1834,36 L1852,36 L1852,88 Z";
 
 // ---------------------------------------------------------------------------------------------------------
 // The slide: a block at the back, and arms either side of the barrel below the seam, out to ARM_FRONT
 
 const SLIDE_TOP = 80;
 const SLIDE_BOTTOM = 347;
-const SEAM = 208; // the slide arms' top, under the barrel's flat face
 const ARM_FRONT = 1683;
 // The block's top steps down at its back: level to STEP, sloping to the back corner
 const STEP: Point = [560, SLIDE_TOP];
 const BACK_TOP: Point = [420, 101];
 const BACK_CORNER: Point = [322, 112];
+const TOP_BEVEL = 19; // the bevel along the block's top, turned up to the sky
+const BACK_BEVEL = 18; // and down its back face
 // The back face, leaning back going down (measured along rows)
 const SLIDE_BACK_POINTS: Point[] = [
   [300, 130],
@@ -189,45 +341,125 @@ const SLIDE_BACK_POINTS: Point[] = [
   [221, 320],
   [210, SLIDE_BOTTOM],
 ];
+const backDown = [BACK_CORNER, ...SLIDE_BACK_POINTS];
 
 const SLIDE =
   `M${fmt(STEP)} L${BARREL_BACK},${SLIDE_TOP} L${BARREL_BACK},${SEAM} L${ARM_FRONT},${SEAM} ` +
   `L${ARM_FRONT},${SLIDE_BOTTOM} L${fmt(SLIDE_BACK_POINTS[SLIDE_BACK_POINTS.length - 1])} ` +
-  smoothCurve(
-    [...SLIDE_BACK_POINTS].reverse().concat([BACK_CORNER]),
-    [0.4, -1],
-    [1, -0.4],
-  ) +
+  smoothCurve([...backDown].reverse(), [0.4, -1], [1, -0.4]) +
   ` L${fmt(BACK_TOP)} C460,96 520,${SLIDE_TOP} ${fmt(STEP)} Z`;
+
+const SLIDE_TOP_BEVEL =
+  `M${fmt(BACK_CORNER)} L${fmt(BACK_TOP)} C460,96 520,${SLIDE_TOP} ${fmt(STEP)} L${BARREL_BACK},${SLIDE_TOP} ` +
+  `L${BARREL_BACK},${SLIDE_TOP + TOP_BEVEL} L${STEP[0] + 6},${SLIDE_TOP + TOP_BEVEL} ` +
+  `C524,${SLIDE_TOP + TOP_BEVEL} 466,${BACK_TOP[1] + 14} ${BACK_TOP[0] + 4},${BACK_TOP[1] + TOP_BEVEL - 2} ` +
+  `L${BACK_CORNER[0] + 14},${BACK_CORNER[1] + 14} Z`;
+const backBevelInner = backDown.map(([x, y]): Point => [x + BACK_BEVEL, y]);
+const SLIDE_BACK_BEVEL =
+  `M${fmt(BACK_CORNER)} ${smoothCurve(backDown, [-0.8, 1], [-0.4, 1])} ` +
+  `L${fmt(backBevelInner[backBevelInner.length - 1])} ${smoothCurve([...backBevelInner].reverse(), [0.4, -1], [0.8, -1])} Z`;
+
+// Serrations: 13 grooves leaning back going down, from the slide's bottom up to SERRATION_TOP; the safety's
+// recess, over them, cuts the back ones short
+const SERRATIONS = 13;
+const SERRATION_LEAN = -0.247; // x per y
+const SERRATION_TOP = 165;
+const SERRATION_BOTTOM = SLIDE_BOTTOM - 2;
+const SERRATION_AT_Y = 280; // where the first groove's back edge is FIRST_SERRATION
+const FIRST_SERRATION = 286;
+const SERRATION_PITCH = 35.8;
+const SERRATION_WIDTH = 29;
+const serrationX = (x280: number, y: number) =>
+  x280 + SERRATION_LEAN * (y - SERRATION_AT_Y);
+
+function serrations(): { grooves: string; backWalls: string; ridges: string } {
+  const grooves: string[] = [];
+  const backWalls: string[] = [];
+  const ridges: string[] = [];
+  for (let i = 0; i < SERRATIONS; i++) {
+    const x0 = FIRST_SERRATION + i * SERRATION_PITCH;
+    const x1 = x0 + SERRATION_WIDTH;
+    const pts: Point[] = [
+      [serrationX(x0, SERRATION_TOP), SERRATION_TOP],
+      [serrationX(x1, SERRATION_TOP), SERRATION_TOP],
+      [serrationX(x1, SERRATION_BOTTOM), SERRATION_BOTTOM],
+      [serrationX(x0, SERRATION_BOTTOM), SERRATION_BOTTOM],
+    ];
+    grooves.push(rounded(pts, [4, 4, 0, 0]));
+    // Its back wall in shadow, its front edge (the ridge's corner) catching the light
+    backWalls.push(
+      `M${fmt(pts[0])} L${fmt(pts[3])} L${fmt([pts[3][0] + 5, pts[3][1]])} L${fmt([pts[0][0] + 5, pts[0][1]])} Z`,
+    );
+    ridges.push(
+      `M${fmt([pts[1][0] + 1.5, pts[1][1] + 3])} L${fmt([pts[2][0] + 1.5, pts[2][1]])}`,
+    );
+  }
+  return {
+    grooves: grooves.join(" "),
+    backWalls: backWalls.join(" "),
+    ridges: ridges.join(" "),
+  };
+}
+
+// The safety: a round hub with a slotted screw, an arm forward along y SAFETY_ARM_TOP to a round end, and a
+// raised pad on the end; dark plastic, the same as the grip
+const SAFETY_HUB: Point = [376, 184];
+const SAFETY_HUB_R = 53;
+const SAFETY_SCREW_R = 25;
+const SAFETY_ARM_TOP = 131;
+const SAFETY_END_R = 27;
+const SAFETY_END: Point = [538 - SAFETY_END_R, SAFETY_ARM_TOP + SAFETY_END_R]; // its round end's center
+const SAFETY =
+  `M${fmt(on(SAFETY_HUB, SAFETY_HUB_R, 75))} ${arc(SAFETY_HUB, SAFETY_HUB_R, 75, 270)} ` +
+  `L${SAFETY_END[0]},${SAFETY_ARM_TOP} ${arc(SAFETY_END, SAFETY_END_R, -90, 75)} Z`;
+const SAFETY_LIT = `M${fmt(on(SAFETY_HUB, SAFETY_HUB_R - 3, 160))} ${arc(SAFETY_HUB, SAFETY_HUB_R - 3, 160, 270)} L${SAFETY_END[0]},${SAFETY_ARM_TOP + 3}`;
+const SAFETY_PAD =
+  "M456,172 C449,171 446,163 451,157 L497,134 C500,132 503,132 507,132 L520,132 C528,132 534,140 534,150 " +
+  "C534,162 527,170 518,170 Z";
+// The pocket the safety turns in: a lower plane cut into the slide round the hub and under the arm
+const RECESS_R = SAFETY_HUB_R + 4;
+const RECESS_RIGHT = 541;
+const RECESS_BOTTOM: Point = [517, 258]; // its bottom front corner, rounded
+const RECESS_BACK: Point = [364, 238]; // where its bottom edge meets the round round the hub
+const RECESS_TOP = SAFETY_ARM_TOP - 3;
+const recessBackAngle = 102; // RECESS_BACK's angle round the hub (it's on the circle)
+const RECESS =
+  `M${SAFETY_HUB[0]},${SAFETY_HUB[1] - RECESS_R} L${RECESS_RIGHT - 22},${RECESS_TOP} ` +
+  `C${RECESS_RIGHT - 9},${RECESS_TOP} ${RECESS_RIGHT},${RECESS_TOP + 10} ${RECESS_RIGHT},${RECESS_TOP + 24} ` +
+  `L${RECESS_RIGHT},${RECESS_BOTTOM[1] - 18} C${RECESS_RIGHT},${RECESS_BOTTOM[1] - 6} ${RECESS_BOTTOM[0] + 14},${RECESS_BOTTOM[1]} ${fmt(RECESS_BOTTOM)} ` +
+  `L${fmt(on(SAFETY_HUB, RECESS_R, recessBackAngle))} ${arc(SAFETY_HUB, RECESS_R, recessBackAngle, 270)} Z`;
+// Its walls: the top and back in shadow, the bottom and front catching the light
+const RECESS_SHADOW = `M${fmt(on(SAFETY_HUB, RECESS_R, 120))} ${arc(SAFETY_HUB, RECESS_R, 120, 270)} L${RECESS_RIGHT - 22},${RECESS_TOP}`;
+const RECESS_LIT =
+  `M${RECESS_RIGHT},${RECESS_TOP + 24} L${RECESS_RIGHT},${RECESS_BOTTOM[1] - 18} ` +
+  `C${RECESS_RIGHT},${RECESS_BOTTOM[1] - 6} ${RECESS_BOTTOM[0] + 14},${RECESS_BOTTOM[1]} ${fmt(RECESS_BOTTOM)} L${fmt(on(SAFETY_HUB, RECESS_R, recessBackAngle))}`;
 
 // The rear sight: a square-backed blade sloping down to the front, its dovetail across the slide's top
 const REAR_SIGHT =
   "M333,104 L333,56 C333,54 334,52 337,52 L365,52 L400,80 L415,98 L415,104 Z M346,104 L398,104 L406,118 L340,118 Z";
 
-// The safety: a round hub with a slotted screw, an arm forward along the recess, a raised pad on its end
-const SAFETY_HUB: Point = [376, 184];
-const SAFETY_HUB_R = 53;
-const SAFETY_SCREW_R = 25;
-const SAFETY_ARM_TOP = 131;
-const SAFETY_END: Point = [520, 157]; // the round end's center
-const SAFETY_END_R = 26;
-const SAFETY =
-  `M${fmt(on(SAFETY_HUB, SAFETY_HUB_R, 120))} ${arc(SAFETY_HUB, SAFETY_HUB_R, 120, 270)} ` +
-  `L${SAFETY_END[0]},${SAFETY_ARM_TOP} ${arc(SAFETY_END, SAFETY_END_R, -90, 75)} Z`;
-const SAFETY_PAD = rounded(
-  [
-    [452, 166],
-    [498, 135],
-    [532, 135],
-    [536, 168],
-    [460, 178],
-  ],
-  [8, 8, 10, 8, 6],
-);
-
 // The hammer: cocked, its spur round at the back with teeth along its top, in a slot in the frame's top
+const SPUR_BACK: Point = [187, 145];
+const SPUR_FRONT: Point = [265, 163];
+function spurTeeth(): string {
+  const dx = SPUR_FRONT[0] - SPUR_BACK[0];
+  const dy = SPUR_FRONT[1] - SPUR_BACK[1];
+  const length = Math.hypot(dx, dy);
+  const u: Point = [dx / length, dy / length];
+  const n: Point = [u[1], -u[0]]; // out of the spur, up
+  const along = (s: number, out: number): Point => [
+    SPUR_BACK[0] + u[0] * s + n[0] * out,
+    SPUR_BACK[1] + u[1] * s + n[1] * out,
+  ];
+  const pts: string[] = [];
+  const pitch = 11;
+  for (let s = 14; s + pitch <= length + 0.5; s += pitch) {
+    pts.push(`L${fmt(along(s, 0))} L${fmt(along(s + pitch / 2, 6))}`);
+  }
+  return pts.join(" ");
+}
 const HAMMER =
-  "M187,145 L265,163 L300,200 L262,292 L228,292 " +
+  `M${fmt(SPUR_BACK)} ${spurTeeth()} L${fmt(SPUR_FRONT)} L300,200 L262,292 L228,292 ` +
   smoothCurve(
     [
       [228, 292],
@@ -237,7 +469,7 @@ const HAMMER =
       [181, 190],
       [170, 172],
       [174, 153],
-      [187, 145],
+      SPUR_BACK,
     ],
     [0, -1],
     [1, -0.35],
@@ -245,56 +477,53 @@ const HAMMER =
   " Z";
 
 // ---------------------------------------------------------------------------------------------------------
-// The frame: the dust cover and rail under the barrel, the trigger guard, the grip and the beavertail
+// The frame: the dust cover and rail under the barrel, the trigger guard, the grip and the beavertail. Its face
+// is polished; a lower plane under the face's edge (the guard, a band round the back of its opening, the front
+// strap and the foot under the grip) and the rail are bead blasted, matte
 
 const DUST_COVER_FRONT = FOOT_BACK;
-const RAIL_BOTTOM = 420; // the accessory rail's body; its lugs go down to LUG_BOTTOM
-const RAIL_BACK = 1040;
+const DUST_COVER_BOTTOM = 381; // where the rail starts, under the dust cover
+const RAIL_BACK = 1043;
+const RAIL_BOTTOM = 430; // the rail's body, between its lugs: the same depth all along
 const LUGS = 11;
-const FIRST_LUG = 1043;
+const LUG_PITCH = 67.25;
 const LUG_WIDTH = 35;
-const LUG_PITCH = 67.3;
-const LUG_BOTTOM = 445;
+const LUG_BOTTOM = 448;
+const LUG_CHAMFER = 3;
 const GUARD_BOTTOM = 646;
-// The grip leans back by STRAP_LEAN (x per y): the front strap and the panel's front edge
+// The grip leans back by STRAP_LEAN (x per y): the front strap and the panel's front edge are straight lines
 const STRAP_LEAN = -0.2;
+const strapX = (y: number) => 669 + STRAP_LEAN * (y - 700); // the front strap
 const FOOT_BOTTOM = 1078; // the frame's foot under the grip
 
-// From the rail's back down the guard's front, along its bottom, down the front strap to the foot
+// From the rail down the guard's front to its bottom (measured along rows)
 const GUARD_FRONT = smoothCurve(
   [
-    [1076, 438],
-    [1030, 456],
-    [1012, 478],
-    [1004, 500],
+    [1077, 448],
+    [1048, 454],
+    [1028, 461],
+    [1018, 472],
+    [1010, 486],
+    [1004, 505],
     [1000, 550],
-    [995, 600],
-    [995, 625],
-    [985, 643],
-    [968, GUARD_BOTTOM],
+    [996, 600],
+    [996, 624],
+    [987, 642],
+    [970, GUARD_BOTTOM],
   ],
-  [-1, 0.25],
+  [-1, 0.2],
   [-1, 0],
 );
-const FRONT_STRAP = smoothCurve(
-  [
-    [740, GUARD_BOTTOM],
-    [712, 652],
-    [690, 670],
-    [675, 690],
-    [669, 700],
-    [649, 800],
-    [630, 900],
-    [618, 990],
-    [624, 1020],
-    [639, 1060],
-    [645, FOOT_BOTTOM - 2],
-  ],
-  [-1, 0],
-  [0.2, 1],
-);
+// The front strap: round from the guard's bottom into one straight line, then flaring forward into the foot
+const STRAP_TOP = 712; // where the straight line starts
+const FLARE_START = 965; // and ends
+const STRAP =
+  `L760,${GUARD_BOTTOM} C724,${GUARD_BOTTOM} ${fixed(strapX(STRAP_TOP) + 6, 1)},${STRAP_TOP - 34} ${fixed(strapX(STRAP_TOP), 1)},${STRAP_TOP} ` +
+  `L${fixed(strapX(FLARE_START), 1)},${FLARE_START} ` +
+  `C${fixed(strapX(FLARE_START + 28), 1)},${FLARE_START + 28} 620,1012 630,1036 ` +
+  `C636,1050 641,1064 645,${FOOT_BOTTOM - 2}`;
 // The back of the grip, the rubber's palm swell, from the foot up to where the frame's back takes over under
-// the beavertail, then round the tang's underside and its tip, and up behind the hammer
+// the beavertail, then round the tang's underside to its tip (measured along rows)
 const GRIP_BACK_POINTS: Point[] = [
   [149, 1018],
   [148, 1000],
@@ -325,55 +554,93 @@ const TANG_POINTS: Point[] = [
   [205, 315],
   [212, 268],
 ];
+const GRIP_BACK = `${smoothCurve(GRIP_BACK_POINTS, [0, -1], [-1, 0])} ${smoothCurve(TANG_POINTS, [-1, -0.6], [0.2, -1])}`;
 
-// The opening in the guard: flat top and bottom, square at the front, round at the back
+// The opening in the guard: flat top and bottom, square at the front, round at the back (a hole)
 const OPENING_TOP = 433;
 const OPENING_BOTTOM = 615;
-const OPENING = `M850,${OPENING_TOP} ${smoothCurve(
-  [
-    [850, OPENING_TOP],
-    [905, OPENING_TOP + 1],
-    [940, 450],
-    [958, 478],
-    [964, 510],
-    [964, 580],
-    [958, 602],
-    [935, OPENING_BOTTOM],
-    [780, OPENING_BOTTOM],
-    [745, 604],
-    [717, 580],
-    [701, 540],
-    [703, 495],
-    [722, 458],
-    [760, 438],
-    [800, OPENING_TOP],
-    [850, OPENING_TOP],
-  ],
-  [1, 0],
-  [1, 0],
-)} Z`;
+const OPENING_POINTS: Point[] = [
+  [850, OPENING_TOP],
+  [905, OPENING_TOP + 1],
+  [940, 450],
+  [958, 478],
+  [964, 510],
+  [964, 580],
+  [958, 602],
+  [935, OPENING_BOTTOM],
+  [780, OPENING_BOTTOM],
+  [745, 604],
+  [717, 580],
+  [701, 540],
+  [703, 495],
+  [722, 458],
+  [760, 438],
+  [800, OPENING_TOP],
+  [850, OPENING_TOP],
+];
+const OPENING = `M850,${OPENING_TOP} ${smoothCurve(OPENING_POINTS, [1, 0], [1, 0])} Z`;
+// Lit: the opening's edge along its bottom and up its front
+const OPENING_LIT = `M790,${OPENING_BOTTOM - 1} L935,${OPENING_BOTTOM - 1} C950,${OPENING_BOTTOM - 4} 962,600 963,575 L963,515`;
 
 const FRAME =
-  `M212,268 L240,268 L240,340 L${DUST_COVER_FRONT},340 L${DUST_COVER_FRONT},${LUG_BOTTOM} ` +
-  `L${RAIL_BACK + 36},${RAIL_BOTTOM} L1076,438 ${GUARD_FRONT} L740,${GUARD_BOTTOM} ${FRONT_STRAP} ` +
-  `L243,${FOOT_BOTTOM + 2} L157,1040 L${fmt(GRIP_BACK_POINTS[0])} ` +
-  smoothCurve(GRIP_BACK_POINTS, [0, -1], [-1, 0]) +
-  " " +
-  smoothCurve(TANG_POINTS, [-1, -0.6], [0.2, -1]) +
-  ` Z ${OPENING}`;
+  `M212,268 L240,268 L240,340 L${DUST_COVER_FRONT},340 L${DUST_COVER_FRONT},${RAIL_BOTTOM} ` +
+  `L1080,${RAIL_BOTTOM} L1077,448 ${GUARD_FRONT} ${STRAP} ` +
+  `L243,${FOOT_BOTTOM + 2} L157,1040 L${fmt(GRIP_BACK_POINTS[0])} ${GRIP_BACK} Z ${OPENING}`;
+
+// The face's edge, where it steps down to the lower plane: from the rail round the slide stop, along the guard's
+// top, round the back of the opening, and down the front strap RIM_INSET behind the strap's front
+const RIM_INSET = 35;
+const RIM_POINTS: Point[] = [
+  [1052, DUST_COVER_BOTTOM],
+  [1030, 397],
+  [1008, 428],
+  [985, 448],
+  [955, 446],
+  [925, 437],
+  [880, 421],
+  [815, 413],
+  [760, 414],
+  [722, 421],
+  [695, 434],
+  [675, 465],
+  [667, 510],
+  [675, 545],
+  [698, 567],
+  [714, 588],
+  [703, 610],
+  [676, 630],
+  [strapX(660) - RIM_INSET, 660],
+];
+const RIM_LINE = `${smoothCurve(RIM_POINTS, [-1, 0.5], [STRAP_LEAN, 1])} L${fixed(strapX(1018) - RIM_INSET, 1)},1018`;
+// The dust cover under the barrel is matte, a step back from the face: the face ends over the rail's back end
+const FACE_FRONT = RIM_POINTS[0][0];
+const FRAME_FACE =
+  `M212,268 L240,268 L240,340 L${FACE_FRONT},340 ` +
+  `L${fmt(RIM_POINTS[0])} ${RIM_LINE} L${fmt(GRIP_BACK_POINTS[0])} ${GRIP_BACK} Z`;
+const RIM_EDGE = `M${FACE_FRONT},${SLIDE_BOTTOM} L${fmt(RIM_POINTS[0])} ${RIM_LINE}`;
+// The matte strap lit along its rounded front, and the guard along its bottom
+const STRAP_LIT =
+  `M955,${GUARD_BOTTOM - 7} L762,${GUARD_BOTTOM - 7} C730,${GUARD_BOTTOM - 7} ${fixed(strapX(STRAP_TOP) - 3, 1)},${STRAP_TOP - 30} ${fixed(strapX(STRAP_TOP) - 9, 1)},${STRAP_TOP + 4} ` +
+  `L${fixed(strapX(FLARE_START) - 9, 1)},${FLARE_START}`;
 
 function railLugs(): string {
   const out: string[] = [];
-  for (let i = 0; i < LUGS; i++) {
-    const x = FIRST_LUG + i * LUG_PITCH;
+  // The first is part of the frame's underside, behind the guard
+  for (let i = 1; i < LUGS; i++) {
+    const x0 = RAIL_BACK + i * LUG_PITCH;
+    const x1 = x0 + LUG_WIDTH;
     out.push(
-      `M${x.toFixed(1)},${RAIL_BOTTOM - 1} L${(x + LUG_WIDTH).toFixed(1)},${RAIL_BOTTOM - 1} L${(x + LUG_WIDTH).toFixed(1)},${LUG_BOTTOM} L${x.toFixed(1)},${LUG_BOTTOM} Z`,
+      `M${fixed(x0, 1)},${RAIL_BOTTOM - 1} L${fixed(x1, 1)},${RAIL_BOTTOM - 1} L${fixed(x1, 1)},${LUG_BOTTOM - LUG_CHAMFER} ` +
+        `L${fixed(x1 - LUG_CHAMFER, 1)},${LUG_BOTTOM} L${fixed(x0 + LUG_CHAMFER, 1)},${LUG_BOTTOM} L${fixed(x0, 1)},${LUG_BOTTOM - LUG_CHAMFER} Z`,
     );
   }
   return out.join(" ");
 }
+// The rail's side: the dust cover's shadow along its top, and the groove down its middle
+const RAIL_SHADOW = `M${RAIL_BACK + 8},${DUST_COVER_BOTTOM + 3} L${DUST_COVER_FRONT},${DUST_COVER_BOTTOM + 3}`;
+const RAIL_GROOVE = `M${RAIL_BACK + 14},401 L${DUST_COVER_FRONT},401`;
 
-// The grip panel: notched round the frame at its top, its front edge along the grip's lean, its back the
+// The grip panel: notched round the frame at its top, its front edge straight along the grip's lean, its back the
 // palm swell (the same curve as the gun's back, since it wraps round the back strap)
 const PANEL_TOP = 349;
 const PANEL_NOTCH = 463; // where its top steps down
@@ -409,40 +676,39 @@ const GRIP_SCREW: Point = [243, 840];
 
 // The trigger: a crescent, its back straight down then curving forward to the tip, its front curved, going up
 // into the frame above the opening
-const TRIGGER =
-  `M722,425 ${smoothCurve(
-    [
-      [722, 425],
-      [719, 470],
-      [717, 510],
-      [720, 540],
-      [729, 560],
-      [742, 580],
-      [766, 598],
-      [796, 606],
-    ],
-    [0, 1],
-    [1, 0.1],
-  )} C800,604 799,600 797,598 ${smoothCurve(
-    [
-      [797, 598],
-      [784, 580],
-      [775, 560],
-      [768, 530],
-      [767, 495],
-      [772, 460],
-      [785, 425],
-    ],
-    [-0.6, -1],
-    [0.3, -1],
-  )} Z`;
+const TRIGGER_FRONT_POINTS: Point[] = [
+  [797, 598],
+  [784, 580],
+  [775, 560],
+  [768, 530],
+  [767, 495],
+  [772, 460],
+  [785, 425],
+];
+const TRIGGER = `M722,425 ${smoothCurve(
+  [
+    [722, 425],
+    [719, 470],
+    [717, 510],
+    [720, 540],
+    [729, 560],
+    [742, 580],
+    [766, 598],
+    [796, 606],
+  ],
+  [0, 1],
+  [1, 0.1],
+)} C800,604 799,600 797,598 ${smoothCurve(TRIGGER_FRONT_POINTS, [-0.6, -1], [0.3, -1])} Z`;
+const TRIGGER_FACE = `M${fmt(TRIGGER_FRONT_POINTS[0])} ${smoothCurve(TRIGGER_FRONT_POINTS, [-0.6, -1], [0.3, -1])}`;
 
 // The slide stop: a lever on the frame over the guard's top front, pivoting on a round pin
 const SLIDE_STOP_PIN: Point = [978, 435];
 const SLIDE_STOP_PIN_R = 18;
 const SLIDE_STOP =
   "M905,353 L975,353 C980,353 983,356 985,360 L1000,400 L1008,425 " +
-  `C1006,448 995,456 978,456 C962,456 950,448 940,430 L930,410 L876,410 L876,371 Z`;
+  "C1006,448 995,456 978,456 C962,456 950,448 940,430 L930,410 L876,410 L876,371 Z";
+const SLIDE_STOP_LIT = "M878,371 L905,355 L975,355 C979,355 982,358 984,362";
+const SLIDE_STOP_GRIP = "M880,380 L992,380 M880,390 L996,390"; // grooves across it to push it by
 
 // The magazine: its dark body between the frame's foot and its base plate, and the plate, with a lip in front
 const MAG_BODY = `M275,${FOOT_BOTTOM - 4} L560,${FOOT_BOTTOM - 4} L560,1093 L275,1093 Z`;
@@ -462,53 +728,217 @@ const MAG_BASE = rounded(
 // The guide rod's tip, out of the dust cover's front face, in a notch in the barrel's foot
 const GUIDE_ROD =
   "M1767,349 L1782,349 C1792,352 1794,358 1792,362 C1788,368 1780,368 1767,368 Z";
-const MAG_CATCH: Point = [690, 575];
+const MAG_CATCH: Point = [686, 582];
 
-function drawSide(): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1151" viewBox="0 0 1920 1151" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
-  <!-- Blockout: each part's silhouette in a flat color, in drawing order -->
+// ---------------------------------------------------------------------------------------------------------
+
+function drawSide(options: DesertEagleOptions = {}): string {
+  const p: Polish = { ...CHROME_STAINLESS, ...options.polish };
+  const s = serrations();
+  const outline = (d: string, w = 5) =>
+    `<path d="${d}" stroke="${p.edgeDark}" stroke-width="${w}" fill="none"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1151" viewBox="0 0 1920 1151" fill-rule="evenodd" stroke-linejoin="round" stroke-linecap="round" clip-rule="evenodd">
+  <defs>
+    <!-- The gun's side, one plane reflecting one horizon: the slide, its arms and the barrel's flat face -->
+    ${linear("desert-eagle-side", [0, BARREL_TOP], [0, SLIDE_BOTTOM], faceStops(p))}
+    <!-- The frame's face, under the slide -->
+    ${linear("desert-eagle-frame-face", [0, SLIDE_BOTTOM], [0, 440], faceStops(p))}
+    <!-- The round chamber behind the flat -->
+    ${linear("desert-eagle-chamber", [0, BARREL_TOP], [0, SEAM], roundStops(p))}
+    ${boxGradient("desert-eagle-up", upStops(p))}
+    ${linear(
+      "desert-eagle-back-bevel",
+      [0, BACK_CORNER[1]],
+      [0, SLIDE_BOTTOM],
+      [
+        [0, p.edge],
+        [0.35, p.sky],
+        [p.horizon, p.skyLow],
+        [Math.min(1, p.horizon + p.hardness), p.floorLow],
+        [1, p.floorLow],
+      ],
+    )}
+    ${linear(
+      "desert-eagle-matte",
+      [0, 381],
+      [0, 1080],
+      [
+        [0, p.matte],
+        [0.4, p.matte],
+        [1, p.matteDark],
+      ],
+    )}
+    ${linear(
+      "desert-eagle-groove",
+      [0, SERRATION_TOP],
+      [0, SERRATION_BOTTOM],
+      [
+        [0, p.matteLight],
+        [
+          Math.max(
+            0,
+            (p.horizon * (SLIDE_BOTTOM - BARREL_TOP) +
+              BARREL_TOP -
+              SERRATION_TOP) /
+              (SERRATION_BOTTOM - SERRATION_TOP),
+          ),
+          p.matte,
+        ],
+        [1, p.matteDark],
+      ],
+    )}
+    ${boxGradient("desert-eagle-recess", [
+      [0, p.matteDark],
+      [1, p.matte],
+    ])}
+    ${boxGradient("desert-eagle-steel", [
+      [0, STEEL.light],
+      [0.3, STEEL.base],
+      [1, STEEL.dark],
+    ])}
+    ${boxGradient("desert-eagle-port-wall", [
+      [0, "#141518"],
+      [1, p.floor],
+    ])}
+    ${linear(
+      "desert-eagle-polymer",
+      panelFront(700),
+      [panelFront(700)[0] - 420, 700 - 84],
+      [
+        [0, POLYMER.dark],
+        [0.06, POLYMER.base],
+        [0.4, POLYMER.light],
+        [0.75, POLYMER.base],
+        [1, POLYMER.dark],
+      ],
+    )}
+    ${boxGradient("desert-eagle-polymer-part", [
+      [0, POLYMER.light],
+      [0.5, POLYMER.base],
+      [1, POLYMER.dark],
+    ])}
+    <clipPath id="desert-eagle-ports">
+      <path d="${PORT_HOLES}"/>
+    </clipPath>
+    <clipPath id="desert-eagle-recess-clip">
+      <path d="${RECESS}"/>
+    </clipPath>
+    <clipPath id="desert-eagle-frame-face-clip">
+      <path d="${FRAME_FACE}"/>
+    </clipPath>
+  </defs>
   <!-- Cocked, in a slot in the frame's top behind the slide -->
-  <path id="desert-eagle-hammer" d="${HAMMER}" fill="${BLACK_PART}"/>
+  <g id="desert-eagle-hammer">
+    ${outline(HAMMER, 4)}
+    <path d="${HAMMER}" fill="url(#desert-eagle-steel)"/>
+  </g>
   <!-- Up into the frame, showing through the guard's opening -->
-  <path id="desert-eagle-trigger" d="${TRIGGER}" fill="${BLACK_PART}"/>
-  <path id="desert-eagle-magazine" d="${MAG_BODY}" fill="${BLACK}"/>
-  <!-- The dust cover and accessory rail, the guard, the grip's straps and foot, the beavertail -->
-  <g id="desert-eagle-frame" fill="${FRAME_COLOR}">
-    <path d="${FRAME}"/>
-    <path d="${railLugs()}"/>
+  <g id="desert-eagle-trigger">
+    ${outline(TRIGGER, 4)}
+    <path d="${TRIGGER}" fill="url(#desert-eagle-steel)"/>
+    <path d="${TRIGGER_FACE}" stroke="${STEEL.highlight}" stroke-width="4" fill="none"/>
   </g>
-  <!-- Fixed on top of the frame: the rail on its top, the long flat face, the nose and the brake -->
+  <path id="desert-eagle-magazine" d="${MAG_BODY}" fill="${STEEL.dark}"/>
+  <!-- The frame: the lower plane and the rail (matte) under the polished face -->
+  <g id="desert-eagle-frame">
+    ${outline(FRAME)}
+    ${outline(railLugs())}
+    <path d="${FRAME}" fill="url(#desert-eagle-matte)"/>
+    <path d="${railLugs()}" fill="url(#desert-eagle-matte)"/>
+    <path d="${RAIL_SHADOW}" stroke="${p.matteDark}" stroke-width="6" fill="none"/>
+    <path d="${RAIL_GROOVE}" stroke="${p.matteDark}" stroke-width="3" fill="none"/>
+    <path d="${STRAP_LIT}" stroke="${p.matteLight}" stroke-width="7" fill="none"/>
+    <path d="${OPENING_LIT}" stroke="${p.matteLight}" stroke-width="5" fill="none"/>
+    <!-- The face's edge throws a shadow on the lower plane -->
+    <path d="${RIM_EDGE}" stroke="${p.matteDark}" stroke-width="16" fill="none"/>
+    <path d="${FRAME_FACE}" fill="url(#desert-eagle-frame-face)"/>
+    <path d="${RIM_EDGE}" stroke="${p.edge}" stroke-width="3" fill="none"/>
+  </g>
+  <!-- Fixed on top of the frame: the rail on its top, the long flat face, the round chamber behind it, the nose
+       and the brake's ports, cut through -->
   <g id="desert-eagle-barrel">
-    <path d="${BARREL}" fill="${BARREL_COLOR}"/>
-    <path d="${Array.from({ length: PORTS }, (_, i) => port(i)).join(" ")}" fill="${BLACK}"/>
+    ${outline(BARREL)}
+    <path d="${BARREL}" fill="url(#desert-eagle-side)"/>
+    <path d="${CHAMBER}" fill="url(#desert-eagle-chamber)"/>
+    <path d="${RAIL_LEDGE}" stroke="${p.floor}" stroke-width="2" fill="none" transform="translate(0,3)"/>
+    <path d="${RAIL_LEDGE}" stroke="${p.edge}" stroke-width="3" fill="none"/>
+    <path d="${barrelTop()}" stroke="${p.edge}" stroke-width="2.5" fill="none" transform="translate(0,1.5)"/>
+    <path d="${NOSE_UNDER}" fill="${p.floor}"/>
+    <path d="${NOSE_EDGE}" stroke="${p.edge}" stroke-width="3" fill="none" transform="translate(-2,0)"/>
+    <path d="${FRONT_DOVETAIL}" fill="${STEEL.dark}"/>
+    <path d="${PORT_WALLS}" fill="url(#desert-eagle-port-wall)" clip-path="url(#desert-eagle-ports)"/>
+    <path d="${PORT_HOLES}" stroke="${p.edgeDark}" stroke-width="2" fill="none"/>
   </g>
-  <path id="desert-eagle-guide-rod" d="${GUIDE_ROD}" fill="${BLACK}"/>
-  <!-- The block behind the barrel and the arms either side of it -->
-  <path id="desert-eagle-slide" d="${SLIDE}" fill="${SLIDE_COLOR}"/>
-  <g id="desert-eagle-sights" fill="${BLACK_PART}">
-    <path d="${REAR_SIGHT}"/>
-    <path d="${FRONT_SIGHT}"/>
+  <path id="desert-eagle-guide-rod" d="${GUIDE_ROD}" fill="${STEEL.dark}"/>
+  <!-- The block behind the barrel and the arms either side of it, below the seam -->
+  <g id="desert-eagle-slide">
+    ${outline(SLIDE)}
+    <path d="${SLIDE}" fill="url(#desert-eagle-side)"/>
+    <path d="${SLIDE_TOP_BEVEL}" fill="url(#desert-eagle-up)"/>
+    <path d="${SLIDE_BACK_BEVEL}" fill="url(#desert-eagle-back-bevel)"/>
+    <!-- The seam under the barrel: a groove, the arm's edge lit below it -->
+    <path d="M${BARREL_BACK},${SEAM} L${ARM_FRONT},${SEAM}" stroke="${p.edgeDark}" stroke-width="5" fill="none"/>
+    <path d="M${BARREL_BACK + 4},${SEAM + 4} L${ARM_FRONT - 2},${SEAM + 4}" stroke="${p.edge}" stroke-width="2.5" fill="none"/>
+    <!-- The block's front face over the barrel, and the arm's front end -->
+    <path d="M${BARREL_BACK},${SLIDE_TOP + 2} L${BARREL_BACK},${SEAM}" stroke="${p.edgeDark}" stroke-width="3" fill="none"/>
+    <path d="M${ARM_FRONT},${SEAM} L${ARM_FRONT},${SLIDE_BOTTOM}" stroke="${p.edgeDark}" stroke-width="3" fill="none"/>
+    <path d="M${ARM_FRONT + 3},${SEAM + 3} L${ARM_FRONT + 3},${NOSE_CHAMFER}" stroke="${p.edge}" stroke-width="2" fill="none"/>
+    <g id="desert-eagle-serrations">
+      <path d="${s.grooves}" fill="url(#desert-eagle-groove)"/>
+      <path d="${s.backWalls}" fill="${p.edgeDark}" opacity="0.45"/>
+      <path d="${s.ridges}" stroke="${p.edge}" stroke-width="3" fill="none"/>
+    </g>
+    <!-- The pocket the safety turns in, a lower plane: its top and back walls in shadow, bottom and front lit -->
+    <g id="desert-eagle-safety-pocket">
+      <path d="${RECESS}" fill="url(#desert-eagle-recess)"/>
+      <path d="${RECESS_SHADOW}" stroke="${p.edgeDark}" stroke-width="10" fill="none" clip-path="url(#desert-eagle-recess-clip)"/>
+      <path d="${RECESS_LIT}" stroke="${p.edge}" stroke-width="5" fill="none" clip-path="url(#desert-eagle-recess-clip)"/>
+    </g>
+    <!-- The block's bottom edge, the seam with the frame -->
+    <path d="M${fmt(SLIDE_BACK_POINTS[SLIDE_BACK_POINTS.length - 1])} L${ARM_FRONT},${SLIDE_BOTTOM}" stroke="${p.edgeDark}" stroke-width="4" fill="none"/>
   </g>
+  <g id="desert-eagle-sights">
+    ${outline(REAR_SIGHT, 3)}
+    ${outline(FRONT_SIGHT, 3)}
+    <path d="${REAR_SIGHT}" fill="url(#desert-eagle-steel)"/>
+    <path d="${FRONT_SIGHT}" fill="url(#desert-eagle-steel)"/>
+  </g>
+  <!-- Dark plastic, as the grip: the hub, the arm, the pad on its end; a steel screw through the hub -->
   <g id="desert-eagle-safety">
-    <path d="${SAFETY}" fill="${BLACK_PART}"/>
-    <path d="${SAFETY_PAD}" fill="${BLUED_STEEL.light}"/>
-    <circle cx="${SAFETY_HUB[0]}" cy="${SAFETY_HUB[1]}" r="${SAFETY_SCREW_R}" fill="${BLACK}"/>
+    ${outline(SAFETY, 4)}
+    <path d="${SAFETY}" fill="url(#desert-eagle-polymer-part)"/>
+    <path d="${SAFETY_LIT}" stroke="${POLYMER.highlight}" stroke-width="3" fill="none"/>
+    <path d="${SAFETY_PAD}" fill="${POLYMER.highlight}" stroke="${POLYMER.dark}" stroke-width="3"/>
+    <path d="M458,158 L500,137 L522,137" stroke="#7a7d83" stroke-width="3" fill="none"/>
+    <circle cx="${SAFETY_HUB[0]}" cy="${SAFETY_HUB[1]}" r="${SAFETY_SCREW_R}" fill="${STEEL.base}" stroke="${STEEL.dark}" stroke-width="3"/>
+    <path d="M${SAFETY_HUB[0] - SAFETY_SCREW_R + 3},${SAFETY_HUB[1] - 1} L${SAFETY_HUB[0] + SAFETY_SCREW_R - 3},${SAFETY_HUB[1] - 1}" stroke="${STEEL.dark}" stroke-width="6"/>
   </g>
   <g id="desert-eagle-slide-stop">
-    <path d="${SLIDE_STOP}" fill="${BLACK_PART}"/>
-    <circle cx="${SLIDE_STOP_PIN[0]}" cy="${SLIDE_STOP_PIN[1]}" r="${SLIDE_STOP_PIN_R}" fill="${BLACK}"/>
+    ${outline(SLIDE_STOP, 4)}
+    <path d="${SLIDE_STOP}" fill="url(#desert-eagle-steel)"/>
+    <path d="${SLIDE_STOP_GRIP}" stroke="${STEEL.dark}" stroke-width="3" fill="none"/>
+    <path d="${SLIDE_STOP_LIT}" stroke="${STEEL.highlight}" stroke-width="3" fill="none"/>
+    <circle cx="${SLIDE_STOP_PIN[0]}" cy="${SLIDE_STOP_PIN[1]}" r="${SLIDE_STOP_PIN_R}" fill="${STEEL.base}" stroke="${STEEL.dark}" stroke-width="3"/>
   </g>
   <!-- Black rubber, wrapped round the back strap -->
   <g id="desert-eagle-grip-panel">
-    <path d="${PANEL}" fill="${RUBBER}"/>
-    <circle cx="${GRIP_SCREW[0]}" cy="${GRIP_SCREW[1]}" r="12" fill="${BLACK}"/>
+    <path d="${PANEL}" fill="url(#desert-eagle-polymer)" stroke="${POLYMER.dark}" stroke-width="4"/>
+    <circle cx="${GRIP_SCREW[0]}" cy="${GRIP_SCREW[1]}" r="12" fill="${STEEL.base}" stroke="${STEEL.dark}" stroke-width="3"/>
+    <path d="M${GRIP_SCREW[0] - 8},${GRIP_SCREW[1] + 5} L${GRIP_SCREW[0] + 8},${GRIP_SCREW[1] - 5}" stroke="${STEEL.dark}" stroke-width="4"/>
   </g>
-  <circle id="desert-eagle-magazine-catch" cx="${MAG_CATCH[0]}" cy="${MAG_CATCH[1]}" r="16" fill="${BLACK}"/>
-  <path id="desert-eagle-magazine-base" d="${MAG_BASE}" fill="${BLACK_PART}"/>
+  <!-- The magazine catch: a plastic button in a ring -->
+  <g id="desert-eagle-magazine-catch">
+    <circle cx="${MAG_CATCH[0]}" cy="${MAG_CATCH[1]}" r="20" fill="${p.edgeDark}"/>
+    <circle cx="${MAG_CATCH[0]}" cy="${MAG_CATCH[1]}" r="15" fill="url(#desert-eagle-polymer-part)"/>
+  </g>
+  <g id="desert-eagle-magazine-base">
+    ${outline(MAG_BASE, 4)}
+    <path d="${MAG_BASE}" fill="url(#desert-eagle-steel)"/>
+  </g>
 </svg>`;
 }
 
-export const DESERT_EAGLE: GunDrawing = {
+export const DESERT_EAGLE: GunDrawing<DesertEagleOptions> = {
   name: "desert-eagle",
   draft: true,
   photo: {
