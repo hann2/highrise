@@ -40,6 +40,8 @@ export interface GlockOptions {
   /** The grip's studs: how far apart and how big (photo pixels; the real ones are about 16.5 and 9) */
   studPitch?: number;
   studSize?: number;
+  /** A thin outline round the silhouette, in each part's own dark (the set's rule; default true) */
+  outline?: boolean;
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -118,8 +120,8 @@ const ORIGIN: Point = [(63 + 1456) / 2, 144.5];
 //     y 330 to 470), a smooth strip along the backstrap's seam, a smooth rounded plate low down ("MADE IN
 //     AUSTRIA"; x 205 to 390, y 745 to 830) and the smooth flared foot. At 128 px the real studs are a pixel
 //     or two, so (Simon's call) they're drawn as a field of small dark squares scaled up about 1.5 times (24 px
-//     apart, 11 across: DEFAULT_STUD_PITCH, DEFAULT_STUD_SIZE) inside the smooth borders; all lettering goes, the
-//     plate stays as a smooth patch.
+//     apart, 11 across: DEFAULT_STUD_PITCH, DEFAULT_STUD_SIZE), in even rows and columns along the grip's axis,
+//     filling the panel to its smooth borders. All lettering goes, and so does the nameplate (Simon's call).
 //   - The magazine release: the Gen 5's button, behind the trigger guard, a square standing proud of the frame
 //     (corners 524,460, 598,483, 591,541, 508,522: turned about 16°, a little more upright than the grip).
 //     Drawn proud: lit along its top and back, a shadow along its bottom and front.
@@ -603,53 +605,37 @@ const THUMB =
 const THUMB_TOP = 345;
 const THUMB_BOTTOM = 490;
 
-// The grip's studs: a field of small dark squares turned with the magazine release on the side panel, and
-// columns of them along the back and front straps. They're scaled up from the real ones (16.5 px apart, 9 across)
-// so they read at 128 px. Studs are only drawn whole, inside a region.
-const STUD_TURN = Math.atan(0.3); // the rows fall forward as the release's top edge does
-const ROW: Point = [Math.cos(STUD_TURN), Math.sin(STUD_TURN)];
-const COLUMN: Point = [-Math.sin(STUD_TURN), Math.cos(STUD_TURN)];
-const STUD_ORIGIN: Point = [400, 640];
+// The grip's studs: a regular grid of small dark squares on the side panel, its columns down the grip's axis and
+// its rows square to it, and columns of them along the back and front straps. They're scaled up from the real
+// ones (16.5 px apart, 9 across) so they read at 128 px. Studs are only drawn whole, inside the panel's smooth
+// borders.
+const ROW: Point = GRIP.forward; // along a row, forward (and down, square to the grip's lean)
+const COLUMN: Point = GRIP.down; // down a column, along the grip's lean
+const STUD_ORIGIN: Point = GRIP.at(0, 580); // on the front strap's line
 const DEFAULT_STUD_PITCH = 24;
 const DEFAULT_STUD_SIZE = 11;
-const SEAM_CLEAR = 34; // the smooth strip in front of the backstrap's seam
-// The side panel: under the thumb's trough, from the smooth strip along the backstrap's seam to the front strap's
-// smooth band, down to just above the flared foot
-const PANEL_FRONT: Point[] = [
-  [505, 500],
-  [522, 547],
-  [508, 600],
-  [480, 700],
-  [455, 790],
-  [432, 840],
-  [415, 864],
-  [372, 870],
-  [260, 864],
-];
-const PANEL_BACK_YS = [856, 800, 750, 700, 650, 600, 550, 500];
-const STUD_PANEL: Point[] = [
-  ...PANEL_FRONT,
-  ...PANEL_BACK_YS.map((y) => [xAt(SEAM, y) + SEAM_CLEAR, y] as Point),
-];
-// Left smooth: round the magazine release, and the plate low on the grip (its lettering dropped)
+// The side panel's smooth borders: in front, a band along the front strap (PANEL_FRONT_CLEAR behind its line,
+// square to it); behind, a strip in front of the backstrap's seam; above, the thumb's trough; below, the flared
+// foot (PANEL_FOOT_CLEAR above the grip's base)
+const PANEL_FRONT_CLEAR = 62;
+const SEAM_CLEAR = 30;
+const PANEL_TOP = 498;
+const PANEL_FOOT_CLEAR = 64;
+function inPanel([x, y]: Point): boolean {
+  const across = (x - STUD_ORIGIN[0]) * ROW[0] + (y - STUD_ORIGIN[1]) * ROW[1];
+  return (
+    across <= -PANEL_FRONT_CLEAR &&
+    x >= xAt(SEAM, y) + SEAM_CLEAR &&
+    y >= PANEL_TOP &&
+    y <= baseY(x) - PANEL_FOOT_CLEAR
+  );
+}
+// Left smooth round the magazine release
 const RELEASE_CLEAR: Point[] = [
   [518, 450],
   [610, 478],
   [602, 552],
   [496, 530],
-];
-const PLATE_CORNERS: Point[] = [
-  [214, 746],
-  [410, 746],
-  [404, 830],
-  [204, 830],
-];
-const PLATE = rounded(PLATE_CORNERS, [28, 22, 22, 28]);
-const PLATE_CLEAR: Point[] = [
-  [208, 741],
-  [416, 741],
-  [409, 835],
-  [198, 835],
 ];
 
 function inside(p: Point, polygon: readonly Point[]): boolean {
@@ -679,19 +665,25 @@ function stud(c: Point, u: Point, v: Point, size: number): Point[] {
 }
 const studPath = (corners: Point[]) => "M" + corners.map(fmt).join(" L") + " Z";
 
-/** The side panel's field: the turned grid's studs wholly in the panel and clear of the smooth parts */
+/**
+ * The side panel's field: the grid's studs wholly in the panel and clear of the release. Its front column's front
+ * edges are on the panel's front border, so that edge is straight.
+ */
 function panelStuds(pitch: number, size: number): string[] {
   const out: string[] = [];
-  for (let i = -40; i <= 40; i++) {
-    for (let j = -40; j <= 40; j++) {
+  const firstAcross = -PANEL_FRONT_CLEAR - size / 2;
+  for (let i = 0; i <= 30; i++) {
+    for (let j = -30; j <= 30; j++) {
+      const across = firstAcross - i * pitch;
+      const down = j * pitch;
       const c: Point = [
-        STUD_ORIGIN[0] + ROW[0] * i * pitch + COLUMN[0] * j * pitch,
-        STUD_ORIGIN[1] + ROW[1] * i * pitch + COLUMN[1] * j * pitch,
+        STUD_ORIGIN[0] + ROW[0] * across + COLUMN[0] * down,
+        STUD_ORIGIN[1] + ROW[1] * across + COLUMN[1] * down,
       ];
       const corners = stud(c, ROW, COLUMN, size);
       if (
-        corners.every((p) => inside(p, STUD_PANEL)) &&
-        !corners.some((p) => inside(p, RELEASE_CLEAR) || inside(p, PLATE_CLEAR))
+        corners.every((p) => inPanel(p)) &&
+        !corners.some((p) => inside(p, RELEASE_CLEAR))
       ) {
         out.push(studPath(corners));
       }
@@ -812,6 +804,30 @@ function stops(...list: [number, string, number?][]): string {
 
 const f1 = (v: number) => fixed(v, 1);
 
+// The outline round the silhouette: OUTLINE_MM wide (the set's rule), in each part's own dark. Each part's shape
+// is stroked twice as wide under everything, so the parts cover the inner half and every edge between parts, and
+// only the outer half shows, round the outside (and round the guard's opening and the trigger in it)
+const OUTLINE_MM = 0.4;
+const OUTLINE = OUTLINE_MM / MM_PER_PX;
+function outlines(S: Material, P: Material): string {
+  const parts: [string, string][] = [
+    [SLIDE, S.dark],
+    [BARREL, S.dark],
+    [sight(REAR_SIGHT), P.dark],
+    [sight(FRONT_SIGHT), P.dark],
+    [FRAME, P.dark],
+    [GUARD, P.dark],
+    [MAG_BASE, P.dark],
+    [TRIGGER, P.dark],
+    [TRIGGER_TAIL, P.dark],
+    [BLADE, P.dark],
+  ];
+  return `<!-- The outline: each part's shape stroked under everything, so only its outer half shows -->
+  <g id="glock-outline" fill="none" stroke-width="${f1(OUTLINE * 2)}">
+    ${parts.map(([d, color]) => `<path d="${d}" stroke="${color}"/>`).join("\n    ")}
+  </g>`;
+}
+
 function drawSide(options: GlockOptions = {}): string {
   const S: Material = { ...BLACK_NITRIDE, ...options.slide };
   const P: Material = { ...BLACK_POLYMER, ...options.frame };
@@ -878,6 +894,7 @@ ${stops([0, P.dark, 0], [0.18, P.dark, 0.55], [0.36, P.base, 0], [0.5, P.light, 
       <path d="${GUARD}" clip-rule="evenodd"/>
     </clipPath>
   </defs>
+  ${options.outline === false ? "" : outlines(S, P)}
   <!-- The barrel's crown, out of the slide's front -->
   <g id="glock-barrel">
     <path d="${BARREL}" fill="url(#glock-barrel-shading)"/>
@@ -927,9 +944,8 @@ ${stops([0, P.dark, 0], [0.18, P.dark, 0.55], [0.36, P.base, 0], [0.5, P.light, 
     <path d="M${RAIL_BACK + 1},256 L${RAIL_BACK + 1},336" stroke="${P.light}" stroke-width="2.5" fill="none" opacity="0.6"/>
     <path d="${RAIL_GROOVE}" fill="${P.dark}"/>
     <path d="${RAIL_LIP}" stroke="${P.light}" stroke-width="3" fill="none"/>
-    <!-- The grip's studs, the smooth plate among them, and the backstrap's seam -->
+    <!-- The grip's studs, and the backstrap's seam -->
     <path id="glock-studs" d="${studPath}" fill="${P.dark}" clip-path="url(#glock-frame-clip)"/>
-    <path id="glock-plate" d="${PLATE}" stroke="${P.dark}" stroke-width="2.5" fill="none" opacity="0.6"/>
     <path id="glock-seam" d="${SEAM_PATH} ${SEAM_UNDER}" stroke="${P.dark}" stroke-width="3" fill="none"/>
     <!-- The trigger housing pin's round boss, and the pin -->
     <circle cx="${HOUSING_BOSS[0]}" cy="${HOUSING_BOSS[1]}" r="22" fill="${P.light}" opacity="0.35"/>
