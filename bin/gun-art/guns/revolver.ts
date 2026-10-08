@@ -100,7 +100,8 @@ import {
   rounded,
   smoothCurve,
 } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import { BLUED_STEEL, POLISHED_STAINLESS, WALNUT } from "../lib/style";
 
 // Not in style.ts yet: the front sight's red insert, from the photo (the lead moves it to style.ts)
@@ -988,6 +989,386 @@ function drawSide(options: RevolverOptions = {}): string {
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the revolver as it's held, seen from above, muzzle along +x and its right side +y, in
+// millimeters about its middle on the bore, at the same scale as the side view. Lengths along the gun are the
+// side view's (`sx`, from its photo's pixels), so the two can't disagree. Widths are the real gun's:
+//
+// - The N frame's cylinder is 43.5 mm across and its top strap 16.6 mm wide (all4shooters.com's measurements of
+//   every S&W frame size; the cylinder matches the side view's 202 px = 43.4 mm).
+// - The whole gun is 1.70 to 1.75" wide on spec sheets (handgunhero.com, N frames): the cylinder, the widest
+//   part.
+// - The frame's sides round the window are about 38 mm apart: the recoil shield has to cover the side chambers'
+//   rims (15.1 mm from the axis, at 60 degrees, plus the .44's rim of 6.5: 19.6 mm out), and from above an N
+//   frame's cylinder stands only a little proud of its sides. Estimated, no photo from above.
+// - The barrel is about 20 mm across (the side view's tube less its rib), tapering a little; its flat rib 6.4 mm
+//   (1/4"), the front sight's blade 3.2 mm (1/8"). The ejector rod's shroud is narrower than the barrel (the
+//   alternate photo, from in front), so from above it's hidden under it.
+// - The target grips are about 39 mm across at their swell (the frame's 38, and a little more), narrower at the
+//   horn and the heel; the backstrap between them 20 mm.
+// - The hammer's spur is a target spur, 12.7 mm (1/2") wide; its body 6.4 mm.
+//
+// No photo from above was found (sw-629-alternate.jpg is too steep, from in front, to register).
+//
+// Moving parts, as the game has them: the `cylinder` swings out to the left (-y) on its crane to load (from
+// above, a crane swinging round an axis along the gun is a move straight out to the side), carrying the ejector
+// rod, which lies under the barrel at rest; the `hammer` tips back as it's cocked each shot (from above its top
+// comes back along the channel, and the spur, tipping down, looks shorter). Under them: the cylinder's window
+// (the frame's floor under it, the recoil shield, the crane's hinge) and the channel the hammer comes forward in.
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) =>
+  (px - (GRIP_HEEL + MUZZLE) / 2) * (BARREL_MM / (MUZZLE - BREECH));
+
+const T_MUZZLE = sx(MUZZLE);
+const T_BARREL_BACK = sx(FRAME_FRONT);
+const T_BARREL_HALF = 10.2; // at the frame
+const T_BARREL_HALF_MUZZLE = 9.9; // the taper
+const T_RIB_HALF = 3.2;
+const T_RAMP: [number, number] = [sx(RAMP_START), sx(BLADE_FRONT)];
+const T_BLADE_BACK = sx(1636);
+const T_BLADE_HALF = 1.6;
+const T_RED: [number, number] = [sx(1666), sx(1696)];
+// The frame: its front around the barrel's shank, the top strap over the cylinder, its back round the recoil
+// shield (as wide as the frame's sides), and its rounded back over the grip, narrowing to the backstrap
+const T_FRONT_HALF = 12.5;
+const T_STRAP_HALF = 16.6 / 2;
+const T_SIDE_HALF = 19;
+const T_WINDOW: [number, number] = [sx(WINDOW_BACK[0][0]), sx(WINDOW_FRONT)];
+const T_FRAME_TOP_BACK = sx(FRAME_TOP_BACK[0]);
+const T_BACKSTRAP = sx(262); // where the frame's back meets the top of the grip
+const T_BACKSTRAP_HALF = 10;
+// The cylinder
+const T_CYL: [number, number] = [sx(CYLINDER_BACK), sx(CYLINDER_FRONT)];
+const T_CYL_HALF = 43.5 / 2;
+const T_FLUTE_BACK = sx(FLUTE_BACK);
+const T_FLUTE_END = FLUTE_END * (BARREL_MM / (MUZZLE - BREECH));
+// The ejector rod, under the barrel at rest, and the crane's barrel round it in front of the cylinder
+const T_ROD_TIP = sx(ROD_TIP);
+const T_ROD_HALF = ((ROD_BOTTOM - ROD_TOP) / 2) * (BARREL_MM / (MUZZLE - BREECH));
+const T_KNURL: [number, number] = [sx(KNURL[0]), sx(KNURL[1])];
+const T_CRANE_FRONT = sx(760);
+const T_CRANE_HALF = 4.5;
+// The hammer: the spur's tip, where the wide spur narrows to the body, and its top's front, under the rear sight
+const T_SPUR_TIP = sx(301);
+const T_SPUR_FRONT = sx(390);
+const T_HAMMER_FRONT = sx(458);
+const T_SPUR_HALF = 6.35;
+const T_HAMMER_HALF = 3.2;
+const T_CHANNEL: [number, number] = [sx(370), T_FRAME_TOP_BACK + 1];
+const T_CHANNEL_HALF = 3.6;
+// The rear sight: its body at the back, the blade on it, and the leaf along the top strap
+const T_SIGHT_BODY: [number, number] = [sx(453), sx(490)];
+const T_SIGHT_BODY_HALF = 7.5;
+const T_SIGHT_BLADE: [number, number] = [sx(466), sx(482)];
+const T_LEAF_FRONT = sx(LEAF_FRONT);
+const T_LEAF_HALF = 4.6;
+// The cylinder release, out from the frame's left side behind the window
+const T_THUMB: [number, number] = [sx(357), sx(452)];
+const T_THUMB_OUT = 5.5;
+// The grip, from above: its widest outline, from the heel at the back to the horn at the front
+const T_GRIP_BACK = sx(GRIP_HEEL);
+const T_GRIP_FRONT = sx(461);
+const T_GRIP_HALF = 19.5;
+
+const t2 = (v: number) => fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "");
+const tp = (x: number, y: number) => `${t2(x)},${t2(y)}`;
+
+/** A rectangle from x0,y0 to x1,y1 with each corner rounded (back-left, front-left, front-right, back-right) */
+function tbox(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+): string {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (cx: number, cy: number, fx: number, fy: number, tx: number, ty: number) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** Points to a smooth curve's path in the top view's millimeters (smoothCurve formats to a tenth) */
+const curve = (points: Point[], from: Point, to: Point) =>
+  smoothCurve(points, from, to);
+
+/** A round part from above, across it: the sky down its top, the horizon and then the floor toward its sides */
+function acrossStops(p: Polish): Stops {
+  return [
+    [0, p.floor],
+    [0.1, p.floorLow],
+    [0.24, p.skyLow],
+    [0.24 + p.hardness, p.sky],
+    [0.46, p.edge],
+    [0.54, p.edge],
+    [0.76 - p.hardness, p.sky],
+    [0.76, p.skyLow],
+    [0.9, p.floorLow],
+    [1, p.floor],
+  ];
+}
+
+/** A flat face turned up to the sky: bright, a little darker toward its edges */
+function topFaceStops(p: Polish): Stops {
+  return [
+    [0, p.skyLow],
+    [0.15, p.sky],
+    [0.5, p.edge],
+    [0.85, p.sky],
+    [1, p.skyLow],
+  ];
+}
+
+function drawTop(options: RevolverOptions = {}): string {
+  const p: Polish = { ...REVOLVER_POLISH, ...options.polish };
+  const W: WoodColors = { ...DEFAULT_WOOD, ...options.wood };
+  const line = (d: string, color: string = p.floor) =>
+    options.outline === false
+      ? ""
+      : `<path d="${d}" stroke="${color}" stroke-width="${OUTLINE_MM}" fill="none"/>`;
+  const across = (id: string, half: number, stops: Stops) =>
+    linear(id, [0, -half], [0, half], stops);
+  const minX = T_GRIP_BACK - 1;
+  const maxX = T_MUZZLE + 1;
+  const half = T_SIDE_HALF + T_THUMB_OUT + 1;
+
+  // The grip's widest outline from above: rounded at the heel, swelling at the palm, narrowing to the horn
+  const gripSide = (s: 1 | -1): Point[] => [
+    [T_GRIP_BACK + 6, s * 13],
+    [T_GRIP_BACK + 30, s * T_GRIP_HALF],
+    [T_GRIP_FRONT - 30, s * (T_GRIP_HALF - 1.5)],
+    [T_GRIP_FRONT - 4, s * 12],
+  ];
+  const grip =
+    `M${tp(T_GRIP_BACK + 6, -13)} ${curve(gripSide(-1), [1, -1], [1, 0.8])} ` +
+    `C${tp(T_GRIP_FRONT + 1, -10)} ${tp(T_GRIP_FRONT + 1, 10)} ${tp(T_GRIP_FRONT - 4, 12)} ` +
+    `${curve([...gripSide(1)].reverse(), [-1, 0.8], [-1, -1])} ` +
+    `C${tp(T_GRIP_BACK - 1, 10)} ${tp(T_GRIP_BACK - 1, -10)} ${tp(T_GRIP_BACK + 6, -13)} Z`;
+
+  // The frame from above: the back over the grip, narrowing to the backstrap; full width round the recoil
+  // shield; the top strap over the window; and the front round the barrel's shank
+  const frameBack =
+    `M${tp(T_BACKSTRAP, -T_BACKSTRAP_HALF)} ` +
+    `${curve(
+      [
+        [T_BACKSTRAP, -T_BACKSTRAP_HALF],
+        [T_FRAME_TOP_BACK - 14, -T_SIDE_HALF + 2],
+        [T_FRAME_TOP_BACK, -T_SIDE_HALF],
+      ],
+      [1, -0.4],
+      [1, 0],
+    )} L${tp(T_WINDOW[0], -T_SIDE_HALF)} L${tp(T_WINDOW[0], T_SIDE_HALF)} L${tp(T_FRAME_TOP_BACK, T_SIDE_HALF)} ` +
+    `${curve(
+      [
+        [T_FRAME_TOP_BACK, T_SIDE_HALF],
+        [T_FRAME_TOP_BACK - 14, T_SIDE_HALF - 2],
+        [T_BACKSTRAP, T_BACKSTRAP_HALF],
+      ],
+      [-1, 0],
+      [-1, -0.4],
+    )} ` +
+    `C${tp(T_BACKSTRAP - 4, T_BACKSTRAP_HALF)} ${tp(T_BACKSTRAP - 4, -T_BACKSTRAP_HALF)} ${tp(T_BACKSTRAP, -T_BACKSTRAP_HALF)} Z`;
+  const strap = tbox(T_WINDOW[0] - 0.5, -T_STRAP_HALF, T_WINDOW[1] + 0.5, T_STRAP_HALF);
+  const front = tbox(T_WINDOW[1], -T_FRONT_HALF, T_BARREL_BACK + 0.5, T_FRONT_HALF, [0, 1.5, 1.5, 0]);
+  const thumb = tbox(T_THUMB[0], -T_SIDE_HALF - T_THUMB_OUT, T_THUMB[1], -T_SIDE_HALF + 1, [3, 3, 0, 0]);
+
+  // The cylinder: a band with its flutes' ends showing either side of the top strap, chamfered at the back
+  const [cb, cf] = T_CYL;
+  const cylinder = tbox(cb, -T_CYL_HALF, cf, T_CYL_HALF, [1.6, 1, 1, 1.6]);
+  const fluteFrom = T_CYL_HALF * Math.sin(((30 - FLUTE_HALF) * Math.PI) / 180);
+  const fluteTo = T_CYL_HALF * Math.sin(((30 + FLUTE_HALF) * Math.PI) / 180);
+  const flute = (s: 1 | -1) => {
+    const a = s * fluteFrom;
+    const b = s * fluteTo;
+    const mid = (a + b) / 2;
+    const r = Math.abs(b - a) / 2;
+    const endC: Point = [T_FLUTE_BACK + T_FLUTE_END, mid];
+    return (
+      `M${tp(cf, Math.min(a, b))} L${tp(endC[0], Math.min(a, b))} ` +
+      `${ellipseArc(endC, T_FLUTE_END, r, 0, 270, 90)} L${tp(cf, Math.max(a, b))} Z`
+    );
+  };
+  // The flutes at the sides (90 degrees), where the cylinder's edge dips in
+  const sideFlute = (s: 1 | -1) =>
+    tbox(T_FLUTE_BACK + T_FLUTE_END * 0.6, s > 0 ? T_CYL_HALF - 0.9 : -T_CYL_HALF, cf, s > 0 ? T_CYL_HALF : -T_CYL_HALF + 0.9);
+  const rod = tbox(cf - 1, -T_ROD_HALF, T_ROD_TIP, T_ROD_HALF, [0, T_ROD_HALF, T_ROD_HALF, 0]);
+  const crane = tbox(cf - 1, -T_CRANE_HALF, T_CRANE_FRONT, T_CRANE_HALF, [0, 1, 1, 0]);
+  const knurl: string[] = [];
+  for (let x = T_KNURL[0] + 0.5; x < T_KNURL[1]; x += 1) {
+    knurl.push(`M${tp(x, -T_ROD_HALF + 0.3)} L${tp(x, T_ROD_HALF - 0.3)}`);
+  }
+
+  // The barrel, tapering, its rib along the top, and the front sight on the rib
+  const barrel =
+    `M${tp(T_BARREL_BACK, -T_BARREL_HALF)} L${tp(T_MUZZLE - 1.2, -T_BARREL_HALF_MUZZLE)} ` +
+    `C${tp(T_MUZZLE - 0.4, -T_BARREL_HALF_MUZZLE)} ${tp(T_MUZZLE, -T_BARREL_HALF_MUZZLE + 0.4)} ${tp(T_MUZZLE, -T_BARREL_HALF_MUZZLE + 1.2)} ` +
+    `L${tp(T_MUZZLE, T_BARREL_HALF_MUZZLE - 1.2)} ` +
+    `C${tp(T_MUZZLE, T_BARREL_HALF_MUZZLE - 0.4)} ${tp(T_MUZZLE - 0.4, T_BARREL_HALF_MUZZLE)} ${tp(T_MUZZLE - 1.2, T_BARREL_HALF_MUZZLE)} ` +
+    `L${tp(T_BARREL_BACK, T_BARREL_HALF)} Z`;
+  const rib = tbox(T_BARREL_BACK, -T_RIB_HALF, T_MUZZLE - 0.6, T_RIB_HALF);
+  const ramp = tbox(T_RAMP[0], -T_RIB_HALF, T_RAMP[1], T_RIB_HALF, [0, 1, 1, 0]);
+  const blade = tbox(T_BLADE_BACK, -T_BLADE_HALF, T_RAMP[1], T_BLADE_HALF, [0, 0.8, 0.8, 0]);
+  const red = tbox(T_RED[0], -T_BLADE_HALF + 0.3, T_RED[1], T_BLADE_HALF - 0.3);
+  const ribLines: string[] = [];
+  for (let x = T_BARREL_BACK + 3; x < T_RAMP[0] - 1; x += 1.6) {
+    ribLines.push(`M${tp(x, -T_RIB_HALF + 0.4)} L${tp(x, T_RIB_HALF - 0.4)}`);
+  }
+
+  // The hammer: its body forward in the channel, the wide checkered spur behind
+  const hammer =
+    `M${tp(T_SPUR_TIP + 2, -T_SPUR_HALF)} L${tp(T_SPUR_FRONT - 2, -T_SPUR_HALF)} ` +
+    `C${tp(T_SPUR_FRONT + 1, -T_SPUR_HALF)} ${tp(T_SPUR_FRONT + 2, -T_HAMMER_HALF)} ${tp(T_SPUR_FRONT + 5, -T_HAMMER_HALF)} ` +
+    `L${tp(T_HAMMER_FRONT, -T_HAMMER_HALF)} L${tp(T_HAMMER_FRONT, T_HAMMER_HALF)} L${tp(T_SPUR_FRONT + 5, T_HAMMER_HALF)} ` +
+    `C${tp(T_SPUR_FRONT + 2, T_HAMMER_HALF)} ${tp(T_SPUR_FRONT + 1, T_SPUR_HALF)} ${tp(T_SPUR_FRONT - 2, T_SPUR_HALF)} ` +
+    `L${tp(T_SPUR_TIP + 2, T_SPUR_HALF)} C${tp(T_SPUR_TIP, T_SPUR_HALF)} ${tp(T_SPUR_TIP, -T_SPUR_HALF)} ${tp(T_SPUR_TIP + 2, -T_SPUR_HALF)} Z`;
+  const spur = tbox(T_SPUR_TIP + 0.5, -T_SPUR_HALF + 0.5, T_SPUR_FRONT - 3, T_SPUR_HALF - 0.5, [2, 1, 1, 2]);
+  const checks: string[] = [];
+  for (let x = sx(322); x < sx(360); x += 1.3) {
+    checks.push(`M${tp(x, -T_SPUR_HALF + 1)} L${tp(x, T_SPUR_HALF - 1)}`);
+  }
+
+  // The rear sight
+  const sightBody = tbox(T_SIGHT_BODY[0], -T_SIGHT_BODY_HALF, T_SIGHT_BODY[1], T_SIGHT_BODY_HALF, [2.5, 1, 1, 2.5]);
+  const leaf =
+    `M${tp(T_SIGHT_BODY[1] - 1, -T_LEAF_HALF - 1)} L${tp(T_LEAF_FRONT - 2, -T_LEAF_HALF)} ` +
+    `C${tp(T_LEAF_FRONT, -T_LEAF_HALF)} ${tp(T_LEAF_FRONT, T_LEAF_HALF)} ${tp(T_LEAF_FRONT - 2, T_LEAF_HALF)} ` +
+    `L${tp(T_SIGHT_BODY[1] - 1, T_LEAF_HALF + 1)} Z`;
+  const sightBlade = tbox(T_SIGHT_BLADE[0], -T_SIGHT_BODY_HALF + 0.5, T_SIGHT_BLADE[1], T_SIGHT_BODY_HALF - 0.5, 0.6);
+  const notch = tbox(T_SIGHT_BLADE[0] - 0.2, -1.6, T_SIGHT_BLADE[1] + 0.2, 1.6);
+
+  const viewW = t2(maxX - minX);
+  const viewH = t2(half * 2);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${viewW}" height="${viewH}" viewBox="${t2(minX)} ${t2(-half)} ${viewW} ${viewH}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("revolver")}
+  <!-- The revolver (a Smith & Wesson 629, 8 3/8") from above, as it's held: muzzle along +x, its right side down
+       the page (+y), millimeters about its middle on the bore, at the same scale as its side view (the pickup);
+       lengths along it are the side view's. Polished stainless, a black rear sight, walnut target grips. -->
+  <defs>
+    ${across("revolver-top-barrel", T_BARREL_HALF, acrossStops(p))}
+    ${across("revolver-top-cylinder", T_CYL_HALF, acrossStops(p))}
+    ${across("revolver-top-rod", T_ROD_HALF, acrossStops(p))}
+    ${across("revolver-top-hammer", T_SPUR_HALF, acrossStops(p))}
+    ${across("revolver-top-strap", T_STRAP_HALF, topFaceStops(p))}
+    ${across("revolver-top-frame", T_SIDE_HALF, topFaceStops(p))}
+    ${across("revolver-top-rib", T_RIB_HALF, topFaceStops(p))}
+    ${across("revolver-top-wood", T_GRIP_HALF, [
+      [0, W.dark],
+      [0.12, W.edge],
+      [0.3, W.middle],
+      [0.5, W.edge],
+      [0.7, W.middle],
+      [0.88, W.edge],
+      [1, W.dark],
+    ])}
+    ${boxGradient("revolver-top-groove", grooveStops(p))}
+    ${boxGradient("revolver-top-floor", [
+      [0, p.floor],
+      [0.5, p.floorLow],
+      [1, p.floor],
+    ])}
+    <clipPath id="revolver-top-cylinder-clip"><path d="${cylinder}"/></clipPath>
+  </defs>
+  <!-- The grips' walnut either side of the frame, under it all -->
+  <g id="grip">
+    <path d="${grip}" fill="url(#revolver-top-wood)"/>
+    ${line(grip, W.dark)}
+  </g>
+  <!-- Under the cylinder, seen when it's swung out: the frame's floor in the window, the recoil shield at its back
+       with the firing pin's hole, and the crane's hinge at its front on the left -->
+  <g id="cylinder-window">
+    <path d="${tbox(T_WINDOW[0], -T_SIDE_HALF, T_WINDOW[1], T_SIDE_HALF)}" fill="url(#revolver-top-floor)"/>
+    <path id="recoil-shield" d="${tbox(T_WINDOW[0] - 0.5, -T_SIDE_HALF + 1, T_WINDOW[0] + 2, T_SIDE_HALF - 1, 1)}" fill="${p.sky}"/>
+    <circle id="firing-pin-hole" cx="${t2(T_WINDOW[0] + 0.8)}" cy="0" r="1.1" fill="${p.floor}"/>
+    <path id="crane-hinge" d="${tbox(T_WINDOW[1] - 6, -T_SIDE_HALF + 0.5, T_WINDOW[1], -T_SIDE_HALF + 7, 1)}" fill="${p.skyLow}"/>
+    ${line(tbox(T_WINDOW[0], -T_SIDE_HALF, T_WINDOW[1], T_SIDE_HALF))}
+  </g>
+  <!-- Wider than the frame, so it shows either side of the top strap. It swings out to the left to load, on its
+       crane, with the ejector rod (under the barrel at rest) -->
+  <g id="cylinder">
+    <path d="${crane}" fill="url(#revolver-top-rod)"/>
+    <path d="${rod}" fill="url(#revolver-top-rod)"/>
+    <path d="${knurl.join(" ")}" stroke="${p.floorLow}" stroke-width="0.35" fill="none"/>
+    ${line(rod)}
+    <path d="${cylinder}" fill="url(#revolver-top-cylinder)"/>
+    <g clip-path="url(#revolver-top-cylinder-clip)">
+      <path d="${flute(-1)}" fill="url(#revolver-top-groove)"/>
+      <path d="${flute(1)}" fill="url(#revolver-top-groove)"/>
+      <path d="${sideFlute(-1)}" fill="${p.floor}"/>
+      <path d="${sideFlute(1)}" fill="${p.floor}"/>
+      <!-- The rear chamfer and the front's rounded edge -->
+      <path d="M${tp(cb + 0.6, -T_CYL_HALF)} L${tp(cb + 0.6, T_CYL_HALF)}" stroke="${p.edge}" stroke-width="0.8"/>
+      <path d="M${tp(cf - 0.5, -T_CYL_HALF)} L${tp(cf - 0.5, T_CYL_HALF)}" stroke="${p.floorLow}" stroke-width="0.8"/>
+    </g>
+    ${line(cylinder)}
+  </g>
+  <!-- The frame: its rounded back over the grip and round the recoil shield, the top strap over the cylinder, its
+       front round the barrel's shank; the cylinder release out on its left; and the channel the hammer comes
+       forward in -->
+  <g id="frame">
+    <path id="frame-back" d="${frameBack}" fill="url(#revolver-top-frame)"/>
+    ${line(frameBack)}
+    <path id="frame-front" d="${front}" fill="url(#revolver-top-strap)"/>
+    ${line(front)}
+    <path id="top-strap" d="${strap}" fill="url(#revolver-top-strap)"/>
+    ${line(strap)}
+    <path id="cylinder-release" d="${thumb}" fill="url(#revolver-top-hammer)"/>
+    ${line(thumb)}
+    <path id="hammer-channel" d="${tbox(T_CHANNEL[0], -T_CHANNEL_HALF, T_CHANNEL[1], T_CHANNEL_HALF, [1.5, 0, 0, 1.5])}" fill="${p.floor}"/>
+    <circle id="channel-firing-pin" cx="${t2(T_CHANNEL[1] - 2)}" cy="0" r="0.9" fill="${p.edgeDark}"/>
+  </g>
+  <!-- Polished, tapering a little, the ejector rod's shroud under it (narrower, so hidden from above), a flat rib
+       along its top -->
+  <g id="barrel">
+    <path d="${barrel}" fill="url(#revolver-top-barrel)"/>
+    <path id="rib" d="${rib}" fill="url(#revolver-top-rib)"/>
+    <path d="${ribLines.join(" ")}" stroke="${p.skyLow}" stroke-width="0.3" fill="none" opacity="0.6"/>
+    ${line(barrel)}
+  </g>
+  <!-- Down, at rest: its body forward in the channel, the wide checkered spur back over the frame's rounded back.
+       Cocked, it tips back: its top comes back along the channel, and the spur, tipping down, looks shorter -->
+  <g id="hammer">
+    <path id="hammer-body" d="${hammer}" fill="url(#revolver-top-hammer)"/>
+    <path id="hammer-spur" d="${spur}" fill="url(#revolver-top-hammer)"/>
+    <path id="spur-checkering" d="${checks.join(" ")}" stroke="${p.floorLow}" stroke-width="0.5" fill="none"/>
+    ${line(hammer)}
+  </g>
+  <!-- Black: the body at the back with the notched blade, and the leaf along the top strap -->
+  <g id="rear-sight">
+    <path d="${leaf}" fill="${BLUED_STEEL.base}"/>
+    <path d="${sightBody}" fill="${BLUED_STEEL.base}"/>
+    <path id="rear-sight-blade" d="${sightBlade}" fill="${BLUED_STEEL.light}"/>
+    <path d="${notch}" fill="${BLUED_STEEL.dark}"/>
+    ${line(leaf, BLUED_STEEL.dark)}
+    ${line(sightBody, BLUED_STEEL.dark)}
+  </g>
+  <!-- A ramp off the rib, and the blade on it with its red insert -->
+  <g id="front-sight">
+    <path d="${ramp}" fill="url(#revolver-top-rib)"/>
+    <path d="${blade}" fill="${p.sky}"/>
+    <path d="${red}" fill="${SIGHT_RED}"/>
+    ${line(ramp)}
+  </g>
+</svg>
+`;
+}
+
+const TOP: TopView<RevolverOptions> = {
+  draw: drawTop,
+};
+
 export const REVOLVER: GunDrawing<RevolverOptions> = {
   name: "revolver",
   photo: {
@@ -1039,4 +1420,5 @@ export const REVOLVER: GunDrawing<RevolverOptions> = {
   <!-- The revolver (a Smith & Wesson 629, 8 3/8") from its left side, mirrored, muzzle to the right. Millimeters,
        with the origin on the gun's middle on the bore, as the guns' top views in weapons/guns/art/ have it. -->`,
   drawSide,
+  top: TOP,
 };
