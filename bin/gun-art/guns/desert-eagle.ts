@@ -12,6 +12,11 @@
  * plastic (the grip panel, the safety, the magazine catch) is one material. Holes are holes: the brake's ports,
  * the barrel rail's slots, the gaps between the accessory rail's lugs and the guard's opening.
  *
+ * The set's outline (round 3): 0.4 mm round each part, in its own material's dark (a mid gray for the stainless),
+ * never near-black; `outline: false` leaves it off. Where a part overhangs a lower plane it casts a short shadow
+ * fading down: the barrel's rail on its flat face, the slide on the frame's face, the nose on the dust cover. The
+ * grip's rubber is lit softly along its swell, following the curve of its back.
+ *
  * ## Dimensions
  *
  * The DE50SRMB (Mark XIX, .50 AE, stainless, 6" barrel with the integral muzzle brake, the gun in the photo) is
@@ -105,6 +110,11 @@ import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
 import type { GunDrawing } from "../lib/gun";
 import { BLACK_POLYMER, BLUED_STEEL } from "../lib/style";
 
+/** The photo's scale: 273 mm (the DE50SRMB's 10.75") over the 1857 px from the beavertail's tip to the muzzle */
+const MM_PER_PIXEL = 273 / 1857;
+/** The set's outline round each part, in millimeters */
+const OUTLINE_MM = 0.4;
+
 // ---------------------------------------------------------------------------------------------------------
 // Materials
 
@@ -112,7 +122,8 @@ import { BLACK_POLYMER, BLUED_STEEL } from "../lib/style";
  * Chrome-like polished stainless: each face reflects a bright sky above and a dark floor below, so it's banded
  * rather than shaded: from `sky` at its top fading to `skyLow` at its horizon, a hard drop (`hardness`, as a
  * fraction of the face) to `floor`, rising to `floorLow` at its bottom edge. Edges that catch the light are a
- * line of `edge` with `edgeDark` just below; the outline is `edgeDark` too. Bead-blasted (matte) planes are a
+ * line of `edge` with `edgeDark` just below (shading, not outline); the outline round the silhouette is `outline`,
+ * a mid gray. Bead-blasted (matte) planes are a
  * step darker and much flatter. Meant to be shared with the revolver.
  */
 export interface Polish {
@@ -126,6 +137,8 @@ export interface Polish {
   readonly hardness: number;
   readonly edge: string;
   readonly edgeDark: string;
+  /** The outline round the silhouette: a mid gray, never near-black */
+  readonly outline: string;
   readonly matte: string;
   readonly matteLight: string;
   readonly matteDark: string;
@@ -141,6 +154,7 @@ export const CHROME_STAINLESS: Polish = {
   hardness: 0.02,
   edge: "#ffffff",
   edgeDark: "#25282d",
+  outline: "#5b6067",
   matte: "#868b92",
   matteLight: "#a9aeb4",
   matteDark: "#5a5f66",
@@ -148,6 +162,8 @@ export const CHROME_STAINLESS: Polish = {
 
 export interface DesertEagleOptions {
   polish?: Partial<Polish>;
+  /** A thin outline round each part, in its own material's dark (default true) */
+  outline?: boolean;
 }
 
 type Stops = readonly (readonly [number, string])[];
@@ -245,14 +261,15 @@ const RUNOUT: Point[] = [
 ];
 
 /** The barrel's top, from its back to its front, down into each slot of the rail (open: the slots go across) */
-function barrelTop(): string {
-  const parts = [`M${BARREL_BACK},${BARREL_TOP}`];
+function barrelTop(dy = 0): string {
+  const top = BARREL_TOP + dy;
+  const parts = [`M${BARREL_BACK},${top}`];
   for (let i = 0; i < SLOTS; i++) {
     const x0 = FIRST_SLOT + i * SLOT_PITCH;
     const x1 = x0 + SLOT_WIDTH;
     parts.push(
-      `L${fixed(x0, 1)},${BARREL_TOP} L${fixed(x0, 1)},${SLOT_BOTTOM} L${fixed(x1 - LUG_BACK_SLOPE, 1)},${SLOT_BOTTOM} ` +
-        `L${fixed(x1, 1)},${i === SLOTS - 1 ? BARREL_TOP_FRONT : BARREL_TOP}`,
+      `L${fixed(x0, 1)},${top} L${fixed(x0, 1)},${SLOT_BOTTOM + dy} L${fixed(x1 - LUG_BACK_SLOPE, 1)},${SLOT_BOTTOM + dy} ` +
+        `L${fixed(x1, 1)},${(i === SLOTS - 1 ? BARREL_TOP_FRONT : BARREL_TOP) + dy}`,
     );
   }
   return parts.join(" ");
@@ -307,11 +324,20 @@ const CHAMBER =
   `M${BARREL_BACK},${BARREL_TOP} L${RAIL_START},${BARREL_TOP} L${RAIL_START},${RAIL_BASE} ` +
   `${smoothCurve(RUNOUT, [0, 1], [1, 0.55])} L${BARREL_BACK},${SEAM} Z`;
 // The ledge where the rail stands up from the flat face, lit; and its shadow on the flat
-const RAIL_LEDGE = `M${RAIL_START},${RAIL_BASE} L${BARREL_FRONT},${RAIL_BASE}`;
+const RAIL_SHADOW_DEPTH = 24; // how far down the flat face the rail's shadow fades
+const UNDER_RAIL = `M${RAIL_START},${RAIL_BASE} L${BARREL_FRONT - 1},${RAIL_BASE} L${BARREL_FRONT - 1},${RAIL_BASE + RAIL_SHADOW_DEPTH} L${RAIL_START + 6},${RAIL_BASE + RAIL_SHADOW_DEPTH} Z`;
+// The slide overhangs the frame's face, and the barrel's nose the dust cover: short shadows under each
+const OVERHANG_DEPTH = 14;
+const UNDER_SLIDE = `M212,347 L1052,347 L1052,${347 + OVERHANG_DEPTH} L212,${347 + OVERHANG_DEPTH} Z`;
+const UNDER_NOSE = `M1683,345 L1767,345 L1767,${345 + OVERHANG_DEPTH} L1683,${345 + OVERHANG_DEPTH} Z`;
 // The nose's bottom chamfer, between the slide's arms and the foot
 const NOSE_UNDER = `M1683,${NOSE_CHAMFER} L1858,${NOSE_CHAMFER} L1854,${NOSE_BOTTOM} L1683,${NOSE_BOTTOM} Z`;
 // The front chamfer's edge, catching the light
-const NOSE_EDGE = `M${BARREL_FRONT},${BARREL_TOP_FRONT + 10} L${BARREL_FRONT},200 C${BARREL_FRONT + 2},208 ${MUZZLE},215 ${fmt(CHAMFER_TOP)} L${FOOT_CORNER[0] + 4},${BARREL_FOOT - 6}`;
+const NOSE_EDGE_IN = 2; // just inside the edge
+const NOSE_EDGE =
+  `M${BARREL_FRONT - NOSE_EDGE_IN},${BARREL_TOP_FRONT + 10} L${BARREL_FRONT - NOSE_EDGE_IN},200 ` +
+  `C${BARREL_FRONT},208 ${MUZZLE - NOSE_EDGE_IN},215 ${CHAMFER_TOP[0] - NOSE_EDGE_IN},${CHAMFER_TOP[1]} ` +
+  `L${FOOT_CORNER[0] + 4 - NOSE_EDGE_IN},${BARREL_FOOT - 6}`;
 // The front sight's dovetail, across the barrel's top under it
 const FRONT_DOVETAIL = "M1781,88 L1850,88 L1850,95 L1781,95 Z";
 
@@ -673,6 +699,19 @@ const PANEL =
   smoothCurve(PANEL_BACK_POINTS, [0, -1], [0.3, -1]) +
   " Z";
 const GRIP_SCREW: Point = [243, 840];
+// The rubber swells over the frame: lit softly along a curve following the grip's back, SWELL forward of it
+const SWELL = 120;
+const PANEL_SWELL = `M${fmt([PANEL_BACK_POINTS[12][0] + SWELL - 20, PANEL_BACK_POINTS[12][1] + 20])} ${smoothCurve(
+  PANEL_BACK_POINTS.slice(1, 13)
+    .reverse()
+    .map(([x, y], i, all): Point => [
+      x + SWELL - 20 + (20 * i) / (all.length - 1),
+      y + (i === 0 ? 20 : 0),
+    ]),
+  [-0.35, 1],
+  [0, 1],
+)}`;
+const PANEL_FRONT_LIT = `M${fmt([panelFront(PANEL_SHOULDER + 14)[0] - 9, PANEL_SHOULDER + 14])} L${fmt([panelFront(PANEL_BOTTOM - 20)[0] - 9, PANEL_BOTTOM - 20])}`;
 
 // The trigger: a crescent, its back straight down then curving forward to the tip, its front curved, going up
 // into the frame above the opening
@@ -735,8 +774,12 @@ const MAG_CATCH: Point = [686, 582];
 function drawSide(options: DesertEagleOptions = {}): string {
   const p: Polish = { ...CHROME_STAINLESS, ...options.polish };
   const s = serrations();
-  const outline = (d: string, w = 5) =>
-    `<path d="${d}" stroke="${p.edgeDark}" stroke-width="${w}" fill="none"/>`;
+  // The set's outline: OUTLINE mm wide outside each part (a stroke twice that, under the part's fill), in the
+  // part's own dark
+  const outline = (d: string, color: string = p.outline) =>
+    options.outline === false
+      ? ""
+      : `<path d="${d}" stroke="${color}" stroke-width="${fixed((2 * OUTLINE_MM) / MM_PER_PIXEL, 2)}" fill="none"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1151" viewBox="0 0 1920 1151" fill-rule="evenodd" stroke-linejoin="round" stroke-linecap="round" clip-rule="evenodd">
   <defs>
     <!-- The gun's side, one plane reflecting one horizon: the slide, its arms and the barrel's flat face -->
@@ -817,6 +860,14 @@ function drawSide(options: DesertEagleOptions = {}): string {
       [0.5, POLYMER.base],
       [1, POLYMER.dark],
     ])}
+    <linearGradient id="desert-eagle-overhang" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${p.edgeDark}" stop-opacity="0.6"/>
+      <stop offset="0.5" stop-color="${p.edgeDark}" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="${p.edgeDark}" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="desert-eagle-panel-clip">
+      <path d="${PANEL}"/>
+    </clipPath>
     <clipPath id="desert-eagle-ports">
       <path d="${PORT_HOLES}"/>
     </clipPath>
@@ -829,12 +880,12 @@ function drawSide(options: DesertEagleOptions = {}): string {
   </defs>
   <!-- Cocked, in a slot in the frame's top behind the slide -->
   <g id="desert-eagle-hammer">
-    ${outline(HAMMER, 4)}
+    ${outline(HAMMER, STEEL.dark)}
     <path d="${HAMMER}" fill="url(#desert-eagle-steel)"/>
   </g>
   <!-- Up into the frame, showing through the guard's opening -->
   <g id="desert-eagle-trigger">
-    ${outline(TRIGGER, 4)}
+    ${outline(TRIGGER, STEEL.dark)}
     <path d="${TRIGGER}" fill="url(#desert-eagle-steel)"/>
     <path d="${TRIGGER_FACE}" stroke="${STEEL.highlight}" stroke-width="4" fill="none"/>
   </g>
@@ -852,6 +903,9 @@ function drawSide(options: DesertEagleOptions = {}): string {
     <!-- The face's edge throws a shadow on the lower plane -->
     <path d="${RIM_EDGE}" stroke="${p.matteDark}" stroke-width="16" fill="none"/>
     <path d="${FRAME_FACE}" fill="url(#desert-eagle-frame-face)"/>
+    <!-- Under the slide's bottom edge, and the barrel's nose -->
+    <path d="${UNDER_SLIDE}" fill="url(#desert-eagle-overhang)"/>
+    <path d="${UNDER_NOSE}" fill="url(#desert-eagle-overhang)"/>
     <path d="${RIM_EDGE}" stroke="${p.edge}" stroke-width="3" fill="none"/>
   </g>
   <!-- Fixed on top of the frame: the rail on its top, the long flat face, the round chamber behind it, the nose
@@ -860,14 +914,15 @@ function drawSide(options: DesertEagleOptions = {}): string {
     ${outline(BARREL)}
     <path d="${BARREL}" fill="url(#desert-eagle-side)"/>
     <path d="${CHAMBER}" fill="url(#desert-eagle-chamber)"/>
-    <path d="${RAIL_LEDGE}" stroke="${p.floor}" stroke-width="2" fill="none" transform="translate(0,3)"/>
-    <path d="${RAIL_LEDGE}" stroke="${p.edge}" stroke-width="3" fill="none"/>
-    <path d="${barrelTop()}" stroke="${p.edge}" stroke-width="2.5" fill="none" transform="translate(0,1.5)"/>
+    <!-- The rail overhangs the flat face: its shadow, fading down the face -->
+    <path d="${UNDER_RAIL}" fill="url(#desert-eagle-overhang)"/>
+    <path d="M${RAIL_START + 2},${RAIL_BASE - 1} L${BARREL_FRONT - 2},${RAIL_BASE - 1}" stroke="${p.edge}" stroke-width="2" fill="none"/>
+    <path d="${barrelTop(1.5)}" stroke="${p.edge}" stroke-width="2.5" fill="none"/>
     <path d="${NOSE_UNDER}" fill="${p.floor}"/>
-    <path d="${NOSE_EDGE}" stroke="${p.edge}" stroke-width="3" fill="none" transform="translate(-2,0)"/>
+    <path d="${NOSE_EDGE}" stroke="${p.edge}" stroke-width="3" fill="none"/>
     <path d="${FRONT_DOVETAIL}" fill="${STEEL.dark}"/>
     <path d="${PORT_WALLS}" fill="url(#desert-eagle-port-wall)" clip-path="url(#desert-eagle-ports)"/>
-    <path d="${PORT_HOLES}" stroke="${p.edgeDark}" stroke-width="2" fill="none"/>
+    <path d="${PORT_HOLES}" stroke="${p.outline}" stroke-width="2" fill="none"/>
   </g>
   <path id="desert-eagle-guide-rod" d="${GUIDE_ROD}" fill="${STEEL.dark}"/>
   <!-- The block behind the barrel and the arms either side of it, below the seam -->
@@ -880,8 +935,8 @@ function drawSide(options: DesertEagleOptions = {}): string {
     <path d="M${BARREL_BACK},${SEAM} L${ARM_FRONT},${SEAM}" stroke="${p.edgeDark}" stroke-width="5" fill="none"/>
     <path d="M${BARREL_BACK + 4},${SEAM + 4} L${ARM_FRONT - 2},${SEAM + 4}" stroke="${p.edge}" stroke-width="2.5" fill="none"/>
     <!-- The block's front face over the barrel, and the arm's front end -->
-    <path d="M${BARREL_BACK},${SLIDE_TOP + 2} L${BARREL_BACK},${SEAM}" stroke="${p.edgeDark}" stroke-width="3" fill="none"/>
-    <path d="M${ARM_FRONT},${SEAM} L${ARM_FRONT},${SLIDE_BOTTOM}" stroke="${p.edgeDark}" stroke-width="3" fill="none"/>
+    <path d="M${BARREL_BACK},${SLIDE_TOP + 2} L${BARREL_BACK},${SEAM}" stroke="${p.outline}" stroke-width="3" fill="none"/>
+    <path d="M${ARM_FRONT},${SEAM} L${ARM_FRONT},${SLIDE_BOTTOM}" stroke="${p.outline}" stroke-width="3" fill="none"/>
     <path d="M${ARM_FRONT + 3},${SEAM + 3} L${ARM_FRONT + 3},${NOSE_CHAMFER}" stroke="${p.edge}" stroke-width="2" fill="none"/>
     <g id="desert-eagle-serrations">
       <path d="${s.grooves}" fill="url(#desert-eagle-groove)"/>
@@ -895,17 +950,17 @@ function drawSide(options: DesertEagleOptions = {}): string {
       <path d="${RECESS_LIT}" stroke="${p.edge}" stroke-width="5" fill="none" clip-path="url(#desert-eagle-recess-clip)"/>
     </g>
     <!-- The block's bottom edge, the seam with the frame -->
-    <path d="M${fmt(SLIDE_BACK_POINTS[SLIDE_BACK_POINTS.length - 1])} L${ARM_FRONT},${SLIDE_BOTTOM}" stroke="${p.edgeDark}" stroke-width="4" fill="none"/>
+    <path d="M${fmt(SLIDE_BACK_POINTS[SLIDE_BACK_POINTS.length - 1])} L${ARM_FRONT},${SLIDE_BOTTOM}" stroke="${p.outline}" stroke-width="4" fill="none"/>
   </g>
   <g id="desert-eagle-sights">
-    ${outline(REAR_SIGHT, 3)}
-    ${outline(FRONT_SIGHT, 3)}
+    ${outline(REAR_SIGHT, STEEL.dark)}
+    ${outline(FRONT_SIGHT, STEEL.dark)}
     <path d="${REAR_SIGHT}" fill="url(#desert-eagle-steel)"/>
     <path d="${FRONT_SIGHT}" fill="url(#desert-eagle-steel)"/>
   </g>
   <!-- Dark plastic, as the grip: the hub, the arm, the pad on its end; a steel screw through the hub -->
   <g id="desert-eagle-safety">
-    ${outline(SAFETY, 4)}
+    ${outline(SAFETY, POLYMER.dark)}
     <path d="${SAFETY}" fill="url(#desert-eagle-polymer-part)"/>
     <path d="${SAFETY_LIT}" stroke="${POLYMER.highlight}" stroke-width="3" fill="none"/>
     <path d="${SAFETY_PAD}" fill="${POLYMER.highlight}" stroke="${POLYMER.dark}" stroke-width="3"/>
@@ -914,7 +969,7 @@ function drawSide(options: DesertEagleOptions = {}): string {
     <path d="M${SAFETY_HUB[0] - SAFETY_SCREW_R + 3},${SAFETY_HUB[1] - 1} L${SAFETY_HUB[0] + SAFETY_SCREW_R - 3},${SAFETY_HUB[1] - 1}" stroke="${STEEL.dark}" stroke-width="6"/>
   </g>
   <g id="desert-eagle-slide-stop">
-    ${outline(SLIDE_STOP, 4)}
+    ${outline(SLIDE_STOP, STEEL.dark)}
     <path d="${SLIDE_STOP}" fill="url(#desert-eagle-steel)"/>
     <path d="${SLIDE_STOP_GRIP}" stroke="${STEEL.dark}" stroke-width="3" fill="none"/>
     <path d="${SLIDE_STOP_LIT}" stroke="${STEEL.highlight}" stroke-width="3" fill="none"/>
@@ -922,17 +977,24 @@ function drawSide(options: DesertEagleOptions = {}): string {
   </g>
   <!-- Black rubber, wrapped round the back strap -->
   <g id="desert-eagle-grip-panel">
-    <path d="${PANEL}" fill="url(#desert-eagle-polymer)" stroke="${POLYMER.dark}" stroke-width="4"/>
+    ${outline(PANEL, POLYMER.dark)}
+    <path d="${PANEL}" fill="url(#desert-eagle-polymer)"/>
+    <g clip-path="url(#desert-eagle-panel-clip)" fill="none" stroke="${POLYMER.highlight}" stroke-linecap="round">
+      <path d="${PANEL_SWELL}" stroke-width="90" opacity="0.07"/>
+      <path d="${PANEL_SWELL}" stroke-width="56" opacity="0.08"/>
+      <path d="${PANEL_SWELL}" stroke-width="26" opacity="0.1"/>
+      <path d="${PANEL_FRONT_LIT}" stroke-width="10" opacity="0.18"/>
+    </g>
     <circle cx="${GRIP_SCREW[0]}" cy="${GRIP_SCREW[1]}" r="12" fill="${STEEL.base}" stroke="${STEEL.dark}" stroke-width="3"/>
     <path d="M${GRIP_SCREW[0] - 8},${GRIP_SCREW[1] + 5} L${GRIP_SCREW[0] + 8},${GRIP_SCREW[1] - 5}" stroke="${STEEL.dark}" stroke-width="4"/>
   </g>
   <!-- The magazine catch: a plastic button in a ring -->
   <g id="desert-eagle-magazine-catch">
-    <circle cx="${MAG_CATCH[0]}" cy="${MAG_CATCH[1]}" r="20" fill="${p.edgeDark}"/>
+    <circle cx="${MAG_CATCH[0]}" cy="${MAG_CATCH[1]}" r="20" fill="${p.floor}"/>
     <circle cx="${MAG_CATCH[0]}" cy="${MAG_CATCH[1]}" r="15" fill="url(#desert-eagle-polymer-part)"/>
   </g>
   <g id="desert-eagle-magazine-base">
-    ${outline(MAG_BASE, 4)}
+    ${outline(MAG_BASE, STEEL.dark)}
     <path d="${MAG_BASE}" fill="url(#desert-eagle-steel)"/>
   </g>
 </svg>`;
@@ -960,7 +1022,7 @@ export const DESERT_EAGLE: GunDrawing<DesertEagleOptions> = {
   // The origin on the gun's middle (between the beavertail's tip, x 31, and the muzzle, x 1888) on the bore (the
   // brake ports' middle and the round chamber's, y 147), and 273 mm (the DE50SRMB's 10.75") over the 1857 px
   // they're apart
-  scale: { origin: [959.5, 147], mmPerPixel: 273 / 1857 },
+  scale: { origin: [959.5, 147], mmPerPixel: MM_PER_PIXEL },
   frame: {
     // The front sight's top, the magazine base's bottom, the beavertail's tip, the muzzle
     top: 36,
