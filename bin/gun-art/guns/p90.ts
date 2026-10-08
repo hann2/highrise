@@ -8,7 +8,8 @@
  */
 import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, polygon, rounded, smoothCurve } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import type { Material } from "../lib/style";
 import { BLACK_POLYMER } from "../lib/style";
 
@@ -855,6 +856,474 @@ ${stops([0, B.highlight], [0.45, B.light], [1, B.base])}
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y, in millimeters
+// about its middle on the bore, at the same scale as the side view. Lengths along the gun are the side view's
+// (`sx` converts its photo's pixels); widths are the real gun's (there's no photo from above: see each one).
+//
+// From above: the stock's top behind the magazine, the magazine lying along the top (clear, its rounds lying
+// across it, bullets to the left, heads to the right: the side view's case heads), the shell's sides either side
+// of it, the sight housing over the magazine's front half, and the barrel and flash hider out of the front.
+// The moving parts keep the old art's ids: the `charging-handle` (knobs out both sides, under the body, moving
+// back along its slot) and the `magazine` (hidden while it's out, the `magazine-well` under it), with its
+// `rounds` (and their `follower`) on a layer of their own that slides back toward the `feed` as it empties.
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - ORIGIN[0]) * MM_PER_PX;
+
+const t2 = (v: number) => {
+  const s = fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "");
+  return s === "-0" ? "0" : s;
+};
+const tp = (x: number, y: number) => `${t2(x)},${t2(y)}`;
+
+/** A rectangle from x0,y0 to x1,y1, each corner rounded by its own radius (back-left, front-left, front-right, back-right) */
+function tbox(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+): string {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (
+    cx: number,
+    cy: number,
+    fx: number,
+    fy: number,
+    tx: number,
+    ty: number,
+  ) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A gradient across the gun (along y), from -half to half */
+function across(
+  id: string,
+  half: number,
+  list: [number, string, number?][],
+): string {
+  return `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t2(-half)}" x2="0" y2="${t2(half)}">
+${stops(...list)}
+    </linearGradient>`;
+}
+
+/** A closed path straight through points, in millimeters */
+function tpoly(points: readonly Point[]): string {
+  return "M" + points.map(([x, y]) => tp(x, y)).join(" L") + " Z";
+}
+
+// Lengths along the gun, from the side view
+const T_BACK = sx(BACK); // -250
+const T_MUZZLE = sx(MUZZLE); // 250
+const T_BUTT_SEAM = sx(BUTT_SEAM);
+const T_CATCH_BACK = sx(512); // the magazine catch's recess
+const T_CATCH = sx(555);
+const T_WELL_BACK = sx(WELL_BACK); // the magazine's back
+const T_GRIPS = sx(PANEL_END); // where the grips' frame starts, widest from there
+const T_MAG_FRONT = sx(MAG_FRONT);
+const T_FEED_FRONT = sx(708); // the rotary feed's front: the rounds' window starts here
+const T_HOUSING_BACK = sx(1075); // the rear leg's foot, over the magazine
+const T_HOUSING_SHELF = sx(1160); // the rear edge's top corner
+const T_BOX_BACK = sx(1325); // the sight box's flat top
+const T_BOX_FRONT = sx(1546);
+const T_CAP = sx(CAP_CENTER[0]);
+const T_CAP_HALF = CAP_R * MM_PER_PX;
+const T_FRONT = sx(FRONT + 1); // the receiver's front face
+const T_RAIL: [number, number] = [sx(1282), sx(1564)];
+const T_RAIL_SLOTS = RAIL_SLOTS.map(([a, b]): [number, number] => [
+  sx(a),
+  sx(b),
+]);
+const T_POSTS = [sx(1330), sx(1533)];
+const T_HANDLE: [number, number] = [
+  sx(1492),
+  sx(HANDLE_CENTER[0] + HANDLE_R),
+];
+const T_SLOT_BACK = sx(1188); // the back of the cocking handle's slot
+const T_HAND_STOP = sx(1645);
+const T_BARREL: [number, number] = [sx(RECESS_BACK), sx(1710)];
+const T_COLLAR: [number, number] = [sx(1708), sx(1734)];
+const T_RING: [number, number] = [sx(1741), sx(1754)];
+const T_NECK: [number, number] = [sx(1754), sx(1765)];
+const T_HIDER: [number, number] = [sx(1765), T_MUZZLE];
+const T_HIDER_SLOT: [number, number] = [sx(1778), sx(1840)];
+const T_HIDER_DIP: [number, number] = [sx(1797), sx(1818)];
+
+// Widths (half widths, from the bore's line). FN gives the P90 as 55 mm wide overall; the rest are estimates
+// (there's no photo from above or behind in the references), kept in proportion to it:
+const T_SHELL_HALF = 27.5; // the grips' frame, the widest of the shell: FN's 55 mm
+const T_BUTT_HALF = 24; // the butt, a little narrower, the shell flaring out to the grips
+const T_STOP_HALF = 24; // the hand stop at the front, narrowing again
+const T_MAG_HALF = 25; // the magazine: a 5.7x28 lies across it (40.5 mm), plus its walls and clearance
+const T_MAG_WALL = 2.2;
+const T_HOUSING_HALF = 22.5; // the sight housing's legs and front block, over the magazine's sides
+const T_BOX_HALF = 16; // the sight box's top, narrower
+const T_RAIL_OUT = 25.5; // the side rails stand 3 mm out from the housing
+const T_CAP_OUT = 25; // the caps on its sides
+const T_HANDLE_OUT = 31; // the cocking handle's knobs, out past the shell either side
+// From the side view's heights, round
+const T_BARREL_HALF = ((466 - 398) * MM_PER_PX) / 2;
+const T_COLLAR_HALF = ((465 - 388) * MM_PER_PX) / 2;
+const T_NECK_HALF = ((456 - 398) * MM_PER_PX) / 2;
+const T_HIDER_HALF = ((465 - 389) * MM_PER_PX) / 2;
+
+// The rounds: 5.7x28 mm, 40.5 mm long, lying across the magazine with their heads to the right (the side view's
+// case heads) and their bullets to the left. Two staggered rows of 25, as in the side view: the upper row's
+// first at the side view's x 775.5, the lower row's half a pitch on. Each round fired moves the stack back half
+// a pitch, so empty they've moved back 25 pitches (197 mm): GunStats.rounds.travel -0.197 at true scale.
+const T_PITCH = PITCH * MM_PER_PX;
+const T_ROUND_LENGTH = 40.5;
+const T_CASE_LENGTH = 28.9;
+const T_HEAD_HALF = 7.95 / 2;
+const T_NECK_R = 6.4 / 2;
+const T_BULLET_R = 5.7 / 2;
+const T_UPPER_FIRST = sx(775.5);
+const T_LOWER_FIRST = sx(790);
+const T_PER_ROW = 25;
+export const P90_ROUNDS_TRAVEL = -T_PER_ROW * T_PITCH;
+const T_FOLLOWER: [number, number] = [
+  T_LOWER_FIRST + (T_PER_ROW - 0.5) * T_PITCH + 0.6,
+  T_LOWER_FIRST + (T_PER_ROW - 0.5) * T_PITCH + 9,
+];
+
+/** A round lying across the gun, centered on x, its head at +y */
+function topRound(x: number): string {
+  const head = T_ROUND_LENGTH / 2;
+  const mouth = head - T_CASE_LENGTH;
+  const shoulder = mouth + 4;
+  const tip = -head;
+  const h = T_HEAD_HALF;
+  const caseBody = tpoly([
+    [x - h, head],
+    [x + h, head],
+    [x + h * 0.95, shoulder],
+    [x + T_NECK_R, shoulder - 2],
+    [x + T_NECK_R, mouth],
+    [x - T_NECK_R, mouth],
+    [x - T_NECK_R, shoulder - 2],
+    [x - h * 0.95, shoulder],
+  ]);
+  const bullet =
+    `M${tp(x - T_BULLET_R, mouth + 0.5)} L${tp(x - T_BULLET_R, mouth - 3)} ` +
+    `C${tp(x - T_BULLET_R, tip + 4)} ${tp(x - 0.6, tip + 0.6)} ${tp(x, tip)} ` +
+    `C${tp(x + 0.6, tip + 0.6)} ${tp(x + T_BULLET_R, tip + 4)} ${tp(x + T_BULLET_R, mouth - 3)} ` +
+    `L${tp(x + T_BULLET_R, mouth + 0.5)} Z`;
+  return `<path d="${bullet}" fill="url(#p90-top-bullet)"/>
+        <path d="${caseBody}" fill="url(#p90-top-case)"/>
+        <path d="${tbox(x - h, head - 1.2, x + h, head)}" fill="url(#p90-top-head)"/>`;
+}
+
+// The shell from above: the butt, flaring out to the grips' frame, narrowing to the hand stop at the front
+const T_SHELL =
+  `M${tp(T_BACK + 3, -T_BUTT_HALF)} ` +
+  `C${tp(T_BACK + 60, -T_BUTT_HALF)} ${tp(T_GRIPS - 40, -T_SHELL_HALF)} ${tp(T_GRIPS, -T_SHELL_HALF)} ` +
+  `L${tp(T_HAND_STOP - 25, -T_SHELL_HALF)} C${tp(T_HAND_STOP - 8, -T_SHELL_HALF)} ${tp(T_HAND_STOP, -T_STOP_HALF)} ${tp(T_HAND_STOP + 6, -T_STOP_HALF)} ` +
+  `L${tp(T_FRONT - 2, -T_STOP_HALF)} C${tp(T_FRONT - 0.9, -T_STOP_HALF)} ${tp(T_FRONT, -T_STOP_HALF + 0.9)} ${tp(T_FRONT, -T_STOP_HALF + 2)} ` +
+  `L${tp(T_FRONT, T_STOP_HALF - 2)} C${tp(T_FRONT, T_STOP_HALF - 0.9)} ${tp(T_FRONT - 0.9, T_STOP_HALF)} ${tp(T_FRONT - 2, T_STOP_HALF)} ` +
+  `L${tp(T_HAND_STOP + 6, T_STOP_HALF)} C${tp(T_HAND_STOP, T_STOP_HALF)} ${tp(T_HAND_STOP - 8, T_SHELL_HALF)} ${tp(T_HAND_STOP - 25, T_SHELL_HALF)} ` +
+  `L${tp(T_GRIPS, T_SHELL_HALF)} C${tp(T_GRIPS - 40, T_SHELL_HALF)} ${tp(T_BACK + 60, T_BUTT_HALF)} ${tp(T_BACK + 3, T_BUTT_HALF)} ` +
+  `C${tp(T_BACK + 1.3, T_BUTT_HALF)} ${tp(T_BACK, T_BUTT_HALF - 1.3)} ${tp(T_BACK, T_BUTT_HALF - 3)} ` +
+  `L${tp(T_BACK, -T_BUTT_HALF + 3)} C${tp(T_BACK, -T_BUTT_HALF + 1.3)} ${tp(T_BACK + 1.3, -T_BUTT_HALF)} ${tp(T_BACK + 3, -T_BUTT_HALF)} Z`;
+const T_BUTT_PAD = tbox(T_BACK, -T_BUTT_HALF, T_BUTT_SEAM, T_BUTT_HALF, [
+  3, 0, 0, 3,
+]);
+// The magazine: square at its front, rounded at its back over the feed
+const T_MAG = tbox(T_WELL_BACK, -T_MAG_HALF, T_MAG_FRONT, T_MAG_HALF, [
+  9, 1.5, 1.5, 9,
+]);
+const T_MAG_INSIDE = tbox(
+  T_FEED_FRONT,
+  -T_MAG_HALF + T_MAG_WALL,
+  T_MAG_FRONT - 2.5,
+  T_MAG_HALF - T_MAG_WALL,
+  1,
+);
+const T_FEED = tbox(T_WELL_BACK, -T_MAG_HALF, T_FEED_FRONT, T_MAG_HALF, [
+  9, 0, 0, 9,
+]);
+// The sight housing from above: its legs and front block over the magazine's sides, the sight box on top
+const T_HOUSING = tbox(
+  T_HOUSING_BACK,
+  -T_HOUSING_HALF,
+  T_FRONT,
+  T_HOUSING_HALF,
+  [4, 3, 3, 4],
+);
+const T_BOX = tbox(
+  T_HOUSING_SHELF,
+  -T_BOX_HALF,
+  T_CAP + 6,
+  T_BOX_HALF,
+  [3, 4, 4, 3],
+);
+const T_BOX_TOP = tbox(
+  T_BOX_BACK,
+  -T_BOX_HALF + 1.5,
+  T_BOX_FRONT,
+  T_BOX_HALF - 1.5,
+  1.5,
+);
+const T_RAILS = [
+  tbox(T_RAIL[0], -T_RAIL_OUT, T_RAIL[1], -T_HOUSING_HALF + 0.5, [1, 1, 0, 0]),
+  tbox(T_RAIL[0], T_HOUSING_HALF - 0.5, T_RAIL[1], T_RAIL_OUT, [0, 0, 1, 1]),
+];
+const T_CAPS = [
+  tbox(
+    T_CAP - T_CAP_HALF,
+    -T_CAP_OUT,
+    T_CAP + T_CAP_HALF,
+    -T_HOUSING_HALF + 0.5,
+    [2, 2, 0, 0],
+  ),
+  tbox(
+    T_CAP - T_CAP_HALF,
+    T_HOUSING_HALF - 0.5,
+    T_CAP + T_CAP_HALF,
+    T_CAP_OUT,
+    [0, 0, 2, 2],
+  ),
+];
+// The cocking handle: a bar across under the receiver, its knobs out either side, rounded at the front
+const T_HANDLE_BAR = tbox(
+  T_HANDLE[0],
+  -T_HANDLE_OUT,
+  T_HANDLE[1],
+  T_HANDLE_OUT,
+  [2, 5, 5, 2],
+);
+const T_DIP_MID = (T_HIDER_DIP[0] + T_HIDER_DIP[1]) / 2;
+const T_HIDER_SHAPE =
+  `M${tp(T_HIDER[0], -T_HIDER_HALF)} L${tp(T_HIDER_DIP[0], -T_HIDER_HALF)} ` +
+  `C${tp(T_HIDER_DIP[0] + 2, -T_HIDER_HALF)} ${tp(T_HIDER_DIP[0] + 2.5, -T_HIDER_HALF + 1.6)} ${tp(T_DIP_MID, -T_HIDER_HALF + 1.6)} ` +
+  `C${tp(T_HIDER_DIP[1] - 2.5, -T_HIDER_HALF + 1.6)} ${tp(T_HIDER_DIP[1] - 2, -T_HIDER_HALF)} ${tp(T_HIDER_DIP[1], -T_HIDER_HALF)} ` +
+  `L${tp(T_HIDER[1] - 2, -T_HIDER_HALF)} C${tp(T_HIDER[1] - 0.9, -T_HIDER_HALF)} ${tp(T_HIDER[1], -T_HIDER_HALF + 0.9)} ${tp(T_HIDER[1], -T_HIDER_HALF + 2)} ` +
+  `L${tp(T_HIDER[1], T_HIDER_HALF - 2)} C${tp(T_HIDER[1], T_HIDER_HALF - 0.9)} ${tp(T_HIDER[1] - 0.9, T_HIDER_HALF)} ${tp(T_HIDER[1] - 2, T_HIDER_HALF)} ` +
+  `L${tp(T_HIDER_DIP[1], T_HIDER_HALF)} ` +
+  `C${tp(T_HIDER_DIP[1] - 2, T_HIDER_HALF)} ${tp(T_HIDER_DIP[1] - 2.5, T_HIDER_HALF - 1.6)} ${tp(T_DIP_MID, T_HIDER_HALF - 1.6)} ` +
+  `C${tp(T_HIDER_DIP[0] + 2.5, T_HIDER_HALF - 1.6)} ${tp(T_HIDER_DIP[0] + 2, T_HIDER_HALF)} ${tp(T_HIDER_DIP[0], T_HIDER_HALF)} ` +
+  `L${tp(T_HIDER[0], T_HIDER_HALF)} Z`;
+
+const T_OUTLINE = 0.4;
+
+function drawTop(options: P90Options = {}): string {
+  const P: Material = { ...BLACK_POLYMER, ...options.body };
+  const B: Material = { ...P90_BRASS, ...options.brass };
+  const M: Material = { ...P90_PHOSPHATE, ...options.muzzle };
+  const smoke: Smoke = { ...P90_SMOKE, ...options.magazine };
+  const outline = options.outline !== false;
+  // Each group's own outline: its silhouette stroked twice as wide under its fill, in its own dark, so it moves
+  // with the part
+  const edge = (d: string, color: string) =>
+    outline
+      ? `<path d="${d}" stroke="${color}" stroke-width="${t2(T_OUTLINE * 2)}" fill="none"/>\n    `
+      : "";
+  const minX = T_BACK - 1;
+  const maxX = T_MUZZLE + 1;
+  const half = T_HANDLE_OUT + 1;
+  const width = t2(maxX - minX);
+  const height = t2(half * 2);
+  const lower = Array.from({ length: T_PER_ROW }, (_, i) =>
+    topRound(T_LOWER_FIRST + i * T_PITCH),
+  );
+  const upper = Array.from({ length: T_PER_ROW }, (_, i) =>
+    topRound(T_UPPER_FIRST + i * T_PITCH),
+  );
+  const slots = T_RAIL_SLOTS.flatMap(([a, b]) => [
+    `<path d="${tbox(a, -T_RAIL_OUT, b, -T_HOUSING_HALF + 0.5)}"/>`,
+    `<path d="${tbox(a, T_HOUSING_HALF - 0.5, b, T_RAIL_OUT)}"/>`,
+  ]);
+  const ridges = [0, 1, 2]
+    .map((i) =>
+      tbox(
+        T_WELL_BACK - 4.4 + i * 1.4,
+        -16,
+        T_WELL_BACK - 3.8 + i * 1.4,
+        16,
+      ),
+    )
+    .join(" ");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t2(minX)} ${t2(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("p90")}
+  <!-- The FN P90 from above, as it's held: muzzle along +x, its right side down the page (+y), millimeters about
+       its middle on the bore, at the same scale as its side view (the pickup); lengths along it are the side
+       view's. Black polymer; the magazine clear, its 50 rounds lying across it; lit from above. -->
+  <defs>
+    ${across("p90-top-shell", T_SHELL_HALF, [
+      [0, P.dark],
+      [0.06, P.base],
+      [0.14, P.light],
+      [0.5, mix(P.light, P.highlight, 0.3)],
+      [0.86, P.light],
+      [0.94, P.base],
+      [1, P.dark],
+    ])}
+    ${across("p90-top-housing", T_HOUSING_HALF, [
+      [0, P.dark],
+      [0.08, P.base],
+      [0.2, mix(P.base, P.light, 0.4)],
+      [0.8, mix(P.base, P.light, 0.4)],
+      [0.92, P.base],
+      [1, P.dark],
+    ])}
+    ${across("p90-top-box", T_BOX_HALF, [
+      [0, P.base],
+      [0.12, P.light],
+      [0.5, P.highlight],
+      [0.88, P.light],
+      [1, P.base],
+    ])}
+    ${across("p90-top-rail", T_RAIL_OUT, [
+      [0, P.base],
+      [0.03, P.light],
+      [0.07, P.dark],
+      [0.93, P.dark],
+      [0.97, P.light],
+      [1, P.base],
+    ])}
+    ${across("p90-top-steel", T_HIDER_HALF, [
+      [0, M.dark],
+      [0.25, M.base],
+      [0.45, M.highlight],
+      [0.6, M.light],
+      [1, M.dark],
+    ])}
+    ${across("p90-top-wall", T_MAG_HALF, [
+      [0, smoke.edge, 0.9],
+      [0.07, mix(smoke.color, "#ffffff", 0.4), 0.7],
+      [0.1, smoke.color, smoke.opacity],
+      [0.9, smoke.color, smoke.opacity],
+      [0.93, mix(smoke.color, "#ffffff", 0.4), 0.7],
+      [1, smoke.edge, 0.9],
+    ])}
+    ${across("p90-top-feed", T_MAG_HALF, [
+      [0, smoke.edge],
+      [0.15, mix(B.dark, smoke.edge, 0.4)],
+      [0.5, mix(B.dark, smoke.color, 0.4)],
+      [0.85, mix(B.dark, smoke.edge, 0.4)],
+      [1, smoke.edge],
+    ])}
+    <!-- Along each round, whichever it's on: its case, head and bullet, lit along their tops -->
+    <linearGradient id="p90-top-case" x1="0" y1="0" x2="1" y2="0">
+${stops([0, B.dark], [0.3, B.light], [0.45, B.highlight], [0.75, B.base], [1, B.dark])}
+    </linearGradient>
+    <linearGradient id="p90-top-head" x1="0" y1="0" x2="1" y2="0">
+${stops([0, B.dark], [0.4, B.base], [1, B.dark])}
+    </linearGradient>
+    <linearGradient id="p90-top-bullet" x1="0" y1="0" x2="1" y2="0">
+${stops([0, "#3d3a37"], [0.4, "#8a8580"], [1, "#2e2c2a"])}
+    </linearGradient>
+    <!-- Where the rounds show: between the feed and the magazine's front cap -->
+    <clipPath id="p90-rounds-window">
+      <rect x="${t2(T_FEED_FRONT)}" y="${t2(-T_MAG_HALF)}" width="${t2(T_MAG_FRONT - 2.5 - T_FEED_FRONT)}" height="${t2(T_MAG_HALF * 2)}"/>
+    </clipPath>
+  </defs>
+  <!-- Its knobs out both sides of the receiver, the bar between them under the body; back along its slot to cock it -->
+  <g id="charging-handle">
+    ${edge(T_HANDLE_BAR, P.dark)}<path d="${T_HANDLE_BAR}" fill="url(#p90-top-shell)"/>
+    <path d="${tbox(T_HANDLE[0] + 2, -T_HANDLE_OUT + 0.8, T_HANDLE[1] - 4, -T_HANDLE_OUT + 1.8)}" fill="${P.highlight}" opacity="0.6"/>
+  </g>
+  <!-- The barrel out of the receiver's front, the flash hider's collar and ring, its neck and the flash hider,
+       slotted along its top and dipped at its sides where its ports are -->
+  <g id="barrel">
+    ${edge(tbox(T_BARREL[0], -T_BARREL_HALF, T_BARREL[1], T_BARREL_HALF), M.dark)}<path d="${tbox(T_BARREL[0], -T_BARREL_HALF, T_BARREL[1], T_BARREL_HALF)}" fill="url(#p90-top-steel)"/>
+    <g id="flash-hider">
+      ${edge(tbox(T_COLLAR[0], -T_COLLAR_HALF, T_RING[1], T_COLLAR_HALF, 0.8), M.dark)}${edge(tbox(T_NECK[0], -T_NECK_HALF, T_NECK[1], T_NECK_HALF), M.dark)}${edge(T_HIDER_SHAPE, M.dark)}<path d="${tbox(T_NECK[0] - 0.5, -T_NECK_HALF, T_NECK[1] + 0.5, T_NECK_HALF)}" fill="url(#p90-top-steel)"/>
+      <path d="${tbox(T_COLLAR[0], -T_COLLAR_HALF, T_COLLAR[1], T_COLLAR_HALF, 0.8)}" fill="url(#p90-top-steel)"/>
+      <path d="${tbox(T_COLLAR[1], -T_COLLAR_HALF + 1.3, T_RING[0], T_COLLAR_HALF - 1.3)}" fill="${M.dark}"/>
+      <path d="${tbox(T_RING[0], -T_COLLAR_HALF, T_RING[1], T_COLLAR_HALF, 0.8)}" fill="url(#p90-top-steel)"/>
+      <path d="${T_HIDER_SHAPE}" fill="url(#p90-top-steel)"/>
+      <path d="${tbox(T_HIDER_SLOT[0], -1.4, T_HIDER_SLOT[1], 1.4, 1.4)}" fill="${M.dark}"/>
+    </g>
+  </g>
+  <!-- The shell: the stock's top behind the magazine, the rubber butt plate, the magazine catch, and its sides
+       either side of the magazine, widest at the grips; and under the magazine (seen when it's out) its well, the
+       feed ramp down into the action at its back -->
+  <g id="body">
+    ${edge(T_SHELL, P.dark)}<path d="${T_SHELL}" fill="url(#p90-top-shell)"/>
+    <path id="butt-pad" d="${T_BUTT_PAD}" fill="${mix(P.dark, "#000000", 0.2)}"/>
+    <!-- The magazine catch: a ridged block in a recess in the stock's top, just behind the magazine -->
+    <path id="magazine-catch-recess" d="${tbox(T_CATCH_BACK, -20, T_WELL_BACK, 20, 2)}" fill="${P.dark}"/>
+    <path id="magazine-catch" d="${tbox(T_CATCH, -18, T_WELL_BACK, 18, [1.5, 0, 0, 1.5])}" fill="url(#p90-top-box)"/>
+    <path d="${ridges}" fill="${P.dark}"/>
+    <!-- The slots the cocking handle runs back along, one on each side -->
+    <path d="${tbox(T_SLOT_BACK, -T_SHELL_HALF + 0.4, T_HANDLE[1], -T_SHELL_HALF + 1.4)} ${tbox(T_SLOT_BACK, T_SHELL_HALF - 1.4, T_HANDLE[1], T_SHELL_HALF - 0.4)}" fill="${P.dark}"/>
+    <g id="magazine-well">
+      <path d="${T_MAG}" fill="${P.dark}"/>
+      <path d="${tbox(T_FEED_FRONT, -T_MAG_HALF + 4, T_MAG_FRONT - 3, T_MAG_HALF - 4, 2)}" fill="${mix(P.dark, "#000000", 0.3)}"/>
+      <path id="feed-ramp" d="${tpoly([
+        [T_FEED_FRONT + 6, -6],
+        [T_WELL_BACK + 8, -3],
+        [T_WELL_BACK + 8, 3],
+        [T_FEED_FRONT + 6, 6],
+      ])}" fill="#141414"/>
+    </g>
+  </g>
+  <!-- Lies along the top, clear plastic, its rounds lying across it in two staggered rows, bullets to the left.
+       The spring pushes them back to the feed at its back, where they're turned to point forward -->
+  <g id="magazine">
+    ${edge(T_MAG, smoke.edge)}<path d="${T_MAG}" fill="url(#p90-top-wall)"/>
+    <!-- Full, as they are here, and slid back toward the feed as it empties (GunStats.rounds), showing only through the window -->
+    <g id="rounds" clip-path="url(#p90-rounds-window)">
+      <g id="lower-row">
+        ${lower.join("\n        ")}
+      </g>
+      <g id="upper-row">
+        ${upper.join("\n        ")}
+      </g>
+      <!-- Behind the last round -->
+      <g id="follower">
+        <path d="${tbox(T_FOLLOWER[0], -T_MAG_HALF + T_MAG_WALL + 0.5, T_FOLLOWER[1], T_MAG_HALF - T_MAG_WALL - 0.5, 1)}" fill="${mix(smoke.edge, smoke.color, 0.3)}"/>
+        <path d="${tbox(T_FOLLOWER[0] + 1.5, -T_MAG_HALF + T_MAG_WALL + 1.5, T_FOLLOWER[0] + 2.5, T_MAG_HALF - T_MAG_WALL - 1.5)}" fill="${mix(smoke.color, "#ffffff", 0.3)}"/>
+      </g>
+    </g>
+    <!-- The plastic over them, and its walls along both sides lit along their tops -->
+    <path d="${T_MAG_INSIDE}" fill="${smoke.color}" opacity="${smoke.tint}"/>
+    <path d="M${tp(T_FEED_FRONT, -T_MAG_HALF + 0.9)} L${tp(T_MAG_FRONT - 1.5, -T_MAG_HALF + 0.9)} M${tp(T_FEED_FRONT, T_MAG_HALF - 0.9)} L${tp(T_MAG_FRONT - 1.5, T_MAG_HALF - 0.9)}" stroke="#ffffff" stroke-width="0.6" opacity="0.35" fill="none"/>
+    <!-- The feed at its back, which the rounds go into (seen through the plastic, darker), and its cap at the front -->
+    <path id="feed" d="${T_FEED}" fill="url(#p90-top-feed)"/>
+    <path d="${tbox(T_FEED_FRONT - 8, -T_MAG_HALF + 3, T_FEED_FRONT - 5, T_MAG_HALF - 3, 1)}" fill="${B.light}" opacity="0.35"/>
+    <path d="${tbox(T_MAG_FRONT - 2.5, -T_MAG_HALF, T_MAG_FRONT, T_MAG_HALF, [0, 1.5, 1.5, 0])}" fill="${smoke.edge}"/>
+  </g>
+  <!-- The ring sight's housing over the magazine's front half: its rear leg and front block down over the
+       magazine's sides, the sight box on top (lit, its two little posts), the rails along its sides and the caps
+       at its front -->
+  <g id="sight">
+    ${edge(T_HOUSING, P.dark)}${T_RAILS.map((d) => edge(d, P.dark)).join("")}${T_CAPS.map((d) => edge(d, P.dark)).join("")}${T_RAILS.map((d) => `<path d="${d}" fill="url(#p90-top-rail)"/>`).join("\n    ")}
+    ${T_CAPS.map((d) => `<path d="${d}" fill="${P.light}"/>`).join("\n    ")}
+    <path d="${T_HOUSING}" fill="url(#p90-top-housing)"/>
+    <!-- The rear leg's slope, facing back and up, a little darker -->
+    <path d="${tbox(T_HOUSING_BACK, -T_HOUSING_HALF + 1, T_HOUSING_SHELF, T_HOUSING_HALF - 1, [3, 0, 0, 3])}" fill="${P.dark}" opacity="0.35"/>
+    ${edge(T_BOX, P.dark)}<path d="${T_BOX}" fill="url(#p90-top-box)"/>
+    <path d="${T_BOX_TOP}" fill="url(#p90-top-box)"/>
+    <path d="M${tp(T_BOX_BACK, -T_BOX_HALF + 1.5)} L${tp(T_BOX_FRONT, -T_BOX_HALF + 1.5)} M${tp(T_BOX_BACK, T_BOX_HALF - 1.5)} L${tp(T_BOX_FRONT, T_BOX_HALF - 1.5)}" stroke="${P.dark}" stroke-width="0.5" opacity="0.6" fill="none"/>
+    <g id="rail-slots" fill="${P.dark}">
+      ${slots.join("\n      ")}
+    </g>
+    <g id="sight-posts" fill="${P.dark}">
+      ${T_POSTS.map((x) => `<path d="${tbox(x - 1.1, -1.1, x + 1.1, 1.1, 1.1)}"/>`).join("\n      ")}
+    </g>
+  </g>
+</svg>
+`;
+}
+
+const TOP: TopView<P90Options> = { draw: drawTop };
+
 export const P90: GunDrawing<P90Options> = {
   name: "p90",
   photo: {
@@ -881,4 +1350,5 @@ export const P90: GunDrawing<P90Options> = {
        Millimeters, with the origin on the gun's middle on the bore, as the guns' top views in weapons/guns/art/
        have it; drawn over a photo, then simplified. The square is the pickup's, as the other pickups'. -->`,
   drawSide,
+  top: TOP,
 };
