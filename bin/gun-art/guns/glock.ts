@@ -17,7 +17,8 @@ import {
   SlantedAxis,
   smoothCurve,
 } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import type { Material } from "../lib/style";
 import { BLACK_POLYMER } from "../lib/style";
 
@@ -1035,6 +1036,309 @@ ${stops([0, P.dark, 0], [0.18, P.dark, 0.55], [0.36, P.base, 0], [0.5, P.light, 
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y, in millimeters
+// about its middle on the bore, at the same scale as the side view. Lengths along the gun are the side view's
+// numbers (sx converts its photo's pixels); widths are the real gun's.
+//
+// Widths. Glock's table: slide 25.5 mm, overall 34 mm. The photo from behind (a MOS model; its optic plate
+// ignored) has, at the slide's back, the slide 120 px across, the grip 129, the slide stop levers 142 and the
+// magwell's flare 143: so with the slide at 25.5, the grip about 27.5 and the levers and flare about 30. The grip
+// is further from the camera than the slide's back, so it's a little bigger than that: 29 mm, and the levers and
+// flare 31. Glock's 34 is less than the photo shows anywhere, so it's taken as the widest point counting the
+// levers' and flare's rounding, not used directly.
+//
+// What moves: the slide (with its sights, port and serrations), straight back. Under it, seen when it's back:
+// the frame's top and the steel rails it runs on, and the barrel, its hood under the port and its crown out of
+// the front.
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - ORIGIN[0]) * MM_PER_PX;
+
+const T_SLIDE_BACK = sx(SLIDE_BACK);
+const T_SLIDE_FRONT = sx(SLIDE_FRONT);
+const T_SLIDE_HALF = 25.5 / 2;
+const T_SLIDE_TOP_HALF = 10.5; // the flat top; the rounded edges either side are the side view's top chamfer
+const T_NOSE = sx(NOSE_BACK); // where the Gen 5's nose starts narrowing
+const T_NOSE_HALF = 11.2; // the slide's half width at its front face
+const T_CROWN = sx(CROWN_FRONT);
+const T_BARREL_HALF = ((BARREL_BOTTOM - BARREL_TOP) * MM_PER_PX) / 2; // the crown, 14.2 mm across
+const T_HOOD_BACK = sx(HOOD_BACK);
+const T_HOOD_FRONT = sx(HOOD_FRONT);
+const T_HOOD_HALF = 8.75; // the barrel's squared hood, filling the port
+const T_PORT_BACK = sx(PORT_BACK);
+const T_PORT_FRONT = sx(PORT_FRONT);
+const T_PORT_LEFT = -8; // the port is cut from left of the middle out through the right side
+const T_EXTRACTOR = [sx(565), sx(PORT_BACK)] as const; // along the right edge, behind the port
+const T_FRAME_HALF = 11; // the frame's top under the slide, and the dust cover
+const T_FRAME_FRONT = sx(DUST_COVER_FRONT);
+const T_TANG_BACK = sx(TANG_BACK);
+const T_GRIP_BACK = sx(63); // the heel, leaning out behind the tang
+const T_GRIP_FRONT = sx(GRIP.at(0, 580)[0]); // the front strap at the top of the grip, under the slide
+const T_GRIP_HALF = 29 / 2;
+const T_FLARE_HALF = 31 / 2; // the magwell's flare, low at the back
+const T_FLARE_FRONT = sx(FRONT_FOOT_X);
+const T_SLIDE_STOP = [sx(508), sx(583)] as const;
+const T_SLIDE_STOP_OUT = 31 / 2;
+// The steel rails the slide runs on: at the back in the trigger housing, and at the front on the locking block
+const T_RAILS: [number, number][] = [
+  [sx(160), sx(300)],
+  [sx(700), sx(860)],
+];
+const T_REAR_SIGHT = [sx(REAR_SIGHT.base[0]), sx(REAR_SIGHT.base[1])] as const;
+const T_REAR_SIGHT_HALF = 5.75;
+const T_REAR_NOTCH_HALF = 1.6;
+const T_FRONT_SIGHT = [
+  sx(FRONT_SIGHT.base[0]),
+  sx(FRONT_SIGHT.base[1]),
+] as const;
+const T_FRONT_SIGHT_HALF = 1.75;
+const T_SERRATION_DEPTH = 1.6; // how far the grooves cut in from each side, seen from above
+const T_OUTLINE = OUTLINE_MM;
+
+const t1 = (v: number) =>
+  fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "").replace(/^-0$/, "0");
+const tp = (x: number, y: number) => `${t1(x)},${t1(y)}`;
+
+/** A rectangle with each corner rounded by its own radius (back-left, front-left, front-right, back-right) */
+function tbox(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+): string {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (
+    cx: number,
+    cy: number,
+    fx: number,
+    fy: number,
+    tx: number,
+    ty: number,
+  ) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A gradient across the gun (along y), from its left edge to its right */
+function across(id: string, half: number, list: [number, string][]): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t1(-half)}" x2="0" y2="${t1(half)}">`,
+    ...list.map(([o, c]) => `      <stop offset="${o}" stop-color="${c}"/>`),
+    "    </linearGradient>",
+  ].join("\n    ");
+}
+
+// The slide's outline from above: square at the back (its corners just rounded), narrowing over the nose to its
+// front face
+const T_SLIDE_BODY =
+  `M${tp(T_SLIDE_BACK + 1, -T_SLIDE_HALF)} L${tp(T_NOSE, -T_SLIDE_HALF)} ` +
+  `C${tp(T_NOSE + 3, -T_SLIDE_HALF)} ${tp(T_SLIDE_FRONT - 1.5, -T_NOSE_HALF - 0.6)} ${tp(T_SLIDE_FRONT, -T_NOSE_HALF)} ` +
+  `L${tp(T_SLIDE_FRONT, T_NOSE_HALF)} ` +
+  `C${tp(T_SLIDE_FRONT - 1.5, T_NOSE_HALF + 0.6)} ${tp(T_NOSE + 3, T_SLIDE_HALF)} ${tp(T_NOSE, T_SLIDE_HALF)} ` +
+  `L${tp(T_SLIDE_BACK + 1, T_SLIDE_HALF)} C${tp(T_SLIDE_BACK + 0.45, T_SLIDE_HALF)} ${tp(T_SLIDE_BACK, T_SLIDE_HALF - 0.45)} ${tp(T_SLIDE_BACK, T_SLIDE_HALF - 1)} ` +
+  `L${tp(T_SLIDE_BACK, -T_SLIDE_HALF + 1)} C${tp(T_SLIDE_BACK, -T_SLIDE_HALF + 0.45)} ${tp(T_SLIDE_BACK + 0.45, -T_SLIDE_HALF)} ${tp(T_SLIDE_BACK + 1, -T_SLIDE_HALF)} Z`;
+const T_SLIDE_TOP = tbox(
+  T_SLIDE_BACK + 1.2,
+  -T_SLIDE_TOP_HALF,
+  T_SLIDE_FRONT - 1.2,
+  T_SLIDE_TOP_HALF,
+  [1, 3, 3, 1],
+);
+// The grip, from above: the heel and the magwell's flare out behind and beside the tang, and the grip itself
+// either side of the slide
+const T_GRIP =
+  `M${tp(T_GRIP_BACK + 5, -T_FLARE_HALF)} L${tp(T_FLARE_FRONT, -T_FLARE_HALF)} L${tp(T_FLARE_FRONT + 3, -T_GRIP_HALF)} ` +
+  `L${tp(T_GRIP_FRONT - 3, -T_GRIP_HALF)} C${tp(T_GRIP_FRONT - 1.3, -T_GRIP_HALF)} ${tp(T_GRIP_FRONT, -T_GRIP_HALF + 1.3)} ${tp(T_GRIP_FRONT, -T_GRIP_HALF + 3)} ` +
+  `L${tp(T_GRIP_FRONT, T_GRIP_HALF - 3)} C${tp(T_GRIP_FRONT, T_GRIP_HALF - 1.3)} ${tp(T_GRIP_FRONT - 1.3, T_GRIP_HALF)} ${tp(T_GRIP_FRONT - 3, T_GRIP_HALF)} ` +
+  `L${tp(T_FLARE_FRONT + 3, T_GRIP_HALF)} L${tp(T_FLARE_FRONT, T_FLARE_HALF)} L${tp(T_GRIP_BACK + 5, T_FLARE_HALF)} ` +
+  `C${tp(T_GRIP_BACK + 2.2, T_FLARE_HALF)} ${tp(T_GRIP_BACK, T_FLARE_HALF - 2.2)} ${tp(T_GRIP_BACK, T_FLARE_HALF - 5)} ` +
+  `L${tp(T_GRIP_BACK, -T_FLARE_HALF + 5)} C${tp(T_GRIP_BACK, -T_FLARE_HALF + 2.2)} ${tp(T_GRIP_BACK + 2.2, -T_FLARE_HALF)} ${tp(T_GRIP_BACK + 5, -T_FLARE_HALF)} Z`;
+// The frame's top: the tang out behind the slide, and under the slide (seen when it's back) to the dust cover's front
+const T_FRAME_TOP = tbox(
+  T_TANG_BACK,
+  -T_FRAME_HALF,
+  T_FRAME_FRONT,
+  T_FRAME_HALF,
+  [3, 1.5, 1.5, 3],
+);
+const T_BARREL = tbox(
+  T_HOOD_FRONT,
+  -T_BARREL_HALF,
+  T_CROWN,
+  T_BARREL_HALF,
+  [0, 1.2, 1.2, 0],
+);
+const T_HOOD = tbox(
+  T_HOOD_BACK,
+  -T_HOOD_HALF,
+  T_HOOD_FRONT + 1,
+  T_HOOD_HALF,
+  [1, 2, 2, 1],
+);
+
+function drawTop(options: GlockOptions = {}): string {
+  const S: Material = { ...BLACK_NITRIDE, ...options.slide };
+  const P: Material = { ...BLACK_POLYMER, ...options.frame };
+  const outline = options.outline !== false;
+  const minX = T_GRIP_BACK - 1;
+  const maxX = T_CROWN + 1;
+  const half = T_SLIDE_STOP_OUT + 1;
+  const width = t1(maxX - minX);
+  const height = t1(half * 2);
+  // Each group's own outline: its silhouette stroked twice as wide under its fill, in its own dark, so it moves
+  // with the part
+  const edge = (d: string, color: string) =>
+    outline
+      ? `<path d="${d}" stroke="${color}" stroke-width="${t1(T_OUTLINE * 2)}" fill="none"/>\n    `
+      : "";
+  const grooves = [
+    ...serrationXs(REAR_SERRATIONS),
+    ...serrationXs(FRONT_SERRATIONS),
+  ].flatMap((px) => {
+    const x0 = sx(px);
+    const x1 = sx(px + SERRATION_WIDTH);
+    return [
+      `<path d="${tbox(x0, -T_SLIDE_HALF, x1, -T_SLIDE_HALF + T_SERRATION_DEPTH)}"/>`,
+      `<path d="${tbox(x0, T_SLIDE_HALF - T_SERRATION_DEPTH, x1, T_SLIDE_HALF)}"/>`,
+    ];
+  });
+  const rails = T_RAILS.flatMap(([a, b]) => [
+    `<path d="${tbox(a, -T_FRAME_HALF + 0.6, b, -T_FRAME_HALF + 1.8)}"/>`,
+    `<path d="${tbox(a, T_FRAME_HALF - 1.8, b, T_FRAME_HALF - 0.6)}"/>`,
+  ]);
+  const levers = [
+    tbox(
+      T_SLIDE_STOP[0],
+      -T_SLIDE_STOP_OUT,
+      T_SLIDE_STOP[1],
+      -T_GRIP_HALF + 1,
+      [1.5, 1.5, 0, 0],
+    ),
+    tbox(
+      T_SLIDE_STOP[0],
+      T_GRIP_HALF - 1,
+      T_SLIDE_STOP[1],
+      T_SLIDE_STOP_OUT,
+      [0, 0, 1.5, 1.5],
+    ),
+  ];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t1(minX)} ${t1(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("glock")}
+  <!-- The Glock 19 (Gen 5) from above, as it's held: muzzle along +x, its right side down the page (+y),
+       millimeters about its middle on the bore, at the same scale as its side view (the pickup); lengths along it
+       are the side view's. Black nitride slide, black polymer frame; lit from above, the top faces brightest. -->
+  <defs>
+    ${across("glock-top-slide", T_SLIDE_HALF, [
+      [0, S.dark],
+      [0.07, S.base],
+      [0.16, S.light],
+      [0.5, S.highlight],
+      [0.84, S.light],
+      [0.93, S.base],
+      [1, S.dark],
+    ])}
+    ${across("glock-top-slide-flat", T_SLIDE_TOP_HALF, [
+      [0, S.light],
+      [0.5, mix(S.light, S.highlight, 0.6)],
+      [1, S.light],
+    ])}
+    ${across("glock-top-frame", T_FRAME_HALF, [
+      [0, P.dark],
+      [0.2, P.base],
+      [0.5, P.light],
+      [0.8, P.base],
+      [1, P.dark],
+    ])}
+    ${across("glock-top-grip", T_FLARE_HALF, [
+      [0, P.dark],
+      [0.08, P.light],
+      [0.2, P.base],
+      [0.8, P.base],
+      [0.92, P.light],
+      [1, P.dark],
+    ])}
+    ${across("glock-top-barrel", T_BARREL_HALF, [
+      [0, S.dark],
+      [0.3, S.light],
+      [0.5, S.highlight],
+      [0.7, S.light],
+      [1, S.dark],
+    ])}
+    ${across("glock-top-hood", T_HOOD_HALF, [
+      [0, S.base],
+      [0.15, S.light],
+      [0.5, mix(S.light, S.highlight, 0.5)],
+      [0.85, S.light],
+      [1, S.base],
+    ])}
+  </defs>
+  <!-- The polymer frame: the grip (its heel and flare out behind and beside the slide), the tang behind the slide,
+       and under the slide (seen when it's back) the frame's top and the steel rails the slide runs on; and the
+       ambidextrous slide stop's levers, out either side -->
+  <g id="frame">
+    ${edge(T_GRIP, P.dark)}<path id="frame-grip" d="${T_GRIP}" fill="url(#glock-top-grip)"/>
+    ${edge(T_FRAME_TOP, P.dark)}<path id="frame-top" d="${T_FRAME_TOP}" fill="url(#glock-top-frame)"/>
+    <g id="frame-rails" fill="${S.light}">
+      ${rails.join("\n      ")}
+    </g>
+    <g id="slide-stop" fill="${S.base}" stroke="${S.dark}" stroke-width="${t1(T_OUTLINE)}">
+      ${levers.map((d) => `<path d="${d}"/>`).join("\n      ")}
+    </g>
+  </g>
+  <!-- Under the slide: the barrel's squared hood (seen through the port) and chamber at the back, and out to its
+       crown, which stands just out of the slide's front -->
+  <g id="barrel">
+    ${edge(T_BARREL, S.dark)}<path d="${T_BARREL}" fill="url(#glock-top-barrel)"/>
+    ${edge(T_HOOD, S.dark)}<path id="chamber-hood" d="${T_HOOD}" fill="url(#glock-top-hood)"/>  </g>
+  <g id="slide">
+    ${edge(T_SLIDE_BODY, S.dark)}<path id="slide-body" d="${T_SLIDE_BODY}" fill="url(#glock-top-slide)"/>
+    <!-- Its flat top; the rounded edges either side of it (the side view's top chamfer) are the slide's shading -->
+    <path id="slide-top" d="${T_SLIDE_TOP}" fill="url(#glock-top-slide-flat)"/>
+    <g id="slide-edges" fill="none" stroke="${S.base}" stroke-width="0.4">
+      <path d="M${tp(T_SLIDE_BACK + 2, -T_SLIDE_TOP_HALF)} L${tp(T_SLIDE_FRONT - 3, -T_SLIDE_TOP_HALF)}"/>
+      <path d="M${tp(T_SLIDE_BACK + 2, T_SLIDE_TOP_HALF)} L${tp(T_SLIDE_FRONT - 3, T_SLIDE_TOP_HALF)}"/>
+    </g>
+    <!-- The serrations' grooves, cut into both sides, their ends seen from above -->
+    <g id="slide-serrations" fill="${S.dark}">
+      ${grooves.join("\n      ")}
+    </g>
+    <!-- The ejection port, cut from left of the middle out through the right side, the barrel's hood in it, a dark
+         gap behind it (the breech face) and down its right side -->
+    <path id="ejection-port" d="${tbox(T_PORT_BACK, T_PORT_LEFT, T_PORT_FRONT, T_SLIDE_HALF + 0.1, [1.2, 2.5, 0, 0])}" fill="#0e0f11"/>
+    <path d="${tbox(T_HOOD_BACK, T_PORT_LEFT + 0.6, T_PORT_FRONT - 0.6, T_HOOD_HALF, [1, 2, 0, 0])}" fill="url(#glock-top-hood)"/>
+    <path d="M${tp(T_PORT_BACK, T_SLIDE_HALF)} L${tp(T_PORT_BACK, T_PORT_LEFT + 1.2)} C${tp(T_PORT_BACK, T_PORT_LEFT + 0.5)} ${tp(T_PORT_BACK + 0.5, T_PORT_LEFT)} ${tp(T_PORT_BACK + 1.2, T_PORT_LEFT)} L${tp(T_PORT_FRONT - 2.5, T_PORT_LEFT)} C${tp(T_PORT_FRONT - 1.1, T_PORT_LEFT)} ${tp(T_PORT_FRONT, T_PORT_LEFT + 1.1)} ${tp(T_PORT_FRONT, T_PORT_LEFT + 2.5)} L${tp(T_PORT_FRONT, T_SLIDE_HALF)}" stroke="${S.highlight}" stroke-width="0.4" fill="none"/>
+    <!-- The extractor, along the right edge behind the port -->
+    <path id="extractor" d="${tbox(T_EXTRACTOR[0], T_SLIDE_HALF - 1.4, T_EXTRACTOR[1], T_SLIDE_HALF - 0.2, [0.7, 0, 0, 0.7])}" fill="${S.dark}"/>
+    <!-- Polymer sights: a wide rear one with its notch down the middle, and a thin blade at the front -->
+    <g id="rear-sight">
+      ${edge(tbox(T_REAR_SIGHT[0], -T_REAR_SIGHT_HALF, T_REAR_SIGHT[1], T_REAR_SIGHT_HALF, 1), P.dark)}<path d="${tbox(T_REAR_SIGHT[0], -T_REAR_SIGHT_HALF, T_REAR_SIGHT[1], T_REAR_SIGHT_HALF, 1)}" fill="${P.light}"/>
+      <path d="${tbox(T_REAR_SIGHT[0], -T_REAR_NOTCH_HALF, T_REAR_SIGHT[1], T_REAR_NOTCH_HALF)}" fill="${P.dark}"/>
+    </g>
+    <g id="front-sight">
+      ${edge(tbox(T_FRONT_SIGHT[0], -T_FRONT_SIGHT_HALF, T_FRONT_SIGHT[1], T_FRONT_SIGHT_HALF, 1), P.dark)}<path d="${tbox(T_FRONT_SIGHT[0], -T_FRONT_SIGHT_HALF, T_FRONT_SIGHT[1], T_FRONT_SIGHT_HALF, 1)}" fill="${P.light}"/>
+    </g>
+  </g>
+</svg>
+`;
+}
+
+const TOP: TopView<GlockOptions> = { draw: drawTop };
+
 export const GLOCK: GunDrawing<GlockOptions> = {
   name: "glock",
   photo: {
@@ -1070,4 +1374,5 @@ export const GLOCK: GunDrawing<GlockOptions> = {
   <!-- The Glock 19 (Gen 5) from its right side, muzzle to the right. Millimeters, with the origin on the gun's
        middle on the bore, as the guns' top views in weapons/guns/art/ have it. -->`,
   drawSide,
+  top: TOP,
 };
