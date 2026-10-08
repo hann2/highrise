@@ -54,23 +54,38 @@ import type { GunDrawing } from "../lib/gun";
 import type { Material } from "../lib/style";
 import { BLUED_STEEL, WALNUT } from "../lib/style";
 
-/** A color case-hardened lock plate: a ground color, mottled with a few flat tones */
+/**
+ * A color case-hardened lock plate, simplified to a graded wash along the plate: warm straw at its tail, through
+ * brown, into blue-gray along the bar. The hammers are the same steel, lit along their own axis.
+ */
 export interface CaseColors {
-  /** The plate's ground, top to bottom */
+  /** The wash, from the plate's tail to its front */
+  readonly straw: string;
+  readonly brown: string;
+  readonly blue: string;
+  /** Lit edges, and the engraved border's light line */
   readonly light: string;
-  readonly base: string;
+  /** Shadowed edges, the border's dark line, the outline */
   readonly dark: string;
-  /** The mottling's tones, in turn */
-  readonly mottles: readonly string[];
 }
 
-/** The photo's: browns and straw with blue-gray, dulled */
+/** The photo's colors, cleaned up */
 export const CASE_HARDENED: CaseColors = {
-  light: "#8a7550",
-  base: "#5e4a33",
-  dark: "#3a2e24",
-  mottles: ["#4b5262", "#9c8455", "#3d3229", "#6e5a6a", "#b39a62"],
+  straw: "#a88d5a",
+  brown: "#6e5a44",
+  blue: "#4d5668",
+  light: "#d6c79e",
+  dark: "#2e2822",
 };
+
+/** How the lock plate is finished */
+export type PlateStyle =
+  /** The case colors' wash, beveled */
+  | "wash"
+  /** The wash, beveled, with an engraved border inset round its edge and a ring round the tail screw */
+  | "engraved"
+  /** Plain blued like the action, beveled, with the engraved border and ring */
+  | "blued";
 
 export interface DoubleBarrelOptions {
   /** How long the barrels are cut to, in inches (12) */
@@ -82,8 +97,8 @@ export interface DoubleBarrelOptions {
   /** The barrels and the action */
   steel?: Partial<Material>;
   wood?: Partial<Material>;
-  /** The lock plate and hammers: case-hardened, or blued like the rest */
-  lock?: "case" | "blued";
+  /** The lock plate's finish (the hammers follow it: case-hardened, or blued with the "blued" plate) */
+  plate?: PlateStyle;
   caseColors?: Partial<CaseColors>;
   /** The sawn muzzle's bright steel, or null for none */
   sawn?: string | null;
@@ -318,50 +333,71 @@ const PLATE =
 // The wood's raised border round the plate's back, lit
 const PLATE_BORDER =
   "M884,690 C850,690 805,697 784,712 C766,725 764,752 784,763 C800,770 840,770 868,769";
-const TUMBLER: Point = [858, 728]; // the ring on the plate the hammer pivots on
-const PLATE_SCREWS: Point[] = [
-  [788, 727],
-  [813, 728],
-  [953, 728],
-];
-// The mottles of the case hardening: [x, y, r], each a tone in turn
-const MOTTLES: [number, number, number][] = [
-  [800, 745, 22],
-  [835, 716, 20],
-  [850, 752, 18],
-  [895, 742, 24],
-  [935, 732, 16],
-  [965, 748, 18],
-  [995, 731, 17],
-  [1012, 752, 14],
-  [870, 712, 14],
-  [915, 718, 12],
-  [778, 733, 12],
-  [975, 722, 11],
-];
+const TUMBLER: Point = [858, 728]; // the hammer's pivot on the plate
+// The screws, placed clear of the border: one in the middle of the tail's round end, one behind the hammer, one
+// down the middle of the bar
+const PLATE_SCREWS: Point[] = [PLATE_BACK, [828, 731], [956, PLATE_FRONT[1]]];
+// The engraved border: a light line, then a dark one, inset round the plate's edge
+const BORDER_INSET = 5.5;
+const BORDER_LINE = 1.4;
+// An engraved ring round the tail's screw, concentric with the tail and the border
+const TAIL_RING = `M${fmt([PLATE_BACK[0] + 9.5, PLATE_BACK[1]])} ${arc(PLATE_BACK, 9.5, 0, 360)}`;
 
 // ---------------------------------------------------------------------------------------------------------
-// The hammers, down: a body round the tumbler, a neck up to the head, whose nose rests on the striker in the fence,
-// and the spur curling up and back from the head's top. The left hammer is the right one moved back and down.
-const HAMMER_NECK: Point[] = [
-  [858, 726],
-  [862, 710],
-  [868, 697],
-  [874, 686],
+// The hammers, down. One outline for the whole hammer: from the spur's tip down its front, over the head and
+// round its nose (resting on the striker in the fence), back under the head, down the neck's front, round the body
+// on the tumbler, up the neck's back and the spur's back to the tip, which is round. Checked against the main photo
+// (where it is) and the percussion double (what a side hammer's body, neck, head and spur look like), simplified.
+const HAMMER_POINTS: Point[] = [
+  [866, 619], // the spur's tip, front side
+  [872, 630],
+  [876, 645],
+  [878, 657], // the spur's root at the head's top
+  [886, 659],
+  [895, 661],
+  [901, 667],
+  [903, 676], // the nose
+  [899, 685],
+  [890, 689], // under the head
+  [881, 694],
+  [875, 704], // the neck's front
+  [872, 716],
+  [872, 728], // the body, round the tumbler
+  [867, 739],
+  [858, 743],
+  [849, 739],
+  [844, 728],
+  [846, 715],
+  [851, 702], // the neck's back
+  [857, 690],
+  [862, 678], // the head's back
+  [866, 666],
+  [868, 652], // the spur's back
+  [866, 638],
+  [861, 627],
+  [858, 620], // the tip, back side
 ];
-const HAMMER_HEAD =
-  "M869,664 C876,660 886,659 893,661 C898,663 900,668 899,674 L896,686 C895,691 891,693 885,693 " +
-  "L873,693 C869,693 866,690 866,685 L866,670 C866,667 867,665 869,664 Z";
-const HAMMER_SPUR: Point[] = [
-  [873, 668],
-  [874, 652],
-  [871, 635],
-  [863, 620],
+const SPUR_TIP: Point = [862, 619.5];
+const HAMMER =
+  `M${fmt(HAMMER_POINTS[0])} ${smoothCurve(HAMMER_POINTS, [0.5, 1], [-0.4, -1])} ` +
+  `${arc(SPUR_TIP, 4, 180, 360)} Z`;
+// Lit along the spur's front and over the head to the nose; shadowed down the neck's back and under the body
+const HAMMER_LIT = `M${fmt(HAMMER_POINTS[1])} ${through(HAMMER_POINTS.slice(1, 9))}`;
+const HAMMER_SHADE = `M${fmt(HAMMER_POINTS[13])} ${through(HAMMER_POINTS.slice(13, 22))}`;
+// The thumb pad's checkering: short lines across the spur near its tip
+const SPUR_AXIS: Point[] = [
+  [870, 640],
+  [868, 635],
+  [866, 630],
+  [864, 626],
 ];
+const CHECKERING = SPUR_AXIS.map(([x, y]) => {
+  const [ux, uy] = unit([-0.45, -1]);
+  const [nx, ny] = [-uy, ux];
+  return `M${f1(x - nx * 3.6)},${f1(y - ny * 3.6)} L${f1(x + nx * 3.6)},${f1(y + ny * 3.6)}`;
+}).join(" ");
 const FAR_HAMMER: Point = [-12, 18]; // how far the left hammer is from the right one in the photo
 
-const shift = (points: readonly Point[], [dx, dy]: Point) =>
-  points.map(([x, y]) => [x + dx, y + dy] as Point);
 const shiftPath = (d: string, [dx, dy]: Point) =>
   d.replace(
     /(-?[\d.]+),(-?[\d.]+)/g,
@@ -385,25 +421,6 @@ function turnPath(d: string, center: Point, degrees: number): string {
     const y = parseFloat(sy) - center[1];
     return `${f1(center[0] + x * cos - y * sin)},${f1(center[1] + x * sin + y * cos)}`;
   });
-}
-
-/** The left hammer, behind the gun: only its head and spur show over the action */
-function farHammer(at: Point, turn = 0): string[] {
-  const pivot: Point = [TUMBLER[0] + at[0], TUMBLER[1] + at[1]];
-  return [shiftPath(HAMMER_HEAD, at), band(shift(HAMMER_SPUR, at), 7, 4)].map(
-    (d) => turnPath(d, pivot, turn),
-  );
-}
-
-/** The hammer's pieces, each its own path (they overlap, and the drawing fills by even-odd) */
-function hammer(turn = 0): string[] {
-  const body = `M${f1(TUMBLER[0] + 13)},${f1(TUMBLER[1])} ${arc(TUMBLER, 13, 0, 360)} Z`;
-  return [
-    body,
-    band(HAMMER_NECK, 15, 13),
-    HAMMER_HEAD,
-    band(HAMMER_SPUR, 7, 4),
-  ].map((d) => turnPath(d, TUMBLER, turn));
 }
 
 // The strikers in the fence, under the hammers' noses (seen when they're cocked)
@@ -473,15 +490,28 @@ const RIM_LIGHT = mm(0.8);
 function drawSide(options: DoubleBarrelOptions = {}): string {
   const S: Material = { ...BLUED_STEEL, ...options.steel };
   const W: Material = { ...WALNUT, ...options.wood };
+  const plate: PlateStyle = options.plate ?? "engraved";
   const C: CaseColors =
-    options.lock === "blued"
+    plate === "blued"
       ? {
-          light: S.light,
-          base: S.base,
+          straw: S.light,
+          brown: S.base,
+          blue: S.base,
+          light: S.highlight,
           dark: S.dark,
-          mottles: [],
         }
       : { ...CASE_HARDENED, ...options.caseColors };
+  // The hammers: the same steel as the plate, lit along their own axis
+  const H: Material =
+    plate === "blued"
+      ? S
+      : {
+          base: mix(C.straw, C.brown, 0.45),
+          dark: C.dark,
+          light: mix(C.straw, C.light, 0.35),
+          highlight: C.light,
+        };
+  const engraved = plate !== "wash";
   const muzzle = muzzleAt(options.barrelInches ?? BARREL_INCHES);
   const forendFront = muzzle - mm(options.forendShort ?? FOREND_SHORT);
   const pistol = options.stock === "pistol";
@@ -489,8 +519,13 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
   const BARREL = barrel(muzzle);
   const FOREND = forend(forendFront);
   const turn = options.hammers === "cocked" ? HAMMER_COCK : 0;
-  const HAMMERS = hammer(turn);
-  const FAR = farHammer(FAR_HAMMER, turn);
+  const PIVOT_FAR: Point = [
+    TUMBLER[0] + FAR_HAMMER[0],
+    TUMBLER[1] + FAR_HAMMER[1],
+  ];
+  const hammerPath = (d: string) => turnPath(d, TUMBLER, turn);
+  const HAMMER_SHAPE = hammerPath(HAMMER);
+  const FAR = turnPath(shiftPath(HAMMER, FAR_HAMMER), PIVOT_FAR, turn);
   const rim = options.rimLight ?? RIM_LIGHT;
   const sawn = options.sawn === undefined ? S.highlight : options.sawn;
   const top = barrelTop(muzzle);
@@ -506,27 +541,11 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
     <path d="${ACTION}" stroke="${S.dark}"/>
     <path d="${BARREL}" stroke="${S.dark}"/>
     <path d="${TOP_LEVER}" stroke="${S.dark}"/>
-    ${FAR.concat(HAMMERS)
-      .map((d) => `<path d="${d}" stroke="${C.dark}"/>`)
-      .join("\n    ")}
+    <path d="${FAR}" stroke="${H.dark}"/>
+    <path d="${HAMMER_SHAPE}" stroke="${H.dark}"/>
     <path d="${TRIGGERS}" stroke="${S.dark}"/>
     <path d="${GUARD_PATH}" stroke="${S.dark}" stroke-width="${f1(GUARD_WIDTH + OUTLINE * 2)}"/>
   </g>`;
-
-  const mottles = C.mottles.length
-    ? MOTTLES.map(
-        ([x, y, r], i) =>
-          `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#double-barrel-shotgun-mottle-${i % C.mottles.length})"/>`,
-      ).join("\n      ")
-    : "";
-
-  // Soft blobs of each tone, fading out at their edges (over each circle's own box, so nothing to convert)
-  const mottleGradients = C.mottles
-    .map(
-      (c, i) =>
-        `<radialGradient id="double-barrel-shotgun-mottle-${i}">\n      <stop offset="0" stop-color="${c}" stop-opacity="0.7"/>\n      <stop offset="0.6" stop-color="${c}" stop-opacity="0.45"/>\n      <stop offset="1" stop-color="${c}" stop-opacity="0"/>\n    </radialGradient>`,
-    )
-    .join("\n    ");
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1650" viewBox="0 0 2200 1650" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
   <defs>
@@ -569,24 +588,52 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
       <stop offset="0.9" stop-color="${S.light}"/>
       <stop offset="1" stop-color="${S.base}"/>
     </radialGradient>
+    <!-- The case colors' wash, along the plate from its tail to its front -->
     ${gradient(
       "double-barrel-shotgun-plate",
+      [PLATE_BACK[0] - PLATE_R, 0],
+      [PLATE_FRONT[0] + PLATE_R, 0],
+      [
+        [0, C.straw],
+        [0.15, C.straw],
+        [0.5, C.brown],
+        [0.85, C.blue],
+        [1, C.blue],
+      ],
+    )}
+    <!-- Over it, the plate's flat face: a touch lighter toward its top, darker toward its bottom -->
+    ${gradient(
+      "double-barrel-shotgun-plate-light",
+      [0, 698],
+      [0, 758],
+      [
+        [0, "#ffffff", 0.16],
+        [0.4, "#ffffff", 0],
+        [0.6, "#000000", 0],
+        [1, "#000000", 0.22],
+      ],
+    )}
+    <!-- Its beveled edge: lit along the top, shadowed along the bottom -->
+    ${gradient(
+      "double-barrel-shotgun-plate-bevel",
       [0, 698],
       [0, 758],
       [
         [0, C.light],
-        [0.45, C.base],
+        [0.45, mix(C.light, C.dark, 0.5)],
         [1, C.dark],
       ],
     )}
+    <!-- The hammer, across its own axis (the neck's): its back dark, lit toward its front -->
     ${gradient(
       "double-barrel-shotgun-hammer",
-      [0, 615],
-      [0, 745],
+      [845, 0],
+      [903, 0],
       [
-        [0, mix(C.light, "#ffffff", 0.15)],
-        [0.5, C.light],
-        [1, C.base],
+        [0, mix(H.base, H.dark, 0.5)],
+        [0.3, H.base],
+        [0.65, H.light],
+        [1, H.base],
       ],
     )}
     ${gradient(
@@ -601,7 +648,6 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
         [1, mix(W.base, W.dark, 0.5)],
       ],
     )}
-    ${mottleGradients}
     ${gradient(
       "double-barrel-shotgun-stock",
       [0, 700],
@@ -617,12 +663,13 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
     <clipPath id="double-barrel-shotgun-barrel-clip"><path d="${BARREL}"/></clipPath>
     <clipPath id="double-barrel-shotgun-action-clip"><path d="${ACTION}"/></clipPath>
     <clipPath id="double-barrel-shotgun-plate-clip"><path d="${PLATE}"/></clipPath>
+    <clipPath id="double-barrel-shotgun-hammer-clip"><path d="${HAMMER_SHAPE}"/></clipPath>
     <clipPath id="double-barrel-shotgun-forend-clip"><path d="${FOREND}"/></clipPath>
   </defs>
   ${outlines}
   <!-- The left hammer, on the far side: only its head and spur show over the action -->
   <g id="far-hammer">
-    ${FAR.map((d) => `<path d="${d}" fill="${mix(C.base, C.dark, 0.3)}"/>`).join("\n    ")}
+    <path d="${FAR}" fill="${mix(H.base, H.dark, 0.35)}"/>
   </g>
   <!-- Walnut, round in section: lit along its top, shaded along its bottom -->
   <g id="stock" clip-path="url(#double-barrel-shotgun-stock-clip)">
@@ -654,14 +701,28 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
     <path d="${GUARD_PATH}" stroke="${S.base}" stroke-width="${GUARD_WIDTH}" fill="none"/>
     <path d="${GUARD_PATH}" stroke="${S.light}" stroke-width="1.5" fill="none"/>
   </g>
-  <!-- Case-hardened, flush in the stock on the action's side, its tumbler and screws -->
+  <!-- Case-hardened (a graded wash along it), flush in the stock on the action's side: its face, its beveled edge,
+       the engraved border and the ring round the tail screw, and clean slotted screws with bright rims -->
   <g id="lock-plate">
     <path d="${PLATE}" fill="url(#double-barrel-shotgun-plate)"/>
-    <g clip-path="url(#double-barrel-shotgun-plate-clip)">
-      ${mottles}
+    <g clip-path="url(#double-barrel-shotgun-plate-clip)" fill="none">
+      ${
+        engraved
+          ? `<path d="${PLATE}" stroke="${C.dark}" stroke-width="${f1(2 * (BORDER_INSET + 2 * BORDER_LINE))}"/>
+      <path d="${PLATE}" stroke="${C.light}" stroke-width="${f1(2 * (BORDER_INSET + BORDER_LINE))}"/>
+      <path d="${PLATE}" stroke="url(#double-barrel-shotgun-plate)" stroke-width="${f1(2 * BORDER_INSET)}"/>
+      <path d="${shiftPath(TAIL_RING, [0, 1.2])}" stroke="${C.dark}" stroke-width="${BORDER_LINE}" stroke-linecap="round"/>
+      <path d="${TAIL_RING}" stroke="${C.light}" stroke-width="${BORDER_LINE}" stroke-linecap="round"/>`
+          : ""
+      }
+      <path d="${PLATE}" fill="url(#double-barrel-shotgun-plate-light)"/>
+      <path d="${PLATE}" stroke="url(#double-barrel-shotgun-plate-bevel)" stroke-width="5"/>
     </g>
-    <path d="${PLATE}" stroke="${C.light}" stroke-width="2" fill="none" opacity="0.8"/>
-    ${PLATE_SCREWS.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="${C.light}"/>\n    <path d="M${x - 4},${y + 1} L${x + 4},${y - 1}" stroke="${C.dark}" stroke-width="1.5"/>`).join("\n    ")}
+    ${PLATE_SCREWS.map(
+      ([x, y]) =>
+        `<circle cx="${x}" cy="${y}" r="5" fill="${mix(C.brown, C.dark, 0.2)}" stroke="${C.light}" stroke-width="1.3"/>\n    ` +
+        `<path d="M${x - 3.6},${y + 1.2} L${x + 3.6},${y - 1.2}" stroke="${C.dark}" stroke-width="1.6" stroke-linecap="round"/>`,
+    ).join("\n    ")}
   </g>
   <!-- On the top tang, its thumbpiece standing up at its back -->
   <g id="top-lever">
@@ -673,8 +734,16 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
   <!-- The hammers, on the side of the gun, so over the top lever: the left one behind the right, its spur lower
        and further back -->
   <g id="hammers">
-    ${HAMMERS.map((d) => `<path d="${d}" fill="url(#double-barrel-shotgun-hammer)"/>`).join("\n    ")}
-    <circle cx="${TUMBLER[0]}" cy="${TUMBLER[1]}" r="5" fill="${C.dark}"/>
+    <path d="${HAMMER_SHAPE}" fill="url(#double-barrel-shotgun-hammer)"/>
+    <g clip-path="url(#double-barrel-shotgun-hammer-clip)" fill="none" stroke-linecap="round">
+      <path d="${hammerPath(HAMMER_LIT)}" stroke="${H.highlight}" stroke-width="3.5"/>
+      <path d="${hammerPath(HAMMER_SHADE)}" stroke="${H.dark}" stroke-width="5" opacity="0.6"/>
+      <path d="${hammerPath(CHECKERING)}" stroke="${H.dark}" stroke-width="1.2"/>
+    </g>
+    <!-- The tumbler's round boss, and the screw through it -->
+    <circle cx="${TUMBLER[0]}" cy="${TUMBLER[1]}" r="8.5" fill="${H.base}" stroke="${H.dark}" stroke-width="1.2"/>
+    <path d="${`M${f1(TUMBLER[0] - 6)},${f1(TUMBLER[1] - 2)} ${arc(TUMBLER, 6.3, 198, 290)}`}" stroke="${H.highlight}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <circle cx="${TUMBLER[0]}" cy="${TUMBLER[1]}" r="3.4" fill="${H.dark}"/>
   </g>
   <!-- Blued, polished, cut square: the sawn steel bright at the muzzle -->
   <g id="barrels">
