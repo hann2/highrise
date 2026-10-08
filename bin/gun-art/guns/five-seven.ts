@@ -41,21 +41,28 @@
  * from the side.
  *
  * The frame (polymer), on two planes:
- * - The upper FACE (550 down to the LEDGE at the back, to 735 over the trigger, to 660 over the rail): the pins,
- *   the slide stop and the shallow recessed marking panel (MARKING_PANEL), the small slot (735 to 783, 719 to
- *   733). Its front is a narrow bevel in shadow; under the dust cover's front a chamfer.
+ * - The upper FACE (550 down to the grip's line at the back, to 735 over the trigger, to 660 over the rail): the
+ *   pins, the slide stop, the marking panel (not a recess: a groove round its sides and bottom, no top, the
+ *   sides slanting as the slide's rear serrations do: MARK_GROOVE), the small slot (735 to 783, 719 to 733).
+ *   Its front is a narrow bevel in shadow; under the dust cover's front a chamfer.
+ * - Below the face's edge at 735, over the trigger and round the upper stippled panel, the frame turns under:
+ *   the same polymer at another angle, in shadow in the photo (luminance 70 against the face's 140). Drawn
+ *   as that change of shade, with no line.
  * - The SLIDE STOP, the black control Simon calls the fire selector: the MK3's ambidextrous slide stop, a round
  *   black pivot (1180,614) with a ridged lever forward of it, the red cocked indicator dot above the lever's
  *   front, and a small FDE plate round the next pin (1379,618). (The left side has the takedown lever too; it
  *   doesn't show on the right.)
  * - Under the dust cover: the rail, set in under an overhang (1690 to 2300), with the steel serial plate
  *   on it (1782 to 2148, 678 to 731) and its lugs below between five slots.
- * - The grip is wider than the upper face, so there's a lit LEDGE where they meet: along from the beavertail
- *   (y 682) to x 360, then diagonally down to the upper stippled panel.
+ * - The grip's line (GRIP_LINE): one groove from the frame's back, along the ledge where the wider grip meets
+ *   the upper face (y 682) to x 360, diagonally down to the upper stippled panel's back corner, and down the
+ *   grip as the backstrap's seam to its foot. The big lower stippled panel's back edge is the same curve.
  * - The grip leans back 0.235 x per y. On it: two stippled panels (the upper one above the thumb rest, the
  *   big lower one), standing a hair proud, drawn darker with a speckle; a sculpted thumb rest between them,
- *   shaded; the backstrap's seam, a long line down the grip; and grooves across the back strap and the front
- *   strap (every 24.6 and 25 px). The pyramids beside the grooves, and the FN logo, are left out.
+ *   shaded; and grooves across the back strap and the front strap (every 24.6 and 25 px). The pyramids
+ *   beside the grooves, and the FN logo, are left out.
+ *
+ * A thin outline (0.4 mm) runs round the silhouette, in each part's own dark shade (the `outline` option).
  * - The trigger guard: a front leaning back with grooves across it, a bottom falling to the back, a fillet up
  *   into the front strap. The opening is a hole in the frame, its inner edges lit.
  * - The magazine release: a black button, proud of the grip ahead of the thumb rest, square to the grip.
@@ -76,6 +83,7 @@ import {
   rounded,
   SlantedAxis,
   smoothCurve,
+  toward,
 } from "../lib/geometry";
 import type { GunDrawing } from "../lib/gun";
 import type { Material } from "../lib/style";
@@ -91,12 +99,15 @@ export interface FiveSevenOptions {
   slideLift?: number;
   /** How far shaded faces go toward the dark color (1 is the material's own) */
   shade?: number;
+  /** A thin outline round the silhouette (0.4 mm), in each part's own dark shade */
+  outline?: boolean;
 }
 
 const DEFAULTS: Required<FiveSevenOptions> = {
   fde: {},
-  slideLift: 0.35,
-  shade: 1,
+  slideLift: 0.6,
+  shade: 1.4,
+  outline: true,
 };
 
 function hex(c: string): [number, number, number] {
@@ -203,6 +214,59 @@ function seeded(seed: number) {
     s = (s * 1664525 + 1013904223) >>> 0;
     return s / 4294967296;
   };
+}
+
+/** A polyline through points, its inner corners rounded by their radii (0 for a sharp one), open at both ends */
+function roundedOpen(points: readonly Point[], radii: readonly number[]): string {
+  const k = 0.45;
+  const parts = [`M${fmt(points[0])}`];
+  for (let i = 1; i < points.length - 1; i++) {
+    const c = points[i];
+    const r = radii[i];
+    if (!r) {
+      parts.push(`L${fmt(c)}`);
+      continue;
+    }
+    const a = toward(c, points[i - 1], r);
+    const b = toward(c, points[i + 1], r);
+    parts.push(
+      `L${fmt(a)} C${fmt([a[0] + (c[0] - a[0]) * (1 - k), a[1] + (c[1] - a[1]) * (1 - k)])} ` +
+        `${fmt([b[0] + (c[0] - b[0]) * (1 - k), b[1] + (c[1] - b[1]) * (1 - k)])} ${fmt(b)}`,
+    );
+  }
+  parts.push(`L${fmt(points[points.length - 1])}`);
+  return parts.join(" ");
+}
+
+/**
+ * Points along a smooth curve (the Béziers smoothCurve writes, from `start`), about every `step` px: so one
+ * curve can be both a line drawn on the gun and the edge of a shape, exactly
+ */
+function sampleCurve(start: Point, curves: string, step = 4): Point[] {
+  const n = (curves.match(/-?[\d.]+/g) ?? []).map(Number);
+  const out: Point[] = [start];
+  let p0 = start;
+  for (let i = 0; i + 5 < n.length; i += 6) {
+    const c1: Point = [n[i], n[i + 1]];
+    const c2: Point = [n[i + 2], n[i + 3]];
+    const p3: Point = [n[i + 4], n[i + 5]];
+    const pieces = Math.max(
+      2,
+      Math.ceil(Math.hypot(p3[0] - p0[0], p3[1] - p0[1]) / step),
+    );
+    for (let k = 1; k <= pieces; k++) {
+      const t = k / pieces;
+      const u = 1 - t;
+      const bez = (a: number, b1: number, b2: number, d: number) =>
+        u * u * u * a + 3 * u * u * t * b1 + 3 * u * t * t * b2 + t * t * t * d;
+      out.push([
+        bez(p0[0], c1[0], c2[0], p3[0]),
+        bez(p0[1], c1[1], c2[1], p3[1]),
+      ]);
+    }
+    p0 = p3;
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -603,29 +667,59 @@ for (let y = 878; y <= 1062; y += 16.5) {
   ]);
 }
 
-// The ledge where the wider grip meets the upper face: along from the beavertail, then down diagonally
-const LEDGE: Point[] = [
+// The grip's line: one groove from the frame's back down the grip. It's the ledge where the wider grip meets
+// the upper face (along from the beavertail, then diagonally down), turns at the upper panel's back corner,
+// and runs down the grip as the backstrap's seam to the foot. The lower stippled panel's back edge is the same
+// curve (GRIP_LINE, sampled), so the two line up by construction.
+const GRIP_LINE_POINTS: Point[] = [
   [139, 681],
   [220, 688],
   [300, 695],
-  [358, 701],
-  [400, 716],
-  [430, 741],
-  [460, 766],
-  [512, 815],
+  [358, 702],
+  [400, 717],
+  [430, 742],
+  [462, 772],
+  [492, 805],
+  [503, 840],
+  [502, 900],
+  [492, 965],
+  [474, 1030],
+  [452, 1087],
+  [433, 1130],
+  [404, 1198],
+  [363, 1300],
+  [326, 1422],
+  [288, 1545],
+  [259, 1668],
+  [234, 1790],
+  [230, 1828],
 ];
-const FACE_BOTTOM = 735; // the upper face's lower edge, over the trigger
-
-// The recessed marking panel on the face, and the slot under it
-const MARKING_PANEL = rounded(
-  [
-    [618, 553],
-    [1050, 553],
-    [1050, 670],
-    [618, 670],
-  ],
-  [4, 4, 12, 12],
+const GRIP_LINE = sampleCurve(
+  GRIP_LINE_POINTS[0],
+  smoothCurve(GRIP_LINE_POINTS, [1, 0.085], [-0.1, 1]),
 );
+const FACE_BOTTOM = 735; // the upper face's edge over the trigger, where the frame turns under
+// The underside's back edge is the grip's line, from the face's edge down to where the upper panel's top is
+const UNDERSIDE_BACK = GRIP_LINE.filter(
+  ([, y]) => y >= FACE_BOTTOM && y <= 812,
+);
+
+// The marking panel: not a recess, only a groove round three sides (none at its top), its sides slanting as
+// the slide's rear serrations do, its bottom corners round
+const SERRATION_LEAN = -0.2375; // x per y down, the rear serrations' slant
+const MARK_TOP = 553;
+const MARK_BOTTOM = 668;
+const markSide = (topX: number): Point[] => [
+  [topX, MARK_TOP],
+  [topX + SERRATION_LEAN * (MARK_BOTTOM - MARK_TOP), MARK_BOTTOM],
+];
+const MARK_GROOVE: Point[] = [
+  markSide(642)[0],
+  markSide(642)[1],
+  markSide(1060)[1],
+  markSide(1060)[0],
+];
+const MARK_GROOVE_RADII = [0, 26, 26, 0];
 const FRAME_SLOT = rounded(
   [
     [735, 719],
@@ -683,27 +777,30 @@ const UPPER_PANEL_CORNERS: Point[] = [
   [510, 822],
 ];
 const UPPER_PANEL = rounded(UPPER_PANEL_CORNERS, [10, 14, 30, 12, 14, 30]);
+// The lower panel: from the grip's line along its top, down its front and round its foot, and back up the
+// grip's line itself
+const LOWER_PANEL_TOP = 1110;
+const LOWER_PANEL_FOOT = 1796;
+const panelBack = GRIP_LINE.filter(
+  ([, y]) => y >= LOWER_PANEL_TOP && y <= LOWER_PANEL_FOOT,
+);
 const LOWER_PANEL_CORNERS: Point[] = [
-  [436, 1110],
+  panelBack[0],
   [768, 1178],
   [648, 1704],
   [470, 1712],
   [405, 1790],
-  [268, 1798],
+  panelBack[panelBack.length - 1],
+  ...panelBack.slice(1, -1).reverse(),
 ];
-const LOWER_PANEL = rounded(LOWER_PANEL_CORNERS, [14, 14, 12, 10, 10, 12]);
-// The backstrap's seam, a long line down the grip
-const BACKSTRAP_SEAM: Point[] = [
-  [446, 1080],
-  [438, 1108],
-  [404, 1198],
-  [363, 1300],
-  [326, 1422],
-  [288, 1545],
-  [259, 1668],
-  [234, 1790],
-  [230, 1828],
-];
+const LOWER_PANEL = rounded(LOWER_PANEL_CORNERS, [
+  0,
+  14,
+  12,
+  10,
+  10,
+  ...panelBack.map(() => 0),
+]);
 // The thumb rest's hollow, under the upper panel
 const THUMB_REST =
   "M470,985 C520,945 640,930 760,925 C840,922 905,930 935,955 C925,990 880,1012 800,1018 " +
@@ -780,6 +877,20 @@ function grooves(lines: Point[][], dark: string, light: string, width: number): 
   );
 }
 
+/** An indented groove: its lit edge (the path `lit`, just below and forward of it), then the dark line */
+function groove(
+  d: string,
+  lit: string,
+  dark: string,
+  light: string,
+  width = 4,
+): string {
+  return (
+    `<path d="${lit}" stroke="${light}" stroke-width="${f1(width * 0.75)}" fill="none"/>\n` +
+    `    <path d="${d}" stroke="${dark}" stroke-width="${width}" fill="none"/>`
+  );
+}
+
 /** A stippled panel: darker, with a speckle of dark and light grains, clipped to it */
 function speckle(id: string, corners: Point[], seed: number, p: Palette): string {
   const random = seeded(seed);
@@ -814,8 +925,19 @@ function speckle(id: string, corners: Point[], seed: number, p: Palette): string
 
 // ---------------------------------------------------------------------------------------------------------
 
+const MM_PER_PIXEL = 207.9 / 2334;
+const OUTLINE_WIDTH = 0.4 / MM_PER_PIXEL;
+const OPTIC_PLATE = `M${PLATE_LIP[0]},${PLATE_LIP_TOP} L${PLATE_LIP[1]},${PLATE_LIP_TOP} L${PLATE_LIP[1]},${PLATE_TOP} L${CUT_FRONT - 2},${PLATE_TOP} L${CUT_FRONT - 2},${CUT_FLOOR} L${CUT_BACK},${CUT_FLOOR} Z`;
+
 function drawSide(options: FiveSevenOptions = {}): string {
   const p = palette(options);
+  // The silhouette's thin outline, 0.4 mm, in each part's own dark shade (the black parts' base: never
+  // near-black)
+  const showOutline = options.outline ?? DEFAULTS.outline;
+  const edge = (d: string, color: string) =>
+    showOutline
+      ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="${f1(OUTLINE_WIDTH)}"/>`
+      : "";
   const F = p.frame;
   const S = p.slide;
   const panelFill = p.frameShade(0.45);
@@ -879,6 +1001,11 @@ function drawSide(options: FiveSevenOptions = {}): string {
     ${linear("five-seven-grip-fade", [0, 840], [0, 1000], [
       [0, "#ffffff", 0],
       [1, "#ffffff", 1],
+    ])}
+    ${linear("five-seven-underside", [0, FACE_BOTTOM], [0, 840], [
+      [0, p.frameShade(0.62)],
+      [0.6, p.frameShade(0.55)],
+      [1, p.frameShade(0.45)],
     ])}
     ${linear("five-seven-thumb-rest", [0, 930], [0, 1020], [
       [0, F.dark, 0],
@@ -948,11 +1075,13 @@ function drawSide(options: FiveSevenOptions = {}): string {
   <g id="five-seven-magazine-base">
     <path d="${MAG_BASE}" fill="url(#five-seven-mag-base)"/>
     <path d="M800,1737 C808,1752 816,1766 826,1774 C834,1778 837,1786 836,1794" stroke="${BLACK_EDGE}" stroke-width="4" fill="none"/>
+    ${edge(MAG_BASE, BLACK)}
   </g>
   <!-- Behind the frame, seen through the guard: a curved blade, its face catching the light -->
   <g id="five-seven-trigger">
     <path d="${TRIGGER}" fill="url(#five-seven-trigger)"/>
     <path d="${TRIGGER_FACE}" stroke="${BLACK_EDGE}" stroke-width="4" fill="none"/>
+    ${edge(TRIGGER, BLACK)}
   </g>
   <!-- The seam between slide and frame -->
   <rect id="five-seven-seam" x="150" y="${SLIDE_BOTTOM - 3}" width="2286" height="${FRAME_TOP - SLIDE_BOTTOM + 5}" fill="${BLACK_DARK}"/>
@@ -961,8 +1090,9 @@ function drawSide(options: FiveSevenOptions = {}): string {
     <g clip-path="url(#five-seven-frame-clip)">
       <!-- The upper face, lit along its top under the seam -->
       <rect x="130" y="${FRAME_TOP}" width="2330" height="250" fill="url(#five-seven-frame-face)"/>
-      <!-- Under the face over the trigger, rounding away -->
-      <path d="M512,${FACE_BOTTOM} L${RAIL_RECESS_BACK},${FACE_BOTTOM} L${RAIL_RECESS_BACK},810 L512,810 Z" fill="${p.frameShade(0.08)}"/>
+      <!-- Under the face, over the trigger and round the upper panel, the frame turns under: the same polymer
+           at another angle, in shadow; no line between them, only the change of shade -->
+      <path d="${line(UNDERSIDE_BACK)} L940,812 C960,818 975,828 990,840 L${RAIL_RECESS_BACK + 20},840 L${RAIL_RECESS_BACK + 20},${FACE_BOTTOM} Z" fill="url(#five-seven-underside)"/>
       <!-- The grip: shaded across, square to its lean, dark at the back and front straps -->
       <path d="M100,840 L1000,840 L1000,1900 L100,1900 Z" fill="url(#five-seven-grip)" mask="url(#five-seven-grip-mask)"/>
       <!-- The rail, set in under the dust cover: its plane in the overhang's shadow -->
@@ -979,16 +1109,8 @@ function drawSide(options: FiveSevenOptions = {}): string {
     </g>
     <!-- The frame's top edge, catching the light under the seam -->
     <path d="M152,${FRAME_TOP + 2} L2440,${FRAME_TOP + 2}" stroke="${F.light}" stroke-width="3" fill="none"/>
-    <!-- The ledge where the grip, wider, meets the upper face: lit, a shadow along its top -->
-    <path d="${line(LEDGE.map(([x, y]) => [x, y + 9] as Point))}" stroke="${mix(F.base, F.light, 0.7)}" stroke-width="11" fill="none" clip-path="url(#five-seven-frame-clip)"/>
-    <path d="${line(LEDGE)}" stroke="${p.frameShade(0.8)}" stroke-width="4" fill="none" clip-path="url(#five-seven-frame-clip)"/>
-    <!-- The upper face's lower edge over the trigger -->
-    <path d="M512,${FACE_BOTTOM} L${RAIL_RECESS_BACK},${FACE_BOTTOM}" stroke="${p.frameShade(0.8)}" stroke-width="3" fill="none"/>
-    <path d="M512,${FACE_BOTTOM + 5} L${RAIL_RECESS_BACK},${FACE_BOTTOM + 5}" stroke="${mix(F.base, F.light, 0.5)}" stroke-width="3" fill="none"/>
-    <!-- The recessed marking panel: a shadow along its top and back, lit along its bottom -->
-    <path d="${MARKING_PANEL}" fill="${p.frameShade(0.12)}"/>
-    <path d="M621,668 L621,562 C621,558 623,556 627,556 L1047,556" stroke="${p.frameShade(0.7)}" stroke-width="4" fill="none"/>
-    <path d="M626,667 L1047,667 L1047,560" stroke="${mix(F.base, F.light, 0.5)}" stroke-width="3" fill="none"/>
+    <!-- The marking panel: a groove round its sides and bottom, no top -->
+    ${groove(roundedOpen(MARK_GROOVE, MARK_GROOVE_RADII), roundedOpen(MARK_GROOVE.map(([x, y]) => [x + 3.5, y + 3.5] as Point), MARK_GROOVE_RADII), p.frameShade(0.85), mix(F.base, F.light, 0.6))}
     <path id="five-seven-frame-slot" d="${FRAME_SLOT}" fill="${BLACK_DARK}"/>
     <!-- The steel serial plate on the rail -->
     <path id="five-seven-serial-plate" d="${rounded(
@@ -1009,25 +1131,26 @@ function drawSide(options: FiveSevenOptions = {}): string {
     <g id="five-seven-upper-panel">
       <path d="${UPPER_PANEL}" fill="${panelFill}"/>
       ${speckle("upper-panel", UPPER_PANEL_CORNERS, 57, p)}
-      <path d="${UPPER_PANEL}" stroke="${p.frameShade(0.85)}" stroke-width="3" fill="none"/>
+      <path d="${UPPER_PANEL}" stroke="${p.frameShade(1)}" stroke-width="3" fill="none"/>
+      <!-- Its top edge, standing proud of the shadow round it, catches the light -->
+      <path d="M${pt(476, 746)} L${pt(930, 778)}" stroke="${mix(F.base, F.light, 0.7)}" stroke-width="4" stroke-linecap="round" fill="none"/>
     </g>
     <g id="five-seven-lower-panel">
       <path d="${LOWER_PANEL}" fill="${panelFill}"/>
       ${speckle("lower-panel", LOWER_PANEL_CORNERS, 28, p)}
       <path d="${LOWER_PANEL}" stroke="${p.frameShade(0.85)}" stroke-width="3" fill="none"/>
     </g>
-    <!-- The backstrap's seam -->
-    <path d="M${fmt(BACKSTRAP_SEAM[0])} ${smoothCurve(BACKSTRAP_SEAM, [-0.3, 1], [-0.1, 1])}" stroke="${p.frameShade(0.8)}" stroke-width="4" fill="none"/>
-    <path d="M${pt(BACKSTRAP_SEAM[0][0] + 6, BACKSTRAP_SEAM[0][1])} ${smoothCurve(
-      BACKSTRAP_SEAM.map(([x, y]) => [x + 6, y] as Point),
-      [-0.3, 1],
-      [-0.1, 1],
-    )}" stroke="${mix(F.base, F.light, 0.5)}" stroke-width="3" fill="none"/>
+    <!-- The grip's line: one groove from the frame's back, along the ledge and down the grip, the lower
+         panel's back edge -->
+    <g clip-path="url(#five-seven-frame-clip)">
+      ${groove(line(GRIP_LINE), line(GRIP_LINE.map(([x, y]) => [x + 4, y + 5] as Point)), p.frameShade(0.9), mix(F.base, F.light, 0.65), 5)}
+    </g>
     <!-- Grooves across the back strap and the front strap -->
     <g clip-path="url(#five-seven-frame-clip)">
       ${grooves(backGrooves, p.frameShade(1), mix(F.base, F.light, 0.55), 9)}
       ${grooves(frontGrooves, p.frameShade(1), mix(F.base, F.light, 0.55), 9)}
     </g>
+    ${edge(`${FRAME_OUTLINE} ${OPENING}`, F.dark)}
   </g>
   <!-- Pins through the frame -->
   <g id="five-seven-frame-pins">
@@ -1104,9 +1227,11 @@ function drawSide(options: FiveSevenOptions = {}): string {
     ${pin(SLIDE_PIN, 17)}
     <circle cx="${SLIDE_HOLE[0]}" cy="${SLIDE_HOLE[1]}" r="12" fill="${p.slideShade(1)}"/>
     <circle cx="${SLIDE_HOLE[0]}" cy="${SLIDE_HOLE[1] + 2}" r="7" fill="${BLACK_DARK}"/>
+    ${edge(SLIDE, S.dark)}
   </g>
   <!-- The optic's adapter plate in the cut, black, its lip up the cut's back wall -->
-  <path id="five-seven-optic-plate" d="M${PLATE_LIP[0]},${PLATE_LIP_TOP} L${PLATE_LIP[1]},${PLATE_LIP_TOP} L${PLATE_LIP[1]},${PLATE_TOP} L${CUT_FRONT - 2},${PLATE_TOP} L${CUT_FRONT - 2},${CUT_FLOOR} L${CUT_BACK},${CUT_FLOOR} Z" fill="${BLACK_DARK}"/>
+  <path id="five-seven-optic-plate" d="${OPTIC_PLATE}" fill="${BLACK_DARK}"/>
+  ${edge(OPTIC_PLATE, BLACK)}
   <path d="M${PLATE_LIP[0]},${PLATE_LIP_TOP + 2} L${PLATE_LIP[1]},${PLATE_LIP_TOP + 2} M${PLATE_LIP[1]},${PLATE_TOP + 2} L${CUT_FRONT - 4},${PLATE_TOP + 2}" stroke="${BLACK_LIGHT}" stroke-width="3" fill="none"/>
   <!-- The red dot (an RM06): FDE, low at the back, its hood tall over the lens -->
   <g id="five-seven-optic">
@@ -1127,6 +1252,7 @@ function drawSide(options: FiveSevenOptions = {}): string {
     <circle cx="${CAP[0]}" cy="${CAP[1]}" r="${CAP_R}" fill="${BLACK_LIGHT}"/>
     <path d="M${pt(...on(CAP, CAP_R - 3, 190))} ${arc(CAP, CAP_R - 3, 190, 300)}" stroke="${BLACK_EDGE}" stroke-width="4" fill="none"/>
     <path d="M${pt(CAP[0] - 32, CAP[1] - 1)} L${pt(CAP[0] + 32, CAP[1] - 1)}" stroke="${BLACK_DARK}" stroke-width="10" stroke-linecap="round" fill="none"/>
+    ${edge(OPTIC, S.dark)}
   </g>
   <!-- The sights, black steel -->
   <g id="five-seven-rear-sight">
@@ -1139,10 +1265,12 @@ function drawSide(options: FiveSevenOptions = {}): string {
     <circle cx="${WINDAGE_SCREW[0]}" cy="${WINDAGE_SCREW[1]}" r="15" fill="${BLACK_LIGHT}"/>
     <path d="M${pt(WINDAGE_SCREW[0] - 13, WINDAGE_SCREW[1] + 9)} L${pt(WINDAGE_SCREW[0] + 13, WINDAGE_SCREW[1] - 9)}" stroke="${BLACK_DARK}" stroke-width="5" stroke-linecap="round" fill="none"/>
     <circle cx="452" cy="265" r="6" fill="${BLACK_LIGHT}"/>
+    ${edge(REAR_SIGHT, BLACK)}
   </g>
   <g id="five-seven-front-sight">
     <path d="${FRONT_SIGHT}" fill="${BLACK}"/>
     <path d="M2245,262 C2250,236 2257,214 2268,209 C2276,207 2290,209 2300,214 L2352,232" stroke="${BLACK_SHINE}" stroke-width="4" fill="none"/>
+    ${edge(FRONT_SIGHT, BLACK)}
   </g>
 </svg>`;
 }
@@ -1180,7 +1308,7 @@ export const FIVE_SEVEN: GunDrawing<FiveSevenOptions> = {
   // port's back (1127) to the nose, is 1336 px, 119 mm (122 with the muzzle's recess); the height over
   // the sights is 149.5 mm against the 142 to 145 retailers give (5.6 to 5.7", FN gives none), and 140 mm
   // without them.
-  scale: { origin: [1296, 430], mmPerPixel: 207.9 / 2334 },
+  scale: { origin: [1296, 430], mmPerPixel: MM_PER_PIXEL },
   frame: {
     // The optic's hood, the bottom of the magazine's base, the beavertail's tip, the nose; the square
     // 218 mm, about 5% more than the gun's length, as the M1911's 224 for 216
