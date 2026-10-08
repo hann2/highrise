@@ -9,7 +9,7 @@ Redraw the four pistols still on old art, each by its own agent following the `g
 | `glock.ts` | Glock 19 | black polymer frame, black slide | `glock-19.webp`, `glock-19-alternate.jpg` (from behind) | `glock-pickup.png`; top `art/glock.svg` |
 | `five-seven.ts` | FN Five-seven **MK3** (its features read better at game scale) | **FDE** (flat dark earth) frame and slide | `five-seven-mk3.webp` (with a red dot, drawn without), `-alternate.webp`, `-alternate-2.webp` | `five-seven-pickup.png`; top `art/five-seven.svg` |
 | `desert-eagle.ts` | Desert Eagle (.50 AE) | **polished stainless**, very shiny | `desert-eagle.png`, `desert-eagle-alternate.jpg` | `desert-eagle-pickup.png`; top `art/desert-eagle.svg` |
-| `revolver.ts` | S&W Model 629, 6.5" tapered barrel (not the Classic's full underlug) | **polished stainless**, very shiny | `sw-629.jpg` (an 8⅜" from its left side; `sw-629-mirrored.jpg` is it flipped to draw over), `sw-629-alternate.jpg`, `sw-629-rosewood-grip.jpg` (a Classic from the right) | `magnum-pickup.png` (the pickup becomes `revolverPickup`); top `art/revolver.svg` |
+| `revolver.ts` | S&W Model 629, 8⅜" tapered barrel (not the Classic's full underlug), its left side mirrored | **polished stainless**, very shiny | `sw-629.jpg` (an 8⅜" from its left side; `sw-629-mirrored.jpg` is it flipped to draw over), `sw-629-alternate.jpg`, `sw-629-rosewood-grip.jpg` (a Classic from the right) | `magnum-pickup.png` (the pickup becomes `revolverPickup`); top `art/revolver.svg` |
 
 All four have photos (2026-10-07). The M1911's photos are the model for what each needs.
 
@@ -43,5 +43,5 @@ Merge each agent's branch; per gun: `build`, regenerate the manifest, delete the
 
 ## Open
 
-- The revolver: its photos are of an 8⅜" barrel, and of its left side.
+- ~~The revolver: its photos are of an 8⅜" barrel, and of its left side.~~ Simon: the 8⅜" (the only photos with the tapered shroud), and the left side, mirrored.
 - Top views this round, or pickups only first? (The plan above does both, pickups first.)
