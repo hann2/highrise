@@ -14,7 +14,7 @@ import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
 import type { GunDrawing } from "../lib/gun";
 import type { Material, Stops } from "../lib/style";
-import { BLACK_POLYMER, linear } from "../lib/style";
+import { linear } from "../lib/style";
 
 // ---------------------------------------------------------------------------------------------------------
 // Dimensions
@@ -46,14 +46,12 @@ import { BLACK_POLYMER, linear } from "../lib/style";
 // back 10.9" collapsed plus 0.66" a notch (`stockNotch`, default 1: one notch out). Collapsed, its front meets the
 // castle nut (x 630) to 10 px, which checks the placing.
 //
-// THE OPTIC, Vortex's AMG UH-1 Gen II (vortexoptics.com and dealers: 3.9" long, 11 oz). The photo with its windage
-// and elevation dials is its right side (recoilweb.com's review: "both the elevation and windage adjustments sit
-// in the right side of the housing"), so it's drawn as photographed, front to the right: its big front window's
-// hood on the right, the grooved slope of its back on the left. Its housing runs from x 92 to 982 in its photo,
-// 890 px for 3.9" (0.1113 mm a pixel); the bump behind that (to x 13) is the battery cap, seen a little from
-// behind. It sits on the upper receiver's rail (lugs' tops at y 780), its clamp's jaws about 5 mm down the rail's
-// sides, its housing's front over the upper's front (x 1150): its mount's recoil lug then sits in the upper's 8th
-// slot from the back.
+// THE OPTIC, Vortex's AMG UH-1 Gen II (Vortex's table: 3.9" long, 2.7" high, 2.1" wide; 11 oz). The photo with its
+// windage and elevation dials is its right side (recoilweb.com's review: "both the elevation and windage adjustments
+// sit in the right side of the housing"), so it's drawn as photographed, front to the right: its big front window's
+// hood on the right, the grooved slope of its back on the left. Its size and seat are worked out in its own section
+// below, from Vortex's numbers and checked against a photo of a UH-1 on an AR-15: round 1 had scaled the 3.9" to
+// the housing without its battery cap, and by its length alone, which drew it 12% too long and 18% too tall.
 const MM_PER_PX = (25 * 10.008) / (1803 - 1183);
 const PX_PER_IN = 25.4 / MM_PER_PX;
 const BORE_Y = 856.5;
@@ -168,23 +166,28 @@ export interface Ar15Options {
   rimLightMm?: number;
 }
 
-/** Black anodized aluminium, a touch cool (the photo's receivers: 30 to 60 gray, lit edges to 120) */
+/** Anodized aluminium as a charcoal, a step lighter than the photo's near black so it holds on the dark floor (Simon's pick, round 2: variant B) */
 export const AR_ANODIZED: Material = {
-  base: "#303237",
-  dark: "#16171a",
-  light: "#45484f",
-  highlight: "#6a6e78",
+  base: "#41444b",
+  dark: "#1f2125",
+  light: "#5d616a",
+  highlight: "#8a8f99",
 };
 
-/** The stock's and grip's polymer: Magpul black, warmer and flatter than the anodizing */
-export const AR_POLYMER: Material = { ...BLACK_POLYMER };
+/** The stock's and grip's polymer: Magpul black as a charcoal, warmer and flatter than the anodizing */
+export const AR_POLYMER: Material = {
+  base: "#45464a",
+  dark: "#232427",
+  light: "#5c5e63",
+  highlight: "#7a7c82",
+};
 
 /** The UH-1's housing: anodized like the receivers, a step lighter, its machined bevels pale gray in the photo */
 export const AR_OPTIC: Material = {
-  base: "#36383e",
-  dark: "#1a1b1f",
-  light: "#50535b",
-  highlight: "#8b8f98",
+  base: "#4a4d55",
+  dark: "#24262a",
+  light: "#666a73",
+  highlight: "#a0a4ad",
 };
 
 /** The aluminium GI magazine: gray anodized, as photographed (110 to 150 gray) */
@@ -197,10 +200,10 @@ export const AR_MAGAZINE: Material = {
 
 /** Black steel: the barrel, the hider, the castle nut, pins */
 export const AR_STEEL: Material = {
-  base: "#3a3c41",
-  dark: "#1a1b1e",
-  light: "#5a5d64",
-  highlight: "#80848c",
+  base: "#45474d",
+  dark: "#1f2023",
+  light: "#686b72",
+  highlight: "#8e929a",
 };
 
 /** The trigger: bright steel */
@@ -1013,19 +1016,35 @@ function stock(butt: number, F: Material, rim: number): string {
 // 861 from 203 to 562, rising to the front (803,780); the cross bolt's nut in a plate (360,808). Logo and
 // lettering dropped. From the side the window isn't seen: the hood's sides are solid.
 
-const OPTIC_MM_PER_PX = (3.9 * 25.4) / (982 - 92);
-const OPTIC_SCALE = OPTIC_MM_PER_PX / MM_PER_PX;
-/** The optic photo's housing front (x 982) goes here, its rail top (y 811, 5 mm above the jaws' bottom) on the rail */
-const OPTIC_FRONT_X = 1150;
+// Its size (round 2), from a photo of a UH-1 on an AR-15 (ar-15-with-uh1.png, from its left side). There the
+// rail's slots give 0.6268 mm a pixel (30 slots in 479 px; the buffer tube, 46 px, comes out 28.8 mm), and the
+// optic is 154 px long overall (x 701 to 855, battery cap and all), 96.5 mm, and 107 px from its hood's top to its
+// mount's bottom (y 243.7 to 351), 67.3 mm. Vortex's table says 3.9" by 2.7" (99 by 68.6 mm: vortexcanada.net,
+// nightvisionguys.com), 2% to 2.5% more, about a pixel or two of the reference's soft edges; the drawing follows the
+// reference, as Simon asked. In its own photo the same extents are x 13 to 982 (969 px) and y 143 to 861 (718
+// px): the close-up photo makes it a little taller than it is (969:718 is 1.35, the reference's 1.44), so it's
+// mapped with one scale along and another up and down, each from the reference. Round 1 had scaled Vortex's 3.9" to
+// the housing without its battery cap (890 px) and used that one scale both ways: 12% too long and 18% too tall.
+// Its seat: the mount's bottom is 13.4 px (8.4 mm) below the rail's top in the reference, which puts the rail's top
+// at y 771 in its photo; and its front sits just behind the upper's long front lug, 5 px (3 mm) behind it.
+const REF_MM_PER_PX = (30 * 10.008) / 479;
+const OPTIC_MM_PER_PX_X = (REF_MM_PER_PX * (855 - 701)) / (982 - 13);
+const OPTIC_MM_PER_PX_Y = (REF_MM_PER_PX * (351 - 243.7)) / (861 - 143);
+const OPTIC_SCALE_X = OPTIC_MM_PER_PX_X / MM_PER_PX;
+const OPTIC_SCALE_Y = OPTIC_MM_PER_PX_Y / MM_PER_PX;
+/** The optic photo's housing front (x 982) goes here, 3 mm behind the upper's long front lug */
+const OPTIC_FRONT_X = 1131 - 3 / MM_PER_PX;
 const OPTIC_FRONT_OX = 982;
-const OPTIC_RAIL_OY = 811;
+/** The rail's top in the optic's photo: 8.4 mm above its mount's bottom (y 861) */
+const OPTIC_RAIL_OY = 861 - 8.4 / OPTIC_MM_PER_PX_Y;
 
 function opticMapper() {
   const p = ([x, y]: Point): Point => [
-    OPTIC_FRONT_X + (x - OPTIC_FRONT_OX) * OPTIC_SCALE,
-    RAIL_LUG_TOP + (y - OPTIC_RAIL_OY) * OPTIC_SCALE,
+    OPTIC_FRONT_X + (x - OPTIC_FRONT_OX) * OPTIC_SCALE_X,
+    RAIL_LUG_TOP + (y - OPTIC_RAIL_OY) * OPTIC_SCALE_Y,
   ];
-  return { p, r: (v: number) => v * OPTIC_SCALE };
+  // Round things (the dials, the nut) by the mean of the two
+  return { p, r: (v: number) => v * Math.sqrt(OPTIC_SCALE_X * OPTIC_SCALE_Y) };
 }
 
 function opticShapes() {
@@ -1566,6 +1585,13 @@ export const AR_15: GunDrawing<Ar15Options> = {
       about:
         "The Vortex AMG UH-1 Gen II from its left side, with its quick-detach lever: a check on its shape",
     },
+    {
+      file: "ar-15-with-uh1.png",
+      width: 1350,
+      height: 900,
+      about:
+        "An FDE AR-15 from its left side (muzzle left) with a UH-1 on its upper: the optic's size against the rail's slots, and where it sits",
+    },
   ],
   // The origin on the gun's middle on the bore (from the butt, one notch out, to the hider's end with a 16"
   // barrel), and the rail's pitch for the scale
@@ -1610,12 +1636,12 @@ export function partPhotoMaps(notch = DEFAULT_NOTCH): Record<
     optic: {
       file: "ar-15-optic.webp",
       matrix: [
-        OPTIC_SCALE,
+        OPTIC_SCALE_X,
         0,
         0,
-        OPTIC_SCALE,
-        OPTIC_FRONT_X - OPTIC_FRONT_OX * OPTIC_SCALE,
-        RAIL_LUG_TOP - OPTIC_RAIL_OY * OPTIC_SCALE,
+        OPTIC_SCALE_Y,
+        OPTIC_FRONT_X - OPTIC_FRONT_OX * OPTIC_SCALE_X,
+        RAIL_LUG_TOP - OPTIC_RAIL_OY * OPTIC_SCALE_Y,
       ],
     },
   };
