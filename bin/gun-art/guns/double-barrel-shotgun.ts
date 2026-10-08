@@ -75,6 +75,22 @@ export const AGED_BRASS: Material = {
   highlight: "#f5dc9c",
 };
 
+/** AGED_BRASS deeper and more golden (Simon's direction: B2, in a more golden, somewhat aged brass) */
+export const GOLDEN_BRASS: Material = {
+  base: "#c99335",
+  dark: "#845c1c",
+  light: "#e0b25a",
+  highlight: "#f3d58e",
+};
+
+/** Antique: golden, a touch browner and less contrasty, still light */
+export const ANTIQUE_BRASS: Material = {
+  base: "#c19651",
+  dark: "#8a6833",
+  light: "#d4ae6d",
+  highlight: "#e7cd96",
+};
+
 /** Satin: the polished brass with less contrast between its lit and shaded parts */
 export const SATIN_BRASS: Material = {
   base: "#d3b665",
@@ -103,7 +119,7 @@ export interface DoubleBarrelOptions {
   border?: PlateBorder;
   /** An engraved ring round the tail screw (with a border, by default) */
   ring?: boolean;
-  /** The hammers (and the tumbler's boss): dark blued steel (default), or the plate's own metal */
+  /** The hammers (and the tumbler's boss): the plate's own metal (default), or dark blued steel */
   hammerFinish?: "steel" | "plate";
   /** The sawn muzzle's bright steel, or null for none */
   sawn?: string | null;
@@ -501,8 +517,8 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
   const W: Material = { ...WALNUT, ...options.wood };
   // The plate's metal, and the hammers'
   const P: Material =
-    options.plate === "blued" ? S : { ...BRASS, ...options.brass };
-  const H: Material = options.hammerFinish === "plate" ? P : S;
+    options.plate === "blued" ? S : { ...GOLDEN_BRASS, ...options.brass };
+  const H: Material = options.hammerFinish === "steel" ? S : P;
   const border: PlateBorder = options.border ?? "single";
   const ring = options.ring ?? border === "single"; // a double border leaves no room for it
   // The border's bands, from the plate's edge in: [how far in each ends, its paint]
@@ -739,6 +755,8 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
       <path d="${hammerPath(HAMMER_SHADE)}" stroke="${H.dark}" stroke-width="5" opacity="0.6"/>
       <path d="${hammerPath(CHECKERING)}" stroke="${H.dark}" stroke-width="1.2"/>
     </g>
+    <!-- A dark line all round it, so a brass hammer stands off the brass plate under it -->
+    <path d="${HAMMER_SHAPE}" stroke="${H.dark}" stroke-width="2" fill="none"/>
     <!-- The tumbler's round boss, and the screw through it -->
     <circle cx="${TUMBLER[0]}" cy="${TUMBLER[1]}" r="8.5" fill="${H.base}" stroke="${H.dark}" stroke-width="1.2"/>
     <path d="${`M${f1(TUMBLER[0] - 6)},${f1(TUMBLER[1] - 2)} ${arc(TUMBLER, 6.3, 198, 290)}`}" stroke="${H.highlight}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
