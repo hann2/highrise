@@ -169,6 +169,8 @@ export interface Ar15Options {
   covers?: boolean;
   /** KAC's rail section under the handguard's front (default true) */
   railSection?: boolean;
+  /** How the Hexmag is lit (default DEFAULT_HEX_LOOK) */
+  hexLook?: Partial<HexLook>;
   /** A thin outline round the silhouette, in each part's own dark (the set's rule; default true) */
   outline?: boolean;
   /** The outline's width in millimeters (default OUTLINE_MM) */
@@ -805,11 +807,29 @@ function pmagRibs(): string {
 // it): a honeycomb of raised hexagons over its side, flat-topped with a little bevel, points up and down, in a regular
 // grid along the magazine's own curve (columns across it, from its back edge to its front, rows down it), about an
 // inch across their flats as in the photo, so three across it and six rows down what shows; grip ridges
-// along its back and front edges below the magazine well (every 15 px, as the photo's); and its floor plate, thin,
-// a little wider than the body, with a low lip at its front. What's above the magazine well's lip (the smooth band with the lettering plate, the
-// slanted notch at its top, the orange follower) is inside the well when it's in, so isn't drawn.
+// along its back and front edges below the magazine well (every 15 px, as the photo's); and its floor plate, a solid
+// band a little wider and deeper than the body, its ends square with their corners just rounded. The honeycomb runs
+// out to the magazine's edges and down to the plate, cut off by its outline. What's above the magazine well's lip (the
+// smooth band with the lettering plate, the slanted notch at its top, the orange follower) is inside the well when
+// it's in, so isn't drawn. How it's lit is `hexLook` (round 5: it should sit with the grip and the stock, which are
+// the same polymer): the body's gradient, the hexes' bevels and the grooves between them.
 const HEX_R = 30; // the hexagons' radius, to their points: 52 px (21 mm) across their flats, three across it
-const HEX_GAP = 4; // the grooves between them
+/** How the Hexmag is lit: the body's gradient, the hexes' bevels and the grooves between them */
+export interface HexLook {
+  /**
+   * The body's gradient: "across" it, straight back to front, lit at the back (round 4's); "grip", square to its
+   * lean as the grip's is, its back lit and its front turning away, with the grip's stops; "above", down it as the
+   * stock is lit, light under the magazine well and darker toward the floor plate; "flat", nearly even
+   */
+  shading: "across" | "grip" | "above" | "flat";
+  /** The hexes' bevels: lit along all three upper edges and shaded along the lower ones ("full", round 4's), or
+   *  faintly, lit only along the two upper-left edges and the lower-right ones a little dark ("soft") */
+  bevel: "full" | "soft";
+  /** The grooves between the hexes: their width (px) and how far toward the dark they are (0 to 1) */
+  groove: number;
+  grooveDark: number;
+}
+export const DEFAULT_HEX_LOOK: HexLook = { shading: "grip", bevel: "soft", groove: 3, grooveDark: 0.35 };
 const HEX_TOP = 1048; // where the hexes start, just under the magazine well's lip
 const hexBackX = (y: number) => interpolateX(PMAG_BACK, y);
 const hexFrontX = (y: number) => interpolateX(PMAG_FRONT, y);
@@ -819,8 +839,8 @@ function onMag(along: number, y: number): Point {
   const back = hexBackX(y);
   return [back + (along * (hexFrontX(y) - back)) / HEX_DEPTH, y];
 }
-function hexagons(): { faces: string; lit: string; shade: string } {
-  const r = HEX_R - HEX_GAP / 2;
+function hexagons(look: HexLook): { faces: string; lit: string; shade: string } {
+  const r = HEX_R - look.groove / 2;
   const across = Math.sqrt(3) * HEX_R;
   const faces: string[] = [];
   const lit: string[] = [];
@@ -828,34 +848,25 @@ function hexagons(): { faces: string; lit: string; shade: string } {
   for (let rowIndex = 0; rowIndex < 7; rowIndex++) {
     const cy = HEX_TOP + 12 + rowIndex * 1.5 * HEX_R;
     const offset = rowIndex % 2 ? across / 2 : 0;
-    for (let col = -1; col < 5; col++) {
+    for (let col = -1; col < 6; col++) {
       const cx = 18 + offset + col * across;
       const pts = [-90, -30, 30, 90, 150, 210].map((a) => {
         const [x, y] = on([cx, cy], r, a);
         return onMag(x, y);
       });
       faces.push(polygon(pts));
-      // Lit along its upper edges, in shadow along its lower ones (the bevel)
-      lit.push(`M${fmt(pts[4])} L${fmt(pts[5])} L${fmt(pts[0])} L${fmt(pts[1])}`);
-      shade.push(`M${fmt(pts[1])} L${fmt(pts[2])} L${fmt(pts[3])} L${fmt(pts[4])}`);
+      // The bevel: lit along its upper edges, in shadow along its lower ones (soft: only the upper-left ones lit)
+      if (look.bevel === "full") {
+        lit.push(`M${fmt(pts[4])} L${fmt(pts[5])} L${fmt(pts[0])} L${fmt(pts[1])}`);
+        shade.push(`M${fmt(pts[1])} L${fmt(pts[2])} L${fmt(pts[3])} L${fmt(pts[4])}`);
+      } else {
+        lit.push(`M${fmt(pts[4])} L${fmt(pts[5])} L${fmt(pts[0])}`);
+        shade.push(`M${fmt(pts[1])} L${fmt(pts[2])} L${fmt(pts[3])}`);
+      }
     }
   }
   return { faces: faces.join(" "), lit: lit.join(" "), shade: shade.join(" ") };
 }
-/** Where the hexes show: the magazine's side inside its ribbed edges, under the well, above the floor plate */
-const HEX_FIELD = (() => {
-  const ys = [HEX_TOP, 1080, 1120, 1160, 1200, 1240, 1280, 1310];
-  const back = ys.filter((y) => y < pmagBaseY(hexBackX(y)) - 8).map((y): Point => [hexBackX(y) + 9, y]);
-  const front = ys.filter((y) => y < pmagBaseY(hexFrontX(y)) - 8).map((y): Point => [hexFrontX(y) - 9, y]);
-  const lastBack = back[back.length - 1];
-  const lastFront = front[front.length - 1];
-  return polygon([
-    ...back,
-    [lastBack[0] + 4, pmagBaseY(lastBack[0]) - 8],
-    [lastFront[0], pmagBaseY(lastFront[0]) - 8],
-    ...front.reverse(),
-  ]);
-})();
 /** The grip ridges along its back and front edges: small bumps standing out of the outline */
 function hexmagRidges(): string {
   const out: string[] = [];
@@ -871,16 +882,15 @@ function hexmagRidges(): string {
   }
   return out.join(" ");
 }
+// The floor plate: a solid band along the base, 3 px wider than the body at each end and 15 deep, its ends square to
+// the base, their corners just rounded
+const PLATE_BACK = 1002;
+const PLATE_FRONT = 1177;
+const PLATE_DOWN = { x: 0.23, y: 0.97 }; // square to the base's slope
+const plateAt = (x: number, down: number): Point => [x + PLATE_DOWN.x * down, pmagBaseY(x) + PLATE_DOWN.y * down];
 const HEXMAG_PLATE = rounded(
-  [
-    [1001, pmagBaseY(1001) - 5],
-    [1172, pmagBaseY(1172) - 5],
-    [1177, pmagBaseY(1177) - 12],
-    [1183, pmagBaseY(1183) - 11],
-    [1184, pmagBaseY(1184) + 7],
-    [1004, pmagBaseY(1004) + 10],
-  ],
-  [3, 2, 2, 3, 6, 6],
+  [plateAt(PLATE_BACK, -5), plateAt(PLATE_FRONT, -5), plateAt(PLATE_FRONT, 10), plateAt(PLATE_BACK, 10)],
+  [2.5, 2.5, 4, 4],
 );
 
 function magLine(t: number, y0 = 1042, y1 = 1300): string {
@@ -1470,7 +1480,10 @@ function drawSide(options: Ar15Options = {}): string {
   const barrel = box(BARREL_BACK, BARREL_TOP, HIDER_BACK + shift + 2, BARREL_BOTTOM);
   const st = stockShapes(butt);
   const op = opticShapes();
-  const hexes = hexagons();
+  const hexLook: HexLook = { ...DEFAULT_HEX_LOOK, ...options.hexLook };
+  const hexes = hexagons(hexLook);
+  // The magazine's back edge, for its rim light (as the grip's back strap has)
+  const magBackEdge = `M${fmt(PMAG_BACK[1])} ${smoothCurve(PMAG_BACK.slice(1), [0, 1], [0.25, 1])}`;
   const tube = box(butt + 40, TUBE_TOP, TUBE_FRONT, TUBE_BOTTOM);
   const flutes: string[] = [];
   for (let x = RING_FRONT + 6; x < HIDER_END - 22; x += 9) {
@@ -1568,13 +1581,36 @@ function drawSide(options: Ar15Options = {}): string {
       [0.65, F.base],
       [1, F.dark],
     ])}
-    <!-- The magazine, across it: lit at its back, its front turning away -->
-    ${linear("ar-15-magazine-shading", [970, 1150], [1135, 1150], [
-      [0, M.light],
-      [0.15, mix(M.base, M.light, 0.5)],
-      [0.6, M.base],
-      [1, mix(M.base, M.dark, 0.6)],
-    ])}
+    <!-- The magazine, lit as hexLook says (the GI magazine and the PMAG: across it, lit at its back) -->
+    ${
+      !hexmag || hexLook.shading === "across"
+        ? linear("ar-15-magazine-shading", [970, 1150], [1135, 1150], [
+            [0, M.light],
+            [0.15, mix(M.base, M.light, 0.5)],
+            [0.6, M.base],
+            [1, mix(M.base, M.dark, 0.6)],
+          ])
+        : hexLook.shading === "grip"
+          ? // square to its lean (its back edge runs 50 px forward in 258 down), with the grip's stops
+            linear("ar-15-magazine-shading", [968, 1180], [968 + 0.982 * 170, 1180 - 0.19 * 170], [
+              [0, M.light],
+              [0.25, mix(M.base, M.light, 0.5)],
+              [0.65, M.base],
+              [1, M.dark],
+            ])
+          : hexLook.shading === "above"
+            ? // down it, as the stock is: light under the well, darker toward the floor plate
+              linear("ar-15-magazine-shading", [0, 1040], [0, 1320], [
+                [0, M.light],
+                [0.15, mix(M.base, M.light, 0.4)],
+                [0.6, M.base],
+                [1, mix(M.base, M.dark, 0.5)],
+              ])
+            : linear("ar-15-magazine-shading", [0, 1040], [0, 1320], [
+                [0, mix(M.base, M.light, 0.3)],
+                [1, M.base],
+              ])
+    }
     ${linear("ar-15-trigger-shading", [855, 0], [884, 0], [
       [0, T.highlight],
       [0.4, T.light],
@@ -1631,9 +1667,6 @@ function drawSide(options: Ar15Options = {}): string {
     </clipPath>
     <clipPath id="ar-15-grip-panel-clip">
       <path d="${GRIP_PANEL}"/>
-    </clipPath>
-    <clipPath id="ar-15-hexmag-field">
-      <path d="${HEX_FIELD}"/>
     </clipPath>
     <clipPath id="ar-15-magazine-clip">
       <path d="${magazine}"/>
@@ -1721,16 +1754,25 @@ function drawSide(options: Ar15Options = {}): string {
     hexmag
       ? `<!-- A Hexmag, up into the magazine well: its raised hexagons, its ribbed edges, its floor plate -->
   <g id="ar-15-magazine">
-    <path d="${hexmagRidges()}" fill="${M.base}" stroke="${M.dark}" stroke-width="1.5"/>
-    <path d="${magazine}" fill="url(#ar-15-magazine-shading)"/>
-    <g clip-path="url(#ar-15-hexmag-field)">
-      <path d="${HEX_FIELD}" fill="${mix(M.base, M.dark, 0.55)}"/>
+    <!-- The body in the grooves' color, the hexes over it, out to its edges, cut off by its outline -->
+    <path d="${magazine}" fill="${mix(M.base, M.dark, hexLook.grooveDark)}"/>
+    <g clip-path="url(#ar-15-magazine-clip)">
       <path d="${hexes.faces}" fill="url(#ar-15-magazine-shading)"/>
-      <path d="${hexes.lit}" stroke="${M.light}" stroke-width="2.5" fill="none"/>
-      <path d="${hexes.shade}" stroke="${M.dark}" stroke-width="2" fill="none" opacity="0.8"/>
+      ${
+        hexLook.bevel === "full"
+          ? `<path d="${hexes.lit}" stroke="${M.light}" stroke-width="2.5" fill="none"/>
+      <path d="${hexes.shade}" stroke="${M.dark}" stroke-width="2" fill="none" opacity="0.8"/>`
+          : `<path d="${hexes.lit}" stroke="${mix(M.base, M.light, 0.7)}" stroke-width="1.5" fill="none" opacity="0.7"/>
+      <path d="${hexes.shade}" stroke="${M.dark}" stroke-width="1.5" fill="none" opacity="0.35"/>`
+      }
+      <!-- The rim light down its back edge, as the grip's -->
+      <path d="${magBackEdge}" stroke="${M.highlight}" stroke-width="${f1(rim * 2)}" fill="none" opacity="0.7"/>
     </g>
-    <path d="${HEXMAG_PLATE}" fill="${mix(M.base, M.dark, 0.25)}"/>
-    <path d="M1001,${f1(pmagBaseY(1001) - 4)} L1172,${f1(pmagBaseY(1172) - 4)} M1178,${f1(pmagBaseY(1178) - 10)} L1182,${f1(pmagBaseY(1182) - 10)}" stroke="${M.light}" stroke-width="2.5" fill="none"/>
+    <!-- The grip ridges, bumps along its edges over the cut-off hexes -->
+    <path d="${hexmagRidges()}" fill="${M.base}" stroke="${M.dark}" stroke-width="1.2"/>
+    <!-- The floor plate: lit along its top edge -->
+    <path d="${HEXMAG_PLATE}" fill="${mix(M.base, M.dark, 0.2)}"/>
+    <path d="M${fmt(plateAt(PLATE_BACK + 3, -4))} L${fmt(plateAt(PLATE_FRONT - 3, -4))}" stroke="${M.light}" stroke-width="2" fill="none"/>
   </g>`
       : pmag
       ? `<!-- A PMAG, up into the magazine well: its lower part ribbed across, its thick floor plate -->
