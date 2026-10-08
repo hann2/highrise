@@ -13,7 +13,9 @@
  *        --view top: the top view in millimeters (--scale 6 px a mm, --grid 5 mm), beside or over a photo from
  *        above, straightened by its registration (four points we know in it)
  *   measure <gun> edges x=600 y=340 ... [--jump 50]    where the photo's colors jump along columns or rows
- *   measure <gun> runs rows|cols <from> <to> <step> [lo hi]   the gun's extent along rows or columns
+ *   measure <gun> runs rows|cols <from> <to> <step> [lo hi] [--white 228]   the gun's extent along rows or
+ *                              columns: everything but white (all channels over --white; raise it for polished
+ *                              steel, which is nearly white) and pale blue. Transparent pixels read as white
  *   measure <gun> sample x,y x,y ...                   the photo's colors there (5 px averages)
  *   options <gun> <variants.json> [--crop x,y,w,h] [--view top] [--out file]
  *                              a sheet of variations: variants.json is {"A": {"label": "...", "options": {...}}}
@@ -379,7 +381,7 @@ async function measure() {
           const g = data[i + 1];
           const b = data[i + 2];
           return !(
-            Math.min(r, g, b) > 228 ||
+            Math.min(r, g, b) > a.white ||
             (b - r > 22 && b > 185 && g > 170)
           );
         };
@@ -411,6 +413,7 @@ async function measure() {
       },
       {
         mode,
+        white: Number(flag("white", "228")),
         from: Number(from),
         to: Number(to),
         step: Number(step),

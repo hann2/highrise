@@ -76,6 +76,9 @@ export async function withPixels<T, A>(
       c.width = img.naturalWidth;
       c.height = img.naturalHeight;
       const g = c.getContext("2d")!;
+      // On white, as the photos are shown, so a transparent background reads as background rather than black
+      g.fillStyle = "#fff";
+      g.fillRect(0, 0, c.width, c.height);
       g.drawImage(img, 0, 0);
       const data = g.getImageData(0, 0, c.width, c.height).data;
       // eslint-disable-next-line no-eval
