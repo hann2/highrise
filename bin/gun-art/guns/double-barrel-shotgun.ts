@@ -1,6 +1,6 @@
 /**
  * A sawn-off side-by-side shotgun from its right side, cut from a coach gun with exposed hammers: blued barrels and
- * steel, a case-hardened lock plate, walnut. Drawn in the pixels of its photo (2200 by 1650) by named numbers,
+ * steel, a brass lock plate (the photo's is case-hardened; Simon chose brass), walnut. Drawn in the pixels of its photo (2200 by 1650) by named numbers,
  * following the gun-art skill (.claude/skills/gun-art/SKILL.md), with guns/m1911.ts as the worked example. A draft
  * until it goes into the game.
  *
@@ -34,9 +34,9 @@
  *   underside, the strip under the lock plate down to where the trigger guard attaches. The bar's sides are mostly
  *   hidden under the lock plate (a bar-action lock: its plate reaches forward along the bar).
  * - FOREND IRON (blued): under the barrels at the knuckle, seen in the forend's concave back.
- * - LOCK PLATE (case-hardened), flush in the stock, on the action's side: a long round-ended plate, high under the
+ * - LOCK PLATE (brass), flush in the stock, on the action's side: a long round-ended plate, high under the
  *   hammer and narrow along the bar; screws and the hammer's pivot (the tumbler) on it.
- * - HAMMERS (case-hardened), outside the plate, pivoting on the tumbler, down (at rest), their noses on the
+ * - HAMMERS (blued steel, or the plate's brass), outside the plate, pivoting on the tumbler, down (at rest), their noses on the
  *   strikers in the fences, the spurs curling up and back. The left one is behind the right, seen beside it as the
  *   photo has it (its spur lower and further back): the gap between the spurs is a hole.
  * - TOP LEVER (blued) on the top tang, its thumbpiece a knob standing up at its back.
@@ -55,37 +55,36 @@ import type { Material } from "../lib/style";
 import { BLUED_STEEL, WALNUT } from "../lib/style";
 
 /**
- * A color case-hardened lock plate, simplified to a graded wash along the plate: warm straw at its tail, through
- * brown, into blue-gray along the bar. The hammers are the same steel, lit along their own axis.
+ * Brass for the lock plate (Simon: all brass, bright, no color wash). Shaded only as a metal plate is: lit along
+ * its top edge, a soft gradient down its face, darker along its lower edge. `dark` is for engraving and the
+ * outline: a darker brass, never near-black.
  */
-export interface CaseColors {
-  /** The wash, from the plate's tail to its front */
-  readonly straw: string;
-  readonly brown: string;
-  readonly blue: string;
-  /** Lit edges, and the engraved border's light line */
-  readonly light: string;
-  /** Shadowed edges, the border's dark line, the outline */
-  readonly dark: string;
-}
-
-/** The photo's colors, cleaned up */
-export const CASE_HARDENED: CaseColors = {
-  straw: "#a88d5a",
-  brown: "#6e5a44",
-  blue: "#4d5668",
-  light: "#d6c79e",
-  dark: "#2e2822",
+/** Polished yellow brass, bright */
+export const BRASS: Material = {
+  base: "#d9b958",
+  dark: "#9c7a2a",
+  light: "#ecd585",
+  highlight: "#fcf1c6",
 };
 
-/** How the lock plate is finished */
-export type PlateStyle =
-  /** The case colors' wash, beveled */
-  | "wash"
-  /** The wash, beveled, with an engraved border inset round its edge and a ring round the tail screw */
-  | "engraved"
-  /** Plain blued like the action, beveled, with the engraved border and ring */
-  | "blued";
+/** Warmer, a little aged: more golden than yellow, still light */
+export const AGED_BRASS: Material = {
+  base: "#cc9f45",
+  dark: "#8d6624",
+  light: "#e2bc69",
+  highlight: "#f5dc9c",
+};
+
+/** Satin: the polished brass with less contrast between its lit and shaded parts */
+export const SATIN_BRASS: Material = {
+  base: "#d3b665",
+  dark: "#a58841",
+  light: "#e0c97f",
+  highlight: "#ecdca6",
+};
+
+/** Engraving inset round the plate's edge: none, one line, or two parallel lines */
+export type PlateBorder = "none" | "single" | "double";
 
 export interface DoubleBarrelOptions {
   /** How long the barrels are cut to, in inches (12) */
@@ -97,9 +96,15 @@ export interface DoubleBarrelOptions {
   /** The barrels and the action */
   steel?: Partial<Material>;
   wood?: Partial<Material>;
-  /** The lock plate's finish (the hammers follow it: case-hardened, or blued with the "blued" plate) */
-  plate?: PlateStyle;
-  caseColors?: Partial<CaseColors>;
+  /** The lock plate: brass (default) or blued like the action */
+  plate?: "brass" | "blued";
+  brass?: Partial<Material>;
+  /** Engraving inset round the plate's edge ("single" by default) */
+  border?: PlateBorder;
+  /** An engraved ring round the tail screw (with a border, by default) */
+  ring?: boolean;
+  /** The hammers (and the tumbler's boss): dark blued steel (default), or the plate's own metal */
+  hammerFinish?: "steel" | "plate";
   /** The sawn muzzle's bright steel, or null for none */
   sawn?: string | null;
   /** A thin outline round the silhouette, in each part's own dark (the set's rule; default true) */
@@ -337,9 +342,13 @@ const TUMBLER: Point = [858, 728]; // the hammer's pivot on the plate
 // The screws, placed clear of the border: one in the middle of the tail's round end, one behind the hammer, one
 // down the middle of the bar
 const PLATE_SCREWS: Point[] = [PLATE_BACK, [828, 731], [956, PLATE_FRONT[1]]];
-// The engraved border: a light line, then a dark one, inset round the plate's edge
-const BORDER_INSET = 5.5;
-const BORDER_LINE = 1.4;
+// The engraved border: each line a cut (dark) with its lit lip (light) on the outside, inset round the plate's
+// edge; a double border is two of them, BORDER_GAP apart, starting nearer the edge (DOUBLE_INSET) so the inner
+// line clears the screws
+const BORDER_INSET = 5;
+const BORDER_LINE = 1.3;
+const BORDER_GAP = 2;
+const DOUBLE_INSET = 3;
 // An engraved ring round the tail's screw, concentric with the tail and the border
 const TAIL_RING = `M${fmt([PLATE_BACK[0] + 9.5, PLATE_BACK[1]])} ${arc(PLATE_BACK, 9.5, 0, 360)}`;
 
@@ -490,28 +499,28 @@ const RIM_LIGHT = mm(0.8);
 function drawSide(options: DoubleBarrelOptions = {}): string {
   const S: Material = { ...BLUED_STEEL, ...options.steel };
   const W: Material = { ...WALNUT, ...options.wood };
-  const plate: PlateStyle = options.plate ?? "engraved";
-  const C: CaseColors =
-    plate === "blued"
-      ? {
-          straw: S.light,
-          brown: S.base,
-          blue: S.base,
-          light: S.highlight,
-          dark: S.dark,
-        }
-      : { ...CASE_HARDENED, ...options.caseColors };
-  // The hammers: the same steel as the plate, lit along their own axis
-  const H: Material =
-    plate === "blued"
-      ? S
-      : {
-          base: mix(C.straw, C.brown, 0.45),
-          dark: C.dark,
-          light: mix(C.straw, C.light, 0.35),
-          highlight: C.light,
-        };
-  const engraved = plate !== "wash";
+  // The plate's metal, and the hammers'
+  const P: Material =
+    options.plate === "blued" ? S : { ...BRASS, ...options.brass };
+  const H: Material = options.hammerFinish === "plate" ? P : S;
+  const border: PlateBorder = options.border ?? "single";
+  const ring = options.ring ?? border === "single"; // a double border leaves no room for it
+  // The border's bands, from the plate's edge in: [how far in each ends, its paint]
+  const face = "url(#double-barrel-shotgun-plate)";
+  const line = (at: number): [number, string][] => [
+    [at, face],
+    [at + BORDER_LINE, P.highlight],
+    [at + 2 * BORDER_LINE, P.dark],
+  ];
+  const bands: [number, string][] =
+    border === "none"
+      ? []
+      : border === "single"
+        ? line(BORDER_INSET)
+        : [
+            ...line(DOUBLE_INSET),
+            ...line(DOUBLE_INSET + 2 * BORDER_LINE + BORDER_GAP),
+          ];
   const muzzle = muzzleAt(options.barrelInches ?? BARREL_INCHES);
   const forendFront = muzzle - mm(options.forendShort ?? FOREND_SHORT);
   const pistol = options.stock === "pistol";
@@ -588,29 +597,15 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
       <stop offset="0.9" stop-color="${S.light}"/>
       <stop offset="1" stop-color="${S.base}"/>
     </radialGradient>
-    <!-- The case colors' wash, along the plate from its tail to its front -->
+    <!-- The plate's face, down it (its own axis is along the gun): lit toward its top, darker toward its bottom -->
     ${gradient(
       "double-barrel-shotgun-plate",
-      [PLATE_BACK[0] - PLATE_R, 0],
-      [PLATE_FRONT[0] + PLATE_R, 0],
-      [
-        [0, C.straw],
-        [0.15, C.straw],
-        [0.5, C.brown],
-        [0.85, C.blue],
-        [1, C.blue],
-      ],
-    )}
-    <!-- Over it, the plate's flat face: a touch lighter toward its top, darker toward its bottom -->
-    ${gradient(
-      "double-barrel-shotgun-plate-light",
       [0, 698],
       [0, 758],
       [
-        [0, "#ffffff", 0.16],
-        [0.4, "#ffffff", 0],
-        [0.6, "#000000", 0],
-        [1, "#000000", 0.22],
+        [0, P.light],
+        [0.45, P.base],
+        [1, mix(P.base, P.dark, 0.35)],
       ],
     )}
     <!-- Its beveled edge: lit along the top, shadowed along the bottom -->
@@ -619,9 +614,9 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
       [0, 698],
       [0, 758],
       [
-        [0, C.light],
-        [0.45, mix(C.light, C.dark, 0.5)],
-        [1, C.dark],
+        [0, P.highlight],
+        [0.45, P.light],
+        [1, P.dark],
       ],
     )}
     <!-- The hammer, across its own axis (the neck's): its back dark, lit toward its front -->
@@ -701,27 +696,31 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
     <path d="${GUARD_PATH}" stroke="${S.base}" stroke-width="${GUARD_WIDTH}" fill="none"/>
     <path d="${GUARD_PATH}" stroke="${S.light}" stroke-width="1.5" fill="none"/>
   </g>
-  <!-- Case-hardened (a graded wash along it), flush in the stock on the action's side: its face, its beveled edge,
-       the engraved border and the ring round the tail screw, and clean slotted screws with bright rims -->
+  <!-- Brass, flush in the stock on the action's side: its face, its beveled edge, the engraved border (bands
+       stroked from the widest in, each covering the edge up to where it ends) and the ring round the tail screw,
+       and slotted screws brighter than the plate -->
   <g id="lock-plate">
-    <path d="${PLATE}" fill="url(#double-barrel-shotgun-plate)"/>
+    <path d="${PLATE}" fill="${face}"/>
     <g clip-path="url(#double-barrel-shotgun-plate-clip)" fill="none">
+      ${[...bands]
+        .reverse()
+        .map(
+          ([end, paint]) =>
+            `<path d="${PLATE}" stroke="${paint}" stroke-width="${f1(2 * end)}"/>`,
+        )
+        .join("\n      ")}
       ${
-        engraved
-          ? `<path d="${PLATE}" stroke="${C.dark}" stroke-width="${f1(2 * (BORDER_INSET + 2 * BORDER_LINE))}"/>
-      <path d="${PLATE}" stroke="${C.light}" stroke-width="${f1(2 * (BORDER_INSET + BORDER_LINE))}"/>
-      <path d="${PLATE}" stroke="url(#double-barrel-shotgun-plate)" stroke-width="${f1(2 * BORDER_INSET)}"/>
-      <path d="${shiftPath(TAIL_RING, [0, 1.2])}" stroke="${C.dark}" stroke-width="${BORDER_LINE}" stroke-linecap="round"/>
-      <path d="${TAIL_RING}" stroke="${C.light}" stroke-width="${BORDER_LINE}" stroke-linecap="round"/>`
+        ring
+          ? `<path d="${shiftPath(TAIL_RING, [0, BORDER_LINE])}" stroke="${P.dark}" stroke-width="${BORDER_LINE}"/>
+      <path d="${TAIL_RING}" stroke="${P.highlight}" stroke-width="${BORDER_LINE}"/>`
           : ""
       }
-      <path d="${PLATE}" fill="url(#double-barrel-shotgun-plate-light)"/>
       <path d="${PLATE}" stroke="url(#double-barrel-shotgun-plate-bevel)" stroke-width="5"/>
     </g>
     ${PLATE_SCREWS.map(
       ([x, y]) =>
-        `<circle cx="${x}" cy="${y}" r="5" fill="${mix(C.brown, C.dark, 0.2)}" stroke="${C.light}" stroke-width="1.3"/>\n    ` +
-        `<path d="M${x - 3.6},${y + 1.2} L${x + 3.6},${y - 1.2}" stroke="${C.dark}" stroke-width="1.6" stroke-linecap="round"/>`,
+        `<circle cx="${x}" cy="${y}" r="5" fill="${P.highlight}" stroke="${P.dark}" stroke-width="1.2"/>\n    ` +
+        `<path d="M${x - 3.6},${y + 1.2} L${x + 3.6},${y - 1.2}" stroke="${P.dark}" stroke-width="1.6" stroke-linecap="round"/>`,
     ).join("\n    ")}
   </g>
   <!-- On the top tang, its thumbpiece standing up at its back -->
@@ -809,7 +808,7 @@ export const DOUBLE_BARREL_SHOTGUN: GunDrawing<DoubleBarrelOptions> = {
   },
   comment: `
   <!-- A sawn-off side-by-side shotgun from its right side, cut from a hammer coach gun, muzzle to the right:
-       12" barrels cut square, exposed hammers, a case-hardened lock, two triggers, walnut. Millimeters, with the
+       12" barrels cut square, exposed hammers, a brass lock plate, two triggers, walnut. Millimeters, with the
        origin on the gun's middle on the bore, as the guns' top views in weapons/guns/art/ have it. -->`,
   drawSide,
 };
