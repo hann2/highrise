@@ -64,16 +64,17 @@ const ORIGIN: Point = [(119 + 1818) / 2, 550];
 // socket (x 577 to 588). At the back a steel butt plate, about 6 mm thick, slanted with the stock's back. The
 // sticker, wear and grain go.
 // THE RECEIVER, milled steel, flat-sided: the side from y 520 (under the dust cover's edge) to its bottom at y 607,
-// from the stock (x 580) to the front trunnion (x 1092). What's on it:
-//   - Flush: the lightening cut over the magazine (a milled recess, a rounded rectangle x 914 to 1069, y 544 to
-//     591): its top wall in shadow, its bottom edge lit. Pins: two plain heads (rivets, x 655 and 790) and two
-//     ringed pins (the trigger and hammer pins, x 821 and 849).
+// from the stock (x 580) to the front trunnion (x 1086). What's on it:
+//   - Flush: the lightening cut over the magazine (a milled recess, a rounded rectangle x 919 to 1076, y 548 to
+//     598): its top wall in shadow, its bottom edge lit. Pins: two plain heads (rivets, x 743 and 780) and two
+//     ringed pins (the trigger and hammer pins, x 819 and 848).
 //   - Proud: the safety selector, a long stamped lever pivoting on a round boss at the back (697,553) and reaching
 //     forward along the top to its tab at x 896, which closes the dust cover's slot. It stands proud (a shadow
 //     under its lower edge) and is folded along its lower edge (a narrow flange, darker).
 //   - Over it, on top: THE DUST COVER, stamped sheet steel: rounded down at the back (from y 470 to the socket at
-//     x 586), its side down to y 518, cut away at the front (x 830 to 1040, its edge up at y 497) for the
-//     ejection port; a stamped crease along its side (y 484 to 489).
+//     x 586), its side down to y 519, cut away at the front (x 888 to 1040, its edge up at y 497) for the
+//     ejection port; a stamped crease along its side (y 486), and its lower lip a step out over the receiver's
+//     rail (y 502).
 //   - In the port, the bolt carrier (steel, lit along its top), and the charging handle's round knob at its front
 //     end (1039,517) on its stem.
 //   - The stamped markings and serials go.
@@ -84,7 +85,7 @@ const ORIGIN: Point = [(119 + 1818) / 2, 550];
 //   - The pistol grip, wood, leaning back about 14°, a little fuller toward the front (the palm swell), its bottom
 //     rounded. It goes up into the receiver (its top hidden under the receiver's bottom).
 //   - The trigger guard: a narrow stamped strip, seen edge on as a thin bright line: from the grip's top front,
-//     round a rounded back corner, along the bottom (y 672) to its front, then straight up to the receiver (x
+//     round a rounded back corner, along the bottom (y 671) to its front, then straight up to the receiver (x
 //     822). What's inside it is a hole.
 //   - The trigger: a crescent, curving down and forward from the receiver, seen through the guard.
 //   - The magazine catch: a block ahead of the guard (x 822 to 858), its paddle reaching down behind the magazine,
@@ -177,6 +178,8 @@ const COVER =
   " Z";
 // The crease stamped along the cover's side
 const CREASE_Y = 486;
+// The cover's lower lip, where it steps out over the receiver's rail
+const LIP_Y = 502;
 // The port: the bolt carrier in it, and the charging handle's knob at its front
 const CARRIER_TOP = PORT_TOP;
 const KNOB: Point = [1035, 516];
@@ -462,7 +465,7 @@ const GRIP =
 const GRIP_SHADE_FROM: Point = [590, 700];
 const GRIP_SHADE_TO: Point = [676, 721];
 const GUARD =
-  "M716,650 C720,666 730,671 746,671 L808,671 C818,671 822,666 822,656 L822,606";
+  "M710,654 C717,666 728,671 746,671 L808,671 C818,671 822,666 822,656 L822,606";
 const GUARD_WIDTH = 4.5;
 const TRIGGER =
   "M735,606 C736,630 750,650 772,658 C775,659 776,655 773,652 C761,642 754,627 753,606 Z";
@@ -665,7 +668,7 @@ function drawSide(options: AkOptions = {}): string {
       [0.1, W.light],
       [0.45, mix(W.light, W.base, 0.5)],
       [0.8, W.base],
-      [1, W.dark],
+      [1, mix(W.base, W.dark, 0.6)],
     ])}
     <!-- The handguards: the upper one round, the lower one's side flat, lit along its top lip and rounding away
          underneath -->
@@ -922,6 +925,9 @@ function drawSide(options: AkOptions = {}): string {
       <path d="M${fmt(COVER_REAR[COVER_REAR.length - 1])} ${smoothCurve([...COVER_REAR].reverse(), [0.35, -1], [1, 0])} L${COVER_FRONT},${COVER_TOP}" stroke="${S.highlight}" stroke-width="${f1(rim * 2)}"/>
       <path d="M584,${COVER_BOTTOM - 1} L${PORT_BACK},${COVER_BOTTOM - 1}" stroke="${S.dark}" stroke-width="3"/>
       <path d="M${PORT_BACK},${PORT_TOP + 1} L${COVER_FRONT},${PORT_TOP + 1}" stroke="${S.dark}" stroke-width="2.5"/>
+      <!-- The cover's lower lip, a step out over the receiver's rail: lit along its top, in shadow under it -->
+      <path d="M592,${LIP_Y} L${PORT_BACK},${LIP_Y}" stroke="${S.dark}" stroke-width="2.5"/>
+      <path d="M592,${LIP_Y + 2} L${PORT_BACK},${LIP_Y + 2}" stroke="${S.light}" stroke-width="2"/>
     </g>
   </g>
   <!-- The rear sight: the block on the trunnion, the leaf lying on it with its slider, the leaf spring's cap -->
@@ -930,7 +936,7 @@ function drawSide(options: AkOptions = {}): string {
     <g clip-path="url(#ak-47-block-clip)" fill="none">
       <path d="M1038,471 L1140,469 C1150,468 1160,467 1170,466" stroke="${S.highlight}" stroke-width="${f1(rim * 2)}"/>
       <path d="M1042,519 L1042,472" stroke="${S.dark}" stroke-width="3"/>
-      <path d="M1120,478 L1150,474 L1164,500 L1132,506 Z" fill="${S.dark}" opacity="0.7"/>
+      <path d="M1040,516 L1171,516" stroke="${S.dark}" stroke-width="4" opacity="0.7"/>
     </g>
     <circle cx="${LEAF_CAP[0]}" cy="${LEAF_CAP[1]}" r="${LEAF_CAP_R}" fill="${S.base}"/>
     <path d="M${fmt(on(LEAF_CAP, LEAF_CAP_R - 3, 190))} ${arc(LEAF_CAP, LEAF_CAP_R - 3, 190, 300)}" stroke="${S.highlight}" stroke-width="3" fill="none"/>
