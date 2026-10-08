@@ -112,7 +112,8 @@ const SIGHT_RED_DARK = "#a93424";
  * style.ts): each face reflects a bright sky above and a dark floor below, so it's banded rather than shaded:
  * from `sky` at its top fading to `skyLow` at its horizon, a hard drop (`hardness`, as a fraction of the face) to
  * `floor`, rising to `floorLow` at its bottom edge. Edges that catch the light are a line of `edge` with
- * `edgeDark` just below; the outline is `edgeDark` too. Bead-blasted (matte) planes are a step darker.
+ * `edgeDark` just below (shading, not an outline: the outline is a thin line in each part's own dark shade).
+ * Bead-blasted (matte) planes are a step darker.
  */
 export interface Polish {
   readonly sky: string;
@@ -145,6 +146,17 @@ export const CHROME_STAINLESS: Polish = {
   matteDark: "#5a5f66",
 };
 
+/**
+ * The revolver's polish, Simon's pick (variant D of round 2): the Desert Eagle's, with a lighter floor (the
+ * floor POLISHED_STAINLESS.dark), which brings the frame's lower half and the barrel's underside closer to the
+ * photo. Same horizon, bands and edges.
+ */
+export const REVOLVER_POLISH: Polish = {
+  ...CHROME_STAINLESS,
+  floor: "#6c7178",
+  floorLow: "#a7acb3",
+};
+
 export interface WoodColors {
   edge: string;
   middle: string;
@@ -160,7 +172,12 @@ export const DEFAULT_WOOD: WoodColors = {
 export interface RevolverOptions {
   polish?: Partial<Polish>;
   wood?: Partial<WoodColors>;
+  /** A thin outline round the silhouette, in each part's own dark shade (default true) */
+  outline?: boolean;
 }
+
+/** The outline's width: 0.4 mm, in the photo's pixels (the rule for every gun) */
+const OUTLINE_MM = 0.4;
 
 // ---------------------------------------------------------------------------------------------------------
 // The scale's numbers, in the photo's pixels
@@ -321,9 +338,11 @@ const HAMMER_UNDER: Point[] = [
 
 // ---------------------------------------------------------------------------------------------------------
 // The trigger: a crescent between two circles, each through three points on its face in the photo
-const TRIGGER_TIP: Point = [630, 514];
-const TRIGGER_FRONT: [Point, Point, Point] = [[590, 395], [568, 455], TRIGGER_TIP];
-const TRIGGER_BACK: [Point, Point, Point] = [[545, 395], [546, 465], TRIGGER_TIP];
+// (Remeasured in round 3 at 6x: the front face's dark edge from the frame at x 596 to its deepest at 565, the
+// tip at 617, and the back's faint edge at 548 halfway down: a narrow blade, about 17 px across at its middle)
+const TRIGGER_TIP: Point = [617, 514];
+const TRIGGER_FRONT: [Point, Point, Point] = [[596, 395], [566, 458], TRIGGER_TIP];
+const TRIGGER_BACK: [Point, Point, Point] = [[545, 395], [549, 462], TRIGGER_TIP];
 
 // ---------------------------------------------------------------------------------------------------------
 // The cylinder release: a checkered pad and a round end round its screw, joined by concave flanks, symmetrical
@@ -360,7 +379,8 @@ const WOOD_FRONT: Point[] = [
   [347, 700],
   [360, 795],
 ];
-const GRIP_BASE = 797;
+const GRIP_BASE = 797; // the base's back corner
+const GRIP_SAG = 6; // how far the base bulges below the line between its corners
 const WOOD_BACK: Point[] = [
   [GRIP_HEEL, 790],
   [110, 620],
@@ -563,7 +583,7 @@ function boxGradient(id: string, stops: Stops): string {
 // ---------------------------------------------------------------------------------------------------------
 
 function drawSide(options: RevolverOptions = {}): string {
-  const p: Polish = { ...CHROME_STAINLESS, ...options.polish };
+  const p: Polish = { ...REVOLVER_POLISH, ...options.polish };
   // Tones for the small marks (pins, seams, notches): the polish's own colors
   const P = {
     hi: p.edge,
@@ -572,8 +592,13 @@ function drawSide(options: RevolverOptions = {}): string {
     dark: p.floorLow,
     floor: p.floor,
   };
-  const outline = (d: string, w = 4) =>
-    `<path d="${d}" stroke="${p.edgeDark}" stroke-width="${w}" fill="none"/>`;
+  // A thin outline round each part's silhouette, in its own dark shade (the stainless's floor tone, a mid gray,
+  // never near black)
+  const outlineWidth = OUTLINE_MM / (BARREL_MM / (MUZZLE - BREECH));
+  const outline = (d: string, color: string = p.floor) =>
+    options.outline === false
+      ? ""
+      : `<path d="${d}" stroke="${color}" stroke-width="${fixed(outlineWidth, 2)}" fill="none"/>`;
   const W: WoodColors = { ...DEFAULT_WOOD, ...options.wood };
 
   // The hammer
@@ -753,10 +778,26 @@ function drawSide(options: RevolverOptions = {}): string {
     `M${f1(c[0] - r * 0.95)},${f1(c[1] - r * 0.25)} L${f1(c[0] + r * 0.95)},${f1(c[1] + r * 0.25)}`;
 
   // The wood
+  // The grip's base: an arc of a big circle through its front and back corners, bulging GRIP_SAG below the line
+  // between them, so the grip looks round
+  const baseFront = WOOD_FRONT[WOOD_FRONT.length - 1];
+  const baseBack: Point = [GRIP_HEEL + 3, GRIP_BASE];
+  const chord = Math.hypot(baseBack[0] - baseFront[0], baseBack[1] - baseFront[1]);
+  const baseR = (chord * chord) / (8 * GRIP_SAG) + GRIP_SAG / 2;
+  const up: Point = [
+    (baseBack[1] - baseFront[1]) / chord,
+    -(baseBack[0] - baseFront[0]) / chord,
+  ];
+  const towardCenter = up[1] < 0 ? up : ([-up[0], -up[1]] as Point);
+  const baseCenter: Point = [
+    (baseFront[0] + baseBack[0]) / 2 + towardCenter[0] * (baseR - GRIP_SAG),
+    (baseFront[1] + baseBack[1]) / 2 + towardCenter[1] * (baseR - GRIP_SAG),
+  ];
   const wood =
     `M${fmt(WOOD_CORNER)} C${WOOD_CORNER[0]},272 265,271 ${fmt(WOOD_TOP[0])} ` +
     `${smoothCurve(WOOD_TOP, [1, 0], [1, 0.05])} ` +
-    `${smoothCurve(WOOD_FRONT, [1, 1.2], [0.12, 1])} L${GRIP_HEEL + 3},${GRIP_BASE} ` +
+    `${smoothCurve(WOOD_FRONT, [1, 1.2], [0.12, 1])} ` +
+    `${shortArc(baseCenter, baseR, angleOf(baseCenter, baseFront), angleOf(baseCenter, baseBack))} ` +
     `C${GRIP_HEEL},${GRIP_BASE} ${GRIP_HEEL - 1},${GRIP_BASE - 3} ${fmt(WOOD_BACK[0])} ` +
     `${smoothCurve(WOOD_BACK, [0.3, -1], [0.1, -1])} L${fmt(WOOD_CORNER)} Z`;
   // The checkering: two sets of lines either side of the grip's axis
@@ -881,10 +922,10 @@ function drawSide(options: RevolverOptions = {}): string {
   </g>
   <!-- The barrel: its lug, the tube, the rod's channel and the rod -->
   <g id="revolver-barrel">
-    ${outline(lug, 8)}
-    ${outline(tube, 8)}
     <path d="${lug}" fill="url(#revolver-lug)"/>
     <path d="${tube}" fill="url(#revolver-tube)"/>
+    ${outline(lug)}
+    ${outline(tube)}
     <path d="M${MUZZLE - 3},${RIB_TOP + 3} L${MUZZLE - 3},${BARREL_UNDER_MUZZLE - 3}" stroke="${P.dark}" stroke-width="2" opacity="0.6"/>
     <path d="${channel}" fill="${P.floor}"/>
     <path d="M${FRAME_FRONT},${CHANNEL_BOTTOM - 1.5} L${CHANNEL_END - channelR},${CHANNEL_BOTTOM - 1.5}" stroke="${P.hi}" stroke-width="3"/>
@@ -901,6 +942,7 @@ function drawSide(options: RevolverOptions = {}): string {
   </g>
   <g id="revolver-rear-sight">
     <path d="${rearSight}" fill="${BLUED_STEEL.base}"/>
+    ${outline(rearSight, BLUED_STEEL.dark)}
     <path d="M470,${LEAF_TOP_BACK + 1} L520,${LEAF_TOP_BACK + 1} C560,${LEAF_TOP_BACK + 3} 585,${LEAF_TOP_FRONT - 3} 620,${LEAF_TOP_FRONT - 2} L${LEAF_FRONT - 4},${LEAF_TOP_FRONT + 1}" stroke="${BLUED_STEEL.highlight}" stroke-width="2.5" fill="none"/>
     <circle cx="${ELEVATION_SCREW[0]}" cy="${ELEVATION_SCREW[1]}" r="9" fill="${BLUED_STEEL.dark}"/>
     <path d="${slot(ELEVATION_SCREW, 8)}" stroke="${BLUED_STEEL.light}" stroke-width="2"/>
@@ -908,7 +950,7 @@ function drawSide(options: RevolverOptions = {}): string {
   <!-- One part, symmetrical about its axis, proud of the frame: the checkered pad and the end round its screw -->
   <g id="revolver-cylinder-release">
     <path d="${thumbpiece}" fill="url(#revolver-up)"/>
-    ${outline(thumbpiece, 3)}
+    ${outline(thumbpiece)}
     <g clip-path="url(#revolver-pad-clip)">
       <path d="${padChecks.join(" ")}" stroke="${P.dark}" stroke-width="2.5" fill="none" opacity="0.7"/>
     </g>
@@ -918,7 +960,7 @@ function drawSide(options: RevolverOptions = {}): string {
   <!-- Wraps the grip frame below the backstrap's top; the checkered field is sunk in a smooth raised border -->
   <g id="revolver-grip">
     <path d="${wood}" fill="url(#revolver-wood)"/>
-    <path d="${wood}" stroke="${W.dark}" stroke-width="4" fill="none"/>
+    ${outline(wood, W.dark)}
     <path d="${FIELD}" fill="${W.edge}" opacity="0.55"/>
     <g clip-path="url(#revolver-field-clip)">
       <path d="${checks.join(" ")}" stroke="${W.dark}" stroke-width="3" fill="none" opacity="0.55"/>
@@ -976,7 +1018,7 @@ export const REVOLVER: GunDrawing<RevolverOptions> = {
   // square round it in millimeters: it's 360 mm long, so 380 (about 5% more, as the M1911's 224 for 216)
   frame: {
     top: 57,
-    bottom: GRIP_BASE,
+    bottom: GRIP_BASE + GRIP_SAG,
     back: GRIP_HEEL,
     front: MUZZLE,
     side: 380,
