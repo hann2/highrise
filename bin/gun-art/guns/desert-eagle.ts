@@ -107,7 +107,8 @@
  */
 import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import { BLACK_POLYMER, BLUED_STEEL } from "../lib/style";
 
 /** The photo's scale: 273 mm (the DE50SRMB's 10.75") over the 1857 px from the beavertail's tip to the muzzle */
@@ -1000,6 +1001,540 @@ function drawSide(options: DesertEagleOptions = {}): string {
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y, in millimeters
+// about its middle on the bore, at the same scale as the side view. Lengths along the gun are the side view's
+// (`sx` converts its photo's pixels); widths are the real gun's.
+//
+// How it's built from above. The barrel is fixed: its top (the rail, on shoulders either side) from the slide's
+// front (x 816) to the muzzle, its flats as wide as the slide, so the slide's arms (which run along the barrel's
+// sides below its flats) are hidden under it, but for the round chamber just ahead of the slide, narrower than
+// the flats, where the arms' tops show either side of it. The slide's rear block is behind the barrel: a raised
+// top whose back end is round in plan (the slope in the side view, x 420 at the middle to 560 at the edges), a
+// lower deck behind it carrying the rear sight, and its back face, which leans back going down, so it's seen from
+// above as a band (x 210 to 322), with a slot for the hammer. From above the raised top's back is square with
+// round corners (it slopes down in the side view, x 420 to 560, but the photo from above shows its plan). The ambidextrous safety stands out of both sides.
+// When the slide goes back it uncovers the frame's top between the block and the barrel: the rails it runs on
+// and the magazine's top round in its well. The hammer, cocked, sticks out behind the slide over the beavertail;
+// it falls forward against the slide's back at each shot.
+//
+// Widths: the slide is 1.25" (31.75 mm), Magnum Research's width for the gun (dealers list it as the slide's).
+// The rest are proportions measured in the photo from above and behind (desert-eagle-alternate.jpg, registered
+// on the slide block's top corners): the round chamber about three quarters of the slide, the rail about two
+// thirds, the rear sight most of the deck, the hammer's spur a third of the slide, the beavertail about 60%. The
+// grip's rubber is a little narrower than the slide (the gun's width is the slide's).
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - 959.5) * MM_PER_PIXEL;
+
+const SLIDE_HALF = 31.75 / 2;
+const TOP_CHAMFER = 1.5; // the slide's and barrel's top edges, chamfered
+const DECK_HALF = SLIDE_HALF - TOP_CHAMFER;
+const SLIDE_BACK_TOP = sx(BACK_CORNER[0]); // the back face's top edge
+const SLIDE_BACK_BOTTOM = sx(
+  SLIDE_BACK_POINTS[SLIDE_BACK_POINTS.length - 1][0],
+); // and its bottom, behind
+const BLOCK_FRONT = sx(BARREL_BACK);
+const ARMS_FRONT = sx(ARM_FRONT);
+const RAISED_BACK_MIDDLE = sx(BACK_TOP[0]); // the raised top's round back end, at the middle
+const RAISED_CORNER = 7; // its back corners, rounded in plan (the photo from above)
+const REAR_SIGHT_X: [number, number] = [sx(333), sx(415)];
+const REAR_SIGHT_HALF = 14;
+const REAR_NOTCH_HALF = 1.8;
+// The barrel from above
+const MUZZLE_X = sx(MUZZLE);
+const BARREL_FRONT_X = sx(BARREL_FRONT);
+const CHAMBER_HALF = 10.5; // the round chamber (21 mm across), narrower than the flats
+const CHAMBER_FRONT = sx(RUNOUT[RUNOUT.length - 1][0]); // where the flats are full width
+const FLATS_START = sx(RAIL_START); // where the flats begin, at their top
+const RAIL_HALF = 10.6; // the rail's lugs
+const FRONT_SIGHT_X: [number, number] = [sx(1772), sx(1852)];
+const FRONT_SIGHT_HALF = 1.7;
+const DOVETAIL_X: [number, number] = [sx(1781), sx(1850)];
+const PORT_IN = 3.6; // how far the brake's ports come in over the top's edges (J-shaped from above)
+// The safety's levers, out of both sides of the slide
+const SAFETY_HUB_X: [number, number] = [
+  sx(SAFETY_HUB[0] - SAFETY_HUB_R),
+  sx(SAFETY_HUB[0] + SAFETY_HUB_R),
+];
+const SAFETY_PAD_X: [number, number] = [sx(451), sx(538)];
+const SAFETY_HUB_OUT = 1.6;
+const SAFETY_PAD_OUT = 3.6;
+// The hammer: cocked, behind the slide; its spur's checkered top
+const HAMMER_BACK = sx(170);
+const HAMMER_PIVOT = sx(269); // where it goes into the slide's back face, at the spur's height
+const SPUR_HALF = 5;
+const HAMMER_SLOT_HALF = SPUR_HALF + 0.6;
+const HAMMER_SLOT_FRONT = sx(300); // the slot in the slide's back face, as far as the face's top
+// The frame: the beavertail behind the slide, its top under the slide (seen when it's back), the grip below
+const TANG_TIP = sx(31);
+const TANG_HALF = 9.5;
+const FRAME_HALF = 13.5;
+const RAILS_IN = 3.6; // the rails the slide runs on, inside the frame's edges, just inside the arms
+const GRIP_BACK_X = sx(148);
+const GRIP_FRONT_X = sx(668);
+const GRIP_HALF = 15;
+// The magazine's well and its top round, under the slide's block, seen when the slide is back
+const WELL_X: [number, number] = [sx(400), sx(712)];
+const WELL_HALF = 7.6;
+const ROUND_BACK = sx(455);
+const CASE_LENGTH = 32.6; // .50 AE
+const BULLET_LENGTH = 8.2; // what's out of the case, to its round nose
+const ROUND_HALF = 6.8;
+// The slide's travel, back (the stats' `parts.slide.offset`)
+export const DESERT_EAGLE_SLIDE_TRAVEL = 48;
+
+const t1 = (v: number) => fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "");
+const tp = (x: number, y: number) => `${t1(x)},${t1(y)}`;
+
+/** A rectangle from x0,y0 to x1,y1 with each corner rounded by its own radius (back-left, front-left, front-right, back-right) */
+function box(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+) {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (
+    cx: number,
+    cy: number,
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+  ) =>
+    `C${tp(fromX + (cx - fromX) * (1 - k), fromY + (cy - fromY) * (1 - k))} ${tp(toX + (cx - toX) * (1 - k), toY + (cy - toY) * (1 - k))} ${tp(toX, toY)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A gradient across the gun (along y), from -half to +half */
+function across(id: string, half: number, stops: Stops): string {
+  return linear(id, [0, -half], [0, half], stops);
+}
+
+/** A flat top seen from above: the sky, a little darker toward its edges */
+function topStops(p: Polish): Stops {
+  return [
+    [0, p.skyLow],
+    [0.25, p.sky],
+    [0.5, p.edge],
+    [0.75, p.sky],
+    [1, p.skyLow],
+  ];
+}
+
+/** A chamfered edge along a top: the horizon in it, hard, and the floor at its outer edge */
+function chamferStops(p: Polish, half: number): Stops {
+  const inner = (half - TOP_CHAMFER) / half; // where the chamfer starts, from the middle
+  const lo = (1 - inner) / 2;
+  const hi = 1 - lo;
+  return [
+    [0, p.floor],
+    [lo * 0.45, p.floorLow],
+    [lo * 0.55, p.skyLow],
+    [lo, p.sky],
+    [hi, p.sky],
+    [1 - lo * 0.55, p.skyLow],
+    [1 - lo * 0.45, p.floorLow],
+    [1, p.floor],
+  ];
+}
+
+/** A cylinder seen from above: bright down its middle, the floor at its sides */
+function cylinderStops(p: Polish): Stops {
+  return [
+    [0, p.floor],
+    [0.16, p.floorLow],
+    [0.3, p.skyLow],
+    [0.3 + p.hardness, p.sky],
+    [0.5, p.edge],
+    [0.7 - p.hardness, p.sky],
+    [0.7, p.skyLow],
+    [0.84, p.floorLow],
+    [1, p.floor],
+  ];
+}
+
+/** The raised top's outline: square at the back with round corners, out to the block's front */
+function raisedTop(half: number): string {
+  return box(RAISED_BACK_MIDDLE, -half, BLOCK_FRONT, half, [
+    RAISED_CORNER,
+    0,
+    0,
+    RAISED_CORNER,
+  ]);
+}
+
+function drawTop(options: DesertEagleOptions = {}): string {
+  const p: Polish = { ...CHROME_STAINLESS, ...options.polish };
+  const outlineWidth = t1(2 * OUTLINE_MM);
+  const outline = (d: string, color: string = p.outline) =>
+    options.outline === false
+      ? ""
+      : `<path d="${d}" stroke="${color}" stroke-width="${outlineWidth}" fill="none"/>`;
+  const minX = TANG_TIP - 1.5;
+  const maxX = MUZZLE_X + 1.5;
+  const half = SLIDE_HALF + SAFETY_PAD_OUT + 1.5;
+  const width = t1(maxX - minX);
+  const height = t1(half * 2);
+
+  // The frame
+  const tang =
+    `M${tp(SLIDE_BACK_BOTTOM + 4, -TANG_HALF)} L${tp(TANG_TIP + TANG_HALF * 0.7, -TANG_HALF)} ` +
+    `C${tp(TANG_TIP + 2, -TANG_HALF)} ${tp(TANG_TIP, -TANG_HALF * 0.55)} ${tp(TANG_TIP, 0)} ` +
+    `C${tp(TANG_TIP, TANG_HALF * 0.55)} ${tp(TANG_TIP + 2, TANG_HALF)} ${tp(TANG_TIP + TANG_HALF * 0.7, TANG_HALF)} ` +
+    `L${tp(SLIDE_BACK_BOTTOM + 4, TANG_HALF)} Z`;
+  const frameTop = box(
+    SLIDE_BACK_BOTTOM + 2,
+    -FRAME_HALF,
+    BLOCK_FRONT + 6,
+    FRAME_HALF,
+    1,
+  );
+  const grip = box(
+    GRIP_BACK_X,
+    -GRIP_HALF,
+    GRIP_FRONT_X,
+    GRIP_HALF,
+    [5, 2, 2, 5],
+  );
+  const well = box(WELL_X[0], -WELL_HALF, WELL_X[1], WELL_HALF, 2);
+  const caseFront = ROUND_BACK + CASE_LENGTH;
+  const roundCase = box(
+    ROUND_BACK,
+    -ROUND_HALF,
+    caseFront,
+    ROUND_HALF,
+    [1.5, 0, 0, 1.5],
+  );
+  const bulletHalf = 6.35; // .50 cal
+  const bullet =
+    `M${tp(caseFront, -bulletHalf)} C${tp(caseFront + BULLET_LENGTH * 0.6, -bulletHalf)} ${tp(caseFront + BULLET_LENGTH, -bulletHalf * 0.5)} ${tp(caseFront + BULLET_LENGTH, 0)} ` +
+    `C${tp(caseFront + BULLET_LENGTH, bulletHalf * 0.5)} ${tp(caseFront + BULLET_LENGTH * 0.6, bulletHalf)} ${tp(caseFront, bulletHalf)} Z`;
+
+  // The hammer: its spur, round at the back, and its neck forward under the slide
+  const hammer = box(
+    HAMMER_BACK,
+    -SPUR_HALF,
+    HAMMER_PIVOT + 8,
+    SPUR_HALF,
+    [3.5, 0, 0, 3.5],
+  );
+  const hammerTeeth: string[] = [];
+  for (let x = HAMMER_BACK + 3; x < HAMMER_PIVOT - 1; x += 1.6) {
+    hammerTeeth.push(`M${tp(x, -SPUR_HALF + 0.9)} L${tp(x, SPUR_HALF - 0.9)}`);
+  }
+
+  // The slide: its body (the block and the arms, the arms under the barrel), its back face seen as a band, the
+  // deck, the raised top, the hammer's slot cut through the back
+  const slot = box(
+    SLIDE_BACK_BOTTOM - 0.5,
+    -HAMMER_SLOT_HALF,
+    HAMMER_SLOT_FRONT,
+    HAMMER_SLOT_HALF,
+    [0, 1.2, 1.2, 0],
+  );
+  // The block, and the two arms forward of it either side of the barrel (an open channel between them, where
+  // the chamber is; the frame shows there when the slide is back)
+  const arms =
+    `${box(BLOCK_FRONT - 0.5, -SLIDE_HALF, ARMS_FRONT, -CHAMBER_HALF, [0, 0.5, 0, 0])} ` +
+    box(
+      BLOCK_FRONT - 0.5,
+      CHAMBER_HALF,
+      ARMS_FRONT,
+      SLIDE_HALF,
+      [0, 0, 0.5, 0],
+    );
+  const slideBody = `${box(SLIDE_BACK_BOTTOM, -SLIDE_HALF, BLOCK_FRONT, SLIDE_HALF, [1.5, 0, 0, 1.5])} ${slot} ${arms}`;
+  const backFace = `${box(SLIDE_BACK_BOTTOM, -SLIDE_HALF, SLIDE_BACK_TOP, SLIDE_HALF, [1.5, 0, 0, 1.5])} ${slot}`;
+  const deck = box(SLIDE_BACK_TOP, -SLIDE_HALF, BLOCK_FRONT, SLIDE_HALF);
+  const raised = raisedTop(DECK_HALF);
+  const serrationMarks: string[] = [];
+  for (let i = 0; i < SERRATIONS; i++) {
+    const x0 = sx(
+      serrationX(FIRST_SERRATION + i * SERRATION_PITCH, SERRATION_TOP),
+    );
+    const x1 = sx(
+      serrationX(
+        FIRST_SERRATION + i * SERRATION_PITCH + SERRATION_WIDTH,
+        SERRATION_TOP,
+      ),
+    );
+    serrationMarks.push(box(x0, -SLIDE_HALF, x1, -SLIDE_HALF + 0.7));
+    serrationMarks.push(box(x0, SLIDE_HALF - 0.7, x1, SLIDE_HALF));
+  }
+  const safety = (side: -1 | 1) => {
+    const y0 = side * SLIDE_HALF;
+    const hub = box(
+      SAFETY_HUB_X[0],
+      side < 0 ? y0 - SAFETY_HUB_OUT : y0 - 0.5,
+      SAFETY_HUB_X[1],
+      side < 0 ? y0 + 0.5 : y0 + SAFETY_HUB_OUT,
+      side < 0 ? [1.2, 1.2, 0, 0] : [0, 0, 1.2, 1.2],
+    );
+    const pad = box(
+      SAFETY_PAD_X[0],
+      side < 0 ? y0 - SAFETY_PAD_OUT : y0 - 0.5,
+      SAFETY_PAD_X[1],
+      side < 0 ? y0 + 0.5 : y0 + SAFETY_PAD_OUT,
+      side < 0 ? [1.5, 2.5, 0, 0] : [0, 0, 2.5, 1.5],
+    );
+    return `${hub} ${pad}`;
+  };
+  const safeties = `${safety(-1)} ${safety(1)}`;
+  const rearSight = box(
+    REAR_SIGHT_X[0],
+    -REAR_SIGHT_HALF,
+    REAR_SIGHT_X[1],
+    REAR_SIGHT_HALF,
+    [1, 2, 2, 1],
+  );
+  const rearNotch = box(
+    REAR_SIGHT_X[0],
+    -REAR_NOTCH_HALF,
+    REAR_SIGHT_X[1],
+    REAR_NOTCH_HALF,
+  );
+
+  // The barrel: the round chamber (the arms' tops either side of it), the flats out to the muzzle, the rail's
+  // lugs with their slots across, the brake's ports over the top's edges, the front sight
+  const chamber = box(
+    BLOCK_FRONT - 0.5,
+    -CHAMBER_HALF,
+    CHAMBER_FRONT + 6,
+    CHAMBER_HALF,
+  );
+  // The flats begin at the runout, full width from where it ends
+  const flats =
+    `M${tp(FLATS_START, -SLIDE_HALF + TOP_CHAMFER)} ` +
+    `C${tp(FLATS_START + 3, -SLIDE_HALF)} ${tp(CHAMBER_FRONT - 4, -SLIDE_HALF)} ${tp(CHAMBER_FRONT, -SLIDE_HALF)} ` +
+    `L${tp(BARREL_FRONT_X - 0.6, -SLIDE_HALF)} C${tp(MUZZLE_X, -SLIDE_HALF)} ${tp(MUZZLE_X, -SLIDE_HALF + 0.6)} ${tp(MUZZLE_X, -SLIDE_HALF + 1.2)} ` +
+    `L${tp(MUZZLE_X, SLIDE_HALF - 1.2)} C${tp(MUZZLE_X, SLIDE_HALF - 0.6)} ${tp(MUZZLE_X, SLIDE_HALF)} ${tp(BARREL_FRONT_X - 0.6, SLIDE_HALF)} ` +
+    `L${tp(CHAMBER_FRONT, SLIDE_HALF)} C${tp(CHAMBER_FRONT - 4, SLIDE_HALF)} ${tp(FLATS_START + 3, SLIDE_HALF)} ${tp(FLATS_START, SLIDE_HALF - TOP_CHAMFER)} ` +
+    `L${tp(FLATS_START, -SLIDE_HALF + TOP_CHAMFER)} Z`;
+  const lugs: string[] = [];
+  let x = FLATS_START;
+  for (let i = 0; i < SLOTS; i++) {
+    const s0 = sx(FIRST_SLOT + i * SLOT_PITCH);
+    lugs.push(
+      box(x, -RAIL_HALF, s0, RAIL_HALF, i === 0 ? [2, 0.3, 0.3, 2] : 0.3),
+    );
+    x = sx(FIRST_SLOT + i * SLOT_PITCH + SLOT_WIDTH);
+  }
+  const lastLug = box(
+    x,
+    -RAIL_HALF,
+    BARREL_FRONT_X - 2,
+    RAIL_HALF,
+    [0.3, 1.5, 1.5, 0.3],
+  );
+  const slotFloors: string[] = [];
+  for (let i = 0; i < SLOTS; i++) {
+    const s0 = sx(FIRST_SLOT + i * SLOT_PITCH);
+    const s1 = sx(FIRST_SLOT + i * SLOT_PITCH + SLOT_WIDTH);
+    slotFloors.push(box(s0, -RAIL_HALF, s1, RAIL_HALF));
+  }
+  const ports: string[] = [];
+  for (let i = 0; i < PORTS; i++) {
+    const p0 = sx(portLeft(i));
+    const p1 = sx(portLeft(i) + PORT_WIDTH);
+    ports.push(
+      box(p0, -SLIDE_HALF - 0.1, p1, -SLIDE_HALF + PORT_IN, [0, 0, 2, 2]),
+    );
+    ports.push(
+      box(p0, SLIDE_HALF - PORT_IN, p1, SLIDE_HALF + 0.1, [2, 2, 0, 0]),
+    );
+  }
+  const frontSight = box(
+    FRONT_SIGHT_X[0],
+    -FRONT_SIGHT_HALF,
+    FRONT_SIGHT_X[1],
+    FRONT_SIGHT_HALF,
+    [3, 0.4, 0.4, 3],
+  );
+  const dovetail = box(
+    DOVETAIL_X[0],
+    -RAIL_HALF - 0.3,
+    DOVETAIL_X[1],
+    RAIL_HALF + 0.3,
+  );
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t1(minX)} ${t1(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("desert-eagle")}
+  <!-- The Desert Eagle Mark XIX from above, as it's held: muzzle along +x, its right side down the page (+y),
+       millimeters about its middle on the bore, at the same scale as its side view (the pickup); lengths along it
+       are the side view's. Polished stainless: the tops face the sky, so they're the brightest. The barrel is
+       fixed; the slide and the hammer move. -->
+  <defs>
+    ${across("desert-eagle-top-slide", SLIDE_HALF, chamferStops(p, SLIDE_HALF))}
+    ${across("desert-eagle-top-raised", DECK_HALF, topStops(p))}
+    ${across("desert-eagle-top-back", SLIDE_HALF, [
+      [0, p.floor],
+      [0.1, p.floorLow],
+      [0.5, p.skyLow],
+      [0.9, p.floorLow],
+      [1, p.floor],
+    ])}
+    ${across("desert-eagle-top-chamber", CHAMBER_HALF, cylinderStops(p))}
+    ${across("desert-eagle-top-rail", RAIL_HALF, topStops(p))}
+    ${across("desert-eagle-top-frame", FRAME_HALF, [
+      [0, p.matteDark],
+      [0.15, p.matte],
+      [0.5, p.matteLight],
+      [0.85, p.matte],
+      [1, p.matteDark],
+    ])}
+    ${across("desert-eagle-top-tang", TANG_HALF, chamferStops(p, TANG_HALF))}
+    ${across("desert-eagle-top-grip", GRIP_HALF, [
+      [0, POLYMER.dark],
+      [0.2, POLYMER.base],
+      [0.5, POLYMER.light],
+      [0.8, POLYMER.base],
+      [1, POLYMER.dark],
+    ])}
+    ${across("desert-eagle-top-steel", SPUR_HALF, [
+      [0, STEEL.dark],
+      [0.3, STEEL.base],
+      [0.5, STEEL.light],
+      [0.7, STEEL.base],
+      [1, STEEL.dark],
+    ])}
+    ${across("desert-eagle-top-steel-base", RAIL_HALF, [
+      [0, STEEL.dark],
+      [0.2, STEEL.base],
+      [0.5, STEEL.light],
+      [0.8, STEEL.base],
+      [1, STEEL.dark],
+    ])}
+    ${across("desert-eagle-top-brass", ROUND_HALF, [
+      [0, "#6e5320"],
+      [0.3, "#b8913f"],
+      [0.5, "#e2c272"],
+      [0.7, "#b8913f"],
+      [1, "#6e5320"],
+    ])}
+  </defs>
+  <!-- The grip's rubber, a little narrower than the slide, out behind the beavertail at its foot -->
+  <g id="grip">
+    ${outline(grip, POLYMER.dark)}
+    <path d="${grip}" fill="url(#desert-eagle-top-grip)"/>
+  </g>
+  <!-- The frame: the beavertail behind the slide, and under the slide (seen when it's back) its top, the rails the
+       slide runs on, and the magazine's well with its top round -->
+  <g id="frame">
+    ${outline(tang)}
+    ${outline(frameTop)}
+    <path id="frame-top" d="${frameTop}" fill="url(#desert-eagle-top-frame)"/>
+    <path id="beavertail" d="${tang}" fill="url(#desert-eagle-top-tang)"/>
+    <g id="frame-rails" fill="${p.sky}">
+      <path d="${box(SLIDE_BACK_BOTTOM + 3, -FRAME_HALF + RAILS_IN, BLOCK_FRONT + 4, -FRAME_HALF + RAILS_IN + 1)}"/>
+      <path d="${box(SLIDE_BACK_BOTTOM + 3, FRAME_HALF - RAILS_IN - 1, BLOCK_FRONT + 4, FRAME_HALF - RAILS_IN)}"/>
+    </g>
+    <path id="magazine-well" d="${well}" fill="${STEEL.dark}"/>
+    <g id="magazine-round">
+      <path d="${roundCase}" fill="url(#desert-eagle-top-brass)"/>
+      <path d="${bullet}" fill="#a8693c"/>
+    </g>
+  </g>
+  <!-- Cocked: its spur out behind the slide over the beavertail, checkered; it falls forward against the slide's
+       back at each shot (shorter from above, about where it goes into the slide) -->
+  <g id="hammer">
+    ${outline(hammer, STEEL.dark)}
+    <path d="${hammer}" fill="url(#desert-eagle-top-steel)"/>
+    <path d="${hammerTeeth.join(" ")}" stroke="${STEEL.dark}" stroke-width="0.5" fill="none"/>
+  </g>
+  <!-- The slide: its rear block (back face, deck, raised top) and the arms along the barrel's sides (under it but
+       for the chamber), with the safety's levers out of both sides and the rear sight -->
+  <g id="slide">
+    ${outline(slideBody)}
+    ${outline(safeties, POLYMER.dark)}
+    <path id="safety" d="${safeties}" fill="${POLYMER.light}"/>
+    <path id="slide-body" d="${slideBody}" fill="url(#desert-eagle-top-slide)"/>
+    <path id="slide-back" d="${backFace}" fill="url(#desert-eagle-top-back)"/>
+    <path id="hammer-slot" d="${slot}" stroke="${p.edgeDark}" stroke-width="0.5" fill="none"/>
+    <path id="slide-top" d="${deck}" fill="url(#desert-eagle-top-slide)"/>
+    <!-- The raised top, its round back end stepping down to the deck -->
+    <path d="${raisedTop(DECK_HALF + 0.4)}" fill="${p.floorLow}"/>
+    <path id="slide-rib" d="${raised}" fill="url(#desert-eagle-top-raised)"/>
+    <g id="slide-serrations" fill="${p.floor}">
+      <path d="${serrationMarks.join(" ")}"/>
+    </g>
+    <g id="rear-sight">
+      ${outline(rearSight, STEEL.dark)}
+      <path d="${rearSight}" fill="${STEEL.base}"/>
+      <path d="${rearNotch}" fill="${STEEL.dark}"/>
+      <path d="M${tp(REAR_SIGHT_X[1] - 0.6, -REAR_SIGHT_HALF + 1.5)} L${tp(REAR_SIGHT_X[1] - 0.6, -REAR_NOTCH_HALF - 0.4)} M${tp(REAR_SIGHT_X[1] - 0.6, REAR_NOTCH_HALF + 0.4)} L${tp(REAR_SIGHT_X[1] - 0.6, REAR_SIGHT_HALF - 1.5)}" stroke="${STEEL.highlight}" stroke-width="0.5" fill="none"/>
+    </g>
+  </g>
+  <!-- Fixed: the round chamber just ahead of the slide, then the flats as wide as the slide out to the muzzle, the
+       rail's lugs on top with their slots across, the brake's four ports coming over both edges, and the front
+       sight in its dovetail -->
+  <g id="barrel">
+    ${outline(flats)}
+    <path id="chamber" d="${chamber}" fill="url(#desert-eagle-top-chamber)"/>
+    <path d="${flats}" fill="url(#desert-eagle-top-slide)"/>
+    <!-- The flats' top, where the cutter ran out of the round -->
+    <path d="M${tp(FLATS_START, -SLIDE_HALF + TOP_CHAMFER)} L${tp(FLATS_START, SLIDE_HALF - TOP_CHAMFER)}" stroke="${p.floorLow}" stroke-width="0.6" fill="none"/>
+    <path d="${slotFloors.join(" ")}" fill="${p.floorLow}"/>
+    <g id="barrel-rail">
+      <path d="${lugs.join(" ")} ${lastLug}" fill="url(#desert-eagle-top-rail)" stroke="${p.floorLow}" stroke-width="0.4"/>
+    </g>
+    <path id="brake-ports" d="${ports.join(" ")}" fill="${p.edgeDark}"/>
+  </g>
+  <!-- On the barrel, fixed: a blade on a base across the rail, in its dovetail -->
+  <g id="front-sight">
+    ${outline(dovetail, STEEL.dark)}
+    ${outline(frontSight, STEEL.dark)}
+    <path d="${dovetail}" fill="url(#desert-eagle-top-steel-base)"/>
+    <path d="${frontSight}" fill="${STEEL.light}"/>
+  </g>
+</svg>
+`;
+}
+
+const TOP: TopView<DesertEagleOptions> = {
+  draw: drawTop,
+  registrations: [
+    {
+      // The slide block's top corners: its back face's top edge and its front face's (the photo is from behind,
+      // above and to the right)
+      file: "desert-eagle-alternate.jpg",
+      points: [
+        [
+          [786, 1193],
+          [SLIDE_BACK_TOP, -DECK_HALF],
+        ],
+        [
+          [975, 1440],
+          [SLIDE_BACK_TOP, DECK_HALF],
+        ],
+        [
+          [1710, 795],
+          [BLOCK_FRONT, -DECK_HALF],
+        ],
+        [
+          [1925, 1010],
+          [BLOCK_FRONT, DECK_HALF],
+        ],
+      ],
+    },
+  ],
+};
+
 export const DESERT_EAGLE: GunDrawing<DesertEagleOptions> = {
   name: "desert-eagle",
   photo: {
@@ -1037,4 +1572,5 @@ export const DESERT_EAGLE: GunDrawing<DesertEagleOptions> = {
        the right, in polished stainless. Millimeters, with the origin on the gun's middle on the bore, as the
        guns' top views in weapons/guns/art/ have it. -->`,
   drawSide,
+  top: TOP,
 };
