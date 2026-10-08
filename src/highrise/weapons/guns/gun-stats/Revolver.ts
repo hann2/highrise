@@ -36,24 +36,28 @@ export const Revolver: GunStats = {
   recoilSlide: 0.07,
   recoilTime: 0.035,
 
+  // From its top view (bin/gun-art/guns/revolver.ts), at true scale: the hand
+  // round the middle of the grip, the rounds into the cylinder's back face,
+  // the thumb on the hammer's spur
   points: {
-    grip: [-0.15, 0],
-    foregrip: [-0.15, 0],
-    magazine: [-0.04, 0],
-    action: [-0.15, 0],
+    grip: [-0.13, 0],
+    foregrip: [-0.13, 0],
+    magazine: [-0.075, 0],
+    action: [-0.118, 0],
   },
-  // The cylinder swings out to the left to load, with the chamber the hand
-  // loads. Each shot, the hammer's cocked (tipping up and back over the grip,
-  // which from above is back and longer) and falls
+  // The cylinder swings out to the left to load, on its crane, just clear of
+  // the frame, with the chamber the hand loads. Each shot, the hammer's cocked
+  // (tipping back about its stud: from above its top comes back along the
+  // channel and it gets shorter about the spur's tip) and falls
   parts: {
-    cylinder: { offset: [0, -0.062], carries: ["magazine"] },
-    hammer: { offset: [-0.016, 0], stretch: 1.2, pivot: [-0.112, 0] },
+    cylinder: { offset: [0, -0.045], carries: ["magazine"] },
+    hammer: { offset: [-0.0016, 0], stretch: 0.58, pivot: [-0.127, 0] },
   },
   cycles: ["hammer"],
   animations: REVOLVER_ANIMATIONS,
   magazine: { texture: "revolverRound", length: 0.04 },
   holdPosition: [0.55, 0],
-  muzzleLength: 0.35,
+  muzzleLength: 0.18,
 
   sounds: {
     ...defaultGunStats.sounds,
