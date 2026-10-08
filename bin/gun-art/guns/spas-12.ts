@@ -111,6 +111,11 @@ export interface Spas12Options {
   shield?: Partial<Material>;
   /** The barrel's and magazine tube's black steel */
   steel?: Partial<Material>;
+  /**
+   * The return spring (coiled round the magazine tube) seen through the shield's lower slots: in brass, in the
+   * barrel's dark steel, or not at all (the slots plain dark)
+   */
+  spring?: "brass" | "steel" | "none";
   /** How strongly the pump's grooves show: 0 is barely, 1 the default, 2 bold */
   ribs?: number;
   /** A thin outline round the silhouette, in each part's own dark (the set's rule; default true) */
@@ -612,6 +617,7 @@ function drawSide(options: Spas12Options = {}): string {
   const S: Material = { ...PARKERIZED, ...options.shield };
   const T: Material = { ...SPAS_STEEL, ...options.steel };
   const ribs = options.ribs ?? 1;
+  const spring = options.spring ?? "brass";
   const outline = (options.outlineMm ?? OUTLINE_MM) / MM_PER_PX;
   const rim = (options.rimLightMm ?? RIM_LIGHT_MM) / MM_PER_PX;
 
@@ -805,8 +811,8 @@ function drawSide(options: Spas12Options = {}): string {
     <path d="${SHIELD} ${TOP_SLOT_PATH} ${LOW_SLOT_PATH}" fill="url(#spas-12-shield-shading)"/>
     <path d="${TOP_SLOT_PATH}" fill="url(#spas-12-barrel-shadowed)"/>
     <g clip-path="url(#spas-12-low-slots-clip)">
-      <path d="${box(1150, TUBE_TOP - 10, 1370, TUBE_BOTTOM + 14)}" fill="${SPRING_DARK}"/>
-      <path d="${coils.join(" ")}" stroke="${SPRING}" stroke-width="3.5" fill="none"/>
+      <path d="${box(1150, TUBE_TOP - 10, 1370, TUBE_BOTTOM + 14)}" fill="${spring === "none" ? T.dark : SPRING_DARK}"/>
+      ${spring === "none" ? "" : `<path d="${coils.join(" ")}" stroke="${spring === "steel" ? T.light : SPRING}" stroke-width="3.5" fill="none"/>`}
     </g>
     <!-- The slots' cut edges: a shadow along their tops, lit along their bottoms -->
     <g fill="none" stroke-width="2">
