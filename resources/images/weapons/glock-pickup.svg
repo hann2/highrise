@@ -129,6 +129,9 @@
       <rect x="87.45" y="12.15" width="3.98" height="15.94" fill="#1d1e21" opacity="0.3"/>
       <!-- The thumb's trough above the studs -->
       <path d="M-61.02,36.59 C-54.38,27.29 -34.46,25.17 -25.7,28.62 C-26.49,37.92 -31.81,45.09 -57.04,45.35 C-59.7,43.23 -60.76,40.04 -61.02,36.59 Z" fill="url(#glock-thumb-shading)"/>
+      <!-- The rim light: the top edges catching the light, a thin line just inside the silhouette (the tang's
+           top and end, and down the back strap), so the gun holds on a dark floor -->
+      <path d="M-82.27,13.21 C-83.6,13.21 -85.33,13.75 -85.59,15.34 L-85.59,18 M-68.33,34.6 C-68.63,36.59 -68.82,38.61 -69.26,40.57 C-69.76,42.83 -70.59,45.02 -71.38,47.21 C-72.37,49.91 -73.31,52.62 -74.57,55.18 C-76.39,58.87 -78.85,62.25 -80.95,65.81 C-82.95,69.22 -84.62,72.82 -86.26,76.43 C-87.64,79.5 -89.01,82.58 -90.24,85.73 C-91.01,87.68 -91.73,89.66 -92.1,91.7 C-92.26,92.62 -92.37,93.56 -92.5,94.49" stroke="#5c5f64" stroke-width="1.59"/>
     </g>
     <!-- The rail: a step where it starts, its lighter face, the groove along it and its lit lower lip -->
     <path d="M52.26,14.81 L84.27,14.81 C84.7,14.81 85.06,15.17 85.06,15.6 L85.06,19.85 L52.26,19.85 Z" fill="#4a4c51" opacity="0.3"/>
@@ -217,6 +220,8 @@
       <path id="glock-port" d="M-7.9,-9.36 L21.32,-9.36 L21.32,-1.13 C21.32,1.06 19.52,2.86 17.33,2.86 L-2.59,2.86 C-5.51,2.86 -7.9,0.46 -7.9,-2.46 Z" fill="#0e0f11"/>
       <path id="glock-hood" d="M-5.78,-9.1 L20.25,-9.1 C20.78,-9.1 21.05,-8.7 21.05,-8.03 L21.05,-1.39 C21.05,0.6 19.46,2.06 17.33,2.06 L-1.53,2.06 C-3.52,2.06 -4.98,1.26 -5.78,0.2 Z" fill="url(#glock-hood-shading)"/>
       <path d="M-7.9,-9.1 L-7.9,-2.46 C-7.9,0.46 -5.51,2.86 -2.59,2.86 L17.33,2.86 C19.59,2.86 21.32,1.13 21.32,-1.13 L21.32,-9.1" stroke="#5f6570" stroke-width="0.4" fill="none"/>
+      <!-- The rim light along its top, just inside the edge -->
+      <path d="M-83.07,-6.97 C-83.07,-8.3 -82.01,-9.36 -80.68,-9.36 L87.72,-9.36 C89.31,-9.36 90.64,-8.03 90.64,-6.44" stroke="#5f6570" stroke-width="1.59" fill="none"/>
       <!-- Its bottom edge, a dark seam over the frame -->
       <path d="M-83.07,12.42 L90.64,12.42" stroke="#15161a" stroke-width="0.53" fill="none"/>
     </g>
