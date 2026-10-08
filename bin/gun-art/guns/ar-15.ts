@@ -11,7 +11,7 @@
  * (the buffer tube, the barrel) banded along their length.
  */
 import type { Point } from "../lib/geometry";
-import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
+import { arc, fixed, fmt, on, polygon, rounded, smoothCurve } from "../lib/geometry";
 import type { GunDrawing } from "../lib/gun";
 import type { Material, Stops } from "../lib/style";
 import { linear } from "../lib/style";
@@ -61,7 +61,8 @@ const TRIGGER_FACE = 855;
 const BOLT_FACE = 1118;
 const HIDER_BACK = 1852;
 const PHOTO_BARREL_IN = (HIDER_BACK + 0.5 * PX_PER_IN - BOLT_FACE) / PX_PER_IN;
-const DEFAULT_BARREL_IN = 16;
+/** Simon's pick (round 4): between the photo's (about 12") and the game's stats' 16" */
+const DEFAULT_BARREL_IN = 13.5;
 const HIDER_END = 1983;
 
 // The stock's length of pull (Magpul's numbers)
@@ -152,7 +153,7 @@ export interface Ar15Options {
   steel?: Partial<Material>;
   /** The trigger's bright steel */
   trigger?: Partial<Material>;
-  /** The barrel's length in inches (default 16, the game's; PHOTO_BARREL_IN is the photo's) */
+  /** The barrel's length in inches (default 13.5, Simon's pick; PHOTO_BARREL_IN is the photo's, the game's stats 16) */
   barrel?: number;
   /** How far out the stock is, in notches from collapsed (0 to 5; default 1) */
   stockNotch?: number;
@@ -162,10 +163,12 @@ export interface Ar15Options {
   handguardLength?: number;
   /** The flip-up sights: folded down under the optic (default), up, or none */
   irons?: Irons;
-  /** The magazine: the photo's aluminium GI magazine (default) or a black polymer PMAG */
-  magazineStyle?: "gi" | "pmag";
-  /** The textured M-LOK covers and the rail section under the front (default true) */
-  extras?: boolean;
+  /** The magazine: a Hexmag Series 2 (default), the base photo's aluminium GI magazine, or a Magpul PMAG */
+  magazineStyle?: "hexmag" | "gi" | "pmag";
+  /** Magpul's textured M-LOK covers over the handguard's middle (default false) */
+  covers?: boolean;
+  /** KAC's rail section under the handguard's front (default true) */
+  railSection?: boolean;
   /** A thin outline round the silhouette, in each part's own dark (the set's rule; default true) */
   outline?: boolean;
   /** The outline's width in millimeters (default OUTLINE_MM) */
@@ -797,6 +800,89 @@ function pmagRibs(): string {
   return out.join(" ");
 }
 
+// A Hexmag Series 2 (`magazineStyle: "hexmag"`, the default; ar-15-hexmag.png), black polymer. Its outline is the
+// standard magazine's curve, as deep as the PMAG's (the photo is a three-quarter view, so only its features come from
+// it): a honeycomb of raised hexagons over its side, flat-topped with a little bevel, points up and down, in a regular
+// grid along the magazine's own curve (columns across it, from its back edge to its front, rows down it), about an
+// inch across their flats as in the photo, so three across it and six rows down what shows; grip ridges
+// along its back and front edges below the magazine well (every 15 px, as the photo's); and its floor plate, thin,
+// a little wider than the body, with a low lip at its front. What's above the magazine well's lip (the smooth band with the lettering plate, the
+// slanted notch at its top, the orange follower) is inside the well when it's in, so isn't drawn.
+const HEX_R = 30; // the hexagons' radius, to their points: 52 px (21 mm) across their flats, three across it
+const HEX_GAP = 4; // the grooves between them
+const HEX_TOP = 1048; // where the hexes start, just under the magazine well's lip
+const hexBackX = (y: number) => interpolateX(PMAG_BACK, y);
+const hexFrontX = (y: number) => interpolateX(PMAG_FRONT, y);
+const HEX_DEPTH = hexFrontX(1150) - hexBackX(1150);
+/** A point `along` px from the magazine's back edge (in its depth at y 1150), at height y: following the curve */
+function onMag(along: number, y: number): Point {
+  const back = hexBackX(y);
+  return [back + (along * (hexFrontX(y) - back)) / HEX_DEPTH, y];
+}
+function hexagons(): { faces: string; lit: string; shade: string } {
+  const r = HEX_R - HEX_GAP / 2;
+  const across = Math.sqrt(3) * HEX_R;
+  const faces: string[] = [];
+  const lit: string[] = [];
+  const shade: string[] = [];
+  for (let rowIndex = 0; rowIndex < 7; rowIndex++) {
+    const cy = HEX_TOP + 12 + rowIndex * 1.5 * HEX_R;
+    const offset = rowIndex % 2 ? across / 2 : 0;
+    for (let col = -1; col < 5; col++) {
+      const cx = 18 + offset + col * across;
+      const pts = [-90, -30, 30, 90, 150, 210].map((a) => {
+        const [x, y] = on([cx, cy], r, a);
+        return onMag(x, y);
+      });
+      faces.push(polygon(pts));
+      // Lit along its upper edges, in shadow along its lower ones (the bevel)
+      lit.push(`M${fmt(pts[4])} L${fmt(pts[5])} L${fmt(pts[0])} L${fmt(pts[1])}`);
+      shade.push(`M${fmt(pts[1])} L${fmt(pts[2])} L${fmt(pts[3])} L${fmt(pts[4])}`);
+    }
+  }
+  return { faces: faces.join(" "), lit: lit.join(" "), shade: shade.join(" ") };
+}
+/** Where the hexes show: the magazine's side inside its ribbed edges, under the well, above the floor plate */
+const HEX_FIELD = (() => {
+  const ys = [HEX_TOP, 1080, 1120, 1160, 1200, 1240, 1280, 1310];
+  const back = ys.filter((y) => y < pmagBaseY(hexBackX(y)) - 8).map((y): Point => [hexBackX(y) + 9, y]);
+  const front = ys.filter((y) => y < pmagBaseY(hexFrontX(y)) - 8).map((y): Point => [hexFrontX(y) - 9, y]);
+  const lastBack = back[back.length - 1];
+  const lastFront = front[front.length - 1];
+  return polygon([
+    ...back,
+    [lastBack[0] + 4, pmagBaseY(lastBack[0]) - 8],
+    [lastFront[0], pmagBaseY(lastFront[0]) - 8],
+    ...front.reverse(),
+  ]);
+})();
+/** The grip ridges along its back and front edges: small bumps standing out of the outline */
+function hexmagRidges(): string {
+  const out: string[] = [];
+  for (let y = 1078; y < 1290; y += 15) {
+    const b = hexBackX(y);
+    if (y < pmagBaseY(b) - 12) {
+      out.push(rbox(b - 2.5, y - 3, b + 6, y + 3, 3));
+    }
+    const f = hexFrontX(y);
+    if (y < pmagBaseY(f) - 12) {
+      out.push(rbox(f - 6, y - 3, f + 2.5, y + 3, 3));
+    }
+  }
+  return out.join(" ");
+}
+const HEXMAG_PLATE = rounded(
+  [
+    [1001, pmagBaseY(1001) - 5],
+    [1172, pmagBaseY(1172) - 5],
+    [1177, pmagBaseY(1177) - 12],
+    [1183, pmagBaseY(1183) - 11],
+    [1184, pmagBaseY(1184) + 7],
+    [1004, pmagBaseY(1004) + 10],
+  ],
+  [3, 2, 2, 3, 6, 6],
+);
+
 function magLine(t: number, y0 = 1042, y1 = 1300): string {
   const back = MAG_BACK.filter((p) => p[1] >= y0 - 1 && p[1] <= y1 + 25);
   const pts: Point[] = back.map((b) => {
@@ -1364,12 +1450,16 @@ function drawSide(options: Ar15Options = {}): string {
   const H: Material = { ...R, ...options.handguard };
   const F: Material = { ...AR_POLYMER, ...options.furniture };
   const O: Material = { ...AR_OPTIC, ...options.optic };
-  const pmag = options.magazineStyle === "pmag";
-  const M: Material = { ...(pmag ? AR_POLYMER : AR_MAGAZINE), ...options.magazine };
-  const extras = options.extras !== false;
+  const magStyle = options.magazineStyle ?? "hexmag";
+  const pmag = magStyle === "pmag";
+  const hexmag = magStyle === "hexmag";
+  // Polymer magazines are the furniture's black unless they're given their own
+  const M: Material = { ...(magStyle === "gi" ? AR_MAGAZINE : F), ...options.magazine };
+  const covers = options.covers === true;
+  const railSection = options.railSection !== false;
   const hg = handguardShapes(options.handguardLength);
   const sights = sightShapes(options.irons ?? "folded", hg.extra);
-  const magazine = pmag ? PMAG : MAGAZINE;
+  const magazine = pmag || hexmag ? PMAG : MAGAZINE;
   const S: Material = { ...AR_STEEL, ...options.steel };
   const T: Material = { ...AR_TRIGGER, ...options.trigger };
   const shift = ((options.barrel ?? DEFAULT_BARREL_IN) - PHOTO_BARREL_IN) * PX_PER_IN;
@@ -1380,6 +1470,7 @@ function drawSide(options: Ar15Options = {}): string {
   const barrel = box(BARREL_BACK, BARREL_TOP, HIDER_BACK + shift + 2, BARREL_BOTTOM);
   const st = stockShapes(butt);
   const op = opticShapes();
+  const hexes = hexagons();
   const tube = box(butt + 40, TUBE_TOP, TUBE_FRONT, TUBE_BOTTOM);
   const flutes: string[] = [];
   for (let x = RING_FRONT + 6; x < HIDER_END - 22; x += 9) {
@@ -1399,7 +1490,7 @@ function drawSide(options: Ar15Options = {}): string {
     [CASTLE, S.dark],
     [END_PLATE, R.dark],
     [st.body, F.dark],
-    [magazine + (pmag ? " " + PMAG_PLATE : ""), M.dark],
+    [magazine + (pmag ? " " + PMAG_PLATE : hexmag ? " " + HEXMAG_PLATE + " " + hexmagRidges() : ""), M.dark],
     [GRIP, F.dark],
     [TRIGGER, T.dark],
     [LOWER, R.dark],
@@ -1408,11 +1499,11 @@ function drawSide(options: Ar15Options = {}): string {
     [rbox(1131, RAIL_LUG_TOP, 1159, HG_TOP + 1, [1.5, 1.5, 0, 0]), R.dark],
     [CHARGING_HANDLE, R.dark],
   ];
-  if (extras) {
-    outlineParts.push(
-      [hg.bottomRail + " " + hg.bottomRailLugs, H.dark],
-      [COVERS.map(([a, b]) => rbox(a, COVER_TOP, b, COVER_BOTTOM, 4)).join(" "), F.dark],
-    );
+  if (railSection) {
+    outlineParts.push([hg.bottomRail + " " + hg.bottomRailLugs, H.dark]);
+  }
+  if (covers) {
+    outlineParts.push([COVERS.map(([a, b]) => rbox(a, COVER_TOP, b, COVER_BOTTOM, 4)).join(" "), F.dark]);
   }
   if (sights) {
     outlineParts.push([sights.rear, R.dark], [sights.front + " " + sights.frontPost, H.dark]);
@@ -1541,6 +1632,9 @@ function drawSide(options: Ar15Options = {}): string {
     <clipPath id="ar-15-grip-panel-clip">
       <path d="${GRIP_PANEL}"/>
     </clipPath>
+    <clipPath id="ar-15-hexmag-field">
+      <path d="${HEX_FIELD}"/>
+    </clipPath>
     <clipPath id="ar-15-magazine-clip">
       <path d="${magazine}"/>
     </clipPath>
@@ -1586,11 +1680,15 @@ function drawSide(options: Ar15Options = {}): string {
       <path d="M${HG_BACK},${HG_TOP + rim / 2} L${f1(hg.front - 3)},${HG_TOP + rim / 2}" stroke="${H.highlight}" stroke-width="${f1(rim)}" opacity="0.6"/>
     </g>
     ${
-      extras
+      railSection
         ? `<!-- KAC's rail section under the front -->
     <path d="${hg.bottomRail} ${hg.bottomRailLugs}" fill="${mix(H.base, H.dark, 0.3)}"/>
-    <path d="M${f1(1650 + hg.shift)},907 L${f1(1845 + hg.shift)},907" stroke="${H.light}" stroke-width="2" fill="none"/>
-    <!-- Magpul's M-LOK covers, stippled -->
+    <path d="M${f1(1650 + hg.shift)},907 L${f1(1845 + hg.shift)},907" stroke="${H.light}" stroke-width="2" fill="none"/>`
+        : ""
+    }
+    ${
+      covers
+        ? `<!-- Magpul's M-LOK covers, stippled -->
     ${COVERS.map(([a, b]) => `<path d="${rbox(a, COVER_TOP, b, COVER_BOTTOM, 4)}" fill="url(#ar-15-cover-shading)"/>`).join("\n    ")}
     ${COVERS.map(([a, b]) => `<path d="${stipple(a, b, COVER_TOP, COVER_BOTTOM)}" fill="${F.dark}" opacity="0.55"/>`).join("\n    ")}`
         : ""
@@ -1620,7 +1718,21 @@ function drawSide(options: Ar15Options = {}): string {
   </g>
   ${stock(butt, F, rim)}
   ${
-    pmag
+    hexmag
+      ? `<!-- A Hexmag, up into the magazine well: its raised hexagons, its ribbed edges, its floor plate -->
+  <g id="ar-15-magazine">
+    <path d="${hexmagRidges()}" fill="${M.base}" stroke="${M.dark}" stroke-width="1.5"/>
+    <path d="${magazine}" fill="url(#ar-15-magazine-shading)"/>
+    <g clip-path="url(#ar-15-hexmag-field)">
+      <path d="${HEX_FIELD}" fill="${mix(M.base, M.dark, 0.55)}"/>
+      <path d="${hexes.faces}" fill="url(#ar-15-magazine-shading)"/>
+      <path d="${hexes.lit}" stroke="${M.light}" stroke-width="2.5" fill="none"/>
+      <path d="${hexes.shade}" stroke="${M.dark}" stroke-width="2" fill="none" opacity="0.8"/>
+    </g>
+    <path d="${HEXMAG_PLATE}" fill="${mix(M.base, M.dark, 0.25)}"/>
+    <path d="M1001,${f1(pmagBaseY(1001) - 4)} L1172,${f1(pmagBaseY(1172) - 4)} M1178,${f1(pmagBaseY(1178) - 10)} L1182,${f1(pmagBaseY(1182) - 10)}" stroke="${M.light}" stroke-width="2.5" fill="none"/>
+  </g>`
+      : pmag
       ? `<!-- A PMAG, up into the magazine well: its lower part ribbed across, its thick floor plate -->
   <g id="ar-15-magazine">
     <path d="${magazine}" fill="url(#ar-15-magazine-shading)"/>
@@ -1768,6 +1880,13 @@ export const AR_15: GunDrawing<Ar15Options> = {
       about:
         "An FDE AR-15 from its left side (muzzle left) with a UH-1 on its upper: the optic's size against the rail's slots, and where it sits",
     },
+    {
+      file: "ar-15-hexmag.png",
+      width: 880,
+      height: 660,
+      about:
+        "A Hexmag Series 2 30-round magazine, three-quarter view, front to the right: its hexagons, grip ridges, notch and floor plate (its outline is the standard magazine's)",
+    },
   ],
   // The origin on the gun's middle on the bore (from the butt, one notch out, to the hider's end with a 16"
   // barrel), and the rail's pitch for the scale
@@ -1778,13 +1897,13 @@ export const AR_15: GunDrawing<Ar15Options> = {
     bottom: 1325,
     back: DEFAULT_BACK,
     front: DEFAULT_FRONT,
-    side: 880,
+    side: 840,
     pixels: 512,
   },
   comment: `
-  <!-- The AR-15 from its right side, muzzle to the right: a Knight's Armament SR-15 with a 16" barrel, KAC's
-       M-LOK handguard, a Magpul DT-PR stock one notch out and a Vortex UH-1 holographic sight, its flip-up sights
-       folded. Millimeters, with the origin on the gun's middle on the bore, as the guns' top views in
+  <!-- The AR-15 from its right side, muzzle to the right: a Knight's Armament SR-15 with a 13.5" barrel, KAC's
+       M-LOK handguard, a Magpul DT-PR stock one notch out, a Vortex UH-1 holographic sight, its flip-up sights
+       folded, and a Hexmag. Millimeters, with the origin on the gun's middle on the bore, as the guns' top views in
        weapons/guns/art/ have it; drawn over photos, then simplified. -->`,
   drawSide,
 };
