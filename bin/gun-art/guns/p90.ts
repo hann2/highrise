@@ -381,17 +381,27 @@ const MAG = box(MAG_BACK, MAG_TOP, MAG_FRONT, RECEIVER_TOP, 3);
 const MAG_BODY = box(MAG_BACK, MAG_TOP, MAG_FRONT, MAG_BOTTOM, 3);
 // The rotary feed at its back, seen through the plastic
 const FEED = box(MAG_BACK + 2, 300, 708, 369, 6);
-// The rounds' heads: two rows, half a pitch apart, and the feed's few at the back
+// The rounds' heads: two rows of 25 (the 50 the top view draws), touching. In the photo the bright circles are
+// the primers (16 px, 4.4 mm); the case heads round them are fainter, 28.6 px apart along a row, so touching
+// (a 5.7x28's head is 7.95 mm, 28.9 px). The rows are staggered half a pitch and nested into each other's gaps,
+// so they're a pitch times sin 60 apart (24.8 px), as the photo's primers are (y 320.5 and 345.3).
 const PITCH = 28.6;
-const HEAD_R = 12;
-const UPPER_ROW = 318;
-const LOWER_ROW = 346;
-const ROUNDS: Point[] = [
-  [700, 317],
-  [729, 317],
+const HEAD_R = PITCH / 2;
+const PRIMER_R = 8;
+const UPPER_ROW = 320.5;
+const LOWER_ROW = UPPER_ROW + PITCH * Math.sin(Math.PI / 3);
+const ROUNDS_PER_ROW = 25;
+// And three more turning in the rotary feed, as photographed (decoration: they don't slide, and the top view
+// hides them under the feed)
+const FEED_ROUNDS: Point[] = [
+  [700, UPPER_ROW],
+  [729, UPPER_ROW],
   [752, 337],
-  ...Array.from({ length: 22 }, (_, i): Point => [775.5 + i * PITCH, UPPER_ROW]),
-  ...Array.from({ length: 22 }, (_, i): Point => [790 + i * PITCH, LOWER_ROW]),
+];
+const ROUNDS: Point[] = [
+  ...FEED_ROUNDS,
+  ...Array.from({ length: ROUNDS_PER_ROW }, (_, i): Point => [790 + i * PITCH, LOWER_ROW]),
+  ...Array.from({ length: ROUNDS_PER_ROW }, (_, i): Point => [775.5 + i * PITCH, UPPER_ROW]),
 ];
 
 // The magazine catch behind it, in a recess in the stock's top, and the boss under it
@@ -612,9 +622,10 @@ function screw(c: Point, P: Material, r = SCREW_R): string {
 
 function round(c: Point, B: Material): string {
   const [x, y] = c;
-  return `<circle cx="${f1(x)}" cy="${f1(y)}" r="${HEAD_R}" fill="url(#p90-head)"/>
-      <circle cx="${f1(x)}" cy="${f1(y)}" r="${HEAD_R - 3}" fill="none" stroke="${B.dark}" stroke-width="1.5" opacity="0.6"/>
-      <circle cx="${f1(x)}" cy="${f1(y)}" r="3.6" fill="${B.light}" stroke="${B.dark}" stroke-width="1"/>`;
+  // The head's rim, the bevel inside it, and the primer
+  return `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(HEAD_R - 0.5)}" fill="url(#p90-head)" stroke="${B.dark}" stroke-width="1.2" stroke-opacity="0.55"/>
+      <circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(HEAD_R - 3.5)}" fill="none" stroke="${B.dark}" stroke-width="1" opacity="0.45"/>
+      <circle cx="${f1(x)}" cy="${f1(y)}" r="${PRIMER_R}" fill="${B.light}" stroke="${B.dark}" stroke-width="1.4"/>`;
 }
 
 function drawSide(options: P90Options = {}): string {
@@ -983,8 +994,8 @@ const T_NECK_HALF = ((456 - 398) * MM_PER_PX) / 2;
 const T_HIDER_HALF = ((465 - 389) * MM_PER_PX) / 2;
 
 // The rounds: 5.7x28 mm, 40.5 mm long, lying across the magazine with their heads to the right (the side view's
-// case heads) and their bullets to the left. Two staggered rows of 25, as in the side view: the upper row's
-// first at the side view's x 775.5, the lower row's half a pitch on. Each round fired moves the stack back half
+// case heads) and their bullets to the left. Two staggered rows of 25, the side view's (the same pitch, 7.87 mm,
+// touching): the upper row's first at the side view's x 775.5, the lower row's half a pitch on. Each round fired moves the stack back half
 // a pitch, so empty they've moved back 25 pitches (197 mm): GunStats.rounds.travel -0.197 at true scale.
 const T_PITCH = PITCH * MM_PER_PX;
 const T_ROUND_LENGTH = 40.5;
