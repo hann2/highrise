@@ -15,7 +15,8 @@ import { resolveLook } from "../../highrise/looks/BodyLook";
 import { portraitUrl } from "../../highrise/looks/composeBody";
 import { usePlaying } from "./usePlaying";
 import { AppearanceTab } from "./AppearanceTab";
-import { Field, Segmented } from "./controls";
+import { Segmented } from "../shared/Segmented";
+import { Field } from "./controls";
 
 const NEUTRAL_STATS = new PlayerStats();
 

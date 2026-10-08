@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { resolveLook } from "../../highrise/looks/BodyLook";
 import { portraitUrl } from "../../highrise/looks/composeBody";
+import { ToolsNav } from "../shared/ToolsNav";
 import { api } from "./api";
 import { CharacterEntry, Voice } from "./apiTypes";
 import { CharacterPanel } from "./CharacterPanel";
@@ -140,71 +141,79 @@ export function App() {
   }, [unsavedIds.length]);
 
   return (
-    <div class={`editor ${collapsed ? "is-collapsed" : ""}`}>
-      <nav class="sidebar">
-        <div class="sidebar__top">
-          <h1>Characters</h1>
-          <button
-            class="sidebar__toggle"
-            data-tip={collapsed ? "Show the names" : "Fold the list away"}
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            {collapsed ? "»" : "«"}
-          </button>
-        </div>
-        {characters?.map(({ id, data: disk }) => {
-          const data = drafts.current!.edited(id, disk);
-          const unsaved = unsavedIds.includes(id);
-          const enabled = data.clips.filter((clip) => clip.enabled).length;
-          return (
-            <a
-              key={id}
-              href={`#${id}`}
-              data-tip={collapsed ? data.name : undefined}
-              data-tip-placement="right"
-              class={`sidebar__item ${entry?.id === id ? "is-selected" : ""}`}
+    <>
+      <ToolsNav current="Character Editor" />
+      <div class={`editor ${collapsed ? "is-collapsed" : ""}`}>
+        <nav class="sidebar">
+          <div class="sidebar__top">
+            <h1>Characters</h1>
+            <button
+              class="sidebar__toggle"
+              data-tip={collapsed ? "Show the names" : "Fold the list away"}
+              onClick={() => setCollapsed(!collapsed)}
             >
-              <img src={portraitUrl(resolveLook(data.look), { scale: 60 })} />
-              <span class="sidebar__name">
-                {data.name}
-                {unsaved && (
-                  <span class="unsaved-dot" data-tip="Unsaved changes" />
-                )}
-              </span>
-              <span class="sidebar__count" data-tip="Enabled clips / all clips">
-                {enabled}/{data.clips.length}
-              </span>
-            </a>
-          );
-        })}
-      </nav>
-      <main class="main">
-        {!characters && !status && <p class="muted">Loading…</p>}
-        {entry && (
-          // Not keyed by character: the game preview in it would start again
-          <CharacterPanel
-            entry={entry}
-            voices={voices}
-            voicesError={voicesError}
-            run={run}
-            drafts={drafts.current}
-            onSave={() => save([entry.id])}
-            onSaveAll={() => save(unsavedIds)}
-            unsavedCount={unsavedIds.length}
-          />
+              {collapsed ? "»" : "«"}
+            </button>
+          </div>
+          {characters?.map(({ id, data: disk }) => {
+            const data = drafts.current!.edited(id, disk);
+            const unsaved = unsavedIds.includes(id);
+            const enabled = data.clips.filter((clip) => clip.enabled).length;
+            return (
+              <a
+                key={id}
+                href={`#${id}`}
+                data-tip={collapsed ? data.name : undefined}
+                data-tip-placement="right"
+                class={`sidebar__item ${entry?.id === id ? "is-selected" : ""}`}
+              >
+                <img src={portraitUrl(resolveLook(data.look), { scale: 60 })} />
+                <span class="sidebar__name">
+                  {data.name}
+                  {unsaved && (
+                    <span class="unsaved-dot" data-tip="Unsaved changes" />
+                  )}
+                </span>
+                <span
+                  class="sidebar__count"
+                  data-tip="Enabled clips / all clips"
+                >
+                  {enabled}/{data.clips.length}
+                </span>
+              </a>
+            );
+          })}
+        </nav>
+        <main class="main">
+          {!characters && !status && <p class="muted">Loading…</p>}
+          {entry && (
+            // Not keyed by character: the game preview in it would start again
+            <CharacterPanel
+              entry={entry}
+              voices={voices}
+              voicesError={voicesError}
+              run={run}
+              drafts={drafts.current}
+              onSave={() => save([entry.id])}
+              onSaveAll={() => save(unsavedIds)}
+              unsavedCount={unsavedIds.length}
+            />
+          )}
+        </main>
+        {status && (
+          <div
+            class={`status status--${status.kind}`}
+            onClick={() => status.kind !== "busy" && setStatus(undefined)}
+          >
+            {status.kind === "busy" && busyCount > 0 && (
+              <span class="spinner" />
+            )}
+            <span class="status__message">{status.message}</span>
+            {status.kind === "error" && <span class="status__close">×</span>}
+          </div>
         )}
-      </main>
-      {status && (
-        <div
-          class={`status status--${status.kind}`}
-          onClick={() => status.kind !== "busy" && setStatus(undefined)}
-        >
-          {status.kind === "busy" && busyCount > 0 && <span class="spinner" />}
-          <span class="status__message">{status.message}</span>
-          {status.kind === "error" && <span class="status__close">×</span>}
-        </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 

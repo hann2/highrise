@@ -27,11 +27,11 @@ import {
   Field,
   Group,
   Picker,
-  Segmented,
   Slider,
   Swatch,
   Toggle,
 } from "./controls";
+import { Segmented } from "../shared/Segmented";
 import {
   capitalize,
   COLLARED,
@@ -55,7 +55,7 @@ import {
   withStyle,
 } from "./lookOptions";
 import { thumbnailUrl } from "./thumbnails";
-import { tip } from "./tooltips";
+import { tip } from "../shared/tooltips";
 
 /** Sets one of the look's settings; changes to the same one close together are one step of undo */
 type SetLook = <K extends keyof BodyLook>(key: K, value: BodyLook[K]) => void;

@@ -3,9 +3,9 @@ import { defineConfig } from "vite";
 import { encodeAudio } from "./vite-plugins/encodeAudio.mjs";
 import { plainManifestUrls } from "./vite-plugins/plainManifestUrls.mjs";
 
-// The pages live in src/: the game at /, and in development the character
-// editor at /tools/character-editor/. Assets come from resources/, outside
-// that root.
+// The pages live in src/: the game at /, and in development the tools at
+// /tools/ (the character editor, the gun browser). Assets come from
+// resources/, outside that root.
 export default defineConfig({
   root: "src",
   // Absolute asset URLs, which the Electron app's app:// protocol serves from
@@ -38,7 +38,7 @@ export default defineConfig({
     // One file per asset, never inlined, the same as every other asset
     assetsInlineLimit: 0,
     rolldownOptions: {
-      // The character editor is development only
+      // The tools are development only
       input: path.resolve(import.meta.dirname, "src/index.html"),
       // Class names show up in the profiler and in error messages
       output: { keepNames: true },

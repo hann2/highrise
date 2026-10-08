@@ -17,7 +17,8 @@ import {
   TopStyle,
 } from "../../highrise/looks/BodyLook";
 import { HAIR_COLORS, SKIN_TONES } from "../../highrise/looks/randomLook";
-import { Option, Preset } from "./controls";
+import { Option } from "../shared/Segmented";
+import { Preset } from "./controls";
 
 /*
  * What the Appearance tab calls each of a look's options, and what it says

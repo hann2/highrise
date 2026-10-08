@@ -1,0 +1,177 @@
+/* What every tool's page shares: colors, type, buttons, the segmented control and tooltips */
+
+:root {
+  --bg: #141418;
+  --panel: #1c1c22;
+  --panel-2: #24242c;
+  --line: #33333d;
+  --text: #e6e6ea;
+  --muted: #8d8d99;
+  --accent: #e0b04a;
+  --accent-text: #1a1406;
+  --ok: #5fbf77;
+  --danger: #e0645a;
+  --ai: #7aa7ff;
+  --rec: #c9a0ff;
+  --radius: 6px;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    14px/1.4 system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+}
+h1 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding: 16px 16px 8px;
+}
+h2 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+h3 {
+  font-size: 14px;
+  display: inline;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 1px solid var(--accent);
+  border-color: var(--accent);
+}
+textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+button {
+  cursor: pointer;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px 10px;
+}
+button:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button.primary {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: 12px;
+}
+.error {
+  color: var(--danger);
+}
+
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  border-radius: 4px;
+}
+.segmented button:hover:not(.is-disabled) {
+  color: var(--text);
+}
+.segmented button.is-selected {
+  background: var(--panel-2);
+  color: var(--text);
+  box-shadow: 0 0 0 1px #4a4a56;
+}
+.segmented button.is-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Tooltips (Tippy) */
+.tippy-box[data-theme~="editor"] {
+  background: #2c2c35;
+  color: var(--text);
+  border: 1px solid #45454f;
+  border-radius: 6px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+.tippy-box[data-theme~="editor"] > .tippy-content {
+  padding: 6px 10px;
+}
+.tippy-box[data-theme~="editor"][data-placement^="top"] > .tippy-arrow::before {
+  border-top-color: #2c2c35;
+}
+.tippy-box[data-theme~="editor"][data-placement^="bottom"]
+  > .tippy-arrow::before {
+  border-bottom-color: #2c2c35;
+}
+.tippy-box[data-theme~="editor"][data-placement^="left"]
+  > .tippy-arrow::before {
+  border-left-color: #2c2c35;
+}
+.tippy-box[data-theme~="editor"][data-placement^="right"]
+  > .tippy-arrow::before {
+  border-right-color: #2c2c35;
+}
+.tip__title {
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+.tip__title + .tip__body {
+  color: #c4c4cf;
+}

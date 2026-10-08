@@ -1,0 +1,33 @@
+.hub {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.hub h1 {
+  padding: 16px 0 8px;
+}
+.hub__note {
+  margin: 0 0 10px;
+}
+.hub__links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+.hub__link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+}
+.hub__link:hover {
+  border-color: var(--muted);
+}
+.hub__name {
+  font-weight: 600;
+}
