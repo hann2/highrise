@@ -99,14 +99,19 @@ export interface P90Options {
   outline?: boolean;
   /** How wide the rim light along the top edges is, in photo px (default RIM_LIGHT) */
   rimLight?: number;
+  /**
+   * Whether the floor shows through the magazine's empty plastic. Off (the default) it's backed by the smoke's
+   * edge color, as on the materials sheet Simon picked variant C from; on, only its rail is solid
+   */
+  clearMagazine?: boolean;
 }
 
-/** Smoky translucent plastic, a little warm, as the photo's magazine */
+/** Clear, light smoky plastic, a little warm, as the photo's magazine (Simon's pick: variant C of the first sheet) */
 export const P90_SMOKE: Smoke = {
-  color: "#8a7c6c",
-  opacity: 0.55,
-  tint: 0.2,
-  edge: "#2a2622",
+  color: "#b8ad9e",
+  opacity: 0.35,
+  tint: 0.1,
+  edge: "#3a352f",
 };
 
 /** The rounds: brass case heads, lit from above */
@@ -802,7 +807,8 @@ ${stops([0, B.highlight], [0.45, B.light], [1, B.base])}
   <!-- The magazine: smoky plastic, empty where the floor shows through, its rounds' heads in two rows and the
        rotary feed at its back seen through it; its rail under it -->
   <g id="p90-magazine">
-    <path d="${MAG}" fill="${smoke.edge}"/>
+    <!-- Backed by its edge color, or (clearMagazine) only its rail solid, so the floor shows through where it's empty -->
+    <path d="${options.clearMagazine ? box(MAG_BACK, MAG_BOTTOM - 3, MAG_FRONT, RECEIVER_TOP, 2) : MAG}" fill="${smoke.edge}"/>
     <path d="${MAG_BODY}" fill="${smoke.color}" opacity="${smoke.opacity}"/>
     <g clip-path="url(#p90-mag-clip)">
       <path d="${FEED}" fill="url(#p90-feed-shading)"/>
