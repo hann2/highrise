@@ -30,24 +30,28 @@ export const DesertEagle: GunStats = {
   recoilSlide: 0.09,
   recoilTime: 0.04,
 
+  // From its top view (bin/gun-art/guns/desert-eagle.ts), at true scale: the
+  // hands round the top of the grip, the other racking it by the serrations
   points: {
-    grip: [-0.12, 0],
-    foregrip: [-0.12, 0],
-    magazine: [-0.12, 0],
-    action: [-0.15, 0],
+    grip: [-0.073, 0],
+    foregrip: [-0.073, 0],
+    magazine: [-0.073, 0],
+    action: [-0.07, 0],
   },
-  // The slide goes back with each shot, and stays back when it's empty,
-  // pushing the hammer back and down (shorter from above) as it goes
+  // The slide goes back with each shot (clearing a .50 AE round), and stays
+  // back when it's empty; the hammer, drawn cocked, falls each shot (tipping up
+  // against the slide's back, shorter from above) and is cocked again
   parts: {
-    slide: { offset: [-0.065, 0], carries: ["action"] },
-    hammer: { stretch: 0.35, pivot: [-0.1445, 0] },
+    slide: { offset: [-0.048, 0], carries: ["action"] },
+    hammer: { stretch: 0.3, pivot: [-0.1015, 0] },
   },
   cycles: ["slide", "hammer"],
   locksBackWhenEmpty: true,
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.14 },
-  holdPosition: [0.52, 0],
-  muzzleLength: 0.35,
+  // The hands where every pistol's are (0.415 m out, as the M1911's)
+  holdPosition: [0.488, 0],
+  muzzleLength: 0.1365,
 
   sounds: {
     ...defaultGunStats.sounds,

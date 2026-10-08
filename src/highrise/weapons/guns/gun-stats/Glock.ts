@@ -25,20 +25,23 @@ export const Glock: GunStats = {
   },
   size: [0.192, 0.192],
 
+  // From its top view (bin/gun-art/guns/glock.ts), at true scale: the hands
+  // round the top of the grip, the other racking it by the rear serrations
   points: {
-    grip: [-0.1, 0],
-    foregrip: [-0.1, 0],
-    magazine: [-0.1, 0],
-    action: [-0.12, 0],
+    grip: [-0.048, 0],
+    foregrip: [-0.048, 0],
+    magazine: [-0.048, 0],
+    action: [-0.056, 0],
   },
   // The slide goes back with each shot, and stays back when it's empty
-  parts: { slide: { offset: [-0.06, 0], carries: ["action"] } },
+  parts: { slide: { offset: [-0.038, 0], carries: ["action"] } },
   cycles: ["slide"],
   locksBackWhenEmpty: true,
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.125 },
-  holdPosition: [0.5, 0],
-  muzzleLength: 0.28,
+  // The hands where every pistol's are (0.415 m out, as the M1911's)
+  holdPosition: [0.463, 0],
+  muzzleLength: 0.0925,
 
   recoilAmount: degToRad(8),
   recoilRecovery: 10,

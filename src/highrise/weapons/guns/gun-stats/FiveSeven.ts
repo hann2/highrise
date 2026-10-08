@@ -25,20 +25,23 @@ export const FiveSeven: GunStats = {
   },
   size: [0.218, 0.218],
 
+  // From its top view (bin/gun-art/guns/five-seven.ts), at true scale: the
+  // hands round the grip, the other racking it by the finger pockets
   points: {
-    grip: [-0.1, 0],
-    foregrip: [-0.1, 0],
-    magazine: [-0.1, 0],
-    action: [-0.115, 0],
+    grip: [-0.06, 0],
+    foregrip: [-0.06, 0],
+    magazine: [-0.06, 0],
+    action: [-0.095, 0],
   },
   // The slide goes back with each shot, and stays back when it's empty
-  parts: { slide: { offset: [-0.055, 0], carries: ["action"] } },
+  parts: { slide: { offset: [-0.045, 0], carries: ["action"] } },
   cycles: ["slide"],
   locksBackWhenEmpty: true,
   animations: PISTOL_ANIMATIONS,
   magazine: { texture: "pistolMagazine", length: 0.125 },
-  holdPosition: [0.5, 0],
-  muzzleLength: 0.26,
+  // The hands where every pistol's are (0.415 m out, as the M1911's)
+  holdPosition: [0.475, 0],
+  muzzleLength: 0.104,
 
   laserSightColor: 0x00ff00,
 
