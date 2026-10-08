@@ -34,9 +34,10 @@ for (const gun of FINISHED) {
 // A drawn gun is the same size on the floor as in hand: its pickup's square (in millimeters) is the size
 // WeaponPickup stretches it to, and its top view (drawn 1:1) is its art
 for (const drawing of FINISHED) {
-  const pickup =
-    drawing.name.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase()) +
-    "Pickup";
+  const camel = drawing.name.replace(/-([a-z0-9])/g, (_, c: string) =>
+    c.toUpperCase(),
+  );
+  const pickup = camel + "Pickup";
   const stats = GUN_STATS.find((s) => s.textures.pickup === pickup);
   test(`${drawing.name} lies on the floor at the scale it's held at`, () => {
     assert.ok(stats, `no gun's textures.pickup is "${pickup}"`);
@@ -49,8 +50,8 @@ for (const drawing of FINISHED) {
     if (drawing.top) {
       assert.equal(
         stats.art,
-        drawing.name,
-        `${stats.name}'s art should be its top view, "${drawing.name}"`,
+        camel,
+        `${stats.name}'s art should be its top view, "${camel}"`,
       );
     }
   });

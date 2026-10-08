@@ -23,7 +23,7 @@ export const FiveSeven: GunStats = {
     pickup: "fiveSevenPickup",
     shellCasing: "pistolCasing",
   },
-  size: [0.45, 0.45],
+  size: [0.218, 0.218],
 
   points: {
     grip: [-0.1, 0],

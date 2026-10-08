@@ -1002,7 +1002,6 @@ function drawSide(options: DesertEagleOptions = {}): string {
 
 export const DESERT_EAGLE: GunDrawing<DesertEagleOptions> = {
   name: "desert-eagle",
-  draft: true,
   photo: {
     file: "desert-eagle.png",
     width: 1920,

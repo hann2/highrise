@@ -23,7 +23,7 @@ export const Glock: GunStats = {
     pickup: "glockPickup",
     shellCasing: "pistolCasing",
   },
-  size: [0.45, 0.45],
+  size: [0.192, 0.192],
 
   points: {
     grip: [-0.1, 0],

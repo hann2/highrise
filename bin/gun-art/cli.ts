@@ -48,6 +48,7 @@ import {
   type GunDrawing,
 } from "./lib/gun";
 import { GUNS } from "./guns";
+import { GUNS as GUN_STATS } from "../../src/highrise/weapons/guns/gun-stats/gunStats";
 
 const [command, ...rest] = process.argv.slice(2);
 
@@ -655,7 +656,13 @@ async function ingame() {
   const page = await newPage({ width: 1280, height: 720 }, 2);
   page.on("pageerror", (e) => console.error("pageerror:", e.message));
   // The gun in both slots: one in hand (the HUD shows its pickup), one dropped at the player's feet
-  const slug = gun.name.replace(/[^a-z0-9]/g, "");
+  // The arena names guns by their stats' name ("S&W Revolver" is "swrevolver"): the one whose pickup this is
+  const pickup =
+    gun.name.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase()) +
+    "Pickup";
+  const stats = GUN_STATS.find((s) => s.textures.pickup === pickup);
+  if (!stats) throw new Error(`No gun's textures.pickup is "${pickup}"`);
+  const slug = stats.name.toLowerCase().replace(/[^a-z0-9]/g, "");
   await page.goto(
     `http://localhost:${port}/?scene=arena&seed=1&god&weapons=${slug},${slug}`,
   );
