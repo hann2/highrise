@@ -845,8 +845,8 @@ export interface HexLook {
   groove: number;
   grooveDark: number;
 }
-/** Simon's pick (round 6): lit from above like the stock (round 5's C), with the bevels a little stronger than soft */
-export const DEFAULT_HEX_LOOK: HexLook = { shading: "above", bevel: 0.4, groove: 3, grooveDark: 0.35 };
+/** Simon's pick (round 6): lit from above like the stock (round 5's C), with the bevels at 0.5 (round 7) */
+export const DEFAULT_HEX_LOOK: HexLook = { shading: "above", bevel: 0.5, groove: 3, grooveDark: 0.35 };
 const bevelStrength = (b: HexLook["bevel"]) => (b === "full" ? 1 : b === "soft" ? 0 : b);
 const HEX_TOP = 1048; // where the hexes start, just under the magazine well's lip
 const hexBackX = (y: number) => interpolateX(PMAG_BACK, y);
