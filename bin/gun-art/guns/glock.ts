@@ -42,6 +42,8 @@ export interface GlockOptions {
   studSize?: number;
   /** A thin outline round the silhouette, in each part's own dark (the set's rule; default true) */
   outline?: boolean;
+  /** How wide the rim light along the top edges is, in photo px (default RIM_LIGHT) */
+  rimLight?: number;
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -804,6 +806,19 @@ function stops(...list: [number, string, number?][]): string {
 
 const f1 = (v: number) => fixed(v, 1);
 
+// The rim light: the top edges (the slide's top, the tang's top and end, the back strap) catching the light, a
+// line RIM_LIGHT px wide just inside the silhouette, stroked twice as wide along the edge and clipped to the part.
+// It's what keeps the near-black gun from vanishing on a dark floor.
+const RIM_LIGHT = 6; // 0.8 mm: at 2 px (0.27 mm) it was a fifth of a pixel at 128 px, and did nothing on a dark floor
+const SLIDE_RIM =
+  `M${SLIDE_BACK},${SLIDE_TOP + SLIDE_BACK_R} ` +
+  `C${SLIDE_BACK},${SLIDE_TOP + 8} ${SLIDE_BACK + 8},${SLIDE_TOP} ${SLIDE_BACK + SLIDE_BACK_R},${SLIDE_TOP} ` +
+  `L${SLIDE_FRONT - SLIDE_FRONT_R},${SLIDE_TOP} ` +
+  `C${SLIDE_FRONT - 10},${SLIDE_TOP} ${SLIDE_FRONT},${SLIDE_TOP + 10} ${SLIDE_FRONT},${SLIDE_TOP + SLIDE_FRONT_R}`;
+const TANG_RIM =
+  `M${SLIDE_BACK + 6},${TANG_TOP} C${SLIDE_BACK - 4},${TANG_TOP} ${TANG_BACK + 2},${TANG_TOP + 4} ` +
+  `${TANG_BACK},${TANG_TOP + 16} L${TANG_BACK},280`;
+
 // The outline round the silhouette: OUTLINE_MM wide (the set's rule), in each part's own dark. Each part's shape
 // is stroked twice as wide under everything, so the parts cover the inner half and every edge between parts, and
 // only the outer half shows, round the outside (and round the guard's opening and the trigger in it)
@@ -831,6 +846,7 @@ function outlines(S: Material, P: Material): string {
 function drawSide(options: GlockOptions = {}): string {
   const S: Material = { ...BLACK_NITRIDE, ...options.slide };
   const P: Material = { ...BLACK_POLYMER, ...options.frame };
+  const rim = options.rimLight ?? RIM_LIGHT;
   const studPath = studs(
     options.studPitch ?? DEFAULT_STUD_PITCH,
     options.studSize ?? DEFAULT_STUD_SIZE,
@@ -843,6 +859,7 @@ function drawSide(options: GlockOptions = {}): string {
   const backStrapLit =
     `M${fmt(BACK_STRAP[5])} ` +
     smoothCurve(BACK_STRAP.slice(5), [-0.15, 1], [-0.15, 1]);
+  const backStrapRim = backStrapLit;
   const frontStrapShade =
     `M${fmt(FRONT_STRAP[0])} ` +
     smoothCurve(FRONT_STRAP, [0, -1], [-GRIP.down[0], -GRIP.down[1]]);
@@ -937,6 +954,9 @@ ${stops([0, P.dark, 0], [0.18, P.dark, 0.55], [0.36, P.base, 0], [0.5, P.light, 
       <rect x="1418" y="${FRAME_TOP}" width="30" height="120" fill="${P.dark}" opacity="0.3"/>
       <!-- The thumb's trough above the studs -->
       <path d="${THUMB}" fill="url(#glock-thumb-shading)"/>
+      <!-- The rim light: the top edges catching the light, a thin line just inside the silhouette (the tang's
+           top and end, and down the back strap), so the gun holds on a dark floor -->
+      <path d="${TANG_RIM} ${backStrapRim}" stroke="${P.highlight}" stroke-width="${rim * 2}"/>
     </g>
     <!-- The rail: a step where it starts, its lighter face, the groove along it and its lit lower lip -->
     <path d="${RAIL_FACE}" fill="${P.light}" opacity="0.3"/>
@@ -1001,6 +1021,8 @@ ${stops([0, P.dark, 0], [0.18, P.dark, 0.55], [0.36, P.base, 0], [0.5, P.light, 
       <path id="glock-port" d="${PORT}" fill="#0e0f11"/>
       <path id="glock-hood" d="${HOOD}" fill="url(#glock-hood-shading)"/>
       <path d="${PORT_EDGE}" stroke="${S.highlight}" stroke-width="3" fill="none"/>
+      <!-- The rim light along its top, just inside the edge -->
+      <path d="${SLIDE_RIM}" stroke="${S.highlight}" stroke-width="${rim * 2}" fill="none"/>
       <!-- Its bottom edge, a dark seam over the frame -->
       <path d="M${SLIDE_BACK},${SLIDE_BOTTOM - 2} L${SLIDE_FRONT},${SLIDE_BOTTOM - 2}" stroke="${S.dark}" stroke-width="4" fill="none"/>
     </g>
