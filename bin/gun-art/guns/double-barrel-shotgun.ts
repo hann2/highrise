@@ -91,6 +91,8 @@ export interface DoubleBarrelOptions {
   outline?: boolean;
   /** The lit line along the barrels', fences' and tang's tops, in px (0.8 mm) */
   rimLight?: number;
+  /** The hammers down on the strikers (at rest), or cocked */
+  hammers?: "down" | "cocked";
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -367,26 +369,45 @@ const shiftPath = (d: string, [dx, dy]: Point) =>
       `${f1(parseFloat(a) + dx)},${f1(parseFloat(b) + dy)}`,
   );
 
+// Cocked, each hammer is turned back about its tumbler by this much (degrees, counterclockwise as seen): its nose
+// lifts off the striker and the spur leans back over the top lever. A first guess at the real throw.
+const HAMMER_COCK = -30;
+
+/** Every point of a path turned `degrees` about `center` (clockwise as seen) */
+function turnPath(d: string, center: Point, degrees: number): string {
+  if (degrees === 0) {
+    return d;
+  }
+  const a = (degrees * Math.PI) / 180;
+  const [cos, sin] = [Math.cos(a), Math.sin(a)];
+  return d.replace(/(-?[\d.]+),(-?[\d.]+)/g, (_m, sx: string, sy: string) => {
+    const x = parseFloat(sx) - center[0];
+    const y = parseFloat(sy) - center[1];
+    return `${f1(center[0] + x * cos - y * sin)},${f1(center[1] + x * sin + y * cos)}`;
+  });
+}
+
 /** The left hammer, behind the gun: only its head and spur show over the action */
-function farHammer(at: Point): string[] {
-  return [shiftPath(HAMMER_HEAD, at), band(shift(HAMMER_SPUR, at), 7, 4)];
+function farHammer(at: Point, turn = 0): string[] {
+  const pivot: Point = [TUMBLER[0] + at[0], TUMBLER[1] + at[1]];
+  return [shiftPath(HAMMER_HEAD, at), band(shift(HAMMER_SPUR, at), 7, 4)].map(
+    (d) => turnPath(d, pivot, turn),
+  );
 }
 
 /** The hammer's pieces, each its own path (they overlap, and the drawing fills by even-odd) */
-function hammer(at: Point = [0, 0]): string[] {
-  const body = `M${f1(TUMBLER[0] + at[0] + 13)},${f1(TUMBLER[1] + at[1])} ${arc(
-    [TUMBLER[0] + at[0], TUMBLER[1] + at[1]],
-    13,
-    0,
-    360,
-  )} Z`;
+function hammer(turn = 0): string[] {
+  const body = `M${f1(TUMBLER[0] + 13)},${f1(TUMBLER[1])} ${arc(TUMBLER, 13, 0, 360)} Z`;
   return [
     body,
-    band(shift(HAMMER_NECK, at), 15, 13),
-    shiftPath(HAMMER_HEAD, at),
-    band(shift(HAMMER_SPUR, at), 7, 4),
-  ];
+    band(HAMMER_NECK, 15, 13),
+    HAMMER_HEAD,
+    band(HAMMER_SPUR, 7, 4),
+  ].map((d) => turnPath(d, TUMBLER, turn));
 }
+
+// The strikers in the fence, under the hammers' noses (seen when they're cocked)
+const STRIKER: Point = [897, 677];
 
 // ---------------------------------------------------------------------------------------------------------
 // The trigger guard: a bow of flat steel from the action's underside back to the wood (its centerline, stroked
@@ -467,8 +488,9 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
   const stock = pistol ? PISTOL_STOCK : FULL_STOCK;
   const BARREL = barrel(muzzle);
   const FOREND = forend(forendFront);
-  const HAMMERS = hammer();
-  const FAR = farHammer(FAR_HAMMER);
+  const turn = options.hammers === "cocked" ? HAMMER_COCK : 0;
+  const HAMMERS = hammer(turn);
+  const FAR = farHammer(FAR_HAMMER, turn);
   const rim = options.rimLight ?? RIM_LIGHT;
   const sawn = options.sawn === undefined ? S.highlight : options.sawn;
   const top = barrelTop(muzzle);
@@ -641,15 +663,18 @@ function drawSide(options: DoubleBarrelOptions = {}): string {
     <path d="${PLATE}" stroke="${C.light}" stroke-width="2" fill="none" opacity="0.8"/>
     ${PLATE_SCREWS.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="${C.light}"/>\n    <path d="M${x - 4},${y + 1} L${x + 4},${y - 1}" stroke="${C.dark}" stroke-width="1.5"/>`).join("\n    ")}
   </g>
-  <!-- The hammers, down: the left one behind the right, its spur lower and further back -->
-  <g id="hammers">
-    ${HAMMERS.map((d) => `<path d="${d}" fill="url(#double-barrel-shotgun-hammer)"/>`).join("\n    ")}
-    <circle cx="${TUMBLER[0]}" cy="${TUMBLER[1]}" r="5" fill="${C.dark}"/>
-  </g>
   <!-- On the top tang, its thumbpiece standing up at its back -->
   <g id="top-lever">
     <path d="${TOP_LEVER}" fill="${S.base}"/>
     <path d="M784,664 C788,658 796,656 802,658" stroke="${S.highlight}" stroke-width="2" fill="none"/>
+  </g>
+  <!-- The striker in the fence, under the hammer's nose -->
+  <circle id="striker" cx="${STRIKER[0]}" cy="${STRIKER[1]}" r="5" fill="${S.light}" stroke="${S.dark}" stroke-width="1.5"/>
+  <!-- The hammers, on the side of the gun, so over the top lever: the left one behind the right, its spur lower
+       and further back -->
+  <g id="hammers">
+    ${HAMMERS.map((d) => `<path d="${d}" fill="url(#double-barrel-shotgun-hammer)"/>`).join("\n    ")}
+    <circle cx="${TUMBLER[0]}" cy="${TUMBLER[1]}" r="5" fill="${C.dark}"/>
   </g>
   <!-- Blued, polished, cut square: the sawn steel bright at the muzzle -->
   <g id="barrels">
