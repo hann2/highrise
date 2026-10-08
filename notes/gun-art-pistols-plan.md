@@ -1,4 +1,6 @@
-# Pistols redrawn by a team of agents (plan, 2026-10-07)
+# Pistols redrawn by a team of agents (plan, 2026-10-07; done)
+
+**Done 2026-10-07**: all four drawn (side views and top views), in the game at true scale, the materials in `bin/gun-art/lib/style.ts`, and what we learned in the `gun-art` skill ("A team of agents"). The plan as it was:
 
 Redraw the four pistols still on old art, each by its own agent following the `gun-art` skill (`.claude/skills/gun-art/SKILL.md`), the way the M1911 was drawn (`bin/gun-art/guns/m1911.ts` is the worked example). Claude (the lead, in the main session) sets up, reviews, and integrates; Simon reviews one combined sheet per round.
 
