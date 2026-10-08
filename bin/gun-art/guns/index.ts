@@ -6,6 +6,7 @@ import { GLOCK } from "./glock";
 import { M1911 } from "./m1911";
 import { REVOLVER } from "./revolver";
 import { AK_47 } from "./ak-47";
+import { AR_15 } from "./ar-15";
 import { P90 } from "./p90";
 import { REMINGTON_870 } from "./remington-870";
 import { SPAS_12 } from "./spas-12";
@@ -18,6 +19,7 @@ export const GUNS: readonly GunDrawing<any>[] = [
   DESERT_EAGLE,
   REVOLVER,
   AK_47,
+  AR_15,
   P90,
   REMINGTON_870,
   SPAS_12,
