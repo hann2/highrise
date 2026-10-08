@@ -158,6 +158,14 @@ export interface Ar15Options {
   stockNotch?: number;
   /** Leave the optic off (the folded sights stay folded) */
   noOptic?: boolean;
+  /** The handguard's length in inches (default the photo's, 10.9": KAC's 10.75" URX 4); longer repeats its slots */
+  handguardLength?: number;
+  /** The flip-up sights: folded down under the optic (default), up, or none */
+  irons?: Irons;
+  /** The magazine: the photo's aluminium GI magazine (default) or a black polymer PMAG */
+  magazineStyle?: "gi" | "pmag";
+  /** The textured M-LOK covers and the rail section under the front (default true) */
+  extras?: boolean;
   /** A thin outline round the silhouette, in each part's own dark (the set's rule; default true) */
   outline?: boolean;
   /** The outline's width in millimeters (default OUTLINE_MM) */
@@ -356,18 +364,8 @@ const HG_BOTTOM = 912;
 const RAIL_LUG_TOP = 780;
 const HG_LUGS = { first: 1183, pitch: 24.8, count: 26, width: 12.5 };
 const UPPER_LUGS = { first: 855, pitch: 25.1, count: 11, width: 11.5 };
-const HANDGUARD = rounded(
-  [
-    [HG_BACK, HG_TOP],
-    [HG_FRONT - 4, HG_TOP],
-    [HG_FRONT, HG_FACE],
-    [HG_FRONT, HG_BOTTOM - 8],
-    [HG_FRONT - 10, HG_BOTTOM],
-    [HG_BACK, HG_BOTTOM],
-  ],
-  [0, 2, 0, 6, 4, 0],
-);
-// The slots, back to front, each [x0, x1]
+// The slots, back to front, each [x0, x1]. The middle row's slots under the covers (1452 and 1553) are there too,
+// for when they're off.
 const SHORT_SLOTS: [number, number][] = [
   [1377, 1429],
   [1483, 1536],
@@ -384,6 +382,8 @@ const TOP_SLOTS: [number, number][] = [
 const MIDDLE_SLOTS: [number, number][] = [
   [1300, 1330],
   [1350, 1426],
+  [1452, 1528],
+  [1553, 1629],
   [1655, 1730],
   [1754, 1831],
 ];
@@ -399,33 +399,83 @@ const SHORT_ROW: [number, number] = [791, 804];
 const TOP_ROW: [number, number] = [813, 830];
 const MIDDLE_ROW: [number, number] = [838, 858];
 const BOTTOM_ROW: [number, number] = [882, 899];
-const row = (slots: [number, number][], [y0, y1]: [number, number]) =>
-  slots.map(([x0, x1]) => pill(x0, x1, y0, y1)).join(" ");
-const THROUGH_SLOTS =
-  row(SHORT_SLOTS, SHORT_ROW) +
-  " " +
-  row(TOP_SLOTS, TOP_ROW) +
-  " " +
-  row(BOTTOM_SLOTS, BOTTOM_ROW);
-const BARREL_SLOTS = row(MIDDLE_SLOTS, MIDDLE_ROW);
 const COVERS: [number, number][] = [
   [1428, 1531],
   [1533, 1640],
 ];
 const COVER_TOP = 831;
 const COVER_BOTTOM = 918;
-const BOTTOM_RAIL = rounded(
-  [
-    [1645, 905],
-    [1847, 905],
-    [1847, 925],
-    [1702, 925],
-  ],
-  [2, 2, 2, 4],
-);
-const BOTTOM_RAIL_LUGS = [0, 1, 2, 3, 4]
-  .map((i) => rbox(1712 + i * 26, 924, 1727 + i * 26, 933, [0, 0, 2, 2]))
-  .join(" ");
+
+// A longer handguard (`handguard`, in inches; the photo's is 10.9" from the upper to its end cap, KAC's 10.75"): the
+// slots repeat every M-LOK pitch (40 mm, 100.8 px here), so whole pitches are put in at CUT (each slot whose middle is
+// past it moves forward, and the slots in the pitches just behind it are repeated forward), and whatever's left of
+// the length goes into the solid front end. The front sight sits on the front end and moves with it; the rail
+// section under the front, mounted in slots, moves by the whole pitches; the covers stay.
+const PHOTO_HANDGUARD_IN = (1850 - HG_BACK) / PX_PER_IN;
+const MLOK_PITCH = 40 / MM_PER_PX;
+const CUT = 1585;
+
+function handguardShapes(lengthIn: number = PHOTO_HANDGUARD_IN) {
+  const extra = Math.max(0, (lengthIn - PHOTO_HANDGUARD_IN) * PX_PER_IN);
+  const pitches = Math.round(extra / MLOK_PITCH);
+  const shift = pitches * MLOK_PITCH;
+  const front = HG_FRONT + extra;
+  const slots = (list: [number, number][]) => {
+    const out: [number, number][] = [];
+    for (const [a, b] of list) {
+      const mid = (a + b) / 2;
+      if (mid < CUT) {
+        out.push([a, b]);
+        // repeated forward into the pitches put in
+        for (let k = 1; k <= pitches; k++) {
+          if (mid + k * MLOK_PITCH >= CUT && mid + k * MLOK_PITCH < CUT + shift) {
+            out.push([a + k * MLOK_PITCH, b + k * MLOK_PITCH]);
+          }
+        }
+      } else {
+        out.push([a + shift, b + shift]);
+      }
+    }
+    return out;
+  };
+  const row = (list: [number, number][], [y0, y1]: [number, number]) =>
+    slots(list)
+      .map(([x0, x1]) => pill(x0, x1, y0, y1))
+      .join(" ");
+  const body = rounded(
+    [
+      [HG_BACK, HG_TOP],
+      [front - 4, HG_TOP],
+      [front, HG_FACE],
+      [front, HG_BOTTOM - 8],
+      [front - 10, HG_BOTTOM],
+      [HG_BACK, HG_BOTTOM],
+    ],
+    [0, 2, 0, 6, 4, 0],
+  );
+  const through =
+    row(SHORT_SLOTS, SHORT_ROW) + " " + row(TOP_SLOTS, TOP_ROW) + " " + row(BOTTOM_SLOTS, BOTTOM_ROW);
+  const barrelSlots = row(MIDDLE_SLOTS, MIDDLE_ROW);
+  const r = (x: number) => x + shift;
+  const bottomRail = rounded(
+    [
+      [r(1645), 905],
+      [r(1847), 905],
+      [r(1847), 925],
+      [r(1702), 925],
+    ],
+    [2, 2, 2, 4],
+  );
+  const bottomRailLugs = [0, 1, 2, 3, 4]
+    .map((i) => rbox(r(1712) + i * 26, 924, r(1727) + i * 26, 933, [0, 0, 2, 2]))
+    .join(" ");
+  const lugSpec = {
+    ...HG_LUGS,
+    count: Math.floor((front - 6 - HG_LUGS.width - HG_LUGS.first) / HG_LUGS.pitch) + 1,
+  };
+  return { extra, shift, front, body, through, barrelSlots, bottomRail, bottomRailLugs, lugSpec };
+}
+
 const HG_QD: Point = [1229, 846];
 
 function lugs(spec: typeof HG_LUGS, top: number, bottom: number): string {
@@ -720,6 +770,33 @@ const MAGAZINE = `M${fmt(MAG_BACK[0])} L${fmt(MAG_FRONT[0])} ${smoothCurve(MAG_F
 const FLOOR_PLATE = `M1012,1314 L1170,1276 L1175,1285 L1018,1325 Z`;
 
 /** A line along the magazine `t` of the way from its back to its front */
+// A Magpul PMAG (`magazineStyle: "pmag"`), black polymer: the same curve, a little deeper toward its bottom, its
+// lower part ribbed across (ribs parallel to its base), a smooth band above them, and a thick floor plate whose
+// front and back stand out past the body, its bottom sloping with the base.
+const PMAG_FRONT: Point[] = MAG_FRONT.map(([x, y]) => [x + Math.max(0, (y - 1040) / 260) * 6, y]);
+const PMAG_BACK: Point[] = MAG_BACK.map(([x, y]) => [x - Math.max(0, (y - 1040) / 260) * 4, y]);
+/** The base's line: y at x, sloping down to the back as the GI magazine's does */
+const pmagBaseY = (x: number) => 1306 + ((x - 1012) * (1268 - 1306)) / (1174 - 1012);
+const PMAG = `M${fmt(PMAG_BACK[0])} L${fmt(PMAG_FRONT[0])} ${smoothCurve(PMAG_FRONT.slice(0, -1), [0, 1], [0.2, 1])} L${f1(1172)},${f1(pmagBaseY(1172))} L${f1(1006)},${f1(pmagBaseY(1006))} ${smoothCurve([[1006, pmagBaseY(1006)], ...[...PMAG_BACK].reverse().slice(1)], [-0.25, -1], [0, -1])} Z`;
+const PMAG_PLATE = rounded(
+  [
+    [998, pmagBaseY(998) - 4],
+    [1182, pmagBaseY(1182) - 4],
+    [1184, pmagBaseY(1184) + 12],
+    [1003, pmagBaseY(1003) + 16],
+  ],
+  [3, 4, 5, 6],
+);
+/** The ribs across its lower part, parallel to its base */
+function pmagRibs(): string {
+  const out: string[] = [];
+  for (let k = 1; k <= 9; k++) {
+    const dy = 10 + k * 11;
+    out.push(`M990,${f1(pmagBaseY(990) - dy)} L1190,${f1(pmagBaseY(1190) - dy)}`);
+  }
+  return out.join(" ");
+}
+
 function magLine(t: number, y0 = 1042, y1 = 1300): string {
   const back = MAG_BACK.filter((p) => p[1] >= y0 - 1 && p[1] <= y1 + 25);
   const pts: Point[] = back.map((b) => {
@@ -744,7 +821,9 @@ function interpolateX(points: Point[], y: number): number {
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// The folded sights (KAC's micro flip-ups, folded down under the optic)
+// The sights: KAC's micro flip-ups. Folded down under the optic by default (`irons`); up, as photographed (the
+// rear's aperture leaf 790 to 804 from y 676, on its body 782 to 812 with its drum, the front's tower 1784 to 1810
+// from y 692 with a window round its post); or left off.
 
 const REAR_SIGHT_BASE = rounded(
   [
@@ -757,6 +836,23 @@ const REAR_SIGHT_BASE = rounded(
   [0, 4, 4, 3, 0],
 );
 const REAR_SIGHT_LEAF = rbox(790, 762, 850, 772, [5, 4, 2, 2]);
+const REAR_SIGHT_UP = rounded(
+  [
+    [773, 770],
+    [782, 757],
+    [782, 709],
+    [790, 707],
+    [790, 678],
+    [804, 676],
+    [804, 707],
+    [812, 709],
+    [812, 757],
+    [826, 760],
+    [840, 770],
+  ],
+  [0, 3, 2, 2, 3, 3, 2, 2, 3, 3, 0],
+);
+const REAR_SIGHT_UP_BASE = rbox(770, 762, 842, 787, [4, 6, 0, 0]);
 const FRONT_SIGHT_BASE = rounded(
   [
     [1785, 780],
@@ -768,6 +864,51 @@ const FRONT_SIGHT_BASE = rounded(
   [0, 4, 6, 3, 0],
 );
 const FRONT_SIGHT_POST = rbox(1736, 762, 1806, 771, [4, 3, 2, 3]);
+const FRONT_SIGHT_UP = rounded(
+  [
+    [1783, 762],
+    [1784, 696],
+    [1789, 692],
+    [1805, 692],
+    [1810, 697],
+    [1810, 762],
+  ],
+  [0, 4, 3, 3, 4, 0],
+);
+const FRONT_SIGHT_WINDOW = rbox(1789, 700, 1805, 744, 4);
+const FRONT_SIGHT_UP_POST = rbox(1795, 706, 1799, 745, 1);
+const FRONT_SIGHT_UP_BASE = rbox(1783, 758, 1846, 787, [3, 6, 0, 0]);
+
+export type Irons = "folded" | "up" | "none";
+
+/** The sights' shapes: the rear on the upper, the front at the handguard's front (moved by `dx`) */
+function sightShapes(irons: Irons, dx: number) {
+  const move = (d: string) =>
+    d.replace(/(-?[\d.]+),(-?[\d.]+)/g, (_m, x: string, y: string) => `${f1(parseFloat(x) + dx)},${y}`);
+  if (irons === "none") {
+    return null;
+  }
+  if (irons === "up") {
+    return {
+      rear: REAR_SIGHT_UP_BASE + " " + REAR_SIGHT_UP,
+      rearLit: "M791,677.5 L803,677.5 M783,710 L811,710",
+      rearDetail: circle([797, 733], 10),
+      front: move(FRONT_SIGHT_UP_BASE + " " + FRONT_SIGHT_UP + " " + FRONT_SIGHT_WINDOW),
+      frontPost: move(FRONT_SIGHT_UP_POST),
+      frontLit: move("M1790,693.5 L1804,693.5"),
+      frontDetail: circle([1824 + dx, 772], 4),
+    };
+  }
+  return {
+    rear: REAR_SIGHT_BASE + " " + REAR_SIGHT_LEAF,
+    rearLit: "M794,763 L846,763",
+    rearDetail: circle([780, 778], 5),
+    front: move(FRONT_SIGHT_BASE),
+    frontPost: move(FRONT_SIGHT_POST),
+    frontLit: move("M1740,763 L1802,763"),
+    frontDetail: circle([1812 + dx, 774], 4),
+  };
+}
 
 // ---------------------------------------------------------------------------------------------------------
 // The stock: Magpul's DT-PR Carbine, drawn in its own photo's pixels (ar-15-stock.jpg, 1200 by 1200, its left
@@ -1223,7 +1364,12 @@ function drawSide(options: Ar15Options = {}): string {
   const H: Material = { ...R, ...options.handguard };
   const F: Material = { ...AR_POLYMER, ...options.furniture };
   const O: Material = { ...AR_OPTIC, ...options.optic };
-  const M: Material = { ...AR_MAGAZINE, ...options.magazine };
+  const pmag = options.magazineStyle === "pmag";
+  const M: Material = { ...(pmag ? AR_POLYMER : AR_MAGAZINE), ...options.magazine };
+  const extras = options.extras !== false;
+  const hg = handguardShapes(options.handguardLength);
+  const sights = sightShapes(options.irons ?? "folded", hg.extra);
+  const magazine = pmag ? PMAG : MAGAZINE;
   const S: Material = { ...AR_STEEL, ...options.steel };
   const T: Material = { ...AR_TRIGGER, ...options.trigger };
   const shift = ((options.barrel ?? DEFAULT_BARREL_IN) - PHOTO_BARREL_IN) * PX_PER_IN;
@@ -1247,15 +1393,13 @@ function drawSide(options: Ar15Options = {}): string {
   const outlineParts: [string, string][] = [
     [barrel, S.dark],
     [hider.body, S.dark],
-    [HANDGUARD, H.dark],
-    [lugs(HG_LUGS, RAIL_LUG_TOP, HG_TOP + 1), H.dark],
-    [BOTTOM_RAIL + " " + BOTTOM_RAIL_LUGS, H.dark],
-    [COVERS.map(([a, b]) => rbox(a, COVER_TOP, b, COVER_BOTTOM, 4)).join(" "), F.dark],
+    [hg.body, H.dark],
+    [lugs(hg.lugSpec, RAIL_LUG_TOP, HG_TOP + 1), H.dark],
     [tube, R.dark],
     [CASTLE, S.dark],
     [END_PLATE, R.dark],
     [st.body, F.dark],
-    [MAGAZINE, M.dark],
+    [magazine + (pmag ? " " + PMAG_PLATE : ""), M.dark],
     [GRIP, F.dark],
     [TRIGGER, T.dark],
     [LOWER, R.dark],
@@ -1263,9 +1407,16 @@ function drawSide(options: Ar15Options = {}): string {
     [lugs(UPPER_LUGS, RAIL_LUG_TOP, HG_TOP + 1), R.dark],
     [rbox(1131, RAIL_LUG_TOP, 1159, HG_TOP + 1, [1.5, 1.5, 0, 0]), R.dark],
     [CHARGING_HANDLE, R.dark],
-    [REAR_SIGHT_BASE + " " + REAR_SIGHT_LEAF, R.dark],
-    [FRONT_SIGHT_BASE + " " + FRONT_SIGHT_POST, H.dark],
   ];
+  if (extras) {
+    outlineParts.push(
+      [hg.bottomRail + " " + hg.bottomRailLugs, H.dark],
+      [COVERS.map(([a, b]) => rbox(a, COVER_TOP, b, COVER_BOTTOM, 4)).join(" "), F.dark],
+    );
+  }
+  if (sights) {
+    outlineParts.push([sights.rear, R.dark], [sights.front + " " + sights.frontPost, H.dark]);
+  }
   if (!options.noOptic) {
     outlineParts.push([op.mount + " " + op.body + " " + op.hood, O.dark]);
   }
@@ -1376,7 +1527,7 @@ function drawSide(options: Ar15Options = {}): string {
       [1, O.dark],
     ])}
     <clipPath id="ar-15-handguard-clip">
-      <path d="${HANDGUARD}"/>
+      <path d="${hg.body}"/>
     </clipPath>
     <clipPath id="ar-15-upper-clip">
       <path d="${UPPER_BODY}"/>
@@ -1391,7 +1542,7 @@ function drawSide(options: Ar15Options = {}): string {
       <path d="${GRIP_PANEL}"/>
     </clipPath>
     <clipPath id="ar-15-magazine-clip">
-      <path d="${MAGAZINE}"/>
+      <path d="${magazine}"/>
     </clipPath>
     <clipPath id="ar-15-stock-clip">
       <path d="${st.body} ${st.opening} ${st.slot} ${st.ringHole}"/>
@@ -1420,34 +1571,42 @@ function drawSide(options: Ar15Options = {}): string {
   </g>
   <!-- The handguard: KAC's URX 4, its rail along the top, M-LOK slots through it in rows -->
   <g id="ar-15-handguard">
-    <path d="${HANDGUARD} ${THROUGH_SLOTS}" fill="url(#ar-15-handguard-shading)"/>
-    <path d="${lugs(HG_LUGS, RAIL_LUG_TOP, HG_TOP + 1)}" fill="${H.base}"/>
-    <path d="${lugs(HG_LUGS, RAIL_LUG_TOP, RAIL_LUG_TOP + 2)}" fill="${H.highlight}"/>
+    <path d="${hg.body} ${hg.through}" fill="url(#ar-15-handguard-shading)"/>
+    <path d="${lugs(hg.lugSpec, RAIL_LUG_TOP, HG_TOP + 1)}" fill="${H.base}"/>
+    <path d="${lugs(hg.lugSpec, RAIL_LUG_TOP, RAIL_LUG_TOP + 2)}" fill="${H.highlight}"/>
     <g clip-path="url(#ar-15-handguard-clip)" fill="none">
       <!-- The middle row: the barrel through them, in the handguard's shadow -->
-      <path d="${BARREL_SLOTS}" fill="${S.dark}" opacity="0.3"/>
+      <path d="${hg.barrelSlots}" fill="${S.dark}" opacity="0.3"/>
       <!-- The slots' cut edges: lit along their bottoms, in shadow along their tops -->
-      <path d="${THROUGH_SLOTS} ${BARREL_SLOTS}" stroke="${H.dark}" stroke-width="3"/>
+      <path d="${hg.through} ${hg.barrelSlots}" stroke="${H.dark}" stroke-width="3"/>
       <!-- The QD socket at the back -->
       <path d="${circle(HG_QD, 18)}" fill="${H.light}" stroke="${H.dark}" stroke-width="2"/>
       <path d="${circle(HG_QD, 11)}" fill="${H.dark}"/>
       <!-- The rim light along the rail's spine -->
-      <path d="M${HG_BACK},${HG_TOP + rim / 2} L${HG_FRONT - 3},${HG_TOP + rim / 2}" stroke="${H.highlight}" stroke-width="${f1(rim)}" opacity="0.6"/>
+      <path d="M${HG_BACK},${HG_TOP + rim / 2} L${f1(hg.front - 3)},${HG_TOP + rim / 2}" stroke="${H.highlight}" stroke-width="${f1(rim)}" opacity="0.6"/>
     </g>
-    <!-- KAC's rail section under the front -->
-    <path d="${BOTTOM_RAIL} ${BOTTOM_RAIL_LUGS}" fill="${mix(H.base, H.dark, 0.3)}"/>
-    <path d="M1650,907 L1845,907" stroke="${H.light}" stroke-width="2" fill="none"/>
+    ${
+      extras
+        ? `<!-- KAC's rail section under the front -->
+    <path d="${hg.bottomRail} ${hg.bottomRailLugs}" fill="${mix(H.base, H.dark, 0.3)}"/>
+    <path d="M${f1(1650 + hg.shift)},907 L${f1(1845 + hg.shift)},907" stroke="${H.light}" stroke-width="2" fill="none"/>
     <!-- Magpul's M-LOK covers, stippled -->
     ${COVERS.map(([a, b]) => `<path d="${rbox(a, COVER_TOP, b, COVER_BOTTOM, 4)}" fill="url(#ar-15-cover-shading)"/>`).join("\n    ")}
-    ${COVERS.map(([a, b]) => `<path d="${stipple(a, b, COVER_TOP, COVER_BOTTOM)}" fill="${F.dark}" opacity="0.55"/>`).join("\n    ")}
+    ${COVERS.map(([a, b]) => `<path d="${stipple(a, b, COVER_TOP, COVER_BOTTOM)}" fill="${F.dark}" opacity="0.55"/>`).join("\n    ")}`
+        : ""
+    }
   </g>
-  <!-- The folded front sight on the handguard's front -->
+  ${
+    sights
+      ? `<!-- The front sight on the handguard's front -->
   <g id="ar-15-front-sight">
-    <path d="${FRONT_SIGHT_BASE}" fill="${H.base}"/>
-    <path d="${FRONT_SIGHT_POST}" fill="${mix(H.base, H.light, 0.5)}"/>
-    <path d="M1740,763 L1802,763" stroke="${H.highlight}" stroke-width="2" fill="none"/>
-    <path d="${circle([1812, 774], 4)}" fill="${H.dark}"/>
-  </g>
+    <path d="${sights.front}" fill="${H.base}"/>
+    <path d="${sights.frontPost}" fill="${mix(H.base, H.light, 0.5)}"/>
+    <path d="${sights.frontLit}" stroke="${H.highlight}" stroke-width="2" fill="none"/>
+    <path d="${sights.frontDetail}" fill="${H.dark}"/>
+  </g>`
+      : ""
+  }
   <!-- The buffer tube, its threads in front of the castle nut, the end plate and its QD socket -->
   <g id="ar-15-buffer-tube">
     <path d="${tube}" fill="url(#ar-15-tube-shading)"/>
@@ -1460,14 +1619,28 @@ function drawSide(options: Ar15Options = {}): string {
     <path d="${circle([645, 845], 3)}" fill="${S.dark}"/>
   </g>
   ${stock(butt, F, rim)}
-  <!-- The magazine, up into the magazine well: pressed ribs along it, its floor plate -->
+  ${
+    pmag
+      ? `<!-- A PMAG, up into the magazine well: its lower part ribbed across, its thick floor plate -->
   <g id="ar-15-magazine">
-    <path d="${MAGAZINE}" fill="url(#ar-15-magazine-shading)"/>
+    <path d="${magazine}" fill="url(#ar-15-magazine-shading)"/>
+    <g clip-path="url(#ar-15-magazine-clip)" fill="none">
+      <path d="${pmagRibs()}" stroke="${M.dark}" stroke-width="4"/>
+      <path d="${pmagRibs().replace(/,(-?[\d.]+)/g, (_m, y: string) => "," + f1(parseFloat(y) + 3.5))}" stroke="${M.light}" stroke-width="2" opacity="0.7"/>
+      <path d="M990,${f1(pmagBaseY(990) - 125)} L1190,${f1(pmagBaseY(1190) - 125)}" stroke="${M.dark}" stroke-width="3" opacity="0.7"/>
+    </g>
+    <path d="${PMAG_PLATE}" fill="${mix(M.base, M.dark, 0.3)}"/>
+    <path d="M1000,${f1(pmagBaseY(1000) - 2)} L1180,${f1(pmagBaseY(1180) - 2)}" stroke="${M.light}" stroke-width="2.5" fill="none"/>
+  </g>`
+      : `<!-- The magazine, up into the magazine well: pressed ribs along it, its floor plate -->
+  <g id="ar-15-magazine">
+    <path d="${magazine}" fill="url(#ar-15-magazine-shading)"/>
     <g clip-path="url(#ar-15-magazine-clip)" fill="none">
       ${[0.1, 0.33, 0.62, 0.86].map((t) => `<path d="${magLine(t)}" stroke="${M.dark}" stroke-width="4"/><path d="${magLine(t + 0.03)}" stroke="${M.light}" stroke-width="3" opacity="0.8"/>`).join("\n      ")}
     </g>
     <path d="${FLOOR_PLATE}" fill="${mix(M.base, M.dark, 0.4)}"/>
-  </g>
+  </g>`
+  }
   <!-- The trigger, hanging into the guard's opening -->
   <g id="ar-15-trigger">
     <path d="${TRIGGER}" fill="url(#ar-15-trigger-shading)"/>
@@ -1540,13 +1713,16 @@ function drawSide(options: Ar15Options = {}): string {
     <path d="${CHARGING_HANDLE}" fill="url(#ar-15-charging-shading)"/>
     <path d="M736,792 L752,792 L752,804 L736,804 Z" fill="${R.dark}"/>
   </g>
-  <!-- The rear sight, folded down behind the optic -->
+  ${
+    sights
+      ? `<!-- The rear sight on the upper's rail, behind the optic -->
   <g id="ar-15-rear-sight">
-    <path d="${REAR_SIGHT_BASE}" fill="${R.base}"/>
-    <path d="${REAR_SIGHT_LEAF}" fill="${mix(R.base, R.light, 0.5)}"/>
-    <path d="M794,763 L846,763" stroke="${R.highlight}" stroke-width="2" fill="none"/>
-    <path d="${circle([780, 778], 5)}" fill="${R.dark}"/>
-  </g>
+    <path d="${sights.rear}" fill="${R.base}"/>
+    <path d="${sights.rearLit}" stroke="${R.highlight}" stroke-width="2" fill="none"/>
+    <path d="${sights.rearDetail}" fill="${R.dark}"/>
+  </g>`
+      : ""
+  }
   ${options.noOptic ? "" : optic(O, rim)}
 </svg>`;
 }
