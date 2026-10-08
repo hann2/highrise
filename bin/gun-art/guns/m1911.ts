@@ -79,6 +79,8 @@ export interface M1911Options {
   wood?: Partial<WoodStyle>;
   /** The hammer's spur from above: the early wide, checkered one, or the 1911 A1's round, knurled one */
   hammer?: "early" | "a1";
+  /** A thin outline round the silhouette, in each part's own dark (the set's rule; default true) */
+  outline?: boolean;
 }
 
 // The grip, in three layers along one axis: the frame, the wood panel on it, and the grip safety, the one part
@@ -400,6 +402,47 @@ function serrations(): string {
   return out.join("\n      ");
 }
 
+// The parts' outlines, for the outline round the silhouette as well as their fills
+const HAMMER =
+  "M128,124 C132,114 150,108 172,108 C195,108 210,121 228,129 L300,132 L300,242 L261,242 C258,214 244,190 222,173 C210,165 200,160 190,155 C172,147 150,143 136,137 C129,134 126,129 128,124 Z";
+const BUSHING =
+  "M1928,116 L1950,116 C1955,116 1958,120 1958,126 L1958,342 C1958,348 1955,352 1950,352 L1928,352 Z";
+const FRAME_FACE = `M262,284 L1552,284 L1552,397 C1552,401 1549,403 1545,403 ${FILLET_START} ${RIM} ${FRAME_GRIP} C150,360 200,345 238,324 C252,315 260,300 262,284 Z`;
+const SLIDE_SHAPE =
+  "M330,74 L844,74 C852,75 857,82 858,92 L859,110 C860,132 876,146 904,146 L1078,146 C1104,146 1120,132 1122,112 L1123,94 C1124,84 1126,77 1134,74 L1905,74 C1918,74 1930,85 1932,100 L1934,350 C1934,372 1920,388 1898,388 L1552,388 L1552,284 L262,284 L262,200 C262,140 290,90 330,74 Z";
+const NOSE =
+  "M1552,284 L1582,284 C1622,262 1662,238 1722,234 L1933,232 L1934,350 C1934,372 1920,388 1898,388 L1552,388 Z";
+const SIDE_REAR_SIGHT =
+  "M386,76 L392,60 L405,47 L416,36 L427,33 L437,40 L449,53 L453,63 L460,76 Z";
+const SIDE_FRONT_SIGHT =
+  "M1806,76 C1825,62 1840,55 1858,54 C1875,54 1890,60 1900,76 Z";
+
+// The outline round the silhouette (the set's rule, as on the other pistols): 0.4 mm, in each part's own dark.
+// Each part's shape is stroked twice as wide under everything, so the parts cover the inner half and the edges
+// between them, and only the outer half shows: round the gun, and in the guard's opening.
+const OUTLINE = 0.4 / (216 / 1867);
+
+function outlines(): string {
+  const steel = [
+    HAMMER,
+    BUSHING,
+    LOWER,
+    FRAME_FACE,
+    MAG_BASE,
+    SLIDE_SHAPE,
+    NOSE,
+    SIDE_REAR_SIGHT,
+    SIDE_FRONT_SIGHT,
+  ];
+  return `<!-- The outline: each part's shape stroked under everything, so only its outer half shows -->
+  <g id="m1911-outline" fill="none" stroke-width="${f1(OUTLINE * 2)}">
+    ${steel.map((d) => `<path d="${d}" stroke="${STEEL_DARK}"/>`).join("\n    ")}
+    <path d="${SAFETY}" stroke="${BRIGHT_STEEL.dark}"/>
+    <path d="${TRIGGER}" stroke="${BRIGHT_STEEL.dark}"/>
+    <path d="${LOOP}" stroke="${STEEL_DARK}" stroke-width="${f1(7 + OUTLINE * 2)}"/>
+  </g>`;
+}
+
 function drawSide(options: M1911Options = {}): string {
   const st: WoodStyle = { ...DEFAULT_WOOD, ...options.wood };
   return `<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1278" viewBox="0 0 2000 1278" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
@@ -446,16 +489,17 @@ function drawSide(options: M1911Options = {}): string {
       <path d="${PANEL}"/>
     </clipPath>
   </defs>
+  ${options.outline === false ? "" : outlines()}
   <!-- Behind the slide, pivoting in the frame; cocked, as it's carried -->
   <g id="hammer">
-    <path d="M128,124 C132,114 150,108 172,108 C195,108 210,121 228,129 L300,132 L300,242 L261,242 C258,214 244,190 222,173 C210,165 200,160 190,155 C172,147 150,143 136,137 C129,134 126,129 128,124 Z" fill="${STEEL}"/>
+    <path d="${HAMMER}" fill="${STEEL}"/>
     <path d="M205,131 L219,133 L221,168 L207,162 Z" fill="${STEEL_DARK}"/>
     <path d="M140,116 L148,124 M150,111 L158,121 M161,109 L168,120 M172,108 L178,120 M183,109 L188,121 M194,112 L197,124" stroke="${STEEL_DARK}" stroke-width="3" fill="none"/>
   </g>
   <!-- Seen through the ejection port, and its bushing out of the front of the slide -->
   <g id="barrel">
     <rect x="845" y="92" width="290" height="63" fill="url(#m1911-barrel-shading)"/>
-    <path d="M1928,116 L1950,116 C1955,116 1958,120 1958,126 L1958,342 C1958,348 1955,352 1950,352 L1928,352 Z" fill="${STEEL_DARK}"/>
+    <path d="${BUSHING}" fill="${STEEL_DARK}"/>
   </g>
   <!-- The frame's lower plane, under its face: the trigger guard, the pocket behind the trigger and the rounded
        front strap, in the shadow of the face's edge, lit along the strap and round the opening -->
@@ -482,7 +526,7 @@ function drawSide(options: M1911Options = {}): string {
   </g>
   <!-- The frame's face: the dust cover under the slide's front, round the trigger's pocket, the grip, and the tang over the grip safety -->
   <g id="frame">
-    <path d="M262,284 L1552,284 L1552,397 C1552,401 1549,403 1545,403 ${FILLET_START} ${RIM} ${FRAME_GRIP} C150,360 200,345 238,324 C252,315 260,300 262,284 Z" fill="url(#m1911-frame-shading)"/>
+    <path d="${FRAME_FACE}" fill="url(#m1911-frame-shading)"/>
     <!-- The face's edge, catching the light where it steps down to the guard and the strap -->
     <path d="M${GUARD_TOP[0]},${GUARD_TOP[1]} ${RIM}" stroke="#5f636b" stroke-width="3" fill="none"/>
     <!-- The back of the grip below the grip safety (the flat mainspring housing, flush with the frame), lit along its edge -->
@@ -501,9 +545,9 @@ function drawSide(options: M1911Options = {}): string {
     ${screw(BOTTOM_SCREW)}
   </g>
   <g id="slide">
-    <path d="M330,74 L844,74 C852,75 857,82 858,92 L859,110 C860,132 876,146 904,146 L1078,146 C1104,146 1120,132 1122,112 L1123,94 C1124,84 1126,77 1134,74 L1905,74 C1918,74 1930,85 1932,100 L1934,350 C1934,372 1920,388 1898,388 L1552,388 L1552,284 L262,284 L262,200 C262,140 290,90 330,74 Z" fill="url(#m1911-slide-shading)"/>
+    <path d="${SLIDE_SHAPE}" fill="url(#m1911-slide-shading)"/>
     <!-- Its nose, under the dust cover's front: rounded below the step -->
-    <path d="M1552,284 L1582,284 C1622,262 1662,238 1722,234 L1933,232 L1934,350 C1934,372 1920,388 1898,388 L1552,388 Z" fill="url(#m1911-nose-shading)"/>
+    <path d="${NOSE}" fill="url(#m1911-nose-shading)"/>
     <!-- The ejection port's cut edge, catching the light -->
     <path d="M858,92 L859,110 C860,132 876,146 904,146 L1078,146 C1104,146 1120,132 1122,112 L1123,94" stroke="#8a8e96" stroke-width="2.5" fill="none"/>
     <!-- Grooves to grip it by -->
@@ -511,8 +555,8 @@ function drawSide(options: M1911Options = {}): string {
       ${serrations()}
     </g>
     <!-- Small, as on the first 1911s -->
-    <path id="rear-sight" d="M386,76 L392,60 L405,47 L416,36 L427,33 L437,40 L449,53 L453,63 L460,76 Z" fill="${STEEL}"/>
-    <path id="front-sight" d="M1806,76 C1825,62 1840,55 1858,54 C1875,54 1890,60 1900,76 Z" fill="${STEEL}"/>
+    <path id="rear-sight" d="${SIDE_REAR_SIGHT}" fill="${STEEL}"/>
+    <path id="front-sight" d="${SIDE_FRONT_SIGHT}" fill="${STEEL}"/>
   </g>
   <!-- Pins through the frame, and the end of the slide stop's -->
   <g id="pins" fill="${STEEL_LIGHT}">
