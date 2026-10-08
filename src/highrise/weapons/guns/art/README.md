@@ -5,7 +5,7 @@ Each gun as it's held, seen from above, one SVG per gun. The game rasterizes the
 ## Where things are
 
 - The gun points along +x: the muzzle on the right, the stock on the left. +y is the gun's right side (down the page), where ejection ports and the AK's charging handle are.
-- 1 unit is a millimeter, and 0,0 is the gun's origin, which `GunStats.points` (in meters) are measured from: a point at `[-0.23, 0]` is at `x="-230"` here. The viewBox is the whole gun, wherever it goes. The guns drawn by generators (`bin/gun-art/`: so far the pistols) are true scale, the same as their pickups; the older ones are still bigger than real ones, about 1.4× along and 2× across.
+- 1 unit is a millimeter, and 0,0 is the gun's origin, which `GunStats.points` (in meters) are measured from: a point at `[-0.23, 0]` is at `x="-230"` here. The viewBox is the whole gun, wherever it goes. Every gun here is drawn by its generator (`bin/gun-art/guns/<name>.ts`) at true scale, the same as its pickup: change the generator, not the file.
 
 ## How a file is laid out
 
@@ -41,4 +41,4 @@ Each gun as it's held, seen from above, one SVG per gun. The game rasterizes the
 
 ## History
 
-They were drawn in Affinity Designer (`assets/source/images/weapons/{pistols,rifles,shotguns}.afdesign`), exported, tidied by `bin/clean-svg.ts`, moved to millimeters about the origin, and then sorted into parts by hand, rendering the same as the export.
+The first versions were drawn in Affinity Designer (`assets/source/images/weapons/{pistols,rifles,shotguns}.afdesign`), exported, tidied by `bin/clean-svg.ts`, moved to millimeters about the origin, and then sorted into parts by hand, rendering the same as the export. They were bigger than the real guns (about 1.4× along and 2× across); in 2026-10 every one was redrawn by a generator from photos, at true scale.
