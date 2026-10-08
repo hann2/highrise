@@ -440,7 +440,8 @@ const PLATE =
   ` L${PLATE_FRONT[0] + 1},${PLATE_TOP} Z ${OPENING_PATH}`;
 // A lit line round the bottom of the opening (its lower edge, rounded, faces up into the light)
 const OPENING_LIT =
-  `M${fmt(OPENING[3])} ` + smoothCurve(OPENING.slice(3, 9), [-0.3, 1], [-0.4, -1]);
+  `M${fmt(OPENING[3])} ` +
+  smoothCurve(OPENING.slice(3, 9), [-0.3, 1], [-0.4, -1]);
 // The trigger: a crescent blade hanging from inside the plate, its tip curling back
 const TRIGGER_BACK: Point[] = [
   [277.6, 95],
@@ -517,12 +518,7 @@ const BUTT_TOE: Point = [39.2, 184];
 // The toe: from the pad's bottom, straight (y = 178 - 0.435 (x - 60)) to the grip
 const TOE_SLOPE = -0.435;
 const toeY = (x: number) => 178 + TOE_SLOPE * (x - 60);
-const TOE: Point[] = [
-  BUTT_TOE,
-  [50, 182],
-  [60, toeY(60)],
-  [176, toeY(176)],
-];
+const TOE: Point[] = [BUTT_TOE, [50, 182], [60, toeY(60)], [176, toeY(176)]];
 // The pistol grip: its back curving down into the cap, its bottom, and its front curving up into the trigger
 // plate (points from the photo's runs)
 const GRIP: Point[] = [
@@ -561,8 +557,7 @@ const PAD_SEAM: [Point, Point] = [
   [45.8, 94.4],
   [55.6, toeY(55.6) + 0.6],
 ];
-const PAD =
-  `M${fmt(PAD_SEAM[0])} L${fmt(PAD_SEAM[1])} L${fmt([30, 190])} L${fmt([20, 190])} L${fmt([20, 90])} Z`;
+const PAD = `M${fmt(PAD_SEAM[0])} L${fmt(PAD_SEAM[1])} L${fmt([30, 190])} L${fmt([20, 190])} L${fmt([20, 90])} Z`;
 // The comb's top rolling over: a dark band along it, and the flute at its back
 const COMB_ROLL =
   `M${fmt(COMB_BACK)} L${fmt(COMB_NOSE)} L${fmt([COMB_NOSE[0] - 6, COMB_NOSE[1] + 4.4])} ` +
@@ -576,7 +571,8 @@ const FLUTE: Point[] = [
   [69.4, 102.2],
   [67.5, 96.6],
 ];
-const FLUTE_PATH = `M${fmt(FLUTE[0])} ` + smoothCurve(FLUTE, [1, -0.05], [-0.2, -1]) + " Z";
+const FLUTE_PATH =
+  `M${fmt(FLUTE[0])} ` + smoothCurve(FLUTE, [1, -0.05], [-0.2, -1]) + " Z";
 // The grip's molded panel: its edge curving down from under the comb's nose to the grip's back, and its lower
 // edge across to the grip's front
 const PANEL_EDGE: Point[] = [
@@ -600,7 +596,9 @@ const BUTT_STUD_X = 87.6;
 const BUTT_STUD: Point = [BUTT_STUD_X, toeY(BUTT_STUD_X) + 1.4];
 
 function stock(S: Material, pad: Material, rim: number): string {
-  const wristRim = `M${fmt(COMB_BACK)} L${fmt(COMB_NOSE)} ` + smoothCurve(WRIST_TOP, [1, 0.04], [0.9, -0.42]);
+  const wristRim =
+    `M${fmt(COMB_BACK)} L${fmt(COMB_NOSE)} ` +
+    smoothCurve(WRIST_TOP, [1, 0.04], [0.9, -0.42]);
   return `<g id="remington-870-stock">
     <path d="${STOCK}" fill="url(#remington-870-stock-shading)"/>
     <g clip-path="url(#remington-870-stock-clip)">
@@ -720,41 +718,66 @@ function drawSide(options: Remington870Options = {}): string {
     ${linear("remington-870-barrel-shading", [tubeX, BARREL_TOP_FRONT], [tubeX, BARREL_BOTTOM_FRONT], cylinderStops(N, sheen))}
     ${linear("remington-870-tube-shading", [tubeX, TUBE_TOP], [tubeX, TUBE_BOTTOM], cylinderStops(N, sheen))}
     ${linear("remington-870-coupling-shading", [tubeX, TUBE_MID - COUPLING_R], [tubeX, TUBE_MID + COUPLING_R], cylinderStops(N, sheen))}
-    ${linear("remington-870-clamp-shading", [tubeX, BARREL_TOP_FRONT], [tubeX, CLAMP_BOTTOM], [
-      [0, mix(N.base, N.dark, 0.3)],
-      [0.1, mix(N.base, N.light, 0.6)],
-      [0.5, N.base],
-      [1, mix(N.base, N.dark, 0.5)],
-    ])}
+    ${linear(
+      "remington-870-clamp-shading",
+      [tubeX, BARREL_TOP_FRONT],
+      [tubeX, CLAMP_BOTTOM],
+      [
+        [0, mix(N.base, N.dark, 0.3)],
+        [0.1, mix(N.base, N.light, 0.6)],
+        [0.5, N.base],
+        [1, mix(N.base, N.dark, 0.5)],
+      ],
+    )}
     ${linear("remington-870-clamp-tube-shading", [tubeX, TUBE_TOP], [tubeX, CLAMP_BOTTOM], cylinderStops(N, sheen))}
-    ${linear("remington-870-bar-shading", [tubeX, ACTION_BAR_TOP], [tubeX, ACTION_BAR_BOTTOM], [
-      [0, N.light],
-      [0.6, N.base],
-      [1, mix(N.base, N.dark, 0.5)],
-    ])}
+    ${linear(
+      "remington-870-bar-shading",
+      [tubeX, ACTION_BAR_TOP],
+      [tubeX, ACTION_BAR_BOTTOM],
+      [
+        [0, N.light],
+        [0.6, N.base],
+        [1, mix(N.base, N.dark, 0.5)],
+      ],
+    )}
     ${linear("remington-870-receiver-shading", [320, RECEIVER_TOP], [320, RECEIVER_BOTTOM], faceStops(N, sheen))}
-    ${linear("remington-870-top-shading", [320, RECEIVER_TOP], [320, RECEIVER_TOP + TOP_BAND], [
-      [0, mix(N.base, N.dark, 0.35)],
-      [0.6, N.base],
-      [1, mix(N.base, N.light, 0.4)],
-    ])}
-    ${linear("remington-870-bolt-shading", [350, PORT_TOP], [350, PORT_BOTTOM], [
-      [0, B.dark],
-      [0.22, mix(B.dark, B.base, 0.5)],
-      [0.42, B.light],
-      [0.55, B.highlight],
-      [0.7, B.base],
-      [1, mix(B.base, B.dark, 0.6)],
-    ])}
-    ${linear("remington-870-pump-shading", [500, PUMP_TOP], [500, PUMP_BOTTOM], [
-      [0, P.light],
-      [0.08, P.base],
-      [0.34, mix(P.base, P.dark, 0.3)],
-      [0.36, P.base],
-      [0.55, mix(P.base, P.light, 0.5)],
-      [0.85, P.base],
-      [1, P.dark],
-    ])}
+    ${linear(
+      "remington-870-top-shading",
+      [320, RECEIVER_TOP],
+      [320, RECEIVER_TOP + TOP_BAND],
+      [
+        [0, mix(N.base, N.dark, 0.35)],
+        [0.6, N.base],
+        [1, mix(N.base, N.light, 0.4)],
+      ],
+    )}
+    ${linear(
+      "remington-870-bolt-shading",
+      [350, PORT_TOP],
+      [350, PORT_BOTTOM],
+      [
+        [0, B.dark],
+        [0.22, mix(B.dark, B.base, 0.5)],
+        [0.42, B.light],
+        [0.55, B.highlight],
+        [0.7, B.base],
+        [1, mix(B.base, B.dark, 0.6)],
+      ],
+    )}
+    ${linear(
+      "remington-870-pump-shading",
+      [500, PUMP_TOP],
+      [500, PUMP_BOTTOM],
+      [
+        [0, P.light],
+        [0.08, P.base],
+        [0.34, mix(P.base, P.dark, 0.3)],
+        [0.36, P.base],
+        [0.55, mix(P.base, P.light, 0.5)],
+        [0.85, P.base],
+        [1, P.dark],
+      ],
+    )}
     ${linear("remington-870-stock-shading", stockFrom, stockTo, [
       [0, S.dark],
       [0.12, S.base],
@@ -762,18 +785,28 @@ function drawSide(options: Remington870Options = {}): string {
       [0.85, S.base],
       [1, S.dark],
     ])}
-    ${linear("remington-870-pad-shading", [28, 140], [56, 140], [
-      [0, pad.dark],
-      [0.3, pad.light],
-      [0.75, pad.base],
-      [1, pad.dark],
-    ])}
-    ${linear("remington-870-plate-shading", [290, 94], [290, 114], [
-      [0, T.dark],
-      [0.3, T.base],
-      [0.8, mix(T.base, T.light, 0.6)],
-      [1, T.base],
-    ])}
+    ${linear(
+      "remington-870-pad-shading",
+      [28, 140],
+      [56, 140],
+      [
+        [0, pad.dark],
+        [0.3, pad.light],
+        [0.75, pad.base],
+        [1, pad.dark],
+      ],
+    )}
+    ${linear(
+      "remington-870-plate-shading",
+      [290, 94],
+      [290, 114],
+      [
+        [0, T.dark],
+        [0.3, T.base],
+        [0.8, mix(T.base, T.light, 0.6)],
+        [1, T.base],
+      ],
+    )}
     <clipPath id="remington-870-stock-clip">
       <path d="${STOCK}"/>
     </clipPath>
@@ -900,7 +933,10 @@ export const REMINGTON_870: GunDrawing<Remington870Options> = {
   ],
   // The origin on the middle of the gun's length on the bore, and 978 mm (38.5") over the 677 px from the
   // recoil pad's back to the muzzle
-  scale: { origin: [(BUTT_BACK + MUZZLE + 0.2) / 2, BORE_Y], mmPerPixel: MM_PER_PX },
+  scale: {
+    origin: [(BUTT_BACK + MUZZLE + 0.2) / 2, BORE_Y],
+    mmPerPixel: MM_PER_PX,
+  },
   // The bead's top, the butt's toe, the recoil pad's back, the muzzle; a meter square
   frame: {
     top: 52,
