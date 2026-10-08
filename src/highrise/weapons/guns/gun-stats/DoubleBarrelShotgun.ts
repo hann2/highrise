@@ -41,21 +41,22 @@ export const DoubleBarrelShotgun: GunStats = {
   recoilTime: 0.05,
 
   points: {
-    grip: [-0.1, 0],
-    foregrip: [0.12, -0.03],
-    magazine: [0, 0],
-    action: [0.12, -0.03],
+    grip: [-0.084, 0],
+    foregrip: [0.197, -0.0225],
+    magazine: [0.036, 0],
+    action: [0.197, -0.0225],
   },
   // Broken open: the barrels tip down on the hinge at the front of the
   // receiver (so they look shorter from above), once the top lever's pushed
   // aside
   parts: {
-    barrels: { stretch: 0.8, pivot: [0.15, 0] },
-    "top-lever": { angle: -0.6, pivot: [0.022, 0] },
+    barrels: { stretch: 0.8, pivot: [0.175, 0] },
+    "top-lever": { angle: -0.6, pivot: [0.005, 0] },
   },
   animations: DOUBLE_BARREL_ANIMATIONS,
   magazine: { texture: "shotgunShellPair", length: 0.075 },
-  holdPosition: [0.4, 0],
+  holdPosition: [0.384, 0],
+  muzzleLength: 0.341,
   stanceAngle: degToRad(35),
   sideOffset: 0.2,
 

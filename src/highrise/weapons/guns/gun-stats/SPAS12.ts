@@ -38,19 +38,19 @@ export const SPAS12: GunStats = {
   recoilTime: 0.045,
 
   points: {
-    grip: [-0.3, 0],
-    foregrip: [0.05, -0.03],
-    magazine: [-0.18, 0],
-    action: [0.05, -0.03],
+    grip: [-0.357, 0],
+    foregrip: [0.041, -0.0205],
+    magazine: [-0.196, 0],
+    action: [0.041, -0.0205],
   },
   // The pump slides back along the magazine tube, with the hand on it
-  parts: { pump: { offset: [-0.12, 0], carries: ["foregrip", "action"] } },
+  parts: { pump: { offset: [-0.075, 0], carries: ["foregrip", "action"] } },
   animations: SHOTGUN_ANIMATIONS,
   magazine: { texture: "shotgunShell", length: 0.075 },
-  holdPosition: [0.6, 0],
+  holdPosition: [0.657, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,
-  muzzleLength: 1.1,
+  muzzleLength: 0.399,
 
   sounds: {
     ...defaultGunStats.sounds,

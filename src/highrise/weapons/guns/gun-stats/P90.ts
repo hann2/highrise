@@ -39,26 +39,26 @@ export const P90: GunStats = {
   recoilTime: 0.028,
 
   points: {
-    grip: [-0.15, 0],
-    foregrip: [0.1, -0.03],
-    magazine: [-0.03, 0],
+    grip: [0.038, 0],
+    foregrip: [0.123, -0.015],
+    magazine: [0.038, 0],
     // The charging handle, on the left
-    action: [0.197, -0.05],
+    action: [0.162, -0.029],
   },
   // Pulled back to chamber a round from empty (it doesn't move when firing).
   // The magazine on top is hidden while it's out of the gun
   parts: {
-    "charging-handle": { offset: [-0.09, 0], carries: ["action"] },
+    "charging-handle": { offset: [-0.084, 0], carries: ["action"] },
   },
   // Fed from the back of the magazine, so they slide back as it empties, half
   // the gap between rounds in a row at a time (they're in two staggered rows)
-  rounds: { count: 50, travel: -0.325 },
+  rounds: { count: 50, travel: -0.197 },
   animations: rifleAnimations({ magazineOnTop: true }),
   magazine: "art",
-  holdPosition: [0.35, 0],
+  holdPosition: [0.162, 0],
   stanceAngle: degToRad(50),
   sideOffset: 0.2,
-  muzzleLength: 0.7,
+  muzzleLength: 0.25,
 
   sounds: {
     ...defaultGunStats.sounds,

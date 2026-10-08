@@ -639,7 +639,7 @@ export default class Gun extends BaseEntity implements Entity {
 
   /** Pulls the gun in (or lets it back out) depending on how close the wall in front of `holder` is */
   updateWallRetraction(holder: Human, dt: number) {
-    const reach = this.stats.holdPosition[0] + this.stats.muzzleLength / 2;
+    const reach = this.stats.holdPosition[0] + this.stats.muzzleLength;
     const side = this.side;
     const hit = this.game.world.raycast(
       holder.localToWorld([0, side]),
@@ -664,7 +664,7 @@ export default class Gun extends BaseEntity implements Entity {
     );
     // The rest comes from swinging the barrel aside around the grip
     const barrel =
-      this.stats.holdPosition[0] + this.stats.muzzleLength / 2 - gripX;
+      this.stats.holdPosition[0] + this.stats.muzzleLength - gripX;
     const cos = (barrel - (this.wallRetraction - slide)) / barrel;
     const tilt = Math.min(Math.acos(clamp(cos, -1, 1)), MAX_WALL_TILT);
     return { slide, tilt };

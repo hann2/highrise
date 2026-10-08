@@ -376,5 +376,5 @@ export function pointOnGun(pose: GunPose, point: Point): V2d {
 
 /** Where the muzzle is with the gun posed so */
 export function muzzleOf(stats: GunStats, pose: GunPose): V2d {
-  return pointOnGun(pose, [stats.muzzleLength / 2, 0]);
+  return pointOnGun(pose, [stats.muzzleLength, 0]);
 }

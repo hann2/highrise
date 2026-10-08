@@ -51,10 +51,10 @@ export const AK47: GunStats = {
   cycles: ["charging-handle"],
   animations: rifleAnimations(),
   magazine: { texture: "akMagazine", length: 0.24 },
-  holdPosition: [0.55, 0],
+  holdPosition: [0.49, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,
-  muzzleLength: 0.98,
+  muzzleLength: 0.435,
 
   sounds: {
     ...defaultGunStats.sounds,

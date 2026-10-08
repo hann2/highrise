@@ -37,7 +37,7 @@ export interface GunAnimations {
 export interface GunStats extends BaseWeaponStats {
   // Maximum rounds per second
   readonly fireRate: number;
-  // Distance from the shooter that the bullet is created
+  /** Where the muzzle is, in meters ahead of the middle of the gun's art (its x in the gun's frame): where bullets and the muzzle flash start */
   readonly muzzleLength: number;
   // Full Auto, Semi Auto, Pump, Burst ...
   readonly fireMode: FireMode;
@@ -205,7 +205,7 @@ export const defaultGunStats: GunStats = {
   recoilTime: 0.035,
 
   size: [1, 1],
-  muzzleLength: 0.5,
+  muzzleLength: 0.25,
   points: {
     grip: [0, 0],
     foregrip: [0, 0],

@@ -39,21 +39,21 @@ export const AR15: GunStats = {
   recoilTime: 0.03,
 
   points: {
-    grip: [-0.23, 0],
-    foregrip: [0.1, -0.03],
-    magazine: [-0.12, 0],
-    action: [-0.3, 0],
+    grip: [-0.152, 0],
+    foregrip: [0.171, -0.021],
+    magazine: [-0.02, 0],
+    action: [-0.163, 0],
   },
   // Pulled back to chamber a round from empty (it doesn't move when firing)
   parts: {
-    "charging-handle": { offset: [-0.08, 0], carries: ["action"] },
+    "charging-handle": { offset: [-0.076, 0], carries: ["action"] },
   },
   animations: rifleAnimations(),
   magazine: { texture: "rifleMagazine", length: 0.19 },
-  holdPosition: [0.55, 0],
+  holdPosition: [0.472, 0],
   stanceAngle: degToRad(55),
   sideOffset: 0.25,
-  muzzleLength: 1.1,
+  muzzleLength: 0.391,
 
   sounds: {
     ...defaultGunStats.sounds,
