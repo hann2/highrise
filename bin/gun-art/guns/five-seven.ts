@@ -85,7 +85,8 @@ import {
   smoothCurve,
   toward,
 } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import type { Material } from "../lib/style";
 import { BLACK_POLYMER, BRIGHT_STEEL, FDE } from "../lib/style";
 
@@ -1373,6 +1374,310 @@ function drawSide(options: FiveSevenOptions = {}): string {
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y, in millimeters
+// about its middle on the bore, at the same scale as the side view. Lengths along the gun come from the side
+// view's pixels (sx); widths are the real gun's, from the photos where they show them (see WIDTHS). The slide
+// moves back (GunStats.parts.slide): the barrel and the frame's top and rails it uncovers are drawn under it,
+// and the red dot rides on it.
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - 1296) * MM_PER_PIXEL;
+
+// WIDTHS (half widths, mm). FN gives only the whole gun's width, 36 mm (1.4"), its widest point being the
+// ambidextrous slide stop's levers. The slide's is from the photos: from behind (the left photo) its rear face is
+// about as wide as it's tall, seen at 45°, so about 1.4 × 19 mm; from the front (the front photo, its face
+// turned about 30° by the muzzle's ellipse) about 24 mm across the face, plus its side bevels: about 26 mm.
+// The facets ahead of the port take about an eighth of the face's width each side (the front photo): 3.2 mm.
+// The red dot is an RM06 (an RMR): 45 mm long as drawn in the side view, its housing about 24 mm wide.
+const SLIDE_HALF = 13;
+const FACET_WIDTH = 3.2; // the lit facets ahead of the port, seen from above as bands along each side
+const EDGE_BEVEL = 0.9; // the top's edges behind the port, broken
+const FRAME_HALF = 11; // the frame's top under the slide, and its tang behind it
+const RAIL_HALF: [number, number] = [9.9, 11]; // the steel rails the slide runs on, inside the frame's edges
+const BARREL_HALF = 5.5; // from the barrel's top in the port (368, the bore 430): 62 px
+const HOOD_HALF = 7.2;
+const STOP_OUT = 18; // the slide stop's levers, the gun's widest point (36 mm)
+const OPTIC_HALF = 11.8;
+const HOOD_TOP_HALF = 10.6; // the optic's hood is a little narrower at its top
+const PLATE_HALF = 12.2;
+const REAR_SIGHT_HALF = 11;
+const REAR_NOTCH_HALF = 1.6;
+const FRONT_SIGHT_HALF = 1.7;
+
+// Along the gun, from the side view's numbers
+const T_SLIDE_BACK = sx(SLIDE_BACK_BOTTOM); // the rear face leans forward going up: from above its foot is the back
+const T_SLIDE_TOP_BACK = sx(SLIDE_BACK_TOP);
+const T_SLIDE_FRONT = sx(2463);
+const T_NOSE_TOP = sx(NOSE_TOP);
+const T_FRAME_BACK = sx(129); // the beavertail's tip
+const T_FRAME_FRONT = sx(2446);
+const T_PORT: [number, number] = [sx(PORT_BACK), sx(PORT_FRONT)];
+const T_HOOD: [number, number] = [sx(1115), sx(CHAMBER_FRONT)];
+const T_MUZZLE = sx(2455); // the crown, a little inside the slide's nose
+const T_CUT: [number, number] = [sx(CUT_BACK), sx(CUT_FRONT - 2)];
+const T_OPTIC: [number, number] = [sx(527), sx(1036)];
+const T_HOOD_BACK = sx(754); // where the hood rises from the optic's low back
+const T_HOOD_TOP: [number, number] = [sx(853), sx(979)];
+const T_LENS: [number, number] = [sx(800), sx(832)]; // the glass, seen down through the hood's back
+const T_DIAL = sx(DIAL[0]);
+const T_REAR_SIGHT: [number, number] = [sx(225), sx(488)];
+const T_FRONT_SIGHT: [number, number] = [sx(2228), sx(2372)];
+const T_STOP: [number, number] = [sx(1163), sx(1331)];
+const T_POCKET: [number, number] = [sx(206), sx(276)];
+// The steel rails, where the old art had them (scaled to true size): at the back and under the dust cover
+const T_RAILS: [number, number][] = [
+  [-74, -50],
+  [53, 70],
+];
+
+const t2 = (v: number) => fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "");
+const tp = (x: number, y: number) => `${t2(x)},${t2(y)}`;
+
+/** A rectangle from x0,y0 to x1,y1, its corners rounded (back-left, front-left, front-right, back-right) */
+function box(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+): string {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (cx: number, cy: number, fx: number, fy: number, tx: number, ty: number) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+const tpoly = (pts: [number, number][]) =>
+  "M" + pts.map(([x, y]) => tp(x, y)).join(" L") + " Z";
+
+function acrossGradient(id: string, half: number, stops: [number, string][]): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t2(-half)}" x2="0" y2="${t2(half)}">`,
+    ...stops.map(([o, c]) => `      <stop offset="${o}" stop-color="${c}"/>`),
+    "    </linearGradient>",
+  ].join("\n    ");
+}
+
+function drawTop(options: FiveSevenOptions = {}): string {
+  const p = palette(options);
+  const F = p.frame;
+  const S = p.slide;
+  const showOutline = options.outline ?? DEFAULTS.outline;
+  const OUT = 0.4;
+  const edge = (d: string, color: string) =>
+    showOutline
+      ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="${OUT}"/>`
+      : "";
+
+  const minX = T_FRAME_BACK - 1;
+  const maxX = T_SLIDE_FRONT + 1;
+  const half = STOP_OUT + 1;
+  const width = t2(maxX - minX);
+  const height = t2(half * 2);
+
+  // The slide from above: its outline; the top flat, full width behind the port but for its broken edges, and
+  // between the facets ahead of it
+  const slideOutline = box(T_SLIDE_BACK, -SLIDE_HALF, T_SLIDE_FRONT, SLIDE_HALF, [2, 2.5, 2.5, 2]);
+  const facetStart = T_PORT[1];
+  const flat = SLIDE_HALF - FACET_WIDTH;
+  const topFlat = tpoly([
+    [T_SLIDE_TOP_BACK, -(SLIDE_HALF - EDGE_BEVEL)],
+    [facetStart - 3, -(SLIDE_HALF - EDGE_BEVEL)],
+    [facetStart, -flat],
+    [T_NOSE_TOP, -flat],
+    [T_NOSE_TOP, flat],
+    [facetStart, flat],
+    [facetStart - 3, SLIDE_HALF - EDGE_BEVEL],
+    [T_SLIDE_TOP_BACK, SLIDE_HALF - EDGE_BEVEL],
+  ]);
+  // The front serrations' notches, cut up into the facets' outer edges
+  const notches = FRONT_SERRATIONS.map((s) => {
+    const x0 = sx(s.corners[0][0]);
+    const x1 = sx(s.corners[1][0]);
+    const depth = 0.4 + (420 - s.top) * 0.035; // the higher the notch's top, the further into the facet
+    return (
+      `<path d="${box(x0, -SLIDE_HALF, x1, -SLIDE_HALF + depth)}"/>` +
+      `<path d="${box(x0, SLIDE_HALF - depth, x1, SLIDE_HALF)}"/>`
+    );
+  }).join("\n        ");
+  // The rear serrations' grooves, where they reach the top's edges, and the finger pockets at the back
+  const rearGrooves = REAR_SERRATIONS.map((s) => {
+    const x = sx(s.back[0][0]);
+    return (
+      `<path d="${box(x - 0.4, -SLIDE_HALF, x + 0.4, -SLIDE_HALF + 1)}"/>` +
+      `<path d="${box(x - 0.4, SLIDE_HALF - 1, x + 0.4, SLIDE_HALF)}"/>`
+    );
+  }).join("\n        ");
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t2(minX)} ${t2(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("five-seven")}
+  <!-- The Five-seven MK3 MRD from above, as it's held: muzzle along +x, its right side down the page (+y),
+       millimeters about its middle on the bore, at the same scale as its side view (the pickup); lengths
+       along it are the side view's. FDE, with an RM06 red dot on the slide. -->
+  <defs>
+    ${acrossGradient("five-seven-top-flat", SLIDE_HALF, [
+      [0, S.light],
+      [0.5, S.highlight],
+      [1, S.light],
+    ])}
+    ${acrossGradient("five-seven-top-facets", SLIDE_HALF, [
+      [0, p.slideShade(0.3)],
+      [0.13, S.base],
+      [0.5, S.base],
+      [0.87, S.base],
+      [1, p.slideShade(0.3)],
+    ])}
+    ${acrossGradient("five-seven-top-frame", FRAME_HALF, [
+      [0, p.frameShade(0.5)],
+      [0.2, F.base],
+      [0.5, mix(F.base, F.light, 0.5)],
+      [0.8, F.base],
+      [1, p.frameShade(0.5)],
+    ])}
+    ${acrossGradient("five-seven-top-barrel", BARREL_HALF, [
+      [0, "#141416"],
+      [0.25, "#3c3e43"],
+      [0.45, "#b4b7bd"],
+      [0.6, "#4b4e54"],
+      [1, "#161719"],
+    ])}
+    ${acrossGradient("five-seven-top-hood", HOOD_HALF, [
+      [0, "#2a2c30"],
+      [0.3, "#6a6d74"],
+      [0.5, "#d7dade"],
+      [0.65, "#878a91"],
+      [1, "#2a2b2f"],
+    ])}
+    <linearGradient id="five-seven-top-port" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="${SLIDE_HALF}">
+      <stop offset="0" stop-color="#5b5e64"/>
+      <stop offset="0.25" stop-color="#d7dade"/>
+      <stop offset="0.5" stop-color="#6a6d74"/>
+      <stop offset="0.8" stop-color="#2a2b2f"/>
+      <stop offset="1" stop-color="#121112"/>
+    </linearGradient>
+    ${acrossGradient("five-seven-top-black", REAR_SIGHT_HALF, [
+      [0, BLACK_DARK],
+      [0.2, BLACK],
+      [0.5, BLACK_LIGHT],
+      [0.8, BLACK],
+      [1, BLACK_DARK],
+    ])}
+    ${acrossGradient("five-seven-top-optic", OPTIC_HALF, [
+      [0, p.slideShade(0.25)],
+      [0.15, S.light],
+      [0.5, S.highlight],
+      [0.85, S.light],
+      [1, p.slideShade(0.25)],
+    ])}
+    ${acrossGradient("five-seven-top-lens", OPTIC_HALF, [
+      [0, "#2f3d3a"],
+      [0.3, "#5f8b84"],
+      [0.5, "#a9c9b8"],
+      [0.7, "#6c8a6a"],
+      [1, "#3a3424"],
+    ])}
+  </defs>
+  <!-- The polymer frame: its tang (the beavertail) behind the slide, and under the slide (seen when it's back)
+       its top, the steel rails the slide runs on, and the dust cover out to its front -->
+  <g id="frame">
+    <path id="frame-top" d="${box(T_FRAME_BACK, -FRAME_HALF, T_FRAME_FRONT, FRAME_HALF, [5, 2, 2, 5])}" fill="url(#five-seven-top-frame)"/>
+    <g id="frame-rails" fill="${BRIGHT_STEEL.dark}">
+      ${T_RAILS.map(([a, b]) => `<path d="${box(a, -RAIL_HALF[1], b, -RAIL_HALF[0])}"/><path d="${box(a, RAIL_HALF[0], b, RAIL_HALF[1])}"/>`).join("\n      ")}
+    </g>
+    ${edge(box(T_FRAME_BACK, -FRAME_HALF, T_FRAME_FRONT, FRAME_HALF, [5, 2, 2, 5]), F.dark)}
+  </g>
+  <!-- The slide stop's levers, both sides (ambidextrous): the gun's widest point -->
+  <g id="slide-stop" fill="${BLACK}">
+    <path d="${box(T_STOP[0], -STOP_OUT, T_STOP[1], -SLIDE_HALF + 1, [2.5, 3, 0, 0])}"/>
+    <path d="${box(T_STOP[0], SLIDE_HALF - 1, T_STOP[1], STOP_OUT, [0, 0, 3, 2.5])}"/>
+    <path d="M${tp(T_STOP[0] + 2, -STOP_OUT + 0.7)} L${tp(T_STOP[1] - 3, -STOP_OUT + 0.7)} M${tp(T_STOP[0] + 2, STOP_OUT - 0.7)} L${tp(T_STOP[1] - 3, STOP_OUT - 0.7)}" stroke="${BLACK_EDGE}" stroke-width="0.6" fill="none"/>
+    ${edge(box(T_STOP[0], -STOP_OUT, T_STOP[1], -SLIDE_HALF + 1, [2.5, 3, 0, 0]), BLACK)}
+    ${edge(box(T_STOP[0], SLIDE_HALF - 1, T_STOP[1], STOP_OUT, [0, 0, 3, 2.5]), BLACK)}
+  </g>
+  <!-- Under the slide: the barrel, shiny black, its crown inside the slide's nose; the chamber's hood shows
+       through the ejection port -->
+  <g id="barrel">
+    <path d="${box(T_HOOD[1] - 1, -BARREL_HALF, T_MUZZLE, BARREL_HALF, [0, 1, 1, 0])}" fill="url(#five-seven-top-barrel)"/>
+    <path id="chamber-hood" d="${box(T_HOOD[0], -HOOD_HALF, T_HOOD[1], HOOD_HALF, [1, 0.5, 0.5, 1])}" fill="url(#five-seven-top-hood)"/>
+    <path d="M${tp(T_HOOD[1], -HOOD_HALF)} L${tp(T_HOOD[1], HOOD_HALF)}" stroke="#121112" stroke-width="0.5" fill="none"/>
+  </g>
+  <g id="slide">
+    <path id="slide-body" d="${slideOutline}" fill="url(#five-seven-top-facets)"/>
+    <!-- The rear face, leaning forward, and the nose's chamfer, seen from above as bands across its ends -->
+    <path d="${box(T_SLIDE_BACK, -SLIDE_HALF + 0.5, T_SLIDE_TOP_BACK, SLIDE_HALF - 0.5, [1.5, 0, 0, 1.5])}" fill="${p.slideShade(0.35)}"/>
+    <path d="${box(T_NOSE_TOP, -SLIDE_HALF + 0.5, T_SLIDE_FRONT, SLIDE_HALF - 0.5, [0, 2, 2, 0])}" fill="${p.slideShade(0.45)}"/>
+    <!-- The top: flat and brightest, full width behind the port but for its broken edges, between the lit
+         facets ahead of it -->
+    <path id="slide-top" d="${topFlat}" fill="url(#five-seven-top-flat)"/>
+    <!-- Where the facets meet the top, a crisp edge -->
+    <path id="slide-rib" d="M${tp(facetStart, -flat)} L${tp(T_NOSE_TOP, -flat)} M${tp(facetStart, flat)} L${tp(T_NOSE_TOP, flat)}" stroke="${S.highlight}" stroke-width="0.5" fill="none"/>
+    <g id="slide-serrations" fill="${p.slideShade(1)}">
+        ${notches}
+        ${rearGrooves}
+        <path d="${box(T_POCKET[0], -SLIDE_HALF, T_POCKET[1], -SLIDE_HALF + 1.6, [0, 0, 1, 1])}"/>
+        <path d="${box(T_POCKET[0], SLIDE_HALF - 1.6, T_POCKET[1], SLIDE_HALF, [1, 1, 0, 0])}"/>
+    </g>
+    <!-- The ejection port, cut through the top's right edge: the barrel's hood under it -->
+    <g id="ejection-port">
+      <path d="${box(T_PORT[0], 6, T_PORT[1], SLIDE_HALF + 0.1, [1.2, 1.2, 0, 0])}" fill="url(#five-seven-top-port)"/>
+      <path d="M${tp(sx(CHAMBER_FRONT), 6.2)} L${tp(sx(CHAMBER_FRONT), SLIDE_HALF)}" stroke="#121112" stroke-width="0.5" fill="none"/>
+      <path d="M${tp(T_PORT[0], SLIDE_HALF)} L${tp(T_PORT[0], 7.2)} C${tp(T_PORT[0], 6.5)} ${tp(T_PORT[0] + 0.5, 6)} ${tp(T_PORT[0] + 1.2, 6)} L${tp(T_PORT[1] - 1.2, 6)} C${tp(T_PORT[1] - 0.5, 6)} ${tp(T_PORT[1], 6.5)} ${tp(T_PORT[1], 7.2)} L${tp(T_PORT[1], SLIDE_HALF)}" stroke="${S.highlight}" stroke-width="0.4" fill="none"/>
+    </g>
+    ${edge(slideOutline, S.dark)}
+    <!-- The red dot's adapter plate in the optic cut, black -->
+    <path id="optic-plate" d="${box(T_CUT[0], -PLATE_HALF, T_CUT[1], PLATE_HALF, 1)}" fill="${BLACK_DARK}"/>
+    ${edge(box(T_CUT[0], -PLATE_HALF, T_CUT[1], PLATE_HALF, 1), BLACK)}
+    <!-- The red dot (an RM06), riding on the slide: its low back with the elevation screw on top and the
+         windage dial on the right; the hood's back, down through which the glass shows as a tinted strip; the
+         hood's top, brightest; and its front -->
+    <g id="optic">
+      <circle cx="${t2(T_DIAL)}" cy="${t2(OPTIC_HALF + 0.4)}" r="3.4" fill="${BLACK}"/>
+      <path d="${box(T_OPTIC[0], -OPTIC_HALF, T_OPTIC[1], OPTIC_HALF, [2.5, 3, 3, 2.5])}" fill="url(#five-seven-top-optic)"/>
+      <path d="${box(T_HOOD_BACK, -OPTIC_HALF + 0.6, T_HOOD_TOP[0], OPTIC_HALF - 0.6, [1, 0, 0, 1])}" fill="${p.slideShade(0.35)}"/>
+      <path id="optic-lens" d="${box(T_LENS[0], -HOOD_TOP_HALF + 2, T_LENS[1], HOOD_TOP_HALF - 2, 1)}" fill="url(#five-seven-top-lens)"/>
+      <path d="${box(T_HOOD_TOP[0], -HOOD_TOP_HALF, T_HOOD_TOP[1], HOOD_TOP_HALF, 2)}" fill="${S.highlight}"/>
+      <path d="${box(T_HOOD_TOP[1], -OPTIC_HALF + 0.6, T_OPTIC[1] - 0.6, OPTIC_HALF - 0.6, [0, 2, 2, 0])}" fill="${p.slideShade(0.2)}"/>
+      <circle cx="${t2(sx(600))}" cy="0" r="3.2" fill="${BLACK}"/>
+      <path d="M${tp(sx(600) - 2.2, 0)} L${tp(sx(600) + 2.2, 0)}" stroke="${BLACK_DARK}" stroke-width="0.8" fill="none"/>
+      ${edge(box(T_OPTIC[0], -OPTIC_HALF, T_OPTIC[1], OPTIC_HALF, [2.5, 3, 3, 2.5]), S.dark)}
+    </g>
+    <!-- The sights, black: the rear one wide, a notch down its middle; the front one a thin blade -->
+    <g id="rear-sight">
+      <path d="${box(T_REAR_SIGHT[0], -REAR_SIGHT_HALF, T_REAR_SIGHT[1], REAR_SIGHT_HALF, [3, 1.5, 1.5, 3])}" fill="url(#five-seven-top-black)"/>
+      <!-- Its windage screw's head across the back, and its top sloping down to the front, a little lit -->
+      <path d="M${tp(sx(300), -REAR_SIGHT_HALF + 0.6)} L${tp(sx(300), REAR_SIGHT_HALF - 0.6)}" stroke="${BLACK_DARK}" stroke-width="0.6" fill="none"/>
+      <path d="M${tp(sx(470), -REAR_SIGHT_HALF + 1)} L${tp(sx(470), REAR_SIGHT_HALF - 1)}" stroke="${BLACK_EDGE}" stroke-width="0.5" fill="none"/>
+      <path d="${box(T_REAR_SIGHT[0], -REAR_NOTCH_HALF, T_REAR_SIGHT[1], REAR_NOTCH_HALF)}" fill="${BLACK_DARK}"/>
+      <circle cx="${t2(sx(WINDAGE_SCREW[0]))}" cy="${t2(REAR_SIGHT_HALF - 0.4)}" r="1.3" fill="${BLACK_LIGHT}"/>
+      ${edge(box(T_REAR_SIGHT[0], -REAR_SIGHT_HALF, T_REAR_SIGHT[1], REAR_SIGHT_HALF, [3, 1.5, 1.5, 3]), BLACK)}
+    </g>
+    <g id="front-sight">
+      <path d="${box(T_FRONT_SIGHT[0], -FRONT_SIGHT_HALF, T_FRONT_SIGHT[1], FRONT_SIGHT_HALF, [0.8, 1.2, 1.2, 0.8])}" fill="${BLACK}"/>
+      ${edge(box(T_FRONT_SIGHT[0], -FRONT_SIGHT_HALF, T_FRONT_SIGHT[1], FRONT_SIGHT_HALF, [0.8, 1.2, 1.2, 0.8]), BLACK)}
+    </g>
+  </g>
+</svg>
+`;
+}
+
+const TOP: TopView<FiveSevenOptions> = {
+  draw: drawTop,
+};
+
 export const FIVE_SEVEN: GunDrawing<FiveSevenOptions> = {
   name: "five-seven",
   photo: {
@@ -1421,4 +1726,5 @@ export const FIVE_SEVEN: GunDrawing<FiveSevenOptions> = {
        Millimeters, with the origin on the gun's middle on the bore, as the guns' top views in
        weapons/guns/art/ have it. -->`,
   drawSide,
+  top: TOP,
 };
