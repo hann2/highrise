@@ -120,13 +120,13 @@ import images116 from "./images/splats/splat_4.png?url";
 import images117 from "./images/splats/splat_5.png?url";
 import images118 from "./images/splats/splat_6.png?url";
 import images119 from "./images/splats/splat_7.png?url";
-import images120 from "./images/weapons/ak47-pickup.png?url";
-import images121 from "./images/weapons/ar-15-pickup.png?url";
+import images120 from "./images/weapons/ak-47-pickup.svg?url";
+import images121 from "./images/weapons/ar-15-pickup.svg?url";
 import images122 from "./images/weapons/axe.png?url";
 import images123 from "./images/weapons/baseball-bat-hold.png?url";
 import images124 from "./images/weapons/baseball-bat-pickup.png?url";
 import images125 from "./images/weapons/desert-eagle-pickup.svg?url";
-import images126 from "./images/weapons/double-barrel-shotgun-pickup.png?url";
+import images126 from "./images/weapons/double-barrel-shotgun-pickup.svg?url";
 import images127 from "./images/weapons/five-seven-pickup.svg?url";
 import images128 from "./images/weapons/glock-pickup.svg?url";
 import images129 from "./images/weapons/katana.png?url";
@@ -137,10 +137,10 @@ import images133 from "./images/weapons/magazines/revolver-round.png?url";
 import images134 from "./images/weapons/magazines/rifle-magazine.png?url";
 import images135 from "./images/weapons/magazines/shotgun-shell-pair.png?url";
 import images136 from "./images/weapons/magazines/shotgun-shell.png?url";
-import images137 from "./images/weapons/p90-pickup.png?url";
-import images138 from "./images/weapons/remington-pickup.png?url";
+import images137 from "./images/weapons/p90-pickup.svg?url";
+import images138 from "./images/weapons/remington-870-pickup.svg?url";
 import images139 from "./images/weapons/revolver-pickup.svg?url";
-import images140 from "./images/weapons/spas12-pickup.png?url";
+import images140 from "./images/weapons/spas-12-pickup.svg?url";
 import images141 from "./images/zombies/crawler-1.png?url";
 import images142 from "./images/zombies/crawler-2.png?url";
 import images143 from "./images/zombies/crawler-3.png?url";
@@ -839,7 +839,7 @@ const images = {
   "shotgunShellPair": images135,
   "shotgunShell": images136,
   "p90Pickup": images137,
-  "remingtonPickup": images138,
+  "remington870Pickup": images138,
   "revolverPickup": images139,
   "spas12Pickup": images140,
   "crawler1": images141,

@@ -907,7 +907,6 @@ function drawSide(options: Remington870Options = {}): string {
 
 export const REMINGTON_870: GunDrawing<Remington870Options> = {
   name: "remington-870",
-  draft: true,
   photo: {
     file: "remington-870-marine.jpeg",
     width: 738,

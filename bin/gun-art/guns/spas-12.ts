@@ -899,7 +899,6 @@ function drawSide(options: Spas12Options = {}): string {
 
 export const SPAS_12: GunDrawing<Spas12Options> = {
   name: "spas-12",
-  draft: true,
   photo: {
     file: "spas-12-unfolded.jpg",
     width: 2400,

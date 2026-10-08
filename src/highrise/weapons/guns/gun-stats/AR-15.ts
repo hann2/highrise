@@ -30,7 +30,7 @@ export const AR15: GunStats = {
     pickup: "ar15Pickup",
     shellCasing: "rifleCasing",
   },
-  size: [0.8, 0.4],
+  size: [0.84, 0.84],
 
   laserSightColor: 0xff0000,
   recoilAmount: degToRad(2),

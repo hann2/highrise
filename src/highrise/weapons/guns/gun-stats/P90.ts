@@ -30,7 +30,7 @@ export const P90: GunStats = {
     pickup: "p90Pickup",
     shellCasing: "pistolCasing",
   },
-  size: [1.0, 1.0],
+  size: [0.51, 0.51],
 
   laserSightColor: 0x00ffff,
   recoilAmount: degToRad(2.5),

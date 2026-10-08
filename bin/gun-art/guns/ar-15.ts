@@ -1919,7 +1919,6 @@ const DEFAULT_OPTIC = opticShapes();
 
 export const AR_15: GunDrawing<Ar15Options> = {
   name: "ar-15",
-  draft: true,
   photo: {
     file: "ar-15.jpg",
     width: 2000,

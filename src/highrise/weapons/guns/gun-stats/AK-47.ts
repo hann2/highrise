@@ -30,7 +30,7 @@ export const AK47: GunStats = {
     pickup: "ak47Pickup",
     shellCasing: "rifleCasing",
   },
-  size: [1.4, 1.4],
+  size: [0.9, 0.9],
 
   recoilAmount: degToRad(4),
   recoilRecovery: 3.1,

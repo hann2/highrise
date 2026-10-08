@@ -28,10 +28,10 @@ export const PumpShotgun: GunStats = {
   art: "remington870",
   textures: {
     ...defaultGunStats.textures,
-    pickup: "remingtonPickup",
+    pickup: "remington870Pickup",
     shellCasing: "shotgunCasing",
   },
-  size: [1.1, 1.1],
+  size: [1, 1],
   recoilAmount: degToRad(8),
   recoilRecovery: 2,
   recoilSlide: 0.08,

@@ -784,7 +784,6 @@ const FRAME_FRONT = Math.ceil(MUZZLE) + 1;
 
 export const DOUBLE_BARREL_SHOTGUN: GunDrawing<DoubleBarrelOptions> = {
   name: "double-barrel-shotgun",
-  draft: true,
   photo: {
     file: "hammer-coach-gun.png",
     width: 2200,

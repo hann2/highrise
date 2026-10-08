@@ -31,7 +31,7 @@ export const SPAS12: GunStats = {
     pickup: "spas12Pickup",
     shellCasing: "shotgunCasing",
   },
-  size: [1.1, 1.1],
+  size: [0.82, 0.82],
   recoilAmount: degToRad(7),
   recoilRecovery: 2.2,
   recoilSlide: 0.075,

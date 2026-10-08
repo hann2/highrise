@@ -33,7 +33,7 @@ export const DoubleBarrelShotgun: GunStats = {
     pickup: "doubleBarrelShotgunPickup",
     shellCasing: "shotgunCasing",
   },
-  size: [1.1, 1.1],
+  size: [0.7, 0.7],
 
   recoilAmount: degToRad(10),
   recoilRecovery: 3,

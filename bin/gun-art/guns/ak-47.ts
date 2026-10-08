@@ -961,7 +961,6 @@ function drawSide(options: AkOptions = {}): string {
 
 export const AK_47: GunDrawing<AkOptions> = {
   name: "ak-47",
-  draft: true,
   photo: {
     file: "ak-47-worn.jpg",
     width: 1920,

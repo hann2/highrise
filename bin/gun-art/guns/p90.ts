@@ -857,7 +857,6 @@ ${stops([0, B.highlight], [0.45, B.light], [1, B.base])}
 
 export const P90: GunDrawing<P90Options> = {
   name: "p90",
-  draft: true,
   photo: {
     file: "p90.webp",
     width: 1920,
