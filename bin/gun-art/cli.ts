@@ -498,7 +498,7 @@ async function optionsSheet() {
       <div style="font-weight:600;margin-bottom:6px;max-width:${cw * scale + 150}px">${key}. ${label}</div>
       <div style="display:flex;gap:10px;align-items:flex-end">
         <img src="${svgDataUrl(side)}" style="width:${cw * scale}px;height:${ch * scale}px">
-        <div style="display:flex;flex-direction:column;gap:8px">${pickupImg(pickup, 128, "#fff")}${pickupImg(pickup, 128, "#2b2b2b")}</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${pickupImg(pickup, 128, "#fff")}${pickupImg(pickup, 128, "#3a3a3a")}</div>
       </div></div>`;
   });
   const file = out(`${gun.name}-options.png`);
@@ -533,7 +533,7 @@ async function sheet() {
     <div style="font-weight:600;margin:20px 0 8px">At the pickups' 128 px, beside others; and on the floor's dark</div>
     <div style="display:flex;gap:12px;align-items:center">
       ${pickupImg(pickup, 128, "#fff")}${others.map(other).join("")}
-      ${pickupImg(pickup, 128, "#2b2b2b")}${pickupImg(pickup, 64, "#fff")}
+      ${pickupImg(pickup, 128, "#3a3a3a")}${pickupImg(pickup, 64, "#fff")}
     </div></div>`;
   const file = out(`${gun.name}-sheet.png`);
   await renderSheet(body, file);

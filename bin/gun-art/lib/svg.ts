@@ -23,7 +23,8 @@ const LENGTH_ATTRIBUTES = ["width", "height", "r", "stroke-width"];
 
 /**
  * Every coordinate and length in a drawing's body (everything after its <svg> tag), from the photo's pixels to
- * millimeters. Paths must use absolute M/L/C/Z only, so every number pair in them is a point.
+ * millimeters. Paths must use absolute M/L/C/Z only, so every number pair in them is a point; transforms and
+ * rx/ry (ellipses, rounded rects) aren't converted, so they're refused.
  */
 export function toMillimeters(svg: string, scale: PhotoScale): string {
   const [ox, oy] = scale.origin;
@@ -31,6 +32,14 @@ export function toMillimeters(svg: string, scale: PhotoScale): string {
   const y = (v: string) => short((parseFloat(v) - oy) * scale.mmPerPixel);
   const length = (v: string) => short(parseFloat(v) * scale.mmPerPixel);
   let body = svg.slice(svg.indexOf(">") + 1);
+  // A transform's numbers would stay in pixels while everything else turns into millimeters
+  const transform =
+    /\b(transform|gradientTransform|patternTransform|rx|ry)="/.exec(body);
+  if (transform) {
+    throw new Error(
+      `toMillimeters can't convert ${transform[1]}: build the shape at its place (paths, circles) instead`,
+    );
+  }
   body = body.replace(/ d="([^"]*)"/g, (_, d: string) => {
     const converted = d.replace(
       /(-?[\d.]+),(-?[\d.]+)/g,
