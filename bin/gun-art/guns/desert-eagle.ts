@@ -1015,7 +1015,7 @@ function drawSide(options: DesertEagleOptions = {}): string {
 // above as a band (x 210 to 322), with a slot for the hammer. From above the raised top's back is square with
 // round corners (it slopes down in the side view, x 420 to 560, but the photo from above shows its plan). The ambidextrous safety stands out of both sides.
 // When the slide goes back it uncovers the frame's top between the block and the barrel: the rails it runs on
-// and the magazine's top round in its well. The hammer, cocked, sticks out behind the slide over the beavertail;
+// and the magazine's well, empty but for its follower. The hammer, cocked, sticks out behind the slide over the beavertail;
 // it falls forward against the slide's back at each shot.
 //
 // Widths: the slide is 1.25" (31.75 mm), Magnum Research's width for the gun (dealers list it as the slide's).
@@ -1074,13 +1074,12 @@ const RAILS_IN = 3.6; // the rails the slide runs on, inside the frame's edges, 
 const GRIP_BACK_X = sx(148);
 const GRIP_FRONT_X = sx(668);
 const GRIP_HALF = 15;
-// The magazine's well and its top round, under the slide's block, seen when the slide is back
+// The magazine's well, under the slide's block, seen when the slide is back: empty but for the magazine's
+// follower, since the slide only stays back (long enough to see) once the gun's empty
 const WELL_X: [number, number] = [sx(400), sx(712)];
 const WELL_HALF = 7.6;
-const ROUND_BACK = sx(455);
-const CASE_LENGTH = 32.6; // .50 AE
-const BULLET_LENGTH = 8.2; // what's out of the case, to its round nose
-const ROUND_HALF = 6.8;
+const FOLLOWER_X: [number, number] = [sx(440), sx(690)];
+const FOLLOWER_HALF = 6.4;
 // The slide's travel, back (the stats' `parts.slide.offset`)
 export const DESERT_EAGLE_SLIDE_TRAVEL = 48;
 
@@ -1213,18 +1212,13 @@ function drawTop(options: DesertEagleOptions = {}): string {
     [5, 2, 2, 5],
   );
   const well = box(WELL_X[0], -WELL_HALF, WELL_X[1], WELL_HALF, 2);
-  const caseFront = ROUND_BACK + CASE_LENGTH;
-  const roundCase = box(
-    ROUND_BACK,
-    -ROUND_HALF,
-    caseFront,
-    ROUND_HALF,
-    [1.5, 0, 0, 1.5],
+  const follower = box(
+    FOLLOWER_X[0],
+    -FOLLOWER_HALF,
+    FOLLOWER_X[1],
+    FOLLOWER_HALF,
+    2,
   );
-  const bulletHalf = 6.35; // .50 cal
-  const bullet =
-    `M${tp(caseFront, -bulletHalf)} C${tp(caseFront + BULLET_LENGTH * 0.6, -bulletHalf)} ${tp(caseFront + BULLET_LENGTH, -bulletHalf * 0.5)} ${tp(caseFront + BULLET_LENGTH, 0)} ` +
-    `C${tp(caseFront + BULLET_LENGTH, bulletHalf * 0.5)} ${tp(caseFront + BULLET_LENGTH * 0.6, bulletHalf)} ${tp(caseFront, bulletHalf)} Z`;
 
   // The hammer: its spur, round at the back, and its neck forward under the slide
   const hammer = box(
@@ -1420,13 +1414,6 @@ function drawTop(options: DesertEagleOptions = {}): string {
       [0.8, STEEL.base],
       [1, STEEL.dark],
     ])}
-    ${across("desert-eagle-top-brass", ROUND_HALF, [
-      [0, "#6e5320"],
-      [0.3, "#b8913f"],
-      [0.5, "#e2c272"],
-      [0.7, "#b8913f"],
-      [1, "#6e5320"],
-    ])}
   </defs>
   <!-- The grip's rubber, a little narrower than the slide, out behind the beavertail at its foot -->
   <g id="grip">
@@ -1434,7 +1421,7 @@ function drawTop(options: DesertEagleOptions = {}): string {
     <path d="${grip}" fill="url(#desert-eagle-top-grip)"/>
   </g>
   <!-- The frame: the beavertail behind the slide, and under the slide (seen when it's back) its top, the rails the
-       slide runs on, and the magazine's well with its top round -->
+       slide runs on, and the empty magazine's well -->
   <g id="frame">
     ${outline(tang)}
     ${outline(frameTop)}
@@ -1445,10 +1432,7 @@ function drawTop(options: DesertEagleOptions = {}): string {
       <path d="${box(SLIDE_BACK_BOTTOM + 3, FRAME_HALF - RAILS_IN - 1, BLOCK_FRONT + 4, FRAME_HALF - RAILS_IN)}"/>
     </g>
     <path id="magazine-well" d="${well}" fill="${STEEL.dark}"/>
-    <g id="magazine-round">
-      <path d="${roundCase}" fill="url(#desert-eagle-top-brass)"/>
-      <path d="${bullet}" fill="#a8693c"/>
-    </g>
+    <path id="magazine-follower" d="${follower}" fill="${STEEL.base}"/>
   </g>
   <!-- Cocked: its spur out behind the slide over the beavertail, checkered; it falls forward against the slide's
        back at each shot (shorter from above, about where it goes into the slide) -->

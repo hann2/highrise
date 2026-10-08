@@ -85,13 +85,6 @@
       <stop offset="0.800" stop-color="#4a4d54"/>
       <stop offset="1.000" stop-color="#26282d"/>
     </linearGradient>
-    <linearGradient id="desert-eagle-top-brass" gradientUnits="userSpaceOnUse" x1="0.0" y1="-6.8" x2="0.0" y2="6.8">
-      <stop offset="0.000" stop-color="#6e5320"/>
-      <stop offset="0.300" stop-color="#b8913f"/>
-      <stop offset="0.500" stop-color="#e2c272"/>
-      <stop offset="0.700" stop-color="#b8913f"/>
-      <stop offset="1.000" stop-color="#6e5320"/>
-    </linearGradient>
   </defs>
   <!-- The grip's rubber, a little narrower than the slide, out behind the beavertail at its foot -->
   <g id="grip">
@@ -99,7 +92,7 @@
     <path d="M-114.3,-15 L-44.85,-15 C-43.75,-15 -42.85,-14.1 -42.85,-13 L-42.85,13 C-42.85,14.1 -43.75,15 -44.85,15 L-114.3,15 C-117.05,15 -119.3,12.75 -119.3,10 L-119.3,-10 C-119.3,-12.75 -117.05,-15 -114.3,-15 Z" fill="url(#desert-eagle-top-grip)"/>
   </g>
   <!-- The frame: the beavertail behind the slide, and under the slide (seen when it's back) its top, the rails the
-       slide runs on, and the magazine's well with its top round -->
+       slide runs on, and the empty magazine's well -->
   <g id="frame">
     <path d="M-106.18,-9.5 L-129.85,-9.5 C-134.5,-9.5 -136.5,-5.22 -136.5,0 C-136.5,5.22 -134.5,9.5 -129.85,9.5 L-106.18,9.5 Z" stroke="#5b6067" stroke-width="0.8" fill="none"/>
     <path d="M-107.18,-13.5 L-16.1,-13.5 C-15.55,-13.5 -15.1,-13.05 -15.1,-12.5 L-15.1,12.5 C-15.1,13.05 -15.55,13.5 -16.1,13.5 L-107.18,13.5 C-107.73,13.5 -108.18,13.05 -108.18,12.5 L-108.18,-12.5 C-108.18,-13.05 -107.73,-13.5 -107.18,-13.5 Z" stroke="#5b6067" stroke-width="0.8" fill="none"/>
@@ -110,10 +103,7 @@
       <path d="M-107.18,8.9 L-17.1,8.9 L-17.1,9.9 L-107.18,9.9 L-107.18,8.9 Z"/>
     </g>
     <path id="magazine-well" d="M-80.25,-7.6 L-38.39,-7.6 C-37.29,-7.6 -36.39,-6.7 -36.39,-5.6 L-36.39,5.6 C-36.39,6.7 -37.29,7.6 -38.39,7.6 L-80.25,7.6 C-81.35,7.6 -82.25,6.7 -82.25,5.6 L-82.25,-5.6 C-82.25,-6.7 -81.35,-7.6 -80.25,-7.6 Z" fill="#26282d"/>
-    <g id="magazine-round">
-      <path d="M-72.67,-6.8 L-41.57,-6.8 L-41.57,6.8 L-72.67,6.8 C-73.49,6.8 -74.17,6.12 -74.17,5.3 L-74.17,-5.3 C-74.17,-6.12 -73.49,-6.8 -72.67,-6.8 Z" fill="url(#desert-eagle-top-brass)"/>
-      <path d="M-41.57,-6.35 C-36.65,-6.35 -33.37,-3.18 -33.37,0 C-33.37,3.18 -36.65,6.35 -41.57,6.35 Z" fill="#a8693c"/>
-    </g>
+    <path id="magazine-follower" d="M-74.37,-6.4 L-41.62,-6.4 C-40.52,-6.4 -39.62,-5.5 -39.62,-4.4 L-39.62,4.4 C-39.62,5.5 -40.52,6.4 -41.62,6.4 L-74.37,6.4 C-75.47,6.4 -76.37,5.5 -76.37,4.4 L-76.37,-4.4 C-76.37,-5.5 -75.47,-6.4 -74.37,-6.4 Z" fill="#4a4d54"/>
   </g>
   <!-- Cocked: its spur out behind the slide over the beavertail, checkered; it falls forward against the slide's
        back at each shot (shorter from above, about where it goes into the slide) -->
