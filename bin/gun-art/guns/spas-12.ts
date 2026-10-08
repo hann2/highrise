@@ -10,7 +10,8 @@
  */
 import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import type { Material, Stops } from "../lib/style";
 import { linear } from "../lib/style";
 
@@ -897,6 +898,400 @@ function drawSide(options: Spas12Options = {}): string {
 `;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y, in millimeters
+// about its middle on the bore, at the same scale as the side view. Lengths along it come from the side view's
+// numbers (`sx`); widths across it from the 3D model seen from above and from behind (`model spas-12 --from +y
+// --up -z`, `--from -x`), at its own scale along the gun (its heat shield, 973 px, is the photo's 760 px: 0.348
+// mm a pixel), except the round parts (barrel, magazine tube, cap, muzzle), which are the side view's diameters.
+// No spec sheet gives the SPAS-12's widths.
+//
+//   - The grip's hump and the receiver: 31 mm across (the model: 89 px from above, 364 px from behind at its
+//     finer scale). The operating handle's knob stands 9.6 mm out of the receiver's right side (from behind).
+//   - The heat shield: 36 mm across (103 px), over the barrel. Its top is flat, with three rows of slots: one down
+//     the middle, and one either side 9.2 mm out, staggered with it (the model; the side view's slots are on its
+//     sides, under the top's edges, so they don't show from above). Round the rear sight, an oval plate (the step
+//     down from its higher back third doesn't show from above). Under it, through the slots: the barrel, and the shield's dark inside.
+//   - The pump: 41 mm across (118 px), so it shows 2.5 mm either side of the shield, with its grooves notching its
+//     edges; its nose out in front of the shield, rounding in, over the magazine tube's cap.
+//   - The barrel 21.2 mm, the collar 23.8, the thread protector 25.6, the magazine tube 25.2, its cap's nut 30,
+//     the flange 34.4 (the side view's heights, as they're round).
+//
+// What moves: the pump, straight back along the magazine tube. Its stroke is how far it can go before its lip
+// meets the receiver's front, 174 px (77 mm), which is about the ejection port's length (75 mm), what the bolt
+// has to travel: 0.075 m. It slides under the heat shield, the barrel and the receiver (drawn after it), and
+// uncovers the magazine tube and its cap in front of it (drawn before it).
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - ORIGIN[0]) * MM_PER_PX;
+/** The model's pixels along the gun (from above) to the photo's: their heat shields' ends */
+const fromModel = (mx: number) =>
+  SHIELD_BACK + ((mx - 824) * (SHIELD_FRONT - SHIELD_BACK + 7)) / (1797 - 824);
+const MODEL_MM = 0.348; // the model's millimeters a pixel, across
+
+const T_HUMP_BACK = sx(BACK);
+const T_SEAM = sx(704);
+const T_RECEIVER_FRONT = sx(RECEIVER_FRONT);
+const T_BODY_HALF = 31 / 2; // the hump and the receiver
+const T_KNOB = [sx(1062), sx(1087)] as const;
+const T_KNOB_OUT = T_BODY_HALF + 9.6;
+const T_LOOP = [sx(612), sx(658)] as const;
+const T_LOOP_HALF = 5;
+const T_PIVOT = sx(PIVOT[0]);
+const T_SHIELD_BACK = sx(SHIELD_BACK);
+const T_SHIELD_FRONT = sx(SHIELD_FRONT);
+const T_SHIELD_HALF = 36 / 2;
+const T_PLATE = [sx(fromModel(850)), sx(fromModel(990))] as const;
+const T_PLATE_HALF = 25 * MODEL_MM;
+const T_REAR_SIGHT = [sx(1216), sx(1272)] as const;
+const T_REAR_POST = sx(1227);
+const T_REAR_SIGHT_HALF = 6;
+const T_BUTTON: Point = [sx(1867), 4.5];
+// The slots from above, in the model's pixels along the gun: the middle row, and the outer rows either side
+const T_SLOT_PITCH = 103.4;
+const T_MIDDLE_SLOTS = [0, 1, 2, 3, 4, 5, 6].map((i) => [
+  sx(fromModel(998 + i * T_SLOT_PITCH)),
+  sx(fromModel(1091 + i * T_SLOT_PITCH)),
+]);
+const T_OUTER_SLOTS = [0, 1, 2, 3, 4, 5, 6].map((i) => [
+  sx(fromModel(1042 + i * T_SLOT_PITCH)),
+  sx(fromModel(1137 + i * T_SLOT_PITCH)),
+]);
+const T_SLOT_HALF = 3; // 6 mm across
+const T_OUTER_SLOT_Y = 9.2;
+const T_BARREL_BACK = sx(BARREL_BACK);
+const T_BARREL_HALF = ((BARREL_BOTTOM - BARREL_TOP) * MM_PER_PX) / 2;
+const T_COLLAR = [sx(COLLAR[0]), sx(COLLAR[1])] as const;
+const T_COLLAR_HALF = ((COLLAR_BOTTOM - COLLAR_TOP) * MM_PER_PX) / 2;
+const T_PROTECTOR_HALF = ((PROTECTOR_BOTTOM - PROTECTOR_TOP) * MM_PER_PX) / 2;
+const T_MUZZLE = sx(MUZZLE);
+const T_KNURL = [sx(KNURL[0]), sx(KNURL[1])] as const;
+const T_SIGHT_BASE = [sx(2204), sx(2268)] as const;
+const T_SIGHT_BASE_HALF = 5;
+const T_SIGHT_BLADE = [sx(2216), sx(2257)] as const;
+const T_SIGHT_BLADE_HALF = 1.5;
+const T_TUBE_END = sx(TUBE_END);
+const T_TUBE_HALF = ((TUBE_BOTTOM - TUBE_TOP) * MM_PER_PX) / 2;
+const T_NUT = [sx(NUT[0]), sx(NUT[1])] as const;
+const T_NUT_HALF = 15;
+const T_NUT_WAIST = [sx(NUT_WAIST[0]), sx(NUT_WAIST[1])] as const;
+const T_FLANGE = [sx(FLANGE[0]), sx(FLANGE[1])] as const;
+const T_FLANGE_HALF = 17.2;
+const T_PUMP_BACK = sx(LIP[0]);
+const T_LIP_FRONT = sx(PUMP_BACK);
+const T_PUMP_NOSE = sx(1905); // where its nose starts rounding in
+const T_PUMP_FRONT = sx(1940);
+const T_PUMP_HALF = 41 / 2;
+const T_LIP_HALF = 21.5;
+const T_NOSE_HALF = 15;
+const T_OUTLINE = OUTLINE_MM;
+
+const t1 = (v: number) =>
+  fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "").replace(/^-0$/, "0");
+const tp = (x: number, y: number) => `${t1(x)},${t1(y)}`;
+
+/** A rectangle with each corner rounded by its own radius (back-left, front-left, front-right, back-right) */
+function tbox(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+): string {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (
+    cx: number,
+    cy: number,
+    fx: number,
+    fy: number,
+    tx: number,
+    ty: number,
+  ) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A pill along the gun, from x0 to x1, `half` either side of y */
+function tpill(x0: number, x1: number, y: number, half: number): string {
+  return tbox(x0, y - half, x1, y + half, half);
+}
+
+/** A gradient across the gun (along y), from its left edge to its right */
+function across(id: string, half: number, list: Stops): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t1(-half)}" x2="0" y2="${t1(half)}">`,
+    ...list.map(([o, c]) => `      <stop offset="${o}" stop-color="${c}"/>`),
+    "    </linearGradient>",
+  ].join("\n    ");
+}
+
+/** A round part from above: dark at its edges, a bright streak down its middle */
+const roundAcross = (m: Material): Stops => [
+  [0, m.dark],
+  [0.22, m.base],
+  [0.42, m.light],
+  [0.5, m.highlight],
+  [0.6, m.light],
+  [0.82, m.base],
+  [1, m.dark],
+];
+/** A flat top with rounded edges: lit across its flat, darker as its edges round away */
+const flatAcross = (m: Material): Stops => [
+  [0, m.dark],
+  [0.08, m.base],
+  [0.2, m.light],
+  [0.5, mix(m.light, m.highlight, 0.4)],
+  [0.8, m.light],
+  [0.92, m.base],
+  [1, m.dark],
+];
+
+// The shapes
+const T_HUMP = tbox(T_HUMP_BACK, -T_BODY_HALF, T_SEAM + 2, T_BODY_HALF, [
+  7, 0, 0, 7,
+]);
+const T_RECEIVER = tbox(
+  T_SEAM,
+  -T_BODY_HALF,
+  T_RECEIVER_FRONT,
+  T_BODY_HALF,
+  [2, 0, 0, 2],
+);
+const T_KNOB_SHAPE = tbox(
+  T_KNOB[0],
+  T_BODY_HALF - 1,
+  T_KNOB[1],
+  T_KNOB_OUT,
+  [0, 0, 4, 4],
+);
+const T_SHIELD = tbox(
+  T_SHIELD_BACK,
+  -T_SHIELD_HALF,
+  T_SHIELD_FRONT,
+  T_SHIELD_HALF,
+  [2, 6, 6, 2],
+);
+const T_SLOTS = [
+  ...T_MIDDLE_SLOTS.map(([a, b]) => tpill(a, b, 0, T_SLOT_HALF)),
+  ...T_OUTER_SLOTS.flatMap(([a, b]) => [
+    tpill(a, b, -T_OUTER_SLOT_Y, T_SLOT_HALF),
+    tpill(a, b, T_OUTER_SLOT_Y, T_SLOT_HALF),
+  ]),
+].join(" ");
+const T_PLATE_SHAPE = tpill(T_PLATE[0], T_PLATE[1], 0, T_PLATE_HALF);
+const T_BARREL = tbox(
+  T_BARREL_BACK,
+  -T_BARREL_HALF,
+  T_COLLAR[0] + 1,
+  T_BARREL_HALF,
+);
+const T_COLLAR_SHAPE = tbox(
+  T_COLLAR[0],
+  -T_COLLAR_HALF,
+  T_COLLAR[1],
+  T_COLLAR_HALF,
+  [1, 0, 0, 1],
+);
+const T_PROTECTOR = tbox(
+  T_COLLAR[1] - 0.5,
+  -T_PROTECTOR_HALF,
+  T_MUZZLE,
+  T_PROTECTOR_HALF,
+  [0, 3, 3, 0],
+);
+const T_TUBE = tbox(T_BARREL_BACK, -T_TUBE_HALF, T_TUBE_END, T_TUBE_HALF, [
+  0, 5, 5, 0,
+]);
+const T_NUT_SHAPE = tbox(T_NUT[0], -T_NUT_HALF, T_NUT[1], T_NUT_HALF, 2);
+const T_FLANGE_SHAPE = tbox(
+  T_FLANGE[0],
+  -T_FLANGE_HALF,
+  T_FLANGE[1],
+  T_FLANGE_HALF,
+  2,
+);
+// The pump from above: its lip at the back a little wider, its body, and its nose rounding in to the front
+const T_PUMP =
+  `M${tp(T_PUMP_BACK + 3, -T_LIP_HALF)} L${tp(T_LIP_FRONT, -T_LIP_HALF)} L${tp(T_LIP_FRONT + 1, -T_PUMP_HALF)} ` +
+  `L${tp(T_PUMP_NOSE, -T_PUMP_HALF)} C${tp(T_PUMP_NOSE + 20, -T_PUMP_HALF)} ${tp(T_PUMP_FRONT, -T_NOSE_HALF - 4)} ${tp(T_PUMP_FRONT, -T_NOSE_HALF)} ` +
+  `L${tp(T_PUMP_FRONT, T_NOSE_HALF)} C${tp(T_PUMP_FRONT, T_NOSE_HALF + 4)} ${tp(T_PUMP_NOSE + 20, T_PUMP_HALF)} ${tp(T_PUMP_NOSE, T_PUMP_HALF)} ` +
+  `L${tp(T_LIP_FRONT + 1, T_PUMP_HALF)} L${tp(T_LIP_FRONT, T_LIP_HALF)} L${tp(T_PUMP_BACK + 3, T_LIP_HALF)} ` +
+  `C${tp(T_PUMP_BACK + 1, T_LIP_HALF)} ${tp(T_PUMP_BACK, T_LIP_HALF - 1)} ${tp(T_PUMP_BACK, T_LIP_HALF - 3)} ` +
+  `L${tp(T_PUMP_BACK, -T_LIP_HALF + 3)} C${tp(T_PUMP_BACK, -T_LIP_HALF + 1)} ${tp(T_PUMP_BACK + 1, -T_LIP_HALF)} ${tp(T_PUMP_BACK + 3, -T_LIP_HALF)} Z`;
+// Its grooves, notching its edges where they show beside the shield
+const T_PUMP_GROOVES = Array.from({ length: RIBS }, (_, i) => {
+  const x0 = sx(RIB_FIRST + i * RIB_PITCH);
+  const x1 = sx(RIB_FIRST + i * RIB_PITCH + RIB_WIDTH);
+  return (
+    tbox(x0, -T_PUMP_HALF, x1, -T_PUMP_HALF + 1.4) +
+    " " +
+    tbox(x0, T_PUMP_HALF - 1.4, x1, T_PUMP_HALF)
+  );
+}).join(" ");
+const T_FRONT_SIGHT_BASE = tbox(
+  T_SIGHT_BASE[0],
+  -T_SIGHT_BASE_HALF,
+  T_SIGHT_BASE[1],
+  T_SIGHT_BASE_HALF,
+  2,
+);
+const T_FRONT_SIGHT_BLADE = tbox(
+  T_SIGHT_BLADE[0],
+  -T_SIGHT_BLADE_HALF,
+  T_SIGHT_BLADE[1],
+  T_SIGHT_BLADE_HALF,
+  1,
+);
+const T_REAR_SIGHT_SHAPE = tbox(
+  T_REAR_SIGHT[0],
+  -T_REAR_SIGHT_HALF,
+  T_REAR_SIGHT[1],
+  T_REAR_SIGHT_HALF,
+  [1, 3, 3, 1],
+);
+
+function drawTop(options: Spas12Options = {}): string {
+  const R: Material = { ...SPAS_RECEIVER, ...options.receiver };
+  const G: Material = { ...SPAS_GRIP, ...options.grip };
+  const P: Material = { ...SPAS_PUMP, ...options.pump };
+  const S: Material = { ...PARKERIZED, ...options.shield };
+  const T: Material = { ...SPAS_STEEL, ...options.steel };
+  const ribs = options.ribs ?? 1;
+  const outlineWidth = options.outlineMm ?? T_OUTLINE;
+  const outline = options.outline !== false;
+  const minX = T_HUMP_BACK - 1;
+  const maxX = T_MUZZLE + 1;
+  const half = T_KNOB_OUT + 1;
+  const width = t1(maxX - minX);
+  const height = t1(half * 2);
+  // Each group's own outline: its silhouette stroked twice as wide under its fill, in its own dark, so it moves
+  // with the part
+  const edge = (d: string, color: string) =>
+    outline
+      ? `<path d="${d}" stroke="${color}" stroke-width="${t1(outlineWidth * 2)}" fill="none"/>\n    `
+      : "";
+  const knurl = (x0: number, x1: number, h: number, step = 1.3) => {
+    const lines: string[] = [];
+    for (let x = x0 + step / 2; x < x1; x += step) {
+      lines.push(`M${tp(x, -h)} L${tp(x, h)}`);
+    }
+    return lines.join(" ");
+  };
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t1(minX)} ${t1(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("spas-12")}
+  <!-- The Franchi SPAS-12 from above, as it's held, with no stock: muzzle along +x, its right side down the page
+       (+y), millimeters about its middle on the bore, at the same scale as its side view (the pickup); lengths
+       along it are the side view's, widths the 3D model's. Lit from above, the top faces brightest. -->
+  <defs>
+    ${across("spas-12-top-hump", T_BODY_HALF, flatAcross(G))}
+    ${across("spas-12-top-receiver", T_BODY_HALF, flatAcross(R))}
+    ${across("spas-12-top-shield", T_SHIELD_HALF, flatAcross(S))}
+    ${across("spas-12-top-pump", T_PUMP_HALF, flatAcross(P))}
+    ${across("spas-12-top-barrel", T_BARREL_HALF, roundAcross(T))}
+    ${across("spas-12-top-collar", T_PROTECTOR_HALF, roundAcross(T))}
+    ${across("spas-12-top-tube", T_TUBE_HALF, roundAcross(T))}
+    ${across("spas-12-top-nut", T_FLANGE_HALF, roundAcross(T))}
+  </defs>
+  <!-- Under the barrel and a little wider: the magazine tube, out in front of the pump to its rounded end, and its
+       cap's knurled nut and flange, uncovered as the pump comes back -->
+  <g id="magazine-tube">
+    ${edge(T_TUBE, T.dark)}<path d="${T_TUBE}" fill="url(#spas-12-top-tube)"/>
+    ${edge(T_FLANGE_SHAPE, T.dark)}<path d="${T_FLANGE_SHAPE}" fill="url(#spas-12-top-nut)"/>
+    ${edge(T_NUT_SHAPE, T.dark)}<path id="magazine-cap" d="${T_NUT_SHAPE}" fill="url(#spas-12-top-nut)"/>
+    <path d="${knurl(T_NUT[0] + 1, T_NUT_WAIST[0], T_NUT_HALF - 0.5)} ${knurl(T_NUT_WAIST[1], T_NUT[1] - 1, T_NUT_HALF - 0.5)}" stroke="${T.dark}" stroke-width="0.45" fill="none" opacity="0.7"/>
+    <path d="${tbox(T_NUT_WAIST[0], -T_NUT_HALF, T_NUT_WAIST[1], T_NUT_HALF)}" fill="${T.dark}" opacity="0.55"/>
+  </g>
+  <!-- Slides back along the magazine tube to work the action, under the heat shield, the barrel and the
+       receiver: its sides show beside the shield, notched by its grooves, and its nose out in front of it -->
+  <g id="pump">
+    ${edge(T_PUMP, P.dark)}<path d="${T_PUMP}" fill="url(#spas-12-top-pump)"/>
+    <path id="pump-grooves" d="${T_PUMP_GROOVES}" fill="${P.dark}" opacity="${Math.min(1, 0.45 + 0.45 * ribs)}"/>
+  </g>
+  <!-- The barrel, through the heat shield's slots and out of its front to the collar, the knurled thread
+       protector and the front sight; and under the shield, its dark inside, seen through the slots beside the barrel -->
+  <path id="shield-inside" d="${tbox(T_SHIELD_BACK + 1, -T_SHIELD_HALF + 1, T_SHIELD_FRONT - 1, T_SHIELD_HALF - 1)}" fill="#0c0b0e"/>
+  <g id="barrel">
+    ${edge(T_BARREL, T.dark)}<path d="${T_BARREL}" fill="url(#spas-12-top-barrel)"/>
+    <!-- In the shield's shadow, under it -->
+    <path d="${tbox(T_BARREL_BACK, -T_BARREL_HALF, T_SHIELD_FRONT, T_BARREL_HALF)}" fill="#0c0b0e" opacity="0.55"/>
+    ${edge(T_COLLAR_SHAPE, T.dark)}<path d="${T_COLLAR_SHAPE}" fill="url(#spas-12-top-collar)"/>
+    <path d="M${tp(T_COLLAR[0] + 6.2, -T_COLLAR_HALF)} L${tp(T_COLLAR[0] + 6.2, T_COLLAR_HALF)} M${tp(T_COLLAR[0] + 9.7, -T_COLLAR_HALF)} L${tp(T_COLLAR[0] + 9.7, T_COLLAR_HALF)}" stroke="${T.dark}" stroke-width="1.1" fill="none"/>
+    ${edge(T_PROTECTOR, T.dark)}<path id="muzzle" d="${T_PROTECTOR}" fill="url(#spas-12-top-collar)"/>
+    <path d="${knurl(T_KNURL[0], T_KNURL[1], T_PROTECTOR_HALF - 0.5)}" stroke="${T.dark}" stroke-width="0.45" fill="none" opacity="0.7"/>
+    <g id="front-sight">
+      ${edge(T_FRONT_SIGHT_BASE, T.dark)}<path d="${T_FRONT_SIGHT_BASE}" fill="${T.base}"/>
+      <path d="${T_FRONT_SIGHT_BLADE}" fill="${T.light}"/>
+    </g>
+  </g>
+  <!-- The heat shield over the barrel: its flat top's three rows of slots, the oval plate round the rear sight, and a button near its front -->
+  <g id="heat-shield">
+    ${edge(T_SHIELD, S.dark)}<path d="${T_SHIELD} ${T_SLOTS}" fill="url(#spas-12-top-shield)"/>
+    <path id="vents" d="${T_SLOTS}" fill="none" stroke="${S.dark}" stroke-width="0.6"/>
+    <path d="${T_PLATE_SHAPE}" fill="none" stroke="${S.dark}" stroke-width="0.6"/>
+    <circle cx="${t1(T_BUTTON[0])}" cy="${t1(T_BUTTON[1])}" r="3" fill="${S.light}" stroke="${S.dark}" stroke-width="0.5"/>
+    <g id="rear-sight">
+      ${edge(T_REAR_SIGHT_SHAPE, S.dark)}<path d="${T_REAR_SIGHT_SHAPE}" fill="${S.base}"/>
+      <path d="${tbox(T_REAR_SIGHT[0], -T_REAR_SIGHT_HALF, T_REAR_POST, T_REAR_SIGHT_HALF, 1)}" fill="${S.light}"/>
+    </g>
+  </g>
+  <!-- The receiver, black, its flat top lit; the operating handle's knob out of its right side -->
+  <g id="receiver">
+    ${edge(T_KNOB_SHAPE, T.dark)}<path id="operating-handle" d="${T_KNOB_SHAPE}" fill="${T.light}"/>
+    ${edge(T_RECEIVER, R.dark)}<path d="${T_RECEIVER}" fill="url(#spas-12-top-receiver)"/>
+  </g>
+  <!-- The grip's hump behind the receiver (the grip itself is under it), where a folding stock would hinge: the
+       pivot pin's ends either side, and the sling loop on its top -->
+  <g id="grip">
+    ${edge(T_HUMP, G.dark)}<path d="${T_HUMP}" fill="url(#spas-12-top-hump)"/>
+    <path d="${tbox(T_PIVOT - 4.5, -T_BODY_HALF - 1, T_PIVOT + 4.5, -T_BODY_HALF + 1, 1)} ${tbox(T_PIVOT - 4.5, T_BODY_HALF - 1, T_PIVOT + 4.5, T_BODY_HALF + 1, 1)}" fill="${R.light}" stroke="${R.dark}" stroke-width="0.4"/>
+    <path id="sling-loop" d="${tpill(T_LOOP[0], T_LOOP[1], 0, T_LOOP_HALF)}" fill="none" stroke="${R.dark}" stroke-width="${t1(LOOP_WIDTH * MM_PER_PX + outlineWidth * 2)}"/>
+    <path d="${tpill(T_LOOP[0], T_LOOP[1], 0, T_LOOP_HALF)}" fill="none" stroke="${mix(R.base, R.light, 0.5)}" stroke-width="${t1(LOOP_WIDTH * MM_PER_PX)}"/>
+  </g>
+</svg>
+`;
+}
+
+const TOP: TopView<Spas12Options> = {
+  draw: drawTop,
+  registrations: [
+    {
+      // The heat shield's corners in the model from above
+      file: "model-py.png",
+      points: [
+        [
+          [824, 10],
+          [T_SHIELD_BACK, -T_SHIELD_HALF],
+        ],
+        [
+          [824, 113],
+          [T_SHIELD_BACK, T_SHIELD_HALF],
+        ],
+        [
+          [1797, 10],
+          [T_SHIELD_FRONT, -T_SHIELD_HALF],
+        ],
+        [
+          [1797, 113],
+          [T_SHIELD_FRONT, T_SHIELD_HALF],
+        ],
+      ],
+    },
+  ],
+};
+
 export const SPAS_12: GunDrawing<Spas12Options> = {
   name: "spas-12",
   photo: {
@@ -920,6 +1315,19 @@ export const SPAS_12: GunDrawing<Spas12Options> = {
       height: 579,
       about:
         "The 3D model (model/) rendered from its right side straight on (`model spas-12 --from +z`): the receiver's back end and the grip without a stock",
+    },
+    {
+      file: "model-py.png",
+      width: 2400,
+      height: 157,
+      about:
+        "The 3D model from above, muzzle to the right and its right side down (`model spas-12 --from +y --up -z`): the widths, the shield's slots from above",
+    },
+    {
+      file: "model-mx.png",
+      width: 651,
+      height: 2400,
+      about: "The 3D model from behind (`model spas-12 --from -x`): the widths of the hump, the receiver and the shield",
     },
     {
       file: "model",
@@ -947,4 +1355,5 @@ export const SPAS_12: GunDrawing<Spas12Options> = {
        shield, the ribbed pump, the magazine tube and the 21.5" barrel. Millimeters, with the origin on the gun's
        middle on the bore, as the guns' top views in weapons/guns/art/ have it. -->`,
   drawSide,
+  top: TOP,
 };

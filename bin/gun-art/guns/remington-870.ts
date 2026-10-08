@@ -66,7 +66,8 @@
  */
 import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import type { Material, Stops } from "../lib/style";
 import { linear } from "../lib/style";
 
@@ -905,6 +906,407 @@ function drawSide(options: Remington870Options = {}): string {
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y (down the page), in
+// millimeters about its middle on the bore, at the same scale as the side view. Lengths along it are the side
+// view's (sx converts its photo's pixels); widths are the real gun's:
+//
+// - The barrel and the magazine tube: their diameters in the side view (round, so as wide as they're tall). The
+//   barrel tapers from 21.8 mm at the receiver to 19.9 at the muzzle; the tube is 23.4, so it shows 0.8 to 1.8 mm
+//   along both sides of the barrel. The extension's coupling 29 mm (side view), the barrel's lug round the tube 27
+//   (its side-view height is the ring and its brazing, so a guess between the tube and the coupling), the barrel
+//   clamp round the tube 26.4 (the tube plus its walls), round the barrel the barrel plus 0.9.
+// - The receiver: 1.5" (38.1 mm), the width Boyd's gives its 870 12 gauge stock at the receiver, which is inlet
+//   flush with it. Its top's rounding is the side view's top band (5.5 mm), so a flat top 27 mm wide.
+// - The stock: 1.5" at the receiver (Boyd's); its wrist 33 mm and the butt 41 mm, the recoil pad 43 mm (a guess:
+//   870 synthetic stocks and their pads are about 1.6 to 1.75" across the butt). The comb's top a rounded ridge
+//   about 18 mm wide.
+// - The pump: 45 mm, a guess from its height in the side view (46 mm; the ribbed synthetic forend is about as
+//   wide as it's tall).
+// - The action bars: flat strips 1.5 mm thick along both sides of the tube, under the barrel's edges.
+//
+// What moves: the `pump`, with the action bars (riveted to it; they go back into the receiver with it), over the
+// magazine tube, which it uncovers in front of it.
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - (BUTT_BACK + MUZZLE + 0.2) / 2) * MM_PER_PX;
+/** A length in the side view's pixels, in millimeters */
+const smm = (px: number) => px * MM_PER_PX;
+
+const T_OUTLINE = 0.4;
+const t2 = (v: number) => {
+  const s = fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "");
+  return s === "-0" ? "0" : s;
+};
+const tp = (x: number, y: number) => `${t2(x)},${t2(y)}`;
+
+/** A rectangle from x0,y0 to x1,y1, each corner rounded by its own radius (back-left, front-left, front-right, back-right) */
+function tbox(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+): string {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (
+    cx: number,
+    cy: number,
+    fx: number,
+    fy: number,
+    tx: number,
+    ty: number,
+  ) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A gradient across the gun (along y), from its left edge to its right */
+function across(id: string, half: number, list: Stops): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t2(-half)}" x2="0" y2="${t2(half)}">`,
+    ...list.map(
+      ([o, c]) => `      <stop offset="${fixed(o, 3)}" stop-color="${c}"/>`,
+    ),
+    "    </linearGradient>",
+  ].join("\n    ");
+}
+
+/** A round part from above, lit from overhead: dark at its sides, bright along its top */
+function roundAcross(M: Material, sheen: number): Stops {
+  const s = Math.min(sheen, 1);
+  const hard = Math.max(0, sheen - 1);
+  return [
+    [0, M.dark],
+    [0.18, mix(M.base, M.dark, 0.2 + 0.2 * hard)],
+    [0.38 + 0.04 * hard, mix(M.base, M.light, s)],
+    [0.5, mix(M.base, M.highlight, s)],
+    [0.62 - 0.04 * hard, mix(M.base, M.light, s)],
+    [0.82, mix(M.base, M.dark, 0.2 + 0.2 * hard)],
+    [1, M.dark],
+  ];
+}
+
+// Along the gun (side view pixels to millimeters)
+const T_BUTT = sx(BUTT_BACK + 0.2);
+const T_PAD_FRONT = sx(PAD_SEAM[0][0]);
+const T_COMB_NOSE = sx(COMB_NOSE[0]);
+const T_WRIST = sx(206); // the wrist's narrowest, at its lowest in the side view
+const T_BUTT_FULL = sx(70); // where the butt reaches its full width
+const T_RECEIVER_BACK = sx(RECEIVER_BACK_TOP[0]);
+const T_RECEIVER_FRONT = sx(RECEIVER_FRONT);
+const T_PORT = [sx(PORT_BACK), sx(PORT_FRONT)] as const;
+const T_PUMP_BACK = sx(PUMP_BACK);
+const T_PUMP_LIP = sx(PUMP_LIP_BACK);
+const T_PUMP_FRONT = sx(PUMP_FRONT);
+const T_LUG_BACK = sx(PUMP_FRONT - 2);
+const T_LUG_FRONT = sx(LUG_FRONT);
+const T_COUPLING_FRONT = sx(COUPLING_FRONT + 2.6);
+const T_CLAMP = [sx(CLAMP_BACK), sx(CLAMP_FRONT)] as const;
+const T_TUBE_END = sx(TUBE_END);
+const T_CAP_START = sx(CAP_START);
+const T_MUZZLE = sx(MUZZLE);
+const T_BEAD = sx(BEAD_X);
+const T_BEAD_R = smm(BEAD_R);
+
+// Across it (half widths)
+const T_BARREL_BACK_HALF = smm(BARREL_BOTTOM_BACK - BARREL_TOP_BACK) / 2;
+const T_BARREL_FRONT_HALF = smm(BARREL_BOTTOM_FRONT - BARREL_TOP_FRONT) / 2;
+const T_TUBE_HALF = smm(TUBE_BOTTOM - TUBE_TOP) / 2;
+const T_COUPLING_HALF = smm(COUPLING_R);
+const T_LUG_HALF = 13.5;
+const T_CLAMP_HALF = T_TUBE_HALF + 1.5;
+const T_CLAMP_BARREL_HALF = T_BARREL_FRONT_HALF + 0.45;
+const T_RECEIVER_HALF = 19.05; // 1.5"
+const T_RECEIVER_TOP_HALF = T_RECEIVER_HALF - smm(TOP_BAND);
+const T_STOCK_RECEIVER_HALF = 19.05;
+const T_WRIST_HALF = 16.5;
+const T_BUTT_HALF = 20.5;
+const T_PAD_HALF = 21.5;
+const T_COMB_HALF = 9;
+const T_PUMP_HALF = 22.5;
+const T_BAR_IN = T_TUBE_HALF - 0.3; // the action bars, along the tube's sides
+const T_BAR_OUT = T_TUBE_HALF + 1.2;
+const T_PUMP_STROKE = 95.25; // 3.75": the pump's real travel, a little short of the gap to the receiver (99 mm)
+
+// The barrel, tapering to its crown
+const T_BARREL =
+  `M${tp(T_RECEIVER_FRONT - 6, -T_BARREL_BACK_HALF)} L${tp(T_MUZZLE - 1.5, -T_BARREL_FRONT_HALF)} ` +
+  `C${tp(T_MUZZLE - 0.6, -T_BARREL_FRONT_HALF)} ${tp(T_MUZZLE, -T_BARREL_FRONT_HALF + 0.6)} ${tp(T_MUZZLE, -T_BARREL_FRONT_HALF + 1.5)} ` +
+  `L${tp(T_MUZZLE, T_BARREL_FRONT_HALF - 1.5)} ` +
+  `C${tp(T_MUZZLE, T_BARREL_FRONT_HALF - 0.6)} ${tp(T_MUZZLE - 0.6, T_BARREL_FRONT_HALF)} ${tp(T_MUZZLE - 1.5, T_BARREL_FRONT_HALF)} ` +
+  `L${tp(T_RECEIVER_FRONT - 6, T_BARREL_BACK_HALF)} Z`;
+// The magazine tube, its extension's cap rounding off at the front
+const T_TUBE =
+  `M${tp(T_RECEIVER_FRONT - 6, -T_TUBE_HALF)} L${tp(T_CAP_START, -T_TUBE_HALF)} ` +
+  `C${tp(T_CAP_START + 8, -T_TUBE_HALF)} ${tp(T_TUBE_END, -T_TUBE_HALF + 3)} ${tp(T_TUBE_END, -T_TUBE_HALF + 5.5)} ` +
+  `L${tp(T_TUBE_END, T_TUBE_HALF - 5.5)} ` +
+  `C${tp(T_TUBE_END, T_TUBE_HALF - 3)} ${tp(T_CAP_START + 8, T_TUBE_HALF)} ${tp(T_CAP_START, T_TUBE_HALF)} ` +
+  `L${tp(T_RECEIVER_FRONT - 6, T_TUBE_HALF)} Z`;
+const T_LUG = tbox(T_LUG_BACK, -T_LUG_HALF, T_LUG_FRONT, T_LUG_HALF, 1);
+const T_COUPLING = tbox(
+  T_LUG_FRONT - 0.5,
+  -T_COUPLING_HALF,
+  T_COUPLING_FRONT,
+  T_COUPLING_HALF,
+  [0, 3.5, 3.5, 0],
+);
+const T_CLAMP_SHAPE = tbox(
+  T_CLAMP[0],
+  -T_CLAMP_HALF,
+  T_CLAMP[1],
+  T_CLAMP_HALF,
+  1,
+);
+const T_CLAMP_RING = tbox(
+  sx(CLAMP_FACE),
+  -T_CLAMP_BARREL_HALF,
+  T_CLAMP[1],
+  T_CLAMP_BARREL_HALF,
+  0.6,
+);
+// The pump: its lip at the back is underneath, so from above it's square at the back, rounded at the front
+const T_PUMP = tbox(
+  T_PUMP_BACK,
+  -T_PUMP_HALF,
+  T_PUMP_FRONT,
+  T_PUMP_HALF,
+  [4, 6, 6, 4],
+);
+// The action bars, from the pump's back into the receiver (as far as the pump goes back, and more)
+const T_BAR_BACK = T_RECEIVER_FRONT - 20;
+const T_BARS = [
+  tbox(T_BAR_BACK, -T_BAR_OUT, T_PUMP_BACK + 2, -T_BAR_IN),
+  tbox(T_BAR_BACK, T_BAR_IN, T_PUMP_BACK + 2, T_BAR_OUT),
+];
+// The receiver: square, its corners just rounded; its back end meets the stock
+const T_RECEIVER = tbox(
+  T_RECEIVER_BACK,
+  -T_RECEIVER_HALF,
+  T_RECEIVER_FRONT,
+  T_RECEIVER_HALF,
+  [3, 1.5, 1.5, 3],
+);
+// The stock: from the receiver, narrowing to the wrist, then widening along the comb to the butt
+const stockSide = (sign: 1 | -1) =>
+  smoothCurve(
+    [
+      [T_RECEIVER_BACK + 1, sign * T_STOCK_RECEIVER_HALF],
+      [sx(235), sign * (T_WRIST_HALF + 0.9)],
+      [T_WRIST, sign * T_WRIST_HALF],
+      [T_COMB_NOSE, sign * (T_WRIST_HALF + 0.7)],
+      [sx(120), sign * (T_BUTT_HALF - 1.4)],
+      [T_BUTT_FULL, sign * T_BUTT_HALF],
+      [T_PAD_FRONT, sign * T_BUTT_HALF],
+    ],
+    [-1, 0],
+    [-1, 0],
+  );
+const T_STOCK =
+  `M${tp(T_RECEIVER_BACK + 1, -T_STOCK_RECEIVER_HALF)} ${stockSide(-1)} ` +
+  `L${tp(T_PAD_FRONT, T_BUTT_HALF)} ` +
+  smoothCurve(
+    [
+      [T_PAD_FRONT, T_BUTT_HALF],
+      [T_BUTT_FULL, T_BUTT_HALF],
+      [sx(120), T_BUTT_HALF - 1.4],
+      [T_COMB_NOSE, T_WRIST_HALF + 0.7],
+      [T_WRIST, T_WRIST_HALF],
+      [sx(235), T_WRIST_HALF + 0.9],
+      [T_RECEIVER_BACK + 1, T_STOCK_RECEIVER_HALF],
+    ],
+    [1, 0],
+    [1, 0],
+  ) +
+  ` L${tp(T_RECEIVER_BACK + 2, T_STOCK_RECEIVER_HALF)} L${tp(T_RECEIVER_BACK + 2, -T_STOCK_RECEIVER_HALF)} Z`;
+// The recoil pad: a little wider than the butt, its back gently rounded
+const T_PAD =
+  `M${tp(T_PAD_FRONT, -T_PAD_HALF)} L${tp(T_PAD_FRONT, T_PAD_HALF)} L${tp(T_BUTT + 3, T_PAD_HALF)} ` +
+  `C${tp(T_BUTT + 1, T_PAD_HALF - 2)} ${tp(T_BUTT, T_PAD_HALF * 0.55)} ${tp(T_BUTT, 0)} ` +
+  `C${tp(T_BUTT, -T_PAD_HALF * 0.55)} ${tp(T_BUTT + 1, -T_PAD_HALF + 2)} ${tp(T_BUTT + 3, -T_PAD_HALF)} Z`;
+// The comb's top: a ridge down the middle of the butt, narrowing over the comb's nose into the wrist's top
+const T_COMB =
+  `M${tp(T_PAD_FRONT, -T_COMB_HALF)} L${tp(T_COMB_NOSE - 10, -T_COMB_HALF + 1)} ` +
+  `C${tp(T_COMB_NOSE + 5, -T_COMB_HALF + 1.5)} ${tp(T_COMB_NOSE + 15, -T_COMB_HALF + 3.5)} ${tp(T_RECEIVER_BACK, -T_COMB_HALF + 4)} ` +
+  `L${tp(T_RECEIVER_BACK, T_COMB_HALF - 4)} ` +
+  `C${tp(T_COMB_NOSE + 15, T_COMB_HALF - 3.5)} ${tp(T_COMB_NOSE + 5, T_COMB_HALF - 1.5)} ${tp(T_COMB_NOSE - 10, T_COMB_HALF - 1)} ` +
+  `L${tp(T_PAD_FRONT, T_COMB_HALF)} Z`;
+
+function drawTop(options: Remington870Options = {}): string {
+  const N: Material = { ...SATIN_NICKEL, ...options.nickel };
+  const S: Material = { ...BLACK_SYNTHETIC, ...options.stock };
+  const P: Material = { ...BLACK_SYNTHETIC, ...options.pump };
+  const pad: Material = { ...BLACK_RUBBER, ...options.recoilPad };
+  const B: Material = {
+    base: mix(N.base, N.light, 0.4),
+    dark: N.dark,
+    light: mix(N.light, N.highlight, 0.5),
+    highlight: "#ffffff",
+    ...options.bolt,
+  };
+  const sheen = options.sheen ?? 1;
+  const rim = options.rimLight ?? RIM_LIGHT_MM;
+  const outline = options.outline !== false;
+  // Each part's own outline: its silhouette stroked twice as wide under its fill, in its own dark, so it moves
+  // with the part
+  const edge = (d: string, color: string) =>
+    outline
+      ? `<path d="${d}" stroke="${color}" stroke-width="${t2(T_OUTLINE * 2)}" fill="none"/>\n    `
+      : "";
+  const minX = T_BUTT - 1;
+  const maxX = T_MUZZLE + 1;
+  const half = T_PUMP_HALF + 1;
+  const width = t2(maxX - minX);
+  const height = t2(half * 2);
+  // The pump's ribs: grooves round its sides, their ends seen from above along both edges; the smooth band along
+  // its top down the middle
+  const first = sx(PUMP_BACK + 3.2);
+  const last = sx(PUMP_FRONT - 3.2);
+  const pitch = (last - first) / (RIB_COUNT - 1);
+  const grooveWidth = smm(1.6);
+  const grooves: string[] = [];
+  for (let i = 0; i < RIB_COUNT; i++) {
+    const x = first + i * pitch;
+    for (const sign of [-1, 1]) {
+      const inner = sign * (T_PUMP_HALF - 6.5);
+      const outer = sign * (T_PUMP_HALF + 0.5);
+      grooves.push(
+        `<path d="${tbox(x - grooveWidth / 2, Math.min(inner, outer), x + grooveWidth / 2, Math.max(inner, outer))}"/>`,
+      );
+    }
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t2(minX)} ${t2(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("remington-870")}
+  <!-- The Remington 870 Marine Magnum from above, as it's held: muzzle along +x, its right side down the page (+y),
+       millimeters about its middle on the bore, at the same scale as its side view (the pickup); lengths along it
+       are the side view's. Nickel receiver, barrel and magazine tube, black synthetic stock and pump; lit from
+       above, the tops brightest. -->
+  <defs>
+    ${across("remington-870-top-barrel", T_BARREL_BACK_HALF, roundAcross(N, sheen))}
+    ${across("remington-870-top-tube", T_TUBE_HALF, roundAcross(N, sheen))}
+    ${across("remington-870-top-coupling", T_COUPLING_HALF, roundAcross(N, sheen))}
+    ${across("remington-870-top-clamp", T_CLAMP_HALF, roundAcross(N, sheen))}
+    ${across("remington-870-top-receiver", T_RECEIVER_HALF, [
+      [0, N.dark],
+      [0.07, mix(N.base, N.dark, 0.3)],
+      [0.145, mix(N.base, N.light, 0.6)],
+      [0.5, mix(N.light, N.highlight, 0.4 * Math.min(sheen, 1.5))],
+      [0.855, mix(N.base, N.light, 0.6)],
+      [0.93, mix(N.base, N.dark, 0.3)],
+      [1, N.dark],
+    ])}
+    ${across("remington-870-top-pump", T_PUMP_HALF, [
+      [0, P.dark],
+      [0.12, P.base],
+      [0.3, P.light],
+      [0.5, mix(P.light, P.highlight, 0.5)],
+      [0.7, P.light],
+      [0.88, P.base],
+      [1, P.dark],
+    ])}
+    ${across("remington-870-top-stock", T_PAD_HALF, [
+      [0, S.dark],
+      [0.12, S.base],
+      [0.32, S.light],
+      [0.5, mix(S.light, S.highlight, 0.3)],
+      [0.68, S.light],
+      [0.88, S.base],
+      [1, S.dark],
+    ])}
+    ${across("remington-870-top-pad", T_PAD_HALF, [
+      [0, pad.dark],
+      [0.2, pad.base],
+      [0.5, pad.light],
+      [0.8, pad.base],
+      [1, pad.dark],
+    ])}
+    ${across("remington-870-top-bar", T_BAR_OUT, [
+      [0, N.dark],
+      [0.03, N.light],
+      [0.97, N.light],
+      [1, N.dark],
+    ])}
+  </defs>
+  <!-- Under the pump, and wider than the barrel, so it shows along both its sides: the magazine tube, the
+       barrel's lug round it in front of the pump, the extension's coupling holding the lug on, and the extension
+       out to its cap just behind the muzzle -->
+  <g id="magazine-tube">
+    ${edge(T_TUBE, N.dark)}<path d="${T_TUBE}" fill="url(#remington-870-top-tube)"/>
+    <path d="M${tp(T_CAP_START, -T_TUBE_HALF + 0.3)} L${tp(T_CAP_START, T_TUBE_HALF - 0.3)}" stroke="${N.dark}" stroke-width="0.4" opacity="0.6" fill="none"/>
+    ${edge(T_LUG, N.dark)}<path id="barrel-lug" d="${T_LUG}" fill="url(#remington-870-top-coupling)"/>
+    ${edge(T_COUPLING, N.dark)}<path id="extension-coupling" d="${T_COUPLING}" fill="url(#remington-870-top-coupling)"/>
+  </g>
+  <!-- Slides back along the magazine tube to work the action (${t2(T_PUMP_STROKE)} mm), its action bars going back
+       into the receiver with it -->
+  <g id="pump">
+    <g id="action-bars" fill="url(#remington-870-top-bar)">
+      ${T_BARS.map((d) => `${edge(d, N.dark)}<path d="${d}"/>`).join("\n      ")}
+    </g>
+    ${edge(T_PUMP, P.dark)}<path id="pump-body" d="${T_PUMP}" fill="url(#remington-870-top-pump)"/>
+    <g id="pump-ribs" fill="${P.dark}">
+      ${grooves.join("\n      ")}
+    </g>
+    <!-- The rim light down its top's middle, where it catches the light -->
+    <path d="M${tp(T_PUMP_BACK + 2, 0)} L${tp(T_PUMP_FRONT - 3, 0)}" stroke="${P.highlight}" stroke-width="${t2(rim * 2)}" opacity="0.6" fill="none"/>
+  </g>
+  <!-- Over the tube and the pump: the barrel, tapering to the muzzle, and the clamp round it and the tube -->
+  <g id="barrel">
+    ${edge(T_BARREL, N.dark)}<path d="${T_BARREL}" fill="url(#remington-870-top-barrel)"/>
+    <g id="barrel-clamp">
+      ${edge(T_CLAMP_SHAPE, N.dark)}<path d="${T_CLAMP_SHAPE}" fill="url(#remington-870-top-clamp)"/>
+      <path d="${T_CLAMP_RING}" fill="url(#remington-870-top-barrel)"/>
+      <path d="M${tp(sx(CLAMP_FACE), -T_CLAMP_BARREL_HALF)} L${tp(sx(CLAMP_FACE), T_CLAMP_BARREL_HALF)}" stroke="${N.dark}" stroke-width="0.4" opacity="0.6" fill="none"/>
+    </g>
+  </g>
+  <!-- The receiver: its flat top between rounded shoulders, square at the front, against the stock at the back;
+       the ejection port on its right, cut into the shoulder, the bolt in it -->
+  <g id="receiver">
+    ${edge(T_RECEIVER, N.dark)}<path id="receiver-body" d="${T_RECEIVER}" fill="url(#remington-870-top-receiver)"/>
+    <g id="receiver-edges" fill="none" stroke="${N.highlight}" stroke-width="0.5" opacity="0.7">
+      <path d="M${tp(T_RECEIVER_BACK + 3, -T_RECEIVER_TOP_HALF)} L${tp(T_RECEIVER_FRONT - 1.5, -T_RECEIVER_TOP_HALF)}"/>
+      <path d="M${tp(T_RECEIVER_BACK + 3, T_RECEIVER_TOP_HALF)} L${tp(T_PORT[0] - 2, T_RECEIVER_TOP_HALF)}"/>
+      <path d="M${tp(T_PORT[1] + 2, T_RECEIVER_TOP_HALF)} L${tp(T_RECEIVER_FRONT - 1.5, T_RECEIVER_TOP_HALF)}"/>
+    </g>
+    <g id="ejection-port">
+      <path d="${tbox(T_PORT[0], T_RECEIVER_TOP_HALF + 0.6, T_PORT[1], T_RECEIVER_HALF + 0.1, [2.5, 2.5, 0, 0])}" fill="${mix(N.dark, "#000000", 0.45)}"/>
+      <!-- The bolt's top, bright, in the port -->
+      <path d="${tbox(T_PORT[0] + 3, T_RECEIVER_TOP_HALF + 1.6, T_PORT[1] - 3, T_RECEIVER_HALF - 1.2, 1)}" fill="${B.light}"/>
+      <path d="M${tp(T_PORT[0] + 4, T_RECEIVER_TOP_HALF + 2.4)} L${tp(T_PORT[1] - 4, T_RECEIVER_TOP_HALF + 2.4)}" stroke="${B.highlight}" stroke-width="0.6" fill="none"/>
+    </g>
+  </g>
+  <!-- Black synthetic: from the receiver, narrowing at the wrist, widening along the comb to the butt; the comb's
+       top a rounded ridge down its middle, and the rubber recoil pad -->
+  <g id="stock">
+    ${edge(T_STOCK, S.dark)}<path id="stock-body" d="${T_STOCK}" fill="url(#remington-870-top-stock)"/>
+    <path id="comb" d="${T_COMB}" fill="${S.light}" opacity="0.45"/>
+    <path d="M${tp(T_PAD_FRONT + 1, 0)} L${tp(T_COMB_NOSE - 4, 0)} C${tp(T_COMB_NOSE + 6, 0)} ${tp(T_COMB_NOSE + 20, 0)} ${tp(T_RECEIVER_BACK - 2, 0)}" stroke="${S.highlight}" stroke-width="${t2(rim * 2)}" opacity="0.7" fill="none"/>
+    ${edge(T_PAD, pad.dark)}<path id="butt-pad" d="${T_PAD}" fill="url(#remington-870-top-pad)"/>
+  </g>
+  <!-- The bead, at the muzzle -->
+  <g id="front-sight">
+    <circle cx="${t2(T_BEAD)}" cy="0" r="${t2(T_BEAD_R + T_OUTLINE)}" fill="${N.dark}"/>
+    <circle cx="${t2(T_BEAD)}" cy="0" r="${t2(T_BEAD_R)}" fill="${N.light}"/>
+    <circle cx="${t2(T_BEAD - 0.6)}" cy="0" r="${t2(T_BEAD_R * 0.4)}" fill="${N.highlight}"/>
+  </g>
+</svg>
+`;
+}
+
+const TOP: TopView<Remington870Options> = { draw: drawTop };
+
 export const REMINGTON_870: GunDrawing<Remington870Options> = {
   name: "remington-870",
   photo: {
@@ -951,4 +1353,5 @@ export const REMINGTON_870: GunDrawing<Remington870Options> = {
        18" barrel. Millimeters, with the origin on the gun's middle on the bore, as the guns' top views in
        weapons/guns/art/ have it; drawn over a photo, then simplified. -->`,
   drawSide,
+  top: TOP,
 };

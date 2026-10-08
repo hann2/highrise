@@ -12,7 +12,8 @@
  */
 import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, polygon, rounded, smoothCurve } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import type { Material, Stops } from "../lib/style";
 import { linear } from "../lib/style";
 
@@ -1915,6 +1916,404 @@ function drawSide(options: Ar15Options = {}): string {
 </svg>`;
 }
 
+
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y, in millimeters about
+// its middle on the bore, at the same scale as the side view. Lengths along it come from the side view's numbers
+// (`sx`, from the base photo's pixels, and the stock's and optic's mappings); widths are the real gun's:
+//   - The rails: MIL-STD-1913's 0.835" (21.2 mm) across; lugs 5 mm long every 10 mm, as the side view's.
+//   - The handguard (KAC's URX 4): a near-round octagon, 42 mm across, from its 45 mm height under the rail in the
+//     side view. Its upper facets show either side of the rail, with the short M-LOK slots through them (holes).
+//   - The upper receiver: 25.4 mm (1") across under its rail (an estimate: AR uppers are about an inch wide), with
+//     the dust cover's hinge and the brass deflector standing out on the right as bumps (the E3 upper has no
+//     forward assist; the deflector is where one would be).
+//   - The lower receiver: 28 mm across at the magazine well (an estimate, a little wider than the upper, as on
+//     every AR), so its edges show either side of the upper; KAC's ambidextrous selector and bolt catch stick out
+//     both sides, the takedown and pivot pins' heads a little.
+//   - The grip (an A2): 30 mm across (estimate), under the lower, its heel out behind it under the buffer tube.
+//   - The Hexmag: 27 mm across (estimate, polymer magazines are about 1.05"), under the lower's well, which hides
+//     it from above.
+//   - The buffer tube: mil-spec 1.148" (29.2 mm); the castle nut 34 mm, as in the side view.
+//   - The stock (Magpul DT-PR): 1.6" (40.6 mm) at its widest, the butt pad (magpul.com); its top box narrower, 35 mm
+//     (estimate from the product photos).
+//   - The optic (Vortex UH-1 Gen II): 2.1" (53.3 mm) across (Vortex's table), its housing seen from above with the
+//     grooved slope at its back; the dials on its right are inset, so don't show.
+//   - The barrel: 19 mm across (its 47 px in the side view); the flash hider 20 mm.
+//   - The charging handle: a mil-spec T, 32 mm across (estimate, about 1.25"), its latch on the left standing out
+//     to 22 mm from the middle; its shaft (9 mm across) runs forward under the upper's rail. It's the moving part
+//     (`charging-handle`): pulled back about 3" (the bolt carrier's stroke, 76 mm) to cock it, it slides back over
+//     the buffer tube and uncovers its shaft.
+// The sights are folded down (as in the side view); the M-LOK covers and the rail section under the handguard don't
+// show from above.
+
+const sx = (px: number) => (px - ORIGIN[0]) * MM_PER_PX;
+const t1 = (v: number) => fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "").replace(/^-0$/, "0");
+const tp = (x: number, y: number) => `${t1(x)},${t1(y)}`;
+
+/** A rectangle with each corner rounded by its own radius (back-left, front-left, front-right, back-right) */
+function tbox(x0: number, y0: number, x1: number, y1: number, r: number | [number, number, number, number] = 0) {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (cx: number, cy: number, fx: number, fy: number, tx: number, ty: number) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+/** A box symmetric about the bore */
+const sym = (x0: number, x1: number, half: number, r: number | [number, number, number, number] = 0) =>
+  tbox(x0, -half, x1, half, r);
+
+/** A gradient across the gun (along y), from its left edge to its right */
+function across(id: string, half: number, list: [number, string][]): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t1(-half)}" x2="0" y2="${t1(half)}">`,
+    ...list.map(([o, c]) => `      <stop offset="${o}" stop-color="${c}"/>`),
+    "    </linearGradient>",
+  ].join("\n    ");
+}
+/** A round part's shading from above: dark at its sides, its top lit */
+const roundAcross = (m: Material): [number, string][] => [
+  [0, m.dark],
+  [0.2, m.base],
+  [0.42, m.light],
+  [0.5, m.highlight],
+  [0.58, m.light],
+  [0.8, m.base],
+  [1, m.dark],
+];
+/** A flat top's shading: its edges turning away, its middle lit */
+const flatAcross = (m: Material): [number, string][] => [
+  [0, m.dark],
+  [0.08, m.base],
+  [0.2, m.light],
+  [0.8, m.light],
+  [0.92, m.base],
+  [1, m.dark],
+];
+
+const T_RAIL_HALF = 21.2 / 2;
+const T_HG_HALF = 21;
+const T_UPPER_HALF = 12.7;
+const T_LOWER_HALF = 14;
+const T_GRIP_HALF = 15;
+const T_MAG_HALF = 13.5;
+const T_TUBE_HALF = 29.2 / 2;
+const T_CASTLE_HALF = 17;
+const T_STOCK_HALF = 17.5;
+const T_PAD_HALF = 40.6 / 2;
+const T_OPTIC_HALF = 53.3 / 2;
+const T_BARREL_HALF = 9.5;
+const T_HIDER_HALF = 10.1;
+const T_CH_HALF = 16;
+const T_CH_LATCH = 22;
+const T_CH_SHAFT_HALF = 4.5;
+/** The charging handle's stroke: pulled back as far as the bolt carrier goes, about 3" */
+export const CHARGING_HANDLE_STROKE_M = 0.076;
+
+function drawTop(options: Ar15Options = {}): string {
+  const R: Material = { ...AR_ANODIZED, ...options.receiver };
+  const H: Material = { ...R, ...options.handguard };
+  const F: Material = { ...AR_POLYMER, ...options.furniture };
+  const O: Material = { ...AR_OPTIC, ...options.optic };
+  const magStyle = options.magazineStyle ?? "hexmag";
+  const M: Material = { ...(magStyle === "gi" ? AR_MAGAZINE : F), ...options.magazine };
+  const S: Material = { ...AR_STEEL, ...options.steel };
+  const shift = ((options.barrel ?? DEFAULT_BARREL_IN) - PHOTO_BARREL_IN) * PX_PER_IN;
+  const butt = buttX(options.stockNotch ?? DEFAULT_NOTCH);
+  const hg = handguardShapes(options.handguardLength);
+  const outlineMm = options.outlineMm ?? OUTLINE_MM;
+  const outline = options.outline !== false;
+  const irons = options.irons ?? "folded";
+  const edge = (d: string, color: string) =>
+    outline ? `<path d="${d}" stroke="${color}" stroke-width="${t1(outlineMm * 2)}" fill="none"/>\n    ` : "";
+
+  // Lengths from the side view
+  const st = stockShapes(butt);
+  const xButt = sx(butt);
+  const xStockFront = sx(st.front);
+  const xPadFront = sx(butt + (STOCK_BUTT_SX - 994) * STOCK_SCALE);
+  const xTubeBack = xStockFront - 20;
+  const xCastle: [number, number] = [sx(630), sx(660)];
+  const xLower: [number, number] = [sx(627), sx(1162)];
+  const xUpper: [number, number] = [sx(UPPER_BACK), sx(UPPER_FRONT)];
+  const xHg: [number, number] = [sx(HG_BACK), sx(hg.front)];
+  const xMuzzle = sx(HIDER_END + shift);
+  const xHider = sx(HIDER_BACK + shift);
+  const xCh: [number, number] = [sx(686), sx(700)];
+
+  const handguard = tbox(xHg[0], -T_HG_HALF, xHg[1], T_HG_HALF, [0, 4, 4, 0]);
+  const hgRail = sym(xHg[0], xHg[1] - 1, T_RAIL_HALF);
+  const hgLugs: string[] = [];
+  for (let i = 0; i < hg.lugSpec.count; i++) {
+    const x = sx(hg.lugSpec.first + i * hg.lugSpec.pitch);
+    hgLugs.push(sym(x, x + hg.lugSpec.width * MM_PER_PX, T_RAIL_HALF, 0.6));
+  }
+  // The short slots high on its sides, through its upper facets
+  const sideSlots: string[] = [];
+  for (const [a, b] of handguardSlotsTop(options.handguardLength)) {
+    sideSlots.push(tbox(sx(a), T_RAIL_HALF + 2.2, sx(b), T_RAIL_HALF + 6.6, 2.2));
+    sideSlots.push(tbox(sx(a), -T_RAIL_HALF - 6.6, sx(b), -T_RAIL_HALF - 2.2, 2.2));
+  }
+  const upperBody = sym(xUpper[0], xUpper[1], T_UPPER_HALF, [2, 0, 0, 2]);
+  const upperRail = sym(sx(702), xUpper[1], T_RAIL_HALF, [1, 0, 0, 1]);
+  const upperLugs: string[] = [];
+  for (let i = 0; i < UPPER_LUGS.count; i++) {
+    const x = sx(UPPER_LUGS.first + i * UPPER_LUGS.pitch);
+    upperLugs.push(sym(x, x + UPPER_LUGS.width * MM_PER_PX, T_RAIL_HALF, 0.6));
+  }
+  upperLugs.push(sym(sx(1131), sx(1159), T_RAIL_HALF, 0.6));
+  // On the right: the dust cover's hinge along the port, and the brass deflector behind it
+  const dustCover = tbox(sx(925), T_UPPER_HALF - 1, sx(1150), 15, [0, 0, 2, 2]);
+  const deflector = tbox(sx(872), T_UPPER_HALF - 1, sx(930), 17.5, [0, 0, 4, 6]);
+  const lower = sym(xLower[0], xLower[1], T_LOWER_HALF, [3, 4, 4, 3]);
+  const grip = sym(sx(596), sx(800), T_GRIP_HALF, 6);
+  const magazine = sym(sx(1000), sx(1175), T_MAG_HALF, 4);
+  const selector = [tbox(sx(745), -20, sx(805), -T_LOWER_HALF + 1, [3, 3, 0, 0]), tbox(sx(745), T_LOWER_HALF - 1, sx(805), 20, [0, 0, 3, 3])];
+  const boltCatch = [tbox(sx(892), -17, sx(926), -T_LOWER_HALF + 1, [3, 3, 0, 0]), tbox(sx(892), T_LOWER_HALF - 1, sx(926), 17, [0, 0, 3, 3])];
+  const pins = [sx(TAKEDOWN_PIN[0]), sx(PIVOT_PIN[0])].flatMap((x) => [
+    tbox(x - 4.5, -T_LOWER_HALF - 1.5, x + 4.5, -T_LOWER_HALF + 1, [2, 2, 0, 0]),
+    tbox(x - 4.5, T_LOWER_HALF - 1, x + 4.5, T_LOWER_HALF + 1.5, [0, 0, 2, 2]),
+  ]);
+  const tube = sym(xTubeBack, xCastle[0] + 1, T_TUBE_HALF);
+  const castle = sym(xCastle[0], xCastle[1], T_CASTLE_HALF, 1.5);
+  const stockBody = sym(xPadFront - 2, xStockFront, T_STOCK_HALF, [0, 4, 4, 0]);
+  const pad = sym(xButt, xPadFront + 2, T_PAD_HALF, [5, 2, 2, 5]);
+  const barrel = sym(xHg[1] - 4, xHider + 1, T_BARREL_HALF);
+  const hider = sym(xHider, xMuzzle, T_HIDER_HALF, [1, 2, 2, 1]);
+  const hiderSlots = [
+    tbox(sx(SLOT_BACK + shift), -3, xMuzzle + 1, 3, [3, 0, 0, 3]),
+  ];
+  // The charging handle: its T behind the upper, its latch out to the left, its shaft forward under the rail
+  const chT = tbox(xCh[0] - 2, -T_CH_HALF, xCh[1] + 2, T_CH_HALF, 3);
+  const chLatch = tbox(xCh[0] - 1, -T_CH_LATCH, xCh[0] + 13, -T_CH_HALF + 1, [3, 3, 0, 0]);
+  const chShaft = sym(xCh[1], xCh[1] + 80, T_CH_SHAFT_HALF);
+
+  // The optic, from above: its housing's length from the side view's mapping, its width Vortex's
+  const op = opticShapes();
+  const xOptic: [number, number] = [sx(op.p([93, 0])[0]), sx(op.p([982, 0])[0])];
+  const xOpticSlope = sx(op.p([340, 0])[0]);
+  const optic = sym(xOptic[0], xOptic[1], T_OPTIC_HALF, 5);
+  const opticSlope = sym(xOptic[0] + 1, xOpticSlope, T_OPTIC_HALF - 1.5, [4, 0, 0, 4]);
+  const opticGrooves = [-9, 9]
+    .map((y) => `M${tp(sx(op.p([215, 0])[0]), y)} L${tp(xOpticSlope - 1, y)}`)
+    .join(" ");
+  const opticCap = sym(sx(op.p([13, 0])[0]), xOptic[0] + 2, 13, [6, 0, 0, 6]);
+
+  // The folded sights
+  const sightsDrawn = irons !== "none";
+  const rearBase = sym(sx(762), sx(818), T_RAIL_HALF - 0.5, 1.5);
+  const rearLeaf = irons === "up" ? sym(sx(782), sx(812), 9, 1.5) : sym(sx(790), sx(850), 8, 2);
+  const frontBase = sym(sx(1785 + hg.extra), sx(1838 + hg.extra), T_RAIL_HALF - 0.5, 1.5);
+  const frontPost = irons === "up" ? sym(sx(1784 + hg.extra), sx(1810 + hg.extra), 8, 1.5) : sym(sx(1736 + hg.extra), sx(1806 + hg.extra), 6, 2);
+
+  const half = T_OPTIC_HALF + 1;
+  const minX = xButt - 1;
+  const maxX = xMuzzle + 1;
+  const width = t1(maxX - minX);
+  const height = t1(half * 2);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t1(minX)} ${t1(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("ar-15")}
+  <!-- The AR-15 from above, as it's held: muzzle along +x, its right side down the page (+y), millimeters about its
+       middle on the bore, at the same scale as its side view (the pickup); lengths along it are the side view's. A
+       KAC SR-15 with a 13.5" barrel under its M-LOK handguard, a Magpul DT-PR stock one notch out, a Vortex UH-1 Gen
+       II, the flip-up sights folded, and a Hexmag under the magazine well. Lit from above: the tops brightest. -->
+  <defs>
+    ${across("ar-15-top-handguard", T_HG_HALF, flatAcross(H))}
+    ${across("ar-15-top-rail", T_RAIL_HALF, [
+      [0, H.dark],
+      [0.15, H.base],
+      [0.5, H.base],
+      [0.85, H.base],
+      [1, H.dark],
+    ])}
+    ${across("ar-15-top-lug", T_RAIL_HALF, [
+      [0, H.base],
+      [0.12, H.light],
+      [0.5, H.highlight],
+      [0.88, H.light],
+      [1, H.base],
+    ])}
+    ${across("ar-15-top-upper", T_UPPER_HALF, flatAcross(R))}
+    ${across("ar-15-top-upper-lug", T_RAIL_HALF, [
+      [0, R.base],
+      [0.12, R.light],
+      [0.5, R.highlight],
+      [0.88, R.light],
+      [1, R.base],
+    ])}
+    ${across("ar-15-top-upper-rail", T_RAIL_HALF, [
+      [0, R.dark],
+      [0.15, R.base],
+      [0.85, R.base],
+      [1, R.dark],
+    ])}
+    ${across("ar-15-top-lower", T_LOWER_HALF, flatAcross(R))}
+    ${across("ar-15-top-grip", T_GRIP_HALF, flatAcross(F))}
+    ${across("ar-15-top-magazine", T_MAG_HALF, flatAcross(M))}
+    ${across("ar-15-top-tube", T_TUBE_HALF, roundAcross(R))}
+    ${across("ar-15-top-castle", T_CASTLE_HALF, roundAcross(S))}
+    ${across("ar-15-top-barrel", T_BARREL_HALF, roundAcross(S))}
+    ${across("ar-15-top-hider", T_HIDER_HALF, roundAcross(S))}
+    ${across("ar-15-top-stock", T_PAD_HALF, [
+      [0, F.dark],
+      [0.12, F.base],
+      [0.25, F.light],
+      [0.5, mix(F.light, F.highlight, 0.4)],
+      [0.75, F.light],
+      [0.88, F.base],
+      [1, F.dark],
+    ])}
+    ${across("ar-15-top-charging-handle", T_CH_HALF, flatAcross(R))}
+    ${across("ar-15-top-optic", T_OPTIC_HALF, [
+      [0, O.dark],
+      [0.06, O.base],
+      [0.14, O.light],
+      [0.5, mix(O.light, O.highlight, 0.3)],
+      [0.86, O.light],
+      [0.94, O.base],
+      [1, O.dark],
+    ])}
+  </defs>
+  <!-- Under the lower: the Hexmag (hidden from above by the magazine well) and the grip, its heel out behind the
+       lower, under the buffer tube -->
+  <g id="magazine-well">
+    ${edge(magazine, M.dark)}<path id="hexmag" d="${magazine}" fill="url(#ar-15-top-magazine)"/>
+  </g>
+  <g id="grip">
+    ${edge(grip, F.dark)}<path d="${grip}" fill="url(#ar-15-top-grip)"/>
+  </g>
+  <!-- The lower receiver, a little wider than the upper: its edges either side of it, and KAC's ambidextrous
+       selector and bolt catch out both sides, the pins' heads -->
+  <g id="lower">
+    ${edge(lower, R.dark)}<path d="${lower}" fill="url(#ar-15-top-lower)"/>
+    <g fill="${R.light}" stroke="${R.dark}" stroke-width="${t1(outlineMm)}">
+      ${[...selector, ...boltCatch, ...pins].map((d) => `<path d="${d}"/>`).join("\n      ")}
+    </g>
+  </g>
+  <!-- The buffer tube from the castle nut back into the stock -->
+  <g id="buffer-tube">
+    ${edge(tube, R.dark)}<path d="${tube}" fill="url(#ar-15-top-tube)"/>
+    ${edge(castle, S.dark)}<path id="castle-nut" d="${castle}" fill="url(#ar-15-top-castle)"/>
+  </g>
+  <!-- The stock: Magpul's DT-PR on the tube, its top box and its butt pad, the widest part of it -->
+  <g id="stock">
+    ${edge(stockBody, F.dark)}${edge(pad, F.dark)}<path d="${stockBody}" fill="url(#ar-15-top-stock)"/>
+    <path id="butt-pad" d="${pad}" fill="${mix(F.base, F.dark, 0.35)}"/>
+    <path d="M${tp(xButt + 2, -T_PAD_HALF + 3)} L${tp(xButt + 2, T_PAD_HALF - 3)}" stroke="${F.light}" stroke-width="0.6" fill="none"/>
+    <!-- The tube's channel down its top box, and its two pockets' ends seen from above -->
+    <path d="M${tp(xPadFront, 0)} L${tp(xStockFront - 3, 0)}" stroke="${F.dark}" stroke-width="0.6" fill="none" opacity="0.6"/>
+  </g>
+  <!-- The barrel out of the handguard, and KAC's 3-prong flash hider, its slot between the prongs a hole -->
+  <g id="barrel">
+    ${edge(barrel, S.dark)}<path d="${barrel}" fill="url(#ar-15-top-barrel)"/>
+    ${edge(hider, S.dark)}<path id="flash-hider" d="${hider} ${hiderSlots.join(" ")}" fill="url(#ar-15-top-hider)"/>
+  </g>
+  <!-- The handguard: KAC's URX 4, its rail along the top, its upper facets either side with the short M-LOK slots
+       through them -->
+  <g id="handguard">
+    ${edge(handguard, H.dark)}<path d="${handguard} ${sideSlots.join(" ")}" fill="url(#ar-15-top-handguard)"/>
+    <path d="${sideSlots.join(" ")}" stroke="${H.dark}" stroke-width="0.6" fill="none"/>
+    <path id="handguard-rail" d="${hgRail}" fill="url(#ar-15-top-rail)"/>
+    <path id="handguard-lugs" d="${hgLugs.join(" ")}" fill="url(#ar-15-top-lug)"/>
+  </g>
+  <!-- The charging handle: its T out behind the upper over the buffer tube, its latch on the left, its shaft
+       forward under the upper's rail (seen when it's pulled back) -->
+  <g id="charging-handle">
+    <path id="charging-handle-shaft" d="${chShaft}" fill="${R.dark}"/>
+    ${edge(chT, R.dark)}<path d="${chT}" fill="url(#ar-15-top-charging-handle)"/>
+    ${edge(chLatch, R.dark)}<path id="charging-handle-latch" d="${chLatch}" fill="${R.light}"/>
+  </g>
+  <!-- The upper receiver: its body under the rail, the dust cover's hinge and the brass deflector out on the right,
+       and its rail -->
+  <g id="receiver">
+    ${edge(deflector, R.dark)}<path id="brass-deflector" d="${deflector}" fill="${R.base}"/>
+    ${edge(dustCover, R.dark)}<path id="dust-cover" d="${dustCover}" fill="${mix(R.base, R.light, 0.4)}"/>
+    ${edge(upperBody, R.dark)}<path d="${upperBody}" fill="url(#ar-15-top-upper)"/>
+    <path id="rail" d="${upperRail}" fill="url(#ar-15-top-upper-rail)"/>
+    <path id="rail-lugs" d="${upperLugs.join(" ")}" fill="url(#ar-15-top-upper-lug)"/>
+  </g>
+  ${
+    sightsDrawn
+      ? `<!-- The flip-up sights, ${irons === "up" ? "up" : "folded down"} -->
+  <g id="rear-sight">
+    ${edge(rearBase + " " + rearLeaf, R.dark)}<path d="${rearBase}" fill="${R.base}"/>
+    <path d="${rearLeaf}" fill="${mix(R.base, R.light, 0.5)}"/>
+  </g>
+  <g id="front-sight">
+    ${edge(frontBase + " " + frontPost, H.dark)}<path d="${frontBase}" fill="${H.base}"/>
+    <path d="${frontPost}" fill="${mix(H.base, H.light, 0.5)}"/>
+  </g>`
+      : ""
+  }
+  ${
+    options.noOptic
+      ? ""
+      : `<!-- The optic: Vortex's UH-1 Gen II from above, its battery cap out behind, the grooved slope at its back -->
+  <g id="optic">
+    ${edge(optic + " " + opticCap, O.dark)}<path id="optic-battery-cap" d="${opticCap}" fill="${O.base}"/>
+    <path d="${optic}" fill="url(#ar-15-top-optic)"/>
+    <path id="optic-slope" d="${opticSlope}" fill="${O.base}" opacity="0.8"/>
+    <path d="${opticGrooves}" stroke="${O.highlight}" stroke-width="1.2" fill="none"/>
+    <path d="M${tp(xOptic[1] - 1.2, -T_OPTIC_HALF + 4)} L${tp(xOptic[1] - 1.2, T_OPTIC_HALF - 4)}" stroke="${O.highlight}" stroke-width="0.8" fill="none"/>
+  </g>`
+  }
+</svg>
+`;
+}
+
+/** The short M-LOK slots' extents along the handguard (the side view's, for a handguard this long) */
+function handguardSlotsTop(lengthIn?: number): [number, number][] {
+  const extra = Math.max(0, ((lengthIn ?? PHOTO_HANDGUARD_IN) - PHOTO_HANDGUARD_IN) * PX_PER_IN);
+  const pitches = Math.round(extra / MLOK_PITCH);
+  const shift = pitches * MLOK_PITCH;
+  const out: [number, number][] = [];
+  for (const [a, b] of SHORT_SLOTS) {
+    const mid = (a + b) / 2;
+    if (mid < CUT) {
+      out.push([a, b]);
+      for (let k = 1; k <= pitches; k++) {
+        if (mid + k * MLOK_PITCH >= CUT && mid + k * MLOK_PITCH < CUT + shift) {
+          out.push([a + k * MLOK_PITCH, b + k * MLOK_PITCH]);
+        }
+      }
+    } else {
+      out.push([a + shift, b + shift]);
+    }
+  }
+  return out;
+}
+
+const TOP: TopView<Ar15Options> = { draw: drawTop };
+
+/** Where things are in the top view's frame, in meters (for the gun's stats) */
+export function topPoints(options: Ar15Options = {}) {
+  const shift = ((options.barrel ?? DEFAULT_BARREL_IN) - PHOTO_BARREL_IN) * PX_PER_IN;
+  const m = (px: number) => sx(px) / 1000;
+  return {
+    // The firing hand round the grip, about halfway down it
+    grip: [m(720), 0],
+    // The support hand on the handguard's left side, a little ahead of its middle
+    foregrip: [m(1520), -T_HG_HALF / 1000],
+    // Where the magazine seats: the middle of the magazine well
+    magazine: [m(1048), 0],
+    // The charging handle's T
+    action: [m(693), 0],
+    muzzle: m(HIDER_END + shift),
+    chargingHandleStroke: CHARGING_HANDLE_STROKE_M,
+  };
+}
+
 const DEFAULT_OPTIC = opticShapes();
 
 export const AR_15: GunDrawing<Ar15Options> = {
@@ -1981,6 +2380,7 @@ export const AR_15: GunDrawing<Ar15Options> = {
        folded, and a Hexmag. Millimeters, with the origin on the gun's middle on the bore, as the guns' top views in
        weapons/guns/art/ have it; drawn over photos, then simplified. -->`,
   drawSide,
+  top: TOP,
 };
 
 /**

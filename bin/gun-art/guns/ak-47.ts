@@ -10,7 +10,8 @@
  */
 import type { Point } from "../lib/geometry";
 import { arc, fixed, fmt, on, rounded, smoothCurve } from "../lib/geometry";
-import type { GunDrawing } from "../lib/gun";
+import type { GunDrawing, TopView } from "../lib/gun";
+import { generatedNote } from "../lib/gun";
 import type { Material } from "../lib/style";
 import { BRIGHT_STEEL } from "../lib/style";
 
@@ -210,8 +211,7 @@ const SELECTOR = (() => {
   );
 })();
 // The lever's folded lower flange, a narrow strip along its bottom edge
-const SELECTOR_FLANGE =
-  `M${fmt([868, 538])} L${fmt([708, 568])} L${fmt([712, 561])} L${fmt([866, 531])} Z`;
+const SELECTOR_FLANGE = `M${fmt([868, 538])} L${fmt([708, 568])} L${fmt([712, 561])} L${fmt([866, 531])} Z`;
 const PINS: { at: Point; ringed: boolean }[] = [
   { at: [743, 591], ringed: false },
   { at: [780, 589], ringed: false },
@@ -458,9 +458,7 @@ const GRIP_FRONT: Point[] = [
   [603, 606],
 ];
 const GRIP =
-  `M${fmt(GRIP_FRONT[0])} ` +
-  smoothCurve(GRIP_FRONT, [0, 1], [0, -1]) +
-  " Z";
+  `M${fmt(GRIP_FRONT[0])} ` + smoothCurve(GRIP_FRONT, [0, 1], [0, -1]) + " Z";
 // The grip's shading runs across it, square to its lean (about 14° back)
 const GRIP_SHADE_FROM: Point = [590, 700];
 const GRIP_SHADE_TO: Point = [676, 721];
@@ -683,58 +681,93 @@ function drawSide(options: AkOptions = {}): string {
     <!-- The handguards: the upper one round, the lower one's side flat, lit along its top lip and rounding away
          underneath -->
     ${roundShading("ak-47-upper-shading", UPPER_TOP, UPPER_BOTTOM, W)}
-    ${gradient("ak-47-lower-shading", [0, LOWER_TOP], [0, 605], [
-      [0, W.dark],
-      [0.06, W.highlight],
-      [0.14, W.light],
-      [0.55, mix(W.light, W.base, 0.6)],
-      [0.85, W.base],
-      [1, W.dark],
-    ])}
+    ${gradient(
+      "ak-47-lower-shading",
+      [0, LOWER_TOP],
+      [0, 605],
+      [
+        [0, W.dark],
+        [0.06, W.highlight],
+        [0.14, W.light],
+        [0.55, mix(W.light, W.base, 0.6)],
+        [0.85, W.base],
+        [1, W.dark],
+      ],
+    )}
     <!-- The dust cover, down its side: its rounded top lit, the crease, then the side -->
-    ${gradient("ak-47-cover-shading", [0, COVER_TOP], [0, COVER_BOTTOM], [
-      [0, S.highlight],
-      [0.1, S.light],
-      [0.24, S.base],
-      [(CREASE_Y - 2 - COVER_TOP) / (COVER_BOTTOM - COVER_TOP), S.base],
-      [(CREASE_Y - COVER_TOP) / (COVER_BOTTOM - COVER_TOP), S.dark],
-      [(CREASE_Y + 2 - COVER_TOP) / (COVER_BOTTOM - COVER_TOP), S.light],
-      [0.7, mix(S.light, S.base, 0.5)],
-      [1, mix(S.base, S.dark, 0.4)],
-    ])}
+    ${gradient(
+      "ak-47-cover-shading",
+      [0, COVER_TOP],
+      [0, COVER_BOTTOM],
+      [
+        [0, S.highlight],
+        [0.1, S.light],
+        [0.24, S.base],
+        [(CREASE_Y - 2 - COVER_TOP) / (COVER_BOTTOM - COVER_TOP), S.base],
+        [(CREASE_Y - COVER_TOP) / (COVER_BOTTOM - COVER_TOP), S.dark],
+        [(CREASE_Y + 2 - COVER_TOP) / (COVER_BOTTOM - COVER_TOP), S.light],
+        [0.7, mix(S.light, S.base, 0.5)],
+        [1, mix(S.base, S.dark, 0.4)],
+      ],
+    )}
     <!-- The receiver's side: in the dust cover's shadow just under it, then lit, darker toward its bottom -->
-    ${gradient("ak-47-receiver-shading", [0, REC_TOP], [0, REC_BOTTOM], [
-      [0, S.dark],
-      [0.07, S.dark],
-      [0.14, S.light],
-      [0.5, mix(S.light, S.base, 0.6)],
-      [1, mix(S.base, S.dark, 0.4)],
-    ])}
-    ${gradient("ak-47-carrier-shading", [0, CARRIER_TOP], [0, COVER_BOTTOM + 1], [
-      [0, S.dark],
-      [0.25, S.light],
-      [0.4, S.highlight],
-      [0.55, S.base],
-      [1, S.dark],
-    ])}
-    ${gradient("ak-47-block-shading", [0, 466], [0, 519], [
-      [0, S.highlight],
-      [0.08, S.light],
-      [0.5, S.base],
-      [1, mix(S.base, S.dark, 0.5)],
-    ])}
-    ${gradient("ak-47-selector-shading", [0, 511], [0, 570], [
-      [0, S.highlight],
-      [0.12, S.light],
-      [1, S.base],
-    ])}
-    ${gradient("ak-47-cut-shading", [0, 548], [0, 598], [
-      [0, S.dark],
-      [0.22, S.dark],
-      [0.4, mix(S.base, S.dark, 0.3)],
-      [0.9, S.base],
-      [1, S.light],
-    ])}
+    ${gradient(
+      "ak-47-receiver-shading",
+      [0, REC_TOP],
+      [0, REC_BOTTOM],
+      [
+        [0, S.dark],
+        [0.07, S.dark],
+        [0.14, S.light],
+        [0.5, mix(S.light, S.base, 0.6)],
+        [1, mix(S.base, S.dark, 0.4)],
+      ],
+    )}
+    ${gradient(
+      "ak-47-carrier-shading",
+      [0, CARRIER_TOP],
+      [0, COVER_BOTTOM + 1],
+      [
+        [0, S.dark],
+        [0.25, S.light],
+        [0.4, S.highlight],
+        [0.55, S.base],
+        [1, S.dark],
+      ],
+    )}
+    ${gradient(
+      "ak-47-block-shading",
+      [0, 466],
+      [0, 519],
+      [
+        [0, S.highlight],
+        [0.08, S.light],
+        [0.5, S.base],
+        [1, mix(S.base, S.dark, 0.5)],
+      ],
+    )}
+    ${gradient(
+      "ak-47-selector-shading",
+      [0, 511],
+      [0, 570],
+      [
+        [0, S.highlight],
+        [0.12, S.light],
+        [1, S.base],
+      ],
+    )}
+    ${gradient(
+      "ak-47-cut-shading",
+      [0, 548],
+      [0, 598],
+      [
+        [0, S.dark],
+        [0.22, S.dark],
+        [0.4, mix(S.base, S.dark, 0.3)],
+        [0.9, S.base],
+        [1, S.light],
+      ],
+    )}
     ${roundShading("ak-47-tube-shading", GAS_TUBE_TOP, GAS_TUBE_BOTTOM, S)}
     ${roundShading("ak-47-barrel-rear-shading", 532, 567, S)}
     ${roundShading("ak-47-barrel-front-shading", 536, 563, S)}
@@ -742,36 +775,61 @@ function drawSide(options: AkOptions = {}): string {
     ${roundShading("ak-47-nut-shading", 535, 568, S)}
     ${roundShading("ak-47-band-shading", 526, 585, S)}
     ${roundShading("ak-47-cap-shading", 465, 521, S)}
-    ${gradient("ak-47-lower-cap-shading", [0, 518], [0, 606], [
-      [0, S.highlight],
-      [0.08, S.light],
-      [0.5, S.base],
-      [1, S.dark],
-    ])}
-    ${gradient("ak-47-gas-block-shading", [0, GAS_TUBE_TOP], [0, 567], [
-      [0, S.dark],
-      [0.06, S.highlight],
-      [0.16, S.light],
-      [0.5, S.base],
-      [1, S.dark],
-    ])}
-    ${gradient("ak-47-front-sight-shading", [FS_BACK, 0], [FS_FRONT, 0], [
-      [0, S.light],
-      [0.35, S.base],
-      [1, mix(S.base, S.dark, 0.5)],
-    ])}
-    ${gradient("ak-47-butt-plate-shading", [119, 0], [158, 0], [
-      [0, S.dark],
-      [0.4, S.light],
-      [1, S.base],
-    ])}
+    ${gradient(
+      "ak-47-lower-cap-shading",
+      [0, 518],
+      [0, 606],
+      [
+        [0, S.highlight],
+        [0.08, S.light],
+        [0.5, S.base],
+        [1, S.dark],
+      ],
+    )}
+    ${gradient(
+      "ak-47-gas-block-shading",
+      [0, GAS_TUBE_TOP],
+      [0, 567],
+      [
+        [0, S.dark],
+        [0.06, S.highlight],
+        [0.16, S.light],
+        [0.5, S.base],
+        [1, S.dark],
+      ],
+    )}
+    ${gradient(
+      "ak-47-front-sight-shading",
+      [FS_BACK, 0],
+      [FS_FRONT, 0],
+      [
+        [0, S.light],
+        [0.35, S.base],
+        [1, mix(S.base, S.dark, 0.5)],
+      ],
+    )}
+    ${gradient(
+      "ak-47-butt-plate-shading",
+      [119, 0],
+      [158, 0],
+      [
+        [0, S.dark],
+        [0.4, S.light],
+        [1, S.base],
+      ],
+    )}
     <!-- The magazine, across it from its back to its front: a flat stamped side, a little lit toward the back -->
-    ${gradient("ak-47-mag-shading", [880, 640], [1010, 610], [
-      [0, mix(M.base, M.dark, 0.3)],
-      [0.15, M.light],
-      [0.5, M.base],
-      [1, mix(M.base, M.dark, 0.4)],
-    ])}
+    ${gradient(
+      "ak-47-mag-shading",
+      [880, 640],
+      [1010, 610],
+      [
+        [0, mix(M.base, M.dark, 0.3)],
+        [0.15, M.light],
+        [0.5, M.base],
+        [1, mix(M.base, M.dark, 0.4)],
+      ],
+    )}
     <clipPath id="ak-47-stock-clip"><path d="${STOCK}"/></clipPath>
     <clipPath id="ak-47-grip-clip"><path d="${GRIP}"/></clipPath>
     <clipPath id="ak-47-receiver-clip"><path d="${RECEIVER}"/></clipPath>
@@ -959,6 +1017,506 @@ function drawSide(options: AkOptions = {}): string {
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------------------------------------
+// The top view: the gun as it's held, seen from above, muzzle along +x and its right side +y (down the page), in
+// millimeters about its middle on the bore, at the same scale as the side view. Lengths along the gun are the side
+// view's numbers (sx converts its photo's pixels); widths are the real gun's.
+//
+// Widths. From the 3D model's top view (`model ak-47 --from +y --up -x`, references/ak-47/model-py.png, 0.377 mm a
+// pixel along the gun when its 2307 px are 870 mm), checked against the side view where a part is round (a round
+// part is as wide as it's tall) and against the real gun:
+//   - The stock: 43 mm at the butt in the model; the real butt plate is about 42. It tapers to about 34 at the
+//     wrist (the model keeps it nearly straight; the real stock narrows into the receiver's socket).
+//   - The receiver: 42.6 mm in the model over its side rails and rivet heads, but the model's round parts come out
+//     about 17% fatter than the side view's (its barrel 16.2 mm against the side view's 13.8), so 36 mm; the
+//     milled receiver is about 1.4" (36 mm). The dust cover on top of it, a dome, 32 (the model's 34, less its
+//     overstatement, against the receiver's 36: about 2 mm in from each side, as the model shows).
+//   - The rear sight block: 28 mm (the model's 30). The leaf on it 15, its slider 19.
+//   - The lower handguard: 38 mm at its back to 34 at its front (the model's 39 to 34, a U round the barrel that
+//     narrows forward). The upper handguard over the gas tube: 30 (round, a little narrower than it's tall in the
+//     side view, 25 mm; the model draws them as one). The steel caps and ferrules a little wider than the wood.
+//   - The gas tube 19.5 and the barrel 17.9 behind the gas block and 13.8 in front of it, the muzzle nut 16.9: as
+//     tall as the side view has them, since they're round. The gas block 22 (the model's 20 under its
+//     overstatement is about 17; the block is wider than the tube it holds, so 22 as the old art's proportions).
+//     The front sight's collar 20, its two ears 2 mm thick either side of the post.
+//   - The safety lever lies along the receiver's right side, standing about 2.5 mm out, its pivot boss and its
+//     tab about 4.5. The charging handle sticks out of the right side by about 22 mm to the end of its knob (the
+//     model's 28, less its overstatement), its knob 11 mm across (the side view's).
+//   - Under the receiver and out of sight from above: the pistol grip (about 30 mm wide), the trigger guard and the
+//     magazine (about 30 mm thick, narrower than the receiver, and its forward curve under the lower handguard).
+//
+// What moves: the charging handle, on the bolt carrier, straight back with each shot, its stroke the carrier's.
+// It's drawn under the receiver, so its root goes into the receiver's side. Nothing shows under it when it's back:
+// it runs along the outside of the receiver, over the selector's lever (which lies flat), so it uncovers only the
+// receiver's side.
+
+/** A length along the gun from the side view's pixels, in millimeters from the gun's middle */
+const sx = (px: number) => (px - ORIGIN[0]) * MM_PER_PX;
+
+const t1 = (v: number) =>
+  fixed(v, 2).replace(/0+$/, "").replace(/\.$/, "").replace(/^-0$/, "0");
+const tp = (x: number, y: number) => `${t1(x)},${t1(y)}`;
+
+/** A rectangle with each corner rounded by its own radius (back-left, front-left, front-right, back-right) */
+function tbox(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  r: number | [number, number, number, number] = 0,
+): string {
+  const [a, b, c, d] = typeof r === "number" ? [r, r, r, r] : r;
+  const k = 0.45;
+  const corner = (
+    cx: number,
+    cy: number,
+    fx: number,
+    fy: number,
+    tx: number,
+    ty: number,
+  ) =>
+    `C${tp(fx + (cx - fx) * (1 - k), fy + (cy - fy) * (1 - k))} ${tp(tx + (cx - tx) * (1 - k), ty + (cy - ty) * (1 - k))} ${tp(tx, ty)}`;
+  return [
+    `M${tp(x0 + a, y0)} L${tp(x1 - b, y0)}`,
+    b ? corner(x1, y0, x1 - b, y0, x1, y0 + b) : "",
+    `L${tp(x1, y1 - c)}`,
+    c ? corner(x1, y1, x1, y1 - c, x1 - c, y1) : "",
+    `L${tp(x0 + d, y1)}`,
+    d ? corner(x0, y1, x0 + d, y1, x0, y1 - d) : "",
+    `L${tp(x0, y0 + a)}`,
+    a ? corner(x0, y0, x0, y0 + a, x0 + a, y0) : "",
+    "Z",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A gradient across the gun (along y), from its left edge to its right */
+function across(
+  id: string,
+  half: number,
+  list: [number, string][],
+  center = 0,
+): string {
+  return [
+    `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t1(center - half)}" x2="0" y2="${t1(center + half)}">`,
+    ...list.map(([o, c]) => `      <stop offset="${o}" stop-color="${c}"/>`),
+    "    </linearGradient>",
+  ].join("\n    ");
+}
+
+/** A round part's shading from above: dark at its sides, a highlight along its top */
+function roundAcross(m: Material): [number, string][] {
+  return [
+    [0, m.dark],
+    [0.2, m.base],
+    [0.4, m.light],
+    [0.5, m.highlight],
+    [0.62, m.light],
+    [0.85, m.base],
+    [1, m.dark],
+  ];
+}
+
+// Lengths, from the side view
+const T_BUTT = sx(119);
+const T_BUTT_PLATE = sx(132);
+const T_STOCK_FRONT = sx(582);
+const T_REC_BACK = sx(578);
+const T_REC_FRONT = sx(REC_FRONT);
+const T_COVER_BACK = sx(586);
+const T_COVER_FRONT = sx(COVER_FRONT);
+const T_BLOCK_BACK = sx(1038);
+const T_BLOCK_FRONT = sx(1171);
+const T_LEAF = [sx(1040), sx(1150)] as const;
+const T_SLIDER = [sx(1046), sx(1060)] as const;
+const T_LEAF_CAP = [sx(1146), sx(1167)] as const;
+const T_FERRULE = [sx(1086), sx(1101)] as const;
+const T_LOWER = [sx(1101), sx(1384)] as const;
+const T_RETAINER = [sx(1384), sx(1400)] as const;
+const T_UPPER_REAR_CAP = [sx(1171), sx(1187)] as const;
+const T_UPPER = [sx(1187), sx(1388)] as const;
+const T_UPPER_FRONT_CAP = [sx(1386), sx(1400)] as const;
+const T_TUBE = [sx(1399), sx(1510)] as const;
+const T_GAS_BLOCK = [sx(1505), sx(1612)] as const;
+const T_GAS_SLOPE = sx(1556); // where its top slopes down to the barrel
+const T_BARREL_REAR = [sx(1395), sx(1600)] as const;
+const T_BARREL_FRONT = [sx(1600), sx(1800)] as const;
+const T_SIGHT_COLLAR = [sx(FS_BACK), sx(FS_FRONT)] as const;
+const T_SIGHT_EARS = [sx(1752), sx(1791)] as const;
+const T_NUT = [sx(1793), sx(1818)] as const;
+const T_NUT_GROOVE = [sx(1796), sx(1801)] as const;
+const T_HANDLE_X = sx(KNOB[0]);
+const T_SELECTOR = [sx(690), sx(897)] as const;
+const T_SELECTOR_BOSS = [
+  sx(SELECTOR_PIVOT[0] - 14),
+  sx(SELECTOR_PIVOT[0] + 14),
+] as const;
+const T_SELECTOR_TAB = [sx(860), sx(897)] as const;
+const T_SPRING_BUTTON = [sx(598), sx(612)] as const; // the recoil spring guide's catch, through the cover's back
+// Half widths
+const T_BUTT_HALF = 21;
+const T_WRIST_HALF = 17;
+const T_REC_HALF = 18;
+const T_COVER_HALF = 16;
+const T_BLOCK_HALF = 14;
+const T_LEAF_HALF = 7.5;
+const T_SLIDER_HALF = 9.5;
+const T_LOWER_HALF: [number, number] = [19, 17];
+const T_FERRULE_HALF = 19.5;
+const T_RETAINER_HALF = 18;
+const T_UPPER_HALF = 15;
+const T_CAP_HALF = 15.5;
+const T_TUBE_HALF = 9.75;
+const T_GAS_BLOCK_HALF = 11;
+const T_BARREL_REAR_HALF = 8.95;
+const T_BARREL_FRONT_HALF = 6.9;
+const T_COLLAR_HALF = 10;
+const T_EAR = 2; // the front sight's ears' thickness
+const T_NUT_HALF = 8.45;
+const T_SELECTOR_OUT = 2.5;
+const T_SELECTOR_BOSS_OUT = 4.5;
+const T_HANDLE_OUT = 22; // from the receiver's side to the end of the knob
+const T_KNOB_R = 5.5;
+const T_STEM_HALF = 2.6;
+const T_OUTLINE = OUTLINE_MM;
+
+// The stock: tapering from the butt to the wrist, its butt's corners rounded
+const T_STOCK =
+  `M${tp(T_BUTT_PLATE, -T_BUTT_HALF)} L${tp(T_STOCK_FRONT, -T_WRIST_HALF)} L${tp(T_STOCK_FRONT, T_WRIST_HALF)} ` +
+  `L${tp(T_BUTT_PLATE, T_BUTT_HALF)} Z`;
+const T_PLATE = tbox(
+  T_BUTT,
+  -T_BUTT_HALF - 0.3,
+  T_BUTT_PLATE + 0.5,
+  T_BUTT_HALF + 0.3,
+  [5, 0, 0, 5],
+);
+// The lower handguard, narrowing forward
+const T_LOWER_PATH =
+  `M${tp(T_LOWER[0], -T_LOWER_HALF[0])} L${tp(T_LOWER[1], -T_LOWER_HALF[1])} L${tp(T_LOWER[1], T_LOWER_HALF[1])} ` +
+  `L${tp(T_LOWER[0], T_LOWER_HALF[0])} Z`;
+// The charging handle: its stem out of the receiver's side, swept a little back, and the knob on its end
+const T_KNOB_C: [number, number] = [
+  T_HANDLE_X - 2,
+  T_REC_HALF + T_HANDLE_OUT - T_KNOB_R,
+];
+const T_STEM =
+  `M${tp(T_HANDLE_X - T_STEM_HALF, T_REC_HALF - 4)} L${tp(T_HANDLE_X + T_STEM_HALF, T_REC_HALF - 4)} ` +
+  `L${tp(T_KNOB_C[0] + T_STEM_HALF, T_KNOB_C[1])} L${tp(T_KNOB_C[0] - T_STEM_HALF, T_KNOB_C[1])} Z`;
+const T_KNOB = tbox(
+  T_KNOB_C[0] - T_KNOB_R,
+  T_KNOB_C[1] - T_KNOB_R - 2,
+  T_KNOB_C[0] + T_KNOB_R,
+  T_KNOB_C[1] + T_KNOB_R,
+  [3, 3, 4, 4],
+);
+// The gas block from above: its flat top, then the slope down to the barrel, lit, rounding off at the front
+const T_GAS_BLOCK_PATH = tbox(
+  T_GAS_BLOCK[0],
+  -T_GAS_BLOCK_HALF,
+  T_GAS_BLOCK[1],
+  T_GAS_BLOCK_HALF,
+  [0, 4, 4, 0],
+);
+const T_GAS_SLOPE_PATH = tbox(
+  T_GAS_SLOPE,
+  -T_GAS_BLOCK_HALF + 1.2,
+  T_GAS_BLOCK[1] - 1,
+  T_GAS_BLOCK_HALF - 1.2,
+  [0, 3, 3, 0],
+);
+// The front sight from above: the collar round the barrel, the two ears and the post between them
+const T_COLLAR = tbox(
+  T_SIGHT_COLLAR[0],
+  -T_COLLAR_HALF,
+  T_SIGHT_COLLAR[1],
+  T_COLLAR_HALF,
+  2,
+);
+const T_EARS = [
+  tbox(
+    T_SIGHT_EARS[0],
+    -T_COLLAR_HALF,
+    T_SIGHT_EARS[1],
+    -T_COLLAR_HALF + T_EAR,
+    [1, 1, 0, 0],
+  ),
+  tbox(
+    T_SIGHT_EARS[0],
+    T_COLLAR_HALF - T_EAR,
+    T_SIGHT_EARS[1],
+    T_COLLAR_HALF,
+    [0, 0, 1, 1],
+  ),
+];
+const T_POST = tbox(sx(1770), -1.2, sx(1778), 1.2, 0.6);
+// The selector's lever along the receiver's right side: its boss at the back, the tab at the front
+const T_SELECTOR_PATH =
+  `M${tp(T_SELECTOR_BOSS[0], T_REC_HALF)} L${tp(T_SELECTOR_BOSS[0] + 2, T_REC_HALF + T_SELECTOR_BOSS_OUT)} ` +
+  `L${tp(T_SELECTOR_BOSS[1], T_REC_HALF + T_SELECTOR_BOSS_OUT)} L${tp(T_SELECTOR_BOSS[1] + 4, T_REC_HALF + T_SELECTOR_OUT)} ` +
+  `L${tp(T_SELECTOR_TAB[0], T_REC_HALF + T_SELECTOR_OUT)} L${tp(T_SELECTOR_TAB[0] + 2, T_REC_HALF + T_SELECTOR_BOSS_OUT)} ` +
+  `L${tp(T_SELECTOR_TAB[1] - 1.5, T_REC_HALF + T_SELECTOR_BOSS_OUT)} L${tp(T_SELECTOR_TAB[1], T_REC_HALF + 2)} ` +
+  `L${tp(T_SELECTOR_TAB[1], T_REC_HALF)} Z`;
+
+function drawTop(options: AkOptions = {}): string {
+  const S: Material = { ...AK_STEEL, ...options.steel };
+  const W: Material = { ...AK_WOOD, ...options.wood };
+  const outline = options.outline !== false;
+  const minX = T_BUTT - 1;
+  const maxX = T_NUT[1] + 1;
+  const half = T_REC_HALF + T_HANDLE_OUT + 1;
+  const width = t1(maxX - minX);
+  const height = t1(half * 2);
+  // Each part's own outline: its silhouette stroked twice as wide under its fill, in its own dark, so it moves with
+  // the part
+  const edge = (d: string, color: string) =>
+    outline
+      ? `<path d="${d}" stroke="${color}" stroke-width="${t1(T_OUTLINE * 2)}" fill="none"/>\n    `
+      : "";
+  const coverTop = tbox(
+    T_COVER_BACK,
+    -T_COVER_HALF,
+    T_COVER_FRONT,
+    T_COVER_HALF,
+    [7, 0, 0, 7],
+  );
+  const receiver = tbox(
+    T_REC_BACK,
+    -T_REC_HALF,
+    T_REC_FRONT,
+    T_REC_HALF,
+    [2, 0, 0, 2],
+  );
+  const block = tbox(
+    T_BLOCK_BACK,
+    -T_BLOCK_HALF,
+    T_BLOCK_FRONT,
+    T_BLOCK_HALF,
+    [1, 3, 3, 1],
+  );
+  const upper = tbox(T_UPPER[0], -T_UPPER_HALF, T_UPPER[1], T_UPPER_HALF, 3);
+  const caps = [
+    tbox(
+      T_UPPER_REAR_CAP[0],
+      -T_CAP_HALF,
+      T_UPPER_REAR_CAP[1],
+      T_CAP_HALF,
+      1.5,
+    ),
+    tbox(
+      T_UPPER_FRONT_CAP[0],
+      -T_CAP_HALF,
+      T_UPPER_FRONT_CAP[1],
+      T_CAP_HALF,
+      1.5,
+    ),
+  ];
+  const ferrule = tbox(
+    T_FERRULE[0],
+    -T_FERRULE_HALF,
+    T_FERRULE[1],
+    T_FERRULE_HALF,
+    1.5,
+  );
+  const retainer = tbox(
+    T_RETAINER[0],
+    -T_RETAINER_HALF,
+    T_RETAINER[1],
+    T_RETAINER_HALF,
+    1.5,
+  );
+  const tube = tbox(T_TUBE[0], -T_TUBE_HALF, T_TUBE[1], T_TUBE_HALF);
+  const barrelRear = tbox(
+    T_BARREL_REAR[0],
+    -T_BARREL_REAR_HALF,
+    T_BARREL_REAR[1],
+    T_BARREL_REAR_HALF,
+  );
+  const barrelFront = tbox(
+    T_BARREL_FRONT[0],
+    -T_BARREL_FRONT_HALF,
+    T_BARREL_FRONT[1],
+    T_BARREL_FRONT_HALF,
+  );
+  const nut = tbox(
+    T_NUT[0],
+    -T_NUT_HALF,
+    T_NUT[1],
+    T_NUT_HALF,
+    [0, 1.5, 1.5, 0],
+  );
+  const leaf = tbox(T_LEAF[0], -T_LEAF_HALF, T_LEAF[1], T_LEAF_HALF, 1);
+  const leafCap = tbox(
+    T_LEAF_CAP[0],
+    -T_LEAF_HALF - 1,
+    T_LEAF_CAP[1],
+    T_LEAF_HALF + 1,
+    [2, 4, 4, 2],
+  );
+  const slider = tbox(
+    T_SLIDER[0],
+    -T_SLIDER_HALF,
+    T_SLIDER[1],
+    T_SLIDER_HALF,
+    1.5,
+  );
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${t1(minX)} ${t1(-half)} ${width} ${height}" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  ${generatedNote("ak-47")}
+  <!-- The AK-47 from above, as it's held: muzzle along +x, its right side down the page (+y), millimeters about its
+       middle on the bore, at the same scale as its side view (the pickup); lengths along it are the side view's.
+       Worn steel and dark wood, as the side view; lit from above, the tops of round parts brightest. -->
+  <defs>
+    ${across("ak-47-top-stock", T_BUTT_HALF, [
+      [0, W.dark],
+      [0.1, W.base],
+      [0.3, W.light],
+      [0.5, mix(W.light, W.highlight, 0.4)],
+      [0.7, W.light],
+      [0.9, W.base],
+      [1, W.dark],
+    ])}
+    ${across("ak-47-top-lower", T_LOWER_HALF[0], [
+      [0, W.dark],
+      [0.12, W.base],
+      [0.22, W.light],
+      [0.78, W.light],
+      [0.88, W.base],
+      [1, W.dark],
+    ])}
+    ${across("ak-47-top-upper", T_UPPER_HALF, roundAcross(W))}
+    ${across("ak-47-top-receiver", T_REC_HALF, [
+      [0, S.dark],
+      [0.08, S.light],
+      [0.2, S.base],
+      [0.8, S.base],
+      [0.92, S.light],
+      [1, S.dark],
+    ])}
+    ${across("ak-47-top-cover", T_COVER_HALF, roundAcross(S))}
+    ${across("ak-47-top-block", T_BLOCK_HALF, [
+      [0, S.dark],
+      [0.15, S.base],
+      [0.5, S.light],
+      [0.85, S.base],
+      [1, S.dark],
+    ])}
+    ${across("ak-47-top-steel-cap", T_FERRULE_HALF, roundAcross(S))}
+    ${across("ak-47-top-tube", T_TUBE_HALF, roundAcross(S))}
+    ${across("ak-47-top-barrel-rear", T_BARREL_REAR_HALF, roundAcross(S))}
+    ${across("ak-47-top-barrel-front", T_BARREL_FRONT_HALF, roundAcross(S))}
+    ${across("ak-47-top-nut", T_NUT_HALF, roundAcross(S))}
+    ${across("ak-47-top-gas-block", T_GAS_BLOCK_HALF, [
+      [0, S.dark],
+      [0.15, S.base],
+      [0.5, S.light],
+      [0.85, S.base],
+      [1, S.dark],
+    ])}
+    <!-- The knob is a short cylinder along the stem (across the gun), so from above it's shaded along the gun -->
+    <linearGradient id="ak-47-top-knob" gradientUnits="userSpaceOnUse" x1="${t1(T_KNOB_C[0] - T_KNOB_R)}" y1="0" x2="${t1(T_KNOB_C[0] + T_KNOB_R)}" y2="0">
+      ${roundAcross(S)
+        .map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`)
+        .join("\n      ")}
+    </linearGradient>
+  </defs>
+  <!-- The barrel, under the gas tube and handguards: thicker behind the gas block, then out to the muzzle nut -->
+  <g id="barrel">
+    ${edge(barrelRear, S.dark)}${edge(barrelFront, S.dark)}${edge(nut, S.dark)}<path d="${barrelRear}" fill="url(#ak-47-top-barrel-rear)"/>
+    <path d="${barrelFront}" fill="url(#ak-47-top-barrel-front)"/>
+    <path id="muzzle-nut" d="${nut}" fill="url(#ak-47-top-nut)"/>
+    <path d="${tbox(T_NUT_GROOVE[0], -T_NUT_HALF + 0.6, T_NUT_GROOVE[1], T_NUT_HALF - 0.6)}" fill="${S.dark}"/>
+  </g>
+  <!-- The front sight: its collar round the barrel, the two ears guarding the post -->
+  <g id="front-sight">
+    ${edge(T_COLLAR, S.dark)}<path d="${T_COLLAR}" fill="url(#ak-47-top-gas-block)"/>
+    <path d="${tbox(T_SIGHT_EARS[0], -T_COLLAR_HALF + T_EAR, T_SIGHT_EARS[1], T_COLLAR_HALF - T_EAR)}" fill="${S.dark}"/>
+    <g fill="${S.light}">
+      ${T_EARS.map((d) => `<path d="${d}"/>`).join("\n      ")}
+    </g>
+    <path id="front-sight-post" d="${T_POST}" fill="${S.highlight}"/>
+  </g>
+  <!-- The gas block over the barrel: its flat top, and its front sloping down to the barrel, facing up, lit -->
+  <g id="gas-block">
+    ${edge(T_GAS_BLOCK_PATH, S.dark)}<path d="${T_GAS_BLOCK_PATH}" fill="url(#ak-47-top-gas-block)"/>
+    <path d="${T_GAS_SLOPE_PATH}" fill="${S.light}" opacity="0.6"/>
+    <path d="M${tp(T_GAS_SLOPE, -T_GAS_BLOCK_HALF + 1.2)} L${tp(T_GAS_SLOPE, T_GAS_BLOCK_HALF - 1.2)}" stroke="${S.highlight}" stroke-width="0.5" fill="none"/>
+  </g>
+  <!-- The gas tube, from the upper handguard into the gas block -->
+  <g id="gas-tube">
+    ${edge(tube, S.dark)}<path d="${tube}" fill="url(#ak-47-top-tube)"/>
+  </g>
+  <!-- The handguards: the lower one, a U round the barrel, narrowing forward between its ferrule and its retainer
+       band; over it the upper one round the gas tube, between its steel caps -->
+  <g id="handguard">
+    ${edge(T_LOWER_PATH, W.dark)}${edge(ferrule, S.dark)}${edge(retainer, S.dark)}<path d="${T_LOWER_PATH}" fill="url(#ak-47-top-lower)"/>
+    <path id="handguard-ferrule" d="${ferrule}" fill="url(#ak-47-top-steel-cap)"/>
+    <path id="handguard-retainer" d="${retainer}" fill="url(#ak-47-top-steel-cap)"/>
+    ${edge(upper, W.dark)}<path id="upper-handguard" d="${upper}" fill="url(#ak-47-top-upper)"/>
+    <g fill="url(#ak-47-top-steel-cap)">
+      ${caps.map((d) => `${edge(d, S.dark)}<path d="${d}"/>`).join("\n      ")}
+    </g>
+  </g>
+  <!-- The stock, narrowing from the butt to the wrist, and its steel butt plate -->
+  <g id="stock">
+    ${edge(T_STOCK, W.dark)}${edge(T_PLATE, S.dark)}<path d="${T_STOCK}" fill="url(#ak-47-top-stock)"/>
+    <path id="butt-plate" d="${T_PLATE}" fill="${S.base}"/>
+  </g>
+  <!-- On the bolt carrier: out of the receiver's right side (its root under the receiver), back and forward with it -->
+  <g id="charging-handle">
+    ${edge(T_STEM, S.dark)}${edge(T_KNOB, S.dark)}<path d="${T_STEM}" fill="${S.base}"/>
+    <path d="${T_KNOB}" fill="url(#ak-47-top-knob)"/>
+  </g>
+  <!-- The milled receiver, the dust cover's dome on it (the recoil spring guide's catch through its back), the rear
+       sight block at its front with the leaf lying on it, and the selector's lever along its right side -->
+  <g id="receiver">
+    ${edge(receiver, S.dark)}${edge(T_SELECTOR_PATH, S.dark)}<path d="${receiver}" fill="url(#ak-47-top-receiver)"/>
+    <path id="selector" d="${T_SELECTOR_PATH}" fill="${S.light}"/>
+    <path id="dust-cover" d="${coverTop}" fill="url(#ak-47-top-cover)" stroke="${S.dark}" stroke-width="${t1(T_OUTLINE)}"/>
+    <path id="spring-catch" d="${tbox(T_SPRING_BUTTON[0], -4, T_SPRING_BUTTON[1], 4, 1)}" fill="${S.dark}"/>
+    <g id="rear-sight">
+      ${edge(block, S.dark)}<path d="${block}" fill="url(#ak-47-top-block)"/>
+      <path d="${leafCap}" fill="${S.base}" stroke="${S.dark}" stroke-width="${t1(T_OUTLINE)}"/>
+      <path d="${leaf}" fill="${S.light}" stroke="${S.dark}" stroke-width="${t1(T_OUTLINE)}"/>
+      <!-- The notch, down the middle of the leaf's back end -->
+      <path d="${tbox(T_LEAF[0], -1, T_LEAF[0] + 3, 1)}" fill="${S.dark}"/>
+      <path d="${slider}" fill="${S.base}" stroke="${S.dark}" stroke-width="${t1(T_OUTLINE)}"/>
+    </g>
+  </g>
+</svg>
+`;
+}
+
+// The model's top view, registered: its length (x 46 to 2353) is the gun's 870 mm, and its widths are taken as
+// 17% fat (see the widths above), so 105 px across its middle (y 10 to 115) is 33.8 mm
+const MODEL_TOP_HALF = (52.5 * (870 / 2307)) / 1.17;
+const TOP: TopView<AkOptions> = {
+  draw: drawTop,
+  registrations: [
+    {
+      file: "model-py.png",
+      points: [
+        [
+          [46, 10],
+          [-435, -MODEL_TOP_HALF],
+        ],
+        [
+          [2353, 10],
+          [435, -MODEL_TOP_HALF],
+        ],
+        [
+          [2353, 115],
+          [435, MODEL_TOP_HALF],
+        ],
+        [
+          [46, 115],
+          [-435, MODEL_TOP_HALF],
+        ],
+      ],
+    },
+  ],
+};
+
 export const AK_47: GunDrawing<AkOptions> = {
   name: "ak-47",
   photo: {
@@ -982,6 +1540,13 @@ export const AK_47: GunDrawing<AkOptions> = {
       height: 710,
       about:
         "The 3D model (Sketchfab, standard license; reference only) from its right side, `model ak-47 --from +x`: the gun is along z, up +y",
+    },
+    {
+      file: "model-py.png",
+      width: 2400,
+      height: 193,
+      about:
+        "The 3D model from above, `model ak-47 --from +y --up -x`: muzzle to the right, its right side down. For widths (its round parts come out about 17% fat against the side view)",
     },
     {
       file: "model-ak-47s-scifi",
@@ -1008,4 +1573,5 @@ export const AK_47: GunDrawing<AkOptions> = {
   <!-- The AK-47 (milled receiver, wood furniture) from its right side, muzzle to the right. Millimeters, with the
        origin on the gun's middle on the bore, as the guns' top views in weapons/guns/art/ have it. -->`,
   drawSide,
+  top: TOP,
 };
