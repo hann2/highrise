@@ -1,4 +1,6 @@
-# Long guns redrawn by a team of agents (plan, 2026-10-08)
+# Long guns redrawn by a team of agents (plan, 2026-10-08; done)
+
+**Done 2026-10-08**: all six drawn, side and top views, in the game at true scale with their stats from the drawings (master e1d9690d). Simon's picks are in each generator's defaults, and the lessons in the `gun-art` skill.
 
 As the pistols were (`notes/gun-art-pistols-plan.md`, and the `gun-art` skill's "A team of agents"), one agent per gun in its own worktree, the lead integrating. This time the first round is construction **and** drawing together (Simon: the base shapes are hard to judge before any shading is in): each agent blocks out, then draws and shades the side view, checks it region by region, and makes a materials options sheet before reporting.
 
