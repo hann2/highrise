@@ -3,13 +3,44 @@
  * (1500 by 1051) by named numbers, following the gun-art skill (.claude/skills/gun-art/SKILL.md), with
  * guns/m1911.ts as the worked example. A draft until it goes into the game.
  *
- * Round 1: construction notes and a blockout (the main silhouettes in flat colors, measured). No shading or
- * detail yet.
+ * The slide is black nitride (BLACK_NITRIDE, here until it moves into lib/style.ts), a little bluer and darker
+ * than the polymer frame, so the two separate at 128 px. Light falls from above and a little behind, as on the
+ * M1911: top edges and the back strap lit, undersides and the front strap in shadow.
  */
 import type { Point } from "../lib/geometry";
-import { fmt, rounded, SlantedAxis, smoothCurve } from "../lib/geometry";
+import {
+  arc,
+  fixed,
+  fmt,
+  on,
+  rounded,
+  SlantedAxis,
+  smoothCurve,
+} from "../lib/geometry";
 import type { GunDrawing } from "../lib/gun";
-import { BLACK_POLYMER, BLUED_STEEL } from "../lib/style";
+import type { Material } from "../lib/style";
+import { BLACK_POLYMER } from "../lib/style";
+
+/**
+ * Black nitride (the Glock's slide, and its steel parts: the slide stop, the takedown lever, the pins): near
+ * black, a touch bluer and darker than the polymer frame. A starting point, picked on the materials sheet.
+ */
+export const BLACK_NITRIDE: Material = {
+  base: "#2b2e34",
+  dark: "#15161a",
+  light: "#41454e",
+  highlight: "#5f6570",
+};
+
+export interface GlockOptions {
+  /** The slide's material, and its steel parts' */
+  slide?: Partial<Material>;
+  /** The frame's polymer */
+  frame?: Partial<Material>;
+  /** The grip's studs: how far apart and how big (photo pixels; the real ones are about 16.5 and 9) */
+  studPitch?: number;
+  studSize?: number;
+}
 
 // ---------------------------------------------------------------------------------------------------------
 // Dimensions. Glock's own table for the G19 Gen 5 (us.glock.com, G19 Gen5 FS): 185 mm long overall, slide 174 mm,
@@ -60,10 +91,10 @@ const ORIGIN: Point = [(63 + 1456) / 2, 144.5];
 //   - The upper frame's flat face: from the tang to the dust cover's front, down to an edge (the RIM below)
 //     along the top of the trigger guard and down behind it. Over it sit, proud: the slide stop lever (Gen 5:
 //     ambidextrous, so it's on this side too; x 507 to 585, y 245 to 290, three grooves) in a recess molded
-//     into the frame below it (x 485 to 610, y 288 to 322); the takedown lever, a slanted serrated tab (x 830
-//     to 900, y 265 to 335) on a raised oval boss; and the trigger pin (a circle, centre 775,323, r 17). The
-//     trigger housing pin is at the top of the backstrap (centre 268,445, r 15), and the backstrap's seam hooks
-//     round it.
+//     into the frame below it (x 481 to 610, y 294 to 323); the takedown lever, a slanted serrated tab (x 840
+//     to 878, y 268 to 332) on a raised oval boss; and the trigger pin (centre 762,322: a dark ring r 17, the
+//     pin r 11.5). The trigger housing pin is at the top of the backstrap (centre 281,446, r 11, on a smooth
+//     round boss), and the backstrap's seam hooks round it.
 //   - The dust cover, under the slide's front, with an accessory rail: a groove along its side (y 300 to 315,
 //     x 1160 to 1430) and one cross slot, seen as a notch in its bottom edge (x 1333 to 1368, 15 px deep: 2 mm,
 //     too small at 128 px, left out). Its front corner is rounded off below (x 1420 to 1443).
@@ -85,11 +116,13 @@ const ORIGIN: Point = [(63 + 1456) / 2, 144.5];
 //     covers a panel on the side, and the front and back straps (it makes the silhouette's edges bumpy). It
 //     stops at a smooth band above (the thumb's place under the slide stop, a shallow recess, x 300 to 560,
 //     y 330 to 470), a smooth strip along the backstrap's seam, a smooth rounded plate low down ("MADE IN
-//     AUSTRIA"; x 205 to 390, y 745 to 830) and the smooth flared foot. At 128 px the studs are a pixel or two:
-//     the panel should read as a slightly different tone (or a faint fine grid) inside a smooth border, not as
-//     studs; the plate's lettering goes, the plate itself might stay as a smooth patch.
-//   - The magazine catch: on the left side, but its end shows on this side as a square, square to the grip
-//     (x 490 to 570, y 463 to 540). Survives as a square.
+//     AUSTRIA"; x 205 to 390, y 745 to 830) and the smooth flared foot. At 128 px the real studs are a pixel
+//     or two, so (Simon's call) they're drawn as a field of small dark squares scaled up about 1.5 times (24 px
+//     apart, 11 across: DEFAULT_STUD_PITCH, DEFAULT_STUD_SIZE) inside the smooth borders; all lettering goes, the
+//     plate stays as a smooth patch.
+//   - The magazine release: the Gen 5's button, behind the trigger guard, a square standing proud of the frame
+//     (corners 524,460, 598,483, 591,541, 508,522: turned about 16°, a little more upright than the grip).
+//     Drawn proud: lit along its top and back, a shadow along its bottom and front.
 //   - The backstrap seam: a line from the trigger housing pin down the grip, parallel to the back. Faint at
 //     128 px; probably a subtle line.
 // THE MAGAZINE's base plate, proud of the grip's base (it's not flush, as the M1911's was): x 148 to 479, 5 mm
@@ -325,15 +358,27 @@ const TRIGGER_BACK: Point[] = [
   [737, 482],
   [722, 464],
   [718, 452],
+  [712, 430],
+  [705, 400],
+  [700, 360],
 ];
 const TRIGGER =
   `M${fmt(TRIGGER_FRONT[0])} ` +
   smoothCurve(TRIGGER_FRONT, [0, 1], [0.5, 1]) +
   // The tip, a round end
   ` C835,516 822,528 ${fmt(TRIGGER_BACK[0])} ` +
-  smoothCurve(TRIGGER_BACK, [-1, -0.4], [-0.3, -1]) +
-  // Its tail, slanting back up into the frame
-  " L692,447 L668,438 L667,414 L690,360 Z";
+  smoothCurve(TRIGGER_BACK, [-1, -0.4], [-0.1, -1]) +
+  " Z";
+// Its tail, a flat bar slanting back up into the frame from behind the shoe
+const TRIGGER_TAIL = rounded(
+  [
+    [668, 410],
+    [724, 436],
+    [720, 452],
+    [668, 438],
+  ],
+  [3, 0, 0, 3],
+);
 
 // ---------------------------------------------------------------------------------------------------------
 // The magazine's base plate, under the grip's base (its top hidden under the frame), its bottom parallel to the
@@ -351,43 +396,608 @@ const MAG_BASE = rounded(
   [0, 0, 36, 6],
 );
 
-// Flat colors for the blockout
-const SLIDE_COLOR = BLUED_STEEL.base;
-const FRAME_COLOR = BLACK_POLYMER.base;
-const GUARD_COLOR = BLACK_POLYMER.dark;
+// ---------------------------------------------------------------------------------------------------------
+// Details on the slide
 
-function drawSide(): string {
+// The serrations: SERRATIONS grooves in each band (the real gun has 11, too fine at 128 px), each a cut with a
+// round top, open at the slide's bottom edge, its front wall lit
+const SERRATIONS = 6;
+const SERRATION_WIDTH = 20;
+const SERRATION_TOP = 98;
+const REAR_SERRATIONS: [number, number] = [213, 458];
+const FRONT_SERRATIONS: [number, number] = [1096, 1343];
+function serrationXs([from, to]: [number, number]): number[] {
+  const pitch = (to - from - SERRATION_WIDTH) / (SERRATIONS - 1);
+  return Array.from({ length: SERRATIONS }, (_, i) => from + i * pitch);
+}
+function serrationCut(x: number): string {
+  const r = SERRATION_WIDTH / 2;
+  const center: Point = [x + r, SERRATION_TOP + r];
+  return (
+    `M${fmt([x, SLIDE_BOTTOM])} L${fmt(on(center, r, 180))} ${arc(center, r, 180, 360)} ` +
+    `L${fmt([x + SERRATION_WIDTH, SLIDE_BOTTOM])} Z`
+  );
+}
+
+// The nose: the side's chamfer from NOSE_BACK to the front, a plane of its own
+const NOSE_BACK = 1400;
+const NOSE = rounded(
+  [
+    [NOSE_BACK, 92],
+    [SLIDE_FRONT + 2, 92],
+    [SLIDE_FRONT + 2, SLIDE_BOTTOM],
+    [NOSE_BACK, SLIDE_BOTTOM],
+  ],
+  [12, 0, 0, 0],
+);
+// The back face's chamfer, a dark band down the back
+const BACK_CHAMFER = 12;
+
+// In the port: the barrel's hood, filling it but for a dark gap behind it (where the breech face is) and under it
+const HOOD_BACK = 716;
+const HOOD_FRONT = 918;
+const HOOD_BOTTOM = 160;
+const HOOD =
+  `M${HOOD_BACK},${SLIDE_TOP + 2} L${HOOD_FRONT - 6},${SLIDE_TOP + 2} ` +
+  `C${HOOD_FRONT - 2},${SLIDE_TOP + 2} ${HOOD_FRONT},${SLIDE_TOP + 5} ${HOOD_FRONT},${SLIDE_TOP + 10} ` +
+  `L${HOOD_FRONT},134 C${HOOD_FRONT},149 906,${HOOD_BOTTOM} 890,${HOOD_BOTTOM} L748,${HOOD_BOTTOM} ` +
+  `C733,${HOOD_BOTTOM} 722,154 ${HOOD_BACK},146 Z`;
+// The port's cut edge down its back, along its bottom and up its front, catching the light
+const PORT_EDGE =
+  `M${PORT_BACK},${SLIDE_TOP + 2} L${PORT_BACK},126 C${PORT_BACK},148 718,${PORT_BOTTOM} 740,${PORT_BOTTOM} ` +
+  `L890,${PORT_BOTTOM} C907,${PORT_BOTTOM} ${PORT_FRONT},153 ${PORT_FRONT},136 L${PORT_FRONT},${SLIDE_TOP + 2}`;
+
+// The extractor's slot behind the port: a pill, round at the back, the extractor in it
+const EXTRACTOR_TOP = 107;
+const EXTRACTOR_BOTTOM = 150;
+const EXTRACTOR_R = (EXTRACTOR_BOTTOM - EXTRACTOR_TOP) / 2;
+const EXTRACTOR_CENTER: Point = [586.5, EXTRACTOR_TOP + EXTRACTOR_R];
+const EXTRACTOR_SLOT =
+  `M${fmt(on(EXTRACTOR_CENTER, EXTRACTOR_R, 270))} L${PORT_BACK},${EXTRACTOR_TOP} L${PORT_BACK},${EXTRACTOR_BOTTOM} ` +
+  `L${fmt(on(EXTRACTOR_CENTER, EXTRACTOR_R, 90))} ${arc(EXTRACTOR_CENTER, EXTRACTOR_R, 90, 270)} Z`;
+const EXTRACTOR = rounded(
+  [
+    [593, 112],
+    [670, 112],
+    [670, 146],
+    [593, 146],
+  ],
+  [4, 0, 0, 4],
+);
+const EXTRACTOR_LIGHT =
+  `M${fmt(on(EXTRACTOR_CENTER, EXTRACTOR_R - 4, 110))} ` +
+  arc(EXTRACTOR_CENTER, EXTRACTOR_R - 4, 110, 200);
+
+// ---------------------------------------------------------------------------------------------------------
+// Details on the frame
+
+/** x on a list of points (top to bottom) at height y, straight between them */
+function xAt(points: readonly Point[], y: number): number {
+  const sorted = [...points].sort((a, b) => a[1] - b[1]);
+  if (y <= sorted[0][1]) return sorted[0][0];
+  for (let i = 1; i < sorted.length; i++) {
+    const [x0, y0] = sorted[i - 1];
+    const [x1, y1] = sorted[i];
+    if (y <= y1) return x0 + ((x1 - x0) * (y - y0)) / (y1 - y0);
+  }
+  return sorted[sorted.length - 1][0];
+}
+
+// The slide stop lever (Gen 5's, ambidextrous), steel, with three grooves, over its recess in the frame
+const SLIDE_STOP_RECESS = rounded(
+  [
+    [481, 294],
+    [610, 294],
+    [610, 323],
+    [481, 323],
+  ],
+  [12, 12, 12, 12],
+);
+const SLIDE_STOP = rounded(
+  [
+    [508, 254],
+    [583, 254],
+    [583, 299],
+    [508, 299],
+  ],
+  [8, 8, 8, 8],
+);
+const SLIDE_STOP_TAB = rounded(
+  [
+    [540, SLIDE_BOTTOM - 2],
+    [590, SLIDE_BOTTOM - 2],
+    [590, 256],
+    [540, 256],
+  ],
+  [0, 0, 4, 4],
+);
+const SLIDE_STOP_GROOVES = [263, 274.5, 286]; // their middles
+const SLIDE_STOP_GROOVE: [number, number] = [515, 577];
+
+// The takedown lever, a slanted serrated steel tab, on a raised boss
+const TAKEDOWN_BOSS_POINTS: Point[] = [
+  [812, 280],
+  [832, 262],
+  [870, 255],
+  [910, 262],
+  [930, 285],
+  [918, 318],
+  [885, 338],
+  [845, 348],
+  [818, 336],
+  [809, 308],
+  [812, 280],
+];
+const TAKEDOWN_BOSS =
+  `M${fmt(TAKEDOWN_BOSS_POINTS[0])} ` +
+  smoothCurve(TAKEDOWN_BOSS_POINTS, [0.6, -1], [0.6, -1]) +
+  " Z";
+// Its corners: top back, top front, bottom front, bottom back
+const TAKEDOWN_LEVER_CORNERS: Point[] = [
+  [861, 268],
+  [878, 274],
+  [856, 332],
+  [840, 327],
+];
+const TAKEDOWN_LEVER = rounded(TAKEDOWN_LEVER_CORNERS, [3, 3, 3, 3]);
+const TAKEDOWN_RIDGES = 7;
+function takedownRidges(): { dark: string; light: string } {
+  const [a, b, c, d] = TAKEDOWN_LEVER_CORNERS;
+  const dark: string[] = [];
+  const light: string[] = [];
+  for (let i = 1; i <= TAKEDOWN_RIDGES; i++) {
+    const t = i / (TAKEDOWN_RIDGES + 1);
+    const left: Point = [a[0] + (d[0] - a[0]) * t, a[1] + (d[1] - a[1]) * t];
+    const right: Point = [b[0] + (c[0] - b[0]) * t, b[1] + (c[1] - b[1]) * t];
+    dark.push(`M${fmt(left)} L${fmt(right)}`);
+    light.push(
+      `M${fmt([left[0], left[1] + 2.5])} L${fmt([right[0], right[1] + 2.5])}`,
+    );
+  }
+  return { dark: dark.join(" "), light: light.join(" ") };
+}
+
+// Pins: the trigger pin, a ring round it in the frame; the trigger housing pin on its round boss
+const TRIGGER_PIN: Point = [762, 322];
+const HOUSING_PIN: Point = [281, 446];
+const HOUSING_BOSS: Point = [283, 447];
+
+// The backstrap's seam: round over the housing pin's boss, then down the grip, parallel to the back; and the arc
+// under the boss
+const SEAM: Point[] = [
+  [268, 414],
+  [292, 425],
+  [305, 447],
+  [299, 475],
+  [284, 505],
+  [262, 545],
+  [242, 580],
+  [214, 645],
+  [185, 712],
+  [160, 785],
+  [137, 857],
+  [132, 872],
+];
+const SEAM_PATH = `M${fmt(SEAM[0])} ` + smoothCurve(SEAM, [1, 0.3], [-0.35, 1]);
+const SEAM_UNDER = "M256,462 C262,470 276,474 288,471 C294,469 298,466 301,462";
+
+// The magazine release: the Gen 5's square button behind the guard, proud of the frame
+const MAG_RELEASE_CORNERS: Point[] = [
+  [524, 460],
+  [598, 483],
+  [591, 541],
+  [508, 522],
+];
+const MAG_RELEASE = rounded(MAG_RELEASE_CORNERS, [5, 5, 5, 5]);
+const MAG_RELEASE_SHADOW = rounded(
+  MAG_RELEASE_CORNERS.map(([x, y]) => [x + 4, y + 5] as Point),
+  [6, 6, 6, 6],
+);
+const [mrA, mrB, , mrD] = MAG_RELEASE_CORNERS;
+const MAG_RELEASE_LIT = `M${fmt([mrD[0] + 1, mrD[1] - 6])} L${fmt([mrA[0] + 2, mrA[1] + 4])} L${fmt([mrB[0] - 6, mrB[1] + 1])}`;
+
+// The thumb's place above the studs: a shallow trough across the grip under a soft ridge. A lens, shaded across
+// (a crease along its top, lit below it, in shadow again over the studs), fading out at its top and bottom
+const THUMB =
+  "M300,420 C350,350 500,334 566,360 C560,430 520,484 330,486 C310,470 302,446 300,420 Z";
+const THUMB_TOP = 345;
+const THUMB_BOTTOM = 490;
+
+// The grip's studs: a field of small dark squares turned with the magazine release on the side panel, and
+// columns of them along the back and front straps. They're scaled up from the real ones (16.5 px apart, 9 across)
+// so they read at 128 px. Studs are only drawn whole, inside a region.
+const STUD_TURN = Math.atan(0.3); // the rows fall forward as the release's top edge does
+const ROW: Point = [Math.cos(STUD_TURN), Math.sin(STUD_TURN)];
+const COLUMN: Point = [-Math.sin(STUD_TURN), Math.cos(STUD_TURN)];
+const STUD_ORIGIN: Point = [400, 640];
+const DEFAULT_STUD_PITCH = 24;
+const DEFAULT_STUD_SIZE = 11;
+const SEAM_CLEAR = 34; // the smooth strip in front of the backstrap's seam
+// The side panel: under the thumb's trough, from the smooth strip along the backstrap's seam to the front strap's
+// smooth band, down to just above the flared foot
+const PANEL_FRONT: Point[] = [
+  [505, 500],
+  [522, 547],
+  [508, 600],
+  [480, 700],
+  [455, 790],
+  [432, 840],
+  [415, 864],
+  [372, 870],
+  [260, 864],
+];
+const PANEL_BACK_YS = [856, 800, 750, 700, 650, 600, 550, 500];
+const STUD_PANEL: Point[] = [
+  ...PANEL_FRONT,
+  ...PANEL_BACK_YS.map((y) => [xAt(SEAM, y) + SEAM_CLEAR, y] as Point),
+];
+// Left smooth: round the magazine release, and the plate low on the grip (its lettering dropped)
+const RELEASE_CLEAR: Point[] = [
+  [518, 450],
+  [610, 478],
+  [602, 552],
+  [496, 530],
+];
+const PLATE_CORNERS: Point[] = [
+  [214, 746],
+  [410, 746],
+  [404, 830],
+  [204, 830],
+];
+const PLATE = rounded(PLATE_CORNERS, [28, 22, 22, 28]);
+const PLATE_CLEAR: Point[] = [
+  [208, 741],
+  [416, 741],
+  [409, 835],
+  [198, 835],
+];
+
+function inside(p: Point, polygon: readonly Point[]): boolean {
+  let hit = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [xi, yi] = polygon[i];
+    const [xj, yj] = polygon[j];
+    if (
+      yi > p[1] !== yj > p[1] &&
+      p[0] < ((xj - xi) * (p[1] - yi)) / (yj - yi) + xi
+    ) {
+      hit = !hit;
+    }
+  }
+  return hit;
+}
+
+/** A square stud: its middle, its two axes, and its size */
+function stud(c: Point, u: Point, v: Point, size: number): Point[] {
+  const h = size / 2;
+  return [
+    [c[0] - u[0] * h - v[0] * h, c[1] - u[1] * h - v[1] * h],
+    [c[0] + u[0] * h - v[0] * h, c[1] + u[1] * h - v[1] * h],
+    [c[0] + u[0] * h + v[0] * h, c[1] + u[1] * h + v[1] * h],
+    [c[0] - u[0] * h + v[0] * h, c[1] - u[1] * h + v[1] * h],
+  ];
+}
+const studPath = (corners: Point[]) => "M" + corners.map(fmt).join(" L") + " Z";
+
+/** The side panel's field: the turned grid's studs wholly in the panel and clear of the smooth parts */
+function panelStuds(pitch: number, size: number): string[] {
+  const out: string[] = [];
+  for (let i = -40; i <= 40; i++) {
+    for (let j = -40; j <= 40; j++) {
+      const c: Point = [
+        STUD_ORIGIN[0] + ROW[0] * i * pitch + COLUMN[0] * j * pitch,
+        STUD_ORIGIN[1] + ROW[1] * i * pitch + COLUMN[1] * j * pitch,
+      ];
+      const corners = stud(c, ROW, COLUMN, size);
+      if (
+        corners.every((p) => inside(p, STUD_PANEL)) &&
+        !corners.some((p) => inside(p, RELEASE_CLEAR) || inside(p, PLATE_CLEAR))
+      ) {
+        out.push(studPath(corners));
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Columns of studs along a strap, `offsets` in from its edge (positive forward), squared to the strap's lean,
+ * every `pitch` from `from` to `to`, alternate columns staggered by half a pitch
+ */
+function strapStuds(
+  edge: readonly Point[],
+  from: number,
+  to: number,
+  offsets: number[],
+  pitch: number,
+  size: number,
+): string[] {
+  const out: string[] = [];
+  offsets.forEach((offset, k) => {
+    for (let y = from + (k % 2) * (pitch / 2); y <= to; y += pitch) {
+      const lean = (xAt(edge, y + 6) - xAt(edge, y - 6)) / 12;
+      const length = Math.hypot(lean, 1);
+      const down: Point = [lean / length, 1 / length];
+      const forward: Point = [down[1], -down[0]];
+      const c: Point = [
+        xAt(edge, y) + forward[0] * offset,
+        y + forward[1] * offset,
+      ];
+      out.push(studPath(stud(c, forward, down, size)));
+    }
+  });
+  return out;
+}
+
+function studs(pitch: number, size: number): string {
+  return [
+    ...panelStuds(pitch, size),
+    ...strapStuds(BACK_STRAP, 486, 810, [11, 11 + pitch * 0.85], pitch, size),
+    ...strapStuds(FRONT_STRAP, 600, 880, [-10], pitch, size),
+  ].join(" ");
+}
+
+// The dust cover's rail: a groove along it, lit along its lower lip
+// The rail starts at a step (RAIL_BACK), forward of which its face, over the groove, is a separate, lighter band
+const RAIL_BACK = 1150;
+const RAIL_GROOVE = rounded(
+  [
+    [RAIL_BACK + 5, 296],
+    [1428, 296],
+    [1428, 304],
+    [RAIL_BACK + 5, 304],
+  ],
+  [4, 0, 0, 4],
+);
+const RAIL_LIP = `M${RAIL_BACK + 8},306 L1426,306`;
+const RAIL_FACE = rounded(
+  [
+    [RAIL_BACK + 3, 256],
+    [1400, 256],
+    [1400, 294],
+    [RAIL_BACK + 3, 294],
+  ],
+  [0, 6, 0, 0],
+);
+
+// The trigger's safety blade, standing out of its face: down the trigger's front, round its own tip, and up its
+// back edge
+const BLADE_BACK: Point[] = [
+  [817, 519],
+  [806, 512],
+  [794, 492],
+  [784, 468],
+  [776, 446],
+  [772, 428],
+];
+const BLADE =
+  `M${fmt(TRIGGER_FRONT[1])} ` +
+  smoothCurve(TRIGGER_FRONT.slice(1), [0.05, 1], [0.5, 1]) +
+  ` C835,514 827,520 ${fmt(BLADE_BACK[0])} ` +
+  smoothCurve(BLADE_BACK, [-1, -0.6], [-0.15, -1]) +
+  " Z";
+const BLADE_GAP =
+  `M${fmt(BLADE_BACK[0])} ` + smoothCurve(BLADE_BACK, [-1, -0.6], [-0.15, -1]);
+
+// The guard opening's lit inner edge, along its front and bottom
+const OPENING_BEVEL =
+  `M${OPENING_FRONT},${OPENING_TOP_FRONT + 62} L${OPENING_FRONT},${OPENING_BOTTOM - 60} ` +
+  `C${OPENING_FRONT},${OPENING_BOTTOM - 27} ${OPENING_FRONT - 27},${OPENING_BOTTOM} ${OPENING_FRONT - 60},${OPENING_BOTTOM} ` +
+  `L${OPENING_BACK + 70},${OPENING_BOTTOM}`;
+const GUARD_FRONT_LIT =
+  `M${fmt(GUARD_FRONT[3])} ` +
+  smoothCurve(GUARD_FRONT.slice(3), [-0.1, 1], [0.3, 1]);
+
+/** A color between two hex colors */
+function mix(a: string, b: string, t: number): string {
+  const ca = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
+  const cb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
+  return (
+    "#" +
+    ca
+      .map((v, i) => Math.round(v + (cb[i] - v) * t))
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join("")
+  );
+}
+
+function stops(...list: [number, string, number?][]): string {
+  return list
+    .map(
+      ([o, c, a]) =>
+        `      <stop offset="${o}" stop-color="${c}"${a === undefined ? "" : ` stop-opacity="${a}"`}/>`,
+    )
+    .join("\n");
+}
+
+const f1 = (v: number) => fixed(v, 1);
+
+function drawSide(options: GlockOptions = {}): string {
+  const S: Material = { ...BLACK_NITRIDE, ...options.slide };
+  const P: Material = { ...BLACK_POLYMER, ...options.frame };
+  const studPath = studs(
+    options.studPitch ?? DEFAULT_STUD_PITCH,
+    options.studSize ?? DEFAULT_STUD_SIZE,
+  );
+  const ridges = takedownRidges();
+  const serrations = [
+    ...serrationXs(REAR_SERRATIONS),
+    ...serrationXs(FRONT_SERRATIONS),
+  ];
+  const backStrapLit =
+    `M${fmt(BACK_STRAP[5])} ` +
+    smoothCurve(BACK_STRAP.slice(5), [-0.15, 1], [-0.15, 1]);
+  const frontStrapShade =
+    `M${fmt(FRONT_STRAP[0])} ` +
+    smoothCurve(FRONT_STRAP, [0, -1], [-GRIP.down[0], -GRIP.down[1]]);
+  const rimPath = `M${fmt(RIM[0])} ` + smoothCurve(RIM, [0.3, -1], [1, 0.15]);
+  const dustCoverShade =
+    `M${fmt(DUST_COVER_BOTTOM[0])} ` +
+    smoothCurve(DUST_COVER_BOTTOM, [1, 0], [1, -0.08]) +
+    " C1420,339 1440,330 1442,308";
+  const baseLit = `M${fmt([80, baseY(80) - 30])} L${fmt([FRONT_FOOT_X, baseY(FRONT_FOOT_X) - 30])}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1051" viewBox="0 0 1500 1051" fill-rule="evenodd" stroke-linejoin="round" clip-rule="evenodd">
+  <defs>
+    <!-- The slide, down its side: the lit top chamfer, the dark crease under it, then the side, darker toward
+         its bottom -->
+    <linearGradient id="glock-slide-shading" gradientUnits="userSpaceOnUse" x1="0" y1="${SLIDE_TOP}" x2="0" y2="${SLIDE_BOTTOM}">
+${stops([0, S.highlight], [0.05, S.light], [0.08, S.base], [0.095, S.dark], [0.125, S.dark], [0.145, S.light], [0.55, S.base], [1, mix(S.base, S.dark, 0.45)])}
+    </linearGradient>
+    <linearGradient id="glock-hood-shading" gradientUnits="userSpaceOnUse" x1="0" y1="${SLIDE_TOP + 2}" x2="0" y2="${HOOD_BOTTOM}">
+${stops([0, S.highlight], [0.08, S.light], [0.5, mix(S.base, S.light, 0.5)], [1, S.base])}
+    </linearGradient>
+    <linearGradient id="glock-barrel-shading" gradientUnits="userSpaceOnUse" x1="0" y1="${BARREL_TOP}" x2="0" y2="${BARREL_BOTTOM}">
+${stops([0, S.dark], [0.1, S.light], [0.18, S.highlight], [0.3, S.base], [1, S.dark])}
+    </linearGradient>
+    <!-- The frame's upper part: in the slide's shadow just under it, lit along its top edge, then its face -->
+    <linearGradient id="glock-frame-top" gradientUnits="userSpaceOnUse" x1="0" y1="${FRAME_TOP}" x2="0" y2="330">
+${stops([0, P.dark], [0.12, P.dark], [0.22, P.light], [0.6, P.base])}
+    </linearGradient>
+    <linearGradient id="glock-lever-shading" gradientUnits="userSpaceOnUse" x1="0" y1="254" x2="0" y2="299">
+${stops([0, S.highlight], [0.15, S.light], [1, S.base])}
+    </linearGradient>
+    <linearGradient id="glock-boss-shading" gradientUnits="userSpaceOnUse" x1="820" y1="335" x2="905" y2="262">
+${stops([0, mix(P.base, P.dark, 0.5)], [0.5, P.base], [1, P.light])}
+    </linearGradient>
+    <linearGradient id="glock-release-shading" gradientUnits="userSpaceOnUse" x1="520" y1="465" x2="590" y2="535">
+${stops([0, P.light], [1, P.base])}
+    </linearGradient>
+    <linearGradient id="glock-magazine-shading" gradientUnits="userSpaceOnUse" x1="0" y1="${f1(baseY(300))}" x2="0" y2="${f1(baseY(300) + MAG_THICK)}">
+${stops([0, P.dark], [0.2, P.light], [0.45, P.base], [1, P.dark])}
+    </linearGradient>
+    <linearGradient id="glock-thumb-shading" gradientUnits="userSpaceOnUse" x1="0" y1="${THUMB_TOP}" x2="0" y2="${THUMB_BOTTOM}">
+${stops([0, P.dark, 0], [0.18, P.dark, 0.55], [0.36, P.base, 0], [0.5, P.light, 0.5], [0.66, P.base, 0], [0.82, P.dark, 0.35], [1, P.dark, 0])}
+    </linearGradient>
+    <clipPath id="glock-slide-clip">
+      <path d="${SLIDE}"/>
+    </clipPath>
+    <clipPath id="glock-frame-clip">
+      <path d="${FRAME}"/>
+    </clipPath>
+    <clipPath id="glock-guard-clip">
+      <path d="${GUARD}" clip-rule="evenodd"/>
+    </clipPath>
+  </defs>
   <!-- The barrel's crown, out of the slide's front -->
   <g id="glock-barrel">
-    <path d="${BARREL}" fill="${BLUED_STEEL.dark}"/>
+    <path d="${BARREL}" fill="url(#glock-barrel-shading)"/>
   </g>
-  <!-- Behind the frame, seen through the guard's opening -->
+  <!-- Behind the frame, seen through the guard's opening: the trigger's shoe and tail, and the safety blade
+       standing out of its face, lighter -->
   <g id="glock-trigger">
-    <path d="${TRIGGER}" fill="${BLACK_POLYMER.light}"/>
+    <path d="${TRIGGER_TAIL}" fill="${P.light}"/>
+    <path d="${TRIGGER}" fill="${mix(P.base, P.light, 0.5)}"/>
+    <path d="${BLADE}" fill="${mix(P.light, P.highlight, 0.5)}"/>
+    <path d="${BLADE_GAP}" stroke="${P.dark}" stroke-width="3" fill="none"/>
+    <path d="M${fmt(TRIGGER_FRONT[2])} ${smoothCurve(TRIGGER_FRONT.slice(2), [0.4, 1], [0.5, 1])}" stroke="${P.highlight}" stroke-width="3" fill="none"/>
   </g>
-  <!-- The guard's ring, on the lower plane under the frame's face -->
+  <!-- The guard's ring, on the lower plane under the frame's face: in the face's shadow along its top, lit round
+       the opening's front and bottom and down its front -->
   <g id="glock-trigger-guard">
-    <path d="${GUARD}" fill="${GUARD_COLOR}"/>
+    <path d="${GUARD}" fill="${P.base}"/>
+    <g clip-path="url(#glock-guard-clip)" fill="none">
+      <path d="${rimPath}" stroke="${P.dark}" stroke-width="22"/>
+      <path d="${OPENING_BEVEL}" stroke="${P.light}" stroke-width="9"/>
+      <path d="${GUARD_FRONT_LIT}" stroke="${P.light}" stroke-width="7"/>
+    </g>
   </g>
-  <!-- The magazine's base plate, proud of the grip's base -->
+  <!-- The magazine's base plate, proud of the grip's base, in a dark seam under it -->
   <g id="glock-magazine">
-    <path d="${MAG_BASE}" fill="${GUARD_COLOR}"/>
+    <path d="${MAG_BASE}" fill="url(#glock-magazine-shading)"/>
   </g>
   <!-- The frame: the tang, the face over the trigger, the dust cover and the grip, one molding -->
   <g id="glock-frame">
-    <path d="${FRAME}" fill="${FRAME_COLOR}"/>
+    <path d="${FRAME}" fill="${P.base}"/>
+    <g clip-path="url(#glock-frame-clip)" fill="none">
+      <rect x="100" y="${FRAME_TOP}" width="${DUST_COVER_FRONT - 100}" height="${330 - FRAME_TOP}" fill="url(#glock-frame-top)"/>
+      <!-- The dust cover's underside, rounding away; the grip's lit back strap, its front strap rounding away,
+           and its flared foot, lit -->
+      <path d="${dustCoverShade}" stroke="${P.dark}" stroke-width="20" opacity="0.7"/>
+      <path d="${backStrapLit}" stroke="${P.light}" stroke-width="18" opacity="0.8"/>
+      <path d="${frontStrapShade}" stroke="${P.dark}" stroke-width="44" opacity="0.55"/>
+      <path d="${baseLit}" stroke="${P.light}" stroke-width="28" opacity="0.35"/>
+      <!-- The frame's front, a little darker as it rounds off -->
+      <rect x="1418" y="${FRAME_TOP}" width="30" height="120" fill="${P.dark}" opacity="0.3"/>
+      <!-- The thumb's trough above the studs -->
+      <path d="${THUMB}" fill="url(#glock-thumb-shading)"/>
+    </g>
+    <!-- The rail: a step where it starts, its lighter face, the groove along it and its lit lower lip -->
+    <path d="${RAIL_FACE}" fill="${P.light}" opacity="0.3"/>
+    <path d="M${RAIL_BACK - 4},252 L${RAIL_BACK - 4},340" stroke="${P.dark}" stroke-width="7" fill="none" opacity="0.6" clip-path="url(#glock-frame-clip)"/>
+    <path d="M${RAIL_BACK + 1},256 L${RAIL_BACK + 1},336" stroke="${P.light}" stroke-width="2.5" fill="none" opacity="0.6"/>
+    <path d="${RAIL_GROOVE}" fill="${P.dark}"/>
+    <path d="${RAIL_LIP}" stroke="${P.light}" stroke-width="3" fill="none"/>
+    <!-- The grip's studs, the smooth plate among them, and the backstrap's seam -->
+    <path id="glock-studs" d="${studPath}" fill="${P.dark}" clip-path="url(#glock-frame-clip)"/>
+    <path id="glock-plate" d="${PLATE}" stroke="${P.dark}" stroke-width="2.5" fill="none" opacity="0.6"/>
+    <path id="glock-seam" d="${SEAM_PATH} ${SEAM_UNDER}" stroke="${P.dark}" stroke-width="3" fill="none"/>
+    <!-- The trigger housing pin's round boss, and the pin -->
+    <circle cx="${HOUSING_BOSS[0]}" cy="${HOUSING_BOSS[1]}" r="22" fill="${P.light}" opacity="0.35"/>
+    <circle cx="${HOUSING_PIN[0]}" cy="${HOUSING_PIN[1]}" r="11.5" fill="${P.dark}"/>
+    <circle cx="${HOUSING_PIN[0]}" cy="${HOUSING_PIN[1]}" r="9" fill="${S.light}"/>
+    <!-- The takedown lever's boss -->
+    <path d="${TAKEDOWN_BOSS}" fill="url(#glock-boss-shading)"/>
+  </g>
+  <!-- The magazine release, proud of the frame: its shadow, then the button, lit along its top and back -->
+  <g id="glock-magazine-release">
+    <path d="${MAG_RELEASE_SHADOW}" fill="${P.dark}" opacity="0.85"/>
+    <path d="${MAG_RELEASE}" fill="url(#glock-release-shading)" stroke="${P.dark}" stroke-width="2.5"/>
+    <path d="${MAG_RELEASE_LIT}" stroke="${P.highlight}" stroke-width="3" fill="none"/>
+  </g>
+  <!-- The slide stop lever, steel, over its recess -->
+  <g id="glock-slide-stop">
+    <path d="${SLIDE_STOP_RECESS}" fill="${P.dark}" opacity="0.65"/>
+    <path d="M490,321 L601,321" stroke="${P.light}" stroke-width="3" fill="none" opacity="0.7"/>
+    <path d="${SLIDE_STOP_TAB}" fill="${S.dark}"/>
+    <path d="${SLIDE_STOP}" fill="url(#glock-lever-shading)" stroke="${S.dark}" stroke-width="3"/>
+    ${SLIDE_STOP_GROOVES.map((y) => `<path d="M${SLIDE_STOP_GROOVE[0]},${y} L${SLIDE_STOP_GROOVE[1]},${y}" stroke="${S.dark}" stroke-width="3.5" fill="none"/>`).join("\n    ")}
+  </g>
+  <!-- The takedown lever, steel, serrated -->
+  <g id="glock-takedown">
+    <path d="${TAKEDOWN_LEVER}" fill="${S.base}" stroke="${S.dark}" stroke-width="2.5"/>
+    <path d="${ridges.dark}" stroke="${S.dark}" stroke-width="2.5" fill="none"/>
+    <path d="${ridges.light}" stroke="${S.highlight}" stroke-width="1.5" fill="none" opacity="0.7"/>
+  </g>
+  <!-- The trigger pin, in its ring -->
+  <g id="glock-pins">
+    <circle cx="${TRIGGER_PIN[0]}" cy="${TRIGGER_PIN[1]}" r="17" fill="${P.dark}"/>
+    <circle cx="${TRIGGER_PIN[0]}" cy="${TRIGGER_PIN[1]}" r="11.5" fill="${S.light}"/>
+    <path d="M${fmt(on(TRIGGER_PIN, 8, 200))} ${arc(TRIGGER_PIN, 8, 200, 290)}" stroke="${S.highlight}" stroke-width="2.5" fill="none"/>
   </g>
   <g id="glock-slide">
-    <path d="${SLIDE}" fill="${SLIDE_COLOR}"/>
-    <path id="glock-port" d="${PORT}" fill="${BLUED_STEEL.dark}"/>
-    <path id="glock-rear-sight" d="${sight(REAR_SIGHT)}" fill="${BLUED_STEEL.dark}"/>
-    <path id="glock-front-sight" d="${sight(FRONT_SIGHT)}" fill="${BLUED_STEEL.dark}"/>
+    <path d="${SLIDE}" fill="url(#glock-slide-shading)"/>
+    <g clip-path="url(#glock-slide-clip)">
+      <!-- The back face's chamfer, and the nose's chamfered side, both turned away from the light -->
+      <rect x="${SLIDE_BACK}" y="${SLIDE_TOP}" width="${BACK_CHAMFER}" height="${SLIDE_BOTTOM - SLIDE_TOP}" fill="${S.dark}" opacity="0.6"/>
+      <path d="${NOSE}" fill="${S.dark}" opacity="0.55"/>
+      <path d="M${NOSE_BACK},104 L${NOSE_BACK},${SLIDE_BOTTOM - 2}" stroke="${S.light}" stroke-width="2" fill="none" opacity="0.5"/>
+      <!-- Grooves to grip it by, at both ends, their front walls lit -->
+      <g id="glock-serrations">
+        ${serrations.map((x) => `<path d="${serrationCut(x)}" fill="${S.dark}"/>`).join("\n        ")}
+        ${serrations.map((x) => `<rect x="${f1(x + SERRATION_WIDTH - 3)}" y="${SERRATION_TOP + 8}" width="3" height="${SLIDE_BOTTOM - SERRATION_TOP - 8}" fill="${S.light}" opacity="0.7"/>`).join("\n        ")}
+      </g>
+      <!-- The extractor's slot, the extractor in it -->
+      <path d="${EXTRACTOR_SLOT}" fill="#0e0f11"/>
+      <path d="${EXTRACTOR}" fill="${S.base}"/>
+      <path d="M670,112 L692,112 L692,146 L670,146 Z" fill="${S.dark}"/>
+      <path d="${EXTRACTOR_LIGHT}" stroke="${S.light}" stroke-width="3" fill="none"/>
+      <!-- The ejection port: its dark depths, the barrel's hood in it, and its cut edge catching the light -->
+      <path id="glock-port" d="${PORT}" fill="#0e0f11"/>
+      <path id="glock-hood" d="${HOOD}" fill="url(#glock-hood-shading)"/>
+      <path d="${PORT_EDGE}" stroke="${S.highlight}" stroke-width="3" fill="none"/>
+      <!-- Its bottom edge, a dark seam over the frame -->
+      <path d="M${SLIDE_BACK},${SLIDE_BOTTOM - 2} L${SLIDE_FRONT},${SLIDE_BOTTOM - 2}" stroke="${S.dark}" stroke-width="4" fill="none"/>
+    </g>
+    <!-- Black polymer sights, lit along their tops -->
+    <path id="glock-rear-sight" d="${sight(REAR_SIGHT)}" fill="${P.dark}"/>
+    <path d="M${REAR_SIGHT.top[0] + 2},${REAR_SIGHT.height + 1.5} L${REAR_SIGHT.top[1] - 2},${REAR_SIGHT.height + 1.5}" stroke="${P.highlight}" stroke-width="3" fill="none"/>
+    <path id="glock-front-sight" d="${sight(FRONT_SIGHT)}" fill="${P.dark}"/>
+    <path d="M${FRONT_SIGHT.top[0] + 2},${FRONT_SIGHT.height + 1.5} L${FRONT_SIGHT.top[1] - 2},${FRONT_SIGHT.height + 1.5}" stroke="${P.highlight}" stroke-width="3" fill="none"/>
   </g>
 </svg>`;
 }
 
-export const GLOCK: GunDrawing = {
+export const GLOCK: GunDrawing<GlockOptions> = {
   name: "glock",
   draft: true,
   photo: {
