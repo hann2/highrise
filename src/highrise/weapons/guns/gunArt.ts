@@ -39,6 +39,11 @@ const GUN_ART = {
 
 export type GunArtName = keyof typeof GUN_ART;
 
+/** A gun's art as it's drawn, in millimeters about the gun's origin (for tools) */
+export function gunArtSvg(name: GunArtName): string {
+  return GUN_ART[name];
+}
+
 /** How many pixels a meter of gun gets when it's rasterized */
 export const GUN_PIXELS_PER_METER = 600;
 

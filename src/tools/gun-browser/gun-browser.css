@@ -1,0 +1,288 @@
+/* Layout: the guns down the left, the gun on the right */
+
+.browser {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  min-height: calc(100vh - 34px);
+}
+
+.gun-list {
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+.gun-list h1 {
+  padding: 14px 14px 4px;
+}
+.gun-list__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+  color: var(--text);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+.gun-list__item:hover {
+  background: var(--panel-2);
+}
+.gun-list__item.is-selected {
+  background: var(--panel-2);
+  border-left-color: var(--accent);
+}
+.gun-list__item.is-compared {
+  border-left-color: var(--ai);
+}
+.gun-list__item img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.gun {
+  padding: 16px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.gun__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.gun__header h2 {
+  font-size: 22px;
+  margin: 0;
+}
+.gun__pickup {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.gun__compare {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.gun__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+}
+.gun__preview {
+  flex: 1 1 520px;
+  min-width: 0;
+}
+.gun__stats {
+  flex: 0 1 auto;
+  min-width: 300px;
+}
+
+.chip {
+  padding: 2px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+}
+.chip.is-on {
+  color: var(--text);
+  background: var(--panel-2);
+  border-color: #6a6a78;
+}
+
+/* The game */
+
+.rig-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rig-preview__frame {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+}
+.rig-preview__frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  /* The page keeps the mouse and the keys */
+  pointer-events: none;
+}
+.rig-preview__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rig-preview__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rig-preview__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rig-preview__play {
+  width: 40px;
+}
+.rig-preview__scrub {
+  flex: 1;
+  min-width: 120px;
+  padding: 0;
+  accent-color: var(--accent);
+}
+.rig-preview__status {
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stats */
+
+.stats {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.stats th,
+.stats td {
+  text-align: left;
+  padding: 2px 10px 2px 0;
+  white-space: nowrap;
+}
+.stats thead th {
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+.stats__group th {
+  padding-top: 12px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.stats tbody:first-of-type .stats__group th {
+  padding-top: 0;
+}
+.stats__label {
+  color: var(--muted);
+}
+.has-tip {
+  border-bottom: 1px dotted #55555f;
+  cursor: help;
+}
+.stats .is-better {
+  color: var(--ok);
+}
+.stats .is-worse {
+  color: var(--danger);
+}
+
+/* Art */
+
+.gun__art {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.gun__art h2 {
+  margin: 0;
+}
+.gun__art-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.legend {
+  display: flex;
+  gap: 12px;
+  color: var(--muted);
+}
+.legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 4px;
+  border: 1px solid #000;
+}
+.parts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.parts__part {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.parts__part input {
+  width: 120px;
+  padding: 0;
+  accent-color: var(--accent);
+}
+.drawings {
+  overflow-x: auto;
+  padding: 8px 0;
+  /* The floor's color, which the guns are drawn to be seen on */
+  background: #3a3a3a;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+.drawings__gun + .drawings__gun {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #4a4a4a;
+}
+.drawings__name {
+  display: block;
+  margin-bottom: 6px;
+}
+.drawings__label {
+  color: #a8a8b0;
+  margin: 6px 0 2px;
+}
+.drawing svg {
+  display: block;
+  overflow: visible;
+}
+.ruler {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+  color: #c8c8d0;
+}
+
+input[type="range"]:focus {
+  outline: none;
+  border-color: transparent;
+}
