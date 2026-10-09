@@ -2,14 +2,17 @@ import BaseEntity from "../../../core/entity/BaseEntity";
 import Entity from "../../../core/entity/Entity";
 import { on } from "../../../core/entity/handler";
 import { KeyCode } from "../../../core/io/Keys";
+import { V, V2d } from "../../../core/Vector";
 import { makeDummy } from "../../arena/ArenaScene";
 import { equipLoadout, refillLoadout } from "../../arena/loadout";
 import { Persistence } from "../../constants/constants";
 import LevelController from "../../controllers/LevelController";
-import { BaseEnemy } from "../../enemies/base/Enemy";
+import { BaseEnemy, isEnemy } from "../../enemies/base/Enemy";
+import type ArrivalRoom from "../../environment/ArrivalRoom";
 import { getPartyManager } from "../../environment/PartyManager";
 import Human from "../../human/Human";
 import PlayerHumanController from "../../human/PlayerHumanController";
+import Gun from "../../weapons/guns/Gun";
 import { ActOverride } from "../../run/acts";
 import { generateRunPlan, RunPlan } from "../../run/RunPlan";
 import { BossDebugAction } from "../BossLevel";
@@ -25,6 +28,15 @@ import {
 
 /** Seconds from the player dying to the fight starting over */
 const RESTART_DELAY = 1.5;
+/** With `auto`, seconds before the fight starts over, and how soon after it's won */
+const AUTO_CYCLE = 25;
+const AUTO_AFTER_WIN = 3;
+/** With `auto`, the leader closes in to this far from the nearest boss (meters) */
+const AUTO_RANGE = 7;
+/** ...and backs away from anything closer than this */
+const AUTO_KEEP_AWAY = 3;
+/** ...and heads back toward the middle of the level when it's further than this */
+const AUTO_WANDER = 5;
 
 /** How the fight is going, or how the last one went */
 export interface Attempt {
@@ -47,6 +59,11 @@ export interface Attempt {
  * Backspace starts the fight over: the floor made afresh and a fresh player
  * with the loadout. Dying starts it over too, and so does taking the stairs
  * once it's won.
+ *
+ * `auto` plays it by itself, for `npm run clip -- --scene boss`: the leader
+ * (who can't die, and never runs out) walks out of the arrival room toward
+ * the nearest boss and shoots at it, and the fight starts over every
+ * `AUTO_CYCLE` seconds, or soon after it's won.
  */
 export default class BossTestScene
   extends BaseEntity
@@ -67,12 +84,25 @@ export default class BossTestScene
   private restartPending = false;
   /** Goes up with every restart, so a restart that was waiting can tell it's late */
   private restarts = 0;
+  /** Plays by itself (see the class comment) */
+  private readonly auto: boolean;
+  /** Seconds since the fight last started over */
+  private sinceRestart = 0;
 
   constructor() {
     super();
-    this.config = parseBossTestConfig(
-      new URLSearchParams(window.location.search),
-    );
+    const params = new URLSearchParams(window.location.search);
+    this.auto = params.has("auto");
+    this.config = parseBossTestConfig(params);
+    if (this.auto) {
+      this.config.god = true;
+      this.config.infiniteAmmo = true;
+    }
+  }
+
+  /** How many times the fight has started over, for `npm run clip` */
+  get cycles(): number {
+    return this.restarts;
   }
 
   /** For `getCurrentAct`: enemies are as tough as in this act */
@@ -130,6 +160,7 @@ export default class BossTestScene
     }
     this.restarts += 1;
     this.restartPending = false;
+    this.sinceRestart = 0;
     if (!this.attempt.outcome && this.attempt.time > 0) {
       this.lastAttempt = this.attempt;
     }
@@ -218,6 +249,81 @@ export default class BossTestScene
     const fight = getBossFight(this.game);
     if (fight && !this.attempt.outcome) {
       this.attempt.time = fight.time;
+    }
+
+    this.sinceRestart += dt;
+    if (this.auto && leader && !leader.isDestroyed) {
+      this.autopilot(leader, dt);
+      const won = fight?.won && fight.timeSinceWon > AUTO_AFTER_WIN;
+      if (this.sinceRestart > AUTO_CYCLE || won) {
+        this.restartPending = true;
+      }
+    }
+  }
+
+  /**
+   * Out of the arrival room, then circling the boss, keeping its distance
+   * from anything close, and shooting. After the player's controls, so it has the
+   * last word.
+   */
+  private autopilot(leader: Human, dt: number) {
+    const position = leader.getPosition();
+    const boss = this.bosses.sort(
+      (a, b) =>
+        a.getPosition().distanceTo(position) -
+        b.getPosition().distanceTo(position),
+    )[0];
+    const arrivalRoom = this.game.entities.getTagged("arrival_room")[0] as
+      ArrivalRoom | undefined;
+
+    // Out of the arrival room first; then circling the boss, away from
+    // anything close, and back toward the middle of the level if it strays
+    const close = [...this.game.entities.getByFilter(isEnemy)].filter(
+      (enemy) => enemy.getPosition().distanceTo(position) < AUTO_KEEP_AWAY,
+    );
+    let direction: V2d | undefined;
+    if (arrivalRoom?.door && arrivalRoom.contains(position)) {
+      const doorway = arrivalRoom.door.getDoorwayCenter();
+      const middle = arrivalRoom.min.add(arrivalRoom.max).imul(0.5);
+      direction = doorway
+        .add(doorway.sub(middle).inormalize(1.5))
+        .isub(position);
+    } else {
+      direction = V(0, 0);
+      for (const enemy of close) {
+        direction.iadd(position.sub(enemy.getPosition()).inormalize());
+      }
+      if (boss) {
+        const fromBoss = position.sub(boss.getPosition());
+        direction.iadd(fromBoss.rotate90cw().inormalize(0.7));
+        if (fromBoss.magnitude > AUTO_RANGE) {
+          direction.iadd(fromBoss.normalize(-0.5));
+        }
+      }
+      const level = this.levelController?.level;
+      if (level) {
+        const toMiddle = V(level.width / 2, level.height / 2).isub(position);
+        if (toMiddle.magnitude > AUTO_WANDER) {
+          direction.iadd(toMiddle.inormalize());
+        }
+      }
+    }
+    if (direction && direction.magnitude > 0.01) {
+      leader.walkSpring.walkTowards(direction.angle, 1);
+    } else {
+      leader.walkSpring.walkTowards(0, 0);
+    }
+
+    // Shooting the nearest thing that's close, else the boss
+    const target = close[0] ?? boss;
+    if (target && !arrivalRoom?.contains(position)) {
+      leader.aimAt(target.getPosition(), dt);
+      const weapon = leader.weapon;
+      if (weapon instanceof Gun && weapon.ammo === 0) {
+        leader.reload();
+      } else {
+        leader.useWeapon();
+      }
     }
   }
 
