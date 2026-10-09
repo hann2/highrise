@@ -24,8 +24,8 @@ From a second design conversation, which replaced the "pick one of three" loop (
 
 ### Run shape
 
-- 15 floors in acts of 4: a landmark floor (boss or siege) at 4, 8 and 12, then 13–15 up to the finale on the roof. Each act has a gun tier: act 1 is the tier 1 starting guns, acts 2–4 put tiers 2–4 on the shelves.
-- The directory shows floor types and landmarks. It never shows what a floor holds or what's for sale.
+- 15 floors in acts of 4, with boss levels on 5 (tier 1), 10 (tier 2) and 15 (the final boss) (revised 2026-10-09, from 4/8/12 landmarks plus the finale; not tied to the acts, and easy to move). Each act has a gun tier: act 1 is the tier 1 starting guns, acts 2–4 put tiers 2–4 on the shelves.
+- The directory shows floor types and the bosses. It never shows what a floor holds or what's for sale.
 
 ### The loop: arrival room vending machine → floor → next floor
 
@@ -45,6 +45,7 @@ From a second design conversation, which replaced the "pick one of three" loop (
 
 ### Bosses
 
+- Boss levels (2026-10-09; "boss level" is the name, not "landmark"): a whole floor with code of its own that doesn't follow the other floors' rules, self-contained, so nothing outside it matters while you're in it. A boss fight or a siege is one kind of boss level, not two systems: a "boss" can be you against 100 zombies with a time limit. Each boss floor deals one from a weighted pool for its tier (tier 1, tier 2, final), so a pool can lean toward sieges. One entry per pool to start. Boss levels keep the arrival room and its store: it's really the end of the floor before, and some downtime to get ready for the boss.
 - Strictly good. A heap of quarters, consumables, and one item from a boss pool with no downsides (Night Vision; Akimbo as "two pistols fire together"). Never a gun, never anything that could make the build worse.
 - A big store on the floor after a boss, so the cash has somewhere to go.
 
@@ -71,7 +72,7 @@ From a second design conversation, which replaced the "pick one of three" loop (
   - **Fire Retardant Jacket**: you can't be on fire. Standing in a burning cell still hurts, but `ignite()` on you does nothing (or the `Burning` goes out almost at once), so the damage stops the moment you step out. The "fire-resistance upgrade" in `notes/fire.md`.
   - **Chainsaw**: a melee weapon that does damage continuously while the trigger is held and stuns the zombie it's cutting, but runs on gasoline and stops when that's gone. Needs a fuel reserve like a gun's ammo (refills from ammo machines or a gas can pickup?), and a held attack rather than `SwingingWeapon`'s swing.
   - **Flamethrower**: a weapon that sets things on fire. Designed in `notes/fire.md` ("The flamethrower"): its own fuel, flame particles that light enemies and spill burning fuel.
-  - **Combining room**: a special room with a device that combines two items or attachments into a new one. Not a recipe for every pair, just the obvious ones (Incendiary Rounds + Exploding Rounds → exploding fire rounds, and the like); pairs with no recipe are refused. It matters most for attachments, since a gun only uses the newest one per slot (`Human.attachmentsFor`), so two ammo attachments never stack today: a combined one is the way to have both. Open: which room it is (a landmark, a keycard room, or rare in the generator), whether it costs quarters, whether the device shows its recipes or you find them by trying (the encyclopedia could list the ones found), and whether combined items can also be rolled on shelves or only made.
+  - **Combining room**: a special room with a device that combines two items or attachments into a new one. Not a recipe for every pair, just the obvious ones (Incendiary Rounds + Exploding Rounds → exploding fire rounds, and the like); pairs with no recipe are refused. It matters most for attachments, since a gun only uses the newest one per slot (`Human.attachmentsFor`), so two ammo attachments never stack today: a combined one is the way to have both. Open: which room it is (on a boss level, a keycard room, or rare in the generator), whether it costs quarters, whether the device shows its recipes or you find them by trying (the encyclopedia could list the ones found), and whether combined items can also be rolled on shelves or only made.
   - **Character-specific items**: items only one character can have, both ones they start with and ones they can find later in the run.
   - **Heavy sniper rifle**: a heavy sniper rifle type gun that has a lot of pierce.
   - **Gun turrets** (2026-10-07): stationary gun turrets for defending a position.
@@ -133,7 +134,7 @@ Current: nothing is a choice. Every floor has the same closet contents (health, 
   - Rule cards, which make builds feel different: kills sometimes drop ammo; reloading from empty is instant; melee kills heal a little; pushes chain stuns; crawlers die in one hit; allies deal more damage.
   - Weapon offers: a specific gun, possibly with a gun-attached upgrade (extended mag, laser, choke). **Guns done 2026-09-23 (`upgrades/weaponOffers.ts`): at most one per offer, from the floor's closet tier or the one above; no gun-attached upgrades yet.**
   - Consumables (feature 7) and quarters.
-- Rarity tiers, and boss/landmark floors offer a guaranteed rare.
+- Rarity tiers, and boss levels offer a guaranteed rare.
 - Data model: `Upgrade = { name, description, rarity, apply(human) }`, collected in one index file like `gunStats.ts`. The encyclopedia (feature 11) reads the same list.
 
 ### 3. Stairwell safe zones with one-way doors (M)
@@ -216,14 +217,17 @@ Current: one survivor per floor in a closet, auto-joins at 2 m with line of sigh
 - The stairwell has a one-way door; stepping on the stairs starts the run as whoever you are.
 - Not done: character traits/starting weapons. Characters are JSON with `stats` and `startingWeapons` now (2026-09-24), but every character has neither set; a character editor is meant to tune them. Still open: one rule-like trait each on top of stats? Santa's toy bag is the obvious first one. Also not done: store/infirmary/survivor icons on the directory (the plan doesn't know about them yet), a run history in the lobby. Open: whether a "start at floor N" unlock should ever exist, or the directory stays a preview.
 
-### 10. Run structure, building generation, landmark floors (L)
+### 10. Run structure, building generation, boss levels (L)
+
+**Boss levels built 2026-10-09 (`boss-levels/`, see CLAUDE.md): `BossLevel`s laid out by hand with the arrival room, a `BossFight` that bars the stairwell until its goal is met and pays out, pools by tier, and `?scene=boss` for working on one. The Necromancer's chapel is the only one, in every pool. Not built: a siege (the generator idea below is the obvious first), a second boss, the roof finale.**
 
 Current (2026-09-23): `run/RunPlan.ts` fixes the run as Shops → Maintenance → Generator → Chapel, each floor with a difficulty of its number + 1. Floors are a 14×14 grid of 2 m cells with the exit at the furthest dead end. The Necromancer arena is on the Chapel floor but optional (the exit is placed independently). Enemy count is `20 + 10×difficulty`, and difficulty also picks the specials and the closet gun tiers; nothing else scales.
 
-- The building is the run: a fixed skeleton with random blanks. 15 floors in acts of 4 with a landmark at 4, 8 and 12 and the finale at 15 (decided 2026-09-25; see "Run shape"); earlier thinking was 3 blocks of 2–3 themed floors plus a landmark, ~10 floors, 20–30 minutes. `level-ideas.txt` has the 100-floor theme list; use it as the pool (shops, maintenance, apartments, offices, gym, arcade, spa, penthouse, roof with helicopter as the end).
-- Landmark floors:
-  - Siege floor (generator): flip the generator, lights come on floor-wide with the existing distance delay, the stairwell door unlocks in N seconds while a horde comes. L4D crescendo event; cheaper than a boss.
-  - Arena floor (Necromancer): the stairwell is inside or behind the arena and stays locked until the boss dies. The boss drops quarters, consumables and one boss-pool item (see "Bosses"). Later a second boss (Heavy as a proper tank fight).
+- The building is the run: a fixed skeleton with random blanks. 15 floors in acts of 4 with boss levels on 5, 10 and 15 (see "Run shape"; first decided 2026-09-25 as landmarks on 4, 8 and 12 and the finale on 15); earlier thinking was 3 blocks of 2–3 themed floors plus a landmark, ~10 floors, 20–30 minutes. `level-ideas.txt` has the 100-floor theme list; use it as the pool (shops, maintenance, apartments, offices, gym, arcade, spa, penthouse, roof with helicopter as the end).
+- Boss level ideas:
+  - Siege (generator): flip the generator, lights come on floor-wide with the existing distance delay, the stairwell door unlocks in N seconds while a horde comes. L4D crescendo event; cheaper than a boss. A `BossGoal` that counts down once the generator's on.
+  - The Necromancer (built): the stairwell behind the chapel stays barred until it dies. Its art is a single old sprite, and it's the same fight on every boss floor for now.
+  - A Heavy as a proper tank fight; the spider and the blob from `enemy-ideas.md`; the roof with the helicopter as the finale.
 - Scaling: enemy HP/damage/speed per floor as well as counts, and more specials.
 - Floor size: smaller floors (10×10?) with more of them make a faster choice cadence and read more like a building. Playtest.
 - Random room events: a rescue that triggers a wave; a store; a dark floor; a flooded floor (slow); an alarm.
@@ -353,6 +357,8 @@ Defaults chosen: one attachment per family and slot (no stacking); attachments a
 Tests: attachments modify capacity (`getCapacity` with Extended Rifle Drum); a fits-check (a shotgun choke does nothing for a rifle); the shelf never offers a held gun or a duplicate pair; trade-in adds quarters; encyclopedia "Fits" text. Re-pin `STORE_SHELF`.
 
 ### 18. Run shape: acts, landmarks, keycard floors, boss rewards, big stores (M–L)
+
+**Superseded in part 2026-10-09: landmarks are boss levels on 5, 10 and 15 (see feature 10), big stores are on 6 and 11, and boss rewards come from winning a boss level (`bossLevelWon`), not a boss dying (`bossDied` is gone).**
 
 **Built 2026-09-26 on the brief 15 branch, not playtested yet.** Differences from the brief below: every store has a gun (Simon), so act 1's stores deal from tiers 0–1 rather than having no gun row, and with 11 guns and no repeats later stores can run out (the slot says sold out) until there are more guns; the armory's attachment is a random item until attachments exist; spitters are `ceil((floor − 4) / 2)` from floor 5; enemy counts are a total of `24 + 4 × floor` with the special kinds taken out of it, not on top; the act is found through the `level_controller` tag (importing `LevelController` from `Enemy` makes an import cycle); boss items are in the encyclopedia with the others, tagged "boss". The keycard, big store and boss are tested in `tests/run.spec.ts`.
 
