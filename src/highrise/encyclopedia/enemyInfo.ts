@@ -69,4 +69,13 @@ export const ENEMY_INFO: ReadonlyArray<EnemyInfo> = [
     description:
       "Raises the dead, hides behind a shield of them, and hurls death orbs.",
   },
+  {
+    name: "Behemoth",
+    image: { look: HEAVY_LOOKS[0] },
+    health: "5000",
+    damage: "35–50 a slam, 40–55 a charge",
+    speed: "Slow, until it charges",
+    description:
+      "A heavy grown huge. Lines up and charges in a straight line, and is left dazed if it runs into a wall.",
+  },
 ];

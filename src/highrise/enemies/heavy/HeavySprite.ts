@@ -11,7 +11,8 @@ import { BodySprite } from "../../creature-stuff/BodySprite";
 import { HEAVY_GAIT } from "../../creature-stuff/Legs";
 import { lerpOffsets } from "../base/enemyUtils";
 import { HEAVY_VARIANTS } from "../zombie/ZombieVariants";
-import Heavy, { HEAVY_RADIUS } from "./Heavy";
+import type { BaseEnemy } from "../base/Enemy";
+import { HEAVY_RADIUS } from "./Heavy";
 
 const WIGGLE_SPEED = 0.5;
 const WIGGLE_AMOUNT = degToRad(7);
@@ -22,17 +23,30 @@ const attackStartPositions: [V2d, V2d] = [V(0.75, -0.4), V(0.75, 0.4)];
 const attackEndPositions: [V2d, V2d] = [V(0.8, 0.25), V(0.8, -0.25)];
 const cooldownPositions: [V2d, V2d] = [V(0.5, 0.2), V(0.5, -0.2)];
 
-// Renders a zombie
+/**
+ * Renders a heavy, or anything built like one (the Behemoth, at `radius`:
+ * its hands reach as much further as it's bigger)
+ */
 export default class HeavySprite extends BodySprite {
   wigglePhase: number = rUniform(0, Math.PI * 2);
   wiggleSpeed: number = rNormal(WIGGLE_SPEED, WIGGLE_SPEED / 5);
+  private size: number;
 
-  constructor(private heavy: Heavy) {
+  constructor(
+    private heavy: BaseEnemy,
+    radius: number = HEAVY_RADIUS,
+  ) {
     const variant = choose(...HEAVY_VARIANTS);
-    super(variant.body.standing, HEAVY_RADIUS, {
+    super(variant.body.standing, radius, {
       textures: variant.body.legs,
       gait: HEAVY_GAIT,
     });
+    this.size = radius / HEAVY_RADIUS;
+  }
+
+  /** One of the hand positions, as big as the body */
+  private scaled([left, right]: [V2d, V2d]): [V2d, V2d] {
+    return [left.mul(this.size), right.mul(this.size)];
   }
 
   getPosition() {
@@ -57,25 +71,40 @@ export default class HeavySprite extends BodySprite {
 
     switch (this.heavy.getAttackPhase()) {
       case "ready": {
-        const [leftOffset, rightOffset] = idlePositions;
+        const [leftOffset, rightOffset] = this.scaled(idlePositions);
         return [shoulders[0].iadd(leftOffset), shoulders[1].iadd(rightOffset)];
       }
       case "windup": {
-        return lerpOffsets(shoulders, idlePositions, attackStartPositions, t);
+        return lerpOffsets(
+          shoulders,
+          this.scaled(idlePositions),
+          this.scaled(attackStartPositions),
+          t,
+        );
       }
       case "attack": {
         return lerpOffsets(
           shoulders,
-          attackStartPositions,
-          attackEndPositions,
+          this.scaled(attackStartPositions),
+          this.scaled(attackEndPositions),
           t,
         );
       }
       case "winddown": {
-        return lerpOffsets(shoulders, attackEndPositions, cooldownPositions, t);
+        return lerpOffsets(
+          shoulders,
+          this.scaled(attackEndPositions),
+          this.scaled(cooldownPositions),
+          t,
+        );
       }
       case "cooldown": {
-        return lerpOffsets(shoulders, cooldownPositions, idlePositions, t);
+        return lerpOffsets(
+          shoulders,
+          this.scaled(cooldownPositions),
+          this.scaled(idlePositions),
+          t,
+        );
       }
     }
   }

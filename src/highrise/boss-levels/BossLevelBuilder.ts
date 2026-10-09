@@ -18,6 +18,17 @@ import RoomTemplate from "../levels/rooms/RoomTemplate";
 import SpawnRoom from "../levels/rooms/SpawnRoom";
 import TransformedRoomTemplate from "../levels/rooms/TransformedRoomTemplate";
 
+/** The hall a boss level made with `addHall` is fought in */
+export interface Hall {
+  /** Its upper left cell, and its size in cells */
+  min: V2d;
+  size: V2d;
+  /** Its rectangle in meters */
+  world: WorldRect;
+  /** A point in the hall's own cell coordinates ((0, 0) its upper left cell's middle) in meters */
+  at(cell: V2d): V2d;
+}
+
 /** Which side of a room its door is on */
 export type Side = "left" | "right" | "up" | "down";
 
@@ -131,6 +142,55 @@ export default class BossLevelBuilder {
       new TransformedRoomTemplate(new ExitStairwell(), orientation),
       at.sub(offset),
     );
+  }
+
+  /** The level size (in cells) `addHall` needs for a hall of `hall` cells */
+  static hallLevelSize(hall: V2d): [number, number] {
+    return [hall.x + 5, Math.max(hall.y, 3)];
+  }
+
+  /**
+   * The usual boss level: a hall of `size` cells, with the arrival room
+   * against its left wall and the stairwell against its right, both half way
+   * down, and the corners beside them solid. The level must be
+   * `hallLevelSize(size)`. `pillars` are cells of the hall (in its own
+   * coordinates) left solid, a cell's worth of wall each, joined into bigger
+   * blocks where they touch.
+   */
+  addHall(arrivalRoom: SpawnRoom, size: V2d, pillars: V2d[] = []): Hall {
+    const cells = BossLevelBuilder.cellsIn;
+    const min = V(3, 0);
+    const isPillar = (cell: V2d) =>
+      pillars.some((pillar) => pillar.add(min).equals(cell));
+    // The hall first, so the rooms' walls go back up around it
+    this.open(cells(min, size).filter((cell) => !isPillar(cell)));
+    this.open(pillars.map((pillar) => pillar.add(min)));
+
+    const arrivalY = Math.floor((size.y - 3) / 2);
+    this.addArrivalRoom(arrivalRoom, V(0, arrivalY));
+    const stairwellY = Math.floor((size.y - 2) / 2);
+    const right = min.x + size.x;
+    this.addExitStairwell(V(right, stairwellY), "left");
+
+    // The corners nobody goes in are solid, rather than rooms of their own
+    for (const [x, width, from, to] of [
+      [0, 3, arrivalY, arrivalY + 3],
+      [right, 2, stairwellY, stairwellY + 2],
+    ]) {
+      if (from > 0) {
+        this.open(cells(V(x, 0), V(width, from)));
+      }
+      if (to < size.y) {
+        this.open(cells(V(x, to), V(width, size.y - to)));
+      }
+    }
+
+    return {
+      min,
+      size,
+      world: this.cellsToWorld(min, size),
+      at: (cell) => this.cellToWorld(min.add(cell)),
+    };
   }
 
   add(...entities: Entity[]) {

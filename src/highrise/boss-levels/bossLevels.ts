@@ -1,6 +1,8 @@
 import { rUniform } from "../../core/util/Random";
 import type { BossTier } from "../run/acts";
 import { BossLevelClass } from "./BossLevel";
+import BehemothLevel from "./behemoth/BehemothLevel";
+import HordeLevel from "./horde/HordeLevel";
 import NecromancerLevel from "./necromancer/NecromancerLevel";
 
 /** A boss level in a pool, and how likely it is to be dealt next to the others */
@@ -12,12 +14,13 @@ interface PoolEntry {
 /**
  * The boss levels each boss floor draws from (`acts.ts` says which floors and
  * tiers). A pool can lean one way, toward boss fights or toward hordes, by
- * its weights. Only the Necromancer for now, in every pool.
+ * its weights. One each for now: a horde to hold out against, the
+ * Necromancer, and the Behemoth.
  */
 export const BOSS_POOLS: Readonly<Record<BossTier, readonly PoolEntry[]>> = {
-  1: [{ level: NecromancerLevel, weight: 1 }],
+  1: [{ level: HordeLevel, weight: 1 }],
   2: [{ level: NecromancerLevel, weight: 1 }],
-  final: [{ level: NecromancerLevel, weight: 1 }],
+  final: [{ level: BehemothLevel, weight: 1 }],
 };
 
 /** Every boss level there is, once each */

@@ -62,3 +62,40 @@ export function killBosses(bosses: BaseEnemy[]): BossGoal {
     },
   };
 }
+
+/**
+ * Done when the fight has gone on for `seconds` (counting from when it
+ * started). The bar empties as the time runs out, and the loot goes at
+ * `rewardAt`.
+ */
+export class SurviveGoal implements BossGoal {
+  timeLeft: number;
+
+  constructor(
+    readonly seconds: number,
+    private rewardAt: V2d,
+  ) {
+    this.timeLeft = seconds;
+  }
+
+  update(dt: number, started: boolean): boolean {
+    if (started) {
+      this.timeLeft = Math.max(0, this.timeLeft - dt);
+    }
+    return this.timeLeft <= 0;
+  }
+
+  readout(): BossReadout {
+    const left = Math.ceil(this.timeLeft);
+    const minutes = Math.floor(left / 60);
+    const seconds = String(left % 60).padStart(2, "0");
+    return {
+      fraction: this.timeLeft / this.seconds,
+      text: `Hold out ${minutes}:${seconds}`,
+    };
+  }
+
+  rewardPosition(): V2d {
+    return this.rewardAt;
+  }
+}

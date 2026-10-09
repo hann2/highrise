@@ -1,3 +1,4 @@
+import Behemoth from "../boss-levels/behemoth/Behemoth";
 import { BaseEnemy } from "../enemies/base/Enemy";
 import Crawler from "../enemies/crawler/Crawler";
 import Heavy from "../enemies/heavy/Heavy";
@@ -14,6 +15,7 @@ const ENEMY_TYPE_NAMES: [abstract new (...args: any[]) => BaseEnemy, string][] =
     [Heavy, "Heavy"],
     [Spitter, "Spitter"],
     [Necromancer, "Necromancer"],
+    [Behemoth, "Behemoth"],
     [Zombie, "Zombie"],
   ];
 
