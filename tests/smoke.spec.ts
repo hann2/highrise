@@ -11,31 +11,31 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "347:-291100383";
+const LEVEL_2_FINGERPRINT = "355:-91931046";
 // What the store in level 2's arrival room sells with this seed. Changes when
 // the item pool, the rarities, or level generation change.
 const STORE_SHELF = {
-  slots: ["Armor Piercing", "Steady Aim", "Tennis Shoes", "Scavenger"],
-  gun: "Sawn Off Shotgun",
-  consumable: "Frag Grenade ×2",
+  slots: ["Curb Stomp", "Quick Draw", "Rifle Drum", "Bayonet"],
+  gun: "S&W Revolver",
+  consumable: "Flashbang ×2",
 };
 // The run's floors with this seed (from the lobby's plan). Changes when the
-// themes, the landmarks or anything random before the plan changes.
+// themes, the boss levels or anything random before the plan changes.
 const RUN_PLAN = [
   "Maintenance",
-  "Offices",
-  "Shops",
   "Generator",
-  "Shops",
   "Maintenance",
   "Shops",
   "Chapel",
-  "Maintenance",
+  "Shops",
+  "Generator",
+  "Shops",
+  "Offices",
+  "Chapel",
+  "Offices",
   "Shops",
   "Offices",
   "Generator",
-  "Maintenance",
-  "Offices",
   "Chapel",
 ];
 // Every quarter on a floor, in closets and carried by enemies (QUARTERS_PER_FLOOR)
@@ -183,9 +183,9 @@ test("game boots, plays, and changes levels without errors", async ({
   expectNoIssues(issues);
 
   // --- The run ahead is planned, but nothing in the lobby gives it away ---
-  // 15 floors in acts of 4 (13 to 15 are act 4), with a landmark ending each
-  // of the first three acts and the run, a keycard floor in each act, and
-  // big stores right after the landmarks
+  // 15 floors in acts of 4 (13 to 15 are act 4), with boss levels on 5, 10
+  // and 15, a keycard floor in each act, and big stores right after the
+  // first two bosses
   const plan = await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const lobby = game.entities.getById("lobby") as any;
@@ -196,21 +196,23 @@ test("game boots, plays, and changes levels without errors", async ({
       names: floors.map((floor) => floor.name) as string[],
       acts: floors.map((floor) => floor.act) as number[],
       gunTiers: floors.map((floor) => floor.gunTier) as number[],
-      sieges: numbers((floor) => floor.landmark === "siege"),
-      bosses: numbers((floor) => floor.landmark === "boss"),
+      bosses: numbers((floor) => floor.boss !== null),
+      bossTiers: floors
+        .filter((floor) => floor.boss !== null)
+        .map((floor) => floor.boss),
       bigStores: numbers((floor) => floor.bigStore),
       keycardActs: floors
         .filter((floor) => floor.keycard)
-        .map((floor) => [floor.act, !!floor.landmark]),
+        .map((floor) => [floor.act, floor.boss !== null]),
       plaques: game.entities.getTagged("directory_plaque").length,
     };
   });
   expect(plan.names).toEqual(RUN_PLAN);
   expect(plan.acts).toEqual([1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4]);
   expect(plan.gunTiers).toEqual(plan.acts.map((act) => act - 1));
-  expect(plan.sieges).toEqual([4, 12]);
-  expect(plan.bosses).toEqual([8, 15]);
-  expect(plan.bigStores).toEqual([5, 9, 13]);
+  expect(plan.bosses).toEqual([5, 10, 15]);
+  expect(plan.bossTiers).toEqual([1, 2, "final"]);
+  expect(plan.bigStores).toEqual([6, 11]);
   expect(plan.keycardActs).toEqual([
     [1, false],
     [2, false],
@@ -2033,8 +2035,9 @@ test("game boots, plays, and changes levels without errors", async ({
   const directoryRows = page.locator(".floor-directory__row");
   await expect(directoryRows).toHaveCount(16);
   await expect(directoryRows.nth(0)).toHaveText(/15\s*Chapel\s*Boss/);
-  await expect(directoryRows.nth(3)).toHaveText(/12\s*Generator\s*Landmark/);
-  await expect(directoryRows.nth(10)).toHaveText(/5\s*Shops\s*Store/);
+  await expect(directoryRows.nth(5)).toHaveText(/10\s*Chapel\s*Boss/);
+  await expect(directoryRows.nth(9)).toHaveText(/6\s*Shops\s*Store/);
+  await expect(directoryRows.nth(10)).toHaveText(/5\s*Chapel\s*Boss/);
   await expect(directoryRows.nth(13)).toHaveText(
     new RegExp(`2\\s*${RUN_PLAN[1]}.*You are here`),
   );
@@ -2242,8 +2245,8 @@ test("game boots, plays, and changes levels without errors", async ({
   await expect(page.locator(".store")).toHaveCount(0);
   expectNoIssues(issues);
 
-  // --- What was bought stuck: the first slot's item (an attachment, Armor
-  // Piercing, with this seed) is on the leader, and so is the gun ---
+  // --- What was bought stuck: the first slot's item is on the leader (with
+  // its attachments, if it's one), and so is the gun ---
   const afterStore = await page.evaluate(() => {
     const leader = (
       [...window.DEBUG.game!.entities.all].find(
@@ -2253,10 +2256,13 @@ test("game boots, plays, and changes levels without errors", async ({
     return {
       items: leader.items.map((i: any) => i.name),
       attachments: leader.attachments.map((a: any) => a.name),
+      firstIsAttachment: leader.items[0]?.category === "attachment",
     };
   });
   expect(afterStore.items).toEqual([STORE_SHELF.slots[0], gunOffer.name]);
-  expect(afterStore.attachments).toEqual([STORE_SHELF.slots[0]]);
+  expect(afterStore.attachments).toEqual(
+    afterStore.firstIsAttachment ? [STORE_SHELF.slots[0]] : [],
+  );
 
   // --- Leaving the arrival room: its door swings out, and locks for good once
   // the leader is out, so it won't swing back in ---
@@ -2481,14 +2487,9 @@ test("game boots, plays, and changes levels without errors", async ({
   expect(attached.withDrum).toBe(attached.base);
   expect(attached.withMag).toBe(Math.round(attached.base * 1.5));
   expect(attached.laser).toBe(true);
-  // The compensator took the rail from the laser sight, on pistols. (The
-  // Armor Piercing from the store fits pistols too.)
+  // The compensator took the rail from the laser sight, on pistols
   expect(attached.laserAfterCompensator).toBe(true);
-  expect(attached.onPistol).toEqual([
-    "Armor Piercing",
-    "Compensator",
-    "Extended Pistol Mag",
-  ]);
+  expect(attached.onPistol).toEqual(["Compensator", "Extended Pistol Mag"]);
   expectNoIssues(issues);
 
   // --- Zoomed out overview with the vision mask off (KeyV is a dev cheat) ---

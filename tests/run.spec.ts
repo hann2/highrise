@@ -1,7 +1,7 @@
 import { expect, Page, test } from "@playwright/test";
 import { collectIssues, expectNoIssues, loadGame, startGame } from "./helpers";
 
-/** Presses the level-complete cheat until the run is on `floor` and it has enemies */
+/** Presses the level-complete cheat until the run is on `floor` and it has enemies (or a boss) */
 async function goToFloor(page: Page, floor: number) {
   const currentLevel = () =>
     page.evaluate(
@@ -21,7 +21,8 @@ async function goToFloor(page: Page, floor: number) {
         return (
           levelController.currentLevel > from &&
           !levelController.changingLevel &&
-          entities.getTagged("zombie").length > 0
+          (entities.getTagged("zombie").length > 0 ||
+            entities.getTagged("boss").length > 0)
         );
       },
       from,
@@ -33,17 +34,29 @@ async function goToFloor(page: Page, floor: number) {
 
 /**
  * Up through a run with the level cheat, to the floors whose shape comes from
- * the run plan (`run/acts.ts`): with seed 12345, act 1's keycard floor (3), a
- * big store after a landmark (5), and the first boss (8). The lobby and the
- * first two floors are in the smoke test.
+ * the run plan (`run/acts.ts`): act 1's keycard floor, the first boss level
+ * (5), and the big store after it (6). The lobby and the first two floors are
+ * in the smoke test.
  */
-test("the run's keycard floor, big store and boss", async ({ page }) => {
+test("the run's keycard floor, boss and big store", async ({ page }) => {
   const issues = collectIssues(page);
   await loadGame(page, 12345);
   await startGame(page);
 
-  // --- Floor 3: the act's keycard floor, with an armory and an infirmary ---
-  await goToFloor(page, 3);
+  // --- Act 1's keycard floor, with an armory and an infirmary ---
+  const keycardFloor = await page.evaluate(
+    () =>
+      (
+        window.DEBUG.game!.entities.getTagged("level_controller")[0] as any
+      ).plan.find((floor: any) => floor.act === 1 && floor.keycard)
+        .number as number,
+  );
+  expect(keycardFloor).toBeLessThan(5);
+  await goToFloor(page, keycardFloor);
+  // Nothing in the way of the doors swinging (Shift+L kills every enemy)
+  await page.keyboard.down("ShiftLeft");
+  await page.keyboard.press("KeyL");
+  await page.keyboard.up("ShiftLeft");
   const lockedRooms = await page.evaluate(() => {
     const entities = [...window.DEBUG.game!.entities.all] as any[];
     const levelController = entities.find(
@@ -168,7 +181,7 @@ test("the run's keycard floor, big store and boss", async ({ page }) => {
   expect(keycards.keycardsPickedUp).toBe(1);
   expect(keycards.hudShown).toBe(true);
   await page.waitForTimeout(800); // let the camera settle
-  await page.screenshot({ path: "tests/output/level-3-locked-door.png" });
+  await page.screenshot({ path: "tests/output/keycard-locked-door.png" });
 
   const unlocking = await page.evaluate(async () => {
     const game = window.DEBUG.game!;
@@ -207,9 +220,150 @@ test("the run's keycard floor, big store and boss", async ({ page }) => {
   expect(unlocking.otherStillLocked).toBe(true);
   expectNoIssues(issues);
 
-  // --- Floor 5 is after a landmark: its store is big, with 8 items and a gun,
-  // and enemies in act 2 are tougher ---
+  // --- Floor 5: the first boss level, the Necromancer's chapel. The
+  // directory has the whole run on it. ---
   await goToFloor(page, 5);
+  await page.evaluate(() => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    (game.entities.getTagged("directory_plaque")[0] as any).handleInteract(
+      leader,
+    );
+  });
+  await expect(page.locator(".floor-directory__row")).toHaveCount(16);
+  await expect(page.locator(".floor-directory__row--here")).toHaveText(
+    /5\s*Chapel.*You are here/,
+  );
+  // The bosses ahead are on the directory
+  await expect(
+    page.locator(".floor-directory__row", { hasText: /^10/ }),
+  ).toContainText("Boss");
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: "tests/output/floor-directory-full.png" });
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".floor-directory")).toHaveCount(0);
+
+  // A boss level is laid out by hand: no closets or enemies but the boss,
+  // and the stairwell stays barred, even with the leader at its door, until
+  // the fight's won. The boss bar shows once the leader's out of the arrival
+  // room.
+  await expect(page.locator(".boss-bar")).toHaveCount(0);
+  const barred = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    const leader = (
+      [...game.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const stairwell = game.entities.getTagged("stairwell")[0] as any;
+    const doorway = stairwell.door.getDoorwayCenter();
+    const outside = doorway.add(
+      doorway.sub(stairwell.min.add(stairwell.max).mul(0.5)).normalize(1),
+    );
+    // Long enough for the arrival room to lock behind them
+    const start = performance.now();
+    while (performance.now() - start < 1500) {
+      leader.body.position.set(outside);
+      leader.body.velocity.set(0, 0);
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    return {
+      barred: stairwell.barred,
+      locked: stairwell.door.locked,
+      zombies: game.entities.getTagged("zombie").length,
+      bosses: game.entities.getTagged("boss").length,
+      fightStarted: (game.entities.getTagged("boss_fight")[0] as any).started,
+    };
+  });
+  expect(barred).toEqual({
+    barred: true,
+    locked: true,
+    zombies: 0,
+    bosses: 1,
+    fightStarted: true,
+  });
+  await expect(page.locator(".boss-bar__title")).toHaveText("The Necromancer");
+  await page.screenshot({ path: "tests/output/boss-fight.png" });
+
+  // A boss is always good news: killing it (Shift+L is a dev cheat that kills
+  // every enemy) leaves quarters, throwables, a usable and a boss item
+  const count = (name: string) =>
+    page.evaluate(
+      (name) =>
+        [...window.DEBUG.game!.entities.all].filter(
+          (e) => e.constructor.name === name,
+        ).length,
+      name,
+    );
+  const necromancerHp = await page.evaluate(
+    () =>
+      (
+        [...window.DEBUG.game!.entities.all].find(
+          (e) => e.constructor.name === "Necromancer",
+        ) as any
+      )?.hp,
+  );
+  // 2000, tougher in act 2
+  expect(necromancerHp).toBeCloseTo(2300);
+  const before = {
+    quarters: await count("Quarter"),
+    throwables: await count("ConsumablePickup"),
+    usables: await count("UsablePickup"),
+  };
+  await page.keyboard.down("ShiftLeft");
+  await page.keyboard.press("KeyL");
+  await page.keyboard.up("ShiftLeft");
+  await page.waitForTimeout(500);
+  expect(await count("Necromancer")).toBe(0);
+  expect((await count("Quarter")) - before.quarters).toBeGreaterThanOrEqual(40);
+  expect((await count("ConsumablePickup")) - before.throwables).toBe(2);
+  expect((await count("UsablePickup")) - before.usables).toBe(1);
+  // ...and the way up is open
+  expect(
+    await page.evaluate(
+      () =>
+        (window.DEBUG.game!.entities.getTagged("stairwell")[0] as any).barred,
+    ),
+  ).toBe(false);
+  await expect(page.locator(".boss-bar--won")).toContainText(
+    "The stairwell is open",
+  );
+  const bossItem = await page.evaluate(async () => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    const pickup = [...window.DEBUG.game!.entities.all].find(
+      (e: any) =>
+        e.constructor.name === "ItemPickup" && e.item.category === "boss",
+    ) as any;
+    leader.body.position.set(pickup.getPosition());
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const prompt = document.querySelector(".interact-prompt")?.textContent;
+    pickup.take(leader);
+    return {
+      name: pickup.item.name as string,
+      prompt,
+      taken: leader.items.map((i: any) => i.name).includes(pickup.item.name),
+    };
+  });
+  await page.screenshot({ path: "tests/output/boss-loot.png" });
+  expect(bossItem.taken).toBe(true);
+  expect([
+    "Night Vision",
+    "Heavy Wallet",
+    "Second Heart",
+    "Adrenal Gland",
+  ]).toContain(bossItem.name);
+  expectNoIssues(issues);
+  // --- Floor 6 is after a boss: its store is big, with 8 items and a gun,
+  // and enemies in act 2 are tougher ---
+  await goToFloor(page, 6);
   const bigStore = await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const entities = [...game.entities.all] as any[];
@@ -256,90 +410,5 @@ test("the run's keycard floor, big store and boss", async ({ page }) => {
   await page.screenshot({ path: "tests/output/big-store.png" });
   await page.keyboard.press("Escape");
   await expect(page.locator(".store")).toHaveCount(0);
-  expectNoIssues(issues);
-
-  // --- Floor 8: the Necromancer. The directory has the whole run on it. ---
-  await goToFloor(page, 8);
-  await page.evaluate(() => {
-    const game = window.DEBUG.game!;
-    const leader = (
-      [...game.entities.all].find(
-        (e) => e.constructor.name === "PartyManager",
-      ) as any
-    ).leader;
-    (game.entities.getTagged("directory_plaque")[0] as any).handleInteract(
-      leader,
-    );
-  });
-  await expect(page.locator(".floor-directory__row")).toHaveCount(16);
-  await expect(page.locator(".floor-directory__row--here")).toHaveText(
-    /8\s*Chapel.*You are here/,
-  );
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: "tests/output/floor-directory-full.png" });
-  await page.keyboard.press("Escape");
-  await expect(page.locator(".floor-directory")).toHaveCount(0);
-
-  // A boss is always good news: killing it (Shift+L is a dev cheat that kills
-  // every enemy) leaves quarters, throwables, a usable and a boss item
-  const count = (name: string) =>
-    page.evaluate(
-      (name) =>
-        [...window.DEBUG.game!.entities.all].filter(
-          (e) => e.constructor.name === name,
-        ).length,
-      name,
-    );
-  const necromancerHp = await page.evaluate(
-    () =>
-      (
-        [...window.DEBUG.game!.entities.all].find(
-          (e) => e.constructor.name === "Necromancer",
-        ) as any
-      )?.hp,
-  );
-  // 2000, tougher in act 2
-  expect(necromancerHp).toBeCloseTo(2300);
-  const before = {
-    quarters: await count("Quarter"),
-    throwables: await count("ConsumablePickup"),
-    usables: await count("UsablePickup"),
-  };
-  await page.keyboard.down("ShiftLeft");
-  await page.keyboard.press("KeyL");
-  await page.keyboard.up("ShiftLeft");
-  await page.waitForTimeout(500);
-  expect(await count("Necromancer")).toBe(0);
-  expect((await count("Quarter")) - before.quarters).toBeGreaterThanOrEqual(40);
-  expect((await count("ConsumablePickup")) - before.throwables).toBe(2);
-  expect((await count("UsablePickup")) - before.usables).toBe(1);
-  const bossItem = await page.evaluate(async () => {
-    const leader = (
-      [...window.DEBUG.game!.entities.all].find(
-        (e) => e.constructor.name === "PartyManager",
-      ) as any
-    ).leader;
-    const pickup = [...window.DEBUG.game!.entities.all].find(
-      (e: any) =>
-        e.constructor.name === "ItemPickup" && e.item.category === "boss",
-    ) as any;
-    leader.body.position.set(pickup.getPosition());
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const prompt = document.querySelector(".interact-prompt")?.textContent;
-    pickup.take(leader);
-    return {
-      name: pickup.item.name as string,
-      prompt,
-      taken: leader.items.map((i: any) => i.name).includes(pickup.item.name),
-    };
-  });
-  await page.screenshot({ path: "tests/output/boss-loot.png" });
-  expect(bossItem.taken).toBe(true);
-  expect([
-    "Night Vision",
-    "Heavy Wallet",
-    "Second Heart",
-    "Adrenal Gland",
-  ]).toContain(bossItem.name);
   expectNoIssues(issues);
 });
