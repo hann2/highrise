@@ -9,6 +9,7 @@ import { darken } from "../../../core/util/ColorUtils";
 import { lerp, smoothStep } from "../../../core/util/MathUtil";
 import { rDirection, rInteger, rUniform } from "../../../core/util/Random";
 import { V, V2d } from "../../../core/Vector";
+import { CollisionGroups } from "../../../config/CollisionGroups";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { getSplatSound } from "../../effects/Splat";
 import Crawler from "../crawler/Crawler";
@@ -18,7 +19,11 @@ import { ZOMBIE_VARIANTS } from "../zombie/ZombieVariants";
 const SIZE = 0.3;
 const SPEED = 15; // meters per second
 
-// TODO: Don't go through walls
+/**
+ * Thrown by the Necromancer: flies to `target` (or lands short of the first
+ * wall in the way) and hatches into a zombie or a crawler. The Necromancer's
+ * children, so they go with it when it dies.
+ */
 export class ZombieEgg extends BaseEntity implements Entity {
   tickLayer = "enemies" as const;
   sprite: Container & GameSprite;
@@ -47,6 +52,13 @@ export class ZombieEgg extends BaseEntity implements Entity {
 
   @on("add")
   async onAdd() {
+    const hit = this.game.world.raycast(this.startPosition, this.target, {
+      collisionMask: CollisionGroups.Walls,
+    });
+    if (hit) {
+      const along = this.target.sub(this.startPosition).inormalize();
+      this.target = V(hit.point).isub(along.imul(ZOMBIE_RADIUS * 1.5));
+    }
     const distance = this.target.distanceTo(this.startPosition);
     const flightTime = 0.2 + distance / SPEED;
     await this.wait(

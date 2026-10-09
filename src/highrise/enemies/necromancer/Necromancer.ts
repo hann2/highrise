@@ -173,7 +173,7 @@ export default class Necromancer extends BaseEnemy {
             (position) => new ZombieEgg(this.getPosition(), position, "zombie"),
           );
 
-        this.game.addEntities(...eggs);
+        this.addChildren(...eggs);
       },
     }),
 
@@ -200,7 +200,7 @@ export default class Necromancer extends BaseEnemy {
             (target) => new ZombieEgg(this.getPosition(), target, "crawler"),
           );
 
-        this.game.addEntities(...eggs);
+        this.addChildren(...eggs);
       },
     }),
   };
