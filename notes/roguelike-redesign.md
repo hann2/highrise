@@ -24,7 +24,7 @@ From a second design conversation, which replaced the "pick one of three" loop (
 
 ### Run shape
 
-- 15 floors in acts of 4, with boss levels on 5 (tier 1), 10 (tier 2) and 15 (the final boss) (revised 2026-10-09, from 4/8/12 landmarks plus the finale; not tied to the acts, and easy to move). Each act has a gun tier: act 1 is the tier 1 starting guns, acts 2–4 put tiers 2–4 on the shelves.
+- 15 floors in three acts of 5, each ending in a boss level: 5 (tier 1), 10 (tier 2) and 15 (the final boss) (revised 2026-10-09, from acts of 4 with landmarks on 4/8/12 plus the finale). Each act's stores deal its gun tier and the one above: tiers 1–2, 2–3, 3–4. Bosses don't scale with the act: a boss level is the same fight wherever it's dealt, and the pools' tiers are what make later ones harder.
 - The directory shows floor types and the bosses. It never shows what a floor holds or what's for sale.
 
 ### The loop: arrival room vending machine → floor → next floor
@@ -223,7 +223,7 @@ Current: one survivor per floor in a closet, auto-joins at 2 m with line of sigh
 
 Current (2026-09-23): `run/RunPlan.ts` fixes the run as Shops → Maintenance → Generator → Chapel, each floor with a difficulty of its number + 1. Floors are a 14×14 grid of 2 m cells with the exit at the furthest dead end. The Necromancer arena is on the Chapel floor but optional (the exit is placed independently). Enemy count is `20 + 10×difficulty`, and difficulty also picks the specials and the closet gun tiers; nothing else scales.
 
-- The building is the run: a fixed skeleton with random blanks. 15 floors in acts of 4 with boss levels on 5, 10 and 15 (see "Run shape"; first decided 2026-09-25 as landmarks on 4, 8 and 12 and the finale on 15); earlier thinking was 3 blocks of 2–3 themed floors plus a landmark, ~10 floors, 20–30 minutes. `level-ideas.txt` has the 100-floor theme list; use it as the pool (shops, maintenance, apartments, offices, gym, arcade, spa, penthouse, roof with helicopter as the end).
+- The building is the run: a fixed skeleton with random blanks. 15 floors in three acts of 5 ending in boss levels on 5, 10 and 15 (see "Run shape"; first decided 2026-09-25 as landmarks on 4, 8 and 12 and the finale on 15); earlier thinking was 3 blocks of 2–3 themed floors plus a landmark, ~10 floors, 20–30 minutes. `level-ideas.txt` has the 100-floor theme list; use it as the pool (shops, maintenance, apartments, offices, gym, arcade, spa, penthouse, roof with helicopter as the end).
 - Boss level ideas:
   - Siege (generator): flip the generator, lights come on floor-wide with the existing distance delay, the stairwell door unlocks in N seconds while a horde comes. L4D crescendo event; cheaper than a boss. A `BossGoal` that counts down once the generator's on.
   - The Necromancer (built): the stairwell behind the chapel stays barred until it dies. Its art is a single old sprite, and it's the same fight on every boss floor for now.

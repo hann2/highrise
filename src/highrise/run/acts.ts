@@ -2,15 +2,15 @@ import type Entity from "../../core/entity/Entity";
 import type Game from "../../core/Game";
 import type LevelController from "../controllers/LevelController";
 
-// The shape of a run: 15 floors in acts of 4, with boss levels on 5, 10 and
-// 15 (a tier 1 boss, a tier 2 boss and the final one). Everything that
+// The shape of a run: 15 floors in three acts of 5, each ending in a boss
+// level (a tier 1 boss, a tier 2 boss and the final one). Everything that
 // depends on how far into the run a floor is reads it from here. First
 // guesses; tune in playtest.
 
 /** Floors in a run, not counting the lobby */
 export const FLOORS = 15;
-export const ACT_LENGTH = 4;
-export const ACT_COUNT = 4;
+export const ACT_LENGTH = 5;
+export const ACT_COUNT = 3;
 /** The top of the building, and the final boss */
 export const FINAL_FLOOR = FLOORS;
 
@@ -20,7 +20,11 @@ export const FINAL_FLOOR = FLOORS;
  */
 export type BossTier = 1 | 2 | "final";
 
-/** The boss floors, and the pool each draws its boss level from */
+/**
+ * The boss floors, and the pool each draws its boss level from. Nothing on a
+ * boss level scales with the act: a boss level is the same fight wherever
+ * it's dealt.
+ */
 export const BOSS_FLOORS: Readonly<Record<number, BossTier>> = {
   5: 1,
   10: 2,
@@ -30,7 +34,7 @@ export const BOSS_FLOORS: Readonly<Record<number, BossTier>> = {
 /** Floors with a bigger store, right after each boss but the last */
 export const BIG_STORE_FLOORS: readonly number[] = [6, 11];
 
-/** Which act (1 to 4) a floor is in. Floors 13 to 15 are all act 4. */
+/** Which act (1 to 3) a floor is in */
 export function actOf(floor: number): number {
   return Math.min(ACT_COUNT, Math.max(1, Math.ceil(floor / ACT_LENGTH)));
 }
@@ -39,11 +43,14 @@ export function actOf(floor: number): number {
  * The gun tier (index into `GUN_TIERS`) each act's stores deal from, along
  * with the tier above it. Index = act − 1.
  */
-export const GUN_TIER_FOR_ACT: readonly number[] = [0, 1, 2, 3];
+export const GUN_TIER_FOR_ACT: readonly number[] = [0, 1, 2];
 
-/** How much tougher and harder-hitting enemies are in each act. Index = act − 1. */
-export const ENEMY_HP_SCALE: readonly number[] = [1, 1.15, 1.3, 1.5];
-export const ENEMY_DAMAGE_SCALE: readonly number[] = [1, 1.1, 1.25, 1.4];
+/**
+ * How much tougher and harder-hitting enemies are in each act. Index = act −
+ * 1. Not on boss levels (see `scalesWithAct`).
+ */
+export const ENEMY_HP_SCALE: readonly number[] = [1, 1.2, 1.5];
+export const ENEMY_DAMAGE_SCALE: readonly number[] = [1, 1.15, 1.4];
 
 /** Enemies on a floor: `ENEMY_BASE + ENEMY_PER_FLOOR × floor`, capped by room */
 export const ENEMY_BASE = 24;
@@ -70,4 +77,15 @@ export function getCurrentAct(game: Game): number {
   const levelController = game.entities.getTagged("level_controller")[0] as
     LevelController | undefined;
   return levelController?.floor?.act ?? 1;
+}
+
+/**
+ * Whether enemies made now get the act's toughness: everywhere but a boss
+ * level, which is the same fight on whichever floor it's dealt
+ */
+export function scalesWithAct(game: Game): boolean {
+  const levelController = game.entities.getTagged("level_controller")[0] as
+    | LevelController
+    | undefined;
+  return !levelController?.floor?.boss;
 }

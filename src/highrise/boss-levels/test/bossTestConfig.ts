@@ -5,17 +5,18 @@ import {
   otherQueryParts,
   parseLoadout,
 } from "../../arena/loadout";
-import { actOf, ACT_COUNT, BOSS_FLOORS, BossTier } from "../../run/acts";
+import { BOSS_FLOORS, BossTier } from "../../run/acts";
 import { BossLevelClass } from "../BossLevel";
 import { BOSS_LEVELS, tiersOf } from "../bossLevels";
 
 /** Everything about a boss test. It all goes in the URL (see `bossTestConfigToQuery`). */
 export interface BossTestConfig extends Loadout {
   level: BossLevelClass;
-  /** Which boss floor of the run it's played as (its store, the directory) */
+  /**
+   * Which boss floor of the run it's played as: its store and the directory.
+   * The fight's the same on any (nothing on a boss level scales with the act).
+   */
   floor: number;
-  /** 1 to `ACT_COUNT`: how tough the enemies are. The floor's act unless given. */
-  act: number;
   /** Quarters to start with, for the arrival room's store */
   quarters: number;
   /** The player can't die */
@@ -47,9 +48,9 @@ export function tierOf(floor: number): BossTier {
 /**
  * Reads the setup from the URL. Anything not given (or not recognized) gets
  * a default: the first boss level, played on the first boss floor that deals
- * it, in that floor's act.
+ * it.
  *
- * `?scene=boss&boss=necromancer&floor=10&act=3&quarters=40&god&infammo&frozen`,
+ * `?scene=boss&boss=necromancer&floor=10&quarters=40&god&infammo&frozen`,
  * plus a loadout as in the arena (`char=`, `weapons=`, `items=`,
  * `throwable=`, `usable=`)
  */
@@ -60,13 +61,11 @@ export function parseBossTestConfig(params: URLSearchParams): BossTestConfig {
   const floor = BOSS_FLOOR_NUMBERS.includes(floorParam)
     ? floorParam
     : floorFor(level);
-  const act = parseInt(params.get("act") ?? "", 10);
   const quarters = parseInt(params.get("quarters") ?? "0", 10);
   return {
     ...parseLoadout(params),
     level,
     floor,
-    act: isNaN(act) ? actOf(floor) : Math.min(Math.max(act, 1), ACT_COUNT),
     quarters: isNaN(quarters) ? 0 : Math.max(quarters, 0),
     god: params.has("god"),
     infiniteAmmo: params.has("infammo"),
@@ -81,9 +80,6 @@ export function bossTestConfigToQuery(config: BossTestConfig): string {
     `boss=${config.level.id}`,
     `floor=${config.floor}`,
   ];
-  if (config.act !== actOf(config.floor)) {
-    parts.push(`act=${config.act}`);
-  }
   parts.push(...loadoutQueryParts(config));
   if (config.quarters > 0) {
     parts.push(`quarters=${config.quarters}`);
@@ -104,7 +100,6 @@ export function bossTestConfigToQuery(config: BossTestConfig): string {
       "scene",
       "boss",
       "floor",
-      "act",
       "quarters",
       ...LOADOUT_PARAMS,
       ...flags.map(([, flag]) => flag),

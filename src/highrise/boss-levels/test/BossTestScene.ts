@@ -13,7 +13,6 @@ import { getPartyManager } from "../../environment/PartyManager";
 import Human from "../../human/Human";
 import PlayerHumanController from "../../human/PlayerHumanController";
 import Gun from "../../weapons/guns/Gun";
-import { ActOverride } from "../../run/acts";
 import { generateRunPlan, RunPlan } from "../../run/RunPlan";
 import { BossDebugAction } from "../BossLevel";
 import BossLevel from "../BossLevel";
@@ -51,7 +50,7 @@ export interface Attempt {
  * A dev-only scene for working on one boss level (`?scene=boss&boss=necromancer`):
  * a practice run that's only that floor, played as one of the run's boss
  * floors, starting in its arrival room like a run does. The setup (which
- * boss level and floor, the act, the player's loadout, and options) is in the
+ * boss level and floor, the player's loadout, and options) is in the
  * URL (see `parseBossTestConfig`), and the panel (Tab) changes it and keeps
  * the URL up to date, so a reload, or a hot reload after changing the code,
  * comes back to the same fight.
@@ -65,12 +64,8 @@ export interface Attempt {
  * the nearest boss and shoots at it, and the fight starts over every
  * `AUTO_CYCLE` seconds, or soon after it's won.
  */
-export default class BossTestScene
-  extends BaseEntity
-  implements Entity, ActOverride
-{
+export default class BossTestScene extends BaseEntity implements Entity {
   id = "bossTestScene";
-  tags = ["act_override"];
   persistenceLevel = Persistence.Permanent;
   config: BossTestConfig;
   /** The fight going on */
@@ -103,11 +98,6 @@ export default class BossTestScene
   /** How many times the fight has started over, for `npm run clip` */
   get cycles(): number {
     return this.restarts;
-  }
-
-  /** For `getCurrentAct`: enemies are as tough as in this act */
-  get act(): number {
-    return this.config.act;
   }
 
   @on("add")

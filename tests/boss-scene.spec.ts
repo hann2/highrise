@@ -39,19 +39,26 @@ function scene(page: Page) {
   });
 }
 
-/** Waits until the fight has started over (the boss is back at full health and the leader's fresh) */
-async function waitForRestart(page: Page, bossHp: number) {
+/** How many times the fight has started over */
+function restarts(page: Page): Promise<number> {
+  return page.evaluate(
+    () => (window.DEBUG.game!.entities.getById("bossTestScene") as any).cycles,
+  );
+}
+
+/** Waits until the fight has started over since there had been `before` restarts */
+async function waitForRestart(page: Page, before: number) {
   await page.waitForFunction(
-    (bossHp) => {
+    (before) => {
       const game = window.DEBUG.game!;
-      const bosses = game.entities.getTagged("boss") as any[];
+      const scene = game.entities.getById("bossTestScene") as any;
       return (
-        bosses.length === 1 &&
-        Math.abs(bosses[0].hp - bossHp) < 1 &&
+        scene.cycles > before &&
+        game.entities.getTagged("boss").length === 1 &&
         game.entities.getTagged("boss_fight").length === 1
       );
     },
-    bossHp,
+    before,
     { timeout: 10000 },
   );
 }
@@ -73,10 +80,10 @@ test("boss test scene", async ({ page }) => {
     null,
     { timeout: 120000 },
   );
-  await waitForRestart(page, 2300);
+  await waitForRestart(page, 0);
 
-  // The loadout, on the first boss floor (act 2: the Necromancer's 2000 HP
-  // is 2300), with the URL filled in
+  // The loadout, on the first boss floor, with the URL filled in. Nothing on
+  // a boss level scales with the act: the Necromancer has its 2000 HP.
   let state = await scene(page);
   expect(state).toMatchObject({
     floor: 5,
@@ -85,7 +92,7 @@ test("boss test scene", async ({ page }) => {
     weapons: ["AR-15", "Glock"],
     items: ["Night Vision"],
     quarters: 30,
-    bossHp: [2300],
+    bossHp: [2000],
     fights: 1,
     humans: 1,
     runStats: false,
@@ -94,8 +101,9 @@ test("boss test scene", async ({ page }) => {
   expect(state.search).toContain("floor=5");
   await page.screenshot({ path: "tests/output/boss-scene.png" });
 
-  // The setup panel: the same boss on floor 10 is in act 3, and applying
-  // starts it over there and rewrites the URL
+  // The setup panel: applying the same boss on floor 10 starts it over there,
+  // as tough as on 5, and rewrites the URL
+  let before = await restarts(page);
   await page.keyboard.press("Tab");
   await expect(page.locator(".arena-panel")).toHaveCount(1);
   await page.screenshot({ path: "tests/output/boss-scene-panel.png" });
@@ -105,13 +113,13 @@ test("boss test scene", async ({ page }) => {
     .click();
   await page.keyboard.press("Tab");
   await expect(page.locator(".arena-panel")).toHaveCount(0);
-  await waitForRestart(page, 2600);
+  await waitForRestart(page, before);
   state = await scene(page);
   expect(state).toMatchObject({
     floor: 10,
     floorName: "Chapel",
     weapons: ["AR-15", "Glock"],
-    bossHp: [2600],
+    bossHp: [2000],
     humans: 1,
   });
   expect(state.search).toContain("floor=10");
@@ -123,14 +131,17 @@ test("boss test scene", async ({ page }) => {
     .getByRole("button", { name: "Half" })
     .click();
   await page.keyboard.press("Escape");
-  expect((await scene(page)).bossHp).toEqual([1300]);
+  expect((await scene(page)).bossHp).toEqual([1000]);
 
   // Backspace starts it over
+  before = await restarts(page);
   await page.keyboard.press("Backspace");
-  await waitForRestart(page, 2600);
+  await waitForRestart(page, before);
+  expect((await scene(page)).bossHp).toEqual([2000]);
 
-  // Winning (Shift+L kills every enemy) is noted, and the stairs start it over
-  await page.evaluate(async () => {
+  // Once the Necromancer has hatched some zombies, killing it kills them too.
+  // Winning is noted, and the stairs start it over.
+  await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const leader = (
       [...game.entities.all].find(
@@ -138,11 +149,24 @@ test("boss test scene", async ({ page }) => {
       ) as any
     ).leader;
     leader.body.position.set([12, 8]);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
   });
-  await page.keyboard.down("ShiftLeft");
-  await page.keyboard.press("KeyL");
-  await page.keyboard.up("ShiftLeft");
+  await page.waitForFunction(
+    () =>
+      (window.DEBUG.game!.entities.getTagged("boss")[0] as any)?.minions
+        .length > 0,
+    null,
+    { timeout: 20000 },
+  );
+  const afterKill = await page.evaluate(async () => {
+    const game = window.DEBUG.game!;
+    (game.entities.getTagged("boss")[0] as any).die();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    return {
+      bosses: game.entities.getTagged("boss").length,
+      zombies: game.entities.getTagged("zombie").length,
+    };
+  });
+  expect(afterKill).toEqual({ bosses: 0, zombies: 0 });
   await expect(page.locator(".arena-hint")).toContainText("Last: won in");
   expect(
     await page.evaluate(
@@ -150,8 +174,9 @@ test("boss test scene", async ({ page }) => {
         (window.DEBUG.game!.entities.getTagged("stairwell")[0] as any).barred,
     ),
   ).toBe(false);
+  before = await restarts(page);
   await page.keyboard.press("KeyL"); // the level cheat, as if up the stairs
-  await waitForRestart(page, 2600);
+  await waitForRestart(page, before);
   expect((await scene(page)).outcome).toBe("won");
 
   // Dying starts it over too, with a fresh leader who can still be moved
@@ -176,7 +201,7 @@ test("boss test scene", async ({ page }) => {
   );
   state = await scene(page);
   expect(state).toMatchObject({ humans: 1, weapons: ["AR-15", "Glock"] });
-  const before = await page.evaluate(() => [
+  const from = await page.evaluate(() => [
     ...(
       [...window.DEBUG.game!.entities.all].find(
         (e) => e.constructor.name === "PartyManager",
@@ -186,13 +211,13 @@ test("boss test scene", async ({ page }) => {
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(500);
   await page.keyboard.up("KeyD");
-  const after = await page.evaluate(() => [
+  const to = await page.evaluate(() => [
     ...(
       [...window.DEBUG.game!.entities.all].find(
         (e) => e.constructor.name === "PartyManager",
       ) as any
     ).leader.getPosition(),
   ]);
-  expect(after[0]).toBeGreaterThan(before[0] + 0.5);
+  expect(to[0]).toBeGreaterThan(from[0] + 0.5);
   expectNoIssues(issues);
 });

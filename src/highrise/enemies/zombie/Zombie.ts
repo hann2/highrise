@@ -36,6 +36,8 @@ const hitSoundRing = new ShuffleRing(ZOMBIE_ATTACK_HIT_SOUNDS);
 
 export default class Zombie extends BaseEnemy {
   tags = ["zombie"];
+  /** Whether it can get back up as a crawler when it dies (a Necromancer's minions don't) */
+  canCrawlOn = true;
   bodySprite: ZombieSprite;
 
   constructor(
@@ -99,6 +101,7 @@ export default class Zombie extends BaseEnemy {
     // Unless its head's gone or it's in pieces, it can get back up without
     // its legs
     const crawls =
+      this.canCrawlOn &&
       style !== "headPopped" &&
       style !== "headOff" &&
       style !== "gibbed" &&

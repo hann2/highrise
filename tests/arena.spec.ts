@@ -50,7 +50,7 @@ test("arena", async ({ page }) => {
   state = await arena(page);
   expect(state.wave.size).toBe(5);
   // Zombies and the spitter have 100 HP in act 1
-  expect(state.zombieHp).toEqual([130, 130, 130, 130]);
+  expect(state.zombieHp).toEqual([150, 150, 150, 150]);
 
   // Backspace clears them away
   await page.keyboard.press("Backspace");

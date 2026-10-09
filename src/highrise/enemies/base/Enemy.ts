@@ -4,6 +4,7 @@ import {
   ENEMY_DAMAGE_SCALE,
   ENEMY_HP_SCALE,
   getCurrentAct,
+  scalesWithAct,
 } from "../../run/acts";
 import type Entity from "../../../core/entity/Entity";
 import { on } from "../../../core/entity/handler";
@@ -112,10 +113,13 @@ export class BaseEnemy extends Creature implements Hittable, Flammable {
 
   @on("add")
   onAdd() {
-    // Tougher and harder-hitting in later acts of the run
-    const act = getCurrentAct(this.game);
-    this.hp *= ENEMY_HP_SCALE[act - 1];
-    this.damageScale = ENEMY_DAMAGE_SCALE[act - 1];
+    // Tougher and harder-hitting in later acts of the run (but not on a boss
+    // level, the same fight wherever it is)
+    if (scalesWithAct(this.game)) {
+      const act = getCurrentAct(this.game);
+      this.hp *= ENEMY_HP_SCALE[act - 1];
+      this.damageScale = ENEMY_DAMAGE_SCALE[act - 1];
+    }
 
     this.voice = this.addChild(this.makeVoice());
     this.aimSpring = new AimSpring(this.body);

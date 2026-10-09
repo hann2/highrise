@@ -12,6 +12,7 @@ import { V, V2d } from "../../../core/Vector";
 import { CollisionGroups } from "../../../config/CollisionGroups";
 import { ZOMBIE_RADIUS } from "../../constants/constants";
 import { getSplatSound } from "../../effects/Splat";
+import type { BaseEnemy } from "../base/Enemy";
 import Crawler from "../crawler/Crawler";
 import Zombie from "../zombie/Zombie";
 import { ZOMBIE_VARIANTS } from "../zombie/ZombieVariants";
@@ -34,6 +35,8 @@ export class ZombieEgg extends BaseEntity implements Entity {
     public startPosition: V2d,
     public target: V2d,
     public spawnType: "zombie" | "crawler",
+    /** Told about what hatches, once it's in the game */
+    private onHatch?: (creature: BaseEnemy) => void,
   ) {
     super();
 
@@ -133,6 +136,7 @@ export class ZombieEgg extends BaseEntity implements Entity {
     const creature = this.makeCreature(position);
     creature.body.angle = this.sprite.rotation;
     this.game.addEntity(creature);
+    this.onHatch?.(creature);
 
     this.destroy();
   }

@@ -7,8 +7,11 @@ import { SPITTER_SOUNDS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import DeathOrb from "../../projectiles/DeathOrb";
 import Phlegm from "../../projectiles/Phlegm";
+import type Human from "../../human/Human";
+import type { DeathBlow } from "../base/DeathBlow";
 import { BaseEnemy } from "../base/Enemy";
 import { makeSimpleEnemyBody } from "../base/enemyUtils";
+import Zombie from "../zombie/Zombie";
 import NecromancerController from "./NecromancerController";
 import NecromancerSprite from "./NecromancerSprite";
 import { ZombieEgg } from "./ZombieEgg";
@@ -57,6 +60,22 @@ export default class Necromancer extends BaseEnemy {
 
     this.aimSpring.stiffness = 50;
     this.aimSpring.damping = 5;
+  }
+
+  /** Its zombies drop dead with it (its eggs go too, being its children) */
+  die(killer?: Human, blow?: DeathBlow) {
+    if (this.isDestroyed) {
+      return;
+    }
+    const minions = this.minions;
+    this.minions = [];
+    super.die(killer, blow);
+    for (const minion of minions) {
+      if (minion instanceof Zombie) {
+        minion.canCrawlOn = false;
+      }
+      minion.die();
+    }
   }
 
   // Override this because we do something more complicatd than a single attack
@@ -170,7 +189,10 @@ export default class Necromancer extends BaseEnemy {
         const eggs = angles
           .map((angle) => this.getPosition().add(direction.rotate(angle)))
           .map(
-            (position) => new ZombieEgg(this.getPosition(), position, "zombie"),
+            (position) =>
+              new ZombieEgg(this.getPosition(), position, "zombie", (minion) =>
+                this.minions.push(minion),
+              ),
           );
 
         this.addChildren(...eggs);
@@ -197,7 +219,10 @@ export default class Necromancer extends BaseEnemy {
         const eggs = angles
           .map((angle) => targetPosition.add(polarToVec(angle, 2)))
           .map(
-            (target) => new ZombieEgg(this.getPosition(), target, "crawler"),
+            (target) =>
+              new ZombieEgg(this.getPosition(), target, "crawler", (minion) =>
+                this.minions.push(minion),
+              ),
           );
 
         this.addChildren(...eggs);

@@ -14,7 +14,6 @@ import {
 import "../../arena/arena.css";
 import { isFloorDirectoryOpen } from "../../menu/FloorDirectory";
 import { isStoreOpen } from "../../menu/StoreScreen";
-import { actOf, ACT_COUNT } from "../../run/acts";
 import { BOSS_LEVELS } from "../bossLevels";
 import type BossTestScene from "./BossTestScene";
 import type { Attempt } from "./BossTestScene";
@@ -104,7 +103,7 @@ export default class BossTestPanel extends ReactEntity implements Entity {
           Boss test{this.game.paused ? " (paused)" : ""}
         </div>
         <div>
-          {config.level.floorName} on floor {config.floor}, act {config.act},{" "}
+          {config.level.floorName} on floor {config.floor},{" "}
           {config.character.name}
         </div>
         {attempt.time > 0 && !attempt.outcome && (
@@ -147,20 +146,7 @@ export default class BossTestPanel extends ReactEntity implements Entity {
               <Choices
                 options={BOSS_FLOOR_NUMBERS}
                 value={draft.floor}
-                onChange={(floor) => {
-                  // The act goes with the floor unless it's been changed
-                  if (draft.act === actOf(draft.floor)) {
-                    draft.act = actOf(floor);
-                  }
-                  draft.floor = floor;
-                }}
-              />
-            </Row>
-            <Row label="Act">
-              <Choices
-                options={Array.from({ length: ACT_COUNT }, (_, i) => i + 1)}
-                value={draft.act}
-                onChange={(act) => (draft.act = act)}
+                onChange={(floor) => (draft.floor = floor)}
               />
             </Row>
             <Row label="Quarters to start with">

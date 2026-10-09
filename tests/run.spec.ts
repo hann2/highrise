@@ -307,8 +307,8 @@ test("the run's keycard floor, boss and big store", async ({ page }) => {
         ) as any
       )?.hp,
   );
-  // 2000, tougher in act 2
-  expect(necromancerHp).toBeCloseTo(2300);
+  // Nothing on a boss level scales with the act
+  expect(necromancerHp).toBeCloseTo(2000);
   const before = {
     quarters: await count("Quarter"),
     throwables: await count("ConsumablePickup"),
@@ -382,7 +382,7 @@ test("the run's keycard floor, boss and big store", async ({ page }) => {
       ],
     };
   });
-  expect(bigStore).toEqual({ slots: 8, gun: true, damageScales: [1.1] });
+  expect(bigStore).toEqual({ slots: 8, gun: true, damageScales: [1.15] });
   await expect(page.locator(".store__machine--big")).toHaveCount(1);
   await expect(page.locator(".store__slot")).toHaveCount(10);
   await page.mouse.move(1, 1);

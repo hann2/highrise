@@ -11,7 +11,7 @@ import {
 } from "./helpers";
 
 // See the "Seeded levels are reproducible" assertion
-const LEVEL_2_FINGERPRINT = "355:-91931046";
+const LEVEL_2_FINGERPRINT = "357:-1126669804";
 // What the store in level 2's arrival room sells with this seed. Changes when
 // the item pool, the rarities, or level generation change.
 const STORE_SHELF = {
@@ -22,20 +22,20 @@ const STORE_SHELF = {
 // The run's floors with this seed (from the lobby's plan). Changes when the
 // themes, the boss levels or anything random before the plan changes.
 const RUN_PLAN = [
+  "Shops",
+  "Generator",
   "Maintenance",
   "Generator",
+  "Chapel",
   "Maintenance",
   "Shops",
-  "Chapel",
-  "Shops",
   "Generator",
   "Shops",
-  "Offices",
   "Chapel",
+  "Maintenance",
   "Offices",
   "Shops",
   "Offices",
-  "Generator",
   "Chapel",
 ];
 // Every quarter on a floor, in closets and carried by enemies (QUARTERS_PER_FLOOR)
@@ -183,9 +183,9 @@ test("game boots, plays, and changes levels without errors", async ({
   expectNoIssues(issues);
 
   // --- The run ahead is planned, but nothing in the lobby gives it away ---
-  // 15 floors in acts of 4 (13 to 15 are act 4), with boss levels on 5, 10
-  // and 15, a keycard floor in each act, and big stores right after the
-  // first two bosses
+  // 15 floors in three acts of 5, each ending in a boss level, with a
+  // keycard floor in each act, and big stores right after the first two
+  // bosses
   const plan = await page.evaluate(() => {
     const game = window.DEBUG.game!;
     const lobby = game.entities.getById("lobby") as any;
@@ -208,7 +208,7 @@ test("game boots, plays, and changes levels without errors", async ({
     };
   });
   expect(plan.names).toEqual(RUN_PLAN);
-  expect(plan.acts).toEqual([1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4]);
+  expect(plan.acts).toEqual([1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]);
   expect(plan.gunTiers).toEqual(plan.acts.map((act) => act - 1));
   expect(plan.bosses).toEqual([5, 10, 15]);
   expect(plan.bossTiers).toEqual([1, 2, "final"]);
@@ -217,7 +217,6 @@ test("game boots, plays, and changes levels without errors", async ({
     [1, false],
     [2, false],
     [3, false],
-    [4, false],
   ]);
   // No theme twice in a row
   for (let i = 1; i < plan.names.length; i++) {
@@ -2036,7 +2035,7 @@ test("game boots, plays, and changes levels without errors", async ({
   await expect(directoryRows).toHaveCount(16);
   await expect(directoryRows.nth(0)).toHaveText(/15\s*Chapel\s*Boss/);
   await expect(directoryRows.nth(5)).toHaveText(/10\s*Chapel\s*Boss/);
-  await expect(directoryRows.nth(9)).toHaveText(/6\s*Shops\s*Store/);
+  await expect(directoryRows.nth(9)).toHaveText(/6\s*Maintenance\s*Dark · Store/);
   await expect(directoryRows.nth(10)).toHaveText(/5\s*Chapel\s*Boss/);
   await expect(directoryRows.nth(13)).toHaveText(
     new RegExp(`2\\s*${RUN_PLAN[1]}.*You are here`),
