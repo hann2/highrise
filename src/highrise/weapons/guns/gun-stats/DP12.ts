@@ -20,8 +20,9 @@ export const DP12: GunStats = {
 
   name: "DP-12",
   flash: DP12_FLASH,
-  // Two trigger pulls as fast as a finger goes, then the pump
-  fireRate: 4,
+  // One barrel a click (it's semi-auto), as fast as a finger goes (a click
+  // during the cooldown is dropped, so it's short), then the pump
+  fireRate: 8,
   shotsPerPump: 2,
   bulletStats: TwelveGuageBuckshot,
   // 12 gauge 00 buckshot from an 18 7/8" barrel
