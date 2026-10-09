@@ -26,7 +26,7 @@ const RUN_PLAN = [
   "Generator",
   "Maintenance",
   "Generator",
-  "Chapel",
+  "Loading Dock",
   "Maintenance",
   "Shops",
   "Generator",
@@ -36,7 +36,7 @@ const RUN_PLAN = [
   "Offices",
   "Shops",
   "Offices",
-  "Chapel",
+  "Penthouse",
 ];
 // Every quarter on a floor, in closets and carried by enemies (QUARTERS_PER_FLOOR)
 const QUARTERS_PER_FLOOR = 20;
@@ -2033,10 +2033,10 @@ test("game boots, plays, and changes levels without errors", async ({
   // The whole run, top floor first, with this one marked and the rest noted
   const directoryRows = page.locator(".floor-directory__row");
   await expect(directoryRows).toHaveCount(16);
-  await expect(directoryRows.nth(0)).toHaveText(/15\s*Chapel\s*Boss/);
+  await expect(directoryRows.nth(0)).toHaveText(/15\s*Penthouse\s*Boss/);
   await expect(directoryRows.nth(5)).toHaveText(/10\s*Chapel\s*Boss/);
   await expect(directoryRows.nth(9)).toHaveText(/6\s*Maintenance\s*Dark · Store/);
-  await expect(directoryRows.nth(10)).toHaveText(/5\s*Chapel\s*Boss/);
+  await expect(directoryRows.nth(10)).toHaveText(/5\s*Loading Dock\s*Boss/);
   await expect(directoryRows.nth(13)).toHaveText(
     new RegExp(`2\\s*${RUN_PLAN[1]}.*You are here`),
   );

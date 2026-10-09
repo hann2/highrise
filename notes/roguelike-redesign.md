@@ -219,7 +219,7 @@ Current: one survivor per floor in a closet, auto-joins at 2 m with line of sigh
 
 ### 10. Run structure, building generation, boss levels (L)
 
-**Boss levels built 2026-10-09 (`boss-levels/`, see CLAUDE.md): `BossLevel`s laid out by hand with the arrival room, a `BossFight` that bars the stairwell until its goal is met and pays out, pools by tier, and `?scene=boss` for working on one. The Necromancer's chapel is the only one, in every pool. Not built: a siege (the generator idea below is the obvious first), a second boss, the roof finale.**
+**Boss levels built 2026-10-09 (`boss-levels/`, see CLAUDE.md): `BossLevel`s laid out by hand with the arrival room, a `BossFight` that bars the stairwell until its goal is met and pays out, pools by tier, and `?scene=boss` for working on one. One per pool, first passes to iterate on (2026-10-09): tier 1 the Loading Dock (hold out 60 s against a horde), tier 2 the Necromancer's chapel, final the Penthouse (the Behemoth: slams, and charges, dazed by walls and pillars). Not built: the generator siege below, the roof finale, more of each tier.**
 
 Current (2026-09-23): `run/RunPlan.ts` fixes the run as Shops → Maintenance → Generator → Chapel, each floor with a difficulty of its number + 1. Floors are a 14×14 grid of 2 m cells with the exit at the furthest dead end. The Necromancer arena is on the Chapel floor but optional (the exit is placed independently). Enemy count is `20 + 10×difficulty`, and difficulty also picks the specials and the closet gun tiers; nothing else scales.
 

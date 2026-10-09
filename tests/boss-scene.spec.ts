@@ -82,11 +82,11 @@ test("boss test scene", async ({ page }) => {
   );
   await waitForRestart(page, 0);
 
-  // The loadout, on the first boss floor, with the URL filled in. Nothing on
-  // a boss level scales with the act: the Necromancer has its 2000 HP.
+  // The loadout, on the boss floor whose pool has the Necromancer (10), with
+  // the URL filled in
   let state = await scene(page);
   expect(state).toMatchObject({
-    floor: 5,
+    floor: 10,
     floorName: "Chapel",
     character: "Chad",
     weapons: ["AR-15", "Glock"],
@@ -98,31 +98,32 @@ test("boss test scene", async ({ page }) => {
     runStats: false,
     pauseMenu: false,
   });
-  expect(state.search).toContain("floor=5");
+  expect(state.search).toContain("floor=10");
   await page.screenshot({ path: "tests/output/boss-scene.png" });
 
-  // The setup panel: applying the same boss on floor 10 starts it over there,
-  // as tough as on 5, and rewrites the URL
+  // The setup panel: applying the same boss on floor 5 starts it over there,
+  // as tough as on 10 (nothing on a boss level scales with the act), and
+  // rewrites the URL
   let before = await restarts(page);
   await page.keyboard.press("Tab");
   await expect(page.locator(".arena-panel")).toHaveCount(1);
   await page.screenshot({ path: "tests/output/boss-scene-panel.png" });
   await page
     .locator(".arena-row", { hasText: "Floor" })
-    .getByRole("button", { name: "10", exact: true })
+    .getByRole("button", { name: "5", exact: true })
     .click();
   await page.keyboard.press("Tab");
   await expect(page.locator(".arena-panel")).toHaveCount(0);
   await waitForRestart(page, before);
   state = await scene(page);
   expect(state).toMatchObject({
-    floor: 10,
+    floor: 5,
     floorName: "Chapel",
     weapons: ["AR-15", "Glock"],
     bossHp: [2000],
     humans: 1,
   });
-  expect(state.search).toContain("floor=10");
+  expect(state.search).toContain("floor=5");
 
   // The boss's health can be set in the middle of the fight
   await page.keyboard.press("Tab");
@@ -219,5 +220,38 @@ test("boss test scene", async ({ page }) => {
     ).leader.getPosition(),
   ]);
   expect(to[0]).toBeGreaterThan(from[0] + 0.5);
+
+  // Another boss level from the panel: the Behemoth, whose own button makes
+  // it line up a charge
+  before = await restarts(page);
+  await page.keyboard.press("Tab");
+  await page
+    .locator(".arena-row", { hasText: "Boss level" })
+    .getByRole("button", { name: "behemoth" })
+    .click();
+  await page.keyboard.press("Tab");
+  await waitForRestart(page, before);
+  state = await scene(page);
+  expect(state).toMatchObject({ floorName: "Penthouse", bossHp: [5000] });
+  expect(state.search).toContain("boss=behemoth");
+  await page.evaluate(() => {
+    const leader = (
+      [...window.DEBUG.game!.entities.all].find(
+        (e) => e.constructor.name === "PartyManager",
+      ) as any
+    ).leader;
+    leader.body.position.set([10, 9]);
+  });
+  await page.keyboard.press("Tab");
+  await page.getByRole("button", { name: "Charge now" }).click();
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(
+    () =>
+      (window.DEBUG.game!.entities.getTagged("boss")[0] as any).controller
+        .state !== "chase",
+    null,
+    { timeout: 5000 },
+  );
+  await expect(page.locator(".boss-bar__title")).toHaveText("The Behemoth");
   expectNoIssues(issues);
 });

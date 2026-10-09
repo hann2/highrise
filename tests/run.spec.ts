@@ -1,7 +1,7 @@
 import { expect, Page, test } from "@playwright/test";
 import { collectIssues, expectNoIssues, loadGame, startGame } from "./helpers";
 
-/** Presses the level-complete cheat until the run is on `floor` and it has enemies (or a boss) */
+/** Presses the level-complete cheat until the run is on `floor` and it has enemies (or it's a boss level) */
 async function goToFloor(page: Page, floor: number) {
   const currentLevel = () =>
     page.evaluate(
@@ -22,7 +22,7 @@ async function goToFloor(page: Page, floor: number) {
           levelController.currentLevel > from &&
           !levelController.changingLevel &&
           (entities.getTagged("zombie").length > 0 ||
-            entities.getTagged("boss").length > 0)
+            entities.getTagged("boss_fight").length > 0)
         );
       },
       from,
@@ -207,9 +207,21 @@ test("the run's keycard floor, boss and big store", async ({ page }) => {
       unlockedSwing: 0,
       otherStillLocked: locks[1].door.locked,
     };
+    // How far it swings in 0.3 s of game time (a slow frame or two mustn't
+    // cut it short), at its widest
     door.body.angularVelocity = door.maxAngle > 1 ? 6 : -6;
-    await wait(300);
-    result.unlockedSwing = Math.abs(door.getOpenAngle());
+    const swingStart = game.elapsedTime;
+    const deadline = performance.now() + 3000;
+    while (
+      game.elapsedTime - swingStart < 0.3 &&
+      performance.now() < deadline
+    ) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      result.unlockedSwing = Math.max(
+        result.unlockedSwing,
+        Math.abs(door.getOpenAngle()),
+      );
+    }
     (window as any).testPinAt = undefined;
     return result;
   });
@@ -220,8 +232,8 @@ test("the run's keycard floor, boss and big store", async ({ page }) => {
   expect(unlocking.otherStillLocked).toBe(true);
   expectNoIssues(issues);
 
-  // --- Floor 5: the first boss level, the Necromancer's chapel. The
-  // directory has the whole run on it. ---
+  // --- Floor 5: the first boss level, the Loading Dock, a horde to hold out
+  // against. The directory has the whole run on it. ---
   await goToFloor(page, 5);
   await page.evaluate(() => {
     const game = window.DEBUG.game!;
@@ -236,7 +248,7 @@ test("the run's keycard floor, boss and big store", async ({ page }) => {
   });
   await expect(page.locator(".floor-directory__row")).toHaveCount(16);
   await expect(page.locator(".floor-directory__row--here")).toHaveText(
-    /5\s*Chapel.*You are here/,
+    /5\s*Loading Dock.*You are here/,
   );
   // The bosses ahead are on the directory
   await expect(
@@ -247,10 +259,10 @@ test("the run's keycard floor, boss and big store", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(page.locator(".floor-directory")).toHaveCount(0);
 
-  // A boss level is laid out by hand: no closets or enemies but the boss,
-  // and the stairwell stays barred, even with the leader at its door, until
-  // the fight's won. The boss bar shows once the leader's out of the arrival
-  // room.
+  // A boss level is laid out by hand: no closets or enemies until the fight
+  // starts, and the stairwell stays barred, even with the leader at its door,
+  // until it's won. The fight, and the boss bar, start once the leader's out
+  // of the arrival room, and then the horde comes.
   await expect(page.locator(".boss-bar")).toHaveCount(0);
   const barred = await page.evaluate(async () => {
     const game = window.DEBUG.game!;
@@ -274,23 +286,21 @@ test("the run's keycard floor, boss and big store", async ({ page }) => {
     return {
       barred: stairwell.barred,
       locked: stairwell.door.locked,
-      zombies: game.entities.getTagged("zombie").length,
-      bosses: game.entities.getTagged("boss").length,
       fightStarted: (game.entities.getTagged("boss_fight")[0] as any).started,
     };
   });
-  expect(barred).toEqual({
-    barred: true,
-    locked: true,
-    zombies: 0,
-    bosses: 1,
-    fightStarted: true,
-  });
-  await expect(page.locator(".boss-bar__title")).toHaveText("The Necromancer");
+  expect(barred).toEqual({ barred: true, locked: true, fightStarted: true });
+  await expect(page.locator(".boss-bar__title")).toHaveText("The Horde");
+  await expect(page.locator(".boss-bar__text")).toContainText("Hold out");
+  await page.waitForFunction(
+    () => window.DEBUG.game!.entities.getTagged("zombie").length > 0,
+    null,
+    { timeout: 10000 },
+  );
   await page.screenshot({ path: "tests/output/boss-fight.png" });
 
-  // A boss is always good news: killing it (Shift+L is a dev cheat that kills
-  // every enemy) leaves quarters, throwables, a usable and a boss item
+  // A boss is always good news: holding out (the time's skipped here) leaves
+  // quarters, throwables, a usable and a boss item
   const count = (name: string) =>
     page.evaluate(
       (name) =>
@@ -299,26 +309,20 @@ test("the run's keycard floor, boss and big store", async ({ page }) => {
         ).length,
       name,
     );
-  const necromancerHp = await page.evaluate(
-    () =>
-      (
-        [...window.DEBUG.game!.entities.all].find(
-          (e) => e.constructor.name === "Necromancer",
-        ) as any
-      )?.hp,
-  );
-  // Nothing on a boss level scales with the act
-  expect(necromancerHp).toBeCloseTo(2000);
   const before = {
     quarters: await count("Quarter"),
     throwables: await count("ConsumablePickup"),
     usables: await count("UsablePickup"),
   };
+  // (Shift+L, a dev cheat, kills the horde first, so it leaves the leader be)
   await page.keyboard.down("ShiftLeft");
   await page.keyboard.press("KeyL");
   await page.keyboard.up("ShiftLeft");
+  await page.evaluate(() => {
+    const fight = window.DEBUG.game!.entities.getTagged("boss_fight")[0] as any;
+    fight.goal.timeLeft = 0;
+  });
   await page.waitForTimeout(500);
-  expect(await count("Necromancer")).toBe(0);
   expect((await count("Quarter")) - before.quarters).toBeGreaterThanOrEqual(40);
   expect((await count("ConsumablePickup")) - before.throwables).toBe(2);
   expect((await count("UsablePickup")) - before.usables).toBe(1);
