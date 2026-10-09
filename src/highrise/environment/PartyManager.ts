@@ -220,6 +220,21 @@ export default class PartyManager extends BaseEntity implements Entity {
     return true;
   }
 
+  /**
+   * Makes `human` the leader (added to the game already), alone: the old
+   * leader goes, and anyone else in the party is left behind. For the boss
+   * test scene, which starts the fight over with a fresh one.
+   */
+  replaceLeader(human: Human) {
+    if (!this.leader.isDestroyed) {
+      this.leader.destroy();
+    }
+    human.persistenceLevel = Persistence.Game;
+    this.leader = human;
+    this.partyMembers = [human];
+    this.updateCharactersInUse();
+  }
+
   hasMember(human: Human) {
     return this.partyMembers.includes(human);
   }

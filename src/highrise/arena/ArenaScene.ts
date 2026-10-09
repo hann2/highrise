@@ -24,12 +24,8 @@ import ContactShadows from "../lighting-and-vision/ContactShadows";
 import VisionController from "../lighting-and-vision/VisionController";
 import { ActOverride } from "../run/acts";
 import { Molotov } from "../weapons/consumables/consumable-stats/Molotov";
-import { AMMO_CLASSES, MAX_RESERVE } from "../weapons/guns/ammo";
-import Gun from "../weapons/guns/Gun";
 import { bulletSpeed, DEFAULT_BULLET_SLOWDOWN } from "../weapons/guns/GunStats";
-import MeleeWeapon from "../weapons/melee/MeleeWeapon";
 import { WEAPONS } from "../weapons/weapons";
-import { WeaponStats } from "../weapons/WeaponStats";
 import {
   ARENA_ENEMIES,
   ArenaConfig,
@@ -38,6 +34,7 @@ import {
   parseArenaConfig,
 } from "./arenaConfig";
 import { ARENA_LAYOUTS, ArenaLayout } from "./arenaLayouts";
+import { equipLoadout, makeWeapon, refillLoadout } from "./loadout";
 import ArenaPanel from "./ArenaPanel";
 import ArenaRoom, { ArenaDoors, ArenaLights } from "./ArenaRoom";
 
@@ -221,24 +218,7 @@ export default class ArenaScene
     const config = this.config;
     const player = this.addChild(new Human(position.clone(), config.character));
     player.body.angle = angle;
-    for (const stats of config.weapons) {
-      if (stats) {
-        player.giveWeapon(makeWeapon(stats), false);
-      }
-    }
-    player.activeSlot = 0;
-    player.refreshWeaponSprite();
-    for (const item of config.items) {
-      // Not giveItem, which marks it seen in the encyclopedia
-      item.apply(player);
-      player.items.push(item);
-    }
-    if (config.throwable && config.throwableCount > 0) {
-      player.giveConsumable(config.throwable, config.throwableCount);
-    }
-    if (config.usable) {
-      player.giveUsable(config.usable);
-    }
+    equipLoadout(player, config);
     this.player = player;
   }
 
@@ -447,7 +427,7 @@ export default class ArenaScene
         player.hp = player.maxHp;
       }
       if (this.config.infiniteAmmo) {
-        this.refill(player);
+        refillLoadout(player, this.config);
       }
     }
 
@@ -456,20 +436,6 @@ export default class ArenaScene
       wave.time += dt;
       wave.alive = this.game.entities.getByFilter(isEnemy).length;
       wave.cleared = wave.toCome === 0 && wave.alive === 0;
-    }
-  }
-
-  /** Reserve ammo, throwables and usable charges back up */
-  private refill(player: Human) {
-    for (const ammoClass of AMMO_CLASSES) {
-      player.reserve[ammoClass] = MAX_RESERVE[ammoClass];
-    }
-    const { throwable, throwableCount } = this.config;
-    if (throwable && player.consumableCount < throwableCount) {
-      player.giveConsumable(throwable, throwableCount - player.consumableCount);
-    }
-    if (player.usable) {
-      player.usable.charges = player.usable.stats.charges;
     }
   }
 
@@ -518,12 +484,8 @@ function distanceToSegment(point: V2d, from: V2d, to: V2d): number {
   return point.distanceTo(from.add(along.imul(t)));
 }
 
-function makeWeapon(stats: WeaponStats): Gun | MeleeWeapon {
-  return "ammoClass" in stats ? new Gun(stats) : new MeleeWeapon(stats);
-}
-
 /** Takes away what makes an enemy move and attack, so it stands there */
-function makeDummy(enemy: BaseEnemy) {
+export function makeDummy(enemy: BaseEnemy) {
   for (const child of [...enemy.children]) {
     if (
       child instanceof SimpleEnemyController ||

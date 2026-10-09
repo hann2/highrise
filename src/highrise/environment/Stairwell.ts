@@ -24,6 +24,8 @@ export default class Stairwell extends BaseEntity implements Entity {
   tags = ["stairwell"];
   /** Locked for good */
   sealed = false;
+  /** Locked for now, whoever's at the door: a boss level's, until its fight is won */
+  barred = false;
   private leaderInsideTime = 0;
 
   constructor(
@@ -97,6 +99,10 @@ export default class Stairwell extends BaseEntity implements Entity {
       return;
     }
 
+    if (this.barred) {
+      door.setLocked(true);
+      return;
+    }
     const partyAtDoor = party.partyMembers.some((member) => {
       const position = member.getPosition();
       return (

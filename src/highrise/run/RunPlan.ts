@@ -1,5 +1,5 @@
 import { choose, rInteger } from "../../core/util/Random";
-import ChapelLevel from "../levels/level-templates/ChapelLevel";
+import { dealBossLevel } from "../boss-levels/bossLevels";
 import GeneratorLevel from "../levels/level-templates/GeneratorLevel";
 import LevelTemplate from "../levels/level-templates/LevelTemplate";
 import MaintenanceLevel from "../levels/level-templates/MaintenanceLevel";
@@ -8,7 +8,8 @@ import {
   actOf,
   ACT_LENGTH,
   BIG_STORE_FLOORS,
-  FINAL_FLOOR,
+  BOSS_FLOORS,
+  BossTier,
   FLOORS,
   GUN_TIER_FOR_ACT,
 } from "./acts";
@@ -34,8 +35,11 @@ export interface FloorPlan {
   readonly name: string;
   /** Short notes for the directory, like "Boss" */
   readonly notes: readonly string[];
-  /** A floor that ends an act (or the run) with something big */
-  readonly landmark: "boss" | "siege" | null;
+  /**
+   * A boss floor's tier, which pool its boss level was dealt from (its
+   * `template` is a `BossLevel`); null on the others
+   */
+  readonly boss: BossTier | null;
   /** Has the act's keycard and its locked rooms */
   readonly keycard: boolean;
   /** The arrival room's store has more on its shelves */
@@ -47,24 +51,13 @@ export interface FloorPlan {
 /** The floors of a run, bottom to top. The run is over when the last one is done. */
 export type RunPlan = readonly FloorPlan[];
 
-/** Themes for the floors between landmarks */
+/** Themes for the floors between the bosses */
 const FILLER_TEMPLATES: readonly LevelTemplateClass[] = [
   ShopLevel,
   MaintenanceLevel,
+  GeneratorLevel,
   LevelTemplate,
 ];
-
-/**
- * The landmark floors. The generator floors will be sieges once that event
- * exists; until then they're plain generator floors. The final boss is the
- * Necromancer for now (a Heavy fight and the roof come later).
- */
-const LANDMARKS: Record<number, [LevelTemplateClass, "boss" | "siege"]> = {
-  4: [GeneratorLevel, "siege"],
-  8: [ChapelLevel, "boss"],
-  12: [GeneratorLevel, "siege"],
-  [FINAL_FLOOR]: [ChapelLevel, "boss"],
-};
 
 /**
  * Plans the building for a run. Made when the player arrives in the lobby.
@@ -72,14 +65,14 @@ const LANDMARKS: Record<number, [LevelTemplateClass, "boss" | "siege"]> = {
  * right before calling this).
  */
 export function generateRunPlan(): RunPlan {
-  // One keycard floor per act, on one of its floors that isn't a landmark
+  // One keycard floor per act, on one of its floors that isn't a boss's
   const keycardFloors = new Set<number>();
   for (let act = 1; act <= actOf(FLOORS); act++) {
     const first = (act - 1) * ACT_LENGTH + 1;
     const last = act === actOf(FLOORS) ? FLOORS : act * ACT_LENGTH;
     const candidates: number[] = [];
     for (let floor = first; floor <= last; floor++) {
-      if (!(floor in LANDMARKS)) {
+      if (!(floor in BOSS_FLOORS)) {
         candidates.push(floor);
       }
     }
@@ -90,17 +83,14 @@ export function generateRunPlan(): RunPlan {
   let lastTheme: LevelTemplateClass | undefined;
   for (let number = 1; number <= FLOORS; number++) {
     const act = actOf(number);
-    const landmark = LANDMARKS[number];
+    const boss: BossTier | undefined = BOSS_FLOORS[number];
     // Filler themes never repeat back to back
-    const template =
-      landmark?.[0] ??
-      choose(...FILLER_TEMPLATES.filter((theme) => theme !== lastTheme));
+    const template: LevelTemplateClass = boss
+      ? dealBossLevel(boss)
+      : choose(...FILLER_TEMPLATES.filter((theme) => theme !== lastTheme));
     lastTheme = template;
     const bigStore = BIG_STORE_FLOORS.includes(number);
     const notes = [...template.floorNotes];
-    if (landmark?.[1] === "siege" && !notes.includes("Landmark")) {
-      notes.push("Landmark");
-    }
     if (bigStore) {
       notes.push("Store");
     }
@@ -111,7 +101,7 @@ export function generateRunPlan(): RunPlan {
       difficulty: number,
       name: template.floorName,
       notes,
-      landmark: landmark?.[1] ?? null,
+      boss: boss ?? null,
       keycard: keycardFloors.has(number),
       bigStore,
       gunTier: GUN_TIER_FOR_ACT[act - 1],

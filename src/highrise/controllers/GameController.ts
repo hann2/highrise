@@ -68,32 +68,46 @@ export class GameController extends BaseEntity implements Entity {
     character,
     plan,
     startFloor,
+    practice = false,
   }: {
     character: Character;
     plan: RunPlan;
     startFloor?: number;
+    practice?: boolean;
   }) {
-    setLastCharacter(character.name);
-    this.startRun(character, plan, startFloor ?? 1);
+    if (!practice) {
+      setLastCharacter(character.name);
+    }
+    this.startRun(character, plan, startFloor ?? 1, practice);
   }
 
-  /** Sets up everything a run (or the tutorial, at floor 0) needs */
-  private startRun(character: Character, plan: RunPlan, startFloor: number) {
+  /**
+   * Sets up everything a run (or the tutorial, at floor 0) needs. A practice
+   * run (the boss test scene) keeps no score, marks nothing seen in the
+   * encyclopedia and has no pause menu: the scene has its own keys.
+   */
+  private startRun(
+    character: Character,
+    plan: RunPlan,
+    startFloor: number,
+    practice = false,
+  ) {
     const game = this.game;
     // Humans carry lights, so this has to exist before the party does
     game.addEntity(new LightingManager());
     game.addEntity(new ContactShadows());
     const partyManager = game.addEntity(new PartyManager(character));
     const getPlayer = () => partyManager.leader;
+    if (!practice) {
+      game.addEntities(new RunStats(character), new EncyclopediaTracker());
+    }
     game.addEntities(
-      new RunStats(character),
-      new EncyclopediaTracker(),
       new QuarterDropper(),
       new BossRewards(),
       new AmmoDropper(),
       // Before the level starts, so it's sized to it
       new FireGrid(),
-      new LevelController(plan, startFloor),
+      new LevelController(plan, startFloor, practice),
       new CameraController(game.camera, getPlayer),
       new PlayerHumanController(getPlayer),
       new VisionController(getPlayer),
@@ -103,8 +117,11 @@ export class GameController extends BaseEntity implements Entity {
       new QuarterCounter(),
       new KeycardOverlay(getPlayer),
       new InteractPrompt(getPlayer),
-      new PauseMenu(startFloor === 0 ? "tutorial" : "run"),
     );
+    // Last, so it's over the HUD
+    if (!practice) {
+      game.addEntity(new PauseMenu(startFloor === 0 ? "tutorial" : "run"));
+    }
   }
 
   @on("gameOver")

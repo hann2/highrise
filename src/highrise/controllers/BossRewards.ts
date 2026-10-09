@@ -22,15 +22,16 @@ const BOSS_THROWABLES = 2;
 const BOSS_USABLES = 1;
 
 /**
- * Bosses are always good news: when one dies it leaves a heap of quarters,
- * some throwables and a usable, and one item from the boss pool
- * (`bossItems.ts`) that the leader doesn't have yet, all on the floor.
+ * Bosses are always good news: winning a boss level (`bossLevelWon`, from
+ * `boss-levels/BossFight`) leaves a heap of quarters, some throwables and a
+ * usable, and one item from the boss pool (`bossItems.ts`) that the leader
+ * doesn't have yet, all on the floor.
  */
 export default class BossRewards extends BaseEntity implements Entity {
   persistenceLevel = Persistence.Game;
 
-  @on("bossDied")
-  async onBossDied({ position }: { position: V2d }) {
+  @on("bossLevelWon")
+  async onBossLevelWon({ position }: { position: V2d }) {
     // Bosses can die in the middle of a physics step (a melee kill), which is
     // no time to be adding bodies
     await this.wait();

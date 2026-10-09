@@ -7,8 +7,6 @@ import { SPITTER_SOUNDS } from "../../constants/constants";
 import { createAttackAction } from "../../creature-stuff/AttackAction";
 import DeathOrb from "../../projectiles/DeathOrb";
 import Phlegm from "../../projectiles/Phlegm";
-import type Human from "../../human/Human";
-import type { DeathBlow } from "../base/DeathBlow";
 import { BaseEnemy } from "../base/Enemy";
 import { makeSimpleEnemyBody } from "../base/enemyUtils";
 import NecromancerController from "./NecromancerController";
@@ -28,6 +26,7 @@ const MAX_MINIONS = 8; // Maximum number of zombies to have at once
 type AbilityName = keyof Necromancer["abilities"];
 
 export default class Necromancer extends BaseEnemy {
+  tags = ["boss"];
   hp: number = HEALTH;
   minions: BaseEnemy[] = [];
 
@@ -58,17 +57,6 @@ export default class Necromancer extends BaseEnemy {
 
     this.aimSpring.stiffness = 50;
     this.aimSpring.damping = 5;
-  }
-
-  die(killer?: Human, blow?: DeathBlow) {
-    if (this.isDestroyed) {
-      return;
-    }
-    this.game.dispatch("bossDied", {
-      boss: this,
-      position: this.getPosition().clone(),
-    });
-    super.die(killer, blow);
   }
 
   // Override this because we do something more complicatd than a single attack

@@ -22,8 +22,18 @@ export type CustomEvents = {
   goToLobby: { from: "boot" | "tutorial" | "run" };
   /** Plays the tutorial, which goes on to the lobby */
   startTutorial: void;
-  /** Starts a run of the planned floors as `character`, from `startFloor` if given (a dev shortcut) */
-  newGame: { character: Character; plan: RunPlan; startFloor?: number };
+  /**
+   * Starts a run of the planned floors as `character`, from `startFloor` if
+   * given (a dev shortcut). In `practice` (the boss test scene) the floor
+   * never ends: dying or finishing it is left to whoever started it, and
+   * nothing about it is saved.
+   */
+  newGame: {
+    character: Character;
+    plan: RunPlan;
+    startFloor?: number;
+    practice?: boolean;
+  };
   startLevel: { level: Level };
   levelComplete: void;
   partyDead: void;
@@ -37,8 +47,11 @@ export type CustomEvents = {
 
   // Enemies
   zombieDied: { zombie: BaseEnemy; killer?: Human };
-  /** A boss is dead, at `position`: `controllers/BossRewards` drops the loot */
-  bossDied: { boss: BaseEnemy; position: V2d };
+  /**
+   * A boss level's fight is won (see `boss-levels/BossFight`), with the loot
+   * to go at `position`: `controllers/BossRewards` drops it
+   */
+  bossLevelWon: { position: V2d };
 
   // Environment
   lightsOn: { position: V2d };

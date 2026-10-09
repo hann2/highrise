@@ -9,6 +9,7 @@ import { getPartyLeader } from "../environment/PartyManager";
 import type Human from "../human/Human";
 import { BIG_SHELF_SLOTS, dealShelf, Shelf, SHELF_SLOTS } from "../items/shelf";
 import type { GunStats } from "../weapons/guns/GunStats";
+import BossLevel from "../boss-levels/BossLevel";
 import { Level } from "../levels/Level";
 import { generateLevel } from "../levels/level-generation/levelGeneration";
 import LevelTemplate from "../levels/level-templates/LevelTemplate";
@@ -43,10 +44,15 @@ export default class LevelController extends BaseEntity implements Entity {
   /** Between reaching an exit and starting the next level */
   private changingLevel = false;
 
-  /** `startFloor` 0 is the tutorial; later ones skip ahead, for development */
+  /**
+   * `startFloor` 0 is the tutorial; later ones skip ahead, for development.
+   * In `practice` (the boss test scene) the floor never ends: finishing it or
+   * dying is left to the scene, which starts it over with `restartFloor`.
+   */
   constructor(
-    readonly plan: RunPlan,
+    public plan: RunPlan,
     private readonly startFloor = 1,
+    readonly practice = false,
   ) {
     super();
   }
@@ -75,7 +81,7 @@ export default class LevelController extends BaseEntity implements Entity {
   // We just got to the exit
   @on("levelComplete")
   async onLevelComplete() {
-    if (this.changingLevel) {
+    if (this.changingLevel || this.practice) {
       return;
     }
     this.changingLevel = true;
@@ -119,6 +125,9 @@ export default class LevelController extends BaseEntity implements Entity {
   // The whole party is dead
   @on("partyDead")
   async onPartyDead() {
+    if (this.practice) {
+      return;
+    }
     if (this.currentLevel !== 0) {
       this.game.dispatch("gameOver", { victory: false });
       return;
@@ -135,11 +144,33 @@ export default class LevelController extends BaseEntity implements Entity {
     game.dispatch("startTutorial", undefined);
   }
 
+  /**
+   * The current floor again from the start (or `floor` of `plan`, if given),
+   * freshly generated, with the party where it arrives. For the boss test
+   * scene; no fade.
+   */
+  restartFloor(plan?: RunPlan, floor?: number) {
+    if (plan) {
+      this.plan = plan;
+    }
+    if (floor !== undefined) {
+      this.currentLevel = floor;
+    }
+    this.game.clearScene(Persistence.Floor);
+    const level = this.generateLevel();
+    this.game.dispatch("startLevel", { level });
+  }
+
   generateLevel(): Level {
     // So that seeded runs get the same levels no matter what happened before
     reseedIfSeeded(this.currentLevel);
-    this.template = this.makeTemplate();
-    this.level = generateLevel(this.template);
+    const template = this.makeTemplate();
+    this.template = template;
+    // Boss levels lay themselves out; the rest come from the generator
+    this.level =
+      template instanceof BossLevel
+        ? template.generateLevel()
+        : generateLevel(template);
     // The store in the arrival room, from the second floor on. Dealt after
     // the level, whose layout mustn't depend on what the leader holds, but
     // still before the floor starts, so it's a function of the seed and of
@@ -150,7 +181,7 @@ export default class LevelController extends BaseEntity implements Entity {
       if (shelf.gun?.weapon) {
         this.gunsDealt.push(shelf.gun.weapon);
       }
-      this.template.shelf = shelf;
+      template.shelf = shelf;
     }
     return this.level;
   }

@@ -18,6 +18,7 @@ import { GameController } from "./controllers/GameController";
 import MusicController from "./controllers/MusicController";
 import VolumeController from "./controllers/VolumeController";
 import ArenaScene from "./arena/ArenaScene";
+import BossTestScene from "./boss-levels/test/BossTestScene";
 import FireTestScene from "./fire/FireTestScene";
 import DeathsTestScene from "./enemies/remains/DeathsTestScene";
 import FlashTestScene from "./rig/FlashTestScene";
@@ -119,9 +120,9 @@ export async function main() {
   game.addEntity(new SettingsController());
   game.addEntity(new AutoPauser(getSetting(game, "autoPause")));
   game.addEntity(new VolumeController());
-  // The arena is for testing, and the music gets in the way of hearing
-  // things; the editor's preview is silent
-  if (params.get("scene") !== "arena" && params.get("scene") !== "preview") {
+  // The arena and the boss test are for testing, and the music gets in the
+  // way of hearing things; the editor's preview is silent
+  if (!["arena", "boss", "preview"].includes(params.get("scene") ?? "")) {
     game.addEntity(new MusicController());
   }
   game.addEntity(new PositionalSoundListener());
@@ -223,6 +224,15 @@ export async function main() {
     params.get("scene") === "arena"
   ) {
     game.addEntity(new ArenaScene());
+    return;
+  }
+
+  // ?scene=boss (development only) is for working on one boss level
+  if (
+    process.env.NODE_ENV === "development" &&
+    params.get("scene") === "boss"
+  ) {
+    game.addEntity(new BossTestScene());
     return;
   }
 

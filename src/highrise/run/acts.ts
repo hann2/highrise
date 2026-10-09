@@ -2,20 +2,33 @@ import type Entity from "../../core/entity/Entity";
 import type Game from "../../core/Game";
 import type LevelController from "../controllers/LevelController";
 
-// The shape of a run: 15 floors in acts of 4, with a landmark floor (a boss,
-// or a siege once that exists) at the end of each of the first three acts,
-// and the last act running up to the finale on 15. Everything that depends on
-// how far into the run a floor is reads it from here. First guesses; tune in
-// playtest.
+// The shape of a run: 15 floors in acts of 4, with boss levels on 5, 10 and
+// 15 (a tier 1 boss, a tier 2 boss and the final one). Everything that
+// depends on how far into the run a floor is reads it from here. First
+// guesses; tune in playtest.
 
 /** Floors in a run, not counting the lobby */
 export const FLOORS = 15;
 export const ACT_LENGTH = 4;
 export const ACT_COUNT = 4;
-/** The top of the building. Floors 4, 8 and 12 are landmarks (see `RunPlan`), and so is this one. */
+/** The top of the building, and the final boss */
 export const FINAL_FLOOR = FLOORS;
-/** Floors with a bigger store, right after each landmark */
-export const BIG_STORE_FLOORS: readonly number[] = [5, 9, 13];
+
+/**
+ * Which pool of boss levels a boss floor draws from (see
+ * `boss-levels/bossLevels.ts`)
+ */
+export type BossTier = 1 | 2 | "final";
+
+/** The boss floors, and the pool each draws its boss level from */
+export const BOSS_FLOORS: Readonly<Record<number, BossTier>> = {
+  5: 1,
+  10: 2,
+  [FINAL_FLOOR]: "final",
+};
+
+/** Floors with a bigger store, right after each boss but the last */
+export const BIG_STORE_FLOORS: readonly number[] = [6, 11];
 
 /** Which act (1 to 4) a floor is in. Floors 13 to 15 are all act 4. */
 export function actOf(floor: number): number {

@@ -42,6 +42,12 @@ export const SCENES: readonly ToolLink[] = [
     about: "Characters and loadouts against waves of enemies (Tab: setup)",
   },
   {
+    name: "Boss test",
+    href: "/?scene=boss",
+    about:
+      "One boss level, played from its arrival room (Tab: setup, Backspace: start over)",
+  },
+  {
     name: "Rig",
     href: "/?scene=rig",
     about:

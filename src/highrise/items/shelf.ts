@@ -10,7 +10,7 @@ import { OTHER_FAMILY_WEIGHT } from "./prices";
 
 /** How many item slots a store has, above the gun and the consumable */
 export const SHELF_SLOTS = 4;
-/** ...and a big store (on the floor after a landmark) */
+/** ...and a big store (on the floor after a boss) */
 export const BIG_SHELF_SLOTS = 8;
 
 /**
