@@ -127,30 +127,31 @@ import images123 from "./images/weapons/baseball-bat-hold.png?url";
 import images124 from "./images/weapons/baseball-bat-pickup.png?url";
 import images125 from "./images/weapons/desert-eagle-pickup.svg?url";
 import images126 from "./images/weapons/double-barrel-shotgun-pickup.svg?url";
-import images127 from "./images/weapons/five-seven-pickup.svg?url";
-import images128 from "./images/weapons/glock-pickup.svg?url";
-import images129 from "./images/weapons/katana.png?url";
-import images130 from "./images/weapons/m1911-pickup.svg?url";
-import images131 from "./images/weapons/magazines/ak-magazine.png?url";
-import images132 from "./images/weapons/magazines/pistol-magazine.png?url";
-import images133 from "./images/weapons/magazines/revolver-round.png?url";
-import images134 from "./images/weapons/magazines/rifle-magazine.png?url";
-import images135 from "./images/weapons/magazines/shotgun-shell-pair.png?url";
-import images136 from "./images/weapons/magazines/shotgun-shell.png?url";
-import images137 from "./images/weapons/p90-pickup.svg?url";
-import images138 from "./images/weapons/remington-870-pickup.svg?url";
-import images139 from "./images/weapons/revolver-pickup.svg?url";
-import images140 from "./images/weapons/spas-12-pickup.svg?url";
-import images141 from "./images/zombies/crawler-1.png?url";
-import images142 from "./images/zombies/crawler-2.png?url";
-import images143 from "./images/zombies/crawler-3.png?url";
-import images144 from "./images/zombies/crawler.png?url";
-import images145 from "./images/zombies/heavy.png?url";
-import images146 from "./images/zombies/necromancer.png?url";
-import images147 from "./images/zombies/spitter.png?url";
-import images148 from "./images/zombies/zombie-1.png?url";
-import images149 from "./images/zombies/zombie-2.png?url";
-import images150 from "./images/zombies/zombie-3.png?url";
+import images127 from "./images/weapons/dp-12-pickup.svg?url";
+import images128 from "./images/weapons/five-seven-pickup.svg?url";
+import images129 from "./images/weapons/glock-pickup.svg?url";
+import images130 from "./images/weapons/katana.png?url";
+import images131 from "./images/weapons/m1911-pickup.svg?url";
+import images132 from "./images/weapons/magazines/ak-magazine.png?url";
+import images133 from "./images/weapons/magazines/pistol-magazine.png?url";
+import images134 from "./images/weapons/magazines/revolver-round.png?url";
+import images135 from "./images/weapons/magazines/rifle-magazine.png?url";
+import images136 from "./images/weapons/magazines/shotgun-shell-pair.png?url";
+import images137 from "./images/weapons/magazines/shotgun-shell.png?url";
+import images138 from "./images/weapons/p90-pickup.svg?url";
+import images139 from "./images/weapons/remington-870-pickup.svg?url";
+import images140 from "./images/weapons/revolver-pickup.svg?url";
+import images141 from "./images/weapons/spas-12-pickup.svg?url";
+import images142 from "./images/zombies/crawler-1.png?url";
+import images143 from "./images/zombies/crawler-2.png?url";
+import images144 from "./images/zombies/crawler-3.png?url";
+import images145 from "./images/zombies/crawler.png?url";
+import images146 from "./images/zombies/heavy.png?url";
+import images147 from "./images/zombies/necromancer.png?url";
+import images148 from "./images/zombies/spitter.png?url";
+import images149 from "./images/zombies/zombie-1.png?url";
+import images150 from "./images/zombies/zombie-2.png?url";
+import images151 from "./images/zombies/zombie-3.png?url";
 import sounds0 from "./audio/characters/andy/andy-death-1.flac?url";
 import sounds1 from "./audio/characters/andy/andy-death-2.flac?url";
 import sounds2 from "./audio/characters/andy/andy-death-3.flac?url";
@@ -828,30 +829,31 @@ const images = {
   "baseballBatPickup": images124,
   "desertEaglePickup": images125,
   "doubleBarrelShotgunPickup": images126,
-  "fiveSevenPickup": images127,
-  "glockPickup": images128,
-  "katana": images129,
-  "m1911Pickup": images130,
-  "akMagazine": images131,
-  "pistolMagazine": images132,
-  "revolverRound": images133,
-  "rifleMagazine": images134,
-  "shotgunShellPair": images135,
-  "shotgunShell": images136,
-  "p90Pickup": images137,
-  "remington870Pickup": images138,
-  "revolverPickup": images139,
-  "spas12Pickup": images140,
-  "crawler1": images141,
-  "crawler2": images142,
-  "crawler3": images143,
-  "crawler": images144,
-  "heavy": images145,
-  "necromancer": images146,
-  "spitter": images147,
-  "zombie1": images148,
-  "zombie2": images149,
-  "zombie3": images150,
+  "dp12Pickup": images127,
+  "fiveSevenPickup": images128,
+  "glockPickup": images129,
+  "katana": images130,
+  "m1911Pickup": images131,
+  "akMagazine": images132,
+  "pistolMagazine": images133,
+  "revolverRound": images134,
+  "rifleMagazine": images135,
+  "shotgunShellPair": images136,
+  "shotgunShell": images137,
+  "p90Pickup": images138,
+  "remington870Pickup": images139,
+  "revolverPickup": images140,
+  "spas12Pickup": images141,
+  "crawler1": images142,
+  "crawler2": images143,
+  "crawler3": images144,
+  "crawler": images145,
+  "heavy": images146,
+  "necromancer": images147,
+  "spitter": images148,
+  "zombie1": images149,
+  "zombie2": images150,
+  "zombie3": images151,
 };
 export type ImageName = keyof typeof images;
 const sounds = {

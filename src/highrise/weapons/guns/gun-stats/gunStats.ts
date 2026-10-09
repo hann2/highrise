@@ -4,6 +4,7 @@ import { AK47 } from "./AK-47";
 import { AR15 } from "./AR-15";
 import { DesertEagle } from "./DesertEagle";
 import { DoubleBarrelShotgun } from "./DoubleBarrelShotgun";
+import { DP12 } from "./DP12";
 import { FiveSeven } from "./FiveSeven";
 import { Glock } from "./Glock";
 import { M1911 } from "./M1911";
@@ -18,6 +19,7 @@ export const GUNS: Array<GunStats> = [
   AR15,
   DesertEagle,
   DoubleBarrelShotgun,
+  DP12,
   FiveSeven,
   Glock,
   M1911,
@@ -28,14 +30,14 @@ export const GUNS: Array<GunStats> = [
 ];
 
 export const PISTOLS = [M1911, Glock, FiveSeven, Revolver, DesertEagle];
-export const SHOTGUNS = [DoubleBarrelShotgun, PumpShotgun, SPAS12];
+export const SHOTGUNS = [DoubleBarrelShotgun, PumpShotgun, SPAS12, DP12];
 export const RIFLES = [AR15, AK47, P90];
 
 export const GUN_TIERS = [
   [M1911, Glock, Revolver, FiveSeven],
   [DesertEagle, AR15, DoubleBarrelShotgun],
   [PumpShotgun],
-  [AK47, SPAS12, P90],
+  [AK47, SPAS12, P90, DP12],
 ];
 
 export function getGunTier(gun: Gun): number {

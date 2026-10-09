@@ -318,7 +318,10 @@ export default class Gun extends BaseEntity implements Entity {
 
     if (this.stats.ejectionType === EjectionType.AUTOMATIC) {
       this.makeShellCasing(shooter);
-    } else if (this.stats.ejectionType === EjectionType.PUMP) {
+    } else if (
+      this.stats.ejectionType === EjectionType.PUMP &&
+      (this.shellsToEject >= (this.stats.shotsPerPump ?? 1) || this.ammo === 0)
+    ) {
       await this.wait(0.175);
       this.pump(shooter);
     }
@@ -331,7 +334,8 @@ export default class Gun extends BaseEntity implements Entity {
       this.playSound("pump", shooter.getPosition());
     }
     await this.wait(PUMP_BACK, undefined, "pump");
-    if (this.shellsToEject > 0) {
+    // Every barrel's spent shell
+    while (this.shellsToEject > 0) {
       this.makeShellCasing(shooter);
     }
     await this.wait(PUMP_HOLD + PUMP_FORWARD, undefined, "pump");
@@ -663,8 +667,7 @@ export default class Gun extends BaseEntity implements Entity {
       Math.max(0, gripX - MIN_GRIP_X),
     );
     // The rest comes from swinging the barrel aside around the grip
-    const barrel =
-      this.stats.holdPosition[0] + this.stats.muzzleLength - gripX;
+    const barrel = this.stats.holdPosition[0] + this.stats.muzzleLength - gripX;
     const cos = (barrel - (this.wallRetraction - slide)) / barrel;
     const tilt = Math.min(Math.acos(clamp(cos, -1, 1)), MAX_WALL_TILT);
     return { slide, tilt };

@@ -73,6 +73,12 @@ export interface GunStats extends BaseWeaponStats {
 
   // Whether the shells eject after each shot or on reload
   readonly ejectionType: EjectionType;
+  /**
+   * For a pump (`EjectionType.PUMP`): shots between pumps, 1 unless one pump
+   * chambers more than one barrel (the DP-12's two). It also pumps when it's
+   * out of shells.
+   */
+  readonly shotsPerPump?: number;
 
   // Color of the laser sight, or none if this doesn't have one
   readonly laserSightColor?: number;

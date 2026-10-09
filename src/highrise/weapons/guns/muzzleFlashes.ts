@@ -211,6 +211,38 @@ export const SPAS12_FLASH: MuzzleFlashStyle = {
   duration: [0.07, 0.085],
 };
 
+/**
+ * The DP-12: 12 gauge out of 19" barrels through a ported muzzle device, so a
+ * pump's plume a little cut short, with jets out of its ports to either side
+ */
+export const DP12_FLASH: MuzzleFlashStyle = {
+  ...PUMP_SHOTGUN_FLASH,
+  lobes: [
+    { angle: 0, length: [0.18, 0.24], width: [0.17, 0.21], heat: 1.2 },
+    { angle: [-0.07, 0.07], length: [0.55, 0.75], width: [0.18, 0.22] },
+    ...fan(4, 0.7, 0.1, {
+      length: [0.4, 0.65],
+      width: [0.06, 0.09],
+      heat: 0.9,
+    }),
+    ...mirrored({
+      angle: [1.25, 1.45],
+      length: [0.16, 0.24],
+      width: [0.06, 0.08],
+      heat: 0.85,
+      origin: [-0.03, 0.012],
+    }),
+    ...mirrored({
+      angle: [1.2, 1.5],
+      length: [0.12, 0.2],
+      width: [0.05, 0.07],
+      heat: 0.75,
+      origin: [-0.06, 0.012],
+      chance: 0.7,
+    }),
+  ],
+};
+
 /** 12 gauge out of short barrels: an enormous ragged fan */
 export const SAWN_OFF_FLASH: MuzzleFlashStyle = {
   lobes: [

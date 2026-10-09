@@ -3,6 +3,7 @@ import ak47 from "./art/ak-47.svg?raw";
 import ar15 from "./art/ar-15.svg?raw";
 import desertEagle from "./art/desert-eagle.svg?raw";
 import doubleBarrelShotgun from "./art/double-barrel-shotgun.svg?raw";
+import dp12 from "./art/dp-12.svg?raw";
 import fiveSeven from "./art/five-seven.svg?raw";
 import glock from "./art/glock.svg?raw";
 import m1911 from "./art/m1911.svg?raw";
@@ -28,6 +29,7 @@ const GUN_ART = {
   ar15,
   desertEagle,
   doubleBarrelShotgun,
+  dp12,
   fiveSeven,
   glock,
   m1911,

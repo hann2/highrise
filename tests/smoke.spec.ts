@@ -1749,9 +1749,9 @@ test("game boots, plays, and changes levels without errors", async ({
   // Right goes to the guns: the one picked up is revealed, the rest aren't
   await page.keyboard.press("ArrowRight");
   await expect(selectedTab).toContainText("Guns");
-  await expect(selectedTab).toContainText(/[1-9]\d* \/ 11/);
+  await expect(selectedTab).toContainText(/[1-9]\d* \/ 12/);
   const gunEntries = page.locator(".encyclopedia__entry");
-  await expect(gunEntries).toHaveCount(11);
+  await expect(gunEntries).toHaveCount(12);
   await expect(
     page.locator(".encyclopedia__entry", { hasText: heldGun }),
   ).toHaveCount(1);

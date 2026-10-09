@@ -11,6 +11,7 @@ import { P90 } from "./p90";
 import { REMINGTON_870 } from "./remington-870";
 import { SPAS_12 } from "./spas-12";
 import { DOUBLE_BARREL_SHOTGUN } from "./double-barrel-shotgun";
+import { DP_12 } from "./dp-12";
 
 export const GUNS: readonly GunDrawing<any>[] = [
   M1911,
@@ -24,4 +25,5 @@ export const GUNS: readonly GunDrawing<any>[] = [
   REMINGTON_870,
   SPAS_12,
   DOUBLE_BARREL_SHOTGUN,
+  DP_12,
 ];

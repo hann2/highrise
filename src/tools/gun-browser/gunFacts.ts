@@ -191,7 +191,13 @@ export const FACT_GROUPS: FactGroup[] = [
         `The real gun's. Bullets in the game go ${DEFAULT_BULLET_SLOWDOWN} times slower`,
         0,
       ),
-      { label: "Shells eject", text: (g) => EJECTION[g.ejectionType] },
+      {
+        label: "Shells eject",
+        text: (g) =>
+          (g.shotsPerPump ?? 1) > 1
+            ? `${EJECTION[g.ejectionType]}, every ${g.shotsPerPump} shots`
+            : EJECTION[g.ejectionType],
+      },
       {
         label: "Laser sight",
         text: (g) =>
